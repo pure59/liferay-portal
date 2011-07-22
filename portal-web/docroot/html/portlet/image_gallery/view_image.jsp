@@ -72,6 +72,7 @@ if (portletDisplay.isWebDAVEnabled()) {
 	<liferay-ui:header
 		backLabel="<%= parentFolderName %>"
 		backURL="<%= backURL.toString() %>"
+		localizeTitle="<%= false %>"
 		title="<%= image.getName() %>"
 	/>
 

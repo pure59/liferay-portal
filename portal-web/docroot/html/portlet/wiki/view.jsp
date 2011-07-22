@@ -139,6 +139,7 @@ if (Validator.isNotNull(ParamUtil.getString(request, "title"))) {
 <liferay-ui:header
 	backLabel="<%= parentTitle %>"
 	backURL="<%= (viewParentPageURL != null) ? viewParentPageURL.toString() : null %>"
+	localizeTitle="<%= false %>"
 	title="<%= title %>"
 />
 

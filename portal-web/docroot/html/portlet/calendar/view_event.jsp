@@ -45,6 +45,7 @@ request.setAttribute("view_event.jsp-event", event);
 <liferay-ui:header
 	backURL="<%= redirect %>"
 	escapeXml="<%= true %>"
+	localizeTitle="<%= false %>"
 	title="<%= event.getTitle() %>"
 />
 
