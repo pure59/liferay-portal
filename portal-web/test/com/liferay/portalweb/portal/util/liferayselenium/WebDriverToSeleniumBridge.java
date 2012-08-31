@@ -340,7 +340,7 @@ public class WebDriverToSeleniumBridge
 
 		WebElement webElement = getWebElement(locator);
 
-		String attribute = attributeLocator.substring(pos);
+		String attribute = attributeLocator.substring(pos + 1);
 
 		return webElement.getAttribute(attribute);
 	}
@@ -501,7 +501,9 @@ public class WebDriverToSeleniumBridge
 
 		String text = webElement.getText();
 
-		return text.trim();
+		text = text.trim();
+
+		return text.replace("\n", " ");
 	}
 
 	@Override

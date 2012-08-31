@@ -143,16 +143,22 @@ boolean showAddArticleButton = JournalPermission.contains(permissionChecker, sco
 <%
 ArticleSearchTerms searchTerms = (ArticleSearchTerms)searchContainer.getSearchTerms();
 
-searchTerms.setFolderId(-1);
-searchTerms.setVersion(-1);
-
 if (folderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-	searchTerms.setFolderId(folderId);
+	List<Long> folderIds = new ArrayList<Long>(1);
+
+	folderIds.add(folderId);
+
+	searchTerms.setFolderIds(folderIds);
+}
+else {
+	searchTerms.setFolderIds(new ArrayList<Long>());
 }
 
 if (Validator.isNotNull(displayTerms.getStructureId())) {
 	searchTerms.setStructureId(displayTerms.getStructureId());
 }
+
+searchTerms.setVersion(-1);
 
 if (displayTerms.getNavigation().equals("recent")) {
 	searchContainer.setOrderByCol("create-date");
