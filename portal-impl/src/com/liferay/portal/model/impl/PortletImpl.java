@@ -26,12 +26,12 @@ import com.liferay.portal.kernel.portlet.FriendlyURLMapper;
 import com.liferay.portal.kernel.portlet.PortletBag;
 import com.liferay.portal.kernel.portlet.PortletBagPool;
 import com.liferay.portal.kernel.portlet.PortletLayoutListener;
+import com.liferay.portal.kernel.portletdisplaytemplate.PortletDisplayTemplateHandler;
 import com.liferay.portal.kernel.scheduler.SchedulerEntry;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.OpenSearch;
 import com.liferay.portal.kernel.servlet.ServletContextPool;
 import com.liferay.portal.kernel.servlet.URLEncoder;
-import com.liferay.portal.kernel.template.PortletDisplayTemplateHandler;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ContextPathUtil;
@@ -1764,6 +1764,16 @@ public class PortletImpl extends PortletBaseImpl {
 	 */
 	public boolean getUseDefaultTemplate() {
 		return _useDefaultTemplate;
+	}
+
+	/**
+	 * Returns the user ID of the portlet. This only applies when the portlet is
+	 * added by a user in a customizable layout.
+	 *
+	 * @return the user ID of the portlet
+	 */
+	public long getUserId() {
+		return PortletConstants.getUserId(getPortletId());
 	}
 
 	/**

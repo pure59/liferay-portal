@@ -15,7 +15,7 @@
 package com.liferay.portlet.wiki.template;
 
 import com.liferay.portal.kernel.language.LanguageUtil;
-import com.liferay.portal.kernel.template.PortletDisplayTemplateHandler;
+import com.liferay.portal.kernel.portletdisplaytemplate.BasePortletDisplayTemplateHandler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
@@ -27,14 +27,15 @@ import java.util.Locale;
 /**
  * @author Juan Fernández
  */
-public class WikiPortletDisplayTemplateHandler implements
-	PortletDisplayTemplateHandler {
+public class WikiPortletDisplayTemplateHandler
+	extends BasePortletDisplayTemplateHandler {
 
 	public String getClassName() {
 		return WikiPage.class.getName();
 	}
 
-	public String getDefaultTemplateLocation() {
+	@Override
+	public String getHelpTemplatePath() {
 		return PropsValues.WIKI_DISPLAY_STYLES_TEMPLATE_CONTENT;
 	}
 

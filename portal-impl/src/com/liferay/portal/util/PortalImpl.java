@@ -68,6 +68,7 @@ import com.liferay.portal.kernel.util.MethodKey;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ReleaseInfo;
+import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringComparator;
@@ -92,6 +93,7 @@ import com.liferay.portal.model.LayoutTypePortlet;
 import com.liferay.portal.model.LayoutTypePortletConstants;
 import com.liferay.portal.model.Organization;
 import com.liferay.portal.model.Portlet;
+import com.liferay.portal.model.PortletConstants;
 import com.liferay.portal.model.PublicRenderParameter;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.ResourcePermission;
@@ -136,6 +138,7 @@ import com.liferay.portal.service.permission.UserPermissionUtil;
 import com.liferay.portal.servlet.filters.i18n.I18nFilter;
 import com.liferay.portal.servlet.filters.secure.NonceUtil;
 import com.liferay.portal.struts.StrutsUtil;
+import com.liferay.portal.theme.PortletDisplay;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.upload.UploadPortletRequestImpl;
 import com.liferay.portal.upload.UploadServletRequestImpl;
@@ -543,6 +546,15 @@ public class PortalImpl implements Portal {
 	public void addPortletBreadcrumbEntry(
 		HttpServletRequest request, String title, String url,
 		Map<String, Object> data) {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
+
+		if (!portletDisplay.isFocused()) {
+			return;
+		}
 
 		List<BreadcrumbEntry> breadcrumbEntries =
 			(List<BreadcrumbEntry>)request.getAttribute(
@@ -1054,6 +1066,14 @@ public class PortalImpl implements Portal {
 			String completeURL, ThemeDisplay themeDisplay, Layout layout)
 		throws PortalException, SystemException {
 
+		return getCanonicalURL(completeURL, themeDisplay, layout, false);
+	}
+
+	public String getCanonicalURL(
+			String completeURL, ThemeDisplay themeDisplay, Layout layout,
+			boolean forceLayoutFriendlyURL)
+		throws PortalException, SystemException {
+
 		completeURL = removeRedirectParameter(completeURL);
 
 		String parametersURL = StringPool.BLANK;
@@ -1083,6 +1103,9 @@ public class PortalImpl implements Portal {
 				StringPool.SLASH + layout.getLayoutId())) &&
 			(!layout.isFirstParent() || Validator.isNotNull(parametersURL))) {
 
+			layoutFriendlyURL = layout.getFriendlyURL();
+		}
+		else if (forceLayoutFriendlyURL) {
 			layoutFriendlyURL = layout.getFriendlyURL();
 		}
 
@@ -2170,13 +2193,14 @@ public class PortalImpl implements Portal {
 			defaultAssetPublisherPortletId;
 
 		if (Validator.isNull(defaultAssetPublisherPortletId)) {
-			defaultAssetPublisherPortletId =
-				PortletKeys.ASSET_PUBLISHER +
-					LayoutTypePortletImpl.getFullInstanceSeparator();
+			String instanceId = LayoutTypePortletImpl.generateInstanceId();
+
+			defaultAssetPublisherPortletId = PortletConstants.assemblePortletId(
+				PortletKeys.ASSET_PUBLISHER, instanceId);
 		}
 
-		HttpServletRequest request =
-			(HttpServletRequest)requestContext.get("request");
+		HttpServletRequest request = (HttpServletRequest)requestContext.get(
+			"request");
 
 		if (Validator.isNull(currentDefaultAssetPublisherPortletId)) {
 			String actualPortletAuthenticationToken = AuthTokenUtil.getToken(
@@ -3150,8 +3174,17 @@ public class PortalImpl implements Portal {
 
 		ResourceBundle resourceBundle = portletConfig.getResourceBundle(locale);
 
-		return resourceBundle.getString(
-			JavaConstants.JAVAX_PORTLET_DESCRIPTION);
+		String portletDescription = ResourceBundleUtil.getString(
+			resourceBundle,
+			JavaConstants.JAVAX_PORTLET_DESCRIPTION.concat(
+				StringPool.PERIOD).concat(portlet.getRootPortletId()));
+
+		if (Validator.isNull(portletDescription)) {
+			portletDescription = ResourceBundleUtil.getString(
+				resourceBundle, JavaConstants.JAVAX_PORTLET_DESCRIPTION);
+		}
+
+		return portletDescription;
 	}
 
 	public String getPortletDescription(Portlet portlet, User user) {
@@ -3423,7 +3456,17 @@ public class PortalImpl implements Portal {
 
 		ResourceBundle resourceBundle = portletConfig.getResourceBundle(locale);
 
-		return resourceBundle.getString(JavaConstants.JAVAX_PORTLET_TITLE);
+		String portletTitle = ResourceBundleUtil.getString(
+			resourceBundle,
+			JavaConstants.JAVAX_PORTLET_TITLE.concat(StringPool.PERIOD).concat(
+				portlet.getRootPortletId()));
+
+		if (Validator.isNull(portletTitle)) {
+			portletTitle = ResourceBundleUtil.getString(
+				resourceBundle, JavaConstants.JAVAX_PORTLET_TITLE);
+		}
+
+		return portletTitle;
 	}
 
 	public String getPortletTitle(Portlet portlet, String languageId) {
@@ -3432,6 +3475,23 @@ public class PortalImpl implements Portal {
 
 	public String getPortletTitle(Portlet portlet, User user) {
 		return getPortletTitle(portlet.getPortletId(), user);
+	}
+
+	public String getPortletTitle(RenderRequest renderRequest) {
+		String portletId = (String)renderRequest.getAttribute(
+			WebKeys.PORTLET_ID);
+
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(portletId);
+
+		HttpServletRequest request = PortalUtil.getHttpServletRequest(
+			renderRequest);
+
+		ServletContext servletContext = (ServletContext)request.getAttribute(
+			WebKeys.CTX);
+
+		Locale locale = renderRequest.getLocale();
+
+		return getPortletTitle(portlet, servletContext, locale);
 	}
 
 	public String getPortletTitle(RenderResponse renderResponse) {

@@ -24,13 +24,21 @@
 
 	<trycatch>
 		<try>
-			<taskdef classname="com.liferay.util.ant.FormatTask" classpathref="project.classpath" name="liferay-format" />
+			<taskdef
+				classname="com.liferay.util.ant.FormatTask"
+				classpathref="project.classpath"
+				name="liferay-format"
+			/>
 		</try>
 		<catch>
 			<ant antfile="portal-service/build.xml" target="compile" inheritAll="false" />
 			<ant antfile="util-java/build.xml" target="compile" inheritAll="false" />
 
-			<taskdef classname="com.liferay.util.ant.FormatTask" classpathref="project.classpath" name="liferay-format" />
+			<taskdef
+				classname="com.liferay.util.ant.FormatTask"
+				classpathref="project.classpath"
+				name="liferay-format"
+			/>
 		</catch>
 	</trycatch>
 
@@ -175,9 +183,9 @@
 		</if>
 
 		<if>
-			<equals arg1="${test.ant.script.selenium.implementation}" arg2="web-driver" />
+			<equals arg1="${test.ant.script.selenium.implementation}" arg2="webdriver" />
 			<then>
-				<property name="test.ant.script.file.selenium.implementation" value="&lt;property name=&quot;test.selenium.implementation&quot; value=&quot;web-driver&quot; /&gt;" />
+				<property name="test.ant.script.file.selenium.implementation" value="&lt;property name=&quot;test.selenium.implementation&quot; value=&quot;webdriver&quot; /&gt;" />
 			</then>
 			<else>
 				<property name="test.ant.script.file.selenium.implementation" value="&lt;property name=&quot;test.selenium.implementation&quot; value=&quot;selenium&quot; /&gt;" />
@@ -211,9 +219,9 @@
 		</if>
 
 		<if>
-			<equals arg1="${test.ant.script.selenium.implementation}" arg2="web-driver" />
+			<equals arg1="${test.ant.script.selenium.implementation}" arg2="webdriver" />
 			<then>
-				<property name="test.ant.script.file.selenium.implementation" value="&lt;param name=&quot;test.selenium.implementation&quot; value=&quot;web-driver&quot; /&gt;" />
+				<property name="test.ant.script.file.selenium.implementation" value="&lt;param name=&quot;test.selenium.implementation&quot; value=&quot;webdriver&quot; /&gt;" />
 			</then>
 			<else>
 				<property name="test.ant.script.file.selenium.implementation" value="&lt;param name=&quot;test.selenium.implementation&quot; value=&quot;selenium&quot; /&gt;" />
@@ -275,7 +283,7 @@
 	</target>
 
 	<target name="build-test-ant-scripts">
-		<property name="build-test-ant-scripts.version" value="1" />
+		<property name="build-test-ant-scripts.version" value="6" />
 
 		<if>
 			<available file="portal-web/test-ant-scripts/version" />
@@ -657,6 +665,20 @@
 		</antcall>
 
 		<antcall target="build-test-ant-script-db-upgrade">
+			<param name="test.ant.script.command" value="db-upgrade-phone" />
+			<param name="test.ant.script.suite" value="Phone" />
+			<param name="test.ant.script.template" value="ant-script-db-upgrade.xml" />
+			<param name="test.ant.script.versions" value="5.2.3,5.2.5,5.2.7,5.2.8,5.2.9,6.0.6,6.0.10,6.0.11,6.0.12,6.1.1,6.1.10,6.1.20" />
+		</antcall>
+
+		<antcall target="build-test-ant-script-db-upgrade">
+			<param name="test.ant.script.command" value="db-upgrade-polls" />
+			<param name="test.ant.script.suite" value="Polls" />
+			<param name="test.ant.script.template" value="ant-script-db-upgrade.xml" />
+			<param name="test.ant.script.versions" value="5.2.3,5.2.5,5.2.7,5.2.8,5.2.9,6.0.6,6.0.10,6.0.11,6.0.12,6.1.1,6.1.10,6.1.20" />
+		</antcall>
+
+		<antcall target="build-test-ant-script-db-upgrade">
 			<param name="test.ant.script.command" value="db-upgrade-portlet-permissions" />
 			<param name="test.ant.script.suite" value="PortletPermissions" />
 			<param name="test.ant.script.template" value="ant-script-db-upgrade.xml" />
@@ -709,6 +731,13 @@
 		<antcall target="build-test-ant-script-db-upgrade">
 			<param name="test.ant.script.command" value="db-upgrade-web-content" />
 			<param name="test.ant.script.suite" value="WebContent" />
+			<param name="test.ant.script.template" value="ant-script-db-upgrade.xml" />
+			<param name="test.ant.script.versions" value="5.2.3,5.2.5,5.2.7,5.2.8,5.2.9,6.0.6,6.0.10,6.0.11,6.0.12,6.1.1,6.1.10,6.1.20" />
+		</antcall>
+
+		<antcall target="build-test-ant-script-db-upgrade">
+			<param name="test.ant.script.command" value="db-upgrade-website" />
+			<param name="test.ant.script.suite" value="Website" />
 			<param name="test.ant.script.template" value="ant-script-db-upgrade.xml" />
 			<param name="test.ant.script.versions" value="5.2.3,5.2.5,5.2.7,5.2.8,5.2.9,6.0.6,6.0.10,6.0.11,6.0.12,6.1.1,6.1.10,6.1.20" />
 		</antcall>
@@ -904,11 +933,6 @@
 		</antcall>
 
 		<antcall target="build-test-ant-script">
-			<param name="test.ant.script.command" value="permissions-organizations" />
-			<param name="test.ant.script.suite" value="PermissionsOrganizationsTestSuite" />
-		</antcall>
-
-		<antcall target="build-test-ant-script">
 			<param name="test.ant.script.command" value="permissions-document-library" />
 			<param name="test.ant.script.suite" value="PermissionsDocumentLibraryTestSuite" />
 		</antcall>
@@ -919,8 +943,18 @@
 		</antcall>
 
 		<antcall target="build-test-ant-script">
+			<param name="test.ant.script.command" value="permissions-media-gallery" />
+			<param name="test.ant.script.suite" value="PermissionsMediaGalleryTestSuite" />
+		</antcall>
+
+		<antcall target="build-test-ant-script">
 			<param name="test.ant.script.command" value="permissions-message-boards" />
 			<param name="test.ant.script.suite" value="PermissionsMessageBoardsTestSuite" />
+		</antcall>
+
+		<antcall target="build-test-ant-script">
+			<param name="test.ant.script.command" value="permissions-organizations" />
+			<param name="test.ant.script.suite" value="PermissionsOrganizationsTestSuite" />
 		</antcall>
 
 		<antcall target="build-test-ant-script">
@@ -1994,8 +2028,8 @@
 		</antcall>
 
 		<antcall target="build-test-ant-script">
-			<param name="test.ant.script.command" value="staging-community-document-library" />
-			<param name="test.ant.script.suite" value="StagingCommunityDocumentLibraryTestSuite" />
+			<param name="test.ant.script.command" value="staging-community-documents-and-media" />
+			<param name="test.ant.script.suite" value="StagingCommunityDocumentsAndMediaTestSuite" />
 		</antcall>
 
 		<antcall target="build-test-ant-script">
@@ -2951,44 +2985,45 @@ executable ZIP file.
 				<equals arg1="${test.browser}" arg2="firefox" />
 			</or>
 			<then>
-				<replace
-					file="portal-web/test/test-portal-web.properties"
-					token="#selenium.executable.dir="
-					value="selenium.executable.dir=${basedir.unix}/tools/selenium/"
-				/>
-				<replace
-					file="portal-web/test/test-portal-web.properties"
-					token="#selenium.download.file.executable="
-					value="selenium.download.file.executable=selenium_download_file_ff.exe"
-				/>
-				<replace
-					file="portal-web/test/test-portal-web.properties"
-					token="#selenium.set.browser.option.executable="
-					value="selenium.set.browser.option.executable=selenium_set_browser_option_ff.exe"
-				/>
+				<property name="browser.type" value="firefox" />
+
+				<propertycopy name="browser.version" from="browser.firefox.version" silent="true" />
 			</then>
+			<elseif>
+				<equals arg1="${test.browser}" arg2="googlechrome" />
+				<then>
+					<property name="browser.type" value="googlechrome" />
+
+					<propertycopy name="browser.version" from="browser.googlechrome.version" silent="true" />
+				</then>
+			</elseif>
 			<elseif>
 				<or>
 					<equals arg1="${test.browser}" arg2="iehta" />
-					<equals arg1="${test.browser}" arg2="iexplorer" />
+					<equals arg1="${test.browser}" arg2="iexplore" />
 				</or>
 				<then>
-					<replace
-						file="portal-web/test/test-portal-web.properties"
-						token="#selenium.executable.dir="
-						value="selenium.executable.dir=${basedir.unix}/tools/selenium/"
-					/>
-					<replace
-						file="portal-web/test/test-portal-web.properties"
-						token="#selenium.download.file.executable="
-						value="selenium.download.file.executable=selenium_download_file_ie.exe"
-					/>
+					<property name="browser.type" value="ie" />
+
+					<propertycopy name="browser.version" from="browser.ie.version" silent="true" />
 				</then>
 			</elseif>
 		</if>
 
+		<replace
+			file="portal-web/test/test-portal-web.properties"
+			token="#selenium.browser.commands.dir="
+			value="selenium.browser.commands.dir=${basedir.unix}/tools/selenium/browser-commands/${test.selenium.implementation}/${os.type}/${browser.type}/${browser.version}/"
+		/>
+
+		<replace
+			file="portal-web/test/test-portal-web.properties"
+			token="#selenium.executable.dir="
+			value="selenium.executable.dir=${basedir.unix}/tools/selenium/"
+		/>
+
 		<if>
-			<equals arg1="${test.selenium.implementation}" arg2="web-driver" />
+			<equals arg1="${test.selenium.implementation}" arg2="webdriver" />
 			<then>
 				<replace
 					file="portal-web/test/test-portal-web.properties"
@@ -3804,13 +3839,19 @@ file.
 		<antcall target="prepare-selenium" />
 
 		<if>
-			<or>
-				<equals arg1="${test.browser}" arg2="iehta" />
-				<equals arg1="${test.browser}" arg2="iexplore" />
-			</or>
+			<equals arg1="${test.browser}" arg2="googlechrome" />
 			<then>
-				<antcall target="start-selenium-nanny" />
+				<antcall target="start-chrome-driver" />
 			</then>
+			<elseif>
+				<or>
+					<equals arg1="${test.browser}" arg2="iehta" />
+					<equals arg1="${test.browser}" arg2="iexplore" />
+				</or>
+				<then>
+					<antcall target="start-selenium-nanny" />
+				</then>
+			</elseif>
 		</if>
 
 		<parallel>
@@ -3859,13 +3900,42 @@ file.
 		</parallel>
 
 		<if>
-			<or>
-				<equals arg1="${test.browser}" arg2="iehta" />
-				<equals arg1="${test.browser}" arg2="iexplore" />
-			</or>
+			<equals arg1="${test.browser}" arg2="googlechrome" />
 			<then>
-				<antcall target="stop-selenium-nanny" />
+				<antcall target="stop-chrome-driver" />
 			</then>
+			<elseif>
+				<or>
+					<equals arg1="${test.browser}" arg2="iehta" />
+					<equals arg1="${test.browser}" arg2="iexplore" />
+				</or>
+				<then>
+					<antcall target="stop-selenium-nanny" />
+				</then>
+			</elseif>
+		</if>
+	</target>
+
+	<target name="start-chrome-driver">
+		<if>
+			<not>
+				<isset property="chrome.driver.zip" />
+			</not>
+			<then>
+				<fail>
+.
+
+Please set "chrome.driver.zip" in test.properties to point to "chromedriver_win_22_0_1203_0b.zip"
+which can be downloaded from this website: http://code.google.com/p/chromedriver/
+				</fail>
+			</then>
+			<else>
+				<exec executable="taskkill.exe">
+					<arg line="/F /IM chromedriver.exe" />
+				</exec>
+
+				<unzip src="${chrome.driver.zip}" dest="tools/selenium" />
+			</else>
 		</if>
 	</target>
 
@@ -3889,6 +3959,12 @@ file.
 		<forget>
 			<exec executable="${selenium.nanny.executable}" />
 		</forget>
+	</target>
+
+	<target name="stop-chrome-driver">
+		<exec executable="taskkill.exe">
+			<arg line="/F /IM chromedriver.exe" />
+		</exec>
 	</target>
 
 	<target name="stop-selenium">

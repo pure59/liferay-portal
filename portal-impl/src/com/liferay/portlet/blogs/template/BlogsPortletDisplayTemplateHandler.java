@@ -15,7 +15,7 @@
 package com.liferay.portlet.blogs.template;
 
 import com.liferay.portal.kernel.language.LanguageUtil;
-import com.liferay.portal.kernel.template.PortletDisplayTemplateHandler;
+import com.liferay.portal.kernel.portletdisplaytemplate.BasePortletDisplayTemplateHandler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
@@ -27,14 +27,15 @@ import java.util.Locale;
 /**
  * @author Juan Fernández
  */
-public class BlogsPortletDisplayTemplateHandler implements
-	PortletDisplayTemplateHandler {
+public class BlogsPortletDisplayTemplateHandler
+	extends BasePortletDisplayTemplateHandler {
 
 	public String getClassName() {
 		return BlogsEntry.class.getName();
 	}
 
-	public String getDefaultTemplateLocation() {
+	@Override
+	public String getHelpTemplatePath() {
 		return PropsValues.BLOGS_DISPLAY_STYLES_TEMPLATE_CONTENT;
 	}
 

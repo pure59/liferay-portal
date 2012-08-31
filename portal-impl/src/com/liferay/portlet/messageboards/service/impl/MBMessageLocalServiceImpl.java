@@ -120,7 +120,7 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		long threadId = 0;
-		long parentMessageId = 0;
+		long parentMessageId = MBMessageConstants.DEFAULT_PARENT_MESSAGE_ID;
 		String subject = String.valueOf(classPK);
 		String body = subject;
 
@@ -1730,7 +1730,7 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 
 			// Subscriptions
 
-			notifySubscribers(message, serviceContext);
+			notifySubscribers((MBMessage)message.clone(), serviceContext);
 
 			// Indexer
 
@@ -1992,10 +1992,8 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 
 		categoryIds.add(message.getCategoryId());
 
-		if ((message.getCategoryId() !=
-				MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) &&
-			(message.getCategoryId() !=
-				MBCategoryConstants.DISCUSSION_CATEGORY_ID)) {
+		if (message.getCategoryId() !=
+				MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
 
 			categoryIds.addAll(category.getAncestorCategoryIds());
 		}
@@ -2112,13 +2110,14 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 			(SubscriptionSender)SerializableUtil.clone(
 				subscriptionSenderPrototype);
 
-		for (long categoryId : categoryIds) {
-			if (categoryId == MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
-				categoryId = message.getGroupId();
-			}
+		subscriptionSender.addPersistedSubscribers(
+			MBCategory.class.getName(), message.getGroupId());
 
-			subscriptionSender.addPersistedSubscribers(
-				MBCategory.class.getName(), categoryId);
+		for (long categoryId : categoryIds) {
+			if (categoryId != MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
+				subscriptionSender.addPersistedSubscribers(
+					MBCategory.class.getName(), categoryId);
+			}
 		}
 
 		subscriptionSender.addPersistedSubscribers(
