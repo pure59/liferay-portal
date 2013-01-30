@@ -96,14 +96,16 @@ public class DLFileEntryPermission {
 			}
 		}
 
-		if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
-			if (dlFileEntry.getFolderId() !=
-					DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+		long folderId = dlFileEntry.getFolderId();
 
-				try {
-					DLFolder dlFolder = DLFolderLocalServiceUtil.getFolder(
-						dlFileEntry.getFolderId());
+		if (folderId !=
+				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
+			try {
+				DLFolder dlFolder = DLFolderLocalServiceUtil.getFolder(
+					folderId);
+
+				if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
 					if (!DLFolderPermission.contains(
 							permissionChecker, dlFolder, ActionKeys.ACCESS) &&
 						!DLFolderPermission.contains(
@@ -112,10 +114,16 @@ public class DLFileEntryPermission {
 						return false;
 					}
 				}
-				catch (NoSuchFolderException nsfe) {
-					if (!latestDLFileVersion.isInTrash()) {
-						throw nsfe;
-					}
+
+				if (DLFolderPermission.contains(
+						permissionChecker, dlFolder, actionId)) {
+
+					return true;
+				}
+			}
+			catch (NoSuchFolderException nsfe) {
+				if (!latestDLFileVersion.isInTrash()) {
+					throw nsfe;
 				}
 			}
 		}
