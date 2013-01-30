@@ -106,72 +106,80 @@ public class MBCategoryPermission {
 			return false;
 		}
 
-		long categoryId = category.getCategoryId();
+		long parentCategoryId = category.getParentCategoryId();
 
-		if (actionId.equals(ActionKeys.VIEW)) {
-			while (categoryId !=
-					MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
+		MBCategory parentCategory = category;
 
-				try {
-					category = MBCategoryLocalServiceUtil.getCategory(
-						categoryId);
+		if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
+			try {
+				while (parentCategoryId !=
+						MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
 
-					categoryId = category.getParentCategoryId();
+					parentCategory = MBCategoryLocalServiceUtil.getCategory(
+						parentCategoryId);
 
 					if (!permissionChecker.hasOwnerPermission(
-							category.getCompanyId(), MBCategory.class.getName(),
-							category.getCategoryId(), category.getUserId(),
-							actionId) &&
+							parentCategory.getCompanyId(),
+							MBCategory.class.getName(), parentCategoryId,
+							parentCategory.getUserId(), ActionKeys.VIEW) &&
 						!permissionChecker.hasPermission(
-							category.getGroupId(), MBCategory.class.getName(),
-							category.getCategoryId(), actionId)) {
-
+							parentCategory.getGroupId(),
+							MBCategory.class.getName(), parentCategoryId,
+							ActionKeys.VIEW)) {
 						return false;
 					}
 
-					if (!PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
-						break;
-					}
-				}
-				catch (NoSuchCategoryException nsce) {
-					if (!category.isInTrash()) {
-						throw nsce;
-					}
+					parentCategoryId = parentCategory.getParentCategoryId();
 				}
 			}
+			catch (NoSuchCategoryException nsce) {
+				if (!parentCategory.isInTrash()) {
+					throw nsce;
+				}
+			}
+
+			parentCategoryId = category.getParentCategoryId();
+
+			parentCategory = category;
+		}
+
+		try {
+			while (parentCategoryId !=
+					MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
+
+				parentCategory = MBCategoryLocalServiceUtil.getCategory(
+					parentCategoryId);
+
+				if (permissionChecker.hasOwnerPermission(
+						parentCategory.getCompanyId(),
+						MBCategory.class.getName(), parentCategoryId,
+						parentCategory.getUserId(), actionId) ||
+					permissionChecker.hasPermission(
+						parentCategory.getGroupId(), MBCategory.class.getName(),
+						parentCategoryId, actionId)) {
+
+					return true;
+				}
+
+				parentCategoryId = parentCategory.getParentCategoryId();
+			}
+		}
+		catch (NoSuchCategoryException nsce) {
+			if (!parentCategory.isInTrash()) {
+				throw nsce;
+			}
+		}
+
+		if (permissionChecker.hasOwnerPermission(
+				category.getCompanyId(), MBCategory.class.getName(),
+				category.getCategoryId(), category.getUserId(), actionId)) {
 
 			return true;
 		}
-		else {
-			while (categoryId !=
-					MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
 
-				category = MBCategoryLocalServiceUtil.getCategory(categoryId);
-
-				categoryId = category.getParentCategoryId();
-
-				if (permissionChecker.hasOwnerPermission(
-						category.getCompanyId(), MBCategory.class.getName(),
-						category.getCategoryId(), category.getUserId(),
-						actionId)) {
-
-					return true;
-				}
-
-				if (permissionChecker.hasPermission(
-						category.getGroupId(), MBCategory.class.getName(),
-						category.getCategoryId(), actionId)) {
-
-					return true;
-				}
-
-				if (actionId.equals(ActionKeys.VIEW)) {
-					break;
-				}
-			}
-
-			return false;
-		}
+		return permissionChecker.hasPermission(
+			category.getGroupId(), MBCategory.class.getName(),
+			category.getCategoryId(), actionId);
 	}
 
 }
