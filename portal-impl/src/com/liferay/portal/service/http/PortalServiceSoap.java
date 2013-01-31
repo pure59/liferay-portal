@@ -139,6 +139,18 @@ public class PortalServiceSoap {
 		}
 	}
 
+	public static void testAutoSyncHibernateSessionStateOnTxCreation()
+		throws RemoteException {
+		try {
+			PortalServiceUtil.testAutoSyncHibernateSessionStateOnTxCreation();
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	public static void testCounterIncrement_Rollback()
 		throws RemoteException {
 		try {

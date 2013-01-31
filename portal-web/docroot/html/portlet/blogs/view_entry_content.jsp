@@ -138,7 +138,7 @@ AssetEntry assetEntry = (AssetEntry)request.getAttribute("view_entry_content.jsp
 
 			<div class="entry-body">
 				<c:choose>
-					<c:when test='<%= pageDisplayStyle.equals(RSSUtil.DISPLAY_STYLE_ABSTRACT) && !strutsAction.equals("/blogs/view_entry") %>'>
+					<c:when test='<%= pageDisplayStyle.equals(BlogsUtil.DISPLAY_STYLE_ABSTRACT) && !strutsAction.equals("/blogs/view_entry") %>'>
 						<c:if test="<%= entry.isSmallImage() %>">
 
 							<%
@@ -171,8 +171,17 @@ AssetEntry assetEntry = (AssetEntry)request.getAttribute("view_entry_content.jsp
 
 						 <aui:a href="<%= viewEntryURL %>"><liferay-ui:message arguments='<%= new Object[] {"aui-helper-hidden-accessible", entry.getTitle()} %>' key="read-more-x-about-x" /> &raquo;</aui:a>
 					</c:when>
-					<c:when test='<%= pageDisplayStyle.equals(RSSUtil.DISPLAY_STYLE_FULL_CONTENT) || strutsAction.equals("/blogs/view_entry") %>'>
-						<%= entry.getContent() %>
+					<c:when test='<%= pageDisplayStyle.equals(BlogsUtil.DISPLAY_STYLE_FULL_CONTENT) || strutsAction.equals("/blogs/view_entry") %>'>
+
+						<%
+						String entryContentId = "blogs-entry-content-" + entry.getEntryId();
+
+						boolean inlineEditEnabled = BlogsEntryPermission.contains(permissionChecker, entry, ActionKeys.UPDATE) && !WorkflowDefinitionLinkLocalServiceUtil.hasWorkflowDefinitionLink(themeDisplay.getCompanyId(), scopeGroupId, BlogsEntry.class.getName());
+						%>
+
+						<div <%= inlineEditEnabled ? "class=\"lfr-editable\" contenteditable=\"true\" id=\"" + entryContentId + "\" spellcheck=\"false\"" : StringPool.BLANK %>>
+							<%= entry.getContent() %>
+						</div>
 
 						<liferay-ui:custom-attributes-available className="<%= BlogsEntry.class.getName() %>">
 							<liferay-ui:custom-attribute-list
@@ -182,8 +191,23 @@ AssetEntry assetEntry = (AssetEntry)request.getAttribute("view_entry_content.jsp
 								label="<%= true %>"
 							/>
 						</liferay-ui:custom-attributes-available>
+
+						<c:if test="<%= inlineEditEnabled %>">
+							<portlet:actionURL var="updateEntryContent">
+								<portlet:param name="struts_action" value="/blogs/edit_entry" />
+								<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.UPDATE_CONTENT %>" />
+								<portlet:param name="entryId" value="<%= String.valueOf(entry.getEntryId()) %>" />
+							</portlet:actionURL>
+
+							<liferay-ui:input-editor
+								editorImpl="ckeditor"
+								inlineEdit="<%= true %>"
+								inlineEditSaveURL="<%= updateEntryContent %>"
+								name="<%= entryContentId %>"
+							/>
+						</c:if>
 					</c:when>
-					<c:when test='<%= pageDisplayStyle.equals(RSSUtil.DISPLAY_STYLE_TITLE) && !strutsAction.equals("/blogs/view_entry") %>'>
+					<c:when test='<%= pageDisplayStyle.equals(BlogsUtil.DISPLAY_STYLE_TITLE) && !strutsAction.equals("/blogs/view_entry") %>'>
 						<aui:a href="<%= viewEntryURL %>"><liferay-ui:message arguments='<%= new Object[] {"aui-helper-hidden-accessible", entry.getTitle()} %>' key="read-more-x-about-x" /> &raquo;</aui:a>
 					</c:when>
 				</c:choose>
@@ -254,7 +278,7 @@ AssetEntry assetEntry = (AssetEntry)request.getAttribute("view_entry_content.jsp
 					/>
 				</span>
 
-				<c:if test='<%= pageDisplayStyle.equals(RSSUtil.DISPLAY_STYLE_FULL_CONTENT) || strutsAction.equals("/blogs/view_entry") %>'>
+				<c:if test='<%= pageDisplayStyle.equals(BlogsUtil.DISPLAY_STYLE_FULL_CONTENT) || strutsAction.equals("/blogs/view_entry") %>'>
 					<c:if test="<%= enableRelatedAssets %>">
 						<div class="entry-links">
 							<liferay-ui:asset-links

@@ -16,11 +16,13 @@ package com.liferay.portlet.messageboards.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.permission.WorkflowPermissionUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.portlet.messageboards.NoSuchCategoryException;
 import com.liferay.portlet.messageboards.model.MBCategory;
 import com.liferay.portlet.messageboards.model.MBCategoryConstants;
 import com.liferay.portlet.messageboards.model.MBMessage;
@@ -92,14 +94,31 @@ public class MBMessagePermission {
 		if ((categoryId != MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) &&
 			(categoryId != MBCategoryConstants.DISCUSSION_CATEGORY_ID)) {
 
-			MBCategory category = MBCategoryLocalServiceUtil.getCategory(
-				categoryId);
+			try {
+				MBCategory category = MBCategoryLocalServiceUtil.getCategory(
+					categoryId);
 
-			if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
-				if (!MBCategoryPermission.contains(
-						permissionChecker, category, ActionKeys.VIEW)) {
+				if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
+					if (!MBCategoryPermission.contains(
+							permissionChecker, category, ActionKeys.VIEW)) {
 
-					return false;
+						return false;
+					}
+				}
+
+				if (!PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE ||
+					!Validator.equals(actionId, ActionKeys.VIEW)) {
+
+					if (MBCategoryPermission.contains(
+							permissionChecker, category, actionId)) {
+
+						return true;
+					}
+				}
+			}
+			catch (NoSuchCategoryException nsce) {
+				if (!message.isInTrashThread()) {
+					throw nsce;
 				}
 			}
 		}

@@ -30,6 +30,8 @@ page import="com.liferay.portal.kernel.search.Indexer" %><%@
 page import="com.liferay.portal.kernel.search.IndexerRegistryUtil" %><%@
 page import="com.liferay.portal.kernel.search.SearchContext" %><%@
 page import="com.liferay.portal.kernel.search.SearchContextFactory" %><%@
+page import="com.liferay.portal.kernel.search.SearchResult" %><%@
+page import="com.liferay.portal.kernel.search.SearchResultUtil" %><%@
 page import="com.liferay.portal.kernel.util.MimeTypesUtil" %><%@
 page import="com.liferay.portal.kernel.workflow.WorkflowDefinition" %><%@
 page import="com.liferay.portal.kernel.workflow.WorkflowDefinitionManagerUtil" %><%@
@@ -38,12 +40,9 @@ page import="com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil" %><
 page import="com.liferay.portal.repository.util.RepositoryFactoryUtil" %><%@
 page import="com.liferay.portlet.asset.model.AssetEntry" %><%@
 page import="com.liferay.portlet.asset.model.AssetRenderer" %><%@
-page import="com.liferay.portlet.asset.model.AssetTag" %><%@
 page import="com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil" %><%@
 page import="com.liferay.portlet.asset.service.AssetEntryServiceUtil" %><%@
-page import="com.liferay.portlet.asset.service.AssetTagLocalServiceUtil" %><%@
 page import="com.liferay.portlet.asset.service.persistence.AssetEntryQuery" %><%@
-page import="com.liferay.portlet.asset.util.AssetUtil" %><%@
 page import="com.liferay.portlet.documentlibrary.DuplicateFileEntryTypeException" %><%@
 page import="com.liferay.portlet.documentlibrary.DuplicateFileException" %><%@
 page import="com.liferay.portlet.documentlibrary.DuplicateFolderNameException" %><%@
@@ -169,7 +168,7 @@ boolean enableRelatedAssets = GetterUtil.getBoolean(preferences.getValue("enable
 
 String defaultEntryColumns = "name,size";
 
-if (PropsValues.DL_FILE_ENTRY_READ_COUNT_ENABLED) {
+if (PropsValues.DL_FILE_ENTRY_BUFFERED_INCREMENT_ENABLED) {
 	defaultEntryColumns += ",downloads";
 }
 

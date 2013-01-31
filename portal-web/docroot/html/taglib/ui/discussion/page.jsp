@@ -22,7 +22,6 @@
 <%@ page import="com.liferay.portlet.messageboards.model.MBMessage" %>
 <%@ page import="com.liferay.portlet.messageboards.model.MBMessageDisplay" %>
 <%@ page import="com.liferay.portlet.messageboards.model.MBThread" %>
-<%@ page import="com.liferay.portlet.messageboards.model.MBThreadConstants" %>
 <%@ page import="com.liferay.portlet.messageboards.model.MBTreeWalker" %>
 <%@ page import="com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil" %>
 <%@ page import="com.liferay.portlet.messageboards.service.permission.MBDiscussionPermission" %>
@@ -519,7 +518,7 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 	loginURL.setWindowState(LiferayWindowState.POP_UP);
 	loginURL.setPortletMode(PortletMode.VIEW);
 
-	loginURL.setParameter("saveLastPath", "0");
+	loginURL.setParameter("saveLastPath", Boolean.FALSE.toString());
 	loginURL.setParameter("struts_action", "/login/login");
 	%>
 

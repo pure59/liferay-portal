@@ -23,7 +23,6 @@ import com.liferay.portal.kernel.scheduler.SchedulerEngineHelperUtil;
 import com.liferay.portal.kernel.scheduler.StorageType;
 import com.liferay.portal.kernel.scheduler.Trigger;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
@@ -49,7 +48,6 @@ import java.io.InputStream;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -98,12 +96,12 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	 *         normalized when accessed see {@link
 	 *         com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil#normalize(
 	 *         String)}.
-	 * @param  serviceContext the service context. Must set the universally
-	 *         unique identifier (UUID) for the layout. Can set the creation
-	 *         date, modification date and the expando bridge attributes for the
-	 *         layout. For layouts that belong to a layout set prototype, an
-	 *         attribute named 'layoutUpdateable' can be used to specify whether
-	 *         site administrators can modify this page within their site.
+	 * @param  serviceContext the service context. Must set the UUID for the
+	 *         layout. Can set the creation date, modification date and the
+	 *         expando bridge attributes for the layout. For layouts that belong
+	 *         to a layout set prototype, an attribute named 'layoutUpdateable'
+	 *         can be used to specify whether site administrators can modify
+	 *         this page within their site.
 	 * @return the layout
 	 * @throws PortalException if a group with the primary key could not be
 	 *         found, if the group did not have permission to manage the layouts
@@ -138,10 +136,6 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	}
 
 	/**
-	 * Adds a layout with empty maps for descriptions, keywords, and titles ,
-	 * and a names map containing a mapping for the default locale as its only
-	 * entry.
-	 *
 	 * <p>
 	 * This method handles the creation of the layout including its resources,
 	 * metadata, and internal data structures. It is not necessary to make
@@ -173,12 +167,12 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	 *         normalized when accessed see {@link
 	 *         com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil#normalize(
 	 *         String)}.
-	 * @param  serviceContext the service context. Must set the universally
-	 *         unique identifier (UUID) for the layout. Can specify the creation
-	 *         date, modification date and the expando bridge attributes for the
-	 *         layout. For layouts that belong to a layout set prototype, an
-	 *         attribute named 'layoutUpdateable' can be used to specify whether
-	 *         site administrators can modify this page within their site.
+	 * @param  serviceContext the service context. Must set the UUID for the
+	 *         layout. Can specify the creation date, modification date and the
+	 *         expando bridge attributes for the layout. For layouts that belong
+	 *         to a layout set prototype, an attribute named 'layoutUpdateable'
+	 *         can be used to specify whether site administrators can modify
+	 *         this page within their site.
 	 * @return the layout
 	 * @throws PortalException if a group with the primary key could not be
 	 *         found, if the group did not have permission to manage the layouts
@@ -191,17 +185,21 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 			boolean hidden, String friendlyURL, ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		Map<Locale, String> localeNamesMap = new HashMap<Locale, String>();
+		PermissionChecker permissionChecker = getPermissionChecker();
 
-		Locale defaultLocale = LocaleUtil.getDefault();
+		if (parentLayoutId == LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
+			GroupPermissionUtil.check(
+				permissionChecker, groupId, ActionKeys.ADD_LAYOUT);
+		}
+		else {
+			LayoutPermissionUtil.check(
+				permissionChecker, groupId, privateLayout, parentLayoutId,
+				ActionKeys.ADD_LAYOUT);
+		}
 
-		localeNamesMap.put(defaultLocale, name);
-
-		return addLayout(
-			groupId, privateLayout, parentLayoutId, localeNamesMap,
-			new HashMap<Locale, String>(), new HashMap<Locale, String>(),
-			new HashMap<Locale, String>(), new HashMap<Locale, String>(), type,
-			hidden, friendlyURL, serviceContext);
+		return layoutLocalService.addLayout(
+			getUserId(), groupId, privateLayout, parentLayoutId, name, title,
+			description, type, hidden, friendlyURL, serviceContext);
 	}
 
 	/**
@@ -414,6 +412,25 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	}
 
 	/**
+	 * Returns all the ancestor layouts of the layout.
+	 *
+	 * @param  plid the primary key of the layout
+	 * @return the ancestor layouts of the layout
+	 * @throws PortalException if a matching layout could not be found or if a
+	 *         portal exception occurred
+	 * @throws SystemException if a system exception occurred
+	 */
+	public List<Layout> getAncestorLayouts(long plid)
+		throws PortalException, SystemException {
+
+		Layout layout = layoutLocalService.getLayout(plid);
+
+		List<Layout> ancestors = layout.getAncestors();
+
+		return filterLayouts(ancestors);
+	}
+
+	/**
 	 * Returns the primary key of the default layout for the group.
 	 *
 	 * @param  groupId the primary key of the group
@@ -520,6 +537,29 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	}
 
 	/**
+	 * @param  uuid the layout's UUID
+	 * @param  groupId the primary key of the group
+	 * @param  privateLayout whether the layout is private to the group
+	 * @return the matching layout
+	 * @throws PortalException if a matching layout could not be found, if the
+	 *         user did not have permission to view the layout, or if some other
+	 *         portal exception occurred
+	 * @throws SystemException if a system exception occurred
+	 */
+	public Layout getLayoutByUuidAndGroupId(
+			String uuid, long groupId, boolean privateLayout)
+		throws PortalException, SystemException {
+
+		Layout layout = layoutLocalService.getLayoutByUuidAndGroupId(
+			uuid, groupId, privateLayout);
+
+		LayoutPermissionUtil.check(
+			getPermissionChecker(), layout, ActionKeys.VIEW);
+
+		return layout;
+	}
+
+	/**
 	 * Returns the name of the layout.
 	 *
 	 * @param  groupId the primary key of the group
@@ -563,20 +603,26 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	}
 
 	public List<Layout> getLayouts(long groupId, boolean privateLayout)
-		throws PortalException, SystemException {
+		throws SystemException {
 
-		List<Layout> layouts = layoutLocalService.getLayouts(
-			groupId, privateLayout);
-
-		return filterLayouts(layouts);
+		return layoutPersistence.filterFindByG_P(groupId, privateLayout);
 	}
 
 	public List<Layout> getLayouts(
 			long groupId, boolean privateLayout, long parentLayoutId)
+		throws SystemException {
+
+		return layoutPersistence.filterFindByG_P_P(
+			groupId, privateLayout, parentLayoutId);
+	}
+
+	public List<Layout> getLayouts(
+			long groupId, boolean privateLayout, long parentLayoutId,
+			boolean incomplete, int start, int end)
 		throws PortalException, SystemException {
 
 		List<Layout> layouts = layoutLocalService.getLayouts(
-			groupId, privateLayout, parentLayoutId);
+			groupId, privateLayout, parentLayoutId, incomplete, start, end);
 
 		return filterLayouts(layouts);
 	}

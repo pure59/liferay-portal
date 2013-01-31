@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.model.CompanyConstants;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.documentlibrary.NoSuchDirectoryException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
@@ -40,9 +41,10 @@ import java.sql.Timestamp;
 public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 
 	protected long addDLFileEntry(
-			long groupId, long companyId, long userId, String userName,
-			Timestamp createDate, long repositoryId, long folderId, String name,
-			String extension, String mimeType, String title, long size)
+			long groupId, long companyId, long userId, String className,
+			long classPK, String userName, Timestamp createDate,
+			long repositoryId, long folderId, String name, String extension,
+			String mimeType, String title, long size)
 		throws Exception {
 
 		Connection con = null;
@@ -53,17 +55,18 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 
 			con = DataAccess.getUpgradeOptimizedConnection();
 
-			StringBundler sb = new StringBundler(9);
+			StringBundler sb = new StringBundler(10);
 
 			sb.append("insert into DLFileEntry (uuid_, fileEntryId, groupId, ");
 			sb.append("companyId, userId, userName, versionUserId, ");
 			sb.append("versionUserName, createDate, modifiedDate, ");
-			sb.append("repositoryId, folderId, name, extension, mimeType, ");
-			sb.append("title, description, extraSettings, fileEntryTypeId, ");
-			sb.append("version, size_, readCount, smallImageId, ");
-			sb.append("largeImageId, custom1ImageId, custom2ImageId) values (");
-			sb.append("?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ");
-			sb.append("?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			sb.append("classNameId, classPK, repositoryId, folderId, name, ");
+			sb.append("extension, mimeType, title, description, ");
+			sb.append("extraSettings, fileEntryTypeId, version, size_, ");
+			sb.append("readCount, smallImageId, largeImageId, ");
+			sb.append("custom1ImageId, custom2ImageId) values (?, ?, ?, ?, ");
+			sb.append("?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ");
+			sb.append("?, ?, ?, ?, ?, ?)");
 
 			String sql = sb.toString();
 
@@ -79,22 +82,24 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 			ps.setString(8, userName);
 			ps.setTimestamp(9, createDate);
 			ps.setTimestamp(10, createDate);
-			ps.setLong(11, repositoryId);
-			ps.setLong(12, folderId);
-			ps.setString(13, name);
-			ps.setString(14, extension);
-			ps.setString(15, mimeType);
-			ps.setString(16, title);
-			ps.setString(17, StringPool.BLANK);
-			ps.setString(18, StringPool.BLANK);
-			ps.setLong(19, 0);
-			ps.setString(20, "1.0");
-			ps.setLong(21, size);
-			ps.setInt(22, 0);
-			ps.setLong(23, 0);
-			ps.setLong(24, 0);
+			ps.setLong(11, PortalUtil.getClassNameId(className));
+			ps.setLong(12, classPK);
+			ps.setLong(13, repositoryId);
+			ps.setLong(14, folderId);
+			ps.setString(15, name);
+			ps.setString(16, extension);
+			ps.setString(17, mimeType);
+			ps.setString(18, title);
+			ps.setString(19, StringPool.BLANK);
+			ps.setString(20, StringPool.BLANK);
+			ps.setLong(21, 0);
+			ps.setString(22, "1.0");
+			ps.setLong(23, size);
+			ps.setInt(24, 0);
 			ps.setLong(25, 0);
 			ps.setLong(26, 0);
+			ps.setLong(27, 0);
+			ps.setLong(28, 0);
 
 			ps.executeUpdate();
 
@@ -167,7 +172,8 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 	protected long addDLFolder(
 			long folderId, long groupId, long companyId, long userId,
 			String userName, Timestamp createDate, long repositoryId,
-			long parentFolderId, String name, boolean hidden)
+			boolean mountPoint, long parentFolderId, String name,
+			boolean hidden)
 		throws Exception {
 
 		Connection con = null;
@@ -182,7 +188,7 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 			sb.append("companyId, userId, userName, createDate, ");
 			sb.append("modifiedDate, repositoryId, mountPoint, ");
 			sb.append("parentFolderId, name, description, lastPostDate, ");
-			sb.append("defaultFileEntryTypeId, hidden_, ");
+			sb.append("defaultFileEntryTypeId, hidden, ");
 			sb.append("overrideFileEntryTypes, status, statusByUserId, ");
 			sb.append("statusByUserName, statusDate) values (?, ?, ?, ?, ?, ");
 			sb.append("?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -200,7 +206,7 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 			ps.setTimestamp(7, createDate);
 			ps.setTimestamp(8, createDate);
 			ps.setLong(9, repositoryId);
-			ps.setBoolean(10, false);
+			ps.setBoolean(10, mountPoint);
 			ps.setLong(11, parentFolderId);
 			ps.setString(12, name);
 			ps.setString(13, StringPool.BLANK);
@@ -231,8 +237,8 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 
 		long folderId = addDLFolder(
 			increment(), groupId, companyId, userId, userName, createDate,
-			repositoryId, DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, portletId,
-			true);
+			repositoryId, true, DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			portletId, true);
 
 		Connection con = null;
 		PreparedStatement ps = null;
@@ -279,10 +285,11 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 		updateAttachments();
 	}
 
-	protected String[] getAttachments(long companyId, long resourcePrimKey)
+	protected String[] getAttachments(
+			long companyId, long containerModelId, long resourcePrimKey)
 		throws Exception {
 
-		String dirName = getDirName(resourcePrimKey);
+		String dirName = getDirName(containerModelId, resourcePrimKey);
 
 		String[] attachments = null;
 
@@ -296,18 +303,23 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 		return attachments;
 	}
 
-	protected abstract long getClassNameId();
+	protected abstract String getClassName();
 
-	protected long getContainerFolderId(
+	protected long getClassNameId() {
+		return PortalUtil.getClassNameId(getClassName());
+	}
+
+	protected long getContainerModelFolderId(
 			long groupId, long companyId, long resourcePrimKey,
-			long containerId, long userId, String userName,
+			long containerModelId, long userId, String userName,
 			Timestamp createDate)
 		throws Exception {
 
 		return DLFolderConstants.DEFAULT_PARENT_FOLDER_ID;
 	}
 
-	protected abstract String getDirName(long resourcePrimKey);
+	protected abstract String getDirName(
+		long containerModelId, long resourcePrimKey);
 
 	protected long getFolderId(
 			long groupId, long companyId, long userId, String userName,
@@ -344,7 +356,7 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 
 		return addDLFolder(
 			increment(), groupId, companyId, userId, userName, createDate,
-			repositoryId, parentFolderId, name, hidden);
+			repositoryId, false, parentFolderId, name, hidden);
 	}
 
 	protected abstract String getPortletId();
@@ -390,10 +402,11 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 
 	protected void updateEntryAttachments(
 			long companyId, long groupId, long resourcePrimKey,
-			long containerId, long userId, String userName)
+			long containerModelId, long userId, String userName)
 		throws Exception {
 
-		String[] attachments = getAttachments(companyId, resourcePrimKey);
+		String[] attachments = getAttachments(
+			companyId, containerModelId, resourcePrimKey);
 
 		if ((attachments == null) || (attachments.length == 0)) {
 			return;
@@ -402,11 +415,12 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 		Timestamp createDate = new Timestamp(System.currentTimeMillis());
 
 		long repositoryId = getRepositoryId(
-			groupId, companyId, userId, userName, createDate, getClassNameId(),
+			groupId, companyId, userId, userName, createDate,
+			PortalUtil.getClassNameId(_LIFERAY_REPOSITORY_CLASS_NAME),
 			getPortletId());
-		long containerFolderId = getContainerFolderId(
-			groupId, companyId, resourcePrimKey, containerId, userId, userName,
-			createDate);
+		long containerModelFolderId = getContainerModelFolderId(
+			groupId, companyId, resourcePrimKey, containerModelId, userId,
+			userName, createDate);
 
 		for (String attachment : attachments) {
 			String name = String.valueOf(
@@ -422,19 +436,20 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 				companyId, CompanyConstants.SYSTEM, attachment);
 
 			long fileEntryId = addDLFileEntry(
-				groupId, companyId, userId, userName, createDate, repositoryId,
-				containerFolderId, name, extension, mimeType, title, size);
+				groupId, companyId, userId, getClassName(), resourcePrimKey,
+				userName, createDate, repositoryId, containerModelFolderId,
+				name, extension, mimeType, title, size);
 
 			addDLFileVersion(
 				increment(), groupId, companyId, userId, userName, createDate,
-				repositoryId, containerFolderId, fileEntryId, extension,
+				repositoryId, containerModelFolderId, fileEntryId, extension,
 				mimeType, title, size);
 
 			byte[] bytes = DLStoreUtil.getFileAsBytes(
 				companyId, CompanyConstants.SYSTEM, attachment);
 
 			DLStoreUtil.addFile(
-				companyId, containerFolderId, name, false, bytes);
+				companyId, containerModelFolderId, name, false, bytes);
 
 			try {
 				DLStoreUtil.deleteFile(
@@ -447,21 +462,10 @@ public abstract class BaseUpgradeAttachments extends UpgradeProcess {
 				}
 			}
 		}
-
-		try {
-			DLStoreUtil.deleteDirectory(
-				companyId, CompanyConstants.SYSTEM,
-				getDirName(resourcePrimKey));
-		}
-		catch (Exception e) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"Unable to delete the directory " +
-						getDirName(resourcePrimKey),
-					e);
-			}
-		}
 	}
+
+	private static final String _LIFERAY_REPOSITORY_CLASS_NAME =
+		"com.liferay.portal.repository.liferayrepository.LiferayRepository";
 
 	private static Log _log = LogFactoryUtil.getLog(
 		BaseUpgradeAttachments.class);

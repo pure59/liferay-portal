@@ -28,20 +28,19 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.CompanyConstants;
 import com.liferay.portal.model.Image;
 import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
 import com.liferay.portal.service.ImageLocalServiceUtil;
 import com.liferay.portal.service.persistence.ImageActionableDynamicQuery;
 import com.liferay.portal.util.MaintenanceUtil;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.documentlibrary.DuplicateDirectoryException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFileVersion;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.persistence.DLFileEntryActionableDynamicQuery;
 import com.liferay.portlet.documentlibrary.store.AdvancedFileSystemStore;
 import com.liferay.portlet.documentlibrary.store.CMISStore;
+import com.liferay.portlet.documentlibrary.store.DBStore;
 import com.liferay.portlet.documentlibrary.store.FileSystemStore;
 import com.liferay.portlet.documentlibrary.store.JCRStore;
 import com.liferay.portlet.documentlibrary.store.S3Store;
@@ -199,28 +198,6 @@ public class ConvertDocumentLibrary extends ConvertProcess {
 		}
 	}
 
-	protected void migrateFiles(
-			long companyId, String dirName, String[] fileNames)
-		throws PortalException, SystemException {
-
-		long repositoryId = CompanyConstants.SYSTEM;
-		String versionNumber = Store.VERSION_DEFAULT;
-
-		try {
-			_targetStore.addDirectory(companyId, repositoryId, dirName);
-		}
-		catch (DuplicateDirectoryException dde) {
-		}
-
-		for (String fileName : fileNames) {
-			if (fileName.startsWith(StringPool.SLASH)) {
-				fileName = fileName.substring(1);
-			}
-
-			migrateFile(companyId, repositoryId, fileName, versionNumber);
-		}
-	}
-
 	protected void migrateImages() throws PortalException, SystemException {
 		int count = ImageLocalServiceUtil.getImagesCount();
 
@@ -259,9 +236,15 @@ public class ConvertDocumentLibrary extends ConvertProcess {
 
 				MBMessage mbMessage = (MBMessage)object;
 
-				migrateFiles(
-					mbMessage.getCompanyId(), mbMessage.getAttachmentsDir(),
-					mbMessage.getAttachmentsFiles());
+				for (FileEntry fileEntry :
+						mbMessage.getAttachmentsFileEntries()) {
+
+					DLFileEntry dlFileEntry = (DLFileEntry)fileEntry.getModel();
+
+					migrateDLFileEntry(
+						mbMessage.getCompanyId(), dlFileEntry.getRepositoryId(),
+						dlFileEntry);
+				}
 			}
 
 		};
@@ -316,8 +299,8 @@ public class ConvertDocumentLibrary extends ConvertProcess {
 
 	private static final String[] _HOOKS = new String[] {
 		AdvancedFileSystemStore.class.getName(), CMISStore.class.getName(),
-		FileSystemStore.class.getName(), JCRStore.class.getName(),
-		S3Store.class.getName()
+		DBStore.class.getName(), FileSystemStore.class.getName(),
+		JCRStore.class.getName(), S3Store.class.getName()
 	};
 
 	private static Log _log = LogFactoryUtil.getLog(

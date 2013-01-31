@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.wiki.asset;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.trash.TrashRenderer;
@@ -50,7 +52,7 @@ public class WikiPageAssetRenderer
 
 	public static long getClassPK(WikiPage page) {
 		if (!page.isApproved() && !page.isDraft() && !page.isPending() &&
-			!page.isInTrash() &&
+			!page.isInTrash() && !page.isInTrashContainer() &&
 			(page.getVersion() != WikiPageConstants.VERSION_DEFAULT)) {
 
 			return page.getPageId();
@@ -66,6 +68,10 @@ public class WikiPageAssetRenderer
 
 	public String getAssetRendererFactoryClassName() {
 		return WikiPageAssetRendererFactory.CLASS_NAME;
+	}
+
+	public String getClassName() {
+		return WikiPage.class.getName();
 	}
 
 	public long getClassPK() {
@@ -108,7 +114,7 @@ public class WikiPageAssetRenderer
 			return _page.getTitle();
 		}
 
-		return TrashUtil.stripTrashNamespace(_page.getTitle());
+		return TrashUtil.getOriginalTitle(_page.getTitle());
 	}
 
 	public String getType() {
@@ -189,19 +195,25 @@ public class WikiPageAssetRenderer
 		return _page.getUuid();
 	}
 
-	public boolean hasDeletePermission(PermissionChecker permissionChecker) {
+	public boolean hasDeletePermission(PermissionChecker permissionChecker)
+		throws PortalException, SystemException {
+
 		return WikiPagePermission.contains(
 			permissionChecker, _page, ActionKeys.DELETE);
 	}
 
 	@Override
-	public boolean hasEditPermission(PermissionChecker permissionChecker) {
+	public boolean hasEditPermission(PermissionChecker permissionChecker)
+		throws PortalException, SystemException {
+
 		return WikiPagePermission.contains(
 			permissionChecker, _page, ActionKeys.UPDATE);
 	}
 
 	@Override
-	public boolean hasViewPermission(PermissionChecker permissionChecker) {
+	public boolean hasViewPermission(PermissionChecker permissionChecker)
+		throws PortalException, SystemException {
+
 		return WikiPagePermission.contains(
 			permissionChecker, _page, ActionKeys.VIEW);
 	}

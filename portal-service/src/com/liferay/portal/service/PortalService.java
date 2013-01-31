@@ -85,6 +85,9 @@ public interface PortalService extends BaseService {
 		java.lang.String transactionPortletBarText)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
+	public void testAutoSyncHibernateSessionStateOnTxCreation()
+		throws com.liferay.portal.kernel.exception.SystemException;
+
 	public void testCounterIncrement_Rollback()
 		throws com.liferay.portal.kernel.exception.SystemException;
 

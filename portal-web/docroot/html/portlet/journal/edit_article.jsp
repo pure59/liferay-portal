@@ -38,15 +38,6 @@ String redirect = ParamUtil.getString(request, "redirect");
 	}
 }*/
 
-String originalRedirect = ParamUtil.getString(request, "originalRedirect", StringPool.BLANK);
-
-if (originalRedirect.equals(StringPool.BLANK)) {
-	originalRedirect = redirect;
-}
-else {
-	redirect = originalRedirect;
-}
-
 String backURL = ParamUtil.getString(request, "backURL");
 
 String referringPortletResource = ParamUtil.getString(request, "referringPortletResource");
@@ -66,15 +57,26 @@ double version = BeanParamUtil.getDouble(article, request, "version", JournalArt
 
 String structureId = BeanParamUtil.getString(article, request, "structureId");
 
-JournalStructure structure = null;
+DDMStructure ddmStructure = null;
 
-long structureGroupId = groupId;
+long ddmStructureId = ParamUtil.getLong(request, "ddmStructureId");
 
-if (Validator.isNotNull(structureId)) {
+long ddmStructureGroupId = groupId;
+
+if (ddmStructureId > 0) {
 	try {
-		structure = JournalStructureLocalServiceUtil.getStructure(groupId, structureId, true);
+		ddmStructure = DDMStructureLocalServiceUtil.getStructure(ddmStructureId);
 
-		structureGroupId = structure.getGroupId();
+		ddmStructureGroupId = ddmStructure.getGroupId();
+	}
+	catch (NoSuchStructureException nsse) {
+	}
+}
+else if (Validator.isNotNull(structureId)) {
+	try {
+		ddmStructure = DDMStructureLocalServiceUtil.getStructure(scopeGroupId, structureId);
+
+		ddmStructureGroupId = ddmStructure.getGroupId();
 	}
 	catch (NoSuchStructureException nsse) {
 	}
@@ -124,7 +126,7 @@ String[][] categorySections = {mainSections};
 
 request.setAttribute("edit_article.jsp-redirect", redirect);
 
-request.setAttribute("edit_article.jsp-structure", structure);
+request.setAttribute("edit_article.jsp-structure", ddmStructure);
 
 request.setAttribute("edit_article.jsp-languageId", languageId);
 request.setAttribute("edit_article.jsp-defaultLanguageId", defaultLanguageId);
@@ -153,15 +155,15 @@ request.setAttribute("edit_article.jsp-toLanguageId", toLanguageId);
 	<portlet:param name="struts_action" value="/journal/edit_article" />
 </portlet:renderURL>
 
-<aui:form action="<%= editArticleActionURL %>" enctype="multipart/form-data" method="post" name="fm1">
+<aui:form action="<%= editArticleActionURL %>" enctype="multipart/form-data" method="post" name="fm1" onSubmit='<%= renderResponse.getNamespace() + "submitForm(event);" %>'>
 	<aui:input name="portletResource" type="hidden" value="<%= portletResource %>" />
 	<aui:input name="<%= Constants.CMD %>" type="hidden" />
 	<aui:input name="tabs2" type="hidden" value="<%= tabs2 %>" />
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
-	<aui:input name="originalRedirect" type="hidden" value="<%= originalRedirect %>" />
 	<aui:input name="backURL" type="hidden" value="<%= backURL %>" />
 	<aui:input name="referringPortletResource" type="hidden" value="<%= referringPortletResource %>" />
 	<aui:input name="groupId" type="hidden" value="<%= groupId %>" />
+	<aui:input name="privateLayout" type="hidden" value="<%= layout.isPrivateLayout() %>" />
 	<aui:input name="folderId" type="hidden" value="<%= folderId %>" />
 	<aui:input name="classNameId" type="hidden" value="<%= classNameId %>" />
 	<aui:input name="classPK" type="hidden" value="<%= classPK %>" />
@@ -171,6 +173,7 @@ request.setAttribute("edit_article.jsp-toLanguageId", toLanguageId);
 	<aui:input name="languageId" type="hidden" value="<%= languageId %>" />
 	<aui:input id="articleContent" name="content" type="hidden" />
 	<aui:input name="articleURL" type="hidden" value="<%= editArticleRenderURL %>" />
+	<aui:input name="ddmStructureId" type="hidden" />
 	<aui:input name="workflowAction" type="hidden" value="<%= String.valueOf(WorkflowConstants.ACTION_SAVE_DRAFT) %>" />
 
 	<liferay-ui:error exception="<%= ArticleContentSizeException.class %>" message="you-have-exceeded-the-maximum-article-content-size-allowed" />
@@ -193,7 +196,7 @@ request.setAttribute("edit_article.jsp-toLanguageId", toLanguageId);
 					<div class="article-info">
 						<div class="float-container">
 							<c:if test="<%= article.isSmallImage() %>">
-								<img alt="" class="article-image" src="<%= HtmlUtil.escape(_getArticleImage(themeDisplay, article)) %>" width="150" />
+								<img alt="" class="article-image" src="<%= HtmlUtil.escape(article.getArticleImageURL(themeDisplay)) %>" width="150" />
 							</c:if>
 
 							<c:if test="<%= !article.isNew() %>">
@@ -264,14 +267,14 @@ request.setAttribute("edit_article.jsp-toLanguageId", toLanguageId);
 						<c:when test="<%= Validator.isNull(toLanguageId) %>">
 							<c:if test="<%= hasSavePermission %>">
 								<c:if test="<%= classNameId == JournalArticleConstants.CLASSNAME_ID_DEFAULT %>">
-									<aui:button name="saveButton" value="<%= saveButtonLabel %>" />
+									<aui:button name="saveButton" onClick='<%= renderResponse.getNamespace() + "saveArticle()" %>' type="submit" value="<%= saveButtonLabel %>" />
 								</c:if>
 
-								<aui:button disabled="<%= pending %>" name="publishButton" value="<%= publishButtonLabel %>" />
+								<aui:button disabled="<%= pending %>" name="publishButton" onClick='<%= renderResponse.getNamespace() + "publishArticle()" %>' type="submit" value="<%= publishButtonLabel %>" />
 							</c:if>
 						</c:when>
 						<c:otherwise>
-							<aui:button name="translateButton" value="save" />
+							<aui:button name="translateButton" onClick='<%= renderResponse.getNamespace() + "translateArticle()" %>' type="submit" value="save" />
 
 							<%
 							String[] translations = article.getAvailableLocales();
@@ -289,6 +292,7 @@ request.setAttribute("edit_article.jsp-toLanguageId", toLanguageId);
 					<liferay-ui:form-navigator
 						categoryNames="<%= _CATEGORY_NAMES %>"
 						categorySections="<%= categorySections %>"
+						formName="fm1"
 						htmlBottom="<%= htmlBottom %>"
 						htmlTop="<%= htmlTop %>"
 						jspPath="/html/portlet/journal/article/"
@@ -343,12 +347,20 @@ request.setAttribute("edit_article.jsp-toLanguageId", toLanguageId);
 		submitForm(document.<portlet:namespace />fm1);
 	}
 
+	function <portlet:namespace />publishArticle() {
+		document.<portlet:namespace />fm1.<portlet:namespace /><%= Constants.CMD %>.value = "<%= Constants.PUBLISH %>";
+	}
+
 	function <portlet:namespace />removeArticleLocale() {
 		if (confirm("<%= UnicodeLanguageUtil.get(pageContext, "are-you-sure-you-want-to-deactivate-this-language") %>")) {
 			document.<portlet:namespace />fm1.<portlet:namespace /><%= Constants.CMD %>.value = "<%= Constants.DELETE_TRANSLATION %>";
 			document.<portlet:namespace />fm1.<portlet:namespace />redirect.value = "<portlet:renderURL><portlet:param name="redirect" value="<%= redirect %>" /><portlet:param name="struts_action" value="/journal/edit_article" /><portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" /><portlet:param name="articleId" value="<%= articleId %>" /><portlet:param name="version" value="<%= String.valueOf(version) %>" /></portlet:renderURL>&<portlet:namespace />languageId=<%= defaultLanguageId %>";
 			submitForm(document.<portlet:namespace />fm1);
 		}
+	}
+
+	function <portlet:namespace />saveArticle() {
+		document.<portlet:namespace />fm1.<portlet:namespace /><%= Constants.CMD %>.value = "<%= (article != null) ? Constants.UPDATE : Constants.ADD %>";
 	}
 
 	function <portlet:namespace />selectDocumentLibrary(url) {
@@ -359,9 +371,9 @@ request.setAttribute("edit_article.jsp-toLanguageId", toLanguageId);
 		document.getElementById(<portlet:namespace />imageGalleryInput).value = url;
 	}
 
-	function <portlet:namespace />selectStructure(structureId, structureName, dialog) {
-		if (confirm('<%= UnicodeLanguageUtil.get(pageContext, "selecting-a-new-structure-will-change-the-available-input-fields-and-available-templates") %>') && (document.<portlet:namespace />fm1.<portlet:namespace />structureId.value != structureId)) {
-			document.<portlet:namespace />fm1.<portlet:namespace />structureId.value = structureId;
+	function <portlet:namespace />selectStructure(ddmStructureId, structureName, dialog) {
+		if (confirm('<%= UnicodeLanguageUtil.get(pageContext, "selecting-a-new-structure-will-change-the-available-input-fields-and-available-templates") %>') && (document.<portlet:namespace />fm1.<portlet:namespace />ddmStructureId.value != ddmStructureId)) {
+			document.<portlet:namespace />fm1.<portlet:namespace />ddmStructureId.value = ddmStructureId;
 			document.<portlet:namespace />fm1.<portlet:namespace />templateId.value = "";
 
 			if (dialog) {
@@ -385,6 +397,25 @@ request.setAttribute("edit_article.jsp-toLanguageId", toLanguageId);
 		}
 	}
 
+	function <portlet:namespace />submitForm(event) {
+		event.preventDefault();
+
+		if (window.<portlet:namespace />journalPortlet) {
+			var cmd = document.<portlet:namespace />fm1.<portlet:namespace /><%= Constants.CMD %>.value;
+
+			if (cmd === '<%= Constants.TRANSLATE %>') {
+				window.<portlet:namespace />journalPortlet.translateArticle();
+			}
+			else {
+				window.<portlet:namespace />journalPortlet.saveArticle(cmd);
+			}
+		}
+	}
+
+	function <portlet:namespace />translateArticle() {
+		document.<portlet:namespace />fm1.<portlet:namespace /><%= Constants.CMD %>.value = "<%= Constants.TRANSLATE %>";
+	}
+
 	<c:if test="<%= windowState.equals(WindowState.MAXIMIZED) %>">
 		<c:choose>
 			<c:when test="<%= PropsValues.JOURNAL_ARTICLE_FORCE_AUTOGENERATE_ID %>">
@@ -398,21 +429,6 @@ request.setAttribute("edit_article.jsp-toLanguageId", toLanguageId);
 </aui:script>
 
 <%!
-private String _getArticleImage(ThemeDisplay themeDisplay, JournalArticle article) {
-	String imageURL = null;
-
-	if (article.isSmallImage()) {
-		if (Validator.isNotNull(article.getSmallImageURL())) {
-			imageURL = article.getSmallImageURL();
-		}
-		else {
-			imageURL = themeDisplay.getPathImage() + "/journal/article?img_id=" + article.getSmallImageId() + "&t=" + WebServerServletTokenUtil.getToken(article.getSmallImageId());
-		}
-	}
-
-	return imageURL;
-}
-
 private String _getSectionJsp(String name) {
 	return TextFormatter.format(name, TextFormatter.N);
 }

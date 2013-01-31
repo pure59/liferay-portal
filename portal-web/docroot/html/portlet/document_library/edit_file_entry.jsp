@@ -179,7 +179,6 @@ else if (dlFileEntryType != null) {
 
 <portlet:actionURL var="editFileEntryURL">
 	<portlet:param name="struts_action" value="/document_library/edit_file_entry" />
-	<portlet:param name="uploader" value="classic" />
 </portlet:actionURL>
 
 <aui:form action="<%= editFileEntryURL %>" cssClass="lfr-dynamic-form" enctype="multipart/form-data" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveFileEntry(" + saveAsDraft + ");" %>'>
@@ -348,7 +347,13 @@ else if (dlFileEntryType != null) {
 							}
 				%>
 
-							<%= DDMXSDUtil.getHTML(pageContext, ddmStructure.getXsd(), fields, String.valueOf(ddmStructure.getPrimaryKey()), locale) %>
+							<liferay-ddm:html
+								classNameId="<%= PortalUtil.getClassNameId(DDMStructure.class) %>"
+								classPK="<%= ddmStructure.getPrimaryKey() %>"
+								fields="<%= fields %>"
+								fieldsNamespace="<%= String.valueOf(ddmStructure.getPrimaryKey()) %>"
+								requestedLocale="<%= locale %>"
+							/>
 
 				<%
 						}

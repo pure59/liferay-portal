@@ -32,6 +32,7 @@ import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
@@ -60,8 +61,10 @@ import com.liferay.portal.util.comparator.OrganizationNameComparator;
 import java.io.Serializable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -470,6 +473,44 @@ public class OrganizationLocalServiceImpl
 		}
 	}
 
+	public List<Organization> getOrganizations(
+			long userId, int start, int end, OrderByComparator obc)
+		throws PortalException, SystemException {
+
+		User user = userPersistence.findByPrimaryKey(userId);
+
+		List<Organization> organizations = ListUtil.copy(
+			userPersistence.getOrganizations(userId));
+
+		Iterator<Organization> iterator = organizations.iterator();
+
+		while (iterator.hasNext()) {
+			Organization organization = iterator.next();
+
+			if ((organization.getCompanyId() != user.getCompanyId()) ||
+				(organization.getParentOrganization() == null)) {
+
+				iterator.remove();
+			}
+		}
+
+		if (organizations.isEmpty()) {
+			return organizations;
+		}
+
+		if (obc == null) {
+			obc = new OrganizationNameComparator(true);
+		}
+
+		Collections.sort(organizations, obc);
+
+		if ((start != QueryUtil.ALL_POS) || (end != QueryUtil.ALL_POS)) {
+			organizations = ListUtil.subList(organizations, start, end);
+		}
+
+		return organizations;
+	}
+
 	/**
 	 * Returns all the organizations belonging to the parent organization.
 	 *
@@ -814,8 +855,6 @@ public class OrganizationLocalServiceImpl
 	 * This method is usually called to determine if the user has view access to
 	 * a resource belonging to the organization.
 	 *
-	 * <p>
-	 *
 	 * <ol>
 	 * <li>
 	 * If <code>inheritSuborganizations=<code>false</code></code>:
@@ -844,8 +883,6 @@ public class OrganizationLocalServiceImpl
 	 * its child organizations.
 	 * </li>
 	 * </ol>
-	 *
-	 * <p>
 	 *
 	 * @param  userId the primary key of the organization's user
 	 * @param  organizationId the primary key of the organization

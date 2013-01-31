@@ -52,9 +52,9 @@ AUI.add(
 						var uri = Liferay.Util.addParams(
 							{
 								groupId: themeDisplay.getScopeGroupId(),
-								p_p_id: '15',
+								p_p_id: '166',
 								p_p_state: 'pop_up',
-								struts_action: '/journal/select_document_library'
+								struts_action: '/dynamic_data_mapping/select_document_library'
 							},
 							themeDisplay.getURLControlPanel()
 						);
@@ -68,7 +68,7 @@ AUI.add(
 						);
 					},
 
-					_selectFileEntry: function(url, uuid, title, version) {
+					_selectFileEntry: function(url, uuid, groupId, title, version) {
 						var instance = this;
 
 						instance.selectedTitle = title;
@@ -78,9 +78,9 @@ AUI.add(
 							'value',
 							JSON.stringify(
 								{
-									groupId: themeDisplay.getScopeGroupId(),
-									uuid: uuid,
+									groupId: groupId,
 									title: title,
+									uuid: uuid,
 									version: version
 								}
 							)

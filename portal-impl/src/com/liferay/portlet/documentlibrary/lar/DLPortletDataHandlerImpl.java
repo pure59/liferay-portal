@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Repository;
 import com.liferay.portal.model.RepositoryEntry;
+import com.liferay.portal.repository.liferayrepository.LiferayRepository;
 import com.liferay.portal.repository.liferayrepository.model.LiferayFileEntry;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.RepositoryEntryLocalServiceUtil;
@@ -48,6 +49,7 @@ import com.liferay.portal.service.RepositoryLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.persistence.RepositoryEntryUtil;
 import com.liferay.portal.service.persistence.RepositoryUtil;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.documentlibrary.DuplicateFileException;
@@ -66,6 +68,7 @@ import com.liferay.portlet.documentlibrary.service.DLFileEntryMetadataLocalServi
 import com.liferay.portlet.documentlibrary.service.DLFileEntryTypeLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryTypeServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileVersionLocalServiceUtil;
+import com.liferay.portlet.documentlibrary.service.DLFolderLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.persistence.DLFileEntryTypeUtil;
 import com.liferay.portlet.documentlibrary.service.persistence.DLFileRankUtil;
 import com.liferay.portlet.documentlibrary.service.persistence.DLFileShortcutUtil;
@@ -92,6 +95,7 @@ import javax.portlet.PortletPreferences;
 /**
  * @author Bruno Farache
  * @author Raymond Augé
+ * @author Sampsa Sohlman
  */
 public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 
@@ -597,6 +601,22 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 					repository.getUuid(), portletDataContext.getScopeGroupId());
 
 				if (existingRepository == null) {
+					existingRepository =
+						RepositoryLocalServiceUtil.fetchRepository(
+							portletDataContext.getScopeGroupId(),
+							repository.getName());
+				}
+
+				long classNameId = 0;
+
+				if (existingRepository != null) {
+					classNameId = existingRepository.getClassNameId();
+				}
+
+				if ((existingRepository == null) ||
+					(classNameId !=
+						PortalUtil.getClassNameId(LiferayRepository.class))) {
+
 					serviceContext.setUuid(repository.getUuid());
 
 					importedRepositoryId =
@@ -864,7 +884,7 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 			Element repositoryEntriesElement, Folder folder, boolean recurse)
 		throws Exception {
 
-		if (!portletDataContext.isWithinDateRange(folder.getModifiedDate())) {
+		if (!portletDataContext.isWithinDateRange(folder.getLastPostDate())) {
 			return;
 		}
 
@@ -962,13 +982,12 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 		for (int i = 0; i < dlFileEntryTypes.size(); i++) {
 			DLFileEntryType dlFileEntryType = dlFileEntryTypes.get(i);
 
-			if (!isFileEntryTypeExportable(
-					portletDataContext.getCompanyId(), dlFileEntryType)) {
-
-				continue;
+			if (dlFileEntryType.getFileEntryTypeId() == 0) {
+				fileEntryTypeUuids[i] = "@basic_document@";
 			}
-
-			fileEntryTypeUuids[i] = dlFileEntryType.getUuid();
+			else {
+				fileEntryTypeUuids[i] = dlFileEntryType.getUuid();
+			}
 
 			if (defaultFileEntryTypeId ==
 					dlFileEntryType.getFileEntryTypeId()) {
@@ -976,8 +995,10 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 				defaultFileEntryTypeUuid = dlFileEntryType.getUuid();
 			}
 
-			exportFileEntryType(
-				portletDataContext, fileEntryTypesElement, dlFileEntryType);
+			if (isFileEntryTypeExportable(dlFileEntryType)) {
+				exportFileEntryType(
+					portletDataContext, fileEntryTypesElement, dlFileEntryType);
+			}
 		}
 
 		folderElement.addAttribute(
@@ -1012,9 +1033,7 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 		fileEntryElement.addAttribute(
 			"fileEntryTypeUuid", dlFileEntryType.getUuid());
 
-		if (!isFileEntryTypeExportable(
-				portletDataContext.getCompanyId(), dlFileEntryType)) {
-
+		if (!isFileEntryTypeExportable(dlFileEntryType)) {
 			return;
 		}
 
@@ -1391,6 +1410,14 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 					portletDataContext.getScopeGroupId());
 
 			if (existingDLFileEntryType == null) {
+				Group companyGroup = GroupLocalServiceUtil.getCompanyGroup(
+					portletDataContext.getCompanyId());
+
+				existingDLFileEntryType = DLFileEntryTypeUtil.fetchByUUID_G(
+					dlFileEntryType.getUuid(), companyGroup.getGroupId());
+			}
+
+			if (existingDLFileEntryType == null) {
 				serviceContext.setUuid(dlFileEntryType.getUuid());
 
 				importedDLFileEntryType =
@@ -1400,10 +1427,15 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 						serviceContext);
 			}
 			else {
-				DLFileEntryTypeLocalServiceUtil.updateFileEntryType(
-					userId, existingDLFileEntryType.getFileEntryTypeId(), name,
-					dlFileEntryType.getDescription(), ddmStructureIds,
-					serviceContext);
+				if (!isFileEntryTypeGlobal(
+						portletDataContext.getCompanyId(),
+						existingDLFileEntryType)) {
+
+					DLFileEntryTypeLocalServiceUtil.updateFileEntryType(
+						userId, existingDLFileEntryType.getFileEntryTypeId(),
+						name, dlFileEntryType.getDescription(), ddmStructureIds,
+						serviceContext);
+				}
 
 				importedDLFileEntryType = existingDLFileEntryType;
 			}
@@ -1416,31 +1448,37 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 					serviceContext);
 		}
 
-		portletDataContext.importClassedModel(
-			dlFileEntryType, importedDLFileEntryType, _NAMESPACE);
+		if (!isFileEntryTypeGlobal(
+				portletDataContext.getCompanyId(), importedDLFileEntryType)) {
 
-		String importedDLFileEntryDDMStructureKey = DLUtil.getDDMStructureKey(
-			importedDLFileEntryType);
+			portletDataContext.importClassedModel(
+				dlFileEntryType, importedDLFileEntryType, _NAMESPACE);
 
-		List<DDMStructure> ddmStructures =
-			importedDLFileEntryType.getDDMStructures();
+			String importedDLFileEntryDDMStructureKey =
+				DLUtil.getDDMStructureKey(importedDLFileEntryType);
 
-		for (DDMStructure ddmStructure : ddmStructures) {
-			String ddmStructureKey = ddmStructure.getStructureKey();
+			List<DDMStructure> ddmStructures =
+				importedDLFileEntryType.getDDMStructures();
 
-			if (!DLUtil.isAutoGeneratedDLFileEntryTypeDDMStructureKey(
-					ddmStructureKey)) {
+			for (DDMStructure ddmStructure : ddmStructures) {
+				String ddmStructureKey = ddmStructure.getStructureKey();
 
-				continue;
+				if (!DLUtil.isAutoGeneratedDLFileEntryTypeDDMStructureKey(
+						ddmStructureKey)) {
+
+					continue;
+				}
+
+				if (ddmStructureKey.equals(
+						importedDLFileEntryDDMStructureKey)) {
+					continue;
+				}
+
+				ddmStructure.setStructureKey(
+					importedDLFileEntryDDMStructureKey);
+
+				DDMStructureLocalServiceUtil.updateDDMStructure(ddmStructure);
 			}
-
-			if (ddmStructureKey.equals(importedDLFileEntryDDMStructureKey)) {
-				continue;
-			}
-
-			ddmStructure.setStructureKey(importedDLFileEntryDDMStructureKey);
-
-			DDMStructureLocalServiceUtil.updateDDMStructure(ddmStructure);
 		}
 	}
 
@@ -1667,6 +1705,21 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 				fileEntryTypeUuid, portletDataContext.getScopeGroupId());
 
 			if (dlFileEntryType == null) {
+				Group companyGroup = GroupLocalServiceUtil.getCompanyGroup(
+					portletDataContext.getCompanyId());
+
+				dlFileEntryType = DLFileEntryTypeUtil.fetchByUUID_G(
+					fileEntryTypeUuid, companyGroup.getGroupId());
+			}
+
+			if ((dlFileEntryType == null) &&
+				fileEntryTypeUuid.equals("@basic_document@")) {
+
+				dlFileEntryType =
+					DLFileEntryTypeLocalServiceUtil.fetchDLFileEntryType(0);
+			}
+
+			if (dlFileEntryType == null) {
 				continue;
 			}
 
@@ -1677,9 +1730,18 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 			}
 		}
 
-		DLFileEntryTypeLocalServiceUtil.updateFolderFileEntryTypes(
-			(DLFolder)folder.getModel(), fileEntryTypeIds,
-			defaultFileEntryTypeId, serviceContext);
+		if (!fileEntryTypeIds.isEmpty()) {
+			DLFolder dlFolder = (DLFolder)folder.getModel();
+
+			dlFolder.setDefaultFileEntryTypeId(defaultFileEntryTypeId);
+			dlFolder.setOverrideFileEntryTypes(true);
+
+			DLFolderLocalServiceUtil.updateDLFolder(dlFolder);
+
+			DLFileEntryTypeLocalServiceUtil.updateFolderFileEntryTypes(
+				dlFolder, fileEntryTypeIds, defaultFileEntryTypeId,
+				serviceContext);
+		}
 	}
 
 	protected static void importMetaData(
@@ -1698,9 +1760,17 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 			fileEntryTypeUuid, portletDataContext.getScopeGroupId());
 
 		if (dlFileEntryType == null) {
-			serviceContext.setAttribute("fileEntryTypeId", -1);
+			Group group = GroupLocalServiceUtil.getCompanyGroup(
+				portletDataContext.getCompanyId());
 
-			return;
+			dlFileEntryType = DLFileEntryTypeUtil.fetchByUUID_G(
+				fileEntryTypeUuid, group.getGroupId());
+
+			if (dlFileEntryType == null) {
+				serviceContext.setAttribute("fileEntryTypeId", -1);
+
+				return;
+			}
 		}
 
 		serviceContext.setAttribute(
@@ -1729,20 +1799,26 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 	}
 
 	protected static boolean isFileEntryTypeExportable(
-			long companyId, DLFileEntryType dlFileEntryType)
-		throws PortalException, SystemException {
+		DLFileEntryType dlFileEntryType) {
 
 		if (dlFileEntryType.getFileEntryTypeId() == 0) {
 			return false;
 		}
 
+		return true;
+	}
+
+	protected static boolean isFileEntryTypeGlobal(
+			long companyId, DLFileEntryType dlFileEntryType)
+		throws PortalException, SystemException {
+
 		Group group = GroupLocalServiceUtil.getCompanyGroup(companyId);
 
 		if (dlFileEntryType.getGroupId() == group.getGroupId()) {
-			return false;
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	@Override
@@ -1796,14 +1872,18 @@ public class DLPortletDataHandlerImpl extends BasePortletDataHandler {
 		Element repositoryEntriesElement = rootElement.addElement(
 			"repository-entries");
 
+		Group companyGroup = GroupLocalServiceUtil.getCompanyGroup(
+			portletDataContext.getCompanyId());
+
 		List<DLFileEntryType> dlFileEntryTypes =
 			DLFileEntryTypeServiceUtil.getFileEntryTypes(
-				new long[] {portletDataContext.getScopeGroupId()});
+				new long[] {
+					portletDataContext.getScopeGroupId(),
+					companyGroup.getGroupId()
+				});
 
 		for (DLFileEntryType dlFileEntryType : dlFileEntryTypes) {
-			if (!isFileEntryTypeExportable(
-					portletDataContext.getCompanyId(), dlFileEntryType)) {
-
+			if (!isFileEntryTypeExportable(dlFileEntryType)) {
 				continue;
 			}
 

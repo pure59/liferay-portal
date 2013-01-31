@@ -19,8 +19,6 @@
 <%@ page import="com.liferay.portal.NoSuchModelException" %><%@
 page import="com.liferay.portal.kernel.portletdisplaytemplate.PortletDisplayTemplateHandler" %><%@
 page import="com.liferay.portal.kernel.portletdisplaytemplate.PortletDisplayTemplateHandlerRegistryUtil" %><%@
-page import="com.liferay.portal.kernel.repository.model.FileEntry" %><%@
-page import="com.liferay.portal.kernel.search.Hits" %><%@
 page import="com.liferay.portal.kernel.xml.Document" %><%@
 page import="com.liferay.portal.kernel.xml.Element" %><%@
 page import="com.liferay.portal.kernel.xml.SAXReaderUtil" %><%@
@@ -46,17 +44,11 @@ page import="com.liferay.portlet.asset.service.persistence.AssetEntryQuery" %><%
 page import="com.liferay.portlet.asset.util.AssetUtil" %><%@
 page import="com.liferay.portlet.assetpublisher.search.AssetDisplayTerms" %><%@
 page import="com.liferay.portlet.assetpublisher.search.AssetSearch" %><%@
-page import="com.liferay.portlet.assetpublisher.search.AssetSearchTerms" %><%@
 page import="com.liferay.portlet.assetpublisher.util.AssetPublisherHelperUtil" %><%@
 page import="com.liferay.portlet.assetpublisher.util.AssetPublisherUtil" %><%@
 page import="com.liferay.portlet.documentlibrary.model.DLFileEntry" %><%@
-page import="com.liferay.portlet.documentlibrary.model.DLFileEntryConstants" %><%@
-page import="com.liferay.portlet.documentlibrary.model.DLFolderConstants" %><%@
-page import="com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil" %><%@
 page import="com.liferay.portlet.documentlibrary.util.DocumentConversionUtil" %><%@
 page import="com.liferay.portlet.journal.model.JournalArticle" %><%@
-page import="com.liferay.portlet.journal.model.JournalStructure" %><%@
-page import="com.liferay.portlet.journal.service.JournalStructureLocalServiceUtil" %><%@
 page import="com.liferay.portlet.portletdisplaytemplate.util.PortletDisplayTemplateConstants" %><%@
 page import="com.liferay.portlet.portletdisplaytemplate.util.PortletDisplayTemplateUtil" %><%@
 page import="com.liferay.util.RSSUtil" %><%@
@@ -148,9 +140,9 @@ String assetTagName = ParamUtil.getString(request, "tag");
 if (Validator.isNotNull(assetTagName)) {
 	allAssetTagNames = new String[] {assetTagName};
 
-	long[] assetTagIds = AssetTagLocalServiceUtil.getTagIds(scopeGroupId, allAssetTagNames);
+	long[] assetTagIds = AssetTagLocalServiceUtil.getTagIds(groupIds, allAssetTagNames);
 
-	assetEntryQuery.setAllTagIds(assetTagIds);
+	assetEntryQuery.setAnyTagIds(assetTagIds);
 
 	PortalUtil.setPageKeywords(assetTagName, request);
 }
@@ -184,7 +176,7 @@ String orderByColumn2 = GetterUtil.getString(preferences.getValue("orderByColumn
 String orderByType1 = GetterUtil.getString(preferences.getValue("orderByType1", "DESC"));
 String orderByType2 = GetterUtil.getString(preferences.getValue("orderByType2", "ASC"));
 boolean excludeZeroViewCount = GetterUtil.getBoolean(preferences.getValue("excludeZeroViewCount", null));
-int delta = GetterUtil.getInteger(preferences.getValue("delta", StringPool.BLANK), SearchContainer.DEFAULT_DELTA);
+int delta = GetterUtil.getInteger(preferences.getValue("delta", null), SearchContainer.DEFAULT_DELTA);
 String paginationType = GetterUtil.getString(preferences.getValue("paginationType", "none"));
 boolean showAvailableLocales = GetterUtil.getBoolean(preferences.getValue("showAvailableLocales", null));
 boolean showMetadataDescriptions = GetterUtil.getBoolean(preferences.getValue("showMetadataDescriptions", null), true);
@@ -225,9 +217,9 @@ String allMetadataFields = "create-date,modified-date,publish-date,expiration-da
 String[] metadataFields = StringUtil.split(preferences.getValue("metadataFields", defaultMetadataFields));
 
 boolean enableRSS = !PortalUtil.isRSSFeedsEnabled() ? false : GetterUtil.getBoolean(preferences.getValue("enableRss", null));
-int rssDelta = GetterUtil.getInteger(preferences.getValue("rssDelta", "20"));
+int rssDelta = GetterUtil.getInteger(preferences.getValue("rssDelta", StringPool.BLANK), SearchContainer.DEFAULT_DELTA);
 String rssDisplayStyle = preferences.getValue("rssDisplayStyle", RSSUtil.DISPLAY_STYLE_ABSTRACT);
-String rssFormat = preferences.getValue("rssFormat", "atom10");
+String rssFeedType = preferences.getValue("rssFeedType", RSSUtil.FEED_TYPE_DEFAULT);
 String rssName = preferences.getValue("rssName", portletDisplay.getTitle());
 
 String[] assetEntryXmls = preferences.getValues("assetEntryXml", new String[0]);

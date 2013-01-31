@@ -9,8 +9,6 @@
 
 <#assign userCounter = dataFactory.newInteger()>
 
-<#assign privateLayouts = []>
-
 <#list lastNames as lastName>
 	<#list firstNames as firstName>
 		<#assign userCounterIncrement = userCounter.increment()>
@@ -18,13 +16,11 @@
 		<#assign contact = dataFactory.addContact(firstName, lastName)>
 		<#assign user = dataFactory.addUser(false, "test" + userScreenNameIncrementer.get())>
 
-		<#assign userGroup = dataFactory.addGroup(counter.get(), dataFactory.userClassName.classNameId, user.userId, stringUtil.valueOf(user.userId), "/" + user.screenName, false)>
+		<#assign userGroup = dataFactory.addGroup(counter.get(), dataFactory.userClassNameId, user.userId, stringUtil.valueOf(user.userId), "/" + user.screenName, false)>
 
-		<#assign publicLayouts = [
-			dataFactory.addLayout(1, "Home", "/home", "", "33,")
-		]>
+		${sampleSQLBuilder.insertGroup(userGroup, [], [dataFactory.addLayout(1, "Home", "/home", "", "33,")])}
 
-		${sampleSQLBuilder.insertUser(contact, userGroup, groupIds, organizationIds, privateLayouts, publicLayouts, roleIds, user)}
+		${sampleSQLBuilder.insertUser(contact, groupIds, organizationIds, roleIds, user)}
 
 		<#assign blogsStatsUser = dataFactory.addBlogsStatsUser(groupId, user.userId)>
 

@@ -34,10 +34,14 @@ import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.Node;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.kernel.xml.XPath;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.User;
+import com.liferay.portal.security.auth.CompanyThreadLocal;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.util.PropsValues;
+import com.liferay.portlet.dynamicdatamapping.NoSuchStructureException;
 import com.liferay.portlet.dynamicdatamapping.RequiredStructureException;
 import com.liferay.portlet.dynamicdatamapping.StructureDuplicateElementException;
 import com.liferay.portlet.dynamicdatamapping.StructureDuplicateStructureKeyException;
@@ -80,6 +84,9 @@ public class DDMStructureLocalServiceImpl
 
 		if (Validator.isNull(structureKey)) {
 			structureKey = String.valueOf(counterLocalService.increment());
+		}
+		else {
+			structureKey = structureKey.trim().toUpperCase();
 		}
 
 		try {
@@ -133,6 +140,41 @@ public class DDMStructureLocalServiceImpl
 		return structure;
 	}
 
+	public DDMStructure addStructure(
+			long userId, long groupId, long classNameId,
+			Map<Locale, String> nameMap, Map<Locale, String> descriptionMap,
+			String xsd, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		return addStructure(
+			userId, groupId, DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID,
+			classNameId, null, nameMap, descriptionMap, xsd,
+			PropsValues.DYNAMIC_DATA_LISTS_STORAGE_TYPE,
+			DDMStructureConstants.TYPE_DEFAULT, serviceContext);
+	}
+
+	public DDMStructure addStructure(
+			long userId, long groupId, String parentStructureKey,
+			long classNameId, String structureKey, Map<Locale, String> nameMap,
+			Map<Locale, String> descriptionMap, String xsd, String storageType,
+			int type, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		DDMStructure parentStructure = fetchStructure(
+			groupId, parentStructureKey);
+
+		long parentStructureId =
+			DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID;
+
+		if (parentStructure != null) {
+			parentStructureId = parentStructure.getStructureId();
+		}
+
+		return addStructure(
+			userId, groupId, parentStructureId, classNameId, structureKey,
+			nameMap, descriptionMap, xsd, storageType, type, serviceContext);
+	}
+
 	public void addStructureResources(
 			DDMStructure structure, boolean addGroupPermissions,
 			boolean addGuestPermissions)
@@ -161,13 +203,28 @@ public class DDMStructureLocalServiceImpl
 			Map<Locale, String> descriptionMap, ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		DDMStructure structure = getStructure(structureId);
+		DDMStructure structure = ddmStructurePersistence.findByPrimaryKey(
+			structureId);
 
 		return addStructure(
 			userId, structure.getGroupId(), structure.getParentStructureId(),
 			structure.getClassNameId(), null, nameMap, descriptionMap,
 			structure.getXsd(), structure.getStorageType(), structure.getType(),
 			serviceContext);
+	}
+
+	public DDMStructure copyStructure(
+			long userId, long structureId, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		DDMStructure structure = ddmStructurePersistence.findByPrimaryKey(
+			structureId);
+
+		return addStructure(
+			userId, structure.getGroupId(), structure.getParentStructureId(),
+			structure.getClassNameId(), null, structure.getNameMap(),
+			structure.getDescriptionMap(), structure.getXsd(),
+			structure.getStorageType(), structure.getType(), serviceContext);
 	}
 
 	public void deleteStructure(DDMStructure structure)
@@ -213,6 +270,8 @@ public class DDMStructureLocalServiceImpl
 	public void deleteStructure(long groupId, String structureKey)
 		throws PortalException, SystemException {
 
+		structureKey = structureKey.trim().toUpperCase();
+
 		DDMStructure structure = ddmStructurePersistence.findByG_S(
 			groupId, structureKey);
 
@@ -239,7 +298,37 @@ public class DDMStructureLocalServiceImpl
 	public DDMStructure fetchStructure(long groupId, String structureKey)
 		throws SystemException {
 
+		structureKey = structureKey.trim().toUpperCase();
+
 		return ddmStructurePersistence.fetchByG_S(groupId, structureKey);
+	}
+
+	public DDMStructure fetchStructure(
+			long groupId, String structureKey, boolean includeGlobalStructures)
+		throws PortalException, SystemException {
+
+		structureKey = structureKey.trim().toUpperCase();
+
+		DDMStructure structure = ddmStructurePersistence.fetchByG_S(
+			groupId, structureKey);
+
+		if ((structure != null) || !includeGlobalStructures) {
+			return structure;
+		}
+
+		Group group = groupPersistence.findByPrimaryKey(groupId);
+
+		Group companyGroup = groupLocalService.getCompanyGroup(
+			group.getCompanyId());
+
+		return ddmStructurePersistence.fetchByG_S(
+			companyGroup.getGroupId(), structureKey);
+	}
+
+	public DDMStructure fetchStructure(String uuid, long groupId)
+		throws SystemException {
+
+		return ddmStructurePersistence.fetchByUUID_G(uuid, groupId);
 	}
 
 	/**
@@ -315,14 +404,37 @@ public class DDMStructureLocalServiceImpl
 	public DDMStructure getStructure(long groupId, String structureKey)
 		throws PortalException, SystemException {
 
+		structureKey = structureKey.trim().toUpperCase();
+
 		return ddmStructurePersistence.findByG_S(groupId, structureKey);
 	}
 
-	public List<DDMStructure> getStructure(
-			long groupId, String name, String description)
-		throws SystemException {
+	public DDMStructure getStructure(
+			long groupId, String structureKey, boolean includeGlobalStructures)
+		throws PortalException, SystemException {
 
-		return ddmStructurePersistence.findByG_N_D(groupId, name, description);
+		structureKey = structureKey.trim().toUpperCase();
+
+		DDMStructure structure = ddmStructurePersistence.fetchByG_S(
+			groupId, structureKey);
+
+		if (structure != null) {
+			return structure;
+		}
+
+		if (!includeGlobalStructures) {
+			throw new NoSuchStructureException(
+				"No DDMStructure exists with the structure key " +
+					structureKey);
+		}
+
+		Group group = groupPersistence.findByPrimaryKey(groupId);
+
+		Group companyGroup = groupLocalService.getCompanyGroup(
+			group.getCompanyId());
+
+		return ddmStructurePersistence.findByG_S(
+			companyGroup.getGroupId(), structureKey);
 	}
 
 	/**
@@ -367,6 +479,36 @@ public class DDMStructureLocalServiceImpl
 		return ddmStructurePersistence.findByGroupId(groupId, start, end);
 	}
 
+	public List<DDMStructure> getStructures(long groupId, long classNameId)
+		throws SystemException {
+
+		return ddmStructurePersistence.findByG_C(groupId, classNameId);
+	}
+
+	public List<DDMStructure> getStructures(
+			long groupId, long classNameId, int start, int end)
+		throws SystemException {
+
+		return ddmStructurePersistence.findByG_C(
+			groupId, classNameId, start, end);
+	}
+
+	public List<DDMStructure> getStructures(
+			long groupId, long classNameId, int start, int end,
+			OrderByComparator orderByComparator)
+		throws SystemException {
+
+		return ddmStructurePersistence.findByG_C(
+			groupId, classNameId, start, end, orderByComparator);
+	}
+
+	public List<DDMStructure> getStructures(
+			long groupId, String name, String description)
+		throws SystemException {
+
+		return ddmStructurePersistence.findByG_N_D(groupId, name, description);
+	}
+
 	public List<DDMStructure> getStructures(long[] groupIds)
 		throws SystemException {
 
@@ -375,6 +517,12 @@ public class DDMStructureLocalServiceImpl
 
 	public int getStructuresCount(long groupId) throws SystemException {
 		return ddmStructurePersistence.countByGroupId(groupId);
+	}
+
+	public int getStructuresCount(long groupId, long classNameId)
+		throws SystemException {
+
+		return ddmStructurePersistence.countByG_C(groupId, classNameId);
 	}
 
 	public List<DDMStructure> search(
@@ -439,6 +587,8 @@ public class DDMStructureLocalServiceImpl
 			Map<Locale, String> nameMap, Map<Locale, String> descriptionMap,
 			String xsd, ServiceContext serviceContext)
 		throws PortalException, SystemException {
+
+		structureKey = structureKey.trim().toUpperCase();
 
 		DDMStructure structure = ddmStructurePersistence.findByG_S(
 			groupId, structureKey);
@@ -524,7 +674,7 @@ public class DDMStructureLocalServiceImpl
 		long classNameId = PortalUtil.getClassNameId(DDMStructure.class);
 
 		List<DDMTemplate> templates = ddmTemplateLocalService.getTemplates(
-			classNameId, structure.getStructureId(),
+			structure.getGroupId(), classNameId, structure.getStructureId(),
 			DDMTemplateConstants.TEMPLATE_TYPE_FORM);
 
 		for (DDMTemplate template : templates) {
@@ -675,6 +825,8 @@ public class DDMStructureLocalServiceImpl
 			String xsd)
 		throws PortalException, SystemException {
 
+		structureKey = structureKey.trim().toUpperCase();
+
 		DDMStructure structure = ddmStructurePersistence.fetchByG_S(
 			groupId, structureKey);
 
@@ -699,7 +851,9 @@ public class DDMStructureLocalServiceImpl
 
 				Element rootElement = document.getRootElement();
 
-				if (rootElement.elements().isEmpty()) {
+				List<Element> rootElementElements = rootElement.elements();
+
+				if (rootElementElements.isEmpty()) {
 					throw new StructureXsdException();
 				}
 
@@ -745,7 +899,11 @@ public class DDMStructureLocalServiceImpl
 		Locale[] availableLocales = LanguageUtil.getAvailableLocales();
 
 		if (!ArrayUtil.contains(availableLocales, contentDefaultLocale)) {
-			LocaleException le = new LocaleException();
+			Long companyId = CompanyThreadLocal.getCompanyId();
+
+			LocaleException le = new LocaleException(
+				"The locale " + contentDefaultLocale +
+					" is not available in company " + companyId);
 
 			le.setSourceAvailableLocales(new Locale[] {contentDefaultLocale});
 			le.setTargetAvailableLocales(availableLocales);

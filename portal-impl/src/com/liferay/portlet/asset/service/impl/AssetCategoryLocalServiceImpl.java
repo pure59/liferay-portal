@@ -17,6 +17,7 @@ package com.liferay.portlet.asset.service.impl;
 import com.liferay.portal.kernel.cache.ThreadLocalCachable;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.transaction.TransactionCommitCallbackRegistryUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -40,10 +41,12 @@ import com.liferay.portlet.asset.model.AssetEntry;
 import com.liferay.portlet.asset.service.base.AssetCategoryLocalServiceBaseImpl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * @author Brian Wing Shun Chan
@@ -141,6 +144,26 @@ public class AssetCategoryLocalServiceImpl
 		return category;
 	}
 
+	public AssetCategory addCategory(
+			long userId, String title, long vocabularyId,
+			ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		Map<Locale, String> titleMap = new HashMap<Locale, String>();
+
+		Locale locale = LocaleUtil.getDefault();
+
+		titleMap.put(locale, title);
+
+		Map<Locale, String> descriptionMap = new HashMap<Locale, String>();
+
+		descriptionMap.put(locale, StringPool.BLANK);
+
+		return addCategory(
+			userId, AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID, titleMap,
+			descriptionMap, vocabularyId, null, serviceContext);
+	}
+
 	public void addCategoryResources(
 			AssetCategory category, boolean addGroupPermissions,
 			boolean addGuestPermissions)
@@ -167,39 +190,7 @@ public class AssetCategoryLocalServiceImpl
 	public void deleteCategory(AssetCategory category)
 		throws PortalException, SystemException {
 
-		// Categories
-
-		List<AssetCategory> categories =
-			assetCategoryPersistence.findByParentCategoryId(
-				category.getCategoryId());
-
-		for (AssetCategory curCategory : categories) {
-			deleteCategory(curCategory);
-		}
-
-		// Category
-
-		assetCategoryPersistence.remove(category);
-
-		// Resources
-
-		resourceLocalService.deleteResource(
-			category.getCompanyId(), AssetCategory.class.getName(),
-			ResourceConstants.SCOPE_INDIVIDUAL, category.getCategoryId());
-
-		// Entries
-
-		List<AssetEntry> entries = assetTagPersistence.getAssetEntries(
-			category.getCategoryId());
-
-		// Properties
-
-		assetCategoryPropertyLocalService.deleteCategoryProperties(
-			category.getCategoryId());
-
-		// Indexer
-
-		assetEntryLocalService.reindex(entries);
+		deleteCategory(category, false);
 	}
 
 	public void deleteCategory(long categoryId)
@@ -253,6 +244,12 @@ public class AssetCategoryLocalServiceImpl
 		throws PortalException, SystemException {
 
 		return assetCategoryPersistence.findByPrimaryKey(categoryId);
+	}
+
+	public AssetCategory getCategory(String uuid, long groupId)
+		throws PortalException, SystemException {
+
+		return assetCategoryPersistence.findByUUID_G(uuid, groupId);
 	}
 
 	public long[] getCategoryIds(String className, long classPK)
@@ -522,6 +519,59 @@ public class AssetCategoryLocalServiceImpl
 		}
 
 		return category;
+	}
+
+	protected void deleteCategory(AssetCategory category, boolean childCategory)
+		throws PortalException, SystemException {
+
+		// Categories
+
+		List<AssetCategory> categories =
+			assetCategoryPersistence.findByParentCategoryId(
+				category.getCategoryId());
+
+		for (AssetCategory curCategory : categories) {
+			deleteCategory(curCategory, true);
+		}
+
+		if (!categories.isEmpty() && !childCategory) {
+			final long groupId = category.getGroupId();
+
+			TransactionCommitCallbackRegistryUtil.registerCallback(
+				new Callable<Void>() {
+
+					public Void call() throws Exception {
+						assetCategoryLocalService.rebuildTree(groupId, true);
+
+						return null;
+					}
+
+				});
+		}
+
+		// Category
+
+		assetCategoryPersistence.remove(category);
+
+		// Resources
+
+		resourceLocalService.deleteResource(
+			category.getCompanyId(), AssetCategory.class.getName(),
+			ResourceConstants.SCOPE_INDIVIDUAL, category.getCategoryId());
+
+		// Entries
+
+		List<AssetEntry> entries = assetTagPersistence.getAssetEntries(
+			category.getCategoryId());
+
+		// Properties
+
+		assetCategoryPropertyLocalService.deleteCategoryProperties(
+			category.getCategoryId());
+
+		// Indexer
+
+		assetEntryLocalService.reindex(entries);
 	}
 
 	protected long[] getCategoryIds(List<AssetCategory> categories) {

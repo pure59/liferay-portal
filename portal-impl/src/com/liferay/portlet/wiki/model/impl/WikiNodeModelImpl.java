@@ -171,7 +171,7 @@ public class WikiNodeModelImpl extends BaseModelImpl<WikiNode>
 	}
 
 	public Serializable getPrimaryKeyObj() {
-		return new Long(_nodeId);
+		return _nodeId;
 	}
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
@@ -533,6 +533,25 @@ public class WikiNodeModelImpl extends BaseModelImpl<WikiNode>
 		_statusDate = statusDate;
 	}
 
+	public long getContainerModelId() {
+		return getNodeId();
+	}
+
+	public void setContainerModelId(long containerModelId) {
+		_nodeId = containerModelId;
+	}
+
+	public String getContainerModelName() {
+		return String.valueOf(getName());
+	}
+
+	public long getParentContainerModelId() {
+		return 0;
+	}
+
+	public void setParentContainerModelId(long parentContainerModelId) {
+	}
+
 	/**
 	 * @deprecated {@link #isApproved}
 	 */
@@ -676,8 +695,7 @@ public class WikiNodeModelImpl extends BaseModelImpl<WikiNode>
 	public int compareTo(WikiNode wikiNode) {
 		int value = 0;
 
-		value = getName().toLowerCase()
-					.compareTo(wikiNode.getName().toLowerCase());
+		value = getName().compareToIgnoreCase(wikiNode.getName());
 
 		if (value != 0) {
 			return value;

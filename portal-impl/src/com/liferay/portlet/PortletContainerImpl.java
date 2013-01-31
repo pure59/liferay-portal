@@ -428,18 +428,9 @@ public class PortletContainerImpl implements PortletContainer {
 			PortletPreferencesFactoryUtil.getPortletPreferencesIds(
 				request, portlet.getPortletId());
 
-		PortletPreferences portletPreferences = null;
-
-		if (allowAddPortletDefaultResource) {
-			portletPreferences =
-				PortletPreferencesLocalServiceUtil.getPreferences(
-					portletPreferencesIds);
-		}
-		else {
-			portletPreferences =
-				PortletPreferencesLocalServiceUtil.getStrictPreferences(
-					portletPreferencesIds);
-		}
+		PortletPreferences portletPreferences =
+			PortletPreferencesLocalServiceUtil.getPreferences(
+				portletPreferencesIds);
 
 		ServletContext servletContext = (ServletContext)request.getAttribute(
 			WebKeys.CTX);
@@ -467,8 +458,8 @@ public class PortletContainerImpl implements PortletContainer {
 					(PortletConfigImpl)invokerPortlet.getPortletConfig();
 
 				if (invokerPortlet.isStrutsPortlet() ||
-					((invokerPortletConfigImpl != null) &&
-						!invokerPortletConfigImpl.isWARFile())) {
+					invokerPortletConfigImpl.isCopyRequestParameters() ||
+					!invokerPortletConfigImpl.isWARFile()) {
 
 					uploadServletRequest = new UploadServletRequestImpl(
 						request);
@@ -882,18 +873,9 @@ public class PortletContainerImpl implements PortletContainer {
 			PortletPreferencesFactoryUtil.getPortletPreferencesIds(
 				request, portlet.getPortletId());
 
-		PortletPreferences portletPreferences = null;
-
-		if (allowAddPortletDefaultResource) {
-			portletPreferences =
-				PortletPreferencesLocalServiceUtil.getPreferences(
-					portletPreferencesIds);
-		}
-		else {
-			portletPreferences =
-				PortletPreferencesLocalServiceUtil.getStrictPreferences(
-					portletPreferencesIds);
-		}
+		PortletPreferences portletPreferences =
+			PortletPreferencesLocalServiceUtil.getPreferences(
+				portletPreferencesIds);
 
 		ServletContext servletContext = (ServletContext)request.getAttribute(
 			WebKeys.CTX);

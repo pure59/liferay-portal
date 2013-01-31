@@ -32,7 +32,10 @@ import com.liferay.portal.model.LayoutSet;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.ResourcePermission;
 import com.liferay.portal.model.User;
+import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portlet.InvokerPortlet;
+import com.liferay.portlet.PortletInstanceFactoryUtil;
 import com.liferay.portlet.expando.model.ExpandoBridge;
 
 import java.io.IOException;
@@ -51,6 +54,7 @@ import java.util.TimeZone;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletConfig;
+import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
@@ -539,20 +543,53 @@ public class PortalUtil {
 			group, privateLayoutSet, themeDisplay);
 	}
 
+	public static String getGroupFriendlyURL(
+			Group group, boolean privateLayoutSet, ThemeDisplay themeDisplay,
+			Locale locale)
+		throws PortalException, SystemException {
+
+		return getPortal().getGroupFriendlyURL(
+			group, privateLayoutSet, themeDisplay, locale);
+	}
+
 	public static String[] getGroupPermissions(HttpServletRequest request) {
 		return getPortal().getGroupPermissions(request);
+	}
+
+	public static String[] getGroupPermissions(
+		HttpServletRequest request, String className) {
+
+		return getPortal().getGroupPermissions(request, className);
 	}
 
 	public static String[] getGroupPermissions(PortletRequest portletRequest) {
 		return getPortal().getGroupPermissions(portletRequest);
 	}
 
+	public static String[] getGroupPermissions(
+		PortletRequest portletRequest, String className) {
+
+		return getPortal().getGroupPermissions(portletRequest, className);
+	}
+
 	public static String[] getGuestPermissions(HttpServletRequest request) {
 		return getPortal().getGuestPermissions(request);
 	}
 
+	public static String[] getGuestPermissions(
+		HttpServletRequest request, String className) {
+
+		return getPortal().getGuestPermissions(request, className);
+	}
+
 	public static String[] getGuestPermissions(PortletRequest portletRequest) {
 		return getPortal().getGuestPermissions(portletRequest);
+	}
+
+	public static String[] getGuestPermissions(
+		PortletRequest portletRequest, String className) {
+
+		return getPortal().getGuestPermissions(portletRequest, className);
 	}
 
 	public static String getHomeURL(HttpServletRequest request)
@@ -582,12 +619,14 @@ public class PortalUtil {
 	}
 
 	public static String getJournalArticleActualURL(
-			long groupId, String mainPath, String friendlyURL,
-			Map<String, String[]> params, Map<String, Object> requestContext)
+			long groupId, boolean privateLayout, String mainPath,
+			String friendlyURL, Map<String, String[]> params,
+			Map<String, Object> requestContext)
 		throws PortalException, SystemException {
 
 		return getPortal().getJournalArticleActualURL(
-			groupId, mainPath, friendlyURL, params, requestContext);
+			groupId, privateLayout, mainPath, friendlyURL, params,
+			requestContext);
 	}
 
 	public static String getJsSafePortletId(String portletId) {
@@ -923,6 +962,19 @@ public class PortalUtil {
 		HttpServletRequest request) {
 
 		return getPortal().getPortletBreadcrumbs(request);
+	}
+
+	public static PortletConfig getPortletConfig(
+			long companyId, String portletId, ServletContext servletContext)
+		throws PortletException, SystemException {
+
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(
+			companyId, portletId);
+
+		InvokerPortlet invokerPortlet = PortletInstanceFactoryUtil.create(
+			portlet, servletContext);
+
+		return invokerPortlet.getPortletConfig();
 	}
 
 	public static String getPortletDescription(
@@ -1412,6 +1464,13 @@ public class PortalUtil {
 		throws Exception {
 
 		return getPortal().isGroupAdmin(user, groupId);
+	}
+
+	public static boolean isGroupFriendlyURL(
+		String fullURL, String groupFriendlyURL, String layoutFriendlyURL) {
+
+		return getPortal().isGroupFriendlyURL(
+			fullURL, groupFriendlyURL, layoutFriendlyURL);
 	}
 
 	public static boolean isGroupOwner(User user, long groupId)

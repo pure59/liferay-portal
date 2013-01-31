@@ -285,15 +285,6 @@
 	}
 }
 
-.tag-cloud {
-	line-height: 2.5em;
-
-	.tag-asset-count {
-		clip: rect(0 0 0 0);
-		position: absolute;
-	}
-}
-
 .tag-selected {
 	color: #000;
 	font-weight: bold;
@@ -302,11 +293,6 @@
 
 .tag-cloud {
 	line-height: 2.5em;
-
-	.tag-asset-count {
-		clip: rect(0 0 0 0);
-		position: absolute;
-	}
 
 	$tag-popularity-font-size: 0.7em;
 
@@ -599,10 +585,8 @@
 	width: 20px;
 }
 
-.ie7 .aui-paginator-link {
-	color: transparent;
-	font-size: 0;
-	overflow: hidden;
+.aui-paginator-page-link {
+	height: auto;
 	text-indent: 0;
 }
 
@@ -611,23 +595,6 @@
 	border-color: #38B6EF #006D9E #006D9E #46B4E6;
 	color: #FFF;
 	text-shadow: -1px -1px #003C57;
-}
-
-.ie7 .aui-paginator-current-page {
-	color: #FFF;
-}
-
-.aui-paginator-page-link {
-	height: auto;
-	text-indent: 0;
-}
-
-.ie7 .aui-paginator-page-link {
-	color: #1F1E1E;
-	font-size: 1em;
-	height: auto;
-	overflow: visible;
-	text-indent: 0;
 }
 
 .aui-paginator-first-link {
@@ -711,6 +678,51 @@
 	}
 }
 
+/* ---------- Inline editing ---------- */
+
+.lfr-editable {
+	$edit-color: #68BB30;
+	$edit-color-hover: darken(#68BB30, 10);
+
+	outline: 1px dashed $edit-color;
+	outline-offset: 2px;
+	position: relative;
+
+	&:after {
+		background: $edit-color url(../images/common/edit_white.png) no-repeat 50%;
+		content: '';
+		display: block;
+		height: 20px;
+		position: absolute;
+		right: 5px;
+		top: 5px;
+		width: 30px;
+	}
+
+	&:focus {
+		&:after {
+			display: none;
+		}
+
+		&:hover {
+			background-color: transparent;
+		}
+	}
+
+	&:hover {
+		background-color: rgba(255, 255, 255, 0.3);
+		outline-color: $edit-color-hover;
+
+		&:after {
+			background-color: $edit-color-hover;
+		}
+	}
+}
+
+.lfr-editable-notice-close {
+	margin-left: 1em;
+}
+
 .ie {
 	.aui-proxy.not-intersecting .forbidden-action {
 		right: 2px;
@@ -725,6 +737,27 @@
 
 	.aui-menu-content li {
 		z-index: 10;
+	}
+
+	.aui-paginator-link {
+		color: transparent;
+		font-size: 0;
+		overflow: hidden;
+		text-indent: 0;
+		vertical-align: middle;
+	}
+
+	.aui-paginator-page-link {
+		color: #1F1E1E;
+		font-size: 1em;
+		height: auto;
+		line-height: 1.4;
+		overflow: visible;
+		text-indent: 0;
+	}
+
+	.aui-paginator-current-page {
+		color: #FFF;
 	}
 }
 

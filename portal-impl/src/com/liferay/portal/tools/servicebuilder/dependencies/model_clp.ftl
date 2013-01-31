@@ -90,19 +90,7 @@ public class ${entity.name}Clp extends BaseModelImpl<${entity.name}> implements 
 
 			);
 		<#else>
-			return
-
-			<#if entity.hasPrimitivePK()>
-				new ${serviceBuilder.getPrimitiveObj("${entity.PKClassName}")} (
-			</#if>
-
-			_${entity.PKList[0].name}
-
-			<#if entity.hasPrimitivePK()>
-				)
-			</#if>
-
-			;
+			return _${entity.PKList[0].name};
 		</#if>
 	}
 
@@ -557,7 +545,7 @@ public class ${entity.name}Clp extends BaseModelImpl<${entity.name}> implements 
 						<#if column.isCaseSensitive()>
 							value = get${column.methodName}().compareTo(${entity.varName}.get${column.methodName}());
 						<#else>
-							value = get${column.methodName}().toLowerCase().compareTo(${entity.varName}.get${column.methodName}().toLowerCase());
+							value = get${column.methodName}().compareToIgnoreCase(${entity.varName}.get${column.methodName}());
 						</#if>
 					</#if>
 				</#if>

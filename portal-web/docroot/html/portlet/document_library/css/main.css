@@ -32,27 +32,28 @@
 
 	.document-container .search-info {
 		background-color: #D3E8F1;
-		min-height: 40px;
+		margin-bottom: 0.5em;
+		padding: 0.5em 0.75em;
+		padding-right: 30px;
 		position: relative;
 
 		.keywords {
 			float: none;
 			font-size: 1.4em;
 			font-weight: bold;
-			position: absolute;
-			top: 7px;
 		}
 
 		.change-search-folder {
 			position: absolute;
-			right: 60px;
-			top: 7px;
+			right: 30px;
+			top: 0.3em;
 		}
 
 		.close-search {
+			margin-top: -8px;
 			position: absolute;
-			right: 20px;
-			top: 10px;
+			right: 5px;
+			top: 50%;
 		}
 	}
 
@@ -188,7 +189,7 @@
 			}
 		}
 
-		.aui-icon-delete, .aui-icon-download, .aui-icon-edit, .aui-icon-lock, .aui-icon-move, .aui-icon-permissions, .aui-icon-undo, .aui-icon-unlock {
+		.aui-icon-delete, .aui-icon-download, .aui-icon-edit, .aui-icon-lock, .aui-icon-move, .aui-icon-permissions, .aui-icon-trash, .aui-icon-undo, .aui-icon-unlock {
 			background: url() no-repeat 0 0;
 		}
 
@@ -212,8 +213,16 @@
 			background-image: url(@theme_image_path@/common/submit.png);
 		}
 
+		.aui-icon-msoffice {
+			background-image: url(@theme_image_path@/document_library/msoffice.png);
+		}
+
 		.aui-icon-permissions {
 			background-image: url(@theme_image_path@/common/permissions.png);
+		}
+
+		.aui-icon-trash {
+			background-image: url(@theme_image_path@/common/trash.png);
 		}
 
 		.aui-icon-undo {
@@ -313,6 +322,13 @@
 		right: 5px;
 		top: 5px;
 		z-index: 1;
+	}
+
+	.subscribe-action {
+		margin-bottom: 5px;
+		margin-right: 10px;
+		margin-top: 5px;
+		text-align: right;
 	}
 
 	.sync-message-hidden {

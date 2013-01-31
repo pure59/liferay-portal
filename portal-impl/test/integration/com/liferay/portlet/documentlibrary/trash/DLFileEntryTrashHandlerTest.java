@@ -15,12 +15,12 @@
 package com.liferay.portlet.documentlibrary.trash;
 
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
-import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.BaseModel;
@@ -30,8 +30,10 @@ import com.liferay.portal.model.WorkflowedModel;
 import com.liferay.portal.repository.liferayrepository.model.LiferayFileEntry;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceTestUtil;
-import com.liferay.portal.test.EnvironmentExecutionTestListener;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
+import com.liferay.portal.test.MainServletExecutionTestListener;
+import com.liferay.portal.test.Sync;
+import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
 import com.liferay.portal.util.TestPropsValues;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFileRank;
@@ -43,10 +45,9 @@ import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileRankLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.service.DLFolderLocalServiceUtil;
+import com.liferay.portlet.documentlibrary.util.DLAppTestUtil;
 import com.liferay.portlet.trash.BaseTrashHandlerTestCase;
-
-import java.io.File;
+import com.liferay.portlet.trash.util.TrashUtil;
 
 import java.util.List;
 
@@ -59,8 +60,13 @@ import org.junit.runner.RunWith;
  * @author Julio Camarero
  * @author Eudaldo Alonso
  */
-@ExecutionTestListeners(listeners = {EnvironmentExecutionTestListener.class})
+@ExecutionTestListeners(
+	listeners = {
+		MainServletExecutionTestListener.class,
+		SynchronousDestinationExecutionTestListener.class
+	})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
+@Sync
 public class DLFileEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 
 	@Test
@@ -70,34 +76,23 @@ public class DLFileEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Override
-	protected BaseModel<?> addBaseModel(
+	protected BaseModel<?> addBaseModelWithWorkflow(
 			BaseModel<?> parentBaseModel, boolean approved,
 			ServiceContext serviceContext)
 		throws Exception {
 
 		DLFolder dlFolder = (DLFolder)parentBaseModel;
 
-		String content = "Content: Enterprise. Open Source.";
+		String title = getSearchKeywords();
 
-		File file = FileUtil.createTempFile(content.getBytes());
+		title += ServiceTestUtil.randomString(
+			_FILE_ENTRY_TITLE_MAX_LENGTH - title.length());
 
-		serviceContext = (ServiceContext)serviceContext.clone();
+		FileEntry fileEntry = DLAppTestUtil.addFileEntry(
+			dlFolder.getGroupId(), dlFolder.getFolderId(),
+			ServiceTestUtil.randomString() + ".txt", title, approved);
 
-		serviceContext.setWorkflowAction(WorkflowConstants.ACTION_SAVE_DRAFT);
-
-		if (approved) {
-			serviceContext.setWorkflowAction(WorkflowConstants.ACTION_PUBLISH);
-		}
-
-		FileEntry fileEntry = DLAppServiceUtil.addFileEntry(
-			dlFolder.getRepositoryId(), dlFolder.getFolderId(),
-			ServiceTestUtil.randomString() + ".txt", ContentTypes.TEXT_PLAIN,
-			getSearchKeywords(), StringPool.BLANK, StringPool.BLANK, file,
-			serviceContext);
-
-		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
-
-		return liferayFileEntry.getDLFileEntry();
+		return (DLFileEntry)fileEntry.getModel();
 	}
 
 	protected int getActiveDLFileRanksCount(long groupId, long fileEntryId)
@@ -135,7 +130,7 @@ public class DLFileEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Override
-	protected int getBaseModelsNotInTrashCount(BaseModel<?> parentBaseModel)
+	protected int getNotInTrashBaseModelsCount(BaseModel<?> parentBaseModel)
 		throws Exception {
 
 		DLFolder dlFolder = (DLFolder)parentBaseModel;
@@ -150,11 +145,11 @@ public class DLFileEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 			Group group, ServiceContext serviceContext)
 		throws Exception {
 
-		return DLFolderLocalServiceUtil.addFolder(
-			TestPropsValues.getUserId(), group.getGroupId(), group.getGroupId(),
-			false, DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-			ServiceTestUtil.randomString(), StringPool.BLANK, false,
-			serviceContext);
+		Folder folder = DLAppTestUtil.addFolder(
+			group.getGroupId(), DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			ServiceTestUtil.randomString(_FOLDER_NAME_MAX_LENGTH));
+
+		return (DLFolder)folder.getModel();
 	}
 
 	@Override
@@ -168,6 +163,15 @@ public class DLFileEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Override
+	protected String getUniqueTitle(BaseModel<?> baseModel) {
+		DLFileEntry dlFileEntry = (DLFileEntry)baseModel;
+
+		String title = dlFileEntry.getTitle();
+
+		return TrashUtil.getOriginalTitle(title);
+	}
+
+	@Override
 	protected WorkflowedModel getWorkflowedModel(ClassedModel baseModel)
 		throws Exception {
 
@@ -177,14 +181,14 @@ public class DLFileEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Override
-	protected boolean isInTrashFolder(ClassedModel classedModel)
+	protected boolean isInTrashContainer(ClassedModel classedModel)
 		throws Exception {
 
 		DLFileEntry dlFileEntry = (DLFileEntry)classedModel;
 
 		DLFileVersion dlFileVersion = dlFileEntry.getFileVersion();
 
-		return dlFileVersion.isInTrashFolder();
+		return dlFileVersion.isInTrashContainer();
 	}
 
 	@Override
@@ -261,16 +265,23 @@ public class DLFileEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 			long primaryKey, ServiceContext serviceContext)
 		throws Exception {
 
+		DLFileEntry dlFileEntry = DLFileEntryLocalServiceUtil.getDLFileEntry(
+			primaryKey);
+
 		String content = "Content: Enterprise. Open Source. For Life.";
 
 		FileEntry fileEntry = DLAppServiceUtil.updateFileEntry(
 			primaryKey, ServiceTestUtil.randomString() + ".txt",
-			ContentTypes.TEXT_PLAIN, getSearchKeywords(), StringPool.BLANK,
+			ContentTypes.TEXT_PLAIN, dlFileEntry.getTitle(), StringPool.BLANK,
 			StringPool.BLANK, false, content.getBytes(), serviceContext);
 
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
 
 		return liferayFileEntry.getDLFileEntry();
 	}
+
+	private static final int _FILE_ENTRY_TITLE_MAX_LENGTH = 255;
+
+	private static final int _FOLDER_NAME_MAX_LENGTH = 100;
 
 }

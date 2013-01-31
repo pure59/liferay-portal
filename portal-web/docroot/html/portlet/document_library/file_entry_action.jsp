@@ -80,7 +80,6 @@ else {
 			if (request.getAttribute("view_entries.jsp-fileShortcut") != null) {
 				fileShortcut = (DLFileShortcut)request.getAttribute("view_entries.jsp-fileShortcut");
 			}
-
 		}
 		else {
 			fileShortcut = (DLFileShortcut)request.getAttribute("view_file_shortcut.jsp-fileShortcut");
@@ -97,6 +96,8 @@ else if (fileEntry != null) {
 	folderId = fileEntry.getFolderId();
 }
 
+boolean checkedOut = fileEntry.isCheckedOut();
+boolean hasLock = fileEntry.hasLock();
 boolean restore = false;
 
 PortletURL viewFolderURL = liferayPortletResponse.createRenderURL();

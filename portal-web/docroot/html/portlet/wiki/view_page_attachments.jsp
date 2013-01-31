@@ -99,7 +99,7 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "att
 
 				<liferay-ui:icon
 					cssClass="trash-attachments"
-					image="delete"
+					image="delete_attachment"
 					label="<%= true %>"
 					message='<%= LanguageUtil.format(pageContext, (deletedAttachmentsCount == 1) ? "x-recently-removed-attachment" : "x-recently-removed-attachments", deletedAttachmentsCount) %>'
 					url="<%= viewTrashAttachmentsURL %>"
@@ -147,7 +147,7 @@ iteratorURL.setParameter("viewTrashAttachments", String.valueOf(viewTrashAttachm
 		<c:otherwise>
 			<liferay-ui:search-container-results
 				results="<%= wikiPage.getAttachmentsFileEntries(searchContainer.getStart(), searchContainer.getEnd()) %>"
-				total="<%= wikiPage.getAttachmentsFilesCount() %>"
+				total="<%= wikiPage.getAttachmentsFileEntriesCount() %>"
 			/>
 		</c:otherwise>
 	</c:choose>
@@ -161,8 +161,6 @@ iteratorURL.setParameter("viewTrashAttachments", String.valueOf(viewTrashAttachm
 	>
 
 		<%
-		DLFileEntry dlFileEntry = (DLFileEntry)fileEntry.getModel();
-
 		int status = WorkflowConstants.STATUS_APPROVED;
 
 		if (viewTrashAttachments) {
@@ -175,7 +173,7 @@ iteratorURL.setParameter("viewTrashAttachments", String.valueOf(viewTrashAttachm
 			<portlet:param name="redirect" value="<%= currentURL %>" />
 			<portlet:param name="nodeId" value="<%= String.valueOf(node.getNodeId()) %>" />
 			<portlet:param name="title" value="<%= wikiPage.getTitle() %>" />
-			<portlet:param name="fileName" value="<%= dlFileEntry.getTitle() %>" />
+			<portlet:param name="fileName" value="<%= fileEntry.getTitle() %>" />
 			<portlet:param name="status" value="<%= String.valueOf(status) %>" />
 		</liferay-portlet:actionURL>
 
@@ -183,22 +181,13 @@ iteratorURL.setParameter("viewTrashAttachments", String.valueOf(viewTrashAttachm
 			href="<%= rowURL %>"
 			name="file-name"
 		>
-
-			<%
-			String fileName = dlFileEntry.getTitle();
-
-			if (viewTrashAttachments) {
-				fileName = TrashUtil.stripTrashNamespace(fileName);
-			}
-			%>
-
-			<img align="left" alt="" border="0" src="<%= themeDisplay.getPathThemeImages() %>/file_system/small/<%= DLUtil.getFileIcon(dlFileEntry.getExtension()) %>.png"> <%= fileName %>
+			<img align="left" alt="" border="0" src="<%= themeDisplay.getPathThemeImages() %>/file_system/small/<%= DLUtil.getFileIcon(fileEntry.getExtension()) %>.png"> <%= TrashUtil.getOriginalTitle(fileEntry.getTitle()) %>
 		</liferay-ui:search-container-column-text>
 
 		<liferay-ui:search-container-column-text
 			href="<%= rowURL %>"
 			name="size"
-			value="<%= TextFormatter.formatStorageSize(dlFileEntry.getSize(), locale) %>"
+			value="<%= TextFormatter.formatStorageSize(fileEntry.getSize(), locale) %>"
 		/>
 
 		<liferay-ui:search-container-column-jsp
@@ -210,17 +199,9 @@ iteratorURL.setParameter("viewTrashAttachments", String.valueOf(viewTrashAttachm
 	<liferay-ui:search-iterator />
 </liferay-ui:search-container>
 
-<aui:script use="liferay-restore-entry">
-	<portlet:actionURL var="restoreEntryURL">
-		<portlet:param name="struts_action" value="/wiki/restore_page_attachment" />
-		<portlet:param name="redirect" value="<%= redirect %>" />
-	</portlet:actionURL>
-
-	new Liferay.RestoreEntry(
-		{
-			checkEntryURL: '<portlet:actionURL><portlet:param name="<%= Constants.CMD %>" value="<%= Constants.CHECK %>" /><portlet:param name="struts_action" value="/wiki/restore_page_attachment" /></portlet:actionURL>',
-			namespace: '<portlet:namespace />',
-			restoreEntryURL: '<portlet:renderURL windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="struts_action" value="/wiki/restore_entry" /><portlet:param name="redirect" value="<%= currentURL %>" /><portlet:param name="restoreEntryURL" value="<%= restoreEntryURL %>" /></portlet:renderURL>'
-		}
-	);
-</aui:script>
+<liferay-ui:restore-entry
+	duplicateEntryAction="/wiki/restore_entry"
+	overrideMessage="overwrite-the-existing-attachment-with-the-removed-one"
+	renameMessage="keep-both-attachments-and-rename-the-removed-attachment-as"
+	restoreEntryAction="/wiki/restore_page_attachment"
+/>

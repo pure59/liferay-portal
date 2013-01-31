@@ -20,10 +20,12 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.sanitizer.SanitizerException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -120,6 +122,11 @@ public class EditEntryAction extends PortletAction {
 			else if (cmd.equals(Constants.UNSUBSCRIBE)) {
 				unsubscribe(actionRequest);
 			}
+			else if (cmd.equals(Constants.UPDATE_CONTENT)) {
+				updateContent(actionRequest, actionResponse);
+
+				return;
+			}
 
 			String redirect = ParamUtil.getString(actionRequest, "redirect");
 			boolean updateRedirect = false;
@@ -209,7 +216,8 @@ public class EditEntryAction extends PortletAction {
 					 e instanceof EntryDisplayDateException ||
 					 e instanceof EntrySmallImageNameException ||
 					 e instanceof EntrySmallImageSizeException ||
-					 e instanceof EntryTitleException) {
+					 e instanceof EntryTitleException ||
+					 e instanceof SanitizerException) {
 
 				SessionErrors.add(actionRequest, e.getClass());
 			}
@@ -219,7 +227,14 @@ public class EditEntryAction extends PortletAction {
 				SessionErrors.add(actionRequest, e.getClass(), e);
 			}
 			else {
-				throw e;
+				Throwable cause = e.getCause();
+
+				if (cause instanceof SanitizerException) {
+					SessionErrors.add(actionRequest, SanitizerException.class);
+				}
+				else {
+					throw e;
+				}
 			}
 		}
 	}
@@ -351,15 +366,11 @@ public class EditEntryAction extends PortletAction {
 	protected void restoreEntries(ActionRequest actionRequest)
 		throws PortalException, SystemException {
 
-		ThemeDisplay themeDislay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
 		long[] restoreEntryIds = StringUtil.split(
 			ParamUtil.getString(actionRequest, "restoreEntryIds"), 0L);
 
 		for (long restoreEntryId : restoreEntryIds) {
-			BlogsEntryLocalServiceUtil.restoreEntryFromTrash(
-				themeDislay.getUserId(), restoreEntryId);
+			BlogsEntryServiceUtil.restoreEntryFromTrash(restoreEntryId);
 		}
 	}
 
@@ -375,6 +386,58 @@ public class EditEntryAction extends PortletAction {
 			WebKeys.THEME_DISPLAY);
 
 		BlogsEntryServiceUtil.unsubscribe(themeDisplay.getScopeGroupId());
+	}
+
+	protected void updateContent(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws Exception {
+
+		long entryId = ParamUtil.getLong(actionRequest, "entryId");
+
+		String content = ParamUtil.getString(actionRequest, "content");
+
+		BlogsEntry entry = BlogsEntryLocalServiceUtil.getEntry(entryId);
+
+		ServiceContext serviceContext = ServiceContextFactory.getInstance(
+			actionRequest);
+
+		try {
+			Calendar displayDateCal = CalendarFactoryUtil.getCalendar();
+
+			displayDateCal.setTime(entry.getDisplayDate());
+
+			int displayDateMonth = displayDateCal.get(Calendar.MONTH);
+			int displayDateDay = displayDateCal.get(Calendar.DATE);
+			int displayDateYear = displayDateCal.get(Calendar.YEAR);
+			int displayDateHour = displayDateCal.get(Calendar.HOUR);
+			int displayDateMinute = displayDateCal.get(Calendar.MINUTE);
+
+			if (displayDateCal.get(Calendar.AM_PM) == Calendar.PM) {
+				displayDateHour += 12;
+			}
+
+			BlogsEntryServiceUtil.updateEntry(
+				entryId, entry.getTitle(), entry.getDescription(), content,
+				displayDateMonth, displayDateDay, displayDateYear,
+				displayDateHour, displayDateMinute, entry.getAllowPingbacks(),
+				entry.getAllowTrackbacks(), null, entry.getSmallImage(),
+				entry.getSmallImageURL(), null, null, serviceContext);
+
+			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+			jsonObject.put("success", Boolean.TRUE);
+
+			writeJSON(actionRequest, actionResponse, jsonObject);
+		}
+		catch (Exception e) {
+			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+			jsonObject.put("success", Boolean.FALSE);
+
+			jsonObject.putException(e);
+
+			writeJSON(actionRequest, actionResponse, jsonObject);
+		}
 	}
 
 	protected Object[] updateEntry(ActionRequest actionRequest)

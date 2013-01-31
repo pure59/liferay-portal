@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -323,6 +324,38 @@ public class ExpandoValueLocalServiceImpl
 
 	public ExpandoValue addValue(
 			long companyId, String className, String tableName,
+			String columnName, long classPK, Map<Locale, ?> dataMap,
+			Locale defautlLocale)
+		throws PortalException, SystemException {
+
+		ExpandoTable table = expandoTableLocalService.getTable(
+			companyId, className, tableName);
+
+		ExpandoColumn column = expandoColumnLocalService.getColumn(
+			table.getTableId(), columnName);
+
+		ExpandoValue value = new ExpandoValueImpl();
+
+		value.setCompanyId(table.getCompanyId());
+		value.setColumnId(column.getColumnId());
+
+		int type = column.getType();
+
+		if (type == ExpandoColumnConstants.STRING_ARRAY_LOCALIZED) {
+			value.setStringArrayMap(
+				(Map<Locale, String[]>)dataMap, defautlLocale);
+		}
+		else {
+			value.setStringMap((Map<Locale, String>)dataMap, defautlLocale);
+		}
+
+		return expandoValueLocalService.addValue(
+			table.getClassNameId(), table.getTableId(), column.getColumnId(),
+			classPK, value.getData());
+	}
+
+	public ExpandoValue addValue(
+			long companyId, String className, String tableName,
 			String columnName, long classPK, Number data)
 		throws PortalException, SystemException {
 
@@ -460,10 +493,15 @@ public class ExpandoValueLocalServiceImpl
 				companyId, className, tableName, columnName, classPK,
 				(String[])data);
 		}
-		else {
+		else if (type == ExpandoColumnConstants.STRING) {
 			return expandoValueLocalService.addValue(
 				companyId, className, tableName, columnName, classPK,
 				(String)data);
+		}
+		else {
+			return expandoValueLocalService.addValue(
+				companyId, className, tableName, columnName, classPK,
+				(Map<Locale, ?>)data, Locale.getDefault());
 		}
 	}
 
@@ -1018,14 +1056,12 @@ public class ExpandoValueLocalServiceImpl
 			return;
 		}
 
-		List<ExpandoColumn> columns = expandoColumnPersistence.findByT_N(
+		ExpandoColumn column = expandoColumnPersistence.fetchByT_N(
 			table.getTableId(), columnName);
 
-		if (columns.isEmpty()) {
+		if (column == null) {
 			return;
 		}
-
-		ExpandoColumn column = columns.get(0);
 
 		ExpandoValue value = expandoValuePersistence.fetchByT_C_C(
 			table.getTableId(), column.getColumnId(), classPK);
@@ -1092,14 +1128,12 @@ public class ExpandoValueLocalServiceImpl
 			return Collections.emptyList();
 		}
 
-		List<ExpandoColumn> columns = expandoColumnPersistence.findByT_N(
+		ExpandoColumn column = expandoColumnPersistence.fetchByT_N(
 			table.getTableId(), columnName);
 
-		if (columns.isEmpty()) {
+		if (column == null) {
 			return Collections.emptyList();
 		}
-
-		ExpandoColumn column = columns.get(0);
 
 		if (data == null) {
 			return expandoValuePersistence.findByT_C(
@@ -1173,14 +1207,12 @@ public class ExpandoValueLocalServiceImpl
 			return 0;
 		}
 
-		List<ExpandoColumn> columns = expandoColumnPersistence.findByT_N(
+		ExpandoColumn column = expandoColumnPersistence.fetchByT_N(
 			table.getTableId(), columnName);
 
-		if (columns.isEmpty()) {
+		if (column == null) {
 			return 0;
 		}
-
-		ExpandoColumn column = columns.get(0);
 
 		if (data == null) {
 			return expandoValuePersistence.countByT_C(
@@ -1462,6 +1494,30 @@ public class ExpandoValueLocalServiceImpl
 		}
 		else {
 			return value.getLongArray();
+		}
+	}
+
+	public Map<?, ?> getData(
+			long companyId, String className, String tableName,
+			String columnName, long classPK, Map<?, ?> defaultData)
+		throws PortalException, SystemException {
+
+		ExpandoValue value = expandoValueLocalService.getValue(
+			companyId, className, tableName, columnName, classPK);
+
+		if (value == null) {
+			return defaultData;
+		}
+
+		ExpandoColumn column = value.getColumn();
+
+		int type = column.getType();
+
+		if (type == ExpandoColumnConstants.STRING_ARRAY_LOCALIZED) {
+			return value.getStringArrayMap();
+		}
+		else {
+			return value.getStringMap();
 		}
 	}
 
@@ -1940,14 +1996,12 @@ public class ExpandoValueLocalServiceImpl
 			return null;
 		}
 
-		List<ExpandoColumn> columns = expandoColumnPersistence.findByT_N(
+		ExpandoColumn column = expandoColumnPersistence.fetchByT_N(
 			table.getTableId(), columnName);
 
-		if (columns.isEmpty()) {
+		if (column == null) {
 			return null;
 		}
-
-		ExpandoColumn column = columns.get(0);
 
 		return expandoValuePersistence.fetchByT_C_C(
 			table.getTableId(), column.getColumnId(), classPK);
@@ -2128,10 +2182,15 @@ public class ExpandoValueLocalServiceImpl
 				companyId, className, tableName, columnName, classPK,
 				new String[0]);
 		}
-		else {
+		else if (type == ExpandoColumnConstants.STRING) {
 			return expandoValueLocalService.getData(
 				companyId, className, tableName, columnName, classPK,
 				value.getString());
+		}
+		else {
+			return (Serializable)expandoValueLocalService.getData(
+				companyId, className, tableName, columnName, classPK,
+				new HashMap<Object, Object>());
 		}
 	}
 

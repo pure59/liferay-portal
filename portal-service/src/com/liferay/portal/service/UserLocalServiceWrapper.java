@@ -103,7 +103,7 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* Performs a dynamic query on the database and returns a range of the matching rows.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.UserModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param dynamicQuery the dynamic query
@@ -123,7 +123,7 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* Performs a dynamic query on the database and returns an ordered range of the matching rows.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.UserModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param dynamicQuery the dynamic query
@@ -186,7 +186,7 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* Returns a range of all the users.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.UserModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param start the lower bound of the range of users
@@ -427,9 +427,9 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* @param sendEmail whether to send the user an email notification about
 	their new account
 	* @param serviceContext the user's service context (optionally
-	<code>null</code>). Can set the universally unique identifier
-	(with the <code>uuid</code> attribute), asset category IDs, asset
-	tag names, and expando bridge attributes for the user.
+	<code>null</code>). Can set the UUID (with the <code>uuid</code>
+	attribute), asset category IDs, asset tag names, and expando
+	bridge attributes for the user.
 	* @return the new user
 	* @throws PortalException if the user's information was invalid
 	* @throws SystemException if a system exception occurred
@@ -511,9 +511,9 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* @param sendEmail whether to send the user an email notification about
 	their new account
 	* @param serviceContext the user's service context (optionally
-	<code>null</code>). Can set the universally unique identifier
-	(with the <code>uuid</code> attribute), asset category IDs, asset
-	tag names, and expando bridge attributes for the user.
+	<code>null</code>). Can set the UUID (with the <code>uuid</code>
+	attribute), asset category IDs, asset tag names, and expando
+	bridge attributes for the user.
 	* @return the new user
 	* @throws PortalException if the user's information was invalid
 	* @throws SystemException if a system exception occurred
@@ -1605,12 +1605,11 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	}
 
 	/**
-	* Returns the user with the universally unique identifier.
+	* Returns the user with the UUID.
 	*
-	* @param uuid the user's universally unique identifier
-	* @return the user with the universally unique identifier
-	* @throws PortalException if a user with the universally unique
-	identifier could not be found
+	* @param uuid the user's UUID
+	* @return the user with the UUID
+	* @throws PortalException if a user with the UUID could not be found
 	* @throws SystemException if a system exception occurred
 	* @deprecated {@link #getUserByUuidAndCompanyId(String, long)}
 	*/
@@ -1621,13 +1620,12 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	}
 
 	/**
-	* Returns the user with the universally unique identifier.
+	* Returns the user with the UUID.
 	*
-	* @param uuid the user's universally unique identifier
+	* @param uuid the user's UUID
 	* @param companyId the primary key of the user's company
-	* @return the user with the universally unique identifier
-	* @throws PortalException if a user with the universally unique identifier
-	could not be found
+	* @return the user with the UUID
+	* @throws PortalException if a user with the UUID could not be found
 	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portal.model.User getUserByUuidAndCompanyId(
@@ -2858,9 +2856,9 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* @param userGroupRoles the user user's group roles
 	* @param userGroupIds the primary keys of the user's user groups
 	* @param serviceContext the user's service context (optionally
-	<code>null</code>). Can set the universally unique identifier
-	(with the <code>uuid</code> attribute), asset category IDs, asset
-	tag names, and expando bridge attributes for the user.
+	<code>null</code>). Can set the UUID (with the <code>uuid</code>
+	attribute), asset category IDs, asset tag names, and expando
+	bridge attributes for the user.
 	* @return the user
 	* @throws PortalException if a user with the primary key could not be found
 	or if the new information was invalid

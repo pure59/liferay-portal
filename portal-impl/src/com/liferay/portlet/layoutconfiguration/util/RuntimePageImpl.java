@@ -48,7 +48,9 @@ import com.liferay.portlet.layoutconfiguration.util.xml.ActionURLLogic;
 import com.liferay.portlet.layoutconfiguration.util.xml.PortletLogic;
 import com.liferay.portlet.layoutconfiguration.util.xml.RenderURLLogic;
 import com.liferay.portlet.layoutconfiguration.util.xml.RuntimeLogic;
+import com.liferay.taglib.util.DummyVelocityTaglib;
 import com.liferay.taglib.util.VelocityTaglib;
+import com.liferay.taglib.util.VelocityTaglibImpl;
 
 import java.io.Closeable;
 
@@ -84,6 +86,14 @@ import org.apache.commons.lang.time.StopWatch;
  */
 public class RuntimePageImpl implements RuntimePage {
 
+	public StringBundler getProcessedTemplate(
+			PageContext pageContext, String portletId,
+			TemplateResource templateResource)
+		throws Exception {
+
+		return doDispatch(pageContext, portletId, templateResource, true);
+	}
+
 	public void processCustomizationSettings(
 			PageContext pageContext, TemplateResource templateResource)
 		throws Exception {
@@ -96,7 +106,10 @@ public class RuntimePageImpl implements RuntimePage {
 			TemplateResource templateResource)
 		throws Exception {
 
-		doDispatch(pageContext, portletId, templateResource, true);
+		StringBundler sb = doDispatch(
+			pageContext, portletId, templateResource, true);
+
+		sb.writeTo(pageContext.getOut());
 	}
 
 	public void processTemplate(
@@ -218,51 +231,51 @@ public class RuntimePageImpl implements RuntimePage {
 		}
 	}
 
-	protected void doDispatch(
+	protected StringBundler doDispatch(
 			PageContext pageContext, String portletId,
 			TemplateResource templateResource, boolean processTemplate)
 		throws Exception {
 
+		ClassLoader pluginClassLoader = null;
+
 		LayoutTemplate layoutTemplate = getLayoutTemplate(
 			templateResource.getTemplateId());
 
-		String pluginServletContextName = GetterUtil.getString(
-			layoutTemplate.getServletContextName());
+		if (layoutTemplate != null) {
+			String pluginServletContextName = GetterUtil.getString(
+				layoutTemplate.getServletContextName());
 
-		ServletContext pluginServletContext = ServletContextPool.get(
-			pluginServletContextName);
+			ServletContext pluginServletContext = ServletContextPool.get(
+				pluginServletContextName);
 
-		ClassLoader pluginClassLoader = null;
-
-		if (pluginServletContext != null) {
-			pluginClassLoader =
-				(ClassLoader)pluginServletContext.getAttribute(
-					PluginContextListener.PLUGIN_CLASS_LOADER);
+			if (pluginServletContext != null) {
+				pluginClassLoader =
+					(ClassLoader)pluginServletContext.getAttribute(
+						PluginContextListener.PLUGIN_CLASS_LOADER);
+			}
 		}
 
 		ClassLoader contextClassLoader =
 			PACLClassLoaderUtil.getContextClassLoader();
 
 		try {
-			TemplateContextType templateContextType =
-				TemplateContextType.STANDARD;
-
 			if ((pluginClassLoader != null) &&
 				(pluginClassLoader != contextClassLoader)) {
 
 				PACLClassLoaderUtil.setContextClassLoader(pluginClassLoader);
-
-				templateContextType = TemplateContextType.CLASS_LOADER;
 			}
 
 			if (processTemplate) {
-				doProcessTemplate(
+				return doProcessTemplate(
 					pageContext, portletId, templateResource,
-					templateContextType);
+					TemplateContextType.STANDARD);
 			}
 			else {
 				doProcessCustomizationSettings(
-					pageContext, templateResource, templateContextType);
+					pageContext, templateResource,
+					TemplateContextType.STANDARD);
+
+				return null;
 			}
 		}
 		finally {
@@ -281,15 +294,12 @@ public class RuntimePageImpl implements RuntimePage {
 
 		HttpServletRequest request =
 			(HttpServletRequest)pageContext.getRequest();
-		HttpServletResponse response =
-			(HttpServletResponse)pageContext.getResponse();
 
 		CustomizationSettingsProcessor processor =
 			new CustomizationSettingsProcessor(pageContext);
 
 		Template template = TemplateManagerUtil.getTemplate(
-			TemplateManager.VELOCITY, templateResource,
-			TemplateContextType.STANDARD);
+			TemplateManager.VELOCITY, templateResource, templateContextType);
 
 		template.put("processor", processor);
 
@@ -299,9 +309,7 @@ public class RuntimePageImpl implements RuntimePage {
 
 		// liferay:include tag library
 
-		VelocityTaglib velocityTaglib = new VelocityTaglib(
-			pageContext.getServletContext(), request, response, pageContext,
-			template);
+		VelocityTaglib velocityTaglib = new DummyVelocityTaglib();
 
 		template.put("taglibLiferay", velocityTaglib);
 		template.put("theme", velocityTaglib);
@@ -316,7 +324,7 @@ public class RuntimePageImpl implements RuntimePage {
 		}
 	}
 
-	protected void doProcessTemplate(
+	protected StringBundler doProcessTemplate(
 			PageContext pageContext, String portletId,
 			TemplateResource templateResource,
 			TemplateContextType templateContextType)
@@ -343,7 +351,7 @@ public class RuntimePageImpl implements RuntimePage {
 
 		UnsyncStringWriter unsyncStringWriter = new UnsyncStringWriter();
 
-		VelocityTaglib velocityTaglib = new VelocityTaglib(
+		VelocityTaglib velocityTaglib = new VelocityTaglibImpl(
 			pageContext.getServletContext(), request,
 			new PipingServletResponse(response, unsyncStringWriter),
 			pageContext, template);
@@ -463,7 +471,7 @@ public class RuntimePageImpl implements RuntimePage {
 			unsyncStringWriter.toString(), "[$TEMPLATE_PORTLET_", "$]",
 			contentsMap);
 
-		sb.writeTo(pageContext.getOut());
+		return sb;
 	}
 
 	protected LayoutTemplate getLayoutTemplate(String velocityTemplateId) {

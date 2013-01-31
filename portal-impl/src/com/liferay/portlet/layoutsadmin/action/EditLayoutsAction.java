@@ -33,9 +33,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
@@ -151,11 +149,11 @@ public class EditLayoutsAction extends PortletAction {
 
 		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
 
-		try {
-			String redirect = ParamUtil.getString(actionRequest, "redirect");
-			String closeRedirect = ParamUtil.getString(
-				actionRequest, "closeRedirect");
+		String redirect = ParamUtil.getString(actionRequest, "redirect");
+		String closeRedirect = ParamUtil.getString(
+			actionRequest, "closeRedirect");
 
+		try {
 			Layout layout = null;
 			String oldFriendlyURL = StringPool.BLANK;
 
@@ -247,18 +245,9 @@ public class EditLayoutsAction extends PortletAction {
 				updateLayoutRevision(actionRequest, themeDisplay);
 			}
 
-			if (Validator.isNotNull(closeRedirect)) {
-				LiferayPortletConfig liferayPortletConfig =
-					(LiferayPortletConfig)portletConfig;
-
-				SessionMessages.add(
-					actionRequest,
-					liferayPortletConfig.getPortletId() +
-						SessionMessages.KEY_SUFFIX_CLOSE_REDIRECT,
-					closeRedirect);
-			}
-
-			sendRedirect(actionRequest, actionResponse, redirect);
+			sendRedirect(
+				portletConfig, actionRequest, actionResponse, redirect,
+				closeRedirect);
 		}
 		catch (Exception e) {
 			if (e instanceof NoSuchLayoutException ||
@@ -286,6 +275,10 @@ public class EditLayoutsAction extends PortletAction {
 				else {
 					SessionErrors.add(actionRequest, e.getClass(), e);
 				}
+
+				sendRedirect(
+					portletConfig, actionRequest, actionResponse, redirect,
+					closeRedirect);
 			}
 			else if (e instanceof DuplicateLockException ||
 					 e instanceof LayoutPrototypeException ||
@@ -295,10 +288,11 @@ public class EditLayoutsAction extends PortletAction {
 
 				SessionErrors.add(actionRequest, e.getClass(), e);
 
-				String redirect = ParamUtil.getString(
-					actionRequest, "pagesRedirect");
+				redirect = ParamUtil.getString(actionRequest, "pagesRedirect");
 
-				sendRedirect(actionRequest, actionResponse, redirect);
+				sendRedirect(
+					portletConfig, actionRequest, actionResponse, redirect,
+					closeRedirect);
 			}
 			else {
 				throw e;
@@ -450,10 +444,19 @@ public class EditLayoutsAction extends PortletAction {
 		}
 		else if (cmd.equals("reset_prototype")) {
 			if (!LayoutPermissionUtil.contains(
-					permissionChecker, layout, ActionKeys.UPDATE) ||
-				!GroupPermissionUtil.contains(
-					permissionChecker, layout.getGroupId(),
-					ActionKeys.UPDATE)) {
+					permissionChecker, layout, ActionKeys.UPDATE)) {
+
+				throw new PrincipalException();
+			}
+			else if (!group.isUser() &&
+					 !GroupPermissionUtil.contains(
+						permissionChecker, layout.getGroupId(),
+						ActionKeys.UPDATE)) {
+
+				throw new PrincipalException();
+			}
+			else if (group.isUser() &&
+					 (permissionChecker.getUserId() != group.getClassPK())) {
 
 				throw new PrincipalException();
 			}
@@ -763,7 +766,9 @@ public class EditLayoutsAction extends PortletAction {
 				value = ParamUtil.getString(actionRequest, property);
 			}
 
-			if (!value.equals(layoutSet.getThemeSetting(key, device))) {
+			if (!Validator.equals(
+					value, layoutSet.getThemeSetting(key, device))) {
+
 				typeSettingsProperties.setProperty(
 					ThemeSettingImpl.namespaceProperty(device, key), value);
 			}
@@ -1046,15 +1051,16 @@ public class EditLayoutsAction extends PortletAction {
 
 		LayoutRevision enableLayoutRevision =
 			LayoutRevisionLocalServiceUtil.updateLayoutRevision(
-			serviceContext.getUserId(), layoutRevisionId,
-			layoutRevision.getLayoutBranchId(), layoutRevision.getName(),
-			layoutRevision.getTitle(), layoutRevision.getDescription(),
-			layoutRevision.getKeywords(), layoutRevision.getRobots(),
-			layoutRevision.getTypeSettings(), layoutRevision.getIconImage(),
-			layoutRevision.getIconImageId(), layoutRevision.getThemeId(),
-			layoutRevision.getColorSchemeId(), layoutRevision.getWapThemeId(),
-			layoutRevision.getWapColorSchemeId(), layoutRevision.getCss(),
-			serviceContext);
+				serviceContext.getUserId(), layoutRevisionId,
+				layoutRevision.getLayoutBranchId(), layoutRevision.getName(),
+				layoutRevision.getTitle(), layoutRevision.getDescription(),
+				layoutRevision.getKeywords(), layoutRevision.getRobots(),
+				layoutRevision.getTypeSettings(), layoutRevision.getIconImage(),
+				layoutRevision.getIconImageId(), layoutRevision.getThemeId(),
+				layoutRevision.getColorSchemeId(),
+				layoutRevision.getWapThemeId(),
+				layoutRevision.getWapColorSchemeId(), layoutRevision.getCss(),
+				serviceContext);
 
 		if (layoutRevision.getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
 			LayoutRevision lastLayoutRevision =
@@ -1070,7 +1076,7 @@ public class EditLayoutsAction extends PortletAction {
 						enableLayoutRevision.getLayoutRevisionId(), false,
 						layoutRevision.getPlid(),
 						lastLayoutRevision.getLayoutRevisionId(),
-						lastLayoutRevision.getPrivateLayout(),
+						lastLayoutRevision.isPrivateLayout(),
 						lastLayoutRevision.getName(),
 						lastLayoutRevision.getTitle(),
 						lastLayoutRevision.getDescription(),

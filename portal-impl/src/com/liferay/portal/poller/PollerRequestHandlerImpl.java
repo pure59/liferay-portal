@@ -121,7 +121,7 @@ public class PollerRequestHandlerImpl
 			return;
 		}
 
-		PollerResponse pollerResponse = (PollerResponse) messagePayload;
+		PollerResponse pollerResponse = (PollerResponse)messagePayload;
 
 		PollerHeader pollerHeader = pollerResponse.getPollerHeader();
 
@@ -358,7 +358,7 @@ public class PollerRequestHandlerImpl
 	}
 
 	protected Map<String, String> parseData(
-		Map<String, Object> pollerRequestChunk)
+			Map<String, Object> pollerRequestChunk)
 		throws Exception {
 
 		Map<String, Object> oldParameterMap =

@@ -52,15 +52,19 @@ public class HookAutoDeployer extends HookDeployer implements AutoDeployer {
 
 			List<String> jars = new ArrayList<String>();
 
+			addExtJar(jars, "ext-util-bridges.jar");
 			addExtJar(jars, "ext-util-java.jar");
+			addExtJar(jars, "ext-util-taglib.jar");
+			addRequiredJar(jars, "util-bridges.jar");
 			addRequiredJar(jars, "util-java.jar");
+			addRequiredJar(jars, "util-taglib.jar");
 
 			this.jars = jars;
 
 			checkArguments();
 		}
 		catch (Exception e) {
-			_log.error(e);
+			_log.error(e, e);
 		}
 	}
 

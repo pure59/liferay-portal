@@ -25,8 +25,6 @@ long messageId = BeanParamUtil.getLong(message, request, "messageId");
 
 long categoryId = MBUtil.getCategoryId(request, message);
 
-List<String> attachments = ListUtil.fromArray(message.getDeletedAttachmentsFiles());
-
 MBUtil.addPortletBreadcrumbEntries(message, request, renderResponse);
 
 PortletURL portletURL = renderResponse.createRenderURL();
@@ -60,7 +58,7 @@ iteratorURL.setParameter("messageId", String.valueOf(messageId));
 	emptyMessage="remove-the-attachments-for-this-message"
 	infoMessage="attachments-that-have-been-removed-for-more-than-x-days-will-be-automatically-deleted"
 	portletURL="<%= emptyTrashURL.toString() %>"
-	totalEntries="<%= attachments.size() %>"
+	totalEntries="<%= message.getDeletedAttachmentsFileEntriesCount() %>"
 />
 
 <liferay-ui:search-container
@@ -69,41 +67,38 @@ iteratorURL.setParameter("messageId", String.valueOf(messageId));
 >
 
 	<liferay-ui:search-container-results
-		results="<%= ListUtil.subList(attachments, searchContainer.getStart(), searchContainer.getEnd()) %>"
-		total="<%= attachments.size() %>"
+		results="<%= message.getDeletedAttachmentsFileEntries(searchContainer.getStart(), searchContainer.getEnd()) %>"
+		total="<%= message.getDeletedAttachmentsFileEntriesCount() %>"
 	/>
 
 	<liferay-ui:search-container-row
-		className="java.lang.String"
-		modelVar="fileName"
-		rowVar="row"
+		className="com.liferay.portal.kernel.repository.model.FileEntry"
+		escapedModel="<%= true %>"
+		keyProperty="fileEntryId"
+		modelVar="fileEntry"
 	>
-
-		<%
-		String shortFileName = FileUtil.getShortFileName(fileName);
-
-		long fileSize = DLStoreUtil.getFileSize(company.getCompanyId(), CompanyConstants.SYSTEM, fileName);
-
-		row.setObject(new Object[] {categoryId, messageId, fileName});
-
-		row.setPrimaryKey(fileName);
-
-		String displayName = TrashUtil.stripTrashNamespace(shortFileName, StringPool.UNDERLINE);
-		%>
+		<portlet:actionURL var="rowURL" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>">
+			<portlet:param name="struts_action" value="/message_boards/get_message_attachment" />
+			<portlet:param name="messageId" value="<%= String.valueOf(message.getMessageId()) %>" />
+			<portlet:param name="attachment" value="<%= fileEntry.getTitle() %>" />
+			<portlet:param name="status" value="<%= String.valueOf(WorkflowConstants.STATUS_IN_TRASH) %>" />
+		</portlet:actionURL>
 
 		<liferay-ui:search-container-column-text
+			href="<%= rowURL %>"
 			name="file-name"
 		>
 			<liferay-ui:icon
-				image='<%= "../file_system/small/" + DLUtil.getFileIcon(FileUtil.getExtension(displayName)) %>'
+				image='<%= "../file_system/small/" + DLUtil.getFileIcon(fileEntry.getExtension()) %>'
 				label="<%= true %>"
-				message="<%= displayName %>"
+				message="<%= TrashUtil.getOriginalTitle(fileEntry.getTitle()) %>"
 			/>
 		</liferay-ui:search-container-column-text>
 
 		<liferay-ui:search-container-column-text
+			href="<%= rowURL %>"
 			name="size"
-			value="<%= TextFormatter.formatStorageSize(fileSize, locale) %>"
+			value="<%= TextFormatter.formatStorageSize(fileEntry.getSize(), locale) %>"
 		/>
 
 		<liferay-ui:search-container-column-jsp
@@ -114,3 +109,10 @@ iteratorURL.setParameter("messageId", String.valueOf(messageId));
 
 	<liferay-ui:search-iterator />
 </liferay-ui:search-container>
+
+<liferay-ui:restore-entry
+	duplicateEntryAction="/message_boards/restore_entry"
+	overrideMessage="overwrite-the-existing-attachment-with-the-removed-one"
+	renameMessage="keep-both-attachments-and-rename-the-removed-attachment-as"
+	restoreEntryAction="/message_boards/restore_message_attachment"
+/>

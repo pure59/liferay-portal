@@ -103,12 +103,12 @@ public class LayoutServiceSoap {
 	normalized when accessed see {@link
 	com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil#normalize(
 	String)}.
-	* @param serviceContext the service context. Must set the universally
-	unique identifier (UUID) for the layout. Can set the creation
-	date, modification date and the expando bridge attributes for the
-	layout. For layouts that belong to a layout set prototype, an
-	attribute named 'layoutUpdateable' can be used to specify whether
-	site administrators can modify this page within their site.
+	* @param serviceContext the service context. Must set the UUID for the
+	layout. Can set the creation date, modification date and the
+	expando bridge attributes for the layout. For layouts that belong
+	to a layout set prototype, an attribute named 'layoutUpdateable'
+	can be used to specify whether site administrators can modify
+	this page within their site.
 	* @return the layout
 	* @throws PortalException if a group with the primary key could not be
 	found, if the group did not have permission to manage the layouts
@@ -157,10 +157,6 @@ public class LayoutServiceSoap {
 	}
 
 	/**
-	* Adds a layout with empty maps for descriptions, keywords, and titles ,
-	* and a names map containing a mapping for the default locale as its only
-	* entry.
-	*
 	* <p>
 	* This method handles the creation of the layout including its resources,
 	* metadata, and internal data structures. It is not necessary to make
@@ -192,12 +188,12 @@ public class LayoutServiceSoap {
 	normalized when accessed see {@link
 	com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil#normalize(
 	String)}.
-	* @param serviceContext the service context. Must set the universally
-	unique identifier (UUID) for the layout. Can specify the creation
-	date, modification date and the expando bridge attributes for the
-	layout. For layouts that belong to a layout set prototype, an
-	attribute named 'layoutUpdateable' can be used to specify whether
-	site administrators can modify this page within their site.
+	* @param serviceContext the service context. Must set the UUID for the
+	layout. Can specify the creation date, modification date and the
+	expando bridge attributes for the layout. For layouts that belong
+	to a layout set prototype, an attribute named 'layoutUpdateable'
+	can be used to specify whether site administrators can modify
+	this page within their site.
 	* @return the layout
 	* @throws PortalException if a group with the primary key could not be
 	found, if the group did not have permission to manage the layouts
@@ -276,6 +272,29 @@ public class LayoutServiceSoap {
 	}
 
 	/**
+	* Returns all the ancestor layouts of the layout.
+	*
+	* @param plid the primary key of the layout
+	* @return the ancestor layouts of the layout
+	* @throws PortalException if a matching layout could not be found or if a
+	portal exception occurred
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portal.model.LayoutSoap[] getAncestorLayouts(
+		long plid) throws RemoteException {
+		try {
+			java.util.List<com.liferay.portal.model.Layout> returnValue = LayoutServiceUtil.getAncestorLayouts(plid);
+
+			return com.liferay.portal.model.LayoutSoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	/**
 	* Returns the primary key of the default layout for the group.
 	*
 	* @param groupId the primary key of the group
@@ -297,6 +316,32 @@ public class LayoutServiceSoap {
 					scopeGroupId, privateLayout, portletId);
 
 			return returnValue;
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	/**
+	* @param uuid the layout's UUID
+	* @param groupId the primary key of the group
+	* @param privateLayout whether the layout is private to the group
+	* @return the matching layout
+	* @throws PortalException if a matching layout could not be found, if the
+	user did not have permission to view the layout, or if some other
+	portal exception occurred
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portal.model.LayoutSoap getLayoutByUuidAndGroupId(
+		java.lang.String uuid, long groupId, boolean privateLayout)
+		throws RemoteException {
+		try {
+			com.liferay.portal.model.Layout returnValue = LayoutServiceUtil.getLayoutByUuidAndGroupId(uuid,
+					groupId, privateLayout);
+
+			return com.liferay.portal.model.LayoutSoap.toSoapModel(returnValue);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -382,6 +427,22 @@ public class LayoutServiceSoap {
 		try {
 			java.util.List<com.liferay.portal.model.Layout> returnValue = LayoutServiceUtil.getLayouts(groupId,
 					privateLayout, parentLayoutId);
+
+			return com.liferay.portal.model.LayoutSoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portal.model.LayoutSoap[] getLayouts(
+		long groupId, boolean privateLayout, long parentLayoutId,
+		boolean incomplete, int start, int end) throws RemoteException {
+		try {
+			java.util.List<com.liferay.portal.model.Layout> returnValue = LayoutServiceUtil.getLayouts(groupId,
+					privateLayout, parentLayoutId, incomplete, start, end);
 
 			return com.liferay.portal.model.LayoutSoap.toSoapModels(returnValue);
 		}

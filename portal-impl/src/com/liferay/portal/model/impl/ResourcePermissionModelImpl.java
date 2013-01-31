@@ -72,6 +72,8 @@ public class ResourcePermissionModelImpl extends BaseModelImpl<ResourcePermissio
 		};
 	public static final String TABLE_SQL_CREATE = "create table ResourcePermission (resourcePermissionId LONG not null primary key,companyId LONG,name VARCHAR(255) null,scope INTEGER,primKey VARCHAR(255) null,roleId LONG,ownerId LONG,actionIds LONG)";
 	public static final String TABLE_SQL_DROP = "drop table ResourcePermission";
+	public static final String ORDER_BY_JPQL = " ORDER BY resourcePermission.resourcePermissionId ASC";
+	public static final String ORDER_BY_SQL = " ORDER BY ResourcePermission.resourcePermissionId ASC";
 	public static final String DATA_SOURCE = "liferayDataSource";
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
@@ -84,13 +86,12 @@ public class ResourcePermissionModelImpl extends BaseModelImpl<ResourcePermissio
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
 				"value.object.column.bitmask.enabled.com.liferay.portal.model.ResourcePermission"),
 			true);
-	public static long ACTIONIDS_COLUMN_BITMASK = 1L;
-	public static long COMPANYID_COLUMN_BITMASK = 2L;
-	public static long NAME_COLUMN_BITMASK = 4L;
-	public static long OWNERID_COLUMN_BITMASK = 8L;
-	public static long PRIMKEY_COLUMN_BITMASK = 16L;
-	public static long ROLEID_COLUMN_BITMASK = 32L;
-	public static long SCOPE_COLUMN_BITMASK = 64L;
+	public static long COMPANYID_COLUMN_BITMASK = 1L;
+	public static long NAME_COLUMN_BITMASK = 2L;
+	public static long PRIMKEY_COLUMN_BITMASK = 4L;
+	public static long ROLEID_COLUMN_BITMASK = 8L;
+	public static long SCOPE_COLUMN_BITMASK = 16L;
+	public static long RESOURCEPERMISSIONID_COLUMN_BITMASK = 32L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -153,7 +154,7 @@ public class ResourcePermissionModelImpl extends BaseModelImpl<ResourcePermissio
 	}
 
 	public Serializable getPrimaryKeyObj() {
-		return new Long(_resourcePermissionId);
+		return _resourcePermissionId;
 	}
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
@@ -361,19 +362,7 @@ public class ResourcePermissionModelImpl extends BaseModelImpl<ResourcePermissio
 	}
 
 	public void setOwnerId(long ownerId) {
-		_columnBitmask |= OWNERID_COLUMN_BITMASK;
-
-		if (!_setOriginalOwnerId) {
-			_setOriginalOwnerId = true;
-
-			_originalOwnerId = _ownerId;
-		}
-
 		_ownerId = ownerId;
-	}
-
-	public long getOriginalOwnerId() {
-		return _originalOwnerId;
 	}
 
 	@JSON
@@ -382,19 +371,7 @@ public class ResourcePermissionModelImpl extends BaseModelImpl<ResourcePermissio
 	}
 
 	public void setActionIds(long actionIds) {
-		_columnBitmask |= ACTIONIDS_COLUMN_BITMASK;
-
-		if (!_setOriginalActionIds) {
-			_setOriginalActionIds = true;
-
-			_originalActionIds = _actionIds;
-		}
-
 		_actionIds = actionIds;
-	}
-
-	public long getOriginalActionIds() {
-		return _originalActionIds;
 	}
 
 	public long getColumnBitmask() {
@@ -505,14 +482,6 @@ public class ResourcePermissionModelImpl extends BaseModelImpl<ResourcePermissio
 		resourcePermissionModelImpl._originalRoleId = resourcePermissionModelImpl._roleId;
 
 		resourcePermissionModelImpl._setOriginalRoleId = false;
-
-		resourcePermissionModelImpl._originalOwnerId = resourcePermissionModelImpl._ownerId;
-
-		resourcePermissionModelImpl._setOriginalOwnerId = false;
-
-		resourcePermissionModelImpl._originalActionIds = resourcePermissionModelImpl._actionIds;
-
-		resourcePermissionModelImpl._setOriginalActionIds = false;
 
 		resourcePermissionModelImpl._columnBitmask = 0;
 	}
@@ -641,11 +610,7 @@ public class ResourcePermissionModelImpl extends BaseModelImpl<ResourcePermissio
 	private long _originalRoleId;
 	private boolean _setOriginalRoleId;
 	private long _ownerId;
-	private long _originalOwnerId;
-	private boolean _setOriginalOwnerId;
 	private long _actionIds;
-	private long _originalActionIds;
-	private boolean _setOriginalActionIds;
 	private long _columnBitmask;
 	private ResourcePermission _escapedModel;
 }

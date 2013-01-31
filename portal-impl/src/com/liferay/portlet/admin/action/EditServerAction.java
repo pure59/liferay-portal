@@ -187,6 +187,9 @@ public class EditServerAction extends PortletAction {
 		else if (cmd.equals("reindex")) {
 			reindex(actionRequest);
 		}
+		else if (cmd.equals("reindexDictionaries")) {
+			reindexDictionaries(actionRequest);
+		}
 		else if (cmd.equals("runScript")) {
 			runScript(portletConfig, actionRequest, actionResponse);
 		}
@@ -417,8 +420,9 @@ public class EditServerAction extends PortletAction {
 					catch (Exception e) {
 						_log.error(e, e);
 					}
-
-					ShardUtil.popCompanyService();
+					finally {
+						ShardUtil.popCompanyService();
+					}
 				}
 			}
 		}
@@ -447,6 +451,16 @@ public class EditServerAction extends PortletAction {
 
 			submitClusterIndexLoadingSyncJob(
 				searchWriterDestinations, companyIds);
+		}
+	}
+
+	protected void reindexDictionaries(ActionRequest actionRequest)
+		throws Exception {
+
+		long[] companyIds = PortalInstances.getCompanyIds();
+
+		for (long companyId : companyIds) {
+			SearchEngineUtil.indexDictionaries(companyId);
 		}
 	}
 
@@ -480,7 +494,7 @@ public class EditServerAction extends PortletAction {
 			unsyncPrintWriter.flush();
 
 			SessionMessages.add(
-				actionRequest, "script_output",
+				actionRequest, "scriptOutput",
 				unsyncByteArrayOutputStream.toString());
 		}
 		catch (ScriptingException se) {

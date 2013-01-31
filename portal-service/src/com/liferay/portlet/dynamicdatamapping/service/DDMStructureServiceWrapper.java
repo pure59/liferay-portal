@@ -50,6 +50,18 @@ public class DDMStructureServiceWrapper implements DDMStructureService,
 	}
 
 	public com.liferay.portlet.dynamicdatamapping.model.DDMStructure addStructure(
+		long userId, long groupId, long classNameId,
+		java.util.Map<java.util.Locale, java.lang.String> nameMap,
+		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
+		java.lang.String xsd,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructureService.addStructure(userId, groupId, classNameId,
+			nameMap, descriptionMap, xsd, serviceContext);
+	}
+
+	public com.liferay.portlet.dynamicdatamapping.model.DDMStructure addStructure(
 		long groupId, long parentStructureId, long classNameId,
 		java.lang.String structureKey,
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,
@@ -63,6 +75,20 @@ public class DDMStructureServiceWrapper implements DDMStructureService,
 			storageType, type, serviceContext);
 	}
 
+	public com.liferay.portlet.dynamicdatamapping.model.DDMStructure addStructure(
+		long userId, long groupId, java.lang.String parentStructureKey,
+		long classNameId, java.lang.String structureKey,
+		java.util.Map<java.util.Locale, java.lang.String> nameMap,
+		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
+		java.lang.String xsd, java.lang.String storageType, int type,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructureService.addStructure(userId, groupId,
+			parentStructureKey, classNameId, structureKey, nameMap,
+			descriptionMap, xsd, storageType, type, serviceContext);
+	}
+
 	public com.liferay.portlet.dynamicdatamapping.model.DDMStructure copyStructure(
 		long structureId,
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,
@@ -72,6 +98,14 @@ public class DDMStructureServiceWrapper implements DDMStructureService,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _ddmStructureService.copyStructure(structureId, nameMap,
 			descriptionMap, serviceContext);
+	}
+
+	public com.liferay.portlet.dynamicdatamapping.model.DDMStructure copyStructure(
+		long structureId,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructureService.copyStructure(structureId, serviceContext);
 	}
 
 	public void deleteStructure(long structureId)
@@ -92,6 +126,34 @@ public class DDMStructureServiceWrapper implements DDMStructureService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _ddmStructureService.getStructure(structureId);
+	}
+
+	public com.liferay.portlet.dynamicdatamapping.model.DDMStructure getStructure(
+		long groupId, java.lang.String structureKey)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructureService.getStructure(groupId, structureKey);
+	}
+
+	public com.liferay.portlet.dynamicdatamapping.model.DDMStructure getStructure(
+		long groupId, java.lang.String structureKey,
+		boolean includeGlobalStructures)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructureService.getStructure(groupId, structureKey,
+			includeGlobalStructures);
+	}
+
+	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMStructure> getStructures(
+		long groupId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructureService.getStructures(groupId);
+	}
+
+	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMStructure> getStructures(
+		long[] groupIds)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructureService.getStructures(groupIds);
 	}
 
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMStructure> search(

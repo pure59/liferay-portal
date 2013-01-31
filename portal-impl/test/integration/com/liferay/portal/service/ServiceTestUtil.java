@@ -16,6 +16,7 @@ package com.liferay.portal.service;
 
 import com.liferay.counter.service.CounterLocalServiceUtil;
 import com.liferay.portal.NoSuchLayoutException;
+import com.liferay.portal.NoSuchRoleException;
 import com.liferay.portal.jcr.JCRFactoryUtil;
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.messaging.MessageBus;
@@ -32,6 +33,7 @@ import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
@@ -40,9 +42,11 @@ import com.liferay.portal.model.LayoutConstants;
 import com.liferay.portal.model.LayoutPrototype;
 import com.liferay.portal.model.LayoutSetPrototype;
 import com.liferay.portal.model.Portlet;
+import com.liferay.portal.model.Role;
 import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.PortletImpl;
 import com.liferay.portal.repository.liferayrepository.LiferayRepository;
+import com.liferay.portal.search.lucene.LuceneHelperUtil;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
@@ -60,15 +64,21 @@ import com.liferay.portlet.blogs.asset.BlogsEntryAssetRendererFactory;
 import com.liferay.portlet.blogs.trash.BlogsEntryTrashHandler;
 import com.liferay.portlet.blogs.util.BlogsIndexer;
 import com.liferay.portlet.blogs.workflow.BlogsEntryWorkflowHandler;
-import com.liferay.portlet.bookmarks.util.BookmarksIndexer;
+import com.liferay.portlet.bookmarks.util.BookmarksEntryIndexer;
+import com.liferay.portlet.bookmarks.util.BookmarksFolderIndexer;
 import com.liferay.portlet.directory.workflow.UserWorkflowHandler;
 import com.liferay.portlet.documentlibrary.asset.DLFileEntryAssetRendererFactory;
 import com.liferay.portlet.documentlibrary.trash.DLFileEntryTrashHandler;
 import com.liferay.portlet.documentlibrary.trash.DLFileShortcutTrashHandler;
 import com.liferay.portlet.documentlibrary.trash.DLFolderTrashHandler;
-import com.liferay.portlet.documentlibrary.util.DLIndexer;
+import com.liferay.portlet.documentlibrary.util.DLFileEntryIndexer;
+import com.liferay.portlet.documentlibrary.util.DLFolderIndexer;
 import com.liferay.portlet.documentlibrary.workflow.DLFileEntryWorkflowHandler;
+import com.liferay.portlet.journal.trash.JournalArticleTrashHandler;
+import com.liferay.portlet.journal.util.JournalArticleIndexer;
+import com.liferay.portlet.journal.util.JournalFolderIndexer;
 import com.liferay.portlet.journal.workflow.JournalArticleWorkflowHandler;
+import com.liferay.portlet.messageboards.trash.MBCategoryTrashHandler;
 import com.liferay.portlet.messageboards.trash.MBThreadTrashHandler;
 import com.liferay.portlet.messageboards.util.MBMessageIndexer;
 import com.liferay.portlet.messageboards.workflow.MBDiscussionWorkflowHandler;
@@ -141,6 +151,14 @@ public class ServiceTestUtil {
 			long groupId, String name, boolean privateLayout)
 		throws Exception {
 
+		return addLayout(groupId, name, privateLayout, null, false);
+	}
+
+	public static Layout addLayout(
+			long groupId, String name, boolean privateLayout,
+			LayoutPrototype layoutPrototype, boolean linkEnabled)
+		throws Exception {
+
 		String friendlyURL =
 			StringPool.SLASH + FriendlyURLNormalizerUtil.normalize(name);
 
@@ -157,11 +175,19 @@ public class ServiceTestUtil {
 
 		String description = "This is a test page.";
 
+		ServiceContext serviceContext = getServiceContext();
+
+		if (layoutPrototype != null) {
+			serviceContext.setAttribute(
+				"layoutPrototypeLinkEnabled", linkEnabled);
+			serviceContext.setAttribute(
+				"layoutPrototypeUuid", layoutPrototype.getUuid());
+		}
+
 		return LayoutLocalServiceUtil.addLayout(
 			TestPropsValues.getUserId(), groupId, privateLayout,
 			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, name, null, description,
-			LayoutConstants.TYPE_PORTLET, false, friendlyURL,
-			getServiceContext());
+			LayoutConstants.TYPE_PORTLET, false, friendlyURL, serviceContext);
 	}
 
 	public static LayoutPrototype addLayoutPrototype(String name)
@@ -186,6 +212,55 @@ public class ServiceTestUtil {
 		return LayoutSetPrototypeLocalServiceUtil.addLayoutSetPrototype(
 			TestPropsValues.getUserId(), TestPropsValues.getCompanyId(),
 			nameMap, null, true, true, getServiceContext());
+	}
+
+	public static void addResourcePermission(
+			Role role, String resourceName, int scope, String primKey,
+			String actionId)
+		throws Exception {
+
+		ResourcePermissionLocalServiceUtil.addResourcePermission(
+			role.getCompanyId(), resourceName, scope, primKey, role.getRoleId(),
+			actionId);
+	}
+
+	public static void addResourcePermission(
+			String roleName, String resourceName, int scope, String primKey,
+			String actionId)
+		throws Exception {
+
+		Role role = RoleLocalServiceUtil.getRole(
+			TestPropsValues.getCompanyId(), roleName);
+
+		addResourcePermission(role, resourceName, scope, primKey, actionId);
+	}
+
+	public static Role addRole(String roleName, int roleType) throws Exception {
+		Role role = null;
+
+		try {
+			role = RoleLocalServiceUtil.getRole(
+				TestPropsValues.getCompanyId(), roleName);
+		}
+		catch (NoSuchRoleException nsre) {
+			role = RoleLocalServiceUtil.addRole(
+				TestPropsValues.getUserId(), null, 0, roleName, null, null,
+				roleType, null);
+		}
+
+		return role;
+	}
+
+	public static Role addRole(
+			String roleName, int roleType, String resourceName, int scope,
+			String primKey, String actionId)
+		throws Exception {
+
+		Role role = addRole(roleName, roleType);
+
+		addResourcePermission(role, resourceName, scope, primKey, actionId);
+
+		return role;
 	}
 
 	public static User addUser(
@@ -230,6 +305,17 @@ public class ServiceTestUtil {
 			userGroupIds, sendMail, getServiceContext());
 	}
 
+	public static User addUser(String screenName, long groupId)
+		throws Exception {
+
+		if (Validator.isNull(screenName)) {
+			return addUser(null, true, new long[] {groupId});
+		}
+		else {
+			return addUser(screenName, false, new long[] {groupId});
+		}
+	}
+
 	public static void destroyServices() {
 		_deleteDLDirectories();
 	}
@@ -257,11 +343,19 @@ public class ServiceTestUtil {
 	public static ServiceContext getServiceContext(long groupId)
 		throws Exception {
 
+		return getServiceContext(groupId, TestPropsValues.getUserId());
+	}
+
+	public static ServiceContext getServiceContext(long groupId, long userId)
+		throws Exception {
+
 		ServiceContext serviceContext = new ServiceContext();
 
+		serviceContext.setAddGroupPermissions(true);
+		serviceContext.setAddGuestPermissions(true);
 		serviceContext.setCompanyId(TestPropsValues.getCompanyId());
 		serviceContext.setScopeGroupId(groupId);
-		serviceContext.setUserId(TestPropsValues.getUserId());
+		serviceContext.setUserId(userId);
 
 		return serviceContext;
 	}
@@ -276,15 +370,7 @@ public class ServiceTestUtil {
 		try {
 			PortalInstances.addCompanyId(TestPropsValues.getCompanyId());
 
-			PrincipalThreadLocal.setName(TestPropsValues.getUserId());
-
-			User user = UserLocalServiceUtil.getUserById(
-				TestPropsValues.getUserId());
-
-			PermissionChecker permissionChecker =
-				PermissionCheckerFactoryUtil.create(user);
-
-			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+			setUser(TestPropsValues.getUser());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -305,6 +391,18 @@ public class ServiceTestUtil {
 			e.printStackTrace();
 		}
 
+		// Lucene
+
+		try {
+			FileUtil.mkdirs(
+				PropsValues.LUCENE_DIR + TestPropsValues.getCompanyId());
+
+			LuceneHelperUtil.startup(TestPropsValues.getCompanyId());
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		// Template manager
 
 		try {
@@ -319,8 +417,12 @@ public class ServiceTestUtil {
 		IndexerRegistryUtil.register(new BlogsIndexer());
 		IndexerRegistryUtil.register(new ContactIndexer());
 		IndexerRegistryUtil.register(new UserIndexer());
-		IndexerRegistryUtil.register(new BookmarksIndexer());
-		IndexerRegistryUtil.register(new DLIndexer());
+		IndexerRegistryUtil.register(new BookmarksEntryIndexer());
+		IndexerRegistryUtil.register(new BookmarksFolderIndexer());
+		IndexerRegistryUtil.register(new DLFileEntryIndexer());
+		IndexerRegistryUtil.register(new DLFolderIndexer());
+		IndexerRegistryUtil.register(new JournalArticleIndexer());
+		IndexerRegistryUtil.register(new JournalFolderIndexer());
 		IndexerRegistryUtil.register(new MBMessageIndexer());
 		IndexerRegistryUtil.register(new TrashIndexer());
 		IndexerRegistryUtil.register(new WikiNodeIndexer());
@@ -393,6 +495,8 @@ public class ServiceTestUtil {
 		TrashHandlerRegistryUtil.register(new DLFileEntryTrashHandler());
 		TrashHandlerRegistryUtil.register(new DLFileShortcutTrashHandler());
 		TrashHandlerRegistryUtil.register(new DLFolderTrashHandler());
+		TrashHandlerRegistryUtil.register(new JournalArticleTrashHandler());
+		TrashHandlerRegistryUtil.register(new MBCategoryTrashHandler());
 		TrashHandlerRegistryUtil.register(new MBThreadTrashHandler());
 		TrashHandlerRegistryUtil.register(new WikiNodeTrashHandler());
 		TrashHandlerRegistryUtil.register(new WikiPageTrashHandler());
@@ -457,6 +561,19 @@ public class ServiceTestUtil {
 		return PwdGenerator.getPassword();
 	}
 
+	public static String randomString(int length) throws Exception {
+		return PwdGenerator.getPassword(length);
+	}
+
+	public static void setUser(User user) throws Exception {
+		PrincipalThreadLocal.setName(user.getUserId());
+
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(user);
+
+		PermissionThreadLocal.setPermissionChecker(permissionChecker);
+	}
+
 	private static void _checkClassNames() {
 		PortalUtil.getClassNameId(LiferayRepository.class.getName());
 	}
@@ -494,6 +611,14 @@ public class ServiceTestUtil {
 
 		FileUtil.deltree(
 			PropsUtil.get(PropsKeys.JCR_JACKRABBIT_REPOSITORY_ROOT));
+
+		try {
+			FileUtil.deltree(
+				PropsValues.LUCENE_DIR + TestPropsValues.getCompanyId());
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static Random _random = new Random();

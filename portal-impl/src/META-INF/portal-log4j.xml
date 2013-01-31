@@ -18,6 +18,10 @@
 		</layout>
 	</appender>
 
+	<category name="com.browseengine.bobo">
+		<priority value="ERROR" />
+	</category>
+
 	<category name="com.ecyrd.jspwiki">
 		<priority value="ERROR" />
 	</category>
@@ -780,6 +784,10 @@
 
 	<category name="com.liferay.portal.spring.jpa.LocalContainerEntityManagerFactoryBean">
 		<priority value="INFO" />
+	</category>
+
+	<category name="com.liferay.portal.staging">
+		<priority value="WARN" />
 	</category>
 
 	<category name="com.liferay.portal.struts">

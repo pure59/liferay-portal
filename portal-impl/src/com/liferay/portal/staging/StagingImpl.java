@@ -28,6 +28,8 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.portal.kernel.lar.UserIdStrategy;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.messaging.MessageStatus;
@@ -81,7 +83,6 @@ import com.liferay.portal.service.LayoutSetLocalServiceUtil;
 import com.liferay.portal.service.LockLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextThreadLocal;
-import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.WorkflowInstanceLinkLocalServiceUtil;
 import com.liferay.portal.service.http.GroupServiceHttp;
 import com.liferay.portal.service.http.LayoutServiceHttp;
@@ -180,7 +181,8 @@ public class StagingImpl implements Staging {
 		Group liveGroup = stagingGroup.getLiveGroup();
 
 		Layout sourceLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(
-			targetLayout.getUuid(), liveGroup.getGroupId());
+			targetLayout.getUuid(), liveGroup.getGroupId(),
+			targetLayout.isPrivateLayout());
 
 		copyPortlet(
 			portletRequest, liveGroup.getGroupId(), stagingGroup.getGroupId(),
@@ -223,7 +225,7 @@ public class StagingImpl implements Staging {
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
 
-		User user = UserLocalServiceUtil.getUser(permissionChecker.getUserId());
+		User user = permissionChecker.getUser();
 
 		StringBundler sb = new StringBundler(4);
 
@@ -286,8 +288,8 @@ public class StagingImpl implements Staging {
 					layouts.add(layout);
 				}
 
-				List<Layout> parentLayouts = getMissingParentLayouts(
-					layout, sourceGroupId);
+				List<Layout> parentLayouts = getMissingRemoteParentLayouts(
+					httpPrincipal, layout, remoteGroupId);
 
 				for (Layout parentLayout : parentLayouts) {
 					if (!layouts.contains(parentLayout)) {
@@ -609,6 +611,9 @@ public class StagingImpl implements Staging {
 		return group.getGroupId();
 	}
 
+	/**
+	 * @see #getMissingRemoteParentLayouts(HttpPrincipal, Layout, long)
+	 */
 	public List<Layout> getMissingParentLayouts(Layout layout, long liveGroupId)
 		throws Exception {
 
@@ -624,7 +629,8 @@ public class StagingImpl implements Staging {
 
 			try {
 				LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(
-					parentLayout.getUuid(), liveGroupId);
+					parentLayout.getUuid(), liveGroupId,
+					parentLayout.isPrivateLayout());
 
 				// If one parent is found all others are assumed to exist
 
@@ -1089,7 +1095,8 @@ public class StagingImpl implements Staging {
 			liveGroup = stagingGroup.getLiveGroup();
 
 			targetLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(
-				sourceLayout.getUuid(), liveGroup.getGroupId());
+				sourceLayout.getUuid(), liveGroup.getGroupId(),
+				sourceLayout.isPrivateLayout());
 		}
 
 		copyPortlet(
@@ -1145,8 +1152,8 @@ public class StagingImpl implements Staging {
 	}
 
 	public void setRecentLayoutBranchId(
-		HttpServletRequest request, long layoutSetBranchId, long plid,
-		long layoutBranchId)
+			HttpServletRequest request, long layoutSetBranchId, long plid,
+			long layoutBranchId)
 		throws SystemException {
 
 		PortalPreferences portalPreferences =
@@ -1157,7 +1164,7 @@ public class StagingImpl implements Staging {
 	}
 
 	public void setRecentLayoutBranchId(
-		User user, long layoutSetBranchId, long plid, long layoutBranchId)
+			User user, long layoutSetBranchId, long plid, long layoutBranchId)
 		throws SystemException {
 
 		PortalPreferences portalPreferences = getPortalPreferences(user);
@@ -1428,6 +1435,11 @@ public class StagingImpl implements Staging {
 				}
 			}
 			catch (LayoutSetBranchNameException lsbne) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Unable to create master branch for public layouts",
+						lsbne);
+				}
 			}
 		}
 
@@ -1458,6 +1470,11 @@ public class StagingImpl implements Staging {
 				}
 			}
 			catch (LayoutSetBranchNameException lsbne) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Unable to create master branch for private layouts",
+						lsbne);
+				}
 			}
 		}
 	}
@@ -1554,6 +1571,40 @@ public class StagingImpl implements Staging {
 		return ParamUtil.getLong(
 			portletRequest, param,
 			GetterUtil.getLong(group.getTypeSettingsProperty(param)));
+	}
+
+	/**
+	 * @see #getMissingParentLayouts(Layout, long)
+	 */
+	protected List<Layout> getMissingRemoteParentLayouts(
+			HttpPrincipal httpPrincipal, Layout layout, long remoteGroupId)
+		throws Exception {
+
+		List<Layout> missingRemoteParentLayouts = new ArrayList<Layout>();
+
+		long parentLayoutId = layout.getParentLayoutId();
+
+		while (parentLayoutId > 0) {
+			Layout parentLayout = LayoutLocalServiceUtil.getLayout(
+				layout.getGroupId(), layout.isPrivateLayout(), parentLayoutId);
+
+			try {
+				LayoutServiceHttp.getLayoutByUuidAndGroupId(
+					httpPrincipal, parentLayout.getUuid(), remoteGroupId,
+					parentLayout.getPrivateLayout());
+
+				// If one parent is found all others are assumed to exist
+
+				break;
+			}
+			catch (NoSuchLayoutException nsle) {
+				missingRemoteParentLayouts.add(parentLayout);
+
+				parentLayoutId = parentLayout.getParentLayoutId();
+			}
+		}
+
+		return missingRemoteParentLayouts;
 	}
 
 	protected PortalPreferences getPortalPreferences(User user)
@@ -1754,21 +1805,13 @@ public class StagingImpl implements Staging {
 			LayoutSet layoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
 				sourceGroupId, privateLayout);
 
-			UnicodeProperties settingsProperties =
-				layoutSet.getSettingsProperties();
-
 			long lastPublishDate = GetterUtil.getLong(
-				settingsProperties.getProperty("last-publish-date"));
+				layoutSet.getSettingsProperty("last-publish-date"));
 
 			if (lastPublishDate > 0) {
-				Calendar cal = Calendar.getInstance(
-					themeDisplay.getTimeZone(), themeDisplay.getLocale());
+				endDate = new Date();
 
-				endDate = cal.getTime();
-
-				cal.setTimeInMillis(lastPublishDate);
-
-				startDate = cal.getTime();
+				startDate = new Date(lastPublishDate);
 			}
 		}
 		else if (range.equals("last")) {
@@ -1964,21 +2007,13 @@ public class StagingImpl implements Staging {
 			LayoutSet layoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
 				groupId, privateLayout);
 
-			UnicodeProperties layoutTypeSettingsProperties =
-				layoutSet.getSettingsProperties();
-
 			long lastPublishDate = GetterUtil.getLong(
-				layoutTypeSettingsProperties.getProperty("last-publish-date"));
+				layoutSet.getSettingsProperty("last-publish-date"));
 
 			if (lastPublishDate > 0) {
-				Calendar cal = Calendar.getInstance(
-					themeDisplay.getTimeZone(), themeDisplay.getLocale());
+				endDate = new Date();
 
-				endDate = cal.getTime();
-
-				cal.setTimeInMillis(lastPublishDate);
-
-				startDate = cal.getTime();
+				startDate = new Date(lastPublishDate);
 			}
 		}
 		else if (range.equals("last")) {
@@ -2125,6 +2160,9 @@ public class StagingImpl implements Staging {
 			}
 		}
 		catch (PortalException pe) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to set recent layout revision ID", pe);
+			}
 		}
 
 		portalPreferences.setValue(
@@ -2229,7 +2267,7 @@ public class StagingImpl implements Staging {
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
 
-		User user = UserLocalServiceUtil.getUser(permissionChecker.getUserId());
+		User user = permissionChecker.getUser();
 
 		String url = buildRemoteURL(
 			remoteAddress, remotePort, remotePathContext, secureConnection,
@@ -2270,5 +2308,7 @@ public class StagingImpl implements Staging {
 		}
 
 	}
+
+	private static Log _log = LogFactoryUtil.getLog(StagingImpl.class);
 
 }

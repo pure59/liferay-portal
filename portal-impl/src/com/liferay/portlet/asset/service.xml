@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.1.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_1_0.dtd">
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.2.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_2_0.dtd">
 
 <service-builder package-path="com.liferay.portlet.asset">
 	<namespace>Asset</namespace>
@@ -54,7 +54,7 @@
 		</finder>
 		<finder name="G_V" return-type="Collection">
 			<finder-column name="groupId" />
-			<finder-column name="vocabularyId" />
+			<finder-column name="vocabularyId" arrayable-operator="OR" />
 		</finder>
 		<finder name="P_N" return-type="Collection">
 			<finder-column name="parentCategoryId" />
@@ -68,12 +68,18 @@
 			<finder-column name="name" />
 			<finder-column name="vocabularyId" />
 		</finder>
-		<finder name="G_P_N" return-type="Collection">
+		<finder name="G_LikeN_V" return-type="Collection">
 			<finder-column name="groupId" />
-			<finder-column name="parentCategoryId" />
-			<finder-column name="name" />
+			<finder-column name="name" comparator="LIKE" />
+			<finder-column name="vocabularyId" arrayable-operator="OR" />
 		</finder>
 		<finder name="P_N_V" return-type="AssetCategory" unique="true">
+			<finder-column name="parentCategoryId" />
+			<finder-column name="name" />
+			<finder-column name="vocabularyId" />
+		</finder>
+		<finder name="G_P_N_V" return-type="Collection">
+			<finder-column name="groupId" />
 			<finder-column name="parentCategoryId" />
 			<finder-column name="name" />
 			<finder-column name="vocabularyId" />

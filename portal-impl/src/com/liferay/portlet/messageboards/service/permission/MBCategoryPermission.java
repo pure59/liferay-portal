@@ -16,10 +16,12 @@ package com.liferay.portlet.messageboards.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.portlet.messageboards.NoSuchCategoryException;
 import com.liferay.portlet.messageboards.model.MBCategory;
 import com.liferay.portlet.messageboards.model.MBCategoryConstants;
 import com.liferay.portlet.messageboards.service.MBBanLocalServiceUtil;
@@ -95,6 +97,8 @@ public class MBCategoryPermission {
 			String actionId)
 		throws PortalException, SystemException {
 
+		MBCategory originalCategory = category;
+
 		if (actionId.equals(ActionKeys.ADD_CATEGORY)) {
 			actionId = ActionKeys.ADD_SUBCATEGORY;
 		}
@@ -107,62 +111,72 @@ public class MBCategoryPermission {
 
 		long categoryId = category.getCategoryId();
 
-		if (actionId.equals(ActionKeys.VIEW)) {
-			while (categoryId !=
-					MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
+		if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
+			try {
+				while (categoryId !=
+						MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
 
-				category = MBCategoryLocalServiceUtil.getCategory(categoryId);
+					category = MBCategoryLocalServiceUtil.getCategory(
+						categoryId);
 
-				categoryId = category.getParentCategoryId();
+					if (!permissionChecker.hasOwnerPermission(
+							category.getCompanyId(), MBCategory.class.getName(),
+							categoryId, category.getUserId(),
+							ActionKeys.VIEW) &&
+						!permissionChecker.hasPermission(
+							category.getGroupId(), MBCategory.class.getName(),
+							categoryId, ActionKeys.VIEW)) {
+						return false;
+					}
 
-				if (!permissionChecker.hasOwnerPermission(
-						category.getCompanyId(), MBCategory.class.getName(),
-						category.getCategoryId(), category.getUserId(),
-						actionId) &&
-					!permissionChecker.hasPermission(
-						category.getGroupId(), MBCategory.class.getName(),
-						category.getCategoryId(), actionId)) {
-
-					return false;
+					categoryId = category.getParentCategoryId();
 				}
-
-				if (!PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
-					break;
+			}
+			catch (NoSuchCategoryException nsce) {
+				if (!category.isInTrash()) {
+					throw nsce;
 				}
 			}
 
-			return true;
-		}
-		else {
-			while (categoryId !=
-					MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
-
-				category = MBCategoryLocalServiceUtil.getCategory(categoryId);
-
-				categoryId = category.getParentCategoryId();
-
-				if (permissionChecker.hasOwnerPermission(
-						category.getCompanyId(), MBCategory.class.getName(),
-						category.getCategoryId(), category.getUserId(),
-						actionId)) {
-
-					return true;
-				}
-
-				if (permissionChecker.hasPermission(
-						category.getGroupId(), MBCategory.class.getName(),
-						category.getCategoryId(), actionId)) {
-
-					return true;
-				}
-
-				if (actionId.equals(ActionKeys.VIEW)) {
-					break;
-				}
+			if (Validator.equals(actionId, ActionKeys.VIEW)) {
+				return true;
 			}
 
-			return false;
+			category = originalCategory;
+			categoryId = category.getCategoryId();
 		}
+
+		if (!PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE ||
+			!Validator.equals(actionId, ActionKeys.VIEW)) {
+
+			try {
+				while (categoryId !=
+						MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
+
+					category = MBCategoryLocalServiceUtil.getCategory(
+							categoryId);
+
+					if (permissionChecker.hasOwnerPermission(
+							category.getCompanyId(), MBCategory.class.getName(),
+							categoryId, category.getUserId(), actionId) ||
+						permissionChecker.hasPermission(
+								category.getGroupId(), MBCategory.class.getName(),
+							categoryId, actionId)) {
+
+						return true;
+					}
+
+					categoryId = category.getParentCategoryId();
+				}
+			}
+			catch (NoSuchCategoryException nsce) {
+				if (!category.isInTrash()) {
+					throw nsce;
+				}
+			}
+		}
+
+		return false;
 	}
 
 }

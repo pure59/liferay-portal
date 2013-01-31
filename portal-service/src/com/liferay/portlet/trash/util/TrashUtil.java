@@ -26,6 +26,10 @@ import com.liferay.portlet.trash.model.TrashEntry;
 import java.util.Date;
 import java.util.List;
 
+import javax.portlet.PortletURL;
+
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author Julio Camarero
  */
@@ -45,12 +49,22 @@ public class TrashUtil {
 
 	public static final String TRASH_TIME_SEPARATOR = "_TRASH_TIME_";
 
-	public static String appendTrashNamespace(String title) {
-		return getTrash().appendTrashNamespace(title);
+	public static void addBaseModelBreadcrumbEntries(
+			HttpServletRequest request, String className, long classPK,
+			PortletURL containerModelURL)
+		throws PortalException, SystemException {
+
+		getTrash().addBaseModelBreadcrumbEntries(
+			request, className, classPK, containerModelURL);
 	}
 
-	public static String appendTrashNamespace(String title, String separator) {
-		return getTrash().appendTrashNamespace(title, separator);
+	public static void addContainerModelBreadcrumbEntries(
+			HttpServletRequest request, String className, long classPK,
+			PortletURL containerModelURL)
+		throws PortalException, SystemException {
+
+		getTrash().addContainerModelBreadcrumbEntries(
+			request, className, classPK, containerModelURL);
 	}
 
 	public static void deleteEntriesAttachments(
@@ -84,6 +98,10 @@ public class TrashUtil {
 		return getTrash().getNewName(themeDisplay, oldName);
 	}
 
+	public static String getOriginalTitle(String title) {
+		return getTrash().getOriginalTitle(title);
+	}
+
 	public static Trash getTrash() {
 		PortalRuntimePermission.checkGetBeanProperty(TrashUtil.class);
 
@@ -92,6 +110,10 @@ public class TrashUtil {
 
 	public static String getTrashTime(String title, String separator) {
 		return getTrash().getTrashTime(title, separator);
+	}
+
+	public static String getTrashTitle(long trashEntryId) {
+		return getTrash().getTrashTitle(trashEntryId);
 	}
 
 	public static boolean isInTrash(String className, long classPK)
@@ -104,52 +126,6 @@ public class TrashUtil {
 		throws PortalException, SystemException {
 
 		return getTrash().isTrashEnabled(groupId);
-	}
-
-	public static void moveAttachmentFromTrash(
-			long companyId, long repositoryId, String deletedFileName,
-			String attachmentsDir)
-		throws PortalException, SystemException {
-
-		getTrash().moveAttachmentFromTrash(
-			companyId, repositoryId, deletedFileName, attachmentsDir);
-	}
-
-	public static void moveAttachmentFromTrash(
-			long companyId, long repositoryId, String deletedFileName,
-			String attachmentsDir, String separator)
-		throws PortalException, SystemException {
-
-		getTrash().moveAttachmentFromTrash(
-			companyId, repositoryId, deletedFileName, attachmentsDir,
-			separator);
-	}
-
-	public static String moveAttachmentToTrash(
-			long companyId, long repositoryId, String fileName,
-			String deletedAttachmentsDir)
-		throws PortalException, SystemException {
-
-		return getTrash().moveAttachmentToTrash(
-			companyId, repositoryId, fileName, deletedAttachmentsDir);
-	}
-
-	public static String moveAttachmentToTrash(
-			long companyId, long repositoryId, String fileName,
-			String deletedAttachmentsDir, String separator)
-		throws PortalException, SystemException {
-
-		return getTrash().moveAttachmentToTrash(
-			companyId, repositoryId, fileName, deletedAttachmentsDir,
-			separator);
-	}
-
-	public static String stripTrashNamespace(String title) {
-		return getTrash().stripTrashNamespace(title);
-	}
-
-	public static String stripTrashNamespace(String title, String separator) {
-		return getTrash().stripTrashNamespace(title, separator);
 	}
 
 	public void setTrash(Trash trash) {

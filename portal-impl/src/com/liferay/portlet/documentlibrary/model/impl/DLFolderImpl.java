@@ -19,6 +19,8 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.Repository;
+import com.liferay.portal.service.RepositoryLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.NoSuchFolderException;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
@@ -34,6 +36,31 @@ import java.util.List;
 public class DLFolderImpl extends DLFolderBaseImpl {
 
 	public DLFolderImpl() {
+	}
+
+	public List<Long> getAncestorFolderIds()
+		throws PortalException, SystemException {
+
+		List<Long> ancestorFolderIds = new ArrayList<Long>();
+
+		DLFolder folder = this;
+
+		while (!folder.isRoot()) {
+			try {
+				folder = folder.getParentFolder();
+
+				ancestorFolderIds.add(folder.getFolderId());
+			}
+			catch (NoSuchFolderException nsfe) {
+				if (folder.isInTrash()) {
+					break;
+				}
+
+				throw nsfe;
+			}
+		}
+
+		return ancestorFolderIds;
 	}
 
 	public List<DLFolder> getAncestors()
@@ -94,7 +121,7 @@ public class DLFolderImpl extends DLFolderBaseImpl {
 		return StringUtil.split(path, CharPool.SLASH);
 	}
 
-	public DLFolder getTrashFolder() {
+	public DLFolder getTrashContainer() {
 		DLFolder dlFolder = null;
 
 		try {
@@ -140,8 +167,25 @@ public class DLFolderImpl extends DLFolderBaseImpl {
 		return false;
 	}
 
-	public boolean isInTrashFolder() {
-		if (getTrashFolder() != null) {
+	public boolean isInHiddenFolder() {
+		try {
+			Repository repository = RepositoryLocalServiceUtil.getRepository(
+				getRepositoryId());
+
+			long dlFolderId = repository.getDlFolderId();
+
+			DLFolder dlFolder = DLFolderLocalServiceUtil.getFolder(dlFolderId);
+
+			return dlFolder.isHidden();
+		}
+		catch (Exception e) {
+		}
+
+		return false;
+	}
+
+	public boolean isInTrashContainer() {
+		if (getTrashContainer() != null) {
 			return true;
 		}
 		else {

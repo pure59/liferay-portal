@@ -20,6 +20,7 @@ import com.liferay.portal.model.AttachedModel;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.GroupedModel;
+import com.liferay.portal.model.StagedModel;
 import com.liferay.portal.model.WorkflowedModel;
 import com.liferay.portal.service.ServiceContext;
 
@@ -43,7 +44,7 @@ import java.util.Date;
  * @generated
  */
 public interface MBMessageModel extends AttachedModel, BaseModel<MBMessage>,
-	GroupedModel, WorkflowedModel {
+	GroupedModel, StagedModel, WorkflowedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -330,27 +331,6 @@ public interface MBMessageModel extends AttachedModel, BaseModel<MBMessage>,
 	 * @param format the format of this message-boards message
 	 */
 	public void setFormat(String format);
-
-	/**
-	 * Returns the attachments of this message-boards message.
-	 *
-	 * @return the attachments of this message-boards message
-	 */
-	public boolean getAttachments();
-
-	/**
-	 * Returns <code>true</code> if this message-boards message is attachments.
-	 *
-	 * @return <code>true</code> if this message-boards message is attachments; <code>false</code> otherwise
-	 */
-	public boolean isAttachments();
-
-	/**
-	 * Sets whether this message-boards message is attachments.
-	 *
-	 * @param attachments the attachments of this message-boards message
-	 */
-	public void setAttachments(boolean attachments);
 
 	/**
 	 * Returns the anonymous of this message-boards message.

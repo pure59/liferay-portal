@@ -25,12 +25,14 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Image;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.persistence.ImageUtil;
 import com.liferay.portal.util.PrefsPropsUtil;
+import com.liferay.portlet.dynamicdatamapping.NoSuchTemplateException;
 import com.liferay.portlet.dynamicdatamapping.TemplateDuplicateTemplateKeyException;
 import com.liferay.portlet.dynamicdatamapping.TemplateNameException;
 import com.liferay.portlet.dynamicdatamapping.TemplateScriptException;
@@ -58,6 +60,19 @@ public class DDMTemplateLocalServiceImpl
 
 	public DDMTemplate addTemplate(
 			long userId, long groupId, long classNameId, long classPK,
+			Map<Locale, String> nameMap, Map<Locale, String> descriptionMap,
+			String type, String mode, String language, String script,
+			ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		return addTemplate(
+			userId, groupId, classNameId, classPK, null, nameMap,
+			descriptionMap, type, mode, language, script, false, false, null,
+			null, serviceContext);
+	}
+
+	public DDMTemplate addTemplate(
+			long userId, long groupId, long classNameId, long classPK,
 			String templateKey, Map<Locale, String> nameMap,
 			Map<Locale, String> descriptionMap, String type, String mode,
 			String language, String script, boolean cacheable,
@@ -72,6 +87,9 @@ public class DDMTemplateLocalServiceImpl
 
 		if (Validator.isNull(templateKey)) {
 			templateKey = String.valueOf(counterLocalService.increment());
+		}
+		else {
+			templateKey = templateKey.trim().toUpperCase();
 		}
 
 		byte[] smallImageBytes = null;
@@ -166,6 +184,43 @@ public class DDMTemplateLocalServiceImpl
 			template.getTemplateId(), groupPermissions, guestPermissions);
 	}
 
+	public DDMTemplate copyTemplate(
+			long userId, long templateId, Map<Locale, String> nameMap,
+			Map<Locale, String> descriptionMap, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		DDMTemplate template = ddmTemplatePersistence.findByPrimaryKey(
+			templateId);
+
+		File smallImageFile = copySmallImage(template);
+
+		return addTemplate(
+			userId, template.getGroupId(), template.getClassNameId(),
+			template.getClassPK(), null, nameMap, descriptionMap,
+			template.getType(), template.getMode(), template.getLanguage(),
+			template.getScript(), template.isCacheable(),
+			template.isSmallImage(), template.getSmallImageURL(),
+			smallImageFile, serviceContext);
+	}
+
+	public DDMTemplate copyTemplate(
+			long userId, long templateId, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		DDMTemplate template = ddmTemplatePersistence.findByPrimaryKey(
+			templateId);
+
+		File smallImageFile = copySmallImage(template);
+
+		return addTemplate(
+			userId, template.getGroupId(), template.getClassNameId(),
+			template.getClassPK(), null, template.getNameMap(),
+			template.getDescriptionMap(), template.getType(),
+			template.getMode(), template.getLanguage(), template.getScript(),
+			template.isCacheable(), template.isSmallImage(),
+			template.getSmallImageURL(), smallImageFile, serviceContext);
+	}
+
 	public List<DDMTemplate> copyTemplates(
 			long userId, long classNameId, long oldClassPK, long newClassPK,
 			String type, ServiceContext serviceContext)
@@ -173,39 +228,12 @@ public class DDMTemplateLocalServiceImpl
 
 		List<DDMTemplate> newTemplates = new ArrayList<DDMTemplate>();
 
-		List<DDMTemplate> oldTemplates = getTemplates(
+		List<DDMTemplate> oldTemplates = ddmTemplatePersistence.findByC_C_T(
 			classNameId, oldClassPK, type);
 
 		for (DDMTemplate oldTemplate : oldTemplates) {
-			File smallImageFile = null;
-
-			if (oldTemplate.isSmallImage() &&
-					Validator.isNull(oldTemplate.getSmallImageURL())) {
-
-				Image smallImage = ImageUtil.fetchByPrimaryKey(
-					oldTemplate.getSmallImageId());
-
-				if (smallImage != null) {
-					smallImageFile = FileUtil.createTempFile(
-						smallImage.getType());
-
-					try {
-						FileUtil.write(smallImageFile, smallImage.getTextObj());
-					}
-					catch (IOException ioe) {
-						_log.error(ioe);
-					}
-				}
-			}
-
-			DDMTemplate newTemplate = addTemplate(
-				userId, oldTemplate.getGroupId(), oldTemplate.getClassNameId(),
-				newClassPK, null, oldTemplate.getNameMap(),
-				oldTemplate.getDescriptionMap(), oldTemplate.getType(),
-				oldTemplate.getMode(), oldTemplate.getLanguage(),
-				oldTemplate.getScript(), oldTemplate.isCacheable(),
-				oldTemplate.isSmallImage(), oldTemplate.getSmallImageURL(),
-				smallImageFile, serviceContext);
+			DDMTemplate newTemplate = copyTemplate(
+				userId, oldTemplate.getTemplateId(), serviceContext);
 
 			newTemplates.add(newTemplate);
 		}
@@ -250,7 +278,37 @@ public class DDMTemplateLocalServiceImpl
 	public DDMTemplate fetchTemplate(long groupId, String templateKey)
 		throws SystemException {
 
+		templateKey = templateKey.trim().toUpperCase();
+
 		return ddmTemplatePersistence.fetchByG_T(groupId, templateKey);
+	}
+
+	public DDMTemplate fetchTemplate(
+			long groupId, String templateKey, boolean includeGlobalTemplates)
+		throws PortalException, SystemException {
+
+		templateKey = templateKey.trim().toUpperCase();
+
+		DDMTemplate template = ddmTemplatePersistence.fetchByG_T(
+			groupId, templateKey);
+
+		if ((template != null) || !includeGlobalTemplates) {
+			return template;
+		}
+
+		Group group = groupPersistence.findByPrimaryKey(groupId);
+
+		Group companyGroup = groupLocalService.getCompanyGroup(
+			group.getCompanyId());
+
+		return ddmTemplatePersistence.fetchByG_T(
+			companyGroup.getGroupId(), templateKey);
+	}
+
+	public DDMTemplate fetchTemplate(String uuid, long groupId)
+		throws SystemException {
+
+		return ddmTemplatePersistence.fetchByUUID_G(uuid, groupId);
 	}
 
 	public DDMTemplate getTemplate(long templateId)
@@ -262,7 +320,36 @@ public class DDMTemplateLocalServiceImpl
 	public DDMTemplate getTemplate(long groupId, String templateKey)
 		throws PortalException, SystemException {
 
+		templateKey = templateKey.trim().toUpperCase();
+
 		return ddmTemplatePersistence.findByG_T(groupId, templateKey);
+	}
+
+	public DDMTemplate getTemplate(
+			long groupId, String templateKey, boolean includeGlobalTemplates)
+		throws PortalException, SystemException {
+
+		templateKey = templateKey.trim().toUpperCase();
+
+		DDMTemplate template = ddmTemplatePersistence.fetchByG_T(
+			groupId, templateKey);
+
+		if (template != null) {
+			return template;
+		}
+
+		if (!includeGlobalTemplates) {
+			throw new NoSuchTemplateException(
+				"No DDMTemplate exists with the template key " + templateKey);
+		}
+
+		Group group = groupPersistence.findByPrimaryKey(groupId);
+
+		Group companyGroup = groupLocalService.getCompanyGroup(
+			group.getCompanyId());
+
+		return ddmTemplatePersistence.findByG_T(
+			companyGroup.getGroupId(), templateKey);
 	}
 
 	public List<DDMTemplate> getTemplates(long classPK) throws SystemException {
@@ -284,18 +371,30 @@ public class DDMTemplateLocalServiceImpl
 	}
 
 	public List<DDMTemplate> getTemplates(
-			long classNameId, long classPK, String type)
+			long groupId, long classNameId, long classPK, String type)
 		throws SystemException {
 
-		return ddmTemplatePersistence.findByC_C_T(classNameId, classPK, type);
+		return ddmTemplatePersistence.findByG_C_C_T(
+			groupId, classNameId, classPK, type);
 	}
 
 	public List<DDMTemplate> getTemplates(
-			long classNameId, long classPK, String type, String mode)
+			long groupId, long classNameId, long classPK, String type,
+			String mode)
 		throws SystemException {
 
-		return ddmTemplatePersistence.findByC_C_T_M(
-			classNameId, classPK, type, mode);
+		return ddmTemplatePersistence.findByG_C_C_T_M(
+			groupId, classNameId, classPK, type, mode);
+	}
+
+	public int getTemplatesCount(long groupId) throws SystemException {
+		return ddmTemplatePersistence.countByGroupId(groupId);
+	}
+
+	public int getTemplatesCount(long groupId, long classNameId)
+		throws SystemException {
+
+		return ddmTemplatePersistence.countByG_C(groupId, classNameId);
 	}
 
 	public List<DDMTemplate> search(
@@ -429,6 +528,30 @@ public class DDMTemplateLocalServiceImpl
 		return template;
 	}
 
+	protected File copySmallImage(DDMTemplate template) throws SystemException {
+		File smallImageFile = null;
+
+		if (template.isSmallImage() &&
+			Validator.isNull(template.getSmallImageURL())) {
+
+			Image smallImage = ImageUtil.fetchByPrimaryKey(
+				template.getSmallImageId());
+
+			if (smallImage != null) {
+				smallImageFile = FileUtil.createTempFile(smallImage.getType());
+
+				try {
+					FileUtil.write(smallImageFile, smallImage.getTextObj());
+				}
+				catch (IOException ioe) {
+					_log.error(ioe, ioe);
+				}
+			}
+		}
+
+		return smallImageFile;
+	}
+
 	protected void saveImages(
 			boolean smallImage, long smallImageId, File smallImageFile,
 			byte[] smallImageBytes)
@@ -449,6 +572,8 @@ public class DDMTemplateLocalServiceImpl
 			String script, boolean smallImage, String smallImageURL,
 			File smallImageFile, byte[] smallImageBytes)
 		throws PortalException, SystemException {
+
+		templateKey = templateKey.trim().toUpperCase();
 
 		DDMTemplate template = ddmTemplatePersistence.fetchByG_T(
 			groupId, templateKey);

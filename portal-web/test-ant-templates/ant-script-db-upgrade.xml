@@ -8,6 +8,8 @@
 	<propertycopy name="db-upgrade.tomcat.folder.dir" from="db-upgrade.${test.ant.script.version}.tomcat.folder.dir" silent="true" />
 
 	<target name="test-${test.ant.script.command}-${test.ant.script.version}-tomcat-db2-firefox">
+		<antcall target="print-scm-revision" />
+
 		<antcall target="clean-up-test-properties" />
 
 		<ant antfile="build-dist.xml" target="build-dist-tomcat" />
@@ -19,7 +21,7 @@
 			<param name="vm.host" value="${vm.db.host}" />
 		</antcall>
 
-		<antcall target="prepare-db-db2-common">
+		<antcall target="prepare-versioned-db2">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
 		</antcall>
@@ -35,7 +37,7 @@
 			<param name="tomcat.folder.dir" value="${db-upgrade.tomcat.folder.dir}" />
 		</antcall>
 
-		<antcall target="prepare-db-db2-common">
+		<antcall target="prepare-versioned-db2">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="skip.rebuild-database" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
@@ -54,11 +56,13 @@
 	</target>
 
 	<target name="test-${test.ant.script.command}-${test.ant.script.version}-tomcat-mysql-firefox">
+		<antcall target="print-scm-revision" />
+
 		<antcall target="clean-up-test-properties" />
 
 		<ant antfile="build-dist.xml" target="build-dist-tomcat" />
 
-		<antcall target="prepare-db-mysql-common">
+		<antcall target="prepare-versioned-mysql">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
 		</antcall>
@@ -74,7 +78,7 @@
 			<param name="tomcat.folder.dir" value="${db-upgrade.tomcat.folder.dir}" />
 		</antcall>
 
-		<antcall target="prepare-db-mysql-common">
+		<antcall target="prepare-versioned-mysql">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="skip.rebuild-database" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
@@ -89,6 +93,8 @@
 	</target>
 
 	<target name="test-${test.ant.script.command}-${test.ant.script.version}-tomcat-oracle-10-firefox">
+		<antcall target="print-scm-revision" />
+
 		<antcall target="clean-up-test-properties" />
 
 		<ant antfile="build-dist.xml" target="build-dist-tomcat" />
@@ -100,7 +106,7 @@
 			<param name="vm.host" value="${vm.db.host}" />
 		</antcall>
 
-		<antcall target="prepare-db-oracle-10-common">
+		<antcall target="prepare-versioned-oracle-10">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
 		</antcall>
@@ -116,7 +122,7 @@
 			<param name="tomcat.folder.dir" value="${db-upgrade.tomcat.folder.dir}" />
 		</antcall>
 
-		<antcall target="prepare-db-oracle-10-common">
+		<antcall target="prepare-versioned-oracle-10">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="skip.rebuild-database" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
@@ -135,6 +141,8 @@
 	</target>
 
 	<target name="test-${test.ant.script.command}-${test.ant.script.version}-tomcat-oracle-11-firefox">
+		<antcall target="print-scm-revision" />
+
 		<antcall target="clean-up-test-properties" />
 
 		<ant antfile="build-dist.xml" target="build-dist-tomcat" />
@@ -146,7 +154,7 @@
 			<param name="vm.host" value="${vm.db.host}" />
 		</antcall>
 
-		<antcall target="prepare-db-oracle-11-common">
+		<antcall target="prepare-versioned-oracle-11">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
 		</antcall>
@@ -162,7 +170,7 @@
 			<param name="tomcat.folder.dir" value="${db-upgrade.tomcat.folder.dir}" />
 		</antcall>
 
-		<antcall target="prepare-db-oracle-11-common">
+		<antcall target="prepare-versioned-oracle-11">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="skip.rebuild-database" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
@@ -181,6 +189,8 @@
 	</target>
 
 	<target name="test-${test.ant.script.command}-${test.ant.script.version}-tomcat-postgresql-8.4-firefox">
+		<antcall target="print-scm-revision" />
+
 		<antcall target="clean-up-test-properties" />
 
 		<ant antfile="build-dist.xml" target="build-dist-tomcat" />
@@ -192,7 +202,7 @@
 			<param name="vm.host" value="${vm.db.host}" />
 		</antcall>
 
-		<antcall target="prepare-db-postgresql-8.4-common">
+		<antcall target="prepare-versioned-postgresql-8.4">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
 		</antcall>
@@ -208,7 +218,7 @@
 			<param name="tomcat.folder.dir" value="${db-upgrade.tomcat.folder.dir}" />
 		</antcall>
 
-		<antcall target="prepare-db-postgresql-8.4-common">
+		<antcall target="prepare-versioned-postgresql-8.4">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="skip.rebuild-database" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
@@ -227,6 +237,8 @@
 	</target>
 
 	<target name="test-${test.ant.script.command}-${test.ant.script.version}-tomcat-postgresql-9.0-firefox">
+		<antcall target="print-scm-revision" />
+
 		<antcall target="clean-up-test-properties" />
 
 		<ant antfile="build-dist.xml" target="build-dist-tomcat" />
@@ -238,7 +250,7 @@
 			<param name="vm.host" value="${vm.db.host}" />
 		</antcall>
 
-		<antcall target="prepare-db-postgresql-9.0-common">
+		<antcall target="prepare-versioned-postgresql-9.0">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
 		</antcall>
@@ -254,7 +266,7 @@
 			<param name="tomcat.folder.dir" value="${db-upgrade.tomcat.folder.dir}" />
 		</antcall>
 
-		<antcall target="prepare-db-postgresql-9.0-common">
+		<antcall target="prepare-versioned-postgresql-9.0">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="skip.rebuild-database" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
@@ -273,6 +285,8 @@
 	</target>
 
 	<target name="test-${test.ant.script.command}-${test.ant.script.version}-tomcat-sql-server-2005-firefox">
+		<antcall target="print-scm-revision" />
+
 		<antcall target="clean-up-test-properties" />
 
 		<ant antfile="build-dist.xml" target="build-dist-tomcat" />
@@ -284,7 +298,7 @@
 			<param name="vm.host" value="${vm.db.host}" />
 		</antcall>
 
-		<antcall target="prepare-db-sql-server-2005-common">
+		<antcall target="prepare-versioned-sql-server-2005">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
 		</antcall>
@@ -300,7 +314,7 @@
 			<param name="tomcat.folder.dir" value="${db-upgrade.tomcat.folder.dir}" />
 		</antcall>
 
-		<antcall target="prepare-db-sql-server-2005-common">
+		<antcall target="prepare-versioned-sql-server-2005">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="skip.rebuild-database" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
@@ -319,6 +333,8 @@
 	</target>
 
 	<target name="test-${test.ant.script.command}-${test.ant.script.version}-tomcat-sql-server-2008-firefox">
+		<antcall target="print-scm-revision" />
+
 		<antcall target="clean-up-test-properties" />
 
 		<ant antfile="build-dist.xml" target="build-dist-tomcat" />
@@ -330,7 +346,7 @@
 			<param name="vm.host" value="${vm.db.host}" />
 		</antcall>
 
-		<antcall target="prepare-db-sql-server-2008-common">
+		<antcall target="prepare-versioned-sql-server-2008">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
 		</antcall>
@@ -365,6 +381,8 @@
 	</target>
 
 	<target name="test-${test.ant.script.command}-${test.ant.script.version}-tomcat-sybase-firefox">
+		<antcall target="print-scm-revision" />
+
 		<antcall target="clean-up-test-properties" />
 
 		<ant antfile="build-dist.xml" target="build-dist-tomcat" />
@@ -376,7 +394,7 @@
 			<param name="vm.host" value="${vm.db.host}" />
 		</antcall>
 
-		<antcall target="prepare-db-sybase-common">
+		<antcall target="prepare-versioned-sybase">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />
 		</antcall>
@@ -392,7 +410,7 @@
 			<param name="tomcat.folder.dir" value="${db-upgrade.tomcat.folder.dir}" />
 		</antcall>
 
-		<antcall target="prepare-db-sybase-common">
+		<antcall target="prepare-versioned-sybase">
 			<param name="skip.prepare-bundle" value="true" />
 			<param name="skip.rebuild-database" value="true" />
 			<param name="sql.version" value="${test.ant.script.version}" />

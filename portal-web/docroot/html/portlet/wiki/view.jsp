@@ -38,12 +38,12 @@ if (wikiPage != null) {
 	parentTitle = wikiPage.getParentTitle();
 }
 
-List childPages = wikiPage.getChildPages();
+List childPages = wikiPage.getViewableChildPages();
 
-int attachmentsCount = 0;
+int attachmentsFileEntriesCount = 0;
 
 if (wikiPage != null) {
-	attachmentsCount = wikiPage.getAttachmentsFilesCount();
+	attachmentsFileEntriesCount = wikiPage.getAttachmentsFileEntriesCount();
 }
 
 boolean preview = false;
@@ -103,6 +103,7 @@ taggedPagesURL.setParameter("nodeId", String.valueOf(node.getNodeId()));
 PortletURL viewAttachmentsURL = PortletURLUtil.clone(viewPageURL, renderResponse);
 
 viewAttachmentsURL.setParameter("struts_action", "/wiki/view_page_attachments");
+viewAttachmentsURL.setParameter("redirect", currentURL);
 
 AssetEntryServiceUtil.incrementViewCounter(WikiPage.class.getName(), wikiPage.getResourcePrimKey());
 
@@ -313,7 +314,7 @@ long portletDisplayDDMTemplateId = PortletDisplayTemplateUtil.getPortletDisplayT
 					<liferay-ui:icon
 						image="clip"
 						label="<%= true %>"
-						message='<%= attachmentsCount + " " + LanguageUtil.get(pageContext, (attachmentsCount == 1) ? "attachment" : "attachments") %>' method="get" url="<%= viewAttachmentsURL.toString() %>"
+						message='<%= attachmentsFileEntriesCount + " " + LanguageUtil.get(pageContext, (attachmentsFileEntriesCount == 1) ? "attachment" : "attachments") %>' method="get" url="<%= viewAttachmentsURL.toString() %>"
 					/>
 				</div>
 
@@ -412,7 +413,7 @@ if ((wikiPage != null) && !wikiPage.getTitle().equals(WikiPageConstants.FRONT_PA
 	PortalUtil.setPageDescription(description, request);
 	PortalUtil.setPageKeywords(AssetUtil.getAssetKeywords(WikiPage.class.getName(), wikiPage.getResourcePrimKey()), request);
 
-	List<WikiPage> parentPages = wikiPage.getParentPages();
+	List<WikiPage> parentPages = wikiPage.getViewableParentPages();
 
 	for (WikiPage curParentPage : parentPages) {
 		viewPageURL.setParameter("title", curParentPage.getTitle());

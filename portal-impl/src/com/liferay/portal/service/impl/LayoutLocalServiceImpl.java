@@ -102,6 +102,7 @@ import javax.portlet.PortletException;
  * @author Jorge Ferrer
  * @author Bruno Farache
  * @author Vilmos Papp
+ * @author James Lefeu
  */
 public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
@@ -161,18 +162,17 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	 *         normalized when accessed see {@link
 	 *         com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil#normalize(
 	 *         String)}.
-	 * @param  serviceContext the service context. Must set the universally
-	 *         unique identifier (UUID) for the layout. Can set the creation
-	 *         date, modification date and the expando bridge attributes for the
-	 *         layout. For layouts that belong to a layout set prototype, an
-	 *         attribute named 'layoutUpdateable' can be set to specify whether
-	 *         site administrators can modify this page within their site. For
-	 *         layouts that are created from a layout prototype, attributes
-	 *         named 'layoutPrototypeUuid' and 'layoutPrototypeLinkedEnabled'
-	 *         can be specified to provide the unique identifier of the source
-	 *         prototype and a boolean to determined whether a link to it should
-	 *         be enabled to activate propagation of changes made to the linked
-	 *         page in the prototype.
+	 * @param  serviceContext the service context. Must set the UUID for the
+	 *         layout. Can set the creation date, modification date and the
+	 *         expando bridge attributes for the layout. For layouts that belong
+	 *         to a layout set prototype, an attribute named 'layoutUpdateable'
+	 *         can be set to specify whether site administrators can modify this
+	 *         page within their site. For layouts that are created from a
+	 *         layout prototype, attributes named 'layoutPrototypeUuid' and
+	 *         'layoutPrototypeLinkedEnabled' can be specified to provide the
+	 *         unique identifier of the source prototype and a boolean to
+	 *         determined whether a link to it should be enabled to activate
+	 *         propagation of changes made to the linked page in the prototype.
 	 * @return the layout
 	 * @throws PortalException if a group or user with the primary key could not
 	 *         be found, or if layout values were invalid
@@ -228,14 +228,14 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		layout.setPriority(priority);
 
 		boolean layoutUpdateable = ParamUtil.getBoolean(
-			serviceContext, "layoutUpdateable", true);
+			serviceContext, SitesUtil.LAYOUT_UPDATEABLE, true);
 
 		if (!layoutUpdateable) {
 			UnicodeProperties typeSettingsProperties =
 				layout.getTypeSettingsProperties();
 
 			typeSettingsProperties.put(
-				"layoutUpdateable", String.valueOf(layoutUpdateable));
+				SitesUtil.LAYOUT_UPDATEABLE, String.valueOf(layoutUpdateable));
 
 			layout.setTypeSettingsProperties(typeSettingsProperties);
 		}
@@ -382,12 +382,11 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	 *         normalized when accessed see {@link
 	 *         com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil#normalize(
 	 *         String)}.
-	 * @param  serviceContext the service context. Must set the universally
-	 *         unique identifier (UUID) for the layout. Can set the creation
-	 *         date and modification date for the layout. For layouts that
-	 *         belong to a layout set prototype, an attribute named
-	 *         'layoutUpdateable' can be set to specify whether site
-	 *         administrators can modify this page within their site.
+	 * @param  serviceContext the service context. Must set the UUID for the
+	 *         layout. Can set the creation date and modification date for the
+	 *         layout. For layouts that belong to a layout set prototype, an
+	 *         attribute named 'layoutUpdateable' can be set to specify whether
+	 *         site administrators can modify this page within their site.
 	 * @return the layout
 	 * @throws PortalException if a group or user with the primary key could not
 	 *         be found
@@ -400,17 +399,25 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		Map<Locale, String> localeNamesMap = new HashMap<Locale, String>();
+		Locale locale = LocaleUtil.getDefault();
 
-		Locale defaultLocale = LocaleUtil.getDefault();
+		Map<Locale, String> descriptionMap = new HashMap<Locale, String>();
 
-		localeNamesMap.put(defaultLocale, name);
+		descriptionMap.put(locale, description);
+
+		Map<Locale, String> nameMap = new HashMap<Locale, String>();
+
+		nameMap.put(locale, name);
+
+		Map<Locale, String> titleMap = new HashMap<Locale, String>();
+
+		titleMap.put(locale, title);
 
 		return addLayout(
-			userId, groupId, privateLayout, parentLayoutId, localeNamesMap,
-			new HashMap<Locale, String>(), new HashMap<Locale, String>(),
-			new HashMap<Locale, String>(), new HashMap<Locale, String>(), type,
-			hidden, friendlyURL, serviceContext);
+			userId, groupId, privateLayout, parentLayoutId, nameMap, titleMap,
+			descriptionMap, new HashMap<Locale, String>(),
+			new HashMap<Locale, String>(), type, hidden, friendlyURL,
+			serviceContext);
 	}
 
 	/**
@@ -529,7 +536,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			layout.getPlid() + PortletConstants.LAYOUT_SEPARATOR + "%";
 
 		List<ResourcePermission> resourcePermissions =
-			resourcePermissionPersistence.findByC_P(
+			resourcePermissionPersistence.findByC_LikeP(
 				layout.getCompanyId(), primKey);
 
 		for (ResourcePermission resourcePermission : resourcePermissions) {
@@ -829,19 +836,18 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	}
 
 	/**
-	 * Returns the layout matching the universally unique identifier and group
-	 * ID
-	 *
-	 * @param  uuid the universally unique identifier of the scope layout
+	 * @param  uuid the layout's UUID
 	 * @param  groupId the primary key of the group
+	 * @param  privateLayout whether the layout is private to the group
 	 * @return the layout, or <code>null</code> if a matching layout could not
 	 *         be found
 	 * @throws SystemException if a system exception occurred
 	 */
-	public Layout fetchLayoutByUuidAndGroupId(String uuid, long groupId)
+	public Layout fetchLayoutByUuidAndGroupId(
+			String uuid, long groupId, boolean privateLayout)
 		throws SystemException {
 
-		return layoutPersistence.fetchByUUID_G(uuid, groupId);
+		return layoutPersistence.fetchByUUID_G_P(uuid, groupId, privateLayout);
 	}
 
 	/**
@@ -1149,29 +1155,38 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	public int getLayoutsCount(Group group, boolean privateLayout)
 		throws PortalException, SystemException {
 
+		return getLayoutsCount(group, privateLayout, true);
+	}
+
+	public int getLayoutsCount(
+			Group group, boolean privateLayout, boolean includeUserGroups)
+		throws PortalException, SystemException {
+
 		LayoutSet layoutSet = layoutSetPersistence.findByG_P(
 			group.getGroupId(), privateLayout);
 
 		int count = layoutSet.getPageCount();
 
-		if (group.isUser()) {
-			List<UserGroup> userGroups = userPersistence.getUserGroups(
-				group.getClassPK());
+		if (!group.isUser() || !includeUserGroups) {
+			return count;
+		}
 
-			if (!userGroups.isEmpty()) {
-				long userGroupClassNameId =
-					classNameLocalService.getClassNameId(UserGroup.class);
+		List<UserGroup> userGroups = userPersistence.getUserGroups(
+			group.getClassPK());
 
-				for (UserGroup userGroup : userGroups) {
-					Group userGroupGroup = groupPersistence.findByC_C_C(
-						group.getCompanyId(), userGroupClassNameId,
-						userGroup.getUserGroupId());
+		if (!userGroups.isEmpty()) {
+			long userGroupClassNameId = classNameLocalService.getClassNameId(
+				UserGroup.class);
 
-					layoutSet = layoutSetPersistence.findByG_P(
-						userGroupGroup.getGroupId(), privateLayout);
+			for (UserGroup userGroup : userGroups) {
+				Group userGroupGroup = groupPersistence.findByC_C_C(
+					group.getCompanyId(), userGroupClassNameId,
+					userGroup.getUserGroupId());
 
-					count += layoutSet.getPageCount();
-				}
+				layoutSet = layoutSetPersistence.findByG_P(
+					userGroupGroup.getGroupId(), privateLayout);
+
+				count += layoutSet.getPageCount();
 			}
 		}
 
@@ -1181,12 +1196,19 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	public int getLayoutsCount(User user, boolean privateLayout)
 		throws PortalException, SystemException {
 
+		return getLayoutsCount(user, privateLayout, true);
+	}
+
+	public int getLayoutsCount(
+			User user, boolean privateLayout, boolean includeUserGroups)
+		throws PortalException, SystemException {
+
 		long classNameId = classNameLocalService.getClassNameId(User.class);
 
 		Group group = groupPersistence.findByC_C_C(
 			user.getCompanyId(), classNameId, user.getUserId());
 
-		return getLayoutsCount(group, privateLayout);
+		return getLayoutsCount(group, privateLayout, includeUserGroups);
 	}
 
 	/**
@@ -1221,6 +1243,18 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	}
 
 	/**
+	 * Returns all the layouts without resource permissions
+	 *
+	 * @return all the layouts without resource permissions
+	 * @throws SystemException if a system exception occurred
+	 */
+	public List<Layout> getNoPermissionLayouts(long roleId)
+		throws SystemException {
+
+		return layoutFinder.findByNoPermissions(roleId);
+	}
+
+	/**
 	 * Returns all the layouts whose friendly URLs are <code>null</code>
 	 *
 	 * @return all the layouts whose friendly URLs are <code>null</code>
@@ -1248,6 +1282,13 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	public boolean hasLayouts(Group group, boolean privateLayout)
 		throws PortalException, SystemException {
 
+		return hasLayouts(group, privateLayout, true);
+	}
+
+	public boolean hasLayouts(
+			Group group, boolean privateLayout, boolean includeUserGroups)
+		throws PortalException, SystemException {
+
 		LayoutSet layoutSet = layoutSetPersistence.findByG_P(
 			group.getGroupId(), privateLayout);
 
@@ -1255,25 +1296,27 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			return true;
 		}
 
-		if (group.isUser()) {
-			List<UserGroup> userGroups = userPersistence.getUserGroups(
-				group.getClassPK());
+		if (!group.isUser() || !includeUserGroups) {
+			return false;
+		}
 
-			if (!userGroups.isEmpty()) {
-				long userGroupClassNameId =
-					classNameLocalService.getClassNameId(UserGroup.class);
+		List<UserGroup> userGroups = userPersistence.getUserGroups(
+			group.getClassPK());
 
-				for (UserGroup userGroup : userGroups) {
-					Group userGroupGroup = groupPersistence.findByC_C_C(
-						group.getCompanyId(), userGroupClassNameId,
-						userGroup.getUserGroupId());
+		if (!userGroups.isEmpty()) {
+			long userGroupClassNameId = classNameLocalService.getClassNameId(
+				UserGroup.class);
 
-					layoutSet = layoutSetPersistence.findByG_P(
-						userGroupGroup.getGroupId(), privateLayout);
+			for (UserGroup userGroup : userGroups) {
+				Group userGroupGroup = groupPersistence.findByC_C_C(
+					group.getCompanyId(), userGroupClassNameId,
+					userGroup.getUserGroupId());
 
-					if (layoutSet.getPageCount() > 0) {
-						return true;
-					}
+				layoutSet = layoutSetPersistence.findByG_P(
+					userGroupGroup.getGroupId(), privateLayout);
+
+				if (layoutSet.getPageCount() > 0) {
+					return true;
 				}
 			}
 		}
@@ -1303,16 +1346,35 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	public boolean hasLayouts(User user, boolean privateLayout)
 		throws PortalException, SystemException {
 
+		return hasLayouts(user, privateLayout, true);
+	}
+
+	public boolean hasLayouts(
+			User user, boolean privateLayout, boolean includeUserGroups)
+		throws PortalException, SystemException {
+
 		long classNameId = classNameLocalService.getClassNameId(User.class);
 
 		Group group = groupPersistence.findByC_C_C(
 			user.getCompanyId(), classNameId, user.getUserId());
 
-		return hasLayouts(group, privateLayout);
+		return hasLayouts(group, privateLayout, includeUserGroups);
 	}
 
 	public boolean hasLayoutSetPrototypeLayout(
-			String layoutSetPrototypeUuid, String layoutUuid, long companyId)
+			long layoutSetPrototypeId, String layoutUuid)
+		throws PortalException, SystemException {
+
+		LayoutSetPrototype layoutSetPrototype =
+			layoutSetPrototypeLocalService.getLayoutSetPrototype(
+				layoutSetPrototypeId);
+
+		return layoutLocalServiceHelper.hasLayoutSetPrototypeLayout(
+			layoutSetPrototype, layoutUuid);
+	}
+
+	public boolean hasLayoutSetPrototypeLayout(
+			String layoutSetPrototypeUuid, long companyId, String layoutUuid)
 		throws PortalException, SystemException {
 
 		LayoutSetPrototype layoutSetPrototype =
@@ -1742,13 +1804,13 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		}
 
 		boolean layoutUpdateable = ParamUtil.getBoolean(
-			serviceContext, "layoutUpdateable", true);
+			serviceContext, SitesUtil.LAYOUT_UPDATEABLE, true);
 
 		UnicodeProperties typeSettingsProperties =
 			layout.getTypeSettingsProperties();
 
 		typeSettingsProperties.put(
-			"layoutUpdateable", String.valueOf(layoutUpdateable));
+			SitesUtil.LAYOUT_UPDATEABLE, String.valueOf(layoutUpdateable));
 
 		layout.setTypeSettingsProperties(typeSettingsProperties);
 
@@ -2289,12 +2351,11 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 	/**
 	 * Updates the names of the portlets within scope of the group, the scope of
-	 * the layout's universally unique identifier, and the privacy.
+	 * the layout's UUID, and the privacy.
 	 *
 	 * @param  groupId the primary key of the group
 	 * @param  privateLayout whether the layout is private to the group
-	 * @param  layoutId the primary key of the layout whose universally unique
-	 *         identifier to match
+	 * @param  layoutId the primary key of the layout whose UUID to match
 	 * @param  name the new name for the portlets
 	 * @param  languageId the primary key of the language
 	 * @throws PortalException if a matching layout could not be found

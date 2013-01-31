@@ -16,12 +16,15 @@ package com.liferay.portlet.wiki.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.permission.WorkflowPermissionUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.wiki.NoSuchPageException;
+import com.liferay.portlet.wiki.NoSuchPageResourceException;
+import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.model.WikiPage;
 import com.liferay.portlet.wiki.service.WikiPageLocalServiceUtil;
 
@@ -62,7 +65,7 @@ public class WikiPagePermission {
 
 	public static void check(
 			PermissionChecker permissionChecker, WikiPage page, String actionId)
-		throws PortalException {
+		throws PortalException, SystemException {
 
 		if (!contains(permissionChecker, page, actionId)) {
 			throw new PrincipalException();
@@ -74,10 +77,15 @@ public class WikiPagePermission {
 			String actionId)
 		throws PortalException, SystemException {
 
-		WikiPage page = WikiPageLocalServiceUtil.getPage(
-			resourcePrimKey, (Boolean)null);
+		try {
+			WikiPage page = WikiPageLocalServiceUtil.getPage(
+				resourcePrimKey, (Boolean)null);
 
-		return contains(permissionChecker, page, actionId);
+			return contains(permissionChecker, page, actionId);
+		}
+		catch (NoSuchPageResourceException nspre) {
+			return false;
+		}
 	}
 
 	public static boolean contains(
@@ -115,7 +123,8 @@ public class WikiPagePermission {
 	}
 
 	public static boolean contains(
-		PermissionChecker permissionChecker, WikiPage page, String actionId) {
+			PermissionChecker permissionChecker, WikiPage page, String actionId)
+		throws PortalException, SystemException {
 
 		if (actionId.equals(ActionKeys.VIEW)) {
 			WikiPage redirectPage = page.getRedirectPage();
@@ -141,27 +150,41 @@ public class WikiPagePermission {
 			return true;
 		}
 
-		if (permissionChecker.hasOwnerPermission(
-				page.getCompanyId(), WikiPage.class.getName(),
-				page.getResourcePrimKey(), page.getUserId(), actionId)) {
-
-			return true;
-		}
+		WikiNode node = page.getNode();
 
 		if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
 			if (!WikiNodePermission.contains(
-					permissionChecker, page.getNode(), ActionKeys.VIEW)) {
+					permissionChecker, node, ActionKeys.VIEW)) {
 
 				return false;
 			}
 
 			WikiPage parentPage = page.getParentPage();
 
-			if ((parentPage != null) &&
-				!contains(permissionChecker, parentPage, ActionKeys.VIEW)) {
-
+			if (!contains(permissionChecker, parentPage, ActionKeys.VIEW)) {
 				return false;
 			}
+		}
+
+		if (!PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE ||
+			!Validator.equals(actionId, ActionKeys.VIEW)) {
+
+			if (WikiNodePermission.contains(
+					permissionChecker, node, actionId)) {
+
+				return true;
+			}
+
+			if (contains(permissionChecker, page, actionId)) {
+				return true;
+			}
+		}
+
+		if (permissionChecker.hasOwnerPermission(
+				page.getCompanyId(), WikiPage.class.getName(),
+				page.getResourcePrimKey(), page.getUserId(), actionId)) {
+
+			return true;
 		}
 
 		return permissionChecker.hasPermission(

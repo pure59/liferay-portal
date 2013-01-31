@@ -9,7 +9,6 @@
 		<portlet-url-class>com.liferay.portal.struts.StrutsActionPortletURL</portlet-url-class>
 		<control-panel-entry-category>my</control-panel-entry-category>
 		<control-panel-entry-weight>1.0</control-panel-entry-weight>
-		<control-panel-entry-class>com.liferay.portlet.myaccount.MyAccountControlPanelEntry</control-panel-entry-class>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
 		<private-request-attributes>false</private-request-attributes>
@@ -25,7 +24,7 @@
 		<portlet-name>3</portlet-name>
 		<icon>/html/icons/search.png</icon>
 		<struts-path>search</struts-path>
-		<configuration-action-class>com.liferay.portal.kernel.portlet.DefaultConfigurationAction</configuration-action-class>
+		<configuration-action-class>com.liferay.portlet.search.action.ConfigurationActionImpl</configuration-action-class>
 		<!--<open-search-class>com.liferay.portal.search.PortalOpenSearchImpl</open-search-class>-->
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
@@ -131,7 +130,8 @@
 		<icon>/html/icons/journal.png</icon>
 		<struts-path>journal</struts-path>
 		<configuration-action-class>com.liferay.portlet.journal.action.ConfigurationActionImpl</configuration-action-class>
-		<indexer-class>com.liferay.portlet.journal.util.JournalIndexer</indexer-class>
+		<indexer-class>com.liferay.portlet.journal.util.JournalArticleIndexer</indexer-class>
+		<indexer-class>com.liferay.portlet.journal.util.JournalFolderIndexer</indexer-class>
 		<open-search-class>com.liferay.portlet.journal.util.JournalOpenSearchImpl</open-search-class>
 		<scheduler-entry>
 			<scheduler-event-listener-class>com.liferay.portlet.journal.messaging.CheckArticleMessageListener</scheduler-event-listener-class>
@@ -152,6 +152,7 @@
 		<control-panel-entry-weight>11.0</control-panel-entry-weight>
 		<asset-renderer-factory>com.liferay.portlet.journal.asset.JournalArticleAssetRendererFactory</asset-renderer-factory>
 		<atom-collection-adapter>com.liferay.portlet.journal.atom.JournalArticleAtomCollectionProvider</atom-collection-adapter>
+		<trash-handler>com.liferay.portlet.journal.trash.JournalArticleTrashHandler</trash-handler>
 		<workflow-handler>com.liferay.portlet.journal.workflow.JournalArticleWorkflowHandler</workflow-handler>
 		<preferences-unique-per-layout>false</preferences-unique-per-layout>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
@@ -205,6 +206,7 @@
 		<asset-renderer-factory>com.liferay.portlet.messageboards.asset.MBMessageAssetRendererFactory</asset-renderer-factory>
 		<custom-attributes-display>com.liferay.portlet.messageboards.MBCategoryCustomAttributesDisplay</custom-attributes-display>
 		<custom-attributes-display>com.liferay.portlet.messageboards.MBMessageCustomAttributesDisplay</custom-attributes-display>
+		<trash-handler>com.liferay.portlet.messageboards.trash.MBCategoryTrashHandler</trash-handler>
 		<trash-handler>com.liferay.portlet.messageboards.trash.MBMessageTrashHandler</trash-handler>
 		<trash-handler>com.liferay.portlet.messageboards.trash.MBThreadTrashHandler</trash-handler>
 		<workflow-handler>com.liferay.portlet.messageboards.workflow.MBDiscussionWorkflowHandler</workflow-handler>
@@ -228,7 +230,8 @@
 		<icon>/html/icons/document_library.png</icon>
 		<struts-path>document_library</struts-path>
 		<configuration-action-class>com.liferay.portlet.documentlibrary.action.ConfigurationActionImpl</configuration-action-class>
-		<indexer-class>com.liferay.portlet.documentlibrary.util.DLIndexer</indexer-class>
+		<indexer-class>com.liferay.portlet.documentlibrary.util.DLFileEntryIndexer</indexer-class>
+		<indexer-class>com.liferay.portlet.documentlibrary.util.DLFolderIndexer</indexer-class>
 		<open-search-class>com.liferay.portlet.documentlibrary.util.DLOpenSearchImpl</open-search-class>
 		<portlet-url-class>com.liferay.portal.struts.StrutsActionPortletURL</portlet-url-class>
 		<portlet-data-handler-class>com.liferay.portlet.documentlibrary.lar.DLPortletDataHandlerImpl</portlet-data-handler-class>
@@ -238,6 +241,7 @@
 		<control-panel-entry-category>content</control-panel-entry-category>
 		<control-panel-entry-weight>12.0</control-panel-entry-weight>
 		<asset-renderer-factory>com.liferay.portlet.documentlibrary.asset.DLFileEntryAssetRendererFactory</asset-renderer-factory>
+		<asset-renderer-factory>com.liferay.portlet.documentlibrary.asset.DLFolderAssetRendererFactory</asset-renderer-factory>
 		<atom-collection-adapter>com.liferay.portlet.documentlibrary.atom.FileEntryAtomCollectionAdapter</atom-collection-adapter>
 		<atom-collection-adapter>com.liferay.portlet.documentlibrary.atom.FolderAtomCollectionAdapter</atom-collection-adapter>
 		<custom-attributes-display>com.liferay.portlet.documentlibrary.DLFileEntryCustomAttributesDisplay</custom-attributes-display>
@@ -246,6 +250,7 @@
 		<trash-handler>com.liferay.portlet.documentlibrary.trash.DLFileShortcutTrashHandler</trash-handler>
 		<trash-handler>com.liferay.portlet.documentlibrary.trash.DLFolderTrashHandler</trash-handler>
 		<workflow-handler>com.liferay.portlet.documentlibrary.workflow.DLFileEntryWorkflowHandler</workflow-handler>
+		<preferences-unique-per-layout>false</preferences-unique-per-layout>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
 		<scopeable>true</scopeable>
@@ -311,7 +316,8 @@
 		<icon>/html/icons/bookmarks.png</icon>
 		<struts-path>bookmarks</struts-path>
 		<configuration-action-class>com.liferay.portlet.bookmarks.action.ConfigurationActionImpl</configuration-action-class>
-		<indexer-class>com.liferay.portlet.bookmarks.util.BookmarksIndexer</indexer-class>
+		<indexer-class>com.liferay.portlet.bookmarks.util.BookmarksEntryIndexer</indexer-class>
+		<indexer-class>com.liferay.portlet.bookmarks.util.BookmarksFolderIndexer</indexer-class>
 		<open-search-class>com.liferay.portlet.bookmarks.util.BookmarksOpenSearchImpl</open-search-class>
 		<friendly-url-mapper-class>com.liferay.portal.kernel.portlet.DefaultFriendlyURLMapper</friendly-url-mapper-class>
 		<friendly-url-mapping>bookmarks</friendly-url-mapping>
@@ -323,6 +329,8 @@
 		<asset-renderer-factory>com.liferay.portlet.bookmarks.asset.BookmarksEntryAssetRendererFactory</asset-renderer-factory>
 		<custom-attributes-display>com.liferay.portlet.bookmarks.BookmarksEntryCustomAttributesDisplay</custom-attributes-display>
 		<custom-attributes-display>com.liferay.portlet.bookmarks.BookmarksFolderCustomAttributesDisplay</custom-attributes-display>
+		<trash-handler>com.liferay.portlet.bookmarks.trash.BookmarksEntryTrashHandler</trash-handler>
+		<trash-handler>com.liferay.portlet.bookmarks.trash.BookmarksFolderTrashHandler</trash-handler>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
 		<scopeable>true</scopeable>
@@ -371,6 +379,7 @@
 		<friendly-url-mapping>image_gallery_display</friendly-url-mapping>
 		<friendly-url-routes>com/liferay/portlet/imagegallerydisplay/image-gallery-display-friendly-url-routes.xml</friendly-url-routes>
 		<portlet-data-handler-class>com.liferay.portlet.documentlibrary.lar.DLDisplayPortletDataHandlerImpl</portlet-data-handler-class>
+		<portlet-display-template-handler>com.liferay.portlet.documentlibrary.template.DocumentLibraryPortletDisplayTemplateHandler</portlet-display-template-handler>
 		<webdav-storage-token>document_library</webdav-storage-token>
 		<webdav-storage-class>com.liferay.portlet.documentlibrary.webdav.DLWebDAVStorageImpl</webdav-storage-class>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
@@ -566,6 +575,7 @@
 		<friendly-url-routes>com/liferay/portlet/journalcontent/journal-content-friendly-url-routes.xml</friendly-url-routes>
 		<portlet-data-handler-class>com.liferay.portlet.journal.lar.JournalContentPortletDataHandlerImpl</portlet-data-handler-class>
 		<portlet-layout-listener-class>com.liferay.portlet.journalcontent.JournalContentPortletLayoutListener</portlet-layout-listener-class>
+		<social-activity-interpreter-class>com.liferay.portlet.journal.social.JournalActivityInterpreter</social-activity-interpreter-class>
 		<custom-attributes-display>com.liferay.portlet.journal.JournalArticleCustomAttributesDisplay</custom-attributes-display>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
@@ -1737,7 +1747,7 @@
 		<use-default-template>false</use-default-template>
 		<private-request-attributes>false</private-request-attributes>
 		<private-session-attributes>false</private-session-attributes>
-		<autopropagated-parameters>chooseCallback,ddmResource,ddmResourceActionId,saveCallback,scopeAvailableFields,scopeStorageType,scopeStructureName,scopeStructureType,scopeTemplateMode,scopeTemplateType,showGlobalScope,showManageTemplates,showToolbar,templateHeaderTitle</autopropagated-parameters>
+		<autopropagated-parameters>chooseCallback,ddmResource,ddmResourceActionId,saveCallback,scopeAvailableFields,scopeStorageType,scopeStructureName,scopeStructureType,scopeTemplateMode,scopeTemplateType,scopeTitle,showGlobalScope,showManageTemplates,showToolbar,templateHeaderTitle</autopropagated-parameters>
 		<render-weight>50</render-weight>
 		<header-portlet-css>/html/portlet/dynamic_data_mapping/css/main.css</header-portlet-css>
 		<header-portlet-javascript>/html/portlet/dynamic_data_lists/js/main.js</header-portlet-javascript>
@@ -1914,7 +1924,6 @@
 		<portlet-url-class>com.liferay.portal.struts.StrutsActionPortletURL</portlet-url-class>
 		<control-panel-entry-category>content</control-panel-entry-category>
 		<control-panel-entry-weight>23.0</control-panel-entry-weight>
-		<control-panel-entry-class>com.liferay.portlet.socialactivity.SocialActivityAdminControlPanelEntry</control-panel-entry-class>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
 		<private-request-attributes>false</private-request-attributes>
@@ -1972,7 +1981,7 @@
 	</portlet>
 	<portlet>
 		<portlet-name>183</portlet-name>
-		<icon>/html/icons/application_display_styles.png</icon>
+		<icon>/html/icons/portlet_display_template.png</icon>
 		<parent-struts-path>dynamic_data_mapping</parent-struts-path>
 		<portlet-url-class>com.liferay.portal.struts.StrutsActionPortletURL</portlet-url-class>
 		<portlet-data-handler-class>com.liferay.portlet.portletdisplaytemplate.lar.PortletDisplayTemplatePortletDataHandlerImpl</portlet-data-handler-class>
@@ -1980,10 +1989,9 @@
 		<control-panel-entry-weight>25.0</control-panel-entry-weight>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
-		<scopeable>true</scopeable>
 		<private-request-attributes>false</private-request-attributes>
 		<private-session-attributes>false</private-session-attributes>
-		<autopropagated-parameters>chooseCallback,ddmResource,ddmResourceActionId,saveCallback,scopeAvailableFields,scopeStorageType,scopeStructureName,scopeStructureType,scopeTemplateMode,scopeTemplateType,showGlobalScope,showManageTemplates,showToolbar,templateHeaderTitle</autopropagated-parameters>
+		<autopropagated-parameters>chooseCallback,ddmResource,ddmResourceActionId,saveCallback,scopeAvailableFields,scopeStorageType,scopeStructureName,scopeStructureType,scopeTemplateMode,scopeTitle,scopeTemplateType,showGlobalScope,showManageTemplates,showToolbar,templateHeaderTitle</autopropagated-parameters>
 		<render-weight>50</render-weight>
 		<header-portlet-css>/html/portlet/dynamic_data_mapping/css/main.css</header-portlet-css>
 		<css-class-wrapper>portlet-dynamic-data-mapping</css-class-wrapper>
@@ -2003,6 +2011,17 @@
 		<render-weight>50</render-weight>
 		<css-class-wrapper>portlet-sites-directory</css-class-wrapper>
 		<add-default-resource>true</add-default-resource>
+	</portlet>
+	<portlet>
+		<portlet-name>185</portlet-name>
+		<struts-path>site_browser</struts-path>
+		<use-default-template>false</use-default-template>
+		<private-request-attributes>false</private-request-attributes>
+		<private-session-attributes>false</private-session-attributes>
+		<render-weight>50</render-weight>
+		<css-class-wrapper>portlet-site-browser</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
+		<system>true</system>
 	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>

@@ -37,6 +37,7 @@ import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
 import com.liferay.portlet.documentlibrary.service.permission.DLFileEntryPermission;
 import com.liferay.portlet.documentlibrary.util.DLUtil;
+import com.liferay.portlet.trash.util.TrashUtil;
 
 import java.util.Locale;
 
@@ -64,6 +65,10 @@ public class DLFileEntryAssetRenderer
 
 	public String getAssetRendererFactoryClassName() {
 		return DLFileEntryAssetRendererFactory.CLASS_NAME;
+	}
+
+	public String getClassName() {
+		return DLFileEntry.class.getName();
 	}
 
 	public long getClassPK() {
@@ -105,34 +110,21 @@ public class DLFileEntryAssetRenderer
 		return assetRendererFactory.getPortletId();
 	}
 
-	@Override
-	public String getRestorePath(RenderRequest renderRequest) {
-		DLFileEntry dlFileEntry = (DLFileEntry)_fileEntry.getModel();
-
-		if ((dlFileEntry != null) && dlFileEntry.isInTrashFolder()) {
-			renderRequest.setAttribute(
-				WebKeys.DOCUMENT_LIBRARY_FILE_ENTRY, _fileEntry);
-			renderRequest.setAttribute(
-				WebKeys.DOCUMENT_LIBRARY_FILE_VERSION, _fileVersion);
-
-			return
-				"/html/portlet/document_library/trash/file_entry_restore.jsp";
-		}
-
-		return null;
-	}
-
 	public String getSummary(Locale locale) {
 		return HtmlUtil.stripHtml(_fileEntry.getDescription());
 	}
 
 	public String getTitle(Locale locale) {
+		String title = null;
+
 		if (_type == AssetRendererFactory.TYPE_LATEST) {
-			return _fileVersion.getTitle();
+			title = _fileVersion.getTitle();
 		}
 		else {
-			return _fileEntry.getTitle();
+			title = _fileEntry.getTitle();
 		}
+
+		return TrashUtil.getOriginalTitle(title);
 	}
 
 	public String getType() {
@@ -261,20 +253,12 @@ public class DLFileEntryAssetRenderer
 					WebKeys.DOCUMENT_LIBRARY_FILE_VERSION, _fileVersion);
 			}
 
-			return "/html/portlet/document_library/asset/" + template + ".jsp";
+			return "/html/portlet/document_library/asset/file_entry" +
+				template + ".jsp";
 		}
 		else {
 			return null;
 		}
-	}
-
-	@Override
-	public String renderActions(
-		RenderRequest renderRequest, RenderResponse renderResponse) {
-
-		renderRequest.setAttribute("view_entries.jsp-fileEntry", _fileEntry);
-
-		return "/html/portlet/document_library/file_entry_action.jsp";
 	}
 
 	private FileEntry _fileEntry;

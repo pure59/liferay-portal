@@ -69,6 +69,33 @@ import java.util.Map;
  */
 public class DDMStructureServiceSoap {
 	public static com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap addStructure(
+		long userId, long groupId, long classNameId,
+		java.lang.String[] nameMapLanguageIds,
+		java.lang.String[] nameMapValues,
+		java.lang.String[] descriptionMapLanguageIds,
+		java.lang.String[] descriptionMapValues, java.lang.String xsd,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws RemoteException {
+		try {
+			Map<Locale, String> nameMap = LocalizationUtil.getLocalizationMap(nameMapLanguageIds,
+					nameMapValues);
+			Map<Locale, String> descriptionMap = LocalizationUtil.getLocalizationMap(descriptionMapLanguageIds,
+					descriptionMapValues);
+
+			com.liferay.portlet.dynamicdatamapping.model.DDMStructure returnValue =
+				DDMStructureServiceUtil.addStructure(userId, groupId,
+					classNameId, nameMap, descriptionMap, xsd, serviceContext);
+
+			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap addStructure(
 		long groupId, long parentStructureId, long classNameId,
 		java.lang.String structureKey, java.lang.String[] nameMapLanguageIds,
 		java.lang.String[] nameMapValues,
@@ -97,6 +124,36 @@ public class DDMStructureServiceSoap {
 		}
 	}
 
+	public static com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap addStructure(
+		long userId, long groupId, java.lang.String parentStructureKey,
+		long classNameId, java.lang.String structureKey,
+		java.lang.String[] nameMapLanguageIds,
+		java.lang.String[] nameMapValues,
+		java.lang.String[] descriptionMapLanguageIds,
+		java.lang.String[] descriptionMapValues, java.lang.String xsd,
+		java.lang.String storageType, int type,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws RemoteException {
+		try {
+			Map<Locale, String> nameMap = LocalizationUtil.getLocalizationMap(nameMapLanguageIds,
+					nameMapValues);
+			Map<Locale, String> descriptionMap = LocalizationUtil.getLocalizationMap(descriptionMapLanguageIds,
+					descriptionMapValues);
+
+			com.liferay.portlet.dynamicdatamapping.model.DDMStructure returnValue =
+				DDMStructureServiceUtil.addStructure(userId, groupId,
+					parentStructureKey, classNameId, structureKey, nameMap,
+					descriptionMap, xsd, storageType, type, serviceContext);
+
+			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	public static com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap copyStructure(
 		long structureId, java.lang.String[] nameMapLanguageIds,
 		java.lang.String[] nameMapValues,
@@ -113,6 +170,24 @@ public class DDMStructureServiceSoap {
 			com.liferay.portlet.dynamicdatamapping.model.DDMStructure returnValue =
 				DDMStructureServiceUtil.copyStructure(structureId, nameMap,
 					descriptionMap, serviceContext);
+
+			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap copyStructure(
+		long structureId,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws RemoteException {
+		try {
+			com.liferay.portlet.dynamicdatamapping.model.DDMStructure returnValue =
+				DDMStructureServiceUtil.copyStructure(structureId,
+					serviceContext);
 
 			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModel(returnValue);
 		}
@@ -157,6 +232,68 @@ public class DDMStructureServiceSoap {
 				DDMStructureServiceUtil.getStructure(structureId);
 
 			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap getStructure(
+		long groupId, java.lang.String structureKey) throws RemoteException {
+		try {
+			com.liferay.portlet.dynamicdatamapping.model.DDMStructure returnValue =
+				DDMStructureServiceUtil.getStructure(groupId, structureKey);
+
+			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap getStructure(
+		long groupId, java.lang.String structureKey,
+		boolean includeGlobalStructures) throws RemoteException {
+		try {
+			com.liferay.portlet.dynamicdatamapping.model.DDMStructure returnValue =
+				DDMStructureServiceUtil.getStructure(groupId, structureKey,
+					includeGlobalStructures);
+
+			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap[] getStructures(
+		long groupId) throws RemoteException {
+		try {
+			java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMStructure> returnValue =
+				DDMStructureServiceUtil.getStructures(groupId);
+
+			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap[] getStructures(
+		long[] groupIds) throws RemoteException {
+		try {
+			java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMStructure> returnValue =
+				DDMStructureServiceUtil.getStructures(groupIds);
+
+			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModels(returnValue);
 		}
 		catch (Exception e) {
 			_log.error(e, e);

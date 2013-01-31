@@ -567,6 +567,14 @@
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>I18n Servlet</servlet-name>
+		<url-pattern>/lt/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>I18n Servlet</servlet-name>
+		<url-pattern>/lt_LT/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>I18n Servlet</servlet-name>
 		<url-pattern>/nb/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
@@ -842,6 +850,10 @@
 			<taglib-location>/WEB-INF/tld/aui.tld</taglib-location>
 		</taglib>
 		<taglib>
+			<taglib-uri>http://liferay.com/tld/ddm</taglib-uri>
+			<taglib-location>/WEB-INF/tld/liferay-ddm.tld</taglib-location>
+		</taglib>
+		<taglib>
 			<taglib-uri>http://liferay.com/tld/portlet</taglib-uri>
 			<taglib-location>/WEB-INF/tld/liferay-portlet-ext.tld</taglib-location>
 		</taglib>
@@ -954,6 +966,8 @@
 			<url-pattern>/ko_KR/c/portal/protected</url-pattern>
 			<url-pattern>/lo/c/portal/protected</url-pattern>
 			<url-pattern>/lo_LA/c/portal/protected</url-pattern>
+			<url-pattern>/lt/c/portal/protected</url-pattern>
+			<url-pattern>/lt_LT/c/portal/protected</url-pattern>
 			<url-pattern>/nb/c/portal/protected</url-pattern>
 			<url-pattern>/nb_NO/c/portal/protected</url-pattern>
 			<url-pattern>/nl/c/portal/protected</url-pattern>

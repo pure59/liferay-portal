@@ -28,6 +28,7 @@ import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.asset.model.AssetCategory;
+import com.liferay.portlet.asset.model.AssetCategoryConstants;
 import com.liferay.portlet.asset.model.AssetVocabulary;
 import com.liferay.portlet.asset.service.base.AssetCategoryServiceBaseImpl;
 import com.liferay.portlet.asset.service.permission.AssetCategoryPermission;
@@ -63,6 +64,19 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 		return assetCategoryLocalService.addCategory(
 			getUserId(), parentCategoryId, titleMap, descriptionMap,
 			vocabularyId, categoryProperties, serviceContext);
+	}
+
+	public AssetCategory addCategory(
+			String title, long vocabularyId, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		AssetCategoryPermission.check(
+			getPermissionChecker(), serviceContext.getScopeGroupId(),
+			AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID,
+			ActionKeys.ADD_CATEGORY);
+
+		return assetCategoryLocalService.addCategory(
+			getUserId(), title, vocabularyId, serviceContext);
 	}
 
 	public void deleteCategories(long[] categoryIds)
@@ -126,32 +140,14 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 				parentCategoryId, start, end, obc));
 	}
 
+	/**
+	 * @deprecated {@link #search(long[], String, long[], int, int)}
+	 */
 	public JSONArray getJSONSearch(
 			long groupId, String name, long[] vocabularyIds, int start, int end)
 		throws PortalException, SystemException {
 
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		for (AssetVocabulary vocabulary :
-				assetVocabularyService.getVocabularies(vocabularyIds)) {
-
-			List<AssetCategory> vocabularyCategory =
-				assetCategoryFinder.findByG_N_V(
-					groupId, name, vocabulary.getVocabularyId(), start, end,
-					null);
-
-			JSONArray vocabularyCategoryJSONArray = toJSONArray(
-				vocabularyCategory);
-
-			for (int i = 0; i < vocabularyCategoryJSONArray.length(); ++i) {
-				JSONObject vocabularyCategoryJSONObject =
-					vocabularyCategoryJSONArray.getJSONObject(i);
-
-				jsonArray.put(vocabularyCategoryJSONObject);
-			}
-		}
-
-		return jsonArray;
+		return search(new long[]{groupId}, name, vocabularyIds, start, end);
 	}
 
 	public JSONObject getJSONVocabularyCategories(
@@ -230,8 +226,14 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 			OrderByComparator obc)
 		throws SystemException {
 
-		return assetCategoryFinder.filterFindByG_N_V(
-			groupId, name, vocabularyId, start, end, obc);
+		if (Validator.isNull(name)) {
+			return assetCategoryPersistence.filterFindByG_V(
+				groupId, vocabularyId, start, end, obc);
+		}
+		else {
+			return assetCategoryPersistence.filterFindByG_LikeN_V(
+				groupId, name, vocabularyId, start, end, obc);
+		}
 	}
 
 	public int getVocabularyCategoriesCount(long groupId, long vocabularyId)
@@ -244,8 +246,14 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 			long groupId, String name, long vocabularyId)
 		throws SystemException {
 
-		return assetCategoryFinder.filterCountByG_N_V(
-			groupId, name, vocabularyId);
+		if (Validator.isNull(name)) {
+			return assetCategoryPersistence.filterCountByG_V(
+				groupId, vocabularyId);
+		}
+		else {
+			return assetCategoryPersistence.filterCountByG_LikeN_V(
+				groupId, name, vocabularyId);
+		}
 	}
 
 	public List<AssetCategory> getVocabularyRootCategories(
@@ -269,19 +277,21 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 			categoryId, parentCategoryId, vocabularyId, serviceContext);
 	}
 
-	public void rebuildTree(long groupId) throws SystemException {
-		assetCategoryPersistence.rebuildTree(groupId, true);
-	}
-
 	public List<AssetCategory> search(
 			long groupId, String keywords, long vocabularyId, int start,
 			int end, OrderByComparator obc)
-		throws PortalException, SystemException {
+		throws SystemException {
 
-		return filterCategories(
-			assetCategoryFinder.findByG_N_V(
-				groupId, CustomSQLUtil.keywords(keywords)[0], vocabularyId,
-				start, end, obc));
+		String name = CustomSQLUtil.keywords(keywords)[0];
+
+		if (Validator.isNull(name)) {
+			return assetCategoryPersistence.filterFindByG_V(
+				groupId, vocabularyId, start, end, obc);
+		}
+		else {
+			return assetCategoryPersistence.filterFindByG_LikeN_V(
+				groupId, name, vocabularyId, start, end, obc);
+		}
 	}
 
 	public JSONArray search(
@@ -295,6 +305,35 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 		categories = filterCategories(categories);
 
 		return Autocomplete.listToJson(categories, "name", "name");
+	}
+
+	public JSONArray search(
+			long[] groupIds, String name, long[] vocabularyIds, int start,
+			int end)
+		throws PortalException, SystemException {
+
+		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
+
+		for (long groupId : groupIds) {
+			JSONArray categoriesJSONArray = null;
+
+			if (Validator.isNull(name)) {
+				categoriesJSONArray = toJSONArray(
+					assetCategoryPersistence.filterFindByG_V(
+						groupId, vocabularyIds));
+			}
+			else {
+				categoriesJSONArray = toJSONArray(
+					assetCategoryPersistence.filterFindByG_LikeN_V(
+						groupId, name, vocabularyIds));
+			}
+
+			for (int j = 0; j < categoriesJSONArray.length(); j++) {
+				jsonArray.put(categoriesJSONArray.getJSONObject(j));
+			}
+		}
+
+		return jsonArray;
 	}
 
 	public AssetCategory updateCategory(

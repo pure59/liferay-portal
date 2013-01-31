@@ -18,6 +18,7 @@
 <%@ page import="com.liferay.portal.kernel.util.HtmlUtil" %>
 <%@ page import="com.liferay.portal.kernel.util.ParamUtil" %>
 <%@ page import="com.liferay.portal.kernel.util.StringUtil" %>
+<%@ page import="com.liferay.portlet.messageboards.model.MBThreadConstants" %>
 
 <%
 String cssPath = ParamUtil.getString(request, "cssPath");
@@ -37,10 +38,8 @@ CKEDITOR.config.removePlugins = [
 	'div',
 	'flash',
 	'forms',
-	'indent',
 	'keystrokes',
 	'link',
-	'menu',
 	'maximize',
 	'newpage',
 	'pagebreak',
@@ -55,7 +54,7 @@ CKEDITOR.config.removePlugins = [
 
 CKEDITOR.config.toolbar_bbcode = [
 	['Bold', 'Italic', 'Underline', 'Strike', '-', 'Link', 'Unlink'],
-	['Image', 'Smiley', '-', 'TextColor', '-', 'NumberedList', 'BulletedList'],
+	['Image', 'Smiley', '-', 'TextColor', '-', 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'],
 	['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'Blockquote', '-', 'Code'],
 	'/',
 	['Font', 'FontSize', '-', 'Format', '-', 'Undo', 'Redo', '-', 'Source']
@@ -87,7 +86,7 @@ CKEDITOR.config.imagesPath = '<%= HtmlUtil.escapeJS(imagesPath) %>/message_board
 
 CKEDITOR.config.language = '<%= HtmlUtil.escapeJS(languageId) %>';
 
-CKEDITOR.config.newThreadURL = '<%= BBCodeTranslatorUtil.NEW_THREAD_URL %>';
+CKEDITOR.config.newThreadURL = '<%= MBThreadConstants.NEW_THREAD_URL %>';
 
 CKEDITOR.config.resize_enabled = '<%= resizable %>';
 

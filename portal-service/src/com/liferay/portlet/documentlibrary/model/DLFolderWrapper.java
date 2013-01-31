@@ -874,6 +874,12 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 		_dlFolder.persist();
 	}
 
+	public java.util.List<java.lang.Long> getAncestorFolderIds()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _dlFolder.getAncestorFolderIds();
+	}
+
 	public java.util.List<com.liferay.portlet.documentlibrary.model.DLFolder> getAncestors()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
@@ -898,8 +904,8 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 		return _dlFolder.getPathArray();
 	}
 
-	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashFolder() {
-		return _dlFolder.getTrashFolder();
+	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashContainer() {
+		return _dlFolder.getTrashContainer();
 	}
 
 	public boolean hasInheritableLock() {
@@ -910,8 +916,12 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 		return _dlFolder.hasLock();
 	}
 
-	public boolean isInTrashFolder() {
-		return _dlFolder.isInTrashFolder();
+	public boolean isInHiddenFolder() {
+		return _dlFolder.isInHiddenFolder();
+	}
+
+	public boolean isInTrashContainer() {
+		return _dlFolder.isInTrashContainer();
 	}
 
 	public boolean isLocked() {

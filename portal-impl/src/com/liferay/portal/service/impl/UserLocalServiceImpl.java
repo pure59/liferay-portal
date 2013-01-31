@@ -44,6 +44,7 @@ import com.liferay.portal.UserPortraitTypeException;
 import com.liferay.portal.UserReminderQueryException;
 import com.liferay.portal.UserScreenNameException;
 import com.liferay.portal.UserSmsException;
+import com.liferay.portal.kernel.concurrent.PortalCallable;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.image.ImageBag;
@@ -67,6 +68,7 @@ import com.liferay.portal.kernel.util.Digester;
 import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.KeyValuePair;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -558,9 +560,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  sendEmail whether to send the user an email notification about
 	 *         their new account
 	 * @param  serviceContext the user's service context (optionally
-	 *         <code>null</code>). Can set the universally unique identifier
-	 *         (with the <code>uuid</code> attribute), asset category IDs, asset
-	 *         tag names, and expando bridge attributes for the user.
+	 *         <code>null</code>). Can set the UUID (with the <code>uuid</code>
+	 *         attribute), asset category IDs, asset tag names, and expando
+	 *         bridge attributes for the user.
 	 * @return the new user
 	 * @throws PortalException if the user's information was invalid
 	 * @throws SystemException if a system exception occurred
@@ -662,9 +664,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  sendEmail whether to send the user an email notification about
 	 *         their new account
 	 * @param  serviceContext the user's service context (optionally
-	 *         <code>null</code>). Can set the universally unique identifier
-	 *         (with the <code>uuid</code> attribute), asset category IDs, asset
-	 *         tag names, and expando bridge attributes for the user.
+	 *         <code>null</code>). Can set the UUID (with the <code>uuid</code>
+	 *         attribute), asset category IDs, asset tag names, and expando
+	 *         bridge attributes for the user.
 	 * @return the new user
 	 * @throws PortalException if the user's information was invalid
 	 * @throws SystemException if a system exception occurred
@@ -686,8 +688,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		Company company = companyPersistence.findByPrimaryKey(companyId);
 		screenName = getScreenName(screenName);
-		emailAddress = emailAddress.trim().toLowerCase();
-		openId = openId.trim();
+		openId = StringUtil.trim(openId);
 		Date now = new Date();
 
 		if (PrefsPropsUtil.getBoolean(
@@ -703,8 +704,13 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		EmailAddressGenerator emailAddressGenerator =
 			EmailAddressGeneratorFactory.getInstance();
 
-		if (emailAddressGenerator.isGenerated(emailAddress)) {
+		if ((emailAddress == null) ||
+			emailAddressGenerator.isGenerated(emailAddress)) {
+
 			emailAddress = StringPool.BLANK;
+		}
+		else {
+			emailAddress = emailAddress.trim().toLowerCase();
 		}
 
 		if (!PropsValues.USERS_EMAIL_ADDRESS_REQUIRED &&
@@ -774,14 +780,20 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		PasswordPolicy passwordPolicy = defaultUser.getPasswordPolicy();
 
-		if ((passwordPolicy != null) && passwordPolicy.isChangeable() &&
-			passwordPolicy.isChangeRequired()) {
+		boolean passwordReset = false;
 
-			user.setPasswordReset(true);
+		if (passwordPolicy != null) {
+			if (passwordPolicy.isChangeable() &&
+				passwordPolicy.isChangeRequired()) {
+
+				passwordReset = true;
+			}
+
+			addPasswordPolicyUsers(
+				passwordPolicy.getPasswordPolicyId(), new long[] {userId});
 		}
-		else {
-			user.setPasswordReset(false);
-		}
+
+		user.setPasswordReset(passwordReset);
 
 		user.setDigest(StringPool.BLANK);
 		user.setScreenName(screenName);
@@ -798,7 +810,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		}
 
 		user.setOpenId(openId);
-		user.setLanguageId(locale.toString());
+		user.setLanguageId(LocaleUtil.toLanguageId(locale));
 		user.setTimeZoneId(defaultUser.getTimeZoneId());
 		user.setGreeting(greeting);
 		user.setFirstName(firstName);
@@ -1196,16 +1208,22 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			user = getUserByEmailAddress(companyId, username);
 		}
 		catch (NoSuchUserException nsue) {
+		}
+
+		if (user == null) {
 			try {
 				user = getUserByScreenName(companyId, username);
 			}
-			catch (NoSuchUserException nsue2) {
-				try {
-					user = getUserById(GetterUtil.getLong(username));
-				}
-				catch (NoSuchUserException nsue3) {
-					return 0;
-				}
+			catch (NoSuchUserException nsue) {
+			}
+		}
+
+		if (user == null) {
+			try {
+				user = getUserById(GetterUtil.getLong(username));
+			}
+			catch (NoSuchUserException nsue) {
+				return 0;
 			}
 		}
 
@@ -2670,12 +2688,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	}
 
 	/**
-	 * Returns the user with the universally unique identifier.
+	 * Returns the user with the UUID.
 	 *
-	 * @param      uuid the user's universally unique identifier
-	 * @return     the user with the universally unique identifier
-	 * @throws     PortalException if a user with the universally unique
-	 *             identifier could not be found
+	 * @param      uuid the user's UUID
+	 * @return     the user with the UUID
+	 * @throws     PortalException if a user with the UUID could not be found
 	 * @throws     SystemException if a system exception occurred
 	 * @deprecated {@link #getUserByUuidAndCompanyId(String, long)}
 	 */
@@ -2693,13 +2710,12 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	}
 
 	/**
-	 * Returns the user with the universally unique identifier.
+	 * Returns the user with the UUID.
 	 *
-	 * @param  uuid the user's universally unique identifier
+	 * @param  uuid the user's UUID
 	 * @param  companyId the primary key of the user's company
-	 * @return the user with the universally unique identifier
-	 * @throws PortalException if a user with the universally unique identifier
-	 *         could not be found
+	 * @return the user with the UUID
+	 * @throws PortalException if a user with the UUID could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
 	public User getUserByUuidAndCompanyId(String uuid, long companyId)
@@ -4747,9 +4763,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  userGroupRoles the user user's group roles
 	 * @param  userGroupIds the primary keys of the user's user groups
 	 * @param  serviceContext the user's service context (optionally
-	 *         <code>null</code>). Can set the universally unique identifier
-	 *         (with the <code>uuid</code> attribute), asset category IDs, asset
-	 *         tag names, and expando bridge attributes for the user.
+	 *         <code>null</code>). Can set the UUID (with the <code>uuid</code>
+	 *         attribute), asset category IDs, asset tag names, and expando
+	 *         bridge attributes for the user.
 	 * @return the user
 	 * @throws PortalException if a user with the primary key could not be found
 	 *         or if the new information was invalid
@@ -5460,9 +5476,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		final Indexer indexer = IndexerRegistryUtil.nullSafeGetIndexer(
 			User.class);
 
-		Callable<Void> callable = new Callable<Void>() {
+		Callable<Void> callable = new PortalCallable<Void>(
+			user.getCompanyId()) {
 
-			public Void call() throws Exception {
+			@Override
+			protected Void doCall() throws Exception {
 				indexer.reindex(user);
 
 				return null;
@@ -6080,7 +6098,6 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 	private static Log _log = LogFactoryUtil.getLog(UserLocalServiceImpl.class);
 
-	private static Map<Long, User> _defaultUsers =
-		new ConcurrentHashMap<Long, User>();
+	private Map<Long, User> _defaultUsers = new ConcurrentHashMap<Long, User>();
 
 }

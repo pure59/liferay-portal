@@ -14,17 +14,17 @@ insert into JournalArticle values ('${portalUUIDUtil.generate()}', ${journalArti
 
 ${sampleSQLBuilder.insertResourcePermission("com.liferay.portlet.journal.model.JournalArticle", stringUtil.valueOf(journalArticleResource.resourcePrimKey))}
 
-<#assign assetEntry = dataFactory.addAssetEntry(groupId, defaultUserId, dataFactory.journalArticleClassName.classNameId, journalArticleResource.resourcePrimKey, true, "text/html", journalArticleTitle)>
+<#assign assetEntry = dataFactory.addAssetEntry(groupId, defaultUserId, dataFactory.journalArticleClassNameId, journalArticleResource.resourcePrimKey, true, "text/html", journalArticleTitle)>
 
 insert into AssetEntry (entryId, groupId, companyId, userId, createDate, modifiedDate, classNameId, classPK, visible, mimeType, title) values (${counter.get()}, ${assetEntry.groupId}, ${companyId}, ${assetEntry.userId}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ${assetEntry.classNameId}, ${assetEntry.classPK}, <#if assetEntry.visible>TRUE<#else>FALSE</#if>, '${assetEntry.mimeType}', '${assetEntry.title}');
 
-<#assign mbDiscussion = dataFactory.addMBDiscussion(dataFactory.journalArticleClassName.classNameId, journalArticleResource.resourcePrimKey, counter.get())>
+<#assign mbDiscussion = dataFactory.addMBDiscussion(dataFactory.journalArticleClassNameId, journalArticleResource.resourcePrimKey, counter.get())>
 
 insert into MBDiscussion values (${mbDiscussion.discussionId}, ${mbDiscussion.classNameId}, ${mbDiscussion.classPK}, ${mbDiscussion.threadId});
 
 <#assign mbMessageId = counter.get()>
 
-<#assign mbMessage = dataFactory.addMBMessage(mbMessageId, groupId, defaultUserId, dataFactory.journalArticleClassName.classNameId, journalArticleResource.resourcePrimKey, -1, counter.get(), mbMessageId, 0, stringUtil.valueOf(journalArticleResource.resourcePrimKey), stringUtil.valueOf(journalArticleResource.resourcePrimKey))>
+<#assign mbMessage = dataFactory.addMBMessage(mbMessageId, groupId, defaultUserId, dataFactory.journalArticleClassNameId, journalArticleResource.resourcePrimKey, -1, counter.get(), mbMessageId, 0, stringUtil.valueOf(journalArticleResource.resourcePrimKey), stringUtil.valueOf(journalArticleResource.resourcePrimKey))>
 
 ${sampleSQLBuilder.insertMBMessage(mbMessage)}
 
@@ -32,7 +32,17 @@ ${sampleSQLBuilder.insertMBMessage(mbMessage)}
 
 insert into MBThread values (${mbThread.threadId}, ${mbThread.groupId}, ${mbThread.companyId}, ${mbThread.categoryId}, ${mbThread.rootMessageId}, ${mbThread.rootMessageUserId}, ${mbThread.messageCount}, 0, ${mbThread.lastPostByUserId}, CURRENT_TIMESTAMP, 0, FALSE, 0, ${mbThread.lastPostByUserId}, '', CURRENT_TIMESTAMP);
 
-<#list journalArticleLayouts as layout>
+<#assign publicLayoutsSize = publicLayouts?size>
+
+<#list 1..maxJournalArticleCount as journalArticleCount>
+	<#assign friendlyURL = "/" + groupId + "_journal_article_" + journalArticleCount>
+
+	<#assign layout = dataFactory.addLayout(publicLayoutsSize + journalArticleCount, "Web Content " + journalArticleCount, friendlyURL, "", "56,")>
+
+	${writerLayoutCSV.write(friendlyURL + "\n")}
+
+	<#assign publicLayouts = publicLayouts + [layout]>
+
 	<#assign preferences = "<portlet-preferences><preference><name>articleId</name><value>" + journalArticleResource.articleId + "</value></preference><preference><name>enableCommentRatings</name><value>false</value></preference><preference><name>enableComments</name><value>false</value></preference><preference><name>enablePrint</name><value>false</value></preference><preference><name>enableRatings</name><value>false</value></preference><preference><name>enableRelatedAssets</name><value>true</value></preference><preference><name>enableViewCountIncrement</name><value>false</value></preference><preference><name>extensions</name><value>NULL_VALUE</value></preference><preference><name>groupId</name><value>" + groupId + "</value></preference><preference><name>showAvailableLocales</name><value>false</value></preference><preference><name>templateId</name><value></value></preference></portlet-preferences>">
 
 	<#assign portletPreferences = dataFactory.addPortletPreferences(defaultUserId, layout.plid, "86", preferences)>

@@ -417,7 +417,7 @@ public class DLAppLocalServiceUtil {
 	/**
 	* Returns the file entry with the UUID and group.
 	*
-	* @param uuid the file entry's universally unique identifier
+	* @param uuid the file entry's UUID
 	* @param groupId the primary key of the file entry's group
 	* @return the file entry with the UUID and group
 	* @throws PortalException if the file entry could not be found
@@ -574,6 +574,33 @@ public class DLAppLocalServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		getService().restoreFileEntryFromTrash(userId, fileEntryId);
+	}
+
+	public static void subscribeFileEntryType(long userId, long groupId,
+		long fileEntryTypeId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().subscribeFileEntryType(userId, groupId, fileEntryTypeId);
+	}
+
+	public static void subscribeFolder(long userId, long groupId, long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().subscribeFolder(userId, groupId, folderId);
+	}
+
+	public static void unsubscribeFileEntryType(long userId, long groupId,
+		long fileEntryTypeId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().unsubscribeFileEntryType(userId, groupId, fileEntryTypeId);
+	}
+
+	public static void unsubscribeFolder(long userId, long groupId,
+		long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().unsubscribeFolder(userId, groupId, folderId);
 	}
 
 	/**

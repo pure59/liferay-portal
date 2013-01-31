@@ -698,6 +698,22 @@ public class StringUtil {
 	}
 
 	/**
+	 * Converts the first character of the string to lower case.
+	 *
+	 * @param  s the string whose first character is to be converted
+	 * @return the string, with its first character converted to lower-case
+	 */
+	public static String lowerCaseFirstLetter(String s) {
+		char[] chars = s.toCharArray();
+
+		if ((chars[0] >= 65) && (chars[0] <= 90)) {
+			chars[0] = (char)(chars[0] + 32);
+		}
+
+		return new String(chars);
+	}
+
+	/**
 	 * Returns <code>true</code> if the specified pattern occurs at any position
 	 * in the string.
 	 *
@@ -1225,8 +1241,6 @@ public class StringUtil {
 					sb.append(s);
 					sb.append(StringPool.NEW_LINE);
 				}
-
-				is.close();
 			}
 
 			return sb.toString().trim();
@@ -1241,8 +1255,6 @@ public class StringUtil {
 
 			String s = read(is);
 
-			is.close();
-
 			return s;
 		}
 	}
@@ -1255,12 +1267,15 @@ public class StringUtil {
 
 		String line = null;
 
-		while ((line = unsyncBufferedReader.readLine()) != null) {
-			sb.append(line);
-			sb.append(CharPool.NEW_LINE);
+		try {
+			while ((line = unsyncBufferedReader.readLine()) != null) {
+				sb.append(line);
+				sb.append(CharPool.NEW_LINE);
+			}
 		}
-
-		unsyncBufferedReader.close();
+		finally {
+			unsyncBufferedReader.close();
+		}
 
 		return sb.toString().trim();
 	}

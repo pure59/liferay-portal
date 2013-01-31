@@ -89,6 +89,10 @@
 		margin-right: 10px;
 	}
 
+	.lfr-document-library-add-menu {
+		margin-bottom: 10px;
+	}
+
 	.lfr-template-editor {
 		.aui-field-element, .aui-field-content, .aui-field-input-text {
 			display: block;
@@ -96,6 +100,33 @@
 
 		.aui-field-input-text {
 			height: 400px;
+		}
+	}
+
+	.editor-toolbar {
+		background-color: #DDD;
+		border: 1px solid #CCC;
+		border-bottom: none;
+		font-size: 0.8em;
+	}
+
+	.editor-type {
+		display: block;
+		padding: .2em;
+		text-align: right;
+	}
+
+	.language-type {
+		float: left;
+		padding: .2em;
+	}
+
+	.aui-form-builder-source-wrapper {
+		height: 600px;
+		position: relative;
+		
+		.aui-form-builder-source {
+			position: relative;
 		}
 	}
 }

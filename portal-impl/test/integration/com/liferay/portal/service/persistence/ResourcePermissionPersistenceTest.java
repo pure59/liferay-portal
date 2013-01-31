@@ -284,10 +284,6 @@ public class ResourcePermissionPersistenceTest {
 				existingResourcePermissionModelImpl.getOriginalPrimKey()));
 		Assert.assertEquals(existingResourcePermissionModelImpl.getRoleId(),
 			existingResourcePermissionModelImpl.getOriginalRoleId());
-		Assert.assertEquals(existingResourcePermissionModelImpl.getOwnerId(),
-			existingResourcePermissionModelImpl.getOriginalOwnerId());
-		Assert.assertEquals(existingResourcePermissionModelImpl.getActionIds(),
-			existingResourcePermissionModelImpl.getOriginalActionIds());
 	}
 
 	protected ResourcePermission addResourcePermission()

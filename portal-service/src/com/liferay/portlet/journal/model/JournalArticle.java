@@ -38,6 +38,9 @@ public interface JournalArticle extends JournalArticleModel, PersistedModel {
 			}
 		};
 
+	public java.lang.String getArticleImageURL(
+		com.liferay.portal.theme.ThemeDisplay themeDisplay);
+
 	public com.liferay.portlet.journal.model.JournalArticleResource getArticleResource()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
@@ -62,6 +65,7 @@ public interface JournalArticle extends JournalArticleModel, PersistedModel {
 
 	public boolean isTemplateDriven();
 
+	@java.lang.SuppressWarnings(value = "unused")
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException;

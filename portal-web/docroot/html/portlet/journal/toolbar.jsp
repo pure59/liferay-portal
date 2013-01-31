@@ -19,15 +19,13 @@
 <liferay-ui:icon-menu align="left" cssClass="actions-button" direction="down" icon="" id="actionsButtonContainer" message="actions" showExpanded="<%= false %>" showWhenSingleIcon="<%= true %>">
 
 	<%
-	String taglibOnClick = "Liferay.fire('" + renderResponse.getNamespace() + "editEntry', {action: '" + Constants.DELETE + "'});";
+	String taglibOnClick = "Liferay.fire('" + renderResponse.getNamespace() + "editEntry', {action: '" + (TrashUtil.isTrashEnabled(scopeGroupId) ? Constants.MOVE_TO_TRASH : Constants.DELETE) + "'});";
 	%>
 
-	<liferay-ui:icon
-		cssClass="delete-articles-button"
-		image="delete"
-		message="delete"
-		onClick="<%= taglibOnClick %>"
-		url="javascript:;"
+	<liferay-ui:icon-delete
+		confirmation="are-you-sure-you-want-to-delete-the-selected-entries"
+		trash="<%= TrashUtil.isTrashEnabled(scopeGroupId) %>"
+		url="<%= taglibOnClick %>"
 	/>
 
 	<%
@@ -77,15 +75,6 @@
 			/>
 
 			<%
-			taglibURL = "javascript:" + renderResponse.getNamespace() + "openTemplatesView()";
-			%>
-
-			<liferay-ui:icon
-				message="templates"
-				url="<%= taglibURL %>"
-			/>
-
-			<%
 			taglibURL = "javascript:" + renderResponse.getNamespace() + "openFeedsView()";
 			%>
 
@@ -116,27 +105,20 @@
 	</c:if>
 
 	function <portlet:namespace />openStructuresView() {
-		Liferay.Util.openWindow(
+		Liferay.Util.openDDMPortlet(
 			{
+				ddmResource: '<%= ddmResource %>',
+				ddmResourceActionId: '<%= ActionKeys.ADD_TEMPLATE %>',
 				dialog: {
 					width: 820
 				},
-				id: '<portlet:namespace />openStructuresView',
-				title: '<%= UnicodeLanguageUtil.get(pageContext, "structures") %>',
-				uri: '<liferay-portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="struts_action" value="/journal/view_structures" /></liferay-portlet:renderURL>'
-			}
-		);
-	}
-
-	function <portlet:namespace />openTemplatesView() {
-		Liferay.Util.openWindow(
-			{
-				dialog: {
-					width: 820
-				},
-				id: '<portlet:namespace />openTemplatesView',
-				title: '<%= UnicodeLanguageUtil.get(pageContext, "templates") %>',
-				uri: '<liferay-portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="struts_action" value="/journal/view_templates" /></liferay-portlet:renderURL>'
+				showGlobalScope: 'false',
+				showManageTemplates: 'true',
+				storageType: '<%= PropsValues.JOURNAL_ARTICLE_STORAGE_TYPE %>',
+				structureName: 'structure',
+				structureType: 'com.liferay.portlet.journal.model.JournalArticle',
+				templateType: '<%= DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY %>',
+				title: '<%= UnicodeLanguageUtil.get(pageContext, "structures") %>'
 			}
 		);
 	}

@@ -278,7 +278,7 @@ public class DLAppServiceSoap {
 	* </p>
 	*
 	* @param fileEntryId the primary key of the file entry to check in
-	* @param lockUuid the lock's universally unique identifier
+	* @param lockUuid the lock's UUID
 	* @param serviceContext the service context to be applied
 	* @throws PortalException if the file entry could not be found
 	* @throws SystemException if a system exception occurred
@@ -909,7 +909,7 @@ public class DLAppServiceSoap {
 	/**
 	* Returns the file entry with the UUID and group.
 	*
-	* @param uuid the file entry's universally unique identifier
+	* @param uuid the file entry's UUID
 	* @param groupId the primary key of the file entry's group
 	* @return the file entry with the UUID and group
 	* @throws PortalException if the file entry could not be found
@@ -2222,6 +2222,30 @@ public class DLAppServiceSoap {
 		}
 	}
 
+	public static void subscribeFileEntryType(long groupId, long fileEntryTypeId)
+		throws RemoteException {
+		try {
+			DLAppServiceUtil.subscribeFileEntryType(groupId, fileEntryTypeId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static void subscribeFolder(long groupId, long folderId)
+		throws RemoteException {
+		try {
+			DLAppServiceUtil.subscribeFolder(groupId, folderId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	/**
 	* @deprecated Use {@link #checkInFileEntry(long, boolean, String,
 	ServiceContext)}.
@@ -2258,7 +2282,7 @@ public class DLAppServiceSoap {
 	*
 	* @param repositoryId the primary key of the repository
 	* @param folderId the primary key of the folder
-	* @param lockUuid the lock's universally unique identifier
+	* @param lockUuid the lock's UUID
 	* @throws PortalException if the repository or folder could not be found
 	* @throws SystemException if a system exception occurred
 	*/
@@ -2280,7 +2304,7 @@ public class DLAppServiceSoap {
 	* @param repositoryId the primary key of the repository
 	* @param parentFolderId the primary key of the parent folder
 	* @param name the folder's name
-	* @param lockUuid the lock's universally unique identifier
+	* @param lockUuid the lock's UUID
 	* @throws PortalException if the repository or folder could not be found
 	* @throws SystemException if a system exception occurred
 	*/
@@ -2290,6 +2314,30 @@ public class DLAppServiceSoap {
 		try {
 			DLAppServiceUtil.unlockFolder(repositoryId, parentFolderId, name,
 				lockUuid);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static void unsubscribeFileEntryType(long groupId,
+		long fileEntryTypeId) throws RemoteException {
+		try {
+			DLAppServiceUtil.unsubscribeFileEntryType(groupId, fileEntryTypeId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static void unsubscribeFolder(long groupId, long folderId)
+		throws RemoteException {
+		try {
+			DLAppServiceUtil.unsubscribeFolder(groupId, folderId);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -2433,7 +2481,7 @@ public class DLAppServiceSoap {
 	*
 	* @param repositoryId the primary key for the repository
 	* @param fileEntryId the primary key for the file entry
-	* @param lockUuid the lock's universally unique identifier
+	* @param lockUuid the lock's UUID
 	* @return <code>true</code> if the file entry is checked out;
 	<code>false</code> otherwise
 	* @throws PortalException if the file entry could not be found
@@ -2475,7 +2523,7 @@ public class DLAppServiceSoap {
 	*
 	* @param repositoryId the primary key for the repository
 	* @param folderId the primary key for the folder
-	* @param lockUuid the lock's universally unique identifier
+	* @param lockUuid the lock's UUID
 	* @return <code>true</code> if the inheritable lock exists;
 	<code>false</code> otherwise
 	* @throws PortalException if the folder could not be found

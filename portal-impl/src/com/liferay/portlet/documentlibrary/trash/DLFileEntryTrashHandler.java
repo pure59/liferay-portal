@@ -19,13 +19,15 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.repository.Repository;
 import com.liferay.portal.kernel.repository.model.FileEntry;
-import com.liferay.portal.kernel.trash.BaseTrashHandler;
 import com.liferay.portal.kernel.trash.TrashActionKeys;
-import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.trash.TrashHandler;
+import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
+import com.liferay.portal.model.ContainerModel;
 import com.liferay.portal.repository.liferayrepository.LiferayRepository;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.RepositoryServiceUtil;
+import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFileVersion;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
@@ -35,12 +37,10 @@ import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileVersionLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.permission.DLFileEntryPermission;
 import com.liferay.portlet.documentlibrary.service.permission.DLFolderPermission;
-import com.liferay.portlet.documentlibrary.util.DLAppHelperThreadLocal;
 import com.liferay.portlet.documentlibrary.util.DLUtil;
 import com.liferay.portlet.trash.DuplicateEntryException;
 import com.liferay.portlet.trash.TrashEntryConstants;
 import com.liferay.portlet.trash.model.TrashEntry;
-import com.liferay.portlet.trash.util.TrashUtil;
 
 import javax.portlet.PortletRequest;
 
@@ -51,7 +51,7 @@ import javax.portlet.PortletRequest;
  * @author Manuel de la Peña
  * @author Zsolt Berentey
  */
-public class DLFileEntryTrashHandler extends BaseTrashHandler {
+public class DLFileEntryTrashHandler extends DLBaseTrashHandler {
 
 	public static final String CLASS_NAME = DLFileEntry.class.getName();
 
@@ -66,13 +66,7 @@ public class DLFileEntryTrashHandler extends BaseTrashHandler {
 			containerModelId = dlFileEntry.getFolderId();
 		}
 
-		String restoredTitle = dlFileEntry.getTitle();
-
-		if (Validator.isNotNull(newName)) {
-			restoredTitle = newName;
-		}
-
-		String originalTitle = TrashUtil.stripTrashNamespace(restoredTitle);
+		String originalTitle = trashEntry.getTypeSettingsProperty("title");
 
 		DLFileEntry duplicateDLFileEntry =
 			DLFileEntryLocalServiceUtil.fetchFileEntry(
@@ -104,6 +98,21 @@ public class DLFileEntryTrashHandler extends BaseTrashHandler {
 
 	public String getClassName() {
 		return CLASS_NAME;
+	}
+
+	@Override
+	public ContainerModel getParentContainerModel(long classPK)
+		throws PortalException, SystemException {
+
+		DLFileEntry dlFileEntry = getDLFileEntry(classPK);
+
+		long parentFolderId = dlFileEntry.getFolderId();
+
+		if (parentFolderId <= 0) {
+			return null;
+		}
+
+		return getContainerModel(parentFolderId);
 	}
 
 	@Override
@@ -145,35 +154,82 @@ public class DLFileEntryTrashHandler extends BaseTrashHandler {
 	public boolean isInTrash(long classPK)
 		throws PortalException, SystemException {
 
+		try {
+			DLFileEntry dlFileEntry = getDLFileEntry(classPK);
+
+			DLFileVersion dlFileVersion = dlFileEntry.getFileVersion();
+
+			if (dlFileEntry.isInTrashContainer() || dlFileVersion.isInTrash()) {
+				return true;
+			}
+
+			return false;
+		}
+		catch (InvalidRepositoryException ire) {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isInTrashContainer(long classPK)
+		throws PortalException, SystemException {
+
 		DLFileEntry dlFileEntry = getDLFileEntry(classPK);
 
-		DLFileVersion dlFileVersion = dlFileEntry.getFileVersion();
+		return dlFileEntry.isInTrashContainer();
+	}
 
-		if (dlFileEntry.isInTrashFolder() || dlFileVersion.isInTrash()) {
-			return true;
+	@Override
+	public boolean isRestorable(long classPK)
+		throws PortalException, SystemException {
+
+		try {
+			DLFileEntry dlFileEntry = getDLFileEntry(classPK);
+
+			return !dlFileEntry.isInTrashContainer();
 		}
+		catch (InvalidRepositoryException ire) {
+			return false;
+		}
+	}
 
-		return false;
+	@Override
+	public void moveEntry(
+			long classPK, long containerModelId, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		DLAppServiceUtil.moveFileEntry(
+			classPK, containerModelId, serviceContext);
+	}
+
+	@Override
+	public void moveTrashEntry(
+			long classPK, long containerModelId, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		DLAppServiceUtil.moveFileEntryFromTrash(
+			classPK, containerModelId, serviceContext);
 	}
 
 	public void restoreTrashEntries(long[] classPKs)
 		throws PortalException, SystemException {
 
 		for (long classPK : classPKs) {
-			boolean dlAppHelperEnabled = DLAppHelperThreadLocal.isEnabled();
+			DLFileEntry dlFileEntry = getDLFileEntry(classPK);
 
-			try {
-				DLFileEntry dlFileEntry = getDLFileEntry(classPK);
+			if ((dlFileEntry.getClassNameId() > 0) &&
+				(dlFileEntry.getClassPK() > 0)) {
 
-				if (dlFileEntry.isInHiddenFolder()) {
-					DLAppHelperThreadLocal.setEnabled(false);
-				}
+				TrashHandler trashHandler =
+					TrashHandlerRegistryUtil.getTrashHandler(
+						dlFileEntry.getClassName());
 
-				DLAppServiceUtil.restoreFileEntryFromTrash(classPK);
+				trashHandler.restoreRelatedTrashEntry(getClassName(), classPK);
+
+				continue;
 			}
-			finally {
-				DLAppHelperThreadLocal.setEnabled(dlAppHelperEnabled);
-			}
+
+			DLAppServiceUtil.restoreFileEntryFromTrash(classPK);
 		}
 	}
 
@@ -209,6 +265,22 @@ public class DLFileEntryTrashHandler extends BaseTrashHandler {
 		FileEntry fileEntry = repository.getFileEntry(classPK);
 
 		return (DLFileEntry)fileEntry.getModel();
+	}
+
+	@Override
+	protected Repository getRepository(long classPK)
+		throws PortalException, SystemException {
+
+		Repository repository = RepositoryServiceUtil.getRepositoryImpl(
+			0, classPK, 0);
+
+		if (!(repository instanceof LiferayRepository)) {
+			throw new InvalidRepositoryException(
+				"Repository " + repository.getRepositoryId() +
+					" does not support trash operations");
+		}
+
+		return repository;
 	}
 
 	@Override

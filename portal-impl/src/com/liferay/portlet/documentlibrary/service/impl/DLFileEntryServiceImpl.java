@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Lock;
+import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
@@ -72,8 +73,9 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		try {
-			DLFileEntryPermission.check(
-				getPermissionChecker(), fileEntryId, ActionKeys.UPDATE);
+			if (!hasFileEntryLock(fileEntryId)) {
+				throw new PrincipalException();
+			}
 		}
 		catch (NoSuchFileEntryException nsfee) {
 		}
@@ -87,8 +89,9 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		try {
-			DLFileEntryPermission.check(
-				getPermissionChecker(), fileEntryId, ActionKeys.UPDATE);
+			if (!hasFileEntryLock(fileEntryId)) {
+				throw new PrincipalException();
+			}
 		}
 		catch (NoSuchFileEntryException nsfee) {
 		}
@@ -111,8 +114,9 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		try {
-			DLFileEntryPermission.check(
-				getPermissionChecker(), fileEntryId, ActionKeys.UPDATE);
+			if (!hasFileEntryLock(fileEntryId)) {
+				throw new PrincipalException();
+			}
 		}
 		catch (NoSuchFileEntryException nsfee) {
 		}
@@ -158,12 +162,6 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 
 		DLFileEntryPermission.check(
 			getPermissionChecker(), fileEntryId, ActionKeys.UPDATE);
-
-		if ((expirationTime <= 0) ||
-			(expirationTime > DLFileEntryImpl.LOCK_EXPIRATION_TIME)) {
-
-			expirationTime = DLFileEntryImpl.LOCK_EXPIRATION_TIME;
-		}
 
 		return dlFileEntryLocalService.checkOutFileEntry(
 			getUserId(), fileEntryId, owner, expirationTime, serviceContext);
@@ -526,6 +524,13 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 			(folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID)) {
 
 			hasLock = dlFolderService.hasInheritableLock(folderId);
+		}
+
+		if (DLFileEntryPermission.contains(
+				getPermissionChecker(), fileEntryId,
+				ActionKeys.OVERRIDE_CHECKOUT)) {
+
+			hasLock = true;
 		}
 
 		return hasLock;

@@ -33,6 +33,7 @@ import com.liferay.portal.model.PortletApp;
 import com.liferay.portal.model.PortletURLListener;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.PortletLocalServiceUtil;
+import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
 
@@ -248,6 +249,16 @@ public abstract class PortletResponseImpl implements LiferayPortletResponse {
 			Layout layout = (Layout)_portletRequestImpl.getAttribute(
 				WebKeys.LAYOUT);
 
+			if (layout == null) {
+				ThemeDisplay themeDisplay =
+					(ThemeDisplay)_portletRequestImpl.getAttribute(
+						WebKeys.THEME_DISPLAY);
+
+				if (themeDisplay != null) {
+					layout = themeDisplay.getLayout();
+				}
+			}
+
 			if (_portletSetup == null) {
 				_portletSetup =
 					PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(
@@ -263,7 +274,8 @@ public abstract class PortletResponseImpl implements LiferayPortletResponse {
 				try {
 					Layout linkedLayout =
 						LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(
-							linkToLayoutUuid, layout.getGroupId());
+							linkToLayoutUuid, layout.getGroupId(),
+							layout.isPrivateLayout());
 
 					plid = linkedLayout.getPlid();
 				}

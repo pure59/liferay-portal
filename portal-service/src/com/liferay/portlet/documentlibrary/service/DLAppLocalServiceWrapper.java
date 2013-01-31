@@ -405,7 +405,7 @@ public class DLAppLocalServiceWrapper implements DLAppLocalService,
 	/**
 	* Returns the file entry with the UUID and group.
 	*
-	* @param uuid the file entry's universally unique identifier
+	* @param uuid the file entry's UUID
 	* @param groupId the primary key of the file entry's group
 	* @return the file entry with the UUID and group
 	* @throws PortalException if the file entry could not be found
@@ -561,6 +561,34 @@ public class DLAppLocalServiceWrapper implements DLAppLocalService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		_dlAppLocalService.restoreFileEntryFromTrash(userId, fileEntryId);
+	}
+
+	public void subscribeFileEntryType(long userId, long groupId,
+		long fileEntryTypeId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		_dlAppLocalService.subscribeFileEntryType(userId, groupId,
+			fileEntryTypeId);
+	}
+
+	public void subscribeFolder(long userId, long groupId, long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		_dlAppLocalService.subscribeFolder(userId, groupId, folderId);
+	}
+
+	public void unsubscribeFileEntryType(long userId, long groupId,
+		long fileEntryTypeId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		_dlAppLocalService.unsubscribeFileEntryType(userId, groupId,
+			fileEntryTypeId);
+	}
+
+	public void unsubscribeFolder(long userId, long groupId, long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		_dlAppLocalService.unsubscribeFolder(userId, groupId, folderId);
 	}
 
 	/**

@@ -80,6 +80,7 @@ public class ShoppingItemFieldModelImpl extends BaseModelImpl<ShoppingItemField>
 				"value.object.column.bitmask.enabled.com.liferay.portlet.shopping.model.ShoppingItemField"),
 			true);
 	public static long ITEMID_COLUMN_BITMASK = 1L;
+	public static long NAME_COLUMN_BITMASK = 2L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
 				"lock.expiration.time.com.liferay.portlet.shopping.model.ShoppingItemField"));
 
@@ -95,7 +96,7 @@ public class ShoppingItemFieldModelImpl extends BaseModelImpl<ShoppingItemField>
 	}
 
 	public Serializable getPrimaryKeyObj() {
-		return new Long(_itemFieldId);
+		return _itemFieldId;
 	}
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
@@ -284,8 +285,7 @@ public class ShoppingItemFieldModelImpl extends BaseModelImpl<ShoppingItemField>
 			return value;
 		}
 
-		value = getName().toLowerCase()
-					.compareTo(shoppingItemField.getName().toLowerCase());
+		value = getName().compareToIgnoreCase(shoppingItemField.getName());
 
 		if (value != 0) {
 			return value;

@@ -31,6 +31,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
 import com.liferay.portal.velocity.VelocityUtil;
 import com.liferay.util.SimpleCounter;
@@ -217,6 +218,10 @@ public abstract class BaseDB implements DB {
 		return _SUPPORTS_INLINE_DISTINCT;
 	}
 
+	public boolean isSupportsQueryingAfterException() {
+		return _SUPPORTS_QUERYING_AFTER_EXCEPTION;
+	}
+
 	public boolean isSupportsScrollableResults() {
 		return _SUPPORTS_SCROLLABLE_RESULTS;
 	}
@@ -319,8 +324,6 @@ public abstract class BaseDB implements DB {
 
 		String template = StringUtil.read(is);
 
-		is.close();
-
 		boolean evaluate = path.endsWith(".vm");
 
 		runSQLTemplateString(template, evaluate, failOnError);
@@ -365,8 +368,6 @@ public abstract class BaseDB implements DB {
 					}
 
 					String include = StringUtil.read(is);
-
-					is.close();
 
 					if (includeFileName.endsWith(".vm")) {
 						try {
@@ -705,6 +706,7 @@ public abstract class BaseDB implements DB {
 		Map<String, Object> variables = new HashMap<String, Object>();
 
 		variables.put("counter", new SimpleCounter());
+		variables.put("portalUUIDUtil", PortalUUIDUtil.class);
 
 		ClassLoader classLoader = PACLClassLoaderUtil.getContextClassLoader();
 
@@ -1016,6 +1018,8 @@ public abstract class BaseDB implements DB {
 	private static final boolean _SUPPORTS_DATE_MILLISECONDS = true;
 
 	private static final boolean _SUPPORTS_INLINE_DISTINCT = true;
+
+	private static final boolean _SUPPORTS_QUERYING_AFTER_EXCEPTION = true;
 
 	private static final boolean _SUPPORTS_SCROLLABLE_RESULTS = true;
 

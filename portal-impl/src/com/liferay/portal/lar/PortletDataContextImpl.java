@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.kernel.xml.Attribute;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.zip.ZipReader;
 import com.liferay.portal.kernel.zip.ZipWriter;
@@ -847,11 +848,11 @@ public class PortletDataContextImpl implements PortletDataContext {
 	public Object getZipEntryAsObject(Element element, String path) {
 		Object object = fromXML(getZipEntryAsString(path));
 
-		Element classNameElement = element.element("class-name");
+		Attribute classNameAttribute = element.attribute("class-name");
 
-		if (classNameElement != null) {
+		if (classNameAttribute != null) {
 			BeanPropertiesUtil.setProperty(
-				object, "className", classNameElement.getText());
+				object, "className", classNameAttribute.getText());
 		}
 
 		return object;
@@ -1220,7 +1221,11 @@ public class PortletDataContextImpl implements PortletDataContext {
 	}
 
 	public boolean isPathNotProcessed(String path) {
-		return !addPrimaryKey(String.class, path);
+		return !isPathProcessed(path);
+	}
+
+	public boolean isPathProcessed(String path) {
+		return addPrimaryKey(String.class, path);
 	}
 
 	public boolean isPerformDirectBinaryImport() {
@@ -1470,6 +1475,8 @@ public class PortletDataContextImpl implements PortletDataContext {
 		_xStream.alias("RatingsEntry", RatingsEntryImpl.class);
 		_xStream.alias("WikiNode", WikiNodeImpl.class);
 		_xStream.alias("WikiPage", WikiPageImpl.class);
+
+		_xStream.omitField(HashMap.class, "cache_bitmask");
 	}
 
 	protected boolean isResourceMain(ClassedModel classedModel) {

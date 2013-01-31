@@ -17,6 +17,7 @@
 <%@ include file="/html/portlet/init.jsp" %>
 
 <%@ page import="com.liferay.portal.LocaleException" %><%@
+page import="com.liferay.portal.kernel.editor.EditorUtil" %><%@
 page import="com.liferay.portal.kernel.portletdisplaytemplate.PortletDisplayTemplateHandler" %><%@
 page import="com.liferay.portal.kernel.portletdisplaytemplate.PortletDisplayTemplateHandlerRegistryUtil" %><%@
 page import="com.liferay.portlet.documentlibrary.model.DLFileEntryMetadata" %><%@
@@ -42,7 +43,6 @@ page import="com.liferay.portlet.dynamicdatamapping.search.StructureSearchTerms"
 page import="com.liferay.portlet.dynamicdatamapping.search.TemplateDisplayTerms" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.search.TemplateSearch" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.search.TemplateSearchTerms" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.service.DDMStorageLinkLocalServiceUtil" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.service.DDMStructureServiceUtil" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.service.DDMTemplateServiceUtil" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.service.permission.DDMPermission" %><%@
@@ -51,7 +51,8 @@ page import="com.liferay.portlet.dynamicdatamapping.service.permission.DDMTempla
 page import="com.liferay.portlet.dynamicdatamapping.storage.StorageType" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.util.DDMTemplateHelperUtil" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.util.DDMUtil" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.util.DDMXSDUtil" %>
+page import="com.liferay.portlet.dynamicdatamapping.util.DDMXSDUtil" %><%@
+page import="com.liferay.portlet.journal.model.JournalArticle" %>
 
 <%
 PortalPreferences portalPreferences = PortletPreferencesFactoryUtil.getPortalPreferences(request);
@@ -66,6 +67,7 @@ String scopeStructureName = ParamUtil.getString(request, "scopeStructureName");
 String scopeStructureType = ParamUtil.getString(request, "scopeStructureType");
 String scopeTemplateMode = ParamUtil.getString(request, "scopeTemplateMode");
 String scopeTemplateType = ParamUtil.getString(request, "scopeTemplateType");
+String scopeTitle = ParamUtil.getString(request, "scopeTitle");
 boolean showGlobalScope = ParamUtil.getBoolean(request, "showGlobalScope");
 boolean showManageTemplates = ParamUtil.getBoolean(request, "showManageTemplates", true);
 boolean showToolbar = ParamUtil.getBoolean(request, "showToolbar", true);
@@ -85,7 +87,7 @@ String templateHeaderTitle = ParamUtil.getString(request, "templateHeaderTitle")
 
 String templateTypeValue = StringPool.BLANK;
 
-if (scopeStorageType.equals(DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY)) {
+if (scopeTemplateType.equals(DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY)) {
 	templateTypeValue = DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY;
 }
 else if (scopeTemplateType.equals(DDMTemplateConstants.TEMPLATE_TYPE_FORM)) {

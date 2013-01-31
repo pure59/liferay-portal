@@ -17,12 +17,10 @@ package com.liferay.portal.kernel.trash;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.ContainerModel;
-import com.liferay.portal.model.Group;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.trash.model.TrashEntry;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.portlet.PortletRequest;
@@ -109,18 +107,6 @@ public interface TrashHandler {
 		throws PortalException, SystemException;
 
 	/**
-	 * Deletes the group's attachments that were trashed before the given date.
-	 *
-	 * @param  group ID the primary key of the group
-	 * @param  date the date from which attachments will be deleted
-	 * @throws PortalException if any one of the attachment file paths were
-	 *         invalid
-	 * @throws SystemException if a system exception occurred
-	 */
-	public void deleteTrashAttachments(Group group, Date date)
-		throws PortalException, SystemException;
-
-	/**
 	 * Deletes all the model entities with the primary keys.
 	 *
 	 * @param  classPKs the primary keys of the model entities to delete
@@ -187,6 +173,11 @@ public interface TrashHandler {
 	 */
 	public ContainerModel getContainerModel(long containerModelId)
 		throws PortalException, SystemException;
+
+	/**
+	 * Returns the parent container model's class name.
+	 */
+	public String getContainerModelClassName();
 
 	/**
 	 * Returns the name of the container model (e.g. folder name).
@@ -270,6 +261,36 @@ public interface TrashHandler {
 	public String getDeleteMessage();
 
 	/**
+	 * Returns the parent container model of the model entity with the primary
+	 * key.
+	 *
+	 * @param  classPK the primary key of a model entity the container models
+	 *         must be able to contain
+	 * @throws PortalException if a portal exception occurred
+	 * @throws SystemException if a system exception occurred
+	 */
+	public ContainerModel getParentContainerModel(long classPK)
+		throws PortalException, SystemException;
+
+	/**
+	 * Returns all the parent container models of the model entity with the
+	 * primary key ordered by hierarchy.
+	 *
+	 * <p>
+	 * For example, if the primary key is for a file entry inside folder C,
+	 * which is inside folder B, which is inside folder A; this method returns
+	 * container models for folders A, B, and C.
+	 * </p>
+	 *
+	 * @param  classPK the primary key of a model entity the container models
+	 *         must be able to contain
+	 * @throws PortalException if a portal exception occurred
+	 * @throws SystemException if a system exception occurred
+	 */
+	public List<ContainerModel> getParentContainerModels(long classPK)
+		throws PortalException, SystemException;
+
+	/**
 	 * Returns the link to the location to which the model entity was restored.
 	 *
 	 * @param  portletRequest the portlet request
@@ -312,6 +333,132 @@ public interface TrashHandler {
 	public String getSubcontainerModelName();
 
 	/**
+	 * Returns the name of the contained model.
+	 *
+	 * <p>
+	 * For example, "files" may be the model name for a folder and "pages" may
+	 * be the model name for a wiki node.
+	 * </p>
+	 *
+	 * @return the name of the contained model
+	 */
+	public String getTrashContainedModelName();
+
+	/**
+	 * Returns the number of model entities (excluding container model entities)
+	 * that are children of the parent container model identified by the primary
+	 * key.
+	 *
+	 * <p>
+	 * For example, for a folder with subfolders and documents, the number of
+	 * documents (excluding those explicitely moved to the recycle bin) is
+	 * returned.
+	 * </p>
+	 *
+	 * @param  classPK the primary key of a container model
+	 * @return the number of model entities that are children of the parent
+	 *         container model identified by the primary key
+	 * @throws PortalException if a portal exception occurred
+	 * @throws SystemException if a system exception occurred
+	 */
+	public int getTrashContainedModelsCount(long classPK)
+		throws PortalException, SystemException;
+
+	/**
+	 * Returns a range of all the trash renderers of model entities (excluding
+	 * container models) that are children of the parent container model
+	 * identified by the primary key.
+	 *
+	 * <p>
+	 * For example, for a folder with subfolders and documents, a range of all
+	 * the trash renderers of documents (excluding those explicitly moved to the
+	 * recycle bin) is returned.
+	 * </p>
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end -
+	 * start</code> instances. The <code>start</code> and <code>end</code>
+	 * values are not primary keys but, rather, indexes in the result set. Thus,
+	 * <code>0</code> refers to the first result in the set. Setting both
+	 * <code>start</code> and <code>end</code> to {@link
+	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * result set.
+	 * </p>
+	 *
+	 * @param  classPK the primary key of a container model
+	 * @param  start the lower bound of the range of results
+	 * @param  end the upper bound of the range of results (not inclusive)
+	 * @return the range of trash renderers of model entities (excluding
+	 *         container models) that are children of the parent container model
+	 *         identified by the primary key
+	 * @throws PortalException if a portal exception occurred
+	 * @throws SystemException if a system exception occurred
+	 */
+	public List<TrashRenderer> getTrashContainedModelTrashRenderers(
+			long classPK, int start, int end)
+		throws PortalException, SystemException;
+
+	/**
+	 * Returns the name of the container model.
+	 *
+	 * <p>
+	 * For example, "folder" may be the container model name for a file entry.
+	 * </p>
+	 *
+	 * @return the name of the container model
+	 */
+	public String getTrashContainerModelName();
+
+	/**
+	 * Returns the number of container models that are children of the parent
+	 * container model identified by the primary key.
+	 *
+	 * <p>
+	 * For example, for a folder with subfolders and documents, the number of
+	 * folders (excluding those explicitly moved to the recycle bin) is
+	 * returned.
+	 * </p>
+	 *
+	 * @param  classPK the primary key of a container model
+	 * @return the number of container models that are children of the parent
+	 *         container model identified by the primary key
+	 * @throws PortalException if a portal exception occurred
+	 * @throws SystemException if a system exception occurred
+	 */
+	public int getTrashContainerModelsCount(long classPK)
+		throws PortalException, SystemException;
+
+	/**
+	 * Returns a range of all the trash renderers of model entities that are
+	 * children of the parent container model identified by the primary key.
+	 *
+	 * <p>
+	 * For example, for a folder with subfolders and documents, the range of
+	 * renderers representing folders (excluding those explicitly moved to the
+	 * recycle bin) is returned.
+	 * </p>
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end -
+	 * start</code> instances. The <code>start</code> and <code>end</code>
+	 * values are not primary keys but, rather, indexes in the result set. Thus,
+	 * <code>0</code> refers to the first result in the set. Setting both
+	 * <code>start</code> and <code>end</code> to {@link
+	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * result set.
+	 * </p>
+	 *
+	 * @param  classPK the primary key of a container model
+	 * @param  start the lower bound of the range of results
+	 * @param  end the upper bound of the range of results (not inclusive)
+	 * @throws PortalException if a portal exception occurred
+	 * @throws SystemException if a system exception occurred
+	 */
+	public List<TrashRenderer> getTrashContainerModelTrashRenderers(
+			long classPK, int start, int end)
+		throws PortalException, SystemException;
+
+	/**
 	 * Returns the trash renderer associated to the model entity with the
 	 * primary key.
 	 *
@@ -350,6 +497,23 @@ public interface TrashHandler {
 		throws PortalException, SystemException;
 
 	/**
+	 * Returns <code>true</code> if the entity is a container model.
+	 *
+	 * @return <code>true</code> if the entity is a container model;
+	 *         <code>false</code> otherwise
+	 */
+	public boolean isContainerModel();
+
+	/**
+	 * Returns <code>true</code> if the entity can be deleted from the Recycle
+	 * Bin.
+	 *
+	 * @return <code>true</code> if the entity can be deleted from the Recycle
+	 *         Bin.
+	 */
+	public boolean isDeletable();
+
+	/**
 	 * Returns <code>true</code> if the model entity with the primary key is in
 	 * the Recycle Bin.
 	 *
@@ -362,6 +526,30 @@ public interface TrashHandler {
 	 */
 	public boolean isInTrash(long classPK)
 		throws PortalException, SystemException;
+
+	/**
+	 * Returns <code>true</code> if the model entity with the primary key is in
+	 * a container that is in the Recycle Bin.
+	 *
+	 * @param  classPK the primary key of the model entity
+	 * @return <code>true</code> if the model entity with the primary key is in
+	 *         a container that is in the Recycle Bin; <code>false</code>
+	 *         otherwise
+	 * @throws PortalException if a model entity with the primary key could not
+	 *         be found in the portal
+	 * @throws SystemException if a system exception occurred
+	 */
+	public boolean isInTrashContainer(long classPK)
+		throws PortalException, SystemException;
+
+	/**
+	 * Returns <code>true</code> if the entity can be moved from one container
+	 * model (such as a folder) to another.
+	 *
+	 * @return <code>true</code> if the entity can be moved from one container
+	 *         model to another; <code>false</code> otherwise
+	 */
+	public boolean isMovable();
 
 	/**
 	 * Returns <code>true</code> if the model entity can be restored to its
@@ -384,6 +572,14 @@ public interface TrashHandler {
 		throws PortalException, SystemException;
 
 	/**
+	 * Moves the entity with the class primary key to the container model with
+	 * the class primary key
+	 */
+	public void moveEntry(
+			long classPK, long containerModelId, ServiceContext serviceContext)
+		throws PortalException, SystemException;
+
+	/**
 	 * Moves the model entity with the primary key out of the Recycle Bin to a
 	 * new destination identified by the container model ID.
 	 *
@@ -391,14 +587,16 @@ public interface TrashHandler {
 	 * @param  containerModelId the primary key of the destination container
 	 *         model
 	 * @param  serviceContext the service context
-	 * @return the moved model entity
 	 * @throws PortalException if a model entity with the primary key or the
 	 *         destination container model with the primary key could not be
 	 *         found
 	 * @throws SystemException if a system exception occurred
 	 */
-	public TrashEntry moveTrashEntry(
+	public void moveTrashEntry(
 			long classPK, long containerModelId, ServiceContext serviceContext)
+		throws PortalException, SystemException;
+
+	public void restoreRelatedTrashEntry(String className, long classPK)
 		throws PortalException, SystemException;
 
 	/**

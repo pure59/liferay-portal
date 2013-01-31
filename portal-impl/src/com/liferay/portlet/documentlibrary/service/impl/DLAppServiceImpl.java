@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.Repository;
+import com.liferay.portal.kernel.repository.RepositoryException;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
@@ -48,6 +49,7 @@ import com.liferay.portlet.documentlibrary.service.base.DLAppServiceBaseImpl;
 import com.liferay.portlet.documentlibrary.service.permission.DLFileEntryPermission;
 import com.liferay.portlet.documentlibrary.service.permission.DLFileShortcutPermission;
 import com.liferay.portlet.documentlibrary.service.permission.DLFolderPermission;
+import com.liferay.portlet.documentlibrary.service.permission.DLPermission;
 import com.liferay.portlet.documentlibrary.util.DLAppUtil;
 import com.liferay.portlet.documentlibrary.util.DLProcessorRegistryUtil;
 import com.liferay.portlet.documentlibrary.util.comparator.RepositoryModelModifiedDateComparator;
@@ -479,7 +481,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * </p>
 	 *
 	 * @param  fileEntryId the primary key of the file entry to check in
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @param  serviceContext the service context to be applied
 	 * @throws PortalException if the file entry could not be found
 	 * @throws SystemException if a system exception occurred
@@ -967,7 +969,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 */
 	public int getFileEntriesAndFileShortcutsCount(
 			long repositoryId, long folderId, int status, String[] mimeTypes)
-			throws PortalException, SystemException {
+		throws PortalException, SystemException {
 
 		Repository repository = getRepository(repositoryId);
 
@@ -1061,7 +1063,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	/**
 	 * Returns the file entry with the UUID and group.
 	 *
-	 * @param  uuid the file entry's universally unique identifier
+	 * @param  uuid the file entry's UUID
 	 * @param  groupId the primary key of the file entry's group
 	 * @return the file entry with the UUID and group
 	 * @throws PortalException if the file entry could not be found
@@ -1076,19 +1078,23 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			return repository.getFileEntryByUuid(uuid);
 		}
 		catch (NoSuchFileEntryException nsfee) {
-			List<com.liferay.portal.model.Repository> repositories =
-				repositoryPersistence.findByGroupId(groupId);
+		}
+		catch (RepositoryException re) {
+			throw new NoSuchFileEntryException(re);
+		}
 
-			for (int i = 0; i < repositories.size(); i++) {
-				try {
-					long repositoryId = repositories.get(i).getRepositoryId();
+		List<com.liferay.portal.model.Repository> repositories =
+			repositoryPersistence.findByGroupId(groupId);
 
-					Repository repository = getRepository(repositoryId);
+		for (int i = 0; i < repositories.size(); i++) {
+			try {
+				long repositoryId = repositories.get(i).getRepositoryId();
 
-					return repository.getFileEntryByUuid(uuid);
-				}
-				catch (NoSuchFileEntryException nsfee2) {
-				}
+				Repository repository = getRepository(repositoryId);
+
+				return repository.getFileEntryByUuid(uuid);
+			}
+			catch (NoSuchFileEntryException nsfee) {
 			}
 		}
 
@@ -2290,7 +2296,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * Refreshes the lock for the file entry. This method is primarily used by
 	 * WebDAV.
 	 *
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @param  companyId the primary key of the file entry's company
 	 * @param  expirationTime the time in milliseconds before the lock expires.
 	 *         If the value is <code>0</code>, the default expiration time will
@@ -2318,7 +2324,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * Refreshes the lock for the folder. This method is primarily used by
 	 * WebDAV.
 	 *
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @param  companyId the primary key of the file entry's company
 	 * @param  expirationTime the time in milliseconds before the lock expires.
 	 *         If the value is <code>0</code>, the default expiration time will
@@ -2466,6 +2472,25 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		}
 	}
 
+	public void subscribeFileEntryType(long groupId, long fileEntryTypeId)
+		throws PortalException, SystemException {
+
+		DLPermission.check(
+			getPermissionChecker(), groupId, ActionKeys.SUBSCRIBE);
+
+		dlAppLocalService.subscribeFileEntryType(
+			getUserId(), groupId, fileEntryTypeId);
+	}
+
+	public void subscribeFolder(long groupId, long folderId)
+		throws PortalException, SystemException {
+
+		DLPermission.check(
+			getPermissionChecker(), groupId, ActionKeys.SUBSCRIBE);
+
+		dlAppLocalService.subscribeFolder(getUserId(), groupId, folderId);
+	}
+
 	/**
 	 * @deprecated Use {@link #checkInFileEntry(long, boolean, String,
 	 *             ServiceContext)}.
@@ -2491,7 +2516,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 *
 	 * @param  repositoryId the primary key of the repository
 	 * @param  folderId the primary key of the folder
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @throws PortalException if the repository or folder could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -2509,7 +2534,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * @param  repositoryId the primary key of the repository
 	 * @param  parentFolderId the primary key of the parent folder
 	 * @param  name the folder's name
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @throws PortalException if the repository or folder could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -2521,6 +2546,25 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		Repository repository = getRepository(repositoryId);
 
 		repository.unlockFolder(parentFolderId, name, lockUuid);
+	}
+
+	public void unsubscribeFileEntryType(long groupId, long fileEntryTypeId)
+		throws PortalException, SystemException {
+
+		DLPermission.check(
+			getPermissionChecker(), groupId, ActionKeys.SUBSCRIBE);
+
+		dlAppLocalService.unsubscribeFileEntryType(
+			getUserId(), groupId, fileEntryTypeId);
+	}
+
+	public void unsubscribeFolder(long groupId, long folderId)
+		throws PortalException, SystemException {
+
+		DLPermission.check(
+			getPermissionChecker(), groupId, ActionKeys.SUBSCRIBE);
+
+		dlAppLocalService.unsubscribeFolder(getUserId(), groupId, folderId);
 	}
 
 	/**
@@ -2852,7 +2896,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 *
 	 * @param  repositoryId the primary key for the repository
 	 * @param  fileEntryId the primary key for the file entry
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @return <code>true</code> if the file entry is checked out;
 	 *         <code>false</code> otherwise
 	 * @throws PortalException if the file entry could not be found
@@ -2882,7 +2926,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 *
 	 * @param  repositoryId the primary key for the repository
 	 * @param  folderId the primary key for the folder
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @return <code>true</code> if the inheritable lock exists;
 	 *         <code>false</code> otherwise
 	 * @throws PortalException if the folder could not be found
