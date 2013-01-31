@@ -16,6 +16,7 @@ package com.liferay.portlet.wiki.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.permission.WorkflowPermissionUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
@@ -160,21 +161,23 @@ public class WikiPagePermission {
 
 			WikiPage parentPage = page.getParentPage();
 
-			while (parentPage != null) {
-				if (!contains(permissionChecker, parentPage, ActionKeys.VIEW)) {
-					return false;
-				}
-
-				parentPage = parentPage.getParentPage();
+			if (!contains(permissionChecker, parentPage, ActionKeys.VIEW)) {
+				return false;
 			}
 		}
 
-		if (WikiNodePermission.contains(permissionChecker, node, actionId)) {
-			return true;
-		}
+		if (!PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE ||
+			!Validator.equals(actionId, ActionKeys.VIEW)) {
 
-		if (contains(permissionChecker, page, actionId)) {
-			return true;
+			if (WikiNodePermission.contains(
+					permissionChecker, node, actionId)) {
+
+				return true;
+			}
+
+			if (contains(permissionChecker, page, actionId)) {
+				return true;
+			}
 		}
 
 		if (permissionChecker.hasOwnerPermission(

@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.staging.permission.StagingPermissionUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.permission.WorkflowPermissionUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
@@ -115,10 +116,15 @@ public class DLFileEntryPermission {
 					}
 				}
 
-				if (DLFolderPermission.contains(
-						permissionChecker, dlFolder, actionId)) {
+				if (!PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE ||
+					!Validator.equals(actionId, ActionKeys.VIEW) ||
+					!Validator.equals(actionId, ActionKeys.ACCESS)) {
 
-					return true;
+					if (DLFolderPermission.contains(
+							permissionChecker, dlFolder, actionId)) {
+
+						return true;
+					}
 				}
 			}
 			catch (NoSuchFolderException nsfe) {

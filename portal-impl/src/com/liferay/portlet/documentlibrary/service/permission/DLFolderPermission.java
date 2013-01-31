@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.staging.permission.StagingPermissionUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
@@ -68,6 +69,8 @@ public class DLFolderPermission {
 			String actionId)
 		throws PortalException, SystemException {
 
+		DLFolder originalFolder = dlFolder;
+
 		if (actionId.equals(ActionKeys.ADD_FOLDER)) {
 			actionId = ActionKeys.ADD_SUBFOLDER;
 		}
@@ -80,79 +83,71 @@ public class DLFolderPermission {
 			return hasPermission.booleanValue();
 		}
 
-		long parentFolderId = dlFolder.getParentFolderId();
-
-		DLFolder parentFolder = dlFolder;
+		long folderId = dlFolder.getFolderId();
 
 		if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
 			try {
-				while (parentFolderId !=
+				while (folderId !=
 						DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-					parentFolder = DLFolderLocalServiceUtil.getFolder(
-						parentFolderId);
+					dlFolder = DLFolderLocalServiceUtil.getFolder(folderId);
 
 					if (!permissionChecker.hasOwnerPermission(
-							parentFolder.getCompanyId(),
-							DLFolder.class.getName(), parentFolderId,
-							parentFolder.getUserId(), ActionKeys.VIEW) &&
+							dlFolder.getCompanyId(), DLFolder.class.getName(),
+							folderId, dlFolder.getUserId(), ActionKeys.VIEW) &&
 						!permissionChecker.hasPermission(
-							parentFolder.getGroupId(), DLFolder.class.getName(),
-							parentFolderId, ActionKeys.VIEW)) {
+							dlFolder.getGroupId(), DLFolder.class.getName(),
+							folderId, ActionKeys.VIEW)) {
 
 						return false;
 					}
 
-					parentFolderId = parentFolder.getParentFolderId();
+					folderId = dlFolder.getParentFolderId();
 				}
 			}
 			catch (NoSuchFolderException nsfe) {
-				if (!parentFolder.isInTrash()) {
+				if (!dlFolder.isInTrash()) {
 					throw nsfe;
 				}
 			}
 
-			parentFolderId = dlFolder.getParentFolderId();
+			if (Validator.equals(actionId, ActionKeys.VIEW)) {
+				return true;
+			}
 
-			parentFolder = dlFolder;
+			dlFolder = originalFolder;
+			folderId = dlFolder.getFolderId();
 		}
 
-		try {
-			while (parentFolderId !=
-					DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+		if (!PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE ||
+			!Validator.equals(actionId, ActionKeys.VIEW)) {
+			try {
+				while (folderId !=
+						DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-				parentFolder = DLFolderLocalServiceUtil.getFolder(
-					parentFolderId);
+					dlFolder = DLFolderLocalServiceUtil.getFolder(folderId);
 
-				if (permissionChecker.hasOwnerPermission(
-						parentFolder.getCompanyId(), DLFolder.class.getName(),
-						parentFolderId, parentFolder.getUserId(), actionId) ||
-					permissionChecker.hasPermission(
-						parentFolder.getGroupId(), DLFolder.class.getName(),
-						parentFolderId, actionId)) {
+					if (permissionChecker.hasOwnerPermission(
+							dlFolder.getCompanyId(), DLFolder.class.getName(),
+							folderId, dlFolder.getUserId(), actionId) ||
+						permissionChecker.hasPermission(
+							dlFolder.getGroupId(), DLFolder.class.getName(),
+							folderId, actionId)) {
 
-					return true;
+						return true;
+					}
+
+					folderId = dlFolder.getParentFolderId();
 				}
-
-				parentFolderId = parentFolder.getParentFolderId();
+			}
+			catch (NoSuchFolderException nsfe) {
+				if (!dlFolder.isInTrash()) {
+					throw nsfe;
+				}
 			}
 		}
-		catch (NoSuchFolderException nsfe) {
-			if (!parentFolder.isInTrash()) {
-				throw nsfe;
-			}
-		}
 
-		if (permissionChecker.hasOwnerPermission(
-				dlFolder.getCompanyId(), DLFolder.class.getName(),
-				dlFolder.getFolderId(), dlFolder.getUserId(), actionId)) {
-
-			return true;
-		}
-
-		return permissionChecker.hasPermission(
-			dlFolder.getGroupId(), DLFolder.class.getName(),
-			dlFolder.getFolderId(), actionId);
+		return false;
 	}
 
 	public static boolean contains(
