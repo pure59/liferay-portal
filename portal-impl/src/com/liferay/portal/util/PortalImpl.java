@@ -3111,7 +3111,11 @@ public class PortalImpl implements Portal {
 
 			String virtualHostname = layoutSet.getVirtualHostname();
 
-			if (Validator.isNotNull(virtualHostname)) {
+			String domain = HttpUtil.getDomain(themeDisplay.getURLPortal());
+
+			if (Validator.isNotNull(virtualHostname) &&
+				domain.startsWith(virtualHostname)) {
+
 				serverName = virtualHostname;
 			}
 		}
