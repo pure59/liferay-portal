@@ -20,9 +20,14 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.model.Role;
+import com.liferay.portal.model.RoleConstants;
+import com.liferay.portal.model.User;
 import com.liferay.portal.security.auth.PrincipalException;
+import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
@@ -73,8 +78,15 @@ public class ActionUtil {
 				serviceContext.setAddGuestPermissions(false);
 			}
 
+			Role siteOwnerRole = RoleLocalServiceUtil.getRole(
+				themeDisplay.getCompanyId(), // safe to do this? I think so. themeDisplay.getScopeGroup().getCompanyId() == themeDisplay.getCompanyId()
+				RoleConstants.SITE_OWNER);
+
+			User siteOwner = UserLocalServiceUtil.getRoleUsers(
+				siteOwnerRole.getRoleId()).get(0);
+
 			node = WikiNodeLocalServiceUtil.addDefaultNode(
-				themeDisplay.getDefaultUserId(), serviceContext);
+				siteOwner.getUserId(), serviceContext);
 		}
 		else {
 			node = WikiUtil.getFirstNode(portletRequest);

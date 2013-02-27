@@ -29,8 +29,11 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.ResourceConstants;
+import com.liferay.portal.model.Role;
+import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.portletfilerepository.PortletFileRepositoryUtil;
+import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsUtil;
@@ -480,8 +483,11 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 
 		Group group = groupPersistence.findByPrimaryKey(groupId);
 
-		long defaultUserId = userLocalService.getDefaultUserId(
-			group.getCompanyId());
+		Role siteOwnerRole = RoleLocalServiceUtil.getRole(
+			group.getCompanyId(), RoleConstants.SITE_OWNER);
+
+		User siteOwner = userLocalService.getRoleUsers(
+			siteOwnerRole.getRoleId()).get(0);
 
 		ServiceContext serviceContext = new ServiceContext();
 
@@ -490,7 +496,7 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 		serviceContext.setScopeGroupId(groupId);
 
 		WikiNode node = wikiNodeLocalService.addDefaultNode(
-			defaultUserId, serviceContext);
+			siteOwner.getUserId(), serviceContext);
 
 		List<WikiNode> nodes = new ArrayList<WikiNode>(1);
 
