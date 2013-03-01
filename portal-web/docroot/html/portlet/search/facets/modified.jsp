@@ -129,18 +129,18 @@ if (fieldParamSelection.equals("0")) {
 		String tokenLabel = modifiedLabel;
 
 		if (fieldParamSelection.equals(String.valueOf(index + 1))) {
-			String fromDateLabel = fieldParamFrom;
-			String toDateLabel = fieldParamTo;
+			String fromDateLabel = HtmlUtil.escape(fieldParamFrom);
+			String toDateLabel = HtmlUtil.escape(fieldParamTo);
 
-			tokenLabel = LanguageUtil.format(pageContext, "from-x-to-x", new Object[] {"<strong>" + fromDateLabel + "</strong>", "<strong>" + toDateLabel + "</strong>"});
+			tokenLabel = UnicodeLanguageUtil.format(pageContext, "from-x-to-x", new Object[] {"<strong>" + fromDateLabel + "</strong>", "<strong>" + toDateLabel + "</strong>"});
 		}
 		%>
 
 		Liferay.Search.tokenList.add(
 			{
-				clearFields: '<%= UnicodeFormatter.toString(fieldName) %>',
-				fieldValues: '<%= UnicodeFormatter.toString(fieldName + "selection|0") %>',
-				text: '<%= UnicodeFormatter.toString(tokenLabel) %>'
+				clearFields: '<%= fieldName %>',
+				fieldValues: '<%= fieldName + "selection|0" %>',
+				html: '<%= tokenLabel %>'
 			}
 		);
 	</aui:script>
@@ -175,7 +175,7 @@ if (fieldParamSelection.equals("0")) {
 					document.<portlet:namespace />fm['<portlet:namespace /><%= facet.getFieldName() %>from'].value = fromDate;
 				}
 
-				var range = '[' + fromDate.replace(/-/g, '') + '000000 TO ' + toDate.replace(/-/g, '') + '000000]';
+				var range = '[' + fromDate.replace(/-/g, '') + '000000 TO ' + toDate.replace(/-/g, '') + '235959]';
 
 				document.<portlet:namespace />fm['<portlet:namespace /><%= facet.getFieldName() %>'].value = range;
 				document.<portlet:namespace />fm['<portlet:namespace /><%= facet.getFieldName() %>selection'].value = selection;

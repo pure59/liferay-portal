@@ -111,7 +111,7 @@ public class JournalFolderLocalServiceUtil {
 	* Performs a dynamic query on the database and returns a range of the matching rows.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.journal.model.impl.JournalFolderModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param dynamicQuery the dynamic query
@@ -131,7 +131,7 @@ public class JournalFolderLocalServiceUtil {
 	* Performs a dynamic query on the database and returns an ordered range of the matching rows.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.journal.model.impl.JournalFolderModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param dynamicQuery the dynamic query
@@ -212,7 +212,7 @@ public class JournalFolderLocalServiceUtil {
 	* Returns a range of all the journal folders.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.journal.model.impl.JournalFolderModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param start the lower bound of the range of journal folders
@@ -279,23 +279,45 @@ public class JournalFolderLocalServiceUtil {
 			description, serviceContext);
 	}
 
-	public static void deleteFolder(
+	public static com.liferay.portlet.journal.model.JournalFolder deleteFolder(
 		com.liferay.portlet.journal.model.JournalFolder folder)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		getService().deleteFolder(folder);
+		return getService().deleteFolder(folder);
 	}
 
-	public static void deleteFolder(long folderId)
+	public static com.liferay.portlet.journal.model.JournalFolder deleteFolder(
+		com.liferay.portlet.journal.model.JournalFolder folder,
+		boolean includeTrashedEntries)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		getService().deleteFolder(folderId);
+		return getService().deleteFolder(folder, includeTrashedEntries);
+	}
+
+	public static com.liferay.portlet.journal.model.JournalFolder deleteFolder(
+		long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService().deleteFolder(folderId);
+	}
+
+	public static com.liferay.portlet.journal.model.JournalFolder deleteFolder(
+		long folderId, boolean includeTrashedEntries)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService().deleteFolder(folderId, includeTrashedEntries);
 	}
 
 	public static void deleteFolders(long groupId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		getService().deleteFolders(groupId);
+	}
+
+	public static com.liferay.portlet.journal.model.JournalFolder fetchFolder(
+		long groupId, long parentFolderId, java.lang.String name)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().fetchFolder(groupId, parentFolderId, name);
 	}
 
 	public static com.liferay.portlet.journal.model.JournalFolder fetchFolder(
@@ -335,9 +357,28 @@ public class JournalFolderLocalServiceUtil {
 	}
 
 	public static java.util.List<com.liferay.portlet.journal.model.JournalFolder> getFolders(
+		long groupId, long parentFolderId, int status)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getFolders(groupId, parentFolderId, status);
+	}
+
+	public static java.util.List<com.liferay.portlet.journal.model.JournalFolder> getFolders(
 		long groupId, long parentFolderId, int start, int end)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService().getFolders(groupId, parentFolderId, start, end);
+	}
+
+	public static java.util.List<com.liferay.portlet.journal.model.JournalFolder> getFolders(
+		long groupId, long parentFolderId, int status, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getFolders(groupId, parentFolderId, status, start, end);
+	}
+
+	public static java.util.List<java.lang.Object> getFoldersAndArticles(
+		long groupId, long folderId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getFoldersAndArticles(groupId, folderId);
 	}
 
 	public static java.util.List<java.lang.Object> getFoldersAndArticles(
@@ -365,6 +406,16 @@ public class JournalFolderLocalServiceUtil {
 		return getService().getFoldersCount(groupId, parentFolderId);
 	}
 
+	public static int getFoldersCount(long groupId, long parentFolderId,
+		int status) throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getFoldersCount(groupId, parentFolderId, status);
+	}
+
+	public static java.util.List<com.liferay.portlet.journal.model.JournalFolder> getNoAssetFolders()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getNoAssetFolders();
+	}
+
 	public static void getSubfolderIds(
 		java.util.List<java.lang.Long> folderIds, long groupId, long folderId)
 		throws com.liferay.portal.kernel.exception.SystemException {
@@ -379,15 +430,56 @@ public class JournalFolderLocalServiceUtil {
 		return getService().moveFolder(folderId, parentFolderId, serviceContext);
 	}
 
+	public static com.liferay.portlet.journal.model.JournalFolder moveFolderFromTrash(
+		long userId, long folderId, long parentFolderId,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .moveFolderFromTrash(userId, folderId, parentFolderId,
+			serviceContext);
+	}
+
+	public static void moveFolderToTrash(long userId, long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().moveFolderToTrash(userId, folderId);
+	}
+
+	public static void restoreFolderFromTrash(long userId, long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().restoreFolderFromTrash(userId, folderId);
+	}
+
+	public static void updateAsset(long userId,
+		com.liferay.portlet.journal.model.JournalFolder folder,
+		long[] assetCategoryIds, java.lang.String[] assetTagNames,
+		long[] assetLinkEntryIds)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService()
+			.updateAsset(userId, folder, assetCategoryIds, assetTagNames,
+			assetLinkEntryIds);
+	}
+
 	public static com.liferay.portlet.journal.model.JournalFolder updateFolder(
-		long folderId, long parentFolderId, java.lang.String name,
+		long userId, long folderId, long parentFolderId, java.lang.String name,
 		java.lang.String description, boolean mergeWithParentFolder,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return getService()
-				   .updateFolder(folderId, parentFolderId, name, description,
-			mergeWithParentFolder, serviceContext);
+				   .updateFolder(userId, folderId, parentFolderId, name,
+			description, mergeWithParentFolder, serviceContext);
+	}
+
+	public static com.liferay.portlet.journal.model.JournalFolder updateStatus(
+		long userId, com.liferay.portlet.journal.model.JournalFolder folder,
+		int status)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService().updateStatus(userId, folder, status);
 	}
 
 	public static JournalFolderLocalService getService() {

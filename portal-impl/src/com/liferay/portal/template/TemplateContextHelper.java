@@ -24,7 +24,8 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletModeFactory_IW;
 import com.liferay.portal.kernel.portlet.WindowStateFactory_IW;
 import com.liferay.portal.kernel.servlet.BrowserSnifferUtil;
-import com.liferay.portal.kernel.templateparser.TemplateContext;
+import com.liferay.portal.kernel.template.Template;
+import com.liferay.portal.kernel.template.TemplateContextType;
 import com.liferay.portal.kernel.util.ArrayUtil_IW;
 import com.liferay.portal.kernel.util.DateUtil_IW;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
@@ -48,6 +49,9 @@ import com.liferay.portal.kernel.util.Validator_IW;
 import com.liferay.portal.kernel.xml.SAXReader;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.Theme;
+import com.liferay.portal.security.lang.PortalSecurityManagerThreadLocal;
+import com.liferay.portal.security.pacl.PACLPolicy;
+import com.liferay.portal.security.pacl.PACLPolicyManager;
 import com.liferay.portal.service.permission.AccountPermissionUtil;
 import com.liferay.portal.service.permission.CommonPermissionUtil;
 import com.liferay.portal.service.permission.GroupPermissionUtil;
@@ -61,28 +65,32 @@ import com.liferay.portal.service.permission.UserGroupPermissionUtil;
 import com.liferay.portal.service.permission.UserPermissionUtil;
 import com.liferay.portal.theme.NavItem;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.SessionClicks_IW;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portal.webserver.WebServerServletTokenUtil;
-import com.liferay.portlet.PortletConfigImpl;
 import com.liferay.portlet.PortletURLFactoryUtil;
+import com.liferay.portlet.documentlibrary.util.DLUtil;
 import com.liferay.portlet.expando.service.ExpandoColumnLocalService;
 import com.liferay.portlet.expando.service.ExpandoRowLocalService;
 import com.liferay.portlet.expando.service.ExpandoTableLocalService;
 import com.liferay.portlet.expando.service.ExpandoValueLocalService;
 import com.liferay.portlet.journalcontent.util.JournalContentUtil;
-import com.liferay.taglib.util.VelocityTaglib;
+import com.liferay.taglib.util.VelocityTaglibImpl;
 import com.liferay.util.portlet.PortletRequestUtil;
 
 import java.lang.reflect.Method;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.portlet.PortletConfig;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.RenderRequest;
@@ -98,8 +106,228 @@ import org.apache.struts.tiles.ComponentContext;
  */
 public class TemplateContextHelper {
 
-	public Map<String, Object> getHelperUtilities() {
-		Map<String, Object> variables = new HashMap<String, Object>();
+	public Map<String, Object> getHelperUtilities(
+		TemplateContextType templateContextType) {
+
+		ClassLoader contextClassLoader =
+			ClassLoaderUtil.getContextClassLoader();
+		ClassLoader portalClassLoader = ClassLoaderUtil.getPortalClassLoader();
+
+		if (contextClassLoader == portalClassLoader) {
+			return doGetHelperUtilities(
+				contextClassLoader, templateContextType);
+		}
+
+		PACLPolicy threadLocalPACLPolicy =
+			PortalSecurityManagerThreadLocal.getPACLPolicy();
+
+		try {
+			PACLPolicy contextClassLoaderPACLPolicy =
+				PACLPolicyManager.getPACLPolicy(contextClassLoader);
+
+			PortalSecurityManagerThreadLocal.setPACLPolicy(
+				contextClassLoaderPACLPolicy);
+
+			return doGetHelperUtilities(
+				contextClassLoader, templateContextType);
+		}
+		finally {
+			PortalSecurityManagerThreadLocal.setPACLPolicy(
+				threadLocalPACLPolicy);
+		}
+	}
+
+	public Set<String> getRestrictedVariables() {
+		return Collections.emptySet();
+	}
+
+	public void prepare(Template template, HttpServletRequest request) {
+
+		// Request
+
+		template.put("request", request);
+
+		// Portlet config
+
+		PortletConfig portletConfig = (PortletConfig)request.getAttribute(
+			JavaConstants.JAVAX_PORTLET_CONFIG);
+
+		if (portletConfig != null) {
+			template.put("portletConfig", portletConfig);
+		}
+
+		// Render request
+
+		final PortletRequest portletRequest =
+			(PortletRequest)request.getAttribute(
+				JavaConstants.JAVAX_PORTLET_REQUEST);
+
+		if (portletRequest != null) {
+			if (portletRequest instanceof RenderRequest) {
+				template.put("renderRequest", portletRequest);
+			}
+		}
+
+		// Render response
+
+		final PortletResponse portletResponse =
+			(PortletResponse)request.getAttribute(
+				JavaConstants.JAVAX_PORTLET_RESPONSE);
+
+		if (portletResponse != null) {
+			if (portletResponse instanceof RenderResponse) {
+				template.put("renderResponse", portletResponse);
+			}
+		}
+
+		// XML request
+
+		if ((portletRequest != null) && (portletResponse != null)) {
+			template.put(
+				"xmlRequest",
+				new Object() {
+
+					@Override
+					public String toString() {
+						return PortletRequestUtil.toXML(
+							portletRequest, portletResponse);
+					}
+
+				}
+			);
+		}
+
+		// Theme display
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		if (themeDisplay != null) {
+			Layout layout = themeDisplay.getLayout();
+			List<Layout> layouts = themeDisplay.getLayouts();
+
+			template.put("themeDisplay", themeDisplay);
+			template.put("company", themeDisplay.getCompany());
+			template.put("user", themeDisplay.getUser());
+			template.put("realUser", themeDisplay.getRealUser());
+			template.put("layout", layout);
+			template.put("layouts", layouts);
+			template.put("plid", String.valueOf(themeDisplay.getPlid()));
+			template.put(
+				"layoutTypePortlet", themeDisplay.getLayoutTypePortlet());
+			template.put(
+				"scopeGroupId", new Long(themeDisplay.getScopeGroupId()));
+			template.put(
+				"permissionChecker", themeDisplay.getPermissionChecker());
+			template.put("locale", themeDisplay.getLocale());
+			template.put("timeZone", themeDisplay.getTimeZone());
+			template.put("colorScheme", themeDisplay.getColorScheme());
+			template.put("portletDisplay", themeDisplay.getPortletDisplay());
+
+			// Navigation items
+
+			if (layout != null) {
+				List<NavItem> navItems = NavItem.fromLayouts(
+					request, layouts, template);
+
+				template.put("navItems", navItems);
+			}
+
+			// Deprecated
+
+			template.put(
+				"portletGroupId", new Long(themeDisplay.getScopeGroupId()));
+		}
+
+		// Theme
+
+		Theme theme = (Theme)request.getAttribute(WebKeys.THEME);
+
+		if ((theme == null) && (themeDisplay != null)) {
+			theme = themeDisplay.getTheme();
+		}
+
+		if (theme != null) {
+			template.put("theme", theme);
+		}
+
+		// Tiles attributes
+
+		prepareTiles(template, request);
+
+		// Page title and subtitle
+
+		ListMergeable<String> pageTitleListMergeable =
+			(ListMergeable<String>)request.getAttribute(WebKeys.PAGE_TITLE);
+
+		if (pageTitleListMergeable != null) {
+			String pageTitle = pageTitleListMergeable.mergeToString(
+				StringPool.SPACE);
+
+			template.put("pageTitle", pageTitle);
+		}
+
+		ListMergeable<String> pageSubtitleListMergeable =
+			(ListMergeable<String>)request.getAttribute(WebKeys.PAGE_SUBTITLE);
+
+		if (pageSubtitleListMergeable != null) {
+			String pageSubtitle = pageSubtitleListMergeable.mergeToString(
+				StringPool.SPACE);
+
+			template.put("pageSubtitle", pageSubtitle);
+		}
+	}
+
+	public void removeAllHelperUtilities() {
+		_helperUtilitiesMaps.clear();
+	}
+
+	public void removeHelperUtilities(ClassLoader classLoader) {
+		_helperUtilitiesMaps.remove(classLoader);
+	}
+
+	protected Map<String, Object> doGetHelperUtilities(
+		ClassLoader classLoader, TemplateContextType templateContextType) {
+
+		HelperUtilitiesMap helperUtilitiesMap = _helperUtilitiesMaps.get(
+			classLoader);
+
+		if (helperUtilitiesMap == null) {
+			helperUtilitiesMap = new HelperUtilitiesMap(
+				TemplateContextType.class);
+
+			_helperUtilitiesMaps.put(classLoader, helperUtilitiesMap);
+		}
+
+		Map<String, Object> helperUtilities = helperUtilitiesMap.get(
+			templateContextType);
+
+		if (helperUtilities != null) {
+			return helperUtilities;
+		}
+
+		helperUtilities = new HashMap<String, Object>();
+
+		populateCommonHelperUtilities(helperUtilities);
+		populateExtraHelperUtilities(helperUtilities);
+
+		if (templateContextType.equals(TemplateContextType.RESTRICTED)) {
+			Set<String> restrictedVariables = getRestrictedVariables();
+
+			for (String restrictedVariable : restrictedVariables) {
+				helperUtilities.remove(restrictedVariable);
+			}
+		}
+
+		helperUtilities = Collections.unmodifiableMap(helperUtilities);
+
+		helperUtilitiesMap.put(templateContextType, helperUtilities);
+
+		return helperUtilities;
+	}
+
+	protected void populateCommonHelperUtilities(
+		Map<String, Object> variables) {
 
 		// Array util
 
@@ -149,6 +377,10 @@ public class TemplateContextHelper {
 		// Date util
 
 		variables.put("dateUtil", DateUtil_IW.getInstance());
+
+		// Document library util
+
+		variables.put("dlUtil", DLUtil.getDL());
 
 		// Expando column service
 
@@ -390,7 +622,7 @@ public class TemplateContextHelper {
 		// VelocityTaglib methods
 
 		try {
-			Class<?> clazz = VelocityTaglib.class;
+			Class<?> clazz = VelocityTaglibImpl.class;
 
 			Method method = clazz.getMethod(
 				"layoutIcon", new Class[] {Layout.class});
@@ -540,169 +772,12 @@ public class TemplateContextHelper {
 		catch (SecurityException se) {
 			_log.error(se, se);
 		}
-
-		return variables;
 	}
 
-	public Map<String, Object> getRestrictedHelperUtilities() {
-		Map<String, Object> helperUtilities = getHelperUtilities();
-
-		Set<String> restrictedVariables = getRestrictedVariables();
-
-		for (String restrictedVariable : restrictedVariables) {
-			helperUtilities.remove(restrictedVariable);
-		}
-
-		return helperUtilities;
+	protected void populateExtraHelperUtilities(Map<String, Object> variables) {
 	}
 
-	public Set<String> getRestrictedVariables() {
-		return Collections.emptySet();
-	}
-
-	public void prepare(
-		TemplateContext templateContext, HttpServletRequest request) {
-
-		// Request
-
-		templateContext.put("request", request);
-
-		// Portlet config
-
-		PortletConfigImpl portletConfigImpl =
-			(PortletConfigImpl)request.getAttribute(
-				JavaConstants.JAVAX_PORTLET_CONFIG);
-
-		if (portletConfigImpl != null) {
-			templateContext.put("portletConfig", portletConfigImpl);
-		}
-
-		// Render request
-
-		final PortletRequest portletRequest =
-			(PortletRequest)request.getAttribute(
-				JavaConstants.JAVAX_PORTLET_REQUEST);
-
-		if (portletRequest != null) {
-			if (portletRequest instanceof RenderRequest) {
-				templateContext.put("renderRequest", portletRequest);
-			}
-		}
-
-		// Render response
-
-		final PortletResponse portletResponse =
-			(PortletResponse)request.getAttribute(
-				JavaConstants.JAVAX_PORTLET_RESPONSE);
-
-		if (portletResponse != null) {
-			if (portletResponse instanceof RenderResponse) {
-				templateContext.put("renderResponse", portletResponse);
-			}
-		}
-
-		// XML request
-
-		if ((portletRequest != null) && (portletResponse != null)) {
-			templateContext.put(
-				"xmlRequest",
-				new Object() {
-
-					@Override
-					public String toString() {
-						return PortletRequestUtil.toXML(
-							portletRequest, portletResponse);
-					}
-
-				}
-			);
-		}
-
-		// Theme display
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		if (themeDisplay != null) {
-			Layout layout = themeDisplay.getLayout();
-			List<Layout> layouts = themeDisplay.getLayouts();
-
-			templateContext.put("themeDisplay", themeDisplay);
-			templateContext.put("company", themeDisplay.getCompany());
-			templateContext.put("user", themeDisplay.getUser());
-			templateContext.put("realUser", themeDisplay.getRealUser());
-			templateContext.put("layout", layout);
-			templateContext.put("layouts", layouts);
-			templateContext.put("plid", String.valueOf(themeDisplay.getPlid()));
-			templateContext.put(
-				"layoutTypePortlet", themeDisplay.getLayoutTypePortlet());
-			templateContext.put(
-				"scopeGroupId", new Long(themeDisplay.getScopeGroupId()));
-			templateContext.put(
-				"permissionChecker", themeDisplay.getPermissionChecker());
-			templateContext.put("locale", themeDisplay.getLocale());
-			templateContext.put("timeZone", themeDisplay.getTimeZone());
-			templateContext.put("colorScheme", themeDisplay.getColorScheme());
-			templateContext.put(
-				"portletDisplay", themeDisplay.getPortletDisplay());
-
-			// Navigation items
-
-			if (layout != null) {
-				List<NavItem> navItems = NavItem.fromLayouts(
-					request, layouts, templateContext);
-
-				templateContext.put("navItems", navItems);
-			}
-
-			// Deprecated
-
-			templateContext.put(
-				"portletGroupId", new Long(themeDisplay.getScopeGroupId()));
-		}
-
-		// Theme
-
-		Theme theme = (Theme)request.getAttribute(WebKeys.THEME);
-
-		if ((theme == null) && (themeDisplay != null)) {
-			theme = themeDisplay.getTheme();
-		}
-
-		if (theme != null) {
-			templateContext.put("theme", theme);
-		}
-
-		// Tiles attributes
-
-		prepareTiles(templateContext, request);
-
-		// Page title and subtitle
-
-		ListMergeable<String> pageTitleListMergeable =
-			(ListMergeable<String>)request.getAttribute(WebKeys.PAGE_TITLE);
-
-		if (pageTitleListMergeable != null) {
-			String pageTitle = pageTitleListMergeable.mergeToString(
-				StringPool.SPACE);
-
-			templateContext.put("pageTitle", pageTitle);
-		}
-
-		ListMergeable<String> pageSubtitleListMergeable =
-			(ListMergeable<String>)request.getAttribute(WebKeys.PAGE_SUBTITLE);
-
-		if (pageSubtitleListMergeable != null) {
-			String pageSubtitle = pageSubtitleListMergeable.mergeToString(
-				StringPool.SPACE);
-
-			templateContext.put("pageSubtitle", pageSubtitle);
-		}
-	}
-
-	protected void prepareTiles(
-		TemplateContext templateContext, HttpServletRequest request) {
-
+	protected void prepareTiles(Template template, HttpServletRequest request) {
 		ComponentContext componentContext =
 			(ComponentContext)request.getAttribute(
 				ComponentConstants.COMPONENT_CONTEXT);
@@ -718,23 +793,36 @@ public class TemplateContextHelper {
 
 		themeDisplay.setTilesTitle(tilesTitle);
 
-		templateContext.put("tilesTitle", tilesTitle);
+		template.put("tilesTitle", tilesTitle);
 
 		String tilesContent = (String)componentContext.getAttribute("content");
 
 		themeDisplay.setTilesContent(tilesContent);
 
-		templateContext.put("tilesContent", tilesContent);
+		template.put("tilesContent", tilesContent);
 
 		boolean tilesSelectable = GetterUtil.getBoolean(
 			(String)componentContext.getAttribute("selectable"));
 
 		themeDisplay.setTilesSelectable(tilesSelectable);
 
-		templateContext.put("tilesSelectable", tilesSelectable);
+		template.put("tilesSelectable", tilesSelectable);
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(
 		TemplateContextHelper.class);
+
+	private Map<ClassLoader, HelperUtilitiesMap>
+		_helperUtilitiesMaps = new ConcurrentHashMap
+			<ClassLoader, HelperUtilitiesMap>();
+
+	private class HelperUtilitiesMap
+		extends EnumMap<TemplateContextType, Map<String, Object>> {
+
+		public HelperUtilitiesMap(Class<TemplateContextType> keyClazz) {
+			super(keyClazz);
+		}
+
+	}
 
 }

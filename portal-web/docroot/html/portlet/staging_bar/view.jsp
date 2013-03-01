@@ -49,12 +49,12 @@ if (layout != null) {
 
 	if (liveGroup != null) {
 		try {
-			liveLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(layout.getUuid(), liveGroup.getGroupId());
+			liveLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(layout.getUuid(), liveGroup.getGroupId(), layout.isPrivateLayout());
 
 			liveFriendlyURL = PortalUtil.getLayoutFriendlyURL(liveLayout, themeDisplay);
 		}
 		catch (Exception e) {
-			liveFriendlyURL = PortalUtil.getGroupFriendlyURL(liveGroup, layout.getPrivateLayout(), themeDisplay);
+			liveFriendlyURL = PortalUtil.getGroupFriendlyURL(liveGroup, layout.isPrivateLayout(), themeDisplay);
 		}
 
 		liveFriendlyURL = PortalUtil.addPreservedParameters(themeDisplay, liveFriendlyURL);
@@ -64,12 +64,12 @@ if (layout != null) {
 
 	if (stagingGroup != null) {
 		try {
-			Layout stagingLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(layout.getUuid(), stagingGroup.getGroupId());
+			Layout stagingLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(layout.getUuid(), stagingGroup.getGroupId(), layout.isPrivateLayout());
 
 			stagingFriendlyURL = PortalUtil.getLayoutFriendlyURL(stagingLayout, themeDisplay);
 		}
 		catch (Exception e) {
-			stagingFriendlyURL = PortalUtil.getGroupFriendlyURL(stagingGroup, layout.getPrivateLayout(), themeDisplay);
+			stagingFriendlyURL = PortalUtil.getGroupFriendlyURL(stagingGroup, layout.isPrivateLayout(), themeDisplay);
 		}
 
 		stagingFriendlyURL = PortalUtil.addPreservedParameters(themeDisplay, stagingFriendlyURL);
@@ -285,14 +285,14 @@ if (layout != null) {
 						</div>
 
 						<div class="staging-details">
-							<portlet:actionURL var="editLayoutRevisonURL">
+							<portlet:actionURL var="editLayoutRevisionURL">
 								<portlet:param name="struts_action" value="/staging_bar/edit_layouts" />
-								<portlet:param name="groupId" value="<%= String.valueOf(layoutRevision.getGroupId()) %>" />
 							</portlet:actionURL>
 
-							<aui:form action="<%= editLayoutRevisonURL %>" enctype="multipart/form-data" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "savePage();" %>'>
+							<aui:form action="<%= editLayoutRevisionURL %>" enctype="multipart/form-data" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "savePage();" %>'>
 								<aui:input name="<%= Constants.CMD %>" type="hidden" />
 								<aui:input name="redirect" type="hidden" value="<%= portletURL.toString() %>" />
+								<aui:input name="groupId" type="hidden" value="<%= String.valueOf(layoutRevision.getGroupId()) %>" />
 								<aui:input name="layoutRevisionId" type="hidden" value="<%= layoutRevision.getLayoutRevisionId() %>" />
 								<aui:input name="layoutSetBranchId" type="hidden" value="<%= layoutRevision.getLayoutSetBranchId() %>" />
 								<aui:input name="updateRecentLayoutRevisionId" type="hidden" value="<%= false %>" />

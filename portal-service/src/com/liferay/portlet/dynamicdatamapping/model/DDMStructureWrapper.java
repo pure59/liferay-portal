@@ -754,6 +754,16 @@ public class DDMStructureWrapper implements DDMStructure,
 	}
 
 	public void setExpandoBridgeAttributes(
+		com.liferay.portal.model.BaseModel<?> baseModel) {
+		_ddmStructure.setExpandoBridgeAttributes(baseModel);
+	}
+
+	public void setExpandoBridgeAttributes(
+		com.liferay.portlet.expando.model.ExpandoBridge expandoBridge) {
+		_ddmStructure.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_ddmStructure.setExpandoBridgeAttributes(serviceContext);
 	}
@@ -807,6 +817,13 @@ public class DDMStructureWrapper implements DDMStructure,
 
 	public java.util.List<java.lang.String> getAvailableLanguageIds() {
 		return _ddmStructure.getAvailableLanguageIds();
+	}
+
+	public java.util.List<java.lang.String> getChildrenFieldNames(
+		java.lang.String fieldName)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructure.getChildrenFieldNames(fieldName);
 	}
 
 	public java.lang.String getCompleteXsd()
@@ -909,6 +926,12 @@ public class DDMStructureWrapper implements DDMStructure,
 		return _ddmStructure.getLocalizedTransientFieldsMap();
 	}
 
+	public java.util.List<java.lang.String> getRootFieldNames()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructure.getRootFieldNames();
+	}
+
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMTemplate> getTemplates()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _ddmStructure.getTemplates();
@@ -921,10 +944,27 @@ public class DDMStructureWrapper implements DDMStructure,
 		return _ddmStructure.getTransientFieldsMap(locale);
 	}
 
+	public java.lang.String getWebDavURL(
+		com.liferay.portal.theme.ThemeDisplay themeDisplay) {
+		return _ddmStructure.getWebDavURL(themeDisplay);
+	}
+
 	public boolean hasField(java.lang.String fieldName)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _ddmStructure.hasField(fieldName);
+	}
+
+	public boolean isFieldPrivate(java.lang.String fieldName)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructure.isFieldPrivate(fieldName);
+	}
+
+	public boolean isFieldRepeatable(java.lang.String fieldName)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _ddmStructure.isFieldRepeatable(fieldName);
 	}
 
 	public void setDocument(com.liferay.portal.kernel.xml.Document document) {

@@ -111,83 +111,410 @@ public class MBThreadFlagUtil {
 	}
 
 	/**
-	* Caches the message boards thread flag in the entity cache if it is enabled.
+	* Returns all the message boards thread flags where uuid = &#63;.
 	*
-	* @param mbThreadFlag the message boards thread flag
+	* @param uuid the uuid
+	* @return the matching message boards thread flags
+	* @throws SystemException if a system exception occurred
 	*/
-	public static void cacheResult(
-		com.liferay.portlet.messageboards.model.MBThreadFlag mbThreadFlag) {
-		getPersistence().cacheResult(mbThreadFlag);
+	public static java.util.List<com.liferay.portlet.messageboards.model.MBThreadFlag> findByUuid(
+		java.lang.String uuid)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().findByUuid(uuid);
 	}
 
 	/**
-	* Caches the message boards thread flags in the entity cache if it is enabled.
+	* Returns a range of all the message boards thread flags where uuid = &#63;.
 	*
-	* @param mbThreadFlags the message boards thread flags
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadFlagModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param uuid the uuid
+	* @param start the lower bound of the range of message boards thread flags
+	* @param end the upper bound of the range of message boards thread flags (not inclusive)
+	* @return the range of matching message boards thread flags
+	* @throws SystemException if a system exception occurred
 	*/
-	public static void cacheResult(
-		java.util.List<com.liferay.portlet.messageboards.model.MBThreadFlag> mbThreadFlags) {
-		getPersistence().cacheResult(mbThreadFlags);
+	public static java.util.List<com.liferay.portlet.messageboards.model.MBThreadFlag> findByUuid(
+		java.lang.String uuid, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().findByUuid(uuid, start, end);
 	}
 
 	/**
-	* Creates a new message boards thread flag with the primary key. Does not add the message boards thread flag to the database.
+	* Returns an ordered range of all the message boards thread flags where uuid = &#63;.
 	*
-	* @param threadFlagId the primary key for the new message boards thread flag
-	* @return the new message boards thread flag
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadFlagModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param uuid the uuid
+	* @param start the lower bound of the range of message boards thread flags
+	* @param end the upper bound of the range of message boards thread flags (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @return the ordered range of matching message boards thread flags
+	* @throws SystemException if a system exception occurred
 	*/
-	public static com.liferay.portlet.messageboards.model.MBThreadFlag create(
-		long threadFlagId) {
-		return getPersistence().create(threadFlagId);
+	public static java.util.List<com.liferay.portlet.messageboards.model.MBThreadFlag> findByUuid(
+		java.lang.String uuid, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().findByUuid(uuid, start, end, orderByComparator);
 	}
 
 	/**
-	* Removes the message boards thread flag with the primary key from the database. Also notifies the appropriate model listeners.
+	* Returns the first message boards thread flag in the ordered set where uuid = &#63;.
 	*
-	* @param threadFlagId the primary key of the message boards thread flag
+	* @param uuid the uuid
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching message boards thread flag
+	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag findByUuid_First(
+		java.lang.String uuid,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException,
+			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
+		return getPersistence().findByUuid_First(uuid, orderByComparator);
+	}
+
+	/**
+	* Returns the first message boards thread flag in the ordered set where uuid = &#63;.
+	*
+	* @param uuid the uuid
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching message boards thread flag, or <code>null</code> if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag fetchByUuid_First(
+		java.lang.String uuid,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().fetchByUuid_First(uuid, orderByComparator);
+	}
+
+	/**
+	* Returns the last message boards thread flag in the ordered set where uuid = &#63;.
+	*
+	* @param uuid the uuid
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching message boards thread flag
+	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag findByUuid_Last(
+		java.lang.String uuid,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException,
+			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
+		return getPersistence().findByUuid_Last(uuid, orderByComparator);
+	}
+
+	/**
+	* Returns the last message boards thread flag in the ordered set where uuid = &#63;.
+	*
+	* @param uuid the uuid
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching message boards thread flag, or <code>null</code> if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag fetchByUuid_Last(
+		java.lang.String uuid,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().fetchByUuid_Last(uuid, orderByComparator);
+	}
+
+	/**
+	* Returns the message boards thread flags before and after the current message boards thread flag in the ordered set where uuid = &#63;.
+	*
+	* @param threadFlagId the primary key of the current message boards thread flag
+	* @param uuid the uuid
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the previous, current, and next message boards thread flag
+	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a message boards thread flag with the primary key could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag[] findByUuid_PrevAndNext(
+		long threadFlagId, java.lang.String uuid,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException,
+			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
+		return getPersistence()
+				   .findByUuid_PrevAndNext(threadFlagId, uuid, orderByComparator);
+	}
+
+	/**
+	* Removes all the message boards thread flags where uuid = &#63; from the database.
+	*
+	* @param uuid the uuid
+	* @throws SystemException if a system exception occurred
+	*/
+	public static void removeByUuid(java.lang.String uuid)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		getPersistence().removeByUuid(uuid);
+	}
+
+	/**
+	* Returns the number of message boards thread flags where uuid = &#63;.
+	*
+	* @param uuid the uuid
+	* @return the number of matching message boards thread flags
+	* @throws SystemException if a system exception occurred
+	*/
+	public static int countByUuid(java.lang.String uuid)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().countByUuid(uuid);
+	}
+
+	/**
+	* Returns the message boards thread flag where uuid = &#63; and groupId = &#63; or throws a {@link com.liferay.portlet.messageboards.NoSuchThreadFlagException} if it could not be found.
+	*
+	* @param uuid the uuid
+	* @param groupId the group ID
+	* @return the matching message boards thread flag
+	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag findByUUID_G(
+		java.lang.String uuid, long groupId)
+		throws com.liferay.portal.kernel.exception.SystemException,
+			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
+		return getPersistence().findByUUID_G(uuid, groupId);
+	}
+
+	/**
+	* Returns the message boards thread flag where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	*
+	* @param uuid the uuid
+	* @param groupId the group ID
+	* @return the matching message boards thread flag, or <code>null</code> if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag fetchByUUID_G(
+		java.lang.String uuid, long groupId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().fetchByUUID_G(uuid, groupId);
+	}
+
+	/**
+	* Returns the message boards thread flag where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	*
+	* @param uuid the uuid
+	* @param groupId the group ID
+	* @param retrieveFromCache whether to use the finder cache
+	* @return the matching message boards thread flag, or <code>null</code> if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag fetchByUUID_G(
+		java.lang.String uuid, long groupId, boolean retrieveFromCache)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().fetchByUUID_G(uuid, groupId, retrieveFromCache);
+	}
+
+	/**
+	* Removes the message boards thread flag where uuid = &#63; and groupId = &#63; from the database.
+	*
+	* @param uuid the uuid
+	* @param groupId the group ID
 	* @return the message boards thread flag that was removed
-	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a message boards thread flag with the primary key could not be found
 	* @throws SystemException if a system exception occurred
 	*/
-	public static com.liferay.portlet.messageboards.model.MBThreadFlag remove(
-		long threadFlagId)
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag removeByUUID_G(
+		java.lang.String uuid, long groupId)
 		throws com.liferay.portal.kernel.exception.SystemException,
 			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
-		return getPersistence().remove(threadFlagId);
-	}
-
-	public static com.liferay.portlet.messageboards.model.MBThreadFlag updateImpl(
-		com.liferay.portlet.messageboards.model.MBThreadFlag mbThreadFlag)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		return getPersistence().updateImpl(mbThreadFlag);
+		return getPersistence().removeByUUID_G(uuid, groupId);
 	}
 
 	/**
-	* Returns the message boards thread flag with the primary key or throws a {@link com.liferay.portlet.messageboards.NoSuchThreadFlagException} if it could not be found.
+	* Returns the number of message boards thread flags where uuid = &#63; and groupId = &#63;.
 	*
-	* @param threadFlagId the primary key of the message boards thread flag
-	* @return the message boards thread flag
-	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a message boards thread flag with the primary key could not be found
+	* @param uuid the uuid
+	* @param groupId the group ID
+	* @return the number of matching message boards thread flags
 	* @throws SystemException if a system exception occurred
 	*/
-	public static com.liferay.portlet.messageboards.model.MBThreadFlag findByPrimaryKey(
-		long threadFlagId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
-		return getPersistence().findByPrimaryKey(threadFlagId);
+	public static int countByUUID_G(java.lang.String uuid, long groupId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().countByUUID_G(uuid, groupId);
 	}
 
 	/**
-	* Returns the message boards thread flag with the primary key or returns <code>null</code> if it could not be found.
+	* Returns all the message boards thread flags where uuid = &#63; and companyId = &#63;.
 	*
-	* @param threadFlagId the primary key of the message boards thread flag
-	* @return the message boards thread flag, or <code>null</code> if a message boards thread flag with the primary key could not be found
+	* @param uuid the uuid
+	* @param companyId the company ID
+	* @return the matching message boards thread flags
 	* @throws SystemException if a system exception occurred
 	*/
-	public static com.liferay.portlet.messageboards.model.MBThreadFlag fetchByPrimaryKey(
-		long threadFlagId)
+	public static java.util.List<com.liferay.portlet.messageboards.model.MBThreadFlag> findByUuid_C(
+		java.lang.String uuid, long companyId)
 		throws com.liferay.portal.kernel.exception.SystemException {
-		return getPersistence().fetchByPrimaryKey(threadFlagId);
+		return getPersistence().findByUuid_C(uuid, companyId);
+	}
+
+	/**
+	* Returns a range of all the message boards thread flags where uuid = &#63; and companyId = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadFlagModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param uuid the uuid
+	* @param companyId the company ID
+	* @param start the lower bound of the range of message boards thread flags
+	* @param end the upper bound of the range of message boards thread flags (not inclusive)
+	* @return the range of matching message boards thread flags
+	* @throws SystemException if a system exception occurred
+	*/
+	public static java.util.List<com.liferay.portlet.messageboards.model.MBThreadFlag> findByUuid_C(
+		java.lang.String uuid, long companyId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().findByUuid_C(uuid, companyId, start, end);
+	}
+
+	/**
+	* Returns an ordered range of all the message boards thread flags where uuid = &#63; and companyId = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadFlagModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param uuid the uuid
+	* @param companyId the company ID
+	* @param start the lower bound of the range of message boards thread flags
+	* @param end the upper bound of the range of message boards thread flags (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @return the ordered range of matching message boards thread flags
+	* @throws SystemException if a system exception occurred
+	*/
+	public static java.util.List<com.liferay.portlet.messageboards.model.MBThreadFlag> findByUuid_C(
+		java.lang.String uuid, long companyId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence()
+				   .findByUuid_C(uuid, companyId, start, end, orderByComparator);
+	}
+
+	/**
+	* Returns the first message boards thread flag in the ordered set where uuid = &#63; and companyId = &#63;.
+	*
+	* @param uuid the uuid
+	* @param companyId the company ID
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching message boards thread flag
+	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag findByUuid_C_First(
+		java.lang.String uuid, long companyId,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException,
+			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
+		return getPersistence()
+				   .findByUuid_C_First(uuid, companyId, orderByComparator);
+	}
+
+	/**
+	* Returns the first message boards thread flag in the ordered set where uuid = &#63; and companyId = &#63;.
+	*
+	* @param uuid the uuid
+	* @param companyId the company ID
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching message boards thread flag, or <code>null</code> if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag fetchByUuid_C_First(
+		java.lang.String uuid, long companyId,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence()
+				   .fetchByUuid_C_First(uuid, companyId, orderByComparator);
+	}
+
+	/**
+	* Returns the last message boards thread flag in the ordered set where uuid = &#63; and companyId = &#63;.
+	*
+	* @param uuid the uuid
+	* @param companyId the company ID
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching message boards thread flag
+	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag findByUuid_C_Last(
+		java.lang.String uuid, long companyId,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException,
+			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
+		return getPersistence()
+				   .findByUuid_C_Last(uuid, companyId, orderByComparator);
+	}
+
+	/**
+	* Returns the last message boards thread flag in the ordered set where uuid = &#63; and companyId = &#63;.
+	*
+	* @param uuid the uuid
+	* @param companyId the company ID
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching message boards thread flag, or <code>null</code> if a matching message boards thread flag could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag fetchByUuid_C_Last(
+		java.lang.String uuid, long companyId,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence()
+				   .fetchByUuid_C_Last(uuid, companyId, orderByComparator);
+	}
+
+	/**
+	* Returns the message boards thread flags before and after the current message boards thread flag in the ordered set where uuid = &#63; and companyId = &#63;.
+	*
+	* @param threadFlagId the primary key of the current message boards thread flag
+	* @param uuid the uuid
+	* @param companyId the company ID
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the previous, current, and next message boards thread flag
+	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a message boards thread flag with the primary key could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag[] findByUuid_C_PrevAndNext(
+		long threadFlagId, java.lang.String uuid, long companyId,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException,
+			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
+		return getPersistence()
+				   .findByUuid_C_PrevAndNext(threadFlagId, uuid, companyId,
+			orderByComparator);
+	}
+
+	/**
+	* Removes all the message boards thread flags where uuid = &#63; and companyId = &#63; from the database.
+	*
+	* @param uuid the uuid
+	* @param companyId the company ID
+	* @throws SystemException if a system exception occurred
+	*/
+	public static void removeByUuid_C(java.lang.String uuid, long companyId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		getPersistence().removeByUuid_C(uuid, companyId);
+	}
+
+	/**
+	* Returns the number of message boards thread flags where uuid = &#63; and companyId = &#63;.
+	*
+	* @param uuid the uuid
+	* @param companyId the company ID
+	* @return the number of matching message boards thread flags
+	* @throws SystemException if a system exception occurred
+	*/
+	public static int countByUuid_C(java.lang.String uuid, long companyId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().countByUuid_C(uuid, companyId);
 	}
 
 	/**
@@ -206,7 +533,7 @@ public class MBThreadFlagUtil {
 	* Returns a range of all the message boards thread flags where userId = &#63;.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadFlagModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param userId the user ID
@@ -225,7 +552,7 @@ public class MBThreadFlagUtil {
 	* Returns an ordered range of all the message boards thread flags where userId = &#63;.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadFlagModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param userId the user ID
@@ -328,6 +655,29 @@ public class MBThreadFlagUtil {
 	}
 
 	/**
+	* Removes all the message boards thread flags where userId = &#63; from the database.
+	*
+	* @param userId the user ID
+	* @throws SystemException if a system exception occurred
+	*/
+	public static void removeByUserId(long userId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		getPersistence().removeByUserId(userId);
+	}
+
+	/**
+	* Returns the number of message boards thread flags where userId = &#63;.
+	*
+	* @param userId the user ID
+	* @return the number of matching message boards thread flags
+	* @throws SystemException if a system exception occurred
+	*/
+	public static int countByUserId(long userId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().countByUserId(userId);
+	}
+
+	/**
 	* Returns all the message boards thread flags where threadId = &#63;.
 	*
 	* @param threadId the thread ID
@@ -344,7 +694,7 @@ public class MBThreadFlagUtil {
 	* Returns a range of all the message boards thread flags where threadId = &#63;.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadFlagModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param threadId the thread ID
@@ -363,7 +713,7 @@ public class MBThreadFlagUtil {
 	* Returns an ordered range of all the message boards thread flags where threadId = &#63;.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadFlagModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param threadId the thread ID
@@ -467,6 +817,29 @@ public class MBThreadFlagUtil {
 	}
 
 	/**
+	* Removes all the message boards thread flags where threadId = &#63; from the database.
+	*
+	* @param threadId the thread ID
+	* @throws SystemException if a system exception occurred
+	*/
+	public static void removeByThreadId(long threadId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		getPersistence().removeByThreadId(threadId);
+	}
+
+	/**
+	* Returns the number of message boards thread flags where threadId = &#63;.
+	*
+	* @param threadId the thread ID
+	* @return the number of matching message boards thread flags
+	* @throws SystemException if a system exception occurred
+	*/
+	public static int countByThreadId(long threadId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().countByThreadId(threadId);
+	}
+
+	/**
 	* Returns the message boards thread flag where userId = &#63; and threadId = &#63; or throws a {@link com.liferay.portlet.messageboards.NoSuchThreadFlagException} if it could not be found.
 	*
 	* @param userId the user ID
@@ -512,6 +885,114 @@ public class MBThreadFlagUtil {
 	}
 
 	/**
+	* Removes the message boards thread flag where userId = &#63; and threadId = &#63; from the database.
+	*
+	* @param userId the user ID
+	* @param threadId the thread ID
+	* @return the message boards thread flag that was removed
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag removeByU_T(
+		long userId, long threadId)
+		throws com.liferay.portal.kernel.exception.SystemException,
+			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
+		return getPersistence().removeByU_T(userId, threadId);
+	}
+
+	/**
+	* Returns the number of message boards thread flags where userId = &#63; and threadId = &#63;.
+	*
+	* @param userId the user ID
+	* @param threadId the thread ID
+	* @return the number of matching message boards thread flags
+	* @throws SystemException if a system exception occurred
+	*/
+	public static int countByU_T(long userId, long threadId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().countByU_T(userId, threadId);
+	}
+
+	/**
+	* Caches the message boards thread flag in the entity cache if it is enabled.
+	*
+	* @param mbThreadFlag the message boards thread flag
+	*/
+	public static void cacheResult(
+		com.liferay.portlet.messageboards.model.MBThreadFlag mbThreadFlag) {
+		getPersistence().cacheResult(mbThreadFlag);
+	}
+
+	/**
+	* Caches the message boards thread flags in the entity cache if it is enabled.
+	*
+	* @param mbThreadFlags the message boards thread flags
+	*/
+	public static void cacheResult(
+		java.util.List<com.liferay.portlet.messageboards.model.MBThreadFlag> mbThreadFlags) {
+		getPersistence().cacheResult(mbThreadFlags);
+	}
+
+	/**
+	* Creates a new message boards thread flag with the primary key. Does not add the message boards thread flag to the database.
+	*
+	* @param threadFlagId the primary key for the new message boards thread flag
+	* @return the new message boards thread flag
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag create(
+		long threadFlagId) {
+		return getPersistence().create(threadFlagId);
+	}
+
+	/**
+	* Removes the message boards thread flag with the primary key from the database. Also notifies the appropriate model listeners.
+	*
+	* @param threadFlagId the primary key of the message boards thread flag
+	* @return the message boards thread flag that was removed
+	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a message boards thread flag with the primary key could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag remove(
+		long threadFlagId)
+		throws com.liferay.portal.kernel.exception.SystemException,
+			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
+		return getPersistence().remove(threadFlagId);
+	}
+
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag updateImpl(
+		com.liferay.portlet.messageboards.model.MBThreadFlag mbThreadFlag)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().updateImpl(mbThreadFlag);
+	}
+
+	/**
+	* Returns the message boards thread flag with the primary key or throws a {@link com.liferay.portlet.messageboards.NoSuchThreadFlagException} if it could not be found.
+	*
+	* @param threadFlagId the primary key of the message boards thread flag
+	* @return the message boards thread flag
+	* @throws com.liferay.portlet.messageboards.NoSuchThreadFlagException if a message boards thread flag with the primary key could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag findByPrimaryKey(
+		long threadFlagId)
+		throws com.liferay.portal.kernel.exception.SystemException,
+			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
+		return getPersistence().findByPrimaryKey(threadFlagId);
+	}
+
+	/**
+	* Returns the message boards thread flag with the primary key or returns <code>null</code> if it could not be found.
+	*
+	* @param threadFlagId the primary key of the message boards thread flag
+	* @return the message boards thread flag, or <code>null</code> if a message boards thread flag with the primary key could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static com.liferay.portlet.messageboards.model.MBThreadFlag fetchByPrimaryKey(
+		long threadFlagId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getPersistence().fetchByPrimaryKey(threadFlagId);
+	}
+
+	/**
 	* Returns all the message boards thread flags.
 	*
 	* @return the message boards thread flags
@@ -526,7 +1007,7 @@ public class MBThreadFlagUtil {
 	* Returns a range of all the message boards thread flags.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadFlagModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param start the lower bound of the range of message boards thread flags
@@ -544,7 +1025,7 @@ public class MBThreadFlagUtil {
 	* Returns an ordered range of all the message boards thread flags.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadFlagModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param start the lower bound of the range of message boards thread flags
@@ -561,43 +1042,6 @@ public class MBThreadFlagUtil {
 	}
 
 	/**
-	* Removes all the message boards thread flags where userId = &#63; from the database.
-	*
-	* @param userId the user ID
-	* @throws SystemException if a system exception occurred
-	*/
-	public static void removeByUserId(long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		getPersistence().removeByUserId(userId);
-	}
-
-	/**
-	* Removes all the message boards thread flags where threadId = &#63; from the database.
-	*
-	* @param threadId the thread ID
-	* @throws SystemException if a system exception occurred
-	*/
-	public static void removeByThreadId(long threadId)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		getPersistence().removeByThreadId(threadId);
-	}
-
-	/**
-	* Removes the message boards thread flag where userId = &#63; and threadId = &#63; from the database.
-	*
-	* @param userId the user ID
-	* @param threadId the thread ID
-	* @return the message boards thread flag that was removed
-	* @throws SystemException if a system exception occurred
-	*/
-	public static com.liferay.portlet.messageboards.model.MBThreadFlag removeByU_T(
-		long userId, long threadId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.messageboards.NoSuchThreadFlagException {
-		return getPersistence().removeByU_T(userId, threadId);
-	}
-
-	/**
 	* Removes all the message boards thread flags from the database.
 	*
 	* @throws SystemException if a system exception occurred
@@ -605,43 +1049,6 @@ public class MBThreadFlagUtil {
 	public static void removeAll()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		getPersistence().removeAll();
-	}
-
-	/**
-	* Returns the number of message boards thread flags where userId = &#63;.
-	*
-	* @param userId the user ID
-	* @return the number of matching message boards thread flags
-	* @throws SystemException if a system exception occurred
-	*/
-	public static int countByUserId(long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		return getPersistence().countByUserId(userId);
-	}
-
-	/**
-	* Returns the number of message boards thread flags where threadId = &#63;.
-	*
-	* @param threadId the thread ID
-	* @return the number of matching message boards thread flags
-	* @throws SystemException if a system exception occurred
-	*/
-	public static int countByThreadId(long threadId)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		return getPersistence().countByThreadId(threadId);
-	}
-
-	/**
-	* Returns the number of message boards thread flags where userId = &#63; and threadId = &#63;.
-	*
-	* @param userId the user ID
-	* @param threadId the thread ID
-	* @return the number of matching message boards thread flags
-	* @throws SystemException if a system exception occurred
-	*/
-	public static int countByU_T(long userId, long threadId)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		return getPersistence().countByU_T(userId, threadId);
 	}
 
 	/**

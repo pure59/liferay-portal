@@ -18,12 +18,13 @@ import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.image.ImageMagick;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.NamedThreadFactory;
 import com.liferay.portal.kernel.util.OSDetector;
-import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portal.util.PropsUtil;
 
@@ -42,6 +43,7 @@ import org.im4java.process.ProcessTask;
  * @author Alexander Chow
  * @author Ivica Cardic
  */
+@DoPrivileged
 public class ImageMagickImpl implements ImageMagick {
 
 	public static ImageMagickImpl getInstance() {
@@ -164,7 +166,7 @@ public class ImageMagickImpl implements ImageMagick {
 			sb.append("Ghostscript. For better quality document and image ");
 			sb.append("previews, install ImageMagick and Ghostscript. Enable ");
 			sb.append("ImageMagick in portal-ext.properties or in the Server ");
-			sb.append("Administration control panel at: ");
+			sb.append("Administration section of the Control Panel at: ");
 			sb.append("http://<server>/group/control_panel/manage/-/server/");
 			sb.append("external-services");
 
@@ -184,7 +186,7 @@ public class ImageMagickImpl implements ImageMagick {
 				_resourceLimitsProperties = getResourceLimitsProperties();
 			}
 			catch (Exception e) {
-				_log.warn(e, e);
+				_log.error(e, e);
 			}
 		}
 	}
@@ -223,7 +225,7 @@ public class ImageMagickImpl implements ImageMagick {
 				_processExecutor.setThreadFactory(
 					new NamedThreadFactory(
 						ImageMagickImpl.class.getName(), Thread.MIN_PRIORITY,
-						PortalClassLoaderUtil.getClassLoader()));
+						ClassLoaderUtil.getPortalClassLoader()));
 			}
 		}
 

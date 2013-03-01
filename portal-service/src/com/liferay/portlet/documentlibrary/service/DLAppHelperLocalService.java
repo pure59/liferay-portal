@@ -64,7 +64,7 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
-	public void addFolder(
+	public void addFolder(long userId,
 		com.liferay.portal.kernel.repository.model.Folder folder,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
@@ -99,7 +99,8 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 	public void getFileAsStream(long userId,
 		com.liferay.portal.kernel.repository.model.FileEntry fileEntry,
 		boolean incrementCounter)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public java.util.List<com.liferay.portlet.documentlibrary.model.DLFileShortcut> getFileShortcuts(
@@ -142,6 +143,15 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	/**
+	* Moves the file entry to the recycle bin.
+	*
+	* @param userId the primary key of the user moving the file entry
+	* @param fileEntry the file entry to be moved
+	* @return the moved file entry
+	* @throws PortalException if a user with the primary key could not be found
+	* @throws SystemException if a system exception occurred
+	*/
 	public com.liferay.portal.kernel.repository.model.FileEntry moveFileEntryToTrash(
 		long userId,
 		com.liferay.portal.kernel.repository.model.FileEntry fileEntry)
@@ -156,6 +166,15 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	/**
+	* Moves the file shortcut to the recycle bin.
+	*
+	* @param userId the primary key of the user moving the file shortcut
+	* @param dlFileShortcut the file shortcut to be moved
+	* @return the moved file shortcut
+	* @throws PortalException if a user with the primary key could not be found
+	* @throws SystemException if a system exception occurred
+	*/
 	public com.liferay.portlet.documentlibrary.model.DLFileShortcut moveFileShortcutToTrash(
 		long userId,
 		com.liferay.portlet.documentlibrary.model.DLFileShortcut dlFileShortcut)
@@ -174,6 +193,15 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	/**
+	* Moves the folder to the recycle bin.
+	*
+	* @param userId the primary key of the user moving the folder
+	* @param folder the folder to be moved
+	* @return the moved folder
+	* @throws PortalException if a user with the primary key could not be found
+	* @throws SystemException if a system exception occurred
+	*/
 	public com.liferay.portal.kernel.repository.model.Folder moveFolderToTrash(
 		long userId, com.liferay.portal.kernel.repository.model.Folder folder)
 		throws com.liferay.portal.kernel.exception.PortalException,
@@ -209,6 +237,18 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	public com.liferay.portlet.asset.model.AssetEntry updateAsset(long userId,
+		com.liferay.portal.kernel.repository.model.Folder folder,
+		long[] assetCategoryIds, java.lang.String[] assetTagNames,
+		long[] assetLinkEntryIds)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
+	public void updateDependentStatus(com.liferay.portal.model.User user,
+		java.util.List<java.lang.Object> dlFileEntriesAndDLFolders, int status)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
 	public void updateFileEntry(long userId,
 		com.liferay.portal.kernel.repository.model.FileEntry fileEntry,
 		com.liferay.portal.kernel.repository.model.FileVersion sourceFileVersion,
@@ -225,7 +265,7 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
-	public void updateFolder(
+	public void updateFolder(long userId,
 		com.liferay.portal.kernel.repository.model.Folder folder,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
@@ -235,12 +275,8 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 		com.liferay.portal.kernel.repository.model.FileEntry fileEntry,
 		com.liferay.portal.kernel.repository.model.FileVersion latestFileVersion,
 		int oldStatus, int newStatus,
-		java.util.Map<java.lang.String, java.io.Serializable> workflowContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
-
-	public void updateStatuses(com.liferay.portal.model.User user,
-		java.util.List<java.lang.Object> dlFileEntriesAndDLFolders, int status)
+		java.util.Map<java.lang.String, java.io.Serializable> workflowContext,
+		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 }

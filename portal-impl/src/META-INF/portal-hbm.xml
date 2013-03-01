@@ -150,6 +150,7 @@
 	<import class="com.liferay.portlet.social.model.SocialActivityCounter" />
 	<import class="com.liferay.portlet.social.model.SocialActivityInterpreter" />
 	<import class="com.liferay.portlet.social.model.SocialActivityLimit" />
+	<import class="com.liferay.portlet.social.model.SocialActivitySet" />
 	<import class="com.liferay.portlet.social.model.SocialActivitySetting" />
 	<import class="com.liferay.portlet.social.model.SocialRelation" />
 	<import class="com.liferay.portlet.social.model.SocialRequest" />
@@ -331,6 +332,7 @@
 		<property name="classPK" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="parentGroupId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="liveGroupId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="treePath" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="name" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="description" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="type" type="com.liferay.portal.dao.orm.hibernate.IntegerType" column="type_" />
@@ -345,7 +347,6 @@
 			<generator class="assigned" />
 		</id>
 		<property name="modifiedDate" type="org.hibernate.type.TimestampType" />
-		<property name="text" type="com.liferay.portal.dao.orm.hibernate.StringType" column="text_" />
 		<property name="type" type="com.liferay.portal.dao.orm.hibernate.StringType" column="type_" />
 		<property name="height" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
 		<property name="width" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
@@ -371,7 +372,7 @@
 		<property name="robots" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="type" type="com.liferay.portal.dao.orm.hibernate.StringType" column="type_" />
 		<property name="typeSettings" type="com.liferay.portal.dao.orm.hibernate.StringType" />
-		<property name="hidden" type="com.liferay.portal.dao.orm.hibernate.BooleanType" column="hidden_" />
+		<property name="hidden" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />
 		<property name="friendlyURL" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="iconImage" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />
 		<property name="iconImageId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
@@ -619,6 +620,7 @@
 		<property name="minNumbers" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
 		<property name="minSymbols" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
 		<property name="minUpperCase" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
+		<property name="regex" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="history" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />
 		<property name="historyCount" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
 		<property name="expireable" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />
@@ -773,6 +775,11 @@
 		</id>
 		<property name="uuid" type="com.liferay.portal.dao.orm.hibernate.StringType" column="uuid_" />
 		<property name="groupId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="userId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="userName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="createDate" type="org.hibernate.type.TimestampType" />
+		<property name="modifiedDate" type="org.hibernate.type.TimestampType" />
 		<property name="repositoryId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="mappedId" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="manualCheckInRequired" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />
@@ -1330,6 +1337,10 @@
 		<property name="description" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="visits" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
 		<property name="priority" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
+		<property name="status" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
+		<property name="statusByUserId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="statusByUserName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="statusDate" type="org.hibernate.type.TimestampType" />
 	</class>
 	<class name="com.liferay.portlet.bookmarks.model.impl.BookmarksFolderImpl" table="BookmarksFolder">
 		<cache usage="read-write" />
@@ -1347,6 +1358,10 @@
 		<property name="parentFolderId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="name" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="description" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="status" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
+		<property name="statusByUserId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="statusByUserName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="statusDate" type="org.hibernate.type.TimestampType" />
 	</class>
 	<class name="com.liferay.portlet.calendar.model.impl.CalEventImpl" table="CalEvent">
 		<cache usage="read-write" />
@@ -1411,6 +1426,8 @@
 		<property name="versionUserName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="createDate" type="org.hibernate.type.TimestampType" />
 		<property name="modifiedDate" type="org.hibernate.type.TimestampType" />
+		<property name="classNameId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="classPK" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="repositoryId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="folderId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="name" type="com.liferay.portal.dao.orm.hibernate.StringType" />
@@ -1461,10 +1478,13 @@
 		<id name="fileRankId" type="long">
 			<generator class="assigned" />
 		</id>
+		<property name="uuid" type="com.liferay.portal.dao.orm.hibernate.StringType" column="uuid_" />
 		<property name="groupId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="userId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="userName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="createDate" type="org.hibernate.type.TimestampType" />
+		<property name="modifiedDate" type="org.hibernate.type.TimestampType" />
 		<property name="fileEntryId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="active" type="com.liferay.portal.dao.orm.hibernate.BooleanType" column="active_" />
 	</class>
@@ -1538,7 +1558,7 @@
 		<property name="description" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="lastPostDate" type="org.hibernate.type.TimestampType" />
 		<property name="defaultFileEntryTypeId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
-		<property name="hidden" type="com.liferay.portal.dao.orm.hibernate.BooleanType" column="hidden_" />
+		<property name="hidden" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />
 		<property name="overrideFileEntryTypes" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />
 		<property name="status" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
 		<property name="statusByUserId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
@@ -1551,8 +1571,8 @@
 			<generator class="assigned" />
 		</id>
 		<property name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
-		<property name="createDate" type="org.hibernate.type.TimestampType" />
-		<property name="modifiedDate" type="org.hibernate.type.TimestampType" />
+		<property name="createDate" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="modifiedDate" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="fileId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="fileUuid" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="repositoryId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
@@ -1862,6 +1882,10 @@
 		<property name="parentFolderId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="name" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="description" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="status" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
+		<property name="statusByUserId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="statusByUserName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="statusDate" type="org.hibernate.type.TimestampType" />
 	</class>
 	<class name="com.liferay.portlet.journal.model.impl.JournalStructureImpl" table="JournalStructure">
 		<cache usage="read-write" />
@@ -1909,6 +1933,7 @@
 		<id name="banId" type="long">
 			<generator class="assigned" />
 		</id>
+		<property name="uuid" type="com.liferay.portal.dao.orm.hibernate.StringType" column="uuid_" />
 		<property name="groupId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="userId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
@@ -1936,6 +1961,10 @@
 		<property name="threadCount" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
 		<property name="messageCount" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
 		<property name="lastPostDate" type="org.hibernate.type.TimestampType" />
+		<property name="status" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
+		<property name="statusByUserId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="statusByUserName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="statusDate" type="org.hibernate.type.TimestampType" />
 	</class>
 	<class name="com.liferay.portlet.messageboards.model.impl.MBDiscussionImpl" table="MBDiscussion">
 		<cache usage="read-write" />
@@ -1998,7 +2027,6 @@
 		<property name="subject" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="body" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="format" type="com.liferay.portal.dao.orm.hibernate.StringType" />
-		<property name="attachments" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />
 		<property name="anonymous" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />
 		<property name="priority" type="com.liferay.portal.dao.orm.hibernate.DoubleType" />
 		<property name="allowPingbacks" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />
@@ -2044,7 +2072,12 @@
 		<id name="threadFlagId" type="long">
 			<generator class="assigned" />
 		</id>
+		<property name="uuid" type="com.liferay.portal.dao.orm.hibernate.StringType" column="uuid_" />
+		<property name="groupId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="userId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="userName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="createDate" type="org.hibernate.type.TimestampType" />
 		<property name="modifiedDate" type="org.hibernate.type.TimestampType" />
 		<property name="threadId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 	</class>
@@ -2382,6 +2415,7 @@
 		<property name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="userId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="createDate" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="activitySetId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="mirrorActivityId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="classNameId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="classPK" type="com.liferay.portal.dao.orm.hibernate.LongType" />
@@ -2432,6 +2466,21 @@
 		<property name="activityType" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
 		<property name="activityCounterName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="value" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+	</class>
+	<class name="com.liferay.portlet.social.model.impl.SocialActivitySetImpl" table="SocialActivitySet">
+		<cache usage="read-write" />
+		<id name="activitySetId" type="long">
+			<generator class="assigned" />
+		</id>
+		<property name="groupId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="userId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="createDate" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="modifiedDate" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="classNameId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="classPK" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="type" type="com.liferay.portal.dao.orm.hibernate.IntegerType" column="type_" />
+		<property name="activityCount" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
 	</class>
 	<class name="com.liferay.portlet.social.model.impl.SocialActivitySettingImpl" table="SocialActivitySetting">
 		<cache usage="read-write" />

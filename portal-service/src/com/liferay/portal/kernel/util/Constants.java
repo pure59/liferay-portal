@@ -23,6 +23,8 @@ public interface Constants {
 
 	public static final String ADD = "add";
 
+	public static final String ADD_DYNAMIC = "add_dynamic";
+
 	public static final String ADD_MULTIPLE = "add_multiple";
 
 	public static final String ADD_TEMP = "add_temp";
@@ -133,6 +135,8 @@ public interface Constants {
 	public static final String UPDATE = "update";
 
 	public static final String UPDATE_AND_CHECKIN = "update_and_checkin";
+
+	public static final String UPDATE_CONTENT = "update_content";
 
 	public static final String VIEW = "view";
 

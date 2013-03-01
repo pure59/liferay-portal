@@ -42,6 +42,10 @@
 	@include box-shadow(inset 0 0 2px #224FA8);
 }
 
+.portlet-document-library-upload-mask .aui-overlaymask-content {
+	@include border-radius(5px);
+}
+
 .lfr-search-combobox-item, .portlet-journal .lfr-search-combobox .search input {
 	@include border-radius(1px);
 }
@@ -56,10 +60,8 @@
 	}
 }
 
-.lfr-upload-container {
-	 .progress-bar, .progress {
-		@include border-radius(10px);
-	 }
+.lfr-upload-container .progress-bar, .lfr-upload-container .progress, .lfr-editable:after {
+	@include border-radius(10px);
 }
 
 body > .lfr-menu-list, body > .lfr-menu-list ul, button, input[type="button"], input[type="submit"], input[type="reset"], .active-area-proxy, .aui-dialog .yui3-widget-hd, .aui-dialog-content, .aui-paginator-link, .entry-display-style .entry-thumbnail img, .lfr-actions, .lfr-api-results, .lfr-header-row .aui-toolbar-only, .lfr-translation-manager, .lfr-translation-manager-translation, .lfr-upload-container .cancel-button .modify-pages .delete-tab, .portlet-image-gallery-display .image-thumbnail img, .portlet-journal .lfr-table .journal-metadata, .portlet-search .search-facet .facet-value, .rule-group-instance-container .rule-group-instance, .select-documents, .select-files, .staging-icon-menu-container.staging-icon-menu.lfr-actions .lfr-trigger strong a, .taglib-logo-selector .lfr-change-logo.show-background, .taglib-ratings.stars:hover, .taglib-ratings.stars:hover .liferay-rating-vote, .tags-search-combobox .aui-field-input-text {
@@ -70,7 +72,7 @@ body > .lfr-menu-list, body > .lfr-menu-list ul, button, input[type="button"], i
 	@include border-radius(5px);
 }
 
-.portlet-journal .structure-tree .structure-field {
+.portlet-journal .lfr-ddm-container .aui-field-wrapper {
 	@include border-radius(6px);
 }
 
@@ -267,10 +269,16 @@ body:first-of-type {
 	@include lfr-drop-active;
 }
 
-.upload-drop-intent .lfr-upload-container .upload-target {
-	@include experimental(animation, lfr-drop-active 1s ease 0.2s infinite);
+.upload-drop-active {
+	.lfr-upload-container .upload-target {
+		@include experimental(animation, none);
+	}
+
+	.portlet-document-library .document-container {
+		@include box-shadow(inset 0 0 5px #B8C1D1);
+	}
 }
 
-.upload-drop-active .lfr-upload-container .upload-target {
-	@include experimental(animation, none);
+.upload-drop-intent .lfr-upload-container .upload-target {
+	@include experimental(animation, lfr-drop-active 1s ease 0.2s infinite);
 }

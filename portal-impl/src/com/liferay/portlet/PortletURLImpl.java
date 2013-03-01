@@ -616,6 +616,12 @@ public class PortletURLImpl
 		}
 	}
 
+	public void setRefererGroupId(long refererGroupId) {
+		_refererGroupId = refererGroupId;
+
+		clearCache();
+	}
+
 	public void setRefererPlid(long refererPlid) {
 		_refererPlid = refererPlid;
 
@@ -942,6 +948,19 @@ public class PortletURLImpl
 			sb.append(StringPool.AMPERSAND);
 		}
 
+		long refererGroupId = _refererGroupId;
+
+		if (refererGroupId <= 0) {
+			refererGroupId = themeDisplay.getRefererGroupId();
+		}
+
+		if (refererGroupId > 0) {
+			sb.append("refererGroupId");
+			sb.append(StringPool.EQUAL);
+			sb.append(processValue(key, refererGroupId));
+			sb.append(StringPool.AMPERSAND);
+		}
+
 		long refererPlid = _refererPlid;
 
 		if (refererPlid <= 0) {
@@ -958,7 +977,11 @@ public class PortletURLImpl
 		String controlPanelCategory = _controlPanelCategory;
 
 		if (Validator.isNull(controlPanelCategory)) {
-			controlPanelCategory = themeDisplay.getControlPanelCategory();
+			HttpServletRequest request = PortalUtil.getOriginalServletRequest(
+				_request);
+
+			controlPanelCategory = ParamUtil.getString(
+				request, "controlPanelCategory");
 		}
 
 		if (Validator.isNotNull(controlPanelCategory)) {
@@ -1392,6 +1415,7 @@ public class PortletURLImpl
 	private String _portletId;
 	private String _portletModeString;
 	private PortletRequest _portletRequest;
+	private long _refererGroupId;
 	private long _refererPlid;
 	private Set<String> _removedParameterNames;
 	private Map<String, String[]> _removePublicRenderParameters;

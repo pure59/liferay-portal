@@ -158,7 +158,7 @@ portletsList = ListUtil.sort(portletsList, new PortletTitleComparator(applicatio
 	</c:choose>
 </aui:form>
 
-<c:if test='<%= cmd.equals(Constants.IMPORT) && SessionMessages.contains(renderRequest, "request_processed") %>'>
+<c:if test='<%= cmd.equals(Constants.IMPORT) && SessionMessages.contains(renderRequest, "requestProcessed") %>'>
 	<aui:script>
 		var opener = Liferay.Util.getOpener();
 
@@ -224,7 +224,7 @@ portletsList = ListUtil.sort(portletsList, new PortletTitleComparator(applicatio
 					<portlet:actionURL var="exportPagesURL">
 						<portlet:param name="struts_action" value="/layouts_admin/export_layouts" />
 						<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.EXPORT %>" />
-						<portlet:param name="groupId" value="<%= String.valueOf(liveGroupId) %>" />
+						<portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" />
 						<portlet:param name="privateLayout" value="<%= String.valueOf(privateLayout) %>" />
 						<portlet:param name="exportLAR" value="<%= Boolean.TRUE.toString() %>" />
 					</portlet:actionURL>

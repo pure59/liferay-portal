@@ -37,9 +37,9 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.SystemProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.pop.POPServerUtil;
-import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
 import com.liferay.portal.struts.AuthPublicPathRegistry;
 import com.liferay.portal.util.BrowserLauncher;
+import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
@@ -176,16 +176,13 @@ public class GlobalStartupAction extends SimpleAction {
 				long interval = PrefsPropsUtil.getLong(
 					PropsKeys.AUTO_DEPLOY_INTERVAL,
 					PropsValues.AUTO_DEPLOY_INTERVAL);
-				int blacklistThreshold = PrefsPropsUtil.getInteger(
-					PropsKeys.AUTO_DEPLOY_BLACKLIST_THRESHOLD,
-					PropsValues.AUTO_DEPLOY_BLACKLIST_THRESHOLD);
 
 				List<AutoDeployListener> autoDeployListeners =
 					getAutoDeployListeners();
 
 				AutoDeployDir autoDeployDir = new AutoDeployDir(
 					AutoDeployDir.DEFAULT_NAME, deployDir, destDir, interval,
-					blacklistThreshold, autoDeployListeners);
+					autoDeployListeners);
 
 				AutoDeployUtil.registerDir(autoDeployDir);
 			}
@@ -265,7 +262,7 @@ public class GlobalStartupAction extends SimpleAction {
 		// Javadoc
 
 		ClassLoader contextClassLoader =
-			PACLClassLoaderUtil.getContextClassLoader();
+			ClassLoaderUtil.getContextClassLoader();
 
 		JavadocManagerUtil.load(StringPool.BLANK, contextClassLoader);
 

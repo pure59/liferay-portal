@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.scripting.Scripting;
 import com.liferay.portal.kernel.scripting.ScriptingException;
 import com.liferay.portal.kernel.scripting.ScriptingExecutor;
 import com.liferay.portal.kernel.scripting.UnsupportedLanguageException;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 
@@ -54,9 +55,10 @@ import org.python.core.PySyntaxError;
  * @author Alberto Montero
  * @author Brian Wing Shun Chan
  */
+@DoPrivileged
 public class ScriptingImpl implements Scripting {
 
-	public void addScriptionExecutor(
+	public void addScriptingExecutor(
 		String language, ScriptingExecutor scriptingExecutor) {
 
 		_scriptingExecutors.put(language, scriptingExecutor);

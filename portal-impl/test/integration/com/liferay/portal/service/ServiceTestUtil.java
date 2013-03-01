@@ -15,7 +15,7 @@
 package com.liferay.portal.service;
 
 import com.liferay.counter.service.CounterLocalServiceUtil;
-import com.liferay.portal.NoSuchLayoutException;
+import com.liferay.portal.NoSuchRoleException;
 import com.liferay.portal.jcr.JCRFactoryUtil;
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.messaging.MessageBus;
@@ -28,21 +28,14 @@ import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.template.TemplateManagerUtil;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.FileUtil;
-import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
-import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.GroupConstants;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutConstants;
-import com.liferay.portal.model.LayoutPrototype;
-import com.liferay.portal.model.LayoutSetPrototype;
 import com.liferay.portal.model.Portlet;
+import com.liferay.portal.model.Role;
 import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.PortletImpl;
 import com.liferay.portal.repository.liferayrepository.LiferayRepository;
+import com.liferay.portal.search.lucene.LuceneHelperUtil;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
@@ -60,15 +53,21 @@ import com.liferay.portlet.blogs.asset.BlogsEntryAssetRendererFactory;
 import com.liferay.portlet.blogs.trash.BlogsEntryTrashHandler;
 import com.liferay.portlet.blogs.util.BlogsIndexer;
 import com.liferay.portlet.blogs.workflow.BlogsEntryWorkflowHandler;
-import com.liferay.portlet.bookmarks.util.BookmarksIndexer;
+import com.liferay.portlet.bookmarks.util.BookmarksEntryIndexer;
+import com.liferay.portlet.bookmarks.util.BookmarksFolderIndexer;
 import com.liferay.portlet.directory.workflow.UserWorkflowHandler;
 import com.liferay.portlet.documentlibrary.asset.DLFileEntryAssetRendererFactory;
 import com.liferay.portlet.documentlibrary.trash.DLFileEntryTrashHandler;
 import com.liferay.portlet.documentlibrary.trash.DLFileShortcutTrashHandler;
 import com.liferay.portlet.documentlibrary.trash.DLFolderTrashHandler;
-import com.liferay.portlet.documentlibrary.util.DLIndexer;
+import com.liferay.portlet.documentlibrary.util.DLFileEntryIndexer;
+import com.liferay.portlet.documentlibrary.util.DLFolderIndexer;
 import com.liferay.portlet.documentlibrary.workflow.DLFileEntryWorkflowHandler;
+import com.liferay.portlet.journal.trash.JournalArticleTrashHandler;
+import com.liferay.portlet.journal.util.JournalArticleIndexer;
+import com.liferay.portlet.journal.util.JournalFolderIndexer;
 import com.liferay.portlet.journal.workflow.JournalArticleWorkflowHandler;
+import com.liferay.portlet.messageboards.trash.MBCategoryTrashHandler;
 import com.liferay.portlet.messageboards.trash.MBThreadTrashHandler;
 import com.liferay.portlet.messageboards.util.MBMessageIndexer;
 import com.liferay.portlet.messageboards.workflow.MBDiscussionWorkflowHandler;
@@ -88,7 +87,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 
@@ -102,132 +100,53 @@ public class ServiceTestUtil {
 
 	public static final int THREAD_COUNT = 25;
 
-	public static Group addGroup() throws Exception {
-		return addGroup(randomString());
-	}
-
-	public static Group addGroup(long parentGroupId, String name)
+	public static void addResourcePermission(
+			Role role, String resourceName, int scope, String primKey,
+			String actionId)
 		throws Exception {
 
-		Group group = GroupLocalServiceUtil.fetchGroup(
-			TestPropsValues.getCompanyId(), name);
-
-		if (group != null) {
-			return group;
-		}
-
-		String description = "This is a test group.";
-		int type = GroupConstants.TYPE_SITE_OPEN;
-		String friendlyURL =
-			StringPool.SLASH + FriendlyURLNormalizerUtil.normalize(name);
-		boolean site = true;
-		boolean active = true;
-
-		return GroupLocalServiceUtil.addGroup(
-			TestPropsValues.getUserId(), parentGroupId, null, 0,
-			GroupConstants.DEFAULT_LIVE_GROUP_ID, name, description, type,
-			friendlyURL, site, active, getServiceContext());
+		ResourcePermissionLocalServiceUtil.addResourcePermission(
+			role.getCompanyId(), resourceName, scope, primKey, role.getRoleId(),
+			actionId);
 	}
 
-	public static Group addGroup(String name) throws Exception {
-		return addGroup(GroupConstants.DEFAULT_PARENT_GROUP_ID, name);
-	}
-
-	public static Layout addLayout(long groupId, String name) throws Exception {
-		return addLayout(groupId, name, false);
-	}
-
-	public static Layout addLayout(
-			long groupId, String name, boolean privateLayout)
+	public static void addResourcePermission(
+			String roleName, String resourceName, int scope, String primKey,
+			String actionId)
 		throws Exception {
 
-		String friendlyURL =
-			StringPool.SLASH + FriendlyURLNormalizerUtil.normalize(name);
+		Role role = RoleLocalServiceUtil.getRole(
+			TestPropsValues.getCompanyId(), roleName);
 
-		Layout layout = null;
+		addResourcePermission(role, resourceName, scope, primKey, actionId);
+	}
+
+	public static Role addRole(String roleName, int roleType) throws Exception {
+		Role role = null;
 
 		try {
-			layout = LayoutLocalServiceUtil.getFriendlyURLLayout(
-				groupId, false, friendlyURL);
-
-			return layout;
+			role = RoleLocalServiceUtil.getRole(
+				TestPropsValues.getCompanyId(), roleName);
 		}
-		catch (NoSuchLayoutException nsle) {
-		}
-
-		String description = "This is a test page.";
-
-		return LayoutLocalServiceUtil.addLayout(
-			TestPropsValues.getUserId(), groupId, privateLayout,
-			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, name, null, description,
-			LayoutConstants.TYPE_PORTLET, false, friendlyURL,
-			getServiceContext());
-	}
-
-	public static LayoutPrototype addLayoutPrototype(String name)
-		throws Exception {
-
-		HashMap<Locale, String> nameMap = new HashMap<Locale, String>();
-
-		nameMap.put(LocaleUtil.getDefault(), name);
-
-		return LayoutPrototypeLocalServiceUtil.addLayoutPrototype(
-			TestPropsValues.getUserId(), TestPropsValues.getCompanyId(),
-			nameMap, null, true);
-	}
-
-	public static LayoutSetPrototype addLayoutSetPrototype(String name)
-		throws Exception {
-
-		HashMap<Locale, String> nameMap = new HashMap<Locale, String>();
-
-		nameMap.put(LocaleUtil.getDefault(), name);
-
-		return LayoutSetPrototypeLocalServiceUtil.addLayoutSetPrototype(
-			TestPropsValues.getUserId(), TestPropsValues.getCompanyId(),
-			nameMap, null, true, true, getServiceContext());
-	}
-
-	public static User addUser(
-			String screenName, boolean autoScreenName, long[] groupIds)
-		throws Exception {
-
-		User user = UserLocalServiceUtil.fetchUserByScreenName(
-			TestPropsValues.getCompanyId(), screenName);
-
-		if (user != null) {
-			return user;
+		catch (NoSuchRoleException nsre) {
+			role = RoleLocalServiceUtil.addRole(
+				TestPropsValues.getUserId(), null, 0, roleName, null, null,
+				roleType, null, null);
 		}
 
-		boolean autoPassword = true;
-		String password1 = StringPool.BLANK;
-		String password2 = StringPool.BLANK;
-		String emailAddress = "ServiceTestSuite." + nextLong() + "@liferay.com";
-		long facebookId = 0;
-		String openId = StringPool.BLANK;
-		Locale locale = LocaleUtil.getDefault();
-		String firstName = "ServiceTestSuite";
-		String middleName = StringPool.BLANK;
-		String lastName = "ServiceTestSuite";
-		int prefixId = 0;
-		int suffixId = 0;
-		boolean male = true;
-		int birthdayMonth = Calendar.JANUARY;
-		int birthdayDay = 1;
-		int birthdayYear = 1970;
-		String jobTitle = StringPool.BLANK;
-		long[] organizationIds = null;
-		long[] roleIds = null;
-		long[] userGroupIds = null;
-		boolean sendMail = false;
+		return role;
+	}
 
-		return UserLocalServiceUtil.addUser(
-			TestPropsValues.getUserId(), TestPropsValues.getCompanyId(),
-			autoPassword, password1, password2, autoScreenName, screenName,
-			emailAddress, facebookId, openId, locale, firstName, middleName,
-			lastName, prefixId, suffixId, male, birthdayMonth, birthdayDay,
-			birthdayYear, jobTitle, groupIds, organizationIds, roleIds,
-			userGroupIds, sendMail, getServiceContext());
+	public static Role addRole(
+			String roleName, int roleType, String resourceName, int scope,
+			String primKey, String actionId)
+		throws Exception {
+
+		Role role = addRole(roleName, roleType);
+
+		addResourcePermission(role, resourceName, scope, primKey, actionId);
+
+		return role;
 	}
 
 	public static void destroyServices() {
@@ -257,11 +176,19 @@ public class ServiceTestUtil {
 	public static ServiceContext getServiceContext(long groupId)
 		throws Exception {
 
+		return getServiceContext(groupId, TestPropsValues.getUserId());
+	}
+
+	public static ServiceContext getServiceContext(long groupId, long userId)
+		throws Exception {
+
 		ServiceContext serviceContext = new ServiceContext();
 
+		serviceContext.setAddGroupPermissions(true);
+		serviceContext.setAddGuestPermissions(true);
 		serviceContext.setCompanyId(TestPropsValues.getCompanyId());
 		serviceContext.setScopeGroupId(groupId);
-		serviceContext.setUserId(TestPropsValues.getUserId());
+		serviceContext.setUserId(userId);
 
 		return serviceContext;
 	}
@@ -276,15 +203,7 @@ public class ServiceTestUtil {
 		try {
 			PortalInstances.addCompanyId(TestPropsValues.getCompanyId());
 
-			PrincipalThreadLocal.setName(TestPropsValues.getUserId());
-
-			User user = UserLocalServiceUtil.getUserById(
-				TestPropsValues.getUserId());
-
-			PermissionChecker permissionChecker =
-				PermissionCheckerFactoryUtil.create(user);
-
-			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+			setUser(TestPropsValues.getUser());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -305,6 +224,18 @@ public class ServiceTestUtil {
 			e.printStackTrace();
 		}
 
+		// Lucene
+
+		try {
+			FileUtil.mkdirs(
+				PropsValues.LUCENE_DIR + TestPropsValues.getCompanyId());
+
+			LuceneHelperUtil.startup(TestPropsValues.getCompanyId());
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		// Template manager
 
 		try {
@@ -319,8 +250,12 @@ public class ServiceTestUtil {
 		IndexerRegistryUtil.register(new BlogsIndexer());
 		IndexerRegistryUtil.register(new ContactIndexer());
 		IndexerRegistryUtil.register(new UserIndexer());
-		IndexerRegistryUtil.register(new BookmarksIndexer());
-		IndexerRegistryUtil.register(new DLIndexer());
+		IndexerRegistryUtil.register(new BookmarksEntryIndexer());
+		IndexerRegistryUtil.register(new BookmarksFolderIndexer());
+		IndexerRegistryUtil.register(new DLFileEntryIndexer());
+		IndexerRegistryUtil.register(new DLFolderIndexer());
+		IndexerRegistryUtil.register(new JournalArticleIndexer());
+		IndexerRegistryUtil.register(new JournalFolderIndexer());
 		IndexerRegistryUtil.register(new MBMessageIndexer());
 		IndexerRegistryUtil.register(new TrashIndexer());
 		IndexerRegistryUtil.register(new WikiNodeIndexer());
@@ -393,6 +328,8 @@ public class ServiceTestUtil {
 		TrashHandlerRegistryUtil.register(new DLFileEntryTrashHandler());
 		TrashHandlerRegistryUtil.register(new DLFileShortcutTrashHandler());
 		TrashHandlerRegistryUtil.register(new DLFolderTrashHandler());
+		TrashHandlerRegistryUtil.register(new JournalArticleTrashHandler());
+		TrashHandlerRegistryUtil.register(new MBCategoryTrashHandler());
 		TrashHandlerRegistryUtil.register(new MBThreadTrashHandler());
 		TrashHandlerRegistryUtil.register(new WikiNodeTrashHandler());
 		TrashHandlerRegistryUtil.register(new WikiPageTrashHandler());
@@ -453,8 +390,25 @@ public class ServiceTestUtil {
 		return _random.nextBoolean();
 	}
 
+	public static long randomLong() throws Exception {
+		return _random.nextLong();
+	}
+
 	public static String randomString() throws Exception {
 		return PwdGenerator.getPassword();
+	}
+
+	public static String randomString(int length) throws Exception {
+		return PwdGenerator.getPassword(length);
+	}
+
+	public static void setUser(User user) throws Exception {
+		PrincipalThreadLocal.setName(user.getUserId());
+
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(user);
+
+		PermissionThreadLocal.setPermissionChecker(permissionChecker);
 	}
 
 	private static void _checkClassNames() {
@@ -494,6 +448,14 @@ public class ServiceTestUtil {
 
 		FileUtil.deltree(
 			PropsUtil.get(PropsKeys.JCR_JACKRABBIT_REPOSITORY_ROOT));
+
+		try {
+			FileUtil.deltree(
+				PropsValues.LUCENE_DIR + TestPropsValues.getCompanyId());
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static Random _random = new Random();

@@ -58,6 +58,7 @@ PortletPreferencesIds portletPreferencesIds = PortletPreferencesFactoryUtil.getP
 PortletPreferences portletPreferences = null;
 
 Group group = null;
+boolean privateLayout = false;
 
 if (layout instanceof VirtualLayout) {
 	VirtualLayout virtualLayout = (VirtualLayout)layout;
@@ -65,9 +66,11 @@ if (layout instanceof VirtualLayout) {
 	Layout sourceLayout = virtualLayout.getSourceLayout();
 
 	group = sourceLayout.getGroup();
+	privateLayout = sourceLayout.isPrivateLayout();
 }
 else {
 	group = layout.getGroup();
+	privateLayout = layout.isPrivateLayout();
 }
 
 if (allowAddPortletDefaultResource) {
@@ -76,7 +79,7 @@ if (allowAddPortletDefaultResource) {
 	String scopeLayoutUuid = portletPreferences.getValue("lfrScopeLayoutUuid", null);
 
 	if (Validator.isNotNull(scopeLayoutUuid)) {
-		Layout scopeLayout = LayoutLocalServiceUtil.fetchLayoutByUuidAndGroupId(scopeLayoutUuid, group.getGroupId());
+		Layout scopeLayout = LayoutLocalServiceUtil.fetchLayoutByUuidAndGroupId(scopeLayoutUuid, group.getGroupId(), privateLayout);
 
 		if (scopeLayout != null) {
 			portletPreferencesIds = PortletPreferencesFactoryUtil.getPortletPreferencesIds(request, scopeLayout, portletId);
@@ -92,7 +95,7 @@ else {
 long portletItemId = ParamUtil.getLong(request, "p_p_i_id");
 
 if (portletItemId > 0) {
-	PortletPreferencesServiceUtil.restoreArchivedPreferences(themeDisplay.getParentGroupId(), layout, portlet.getRootPortletId(), portletItemId, portletPreferences);
+	PortletPreferencesServiceUtil.restoreArchivedPreferences(themeDisplay.getSiteGroupId(), layout, portlet.getRootPortletId(), portletItemId, portletPreferences);
 }
 
 PortletConfig portletConfig = PortletConfigFactoryUtil.create(portlet, application);
@@ -351,16 +354,16 @@ else {
 	themeDisplay.setScopeGroupId(PortalUtil.getScopeGroupId(request, portletId));
 }
 
-long previousParentGroupId = themeDisplay.getParentGroupId();
+long previousSiteGroupId = themeDisplay.getSiteGroupId();
 
-Group parentGroup = GroupLocalServiceUtil.getGroup(themeDisplay.getParentGroupId());
+Group siteGroup = GroupLocalServiceUtil.getGroup(themeDisplay.getSiteGroupId());
 
-if (parentGroup.isStagingGroup()) {
-	parentGroup = parentGroup.getLiveGroup();
+if (siteGroup.isStagingGroup()) {
+	siteGroup = siteGroup.getLiveGroup();
 }
 
-if (parentGroup.isStaged() && !parentGroup.isStagedRemotely() && !parentGroup.isStagedPortlet(portletId)) {
-	themeDisplay.setParentGroupId(parentGroup.getGroupId());
+if (siteGroup.isStaged() && !siteGroup.isStagedRemotely() && !siteGroup.isStagedPortlet(portletId)) {
+	themeDisplay.setParentGroupId(siteGroup.getGroupId());
 }
 
 portletDisplay.recycle();
@@ -436,7 +439,7 @@ portletDisplay.setURLPortlet(themeDisplay.getCDNHost() + portletIcon);
 
 // URL close
 
-String urlClose = themeDisplay.getPathMain() + "/portal/update_layout?p_auth=" + AuthTokenUtil.getToken(request) + "&p_l_id=" + plid + "&p_p_id=" + portletDisplay.getId() + "&p_v_l_s_g_id=" + themeDisplay.getParentGroupId() + "&doAsUserId=" + HttpUtil.encodeURL(themeDisplay.getDoAsUserId()) + "&" + Constants.CMD + "=" + Constants.DELETE + "&referer=" + HttpUtil.encodeURL(themeDisplay.getPathMain() + "/portal/layout?p_l_id=" + plid + "&doAsUserId=" + themeDisplay.getDoAsUserId()) + "&refresh=1";
+String urlClose = themeDisplay.getPathMain() + "/portal/update_layout?p_auth=" + AuthTokenUtil.getToken(request) + "&p_l_id=" + plid + "&p_p_id=" + portletDisplay.getId() + "&p_v_l_s_g_id=" + themeDisplay.getSiteGroupId() + "&doAsUserId=" + HttpUtil.encodeURL(themeDisplay.getDoAsUserId()) + "&" + Constants.CMD + "=" + Constants.DELETE + "&referer=" + HttpUtil.encodeURL(themeDisplay.getPathMain() + "/portal/layout?p_l_id=" + plid + "&doAsUserId=" + themeDisplay.getDoAsUserId()) + "&refresh=1";
 
 if (themeDisplay.isAddSessionIdToURL()) {
 	urlClose = PortalUtil.getURLWithSessionId(urlClose, themeDisplay.getSessionId());
@@ -623,7 +626,7 @@ portletDisplay.setURLMax(urlMax.toString());
 
 // URL min
 
-String urlMin = themeDisplay.getPathMain() + "/portal/update_layout?p_l_id=" + plid + "&p_p_id=" + portletDisplay.getId() + "&p_p_restore=" + portletDisplay.isStateMin() + "&p_v_l_s_g_id=" + themeDisplay.getParentGroupId() + "&doAsUserId=" + HttpUtil.encodeURL(themeDisplay.getDoAsUserId()) + "&" + Constants.CMD + "=minimize&referer=" + HttpUtil.encodeURL(themeDisplay.getPathMain() + "/portal/layout?p_auth=" + AuthTokenUtil.getToken(request) + "&p_l_id=" + plid + "&doAsUserId=" + themeDisplay.getDoAsUserId()) + "&refresh=1";
+String urlMin = themeDisplay.getPathMain() + "/portal/update_layout?p_l_id=" + plid + "&p_p_id=" + portletDisplay.getId() + "&p_p_restore=" + portletDisplay.isStateMin() + "&p_v_l_s_g_id=" + themeDisplay.getSiteGroupId() + "&doAsUserId=" + HttpUtil.encodeURL(themeDisplay.getDoAsUserId()) + "&" + Constants.CMD + "=minimize&referer=" + HttpUtil.encodeURL(themeDisplay.getPathMain() + "/portal/layout?p_auth=" + AuthTokenUtil.getToken(request) + "&p_l_id=" + plid + "&doAsUserId=" + themeDisplay.getDoAsUserId()) + "&refresh=1";
 
 portletDisplay.setURLMin(urlMin);
 
@@ -1114,7 +1117,7 @@ if (themeDisplay.isStatePopUp()) {
 }
 
 themeDisplay.setScopeGroupId(previousScopeGroupId);
-themeDisplay.setParentGroupId(previousParentGroupId);
+themeDisplay.setSiteGroupId(previousSiteGroupId);
 
 if (showPortletCssIcon) {
 	themeDisplay.setIncludePortletCssJs(true);

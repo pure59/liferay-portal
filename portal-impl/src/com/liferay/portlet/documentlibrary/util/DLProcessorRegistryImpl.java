@@ -19,12 +19,13 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.InstanceFactory;
-import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.repository.liferayrepository.model.LiferayFileVersion;
+import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLProcessorConstants;
 
@@ -34,10 +35,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Mika Koivisto
  */
+@DoPrivileged
 public class DLProcessorRegistryImpl implements DLProcessorRegistry {
 
 	public void afterPropertiesSet() throws Exception {
-		ClassLoader classLoader = PortalClassLoaderUtil.getClassLoader();
+		ClassLoader classLoader = ClassLoaderUtil.getPortalClassLoader();
 
 		for (String dlProcessorClassName : _DL_FILE_ENTRY_PROCESSORS) {
 			DLProcessor dlProcessor = (DLProcessor)InstanceFactory.newInstance(
@@ -82,7 +84,7 @@ public class DLProcessorRegistryImpl implements DLProcessorRegistry {
 			return;
 		}
 
-		FileVersion latestFileVersion = _getLatestFileVersion(fileEntry);
+		FileVersion latestFileVersion = _getLatestFileVersion(fileEntry, true);
 
 		if (latestFileVersion == null) {
 			return;
@@ -131,6 +133,12 @@ public class DLProcessorRegistryImpl implements DLProcessorRegistry {
 	}
 
 	public void trigger(FileEntry fileEntry, FileVersion fileVersion) {
+		trigger(fileEntry, fileVersion, false);
+	}
+
+	public void trigger(
+		FileEntry fileEntry, FileVersion fileVersion, boolean trusted) {
+
 		if (!DLProcessorThreadLocal.isEnabled()) {
 			return;
 		}
@@ -139,7 +147,8 @@ public class DLProcessorRegistryImpl implements DLProcessorRegistry {
 			return;
 		}
 
-		FileVersion latestFileVersion = _getLatestFileVersion(fileEntry);
+		FileVersion latestFileVersion = _getLatestFileVersion(
+			fileEntry, trusted);
 
 		if (latestFileVersion == null) {
 			return;
@@ -158,7 +167,9 @@ public class DLProcessorRegistryImpl implements DLProcessorRegistry {
 		_dlProcessors.remove(type);
 	}
 
-	private FileVersion _getLatestFileVersion(FileEntry fileEntry) {
+	private FileVersion _getLatestFileVersion(
+		FileEntry fileEntry, boolean trusted) {
+
 		FileVersion latestFileVersion = null;
 
 		try {
@@ -166,7 +177,7 @@ public class DLProcessorRegistryImpl implements DLProcessorRegistry {
 				DLFileEntry dlFileEntry = (DLFileEntry)fileEntry.getModel();
 
 				latestFileVersion = new LiferayFileVersion(
-					dlFileEntry.getLatestFileVersion(false));
+					dlFileEntry.getLatestFileVersion(trusted));
 			}
 			else {
 				latestFileVersion = fileEntry.getLatestFileVersion();

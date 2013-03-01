@@ -57,6 +57,13 @@ request.setAttribute("view.jsp-folder", folder);
 request.setAttribute("view.jsp-folderId", String.valueOf(folderId));
 %>
 
+<portlet:actionURL var="undoTrashURL">
+	<portlet:param name="struts_action" value="/journal/edit_entry" />
+	<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.RESTORE %>" />
+</portlet:actionURL>
+
+<liferay-ui:trash-undo portletURL="<%= undoTrashURL %>" />
+
 <div id="<portlet:namespace />journalContainer">
 	<aui:layout cssClass="lfr-app-column-view">
 		<aui:column columnWidth="<%= 20 %>" cssClass="navigation-pane" first="<%= true %>">
@@ -163,6 +170,7 @@ int foldersTotal = GetterUtil.getInteger((String)request.getAttribute("view_fold
 					node: A.one(document.<portlet:namespace />fm)
 				},
 				moveEntryRenderUrl: '<portlet:renderURL><portlet:param name="struts_action" value="/journal/move_entry" /></portlet:renderURL>',
+				trashLinkId: '<%= TrashUtil.isTrashEnabled(scopeGroupId) ? "_" + PortletKeys.CONTROL_PANEL_MENU + "_portlet_" + PortletKeys.TRASH : StringPool.BLANK %>',
 				updateable: true
 			},
 			paginator: {

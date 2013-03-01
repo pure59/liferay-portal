@@ -88,11 +88,32 @@ if (Validator.isNotNull(viewUsersRedirect)) {
 	if (userGroupId > 0) {
 		userParams.put("usersUserGroups", new Long(userGroupId));
 	}
+
+	if (portletName.equals(PortletKeys.FRIENDS_DIRECTORY)) {
+		userParams.put("socialRelationType", new Long[] {themeDisplay.getUserId(), new Long(SocialRelationConstants.TYPE_BI_FRIEND)});
+	}
+	else if (portletName.equals(PortletKeys.MY_SITES_DIRECTORY) && (organizationId == 0) && (userGroupId == 0)) {
+		LinkedHashMap<String, Object> groupParams = new LinkedHashMap<String, Object>();
+
+		groupParams.put("inherit", Boolean.FALSE);
+		groupParams.put("site", Boolean.TRUE);
+		groupParams.put("usersGroups", user.getUserId());
+
+		userParams.put("inherit", Boolean.TRUE);
+
+		List<Group> groups = GroupLocalServiceUtil.search(user.getCompanyId(), groupParams, QueryUtil.ALL_POS,QueryUtil.ALL_POS);
+
+		userParams.put("usersGroups", SitesUtil.filterGroups(groups, PropsValues.MY_SITES_DIRECTORY_SITE_EXCLUDES));
+	}
+	else if (portletName.equals(PortletKeys.SITE_MEMBERS_DIRECTORY) && (organizationId == 0) && (userGroupId == 0)) {
+		userParams.put("inherit", Boolean.TRUE);
+		userParams.put("usersGroups", new Long(themeDisplay.getScopeGroupId()));
+	}
 	%>
 
 	<liferay-ui:search-container-results>
 		<c:choose>
-			<c:when test="<%= PropsValues.USERS_INDEXER_ENABLED && PropsValues.USERS_SEARCH_WITH_INDEX %>">
+			<c:when test="<%= portletName.equals(PortletKeys.DIRECTORY) && PropsValues.USERS_INDEXER_ENABLED && PropsValues.USERS_SEARCH_WITH_INDEX %>">
 				<%@ include file="/html/portlet/users_admin/user_search_results_index.jspf" %>
 			</c:when>
 			<c:otherwise>

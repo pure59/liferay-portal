@@ -64,9 +64,9 @@ public class DLSyncLocalServiceImpl extends DLSyncLocalServiceBaseImpl {
 		DLSync dlSync = dlSyncPersistence.create(syncId);
 
 		dlSync.setCompanyId(companyId);
-		dlSync.setCreateDate(now);
+		dlSync.setCreateDate(now.getTime());
 		dlSync.setDescription(description);
-		dlSync.setModifiedDate(now);
+		dlSync.setModifiedDate(now.getTime());
 		dlSync.setFileId(fileId);
 		dlSync.setFileUuid(fileUuid);
 		dlSync.setRepositoryId(repositoryId);
@@ -116,7 +116,7 @@ public class DLSyncLocalServiceImpl extends DLSyncLocalServiceBaseImpl {
 			dlSync = dlSyncPersistence.findByFileId(fileId);
 		}
 
-		dlSync.setModifiedDate(new Date());
+		dlSync.setModifiedDate(System.currentTimeMillis());
 		dlSync.setParentFolderId(parentFolderId);
 		dlSync.setName(name);
 		dlSync.setDescription(description);
@@ -140,19 +140,21 @@ public class DLSyncLocalServiceImpl extends DLSyncLocalServiceBaseImpl {
 
 			return folder.isDefaultRepository();
 		}
-		catch (NoSuchModelException nsfe) {
-			try {
-				Folder folder = dlAppLocalService.getFolder(fileId);
+		catch (NoSuchModelException nsme) {
+		}
 
-				return folder.isDefaultRepository();
-			}
-			catch (NoSuchModelException nsfe2) {
-				FileEntry fileEntry = dlAppLocalService.getFileEntry(fileId);
+		try {
+			Folder folder = dlAppLocalService.getFolder(fileId);
 
-				if (fileEntry instanceof LiferayFileEntry) {
-					return true;
-				}
-			}
+			return folder.isDefaultRepository();
+		}
+		catch (NoSuchModelException nsme) {
+		}
+
+		FileEntry fileEntry = dlAppLocalService.getFileEntry(fileId);
+
+		if (fileEntry instanceof LiferayFileEntry) {
+			return true;
 		}
 
 		return false;

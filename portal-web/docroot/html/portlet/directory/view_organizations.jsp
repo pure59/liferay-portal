@@ -39,11 +39,26 @@ PortletURL portletURL = (PortletURL)request.getAttribute("view.jsp-portletURL");
 	if (parentOrganizationId <= 0) {
 		parentOrganizationId = OrganizationConstants.ANY_PARENT_ORGANIZATION_ID;
 	}
+
+	if (portletName.equals(PortletKeys.MY_SITES_DIRECTORY)) {
+		LinkedHashMap<String, Object> groupParams = new LinkedHashMap<String, Object>();
+
+		groupParams.put("inherit", Boolean.FALSE);
+		groupParams.put("site", Boolean.TRUE);
+		groupParams.put("usersGroups", user.getUserId());
+
+		List<Group> groups = GroupLocalServiceUtil.search(user.getCompanyId(), groupParams, QueryUtil.ALL_POS,QueryUtil.ALL_POS);
+
+		organizationParams.put("organizationsGroups", SitesUtil.filterGroups(groups, PropsValues.MY_SITES_DIRECTORY_SITE_EXCLUDES));
+	}
+	else if (portletName.equals(PortletKeys.SITE_MEMBERS_DIRECTORY)) {
+		organizationParams.put("organizationsGroups", new Long(themeDisplay.getScopeGroupId()));
+	}
 	%>
 
 	<liferay-ui:search-container-results>
 		<c:choose>
-			<c:when test="<%= PropsValues.ORGANIZATIONS_INDEXER_ENABLED && PropsValues.ORGANIZATIONS_SEARCH_WITH_INDEX %>">
+			<c:when test="<%= portletName.equals(PortletKeys.DIRECTORY) && PropsValues.ORGANIZATIONS_INDEXER_ENABLED && PropsValues.ORGANIZATIONS_SEARCH_WITH_INDEX %>">
 				<%@ include file="/html/portlet/users_admin/organization_search_results_index.jspf" %>
 			</c:when>
 			<c:otherwise>

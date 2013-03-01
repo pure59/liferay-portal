@@ -77,6 +77,8 @@ public class PortletKeys {
 
 	public static final String FLAGS = "142";
 
+	public static final String FRIENDS_DIRECTORY = "186";
+
 	public static final String GROUP_PAGES = "156";
 
 	public static final String GROUP_STATISTICS = "181";
@@ -116,8 +118,6 @@ public class PortletKeys {
 
 	public static final String MESSAGE_BOARDS_ADMIN = "162";
 
-	public static final String METADATA_SET_ADMIN = "171";
-
 	public static final String MOBILE_DEVICE_GLOBAL_ADMIN = "177";
 
 	public static final String MOBILE_DEVICE_SITE_ADMIN = "178";
@@ -130,13 +130,13 @@ public class PortletKeys {
 
 	public static final String MY_SITES = "29";
 
+	public static final String MY_SITES_DIRECTORY = "188";
+
 	public static final String MY_WORKFLOW_INSTANCES = "158";
 
 	public static final String MY_WORKFLOW_TASKS = "153";
 
 	public static final String NESTED_PORTLETS = "118";
-
-	public static final String ORGANIZATION_ADMIN = "80";
 
 	public static final String PAGE_COMMENTS = "107";
 
@@ -196,7 +196,11 @@ public class PortletKeys {
 
 	public static final String SHOPPING = "34";
 
+	public static final String SITE_BROWSER = "185";
+
 	public static final String SITE_MAP = "85";
+
+	public static final String SITE_MEMBERS_DIRECTORY = "187";
 
 	public static final String SITE_MEMBERSHIPS_ADMIN = "174";
 

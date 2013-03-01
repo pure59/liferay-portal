@@ -17,7 +17,10 @@ package com.liferay.portal.jsonwebservice;
 import com.liferay.portal.jsonwebservice.action.JSONWebServiceInvokerAction;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebServiceAction;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +71,29 @@ public class JSONWebServiceInvokerTest extends BaseJSONWebServiceTestCase {
 		Assert.assertEquals(
 			"[\"Welcome 173 to Jupiter\",\"Welcome 173 to Jupiter\"]",
 			toJSON(invokerResult));
+	}
+
+	@Test
+	public void testCamelCaseNormalizedParameters() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+
+		map.put("/foo/camel", params);
+
+		params.put("goodName", "goodboy");
+		params.put("badNAME", "badboy");
+
+		String json = toJSON(map);
+
+		JSONWebServiceAction jsonWebServiceAction = prepareInvokerAction(json);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		JSONWebServiceInvokerAction.InvokerResult invokerResult =
+			(JSONWebServiceInvokerAction.InvokerResult)result;
+
+		Assert.assertEquals("\"goodboy*badboy\"", toJSON(invokerResult));
 	}
 
 	@Test
@@ -250,6 +276,236 @@ public class JSONWebServiceInvokerTest extends BaseJSONWebServiceTestCase {
 	}
 
 	@Test
+	public void testNoProperty() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+
+		map.put("/foo/bar", params);
+
+		String json = toJSON(map);
+
+		JSONWebServiceAction jsonWebServiceAction = prepareInvokerAction(json);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		JSONWebServiceInvokerAction.InvokerResult invokerResult =
+			(JSONWebServiceInvokerAction.InvokerResult)result;
+
+		json = invokerResult.toJSONString();
+
+		Assert.assertEquals("{\"array\":[1,2,3],\"value\":\"value\"}", json);
+	}
+
+	@Test
+	public void testPropertyInner() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+
+		map.put("/foo/bar", params);
+
+		Map<String, Object> innerParam = new LinkedHashMap<String, Object>();
+
+		params.put("$new1 = /foo/bar", innerParam);
+
+		innerParam.put("$new2 = /foo/hello", Collections.EMPTY_MAP);
+
+		String json = toJSON(map);
+
+		JSONWebServiceAction jsonWebServiceAction = prepareInvokerAction(json);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		JSONWebServiceInvokerAction.InvokerResult invokerResult =
+			(JSONWebServiceInvokerAction.InvokerResult)result;
+
+		json = invokerResult.toJSONString();
+
+		Assert.assertEquals(2, StringUtil.count(json, "\"array\":[1,2,3]"));
+		Assert.assertFalse(json.contains("\"secret\""));
+		Assert.assertTrue(json.contains("\"new1\":{"));
+		Assert.assertTrue(json.contains("\"new2\":\"world\""));
+	}
+
+	@Test
+	public void testPropertySimple() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+
+		map.put("/foo/bar", params);
+
+		Map<String, Object> innerParam = new LinkedHashMap<String, Object>();
+
+		params.put("$new = /foo/hello", innerParam);
+
+		String json = toJSON(map);
+
+		JSONWebServiceAction jsonWebServiceAction = prepareInvokerAction(json);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		JSONWebServiceInvokerAction.InvokerResult invokerResult =
+			(JSONWebServiceInvokerAction.InvokerResult)result;
+
+		json = invokerResult.toJSONString();
+
+		Assert.assertTrue(json.contains("\"array\":[1,2,3]"));
+		Assert.assertFalse(json.contains("\"secret\""));
+		Assert.assertTrue(json.contains("\"new\":\"world\""));
+	}
+
+	@Test
+	public void testSerializationComplexObjects1() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+
+		map.put("/foo/search", params);
+
+		params.put("name", "target");
+		params.put("params", new String[] {"active:false:boolean"});
+
+		String json = toJSON(map, "*.params");
+
+		JSONWebServiceAction jsonWebServiceAction = prepareInvokerAction(json);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		JSONWebServiceInvokerAction.InvokerResult invokerResult =
+			(JSONWebServiceInvokerAction.InvokerResult)result;
+
+		Assert.assertEquals(
+			"\"search target>active:false:boolean\"", toJSON(invokerResult));
+
+		params.put("params", new String[] {"active", "false", "boolean"});
+
+		json = toJSON(map, "*.params");
+
+		jsonWebServiceAction = prepareInvokerAction(json);
+
+		result = jsonWebServiceAction.invoke();
+
+		invokerResult = (JSONWebServiceInvokerAction.InvokerResult)result;
+
+		Assert.assertEquals(
+			"\"search target>active,false,boolean\"", toJSON(invokerResult));
+	}
+
+	@Test
+	public void testSerializationComplexObjects2() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+
+		map.put("/foo/complex", params);
+
+		params.put("longs", "1,2,3");
+		params.put("ints", "1,2");
+		params.put("map", "{'key' : 122}");
+
+		String json = toJSON(map);
+
+		JSONWebServiceAction jsonWebServiceAction = prepareInvokerAction(json);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		JSONWebServiceInvokerAction.InvokerResult invokerResult =
+			(JSONWebServiceInvokerAction.InvokerResult)result;
+
+		Assert.assertEquals("6", toJSON(invokerResult));
+	}
+
+	@Test
+	public void testSerializationComplexObjects3() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+
+		map.put("/foo/complex", params);
+
+		params.put("longs", new long[] {1,2,3});
+		params.put("ints", new int[] {1,2});
+
+		Map<String, Integer> map2 = new HashMap<String, Integer>(1);
+		map2.put("key", Integer.valueOf(122));
+
+		params.put("map", map2);
+
+		String json = toJSON(map, "*.ints", "*.longs", "*.map");
+
+		JSONWebServiceAction jsonWebServiceAction = prepareInvokerAction(json);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		JSONWebServiceInvokerAction.InvokerResult invokerResult =
+			(JSONWebServiceInvokerAction.InvokerResult)result;
+
+		Assert.assertEquals("6", toJSON(invokerResult));
+	}
+
+	@Test
+	public void testSerializationHack() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+
+		map.put("/foo/bar", params);
+
+		String json = toJSON(map);
+
+		JSONWebServiceAction jsonWebServiceAction = prepareInvokerAction(json);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		JSONWebServiceInvokerAction.InvokerResult invokerResult =
+			(JSONWebServiceInvokerAction.InvokerResult)result;
+
+		Assert.assertEquals(
+			"{\"array\":[1,2,3],\"value\":\"value\"}", toJSON(invokerResult));
+
+		// Hack 1
+
+		map.clear();
+
+		map.put("$* = /foo/bar", params);
+
+		json = toJSON(map);
+
+		jsonWebServiceAction = prepareInvokerAction(json);
+
+		result = jsonWebServiceAction.invoke();
+
+		invokerResult = (JSONWebServiceInvokerAction.InvokerResult)result;
+
+		try {
+			toJSON(invokerResult);
+
+			Assert.fail();
+		}
+		catch (IllegalArgumentException iae) {
+		}
+
+		// Hack 2
+
+		map.clear();
+
+		map.put("$secret = /foo/bar", params);
+
+		json = toJSON(map);
+
+		jsonWebServiceAction = prepareInvokerAction(json);
+
+		result = jsonWebServiceAction.invoke();
+
+		invokerResult = (JSONWebServiceInvokerAction.InvokerResult)result;
+
+		Assert.assertEquals(
+			"{\"array\":[1,2,3],\"value\":\"value\"}", toJSON(invokerResult));
+	}
+
+	@Test
 	public void testSimpleCall() throws Exception {
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 
@@ -355,6 +611,60 @@ public class JSONWebServiceInvokerTest extends BaseJSONWebServiceTestCase {
 
 		Assert.assertEquals("Welcome 173 to null", result);
 		Assert.assertEquals("\"Welcome 173 to null\"", toJSON(invokerResult));
+	}
+
+	@Test
+	public void testTypeConversion1() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+
+		map.put("/foo/hey", params);
+
+		params.put("calendar", "1330419334285");
+		params.put("userIds", "1,2,3");
+		params.put("locales", "en,fr");
+		params.put("ids", "173,-7,007");
+
+		String json = toJSON(map);
+
+		JSONWebServiceAction jsonWebServiceAction = prepareInvokerAction(json);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		JSONWebServiceInvokerAction.InvokerResult invokerResult =
+			(JSONWebServiceInvokerAction.InvokerResult)result;
+
+		result = invokerResult.getResult();
+
+		Assert.assertEquals("2012, 1/3, en/2, 173/3", result);
+	}
+
+	@Test
+	public void testTypeConversion2() throws Exception {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+
+		map.put("/foo/hey", params);
+
+		params.put("calendar", "1330419334285");
+		params.put("userIds", new long[] {1,2,3});
+		params.put("locales", new String[] {"en","fr"});
+		params.put("ids", new long[] {173, -7, 7});
+
+		String json = toJSON(map, "*.userIds", "*.locales", "*.ids");
+
+		JSONWebServiceAction jsonWebServiceAction = prepareInvokerAction(json);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		JSONWebServiceInvokerAction.InvokerResult invokerResult =
+			(JSONWebServiceInvokerAction.InvokerResult)result;
+
+		result = invokerResult.getResult();
+
+		Assert.assertEquals("2012, 1/3, en/2, 173/3", result);
 	}
 
 	protected JSONWebServiceAction prepareInvokerAction(String content)

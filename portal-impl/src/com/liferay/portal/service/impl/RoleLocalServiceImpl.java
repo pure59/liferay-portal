@@ -16,15 +16,17 @@ package com.liferay.portal.service.impl;
 
 import com.liferay.portal.DuplicateRoleException;
 import com.liferay.portal.NoSuchRoleException;
+import com.liferay.portal.NoSuchShardException;
 import com.liferay.portal.RequiredRoleException;
 import com.liferay.portal.RoleNameException;
 import com.liferay.portal.kernel.cache.Lifecycle;
 import com.liferay.portal.kernel.cache.ThreadLocalCachable;
 import com.liferay.portal.kernel.cache.ThreadLocalCache;
 import com.liferay.portal.kernel.cache.ThreadLocalCacheManager;
+import com.liferay.portal.kernel.dao.shard.ShardUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.lar.ImportExportThreadLocal;
+import com.liferay.portal.kernel.lar.ExportImportThreadLocal;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.spring.aop.Skip;
@@ -44,10 +46,13 @@ import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.ResourcePermission;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
+import com.liferay.portal.model.Shard;
 import com.liferay.portal.model.Team;
 import com.liferay.portal.model.User;
+import com.liferay.portal.security.auth.MembershipPolicyUtil;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionCacheUtil;
+import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.base.RoleLocalServiceBaseImpl;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
@@ -63,6 +68,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The implementation of the role local service.
@@ -89,7 +95,7 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 	 *             primary key could not be found
 	 * @throws     SystemException if a system exception occurred
 	 * @deprecated {@link #addRole(long, String, long, String, Map, Map, int,
-	 *             String)}
+	 *             String, ServiceContext)}
 	 */
 	public Role addRole(
 			long userId, long companyId, String name,
@@ -98,7 +104,7 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		return addRole(
-			userId, null, 0, name, titleMap, descriptionMap, type, null);
+			userId, null, 0, name, titleMap, descriptionMap, type, null, null);
 	}
 
 	/**
@@ -123,7 +129,7 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 	 *             primary key could not be found
 	 * @throws     SystemException if a system exception occurred
 	 * @deprecated {@link #addRole(long, String, long, String, Map, Map, int,
-	 *             String)}
+	 *             String, ServiceContext)}
 	 */
 	public Role addRole(
 			long userId, long companyId, String name,
@@ -133,7 +139,7 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 
 		return addRole(
 			userId, className, classPK, name, titleMap, descriptionMap, type,
-			null);
+			null, null);
 	}
 
 	/**
@@ -151,6 +157,10 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 	 * @param  descriptionMap the role's localized descriptions (optionally
 	 *         <code>null</code>)
 	 * @param  type the role's type (optionally <code>0</code>)
+	 * @param  subType the role's subtype (optionally <code>null</code>)
+	 * @param  serviceContext the roles's service context (optionally
+	 *         <code>null</code>). Can set expando bridge attributes for the
+	 *         role.
 	 * @return the role
 	 * @throws PortalException if the class name or the role name were invalid,
 	 *         if the role is a duplicate, or if a user with the primary key
@@ -160,7 +170,7 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 	public Role addRole(
 			long userId, String className, long classPK, String name,
 			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
-			int type, String subType)
+			int type, String subType, ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
 		// Role
@@ -188,6 +198,7 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 		role.setDescriptionMap(descriptionMap);
 		role.setType(type);
 		role.setSubtype(subType);
+		role.setExpandoBridgeAttributes(serviceContext);
 
 		rolePersistence.update(role);
 
@@ -198,7 +209,7 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 				user.getCompanyId(), 0, userId, Role.class.getName(),
 				role.getRoleId(), false, false, false);
 
-			if (!ImportExportThreadLocal.isImportInProcess()) {
+			if (!ExportImportThreadLocal.isImportInProcess()) {
 				Indexer indexer = IndexerRegistryUtil.nullSafeGetIndexer(
 					User.class);
 
@@ -232,6 +243,26 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 		PermissionCacheUtil.clearCache();
 	}
 
+	public void checkMembershipPolicy(User user)
+		throws PortalException, SystemException {
+
+		List<Role> roles = getUserRoles(user.getUserId());
+
+		for (Role role : roles) {
+			if (!MembershipPolicyUtil.isMembershipAllowed(role, user)) {
+				unsetUserRoles(user.getUserId(), new long[] {role.getRoleId()});
+			}
+		}
+
+		Set<Role> mandatoryRoles = MembershipPolicyUtil.getMandatoryRoles(user);
+
+		for (Role role : mandatoryRoles) {
+			if (!hasUserRole(user.getUserId(), role.getRoleId())) {
+				addUserRoles(user.getUserId(), new long[] {role.getRoleId()});
+			}
+		}
+	}
+
 	/**
 	 * Checks to ensure that the system roles map has appropriate default roles
 	 * in each company.
@@ -243,8 +274,25 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 	public void checkSystemRoles() throws PortalException, SystemException {
 		List<Company> companies = companyLocalService.getCompanies();
 
+		String currentShardName = ShardUtil.getCurrentShardName();
+
 		for (Company company : companies) {
-			checkSystemRoles(company.getCompanyId());
+			String shardName = null;
+
+			try {
+				shardName = company.getShardName();
+			}
+			catch (NoSuchShardException nsse) {
+				Shard shard = shardLocalService.addShard(
+					Company.class.getName(), company.getCompanyId(),
+					PropsValues.SHARD_DEFAULT_NAME);
+
+				shardName = shard.getName();
+			}
+
+			if (!ShardUtil.isEnabled() || shardName.equals(currentShardName)) {
+				checkSystemRoles(company.getCompanyId());
+			}
 		}
 	}
 
@@ -393,6 +441,11 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 		// Role
 
 		rolePersistence.remove(role);
+
+		// Expando
+
+		expandoValueLocalService.deleteValues(
+			Role.class.getName(), role.getRoleId());
 
 		// Permission cache
 
@@ -1200,6 +1253,9 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 	 * @param  descriptionMap the new localized descriptions (optionally
 	 *         <code>null</code>) to replace those existing for the role
 	 * @param  subtype the role's new subtype (optionally <code>null</code>)
+	 * @param  serviceContext the roles's service context (optionally
+	 *         <code>null</code>). Can set expando bridge attributes for the
+	 *         role.
 	 * @return the role with the primary key
 	 * @throws PortalException if a role with the primary could not be found or
 	 *         if the role's name was invalid
@@ -1207,7 +1263,8 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 	 */
 	public Role updateRole(
 			long roleId, String name, Map<Locale, String> titleMap,
-			Map<Locale, String> descriptionMap, String subtype)
+			Map<Locale, String> descriptionMap, String subtype,
+			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
 		Role role = rolePersistence.findByPrimaryKey(roleId);
@@ -1223,6 +1280,7 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 		role.setTitleMap(titleMap);
 		role.setDescriptionMap(descriptionMap);
 		role.setSubtype(subtype);
+		role.setExpandoBridgeAttributes(serviceContext);
 
 		rolePersistence.update(role);
 
@@ -1256,11 +1314,11 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 
 			role = roleLocalService.addRole(
 				user.getUserId(), null, 0, name, null, descriptionMap, type,
-				null);
-		}
+				null, null);
 
-		if (name.equals(RoleConstants.USER)) {
-			initPersonalControlPanelPortletsPermissions(role);
+			if (name.equals(RoleConstants.USER)) {
+				initPersonalControlPanelPortletsPermissions(role);
+			}
 		}
 
 		_systemRolesMap.put(key, role);
@@ -1277,6 +1335,14 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		for (String portletId : getDefaultControlPanelPortlets()) {
+			int count = resourcePermissionPersistence.countByC_N_S_P_R(
+				role.getCompanyId(), portletId, ResourceConstants.SCOPE_COMPANY,
+				String.valueOf(role.getCompanyId()), role.getRoleId());
+
+			if (count > 0) {
+				continue;
+			}
+
 			ResourceAction resourceAction =
 				resourceActionLocalService.fetchResourceAction(
 					portletId, ActionKeys.ACCESS_IN_CONTROL_PANEL);

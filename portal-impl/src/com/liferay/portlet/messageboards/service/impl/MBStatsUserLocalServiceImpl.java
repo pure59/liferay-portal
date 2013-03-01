@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Group;
-import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
+import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portlet.messageboards.model.MBStatsUser;
 import com.liferay.portlet.messageboards.model.MBThread;
 import com.liferay.portlet.messageboards.model.impl.MBStatsUserImpl;
@@ -106,12 +106,12 @@ public class MBStatsUserLocalServiceImpl
 		}
 	}
 
-	public Date getLasPostDateByUserId(long groupId, long userId)
+	public Date getLastPostDateByUserId(long groupId, long userId)
 		throws SystemException {
 
 		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
 			MBThread.class, MBStatsUserImpl.TABLE_NAME,
-			PACLClassLoaderUtil.getPortalClassLoader());
+			ClassLoaderUtil.getPortalClassLoader());
 
 		Projection projection = ProjectionFactoryUtil.max("lastPostDate");
 
@@ -135,17 +135,13 @@ public class MBStatsUserLocalServiceImpl
 
 		List<Date> results = mbStatsUserLocalService.dynamicQuery(dynamicQuery);
 
-		if (results.isEmpty()) {
-			return null;
-		}
-
 		return results.get(0);
 	}
 
 	public long getMessageCountByGroupId(long groupId) throws SystemException {
 		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
 			MBStatsUser.class, MBStatsUserImpl.TABLE_NAME,
-			PACLClassLoaderUtil.getPortalClassLoader());
+			ClassLoaderUtil.getPortalClassLoader());
 
 		Projection projection = ProjectionFactoryUtil.sum("messageCount");
 
@@ -157,7 +153,7 @@ public class MBStatsUserLocalServiceImpl
 
 		List<Long> results = mbStatsUserLocalService.dynamicQuery(dynamicQuery);
 
-		if (results.isEmpty()) {
+		if (results.get(0) == null) {
 			return 0;
 		}
 
@@ -167,7 +163,7 @@ public class MBStatsUserLocalServiceImpl
 	public long getMessageCountByUserId(long userId) throws SystemException {
 		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
 			MBStatsUser.class, MBStatsUserImpl.TABLE_NAME,
-			PACLClassLoaderUtil.getPortalClassLoader());
+			ClassLoaderUtil.getPortalClassLoader());
 
 		Projection projection = ProjectionFactoryUtil.sum("messageCount");
 
@@ -179,7 +175,7 @@ public class MBStatsUserLocalServiceImpl
 
 		List<Long> results = mbStatsUserLocalService.dynamicQuery(dynamicQuery);
 
-		if (results.isEmpty()) {
+		if (results.get(0) == null) {
 			return 0;
 		}
 
@@ -234,7 +230,7 @@ public class MBStatsUserLocalServiceImpl
 		throws SystemException {
 
 		return updateStatsUser(
-			groupId, userId, getLasPostDateByUserId(groupId, userId));
+			groupId, userId, getLastPostDateByUserId(groupId, userId));
 	}
 
 	public MBStatsUser updateStatsUser(

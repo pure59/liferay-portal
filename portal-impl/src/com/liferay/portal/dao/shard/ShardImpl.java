@@ -16,6 +16,7 @@ package com.liferay.portal.dao.shard;
 
 import com.liferay.portal.dao.shard.advice.ShardAdvice;
 import com.liferay.portal.kernel.dao.shard.Shard;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.InfrastructureUtil;
 import com.liferay.portal.util.PropsValues;
 
@@ -24,6 +25,7 @@ import javax.sql.DataSource;
 /**
  * @author Alexander Chow
  */
+@DoPrivileged
 public class ShardImpl implements Shard {
 
 	public String[] getAvailableShardNames() {
@@ -83,6 +85,26 @@ public class ShardImpl implements Shard {
 
 	public void setShardAdvice(ShardAdvice shardAdvice) {
 		_shardAdvice = shardAdvice;
+	}
+
+	public String setTargetSource(String shardName) {
+		if (_shardAdvice == null) {
+			return null;
+		}
+
+		String currentShardName = getCurrentShardName();
+
+		ShardDataSourceTargetSource shardDataSourceTargetSource =
+			_shardAdvice.getShardDataSourceTargetSource();
+
+		shardDataSourceTargetSource.setDataSource(shardName);
+
+		ShardSessionFactoryTargetSource shardSessionFactoryTargetSource =
+			_shardAdvice.getShardSessionFactoryTargetSource();
+
+		shardSessionFactoryTargetSource.setSessionFactory(shardName);
+
+		return currentShardName;
 	}
 
 	private static ShardAdvice _shardAdvice;

@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.language.LanguageWrapper;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.CookieKeys;
 import com.liferay.portal.kernel.util.JavaConstants;
@@ -66,6 +67,7 @@ import javax.servlet.jsp.PageContext;
  * @author Brian Wing Shun Chan
  * @author Andrius Vitkauskas
  */
+@DoPrivileged
 public class LanguageImpl implements Language {
 
 	public String format(Locale locale, String pattern, Object argument) {
@@ -537,6 +539,10 @@ public class LanguageImpl implements Language {
 		_instances.clear();
 	}
 
+	public boolean isAvailableLanguageCode(String languageCode) {
+		return _getInstance()._localesMap.containsKey(languageCode);
+	}
+
 	public boolean isAvailableLocale(Locale locale) {
 		return _getInstance()._localesSet.contains(locale);
 	}
@@ -609,7 +615,7 @@ public class LanguageImpl implements Language {
 		for (int i = 0; i < localesArray.length; i++) {
 			String languageId = localesArray[i];
 
-			Locale locale = LocaleUtil.fromLanguageId(languageId);
+			Locale locale = LocaleUtil.fromLanguageId(languageId, false);
 
 			_charEncodings.put(locale.toString(), StringPool.UTF8);
 
@@ -639,7 +645,7 @@ public class LanguageImpl implements Language {
 		_localesBetaSet = new HashSet<Locale>(localesBetaArray.length);
 
 		for (String languageId : localesBetaArray) {
-			Locale locale = LocaleUtil.fromLanguageId(languageId);
+			Locale locale = LocaleUtil.fromLanguageId(languageId, false);
 
 			_localesBetaSet.add(locale);
 		}

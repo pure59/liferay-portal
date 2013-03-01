@@ -17,6 +17,9 @@ package com.liferay.portal.lar;
 import com.liferay.portal.NoSuchRoleException;
 import com.liferay.portal.NoSuchTeamException;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.Property;
+import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -35,6 +38,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.kernel.xml.Attribute;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.zip.ZipReader;
 import com.liferay.portal.kernel.zip.ZipWriter;
@@ -384,6 +388,23 @@ public class PortletDataContextImpl implements PortletDataContext {
 		String className, long classPK, List<MBMessage> messages) {
 
 		_commentsMap.put(getPrimaryKeyString(className, classPK), messages);
+	}
+
+	/**
+	 * @see #isWithinDateRange(Date)
+	 */
+	public void addDateRangeCriteria(
+		DynamicQuery dynamicQuery, String modifiedDatePropertyName) {
+
+		if (!hasDateRange()) {
+			return;
+		}
+
+		Property modifiedDateProperty = PropertyFactoryUtil.forName(
+			modifiedDatePropertyName);
+
+		dynamicQuery.add(modifiedDateProperty.ge(_startDate));
+		dynamicQuery.add(modifiedDateProperty.lt(_endDate));
 	}
 
 	public void addExpando(
@@ -847,11 +868,11 @@ public class PortletDataContextImpl implements PortletDataContext {
 	public Object getZipEntryAsObject(Element element, String path) {
 		Object object = fromXML(getZipEntryAsString(path));
 
-		Element classNameElement = element.element("class-name");
+		Attribute classNameAttribute = element.attribute("class-name");
 
-		if (classNameElement != null) {
+		if (classNameAttribute != null) {
 			BeanPropertiesUtil.setProperty(
-				object, "className", classNameElement.getText());
+				object, "className", classNameAttribute.getText());
 		}
 
 		return object;
@@ -1220,7 +1241,11 @@ public class PortletDataContextImpl implements PortletDataContext {
 	}
 
 	public boolean isPathNotProcessed(String path) {
-		return !addPrimaryKey(String.class, path);
+		return !isPathProcessed(path);
+	}
+
+	public boolean isPathProcessed(String path) {
+		return addPrimaryKey(String.class, path);
 	}
 
 	public boolean isPerformDirectBinaryImport() {
@@ -1232,6 +1257,9 @@ public class PortletDataContextImpl implements PortletDataContext {
 		return _privateLayout;
 	}
 
+	/**
+	 * @see #addDateRangeCriteria(DynamicQuery, String)
+	 */
 	public boolean isWithinDateRange(Date modifiedDate) {
 		if (!hasDateRange()) {
 			return true;
@@ -1470,6 +1498,8 @@ public class PortletDataContextImpl implements PortletDataContext {
 		_xStream.alias("RatingsEntry", RatingsEntryImpl.class);
 		_xStream.alias("WikiNode", WikiNodeImpl.class);
 		_xStream.alias("WikiPage", WikiPageImpl.class);
+
+		_xStream.omitField(HashMap.class, "cache_bitmask");
 	}
 
 	protected boolean isResourceMain(ClassedModel classedModel) {

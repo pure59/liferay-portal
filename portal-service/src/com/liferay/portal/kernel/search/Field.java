@@ -36,6 +36,8 @@ public class Field implements Serializable {
 
 	public static final String ASSET_CATEGORY_TITLES = "assetCategoryTitles";
 
+	public static final String ASSET_TAG_IDS = "assetTagIds";
+
 	public static final String ASSET_TAG_NAMES = "assetTagNames";
 
 	public static final String CATEGORY_ID = "categoryId";
@@ -64,6 +66,10 @@ public class Field implements Serializable {
 
 	public static final String GROUP_ROLE_ID = "groupRoleId";
 
+	public static final String HIDDEN = "hidden";
+
+	public static final String KEYWORD_SEARCH = "keywordSearch";
+
 	public static final String[] KEYWORDS = {
 		Field.ASSET_CATEGORY_TITLES, Field.ASSET_TAG_NAMES, Field.COMMENTS,
 		Field.CONTENT, Field.DESCRIPTION, Field.PROPERTIES, Field.TITLE,
@@ -86,6 +92,8 @@ public class Field implements Serializable {
 	public static final String PORTLET_ID = "portletId";
 
 	public static final String PROPERTIES = "properties";
+
+	public static final String RELATED_ENTRY = "relatedEntry";
 
 	public static final String REMOVED_BY_USER_NAME = "removedByUserName";
 

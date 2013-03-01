@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.Company;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutSetPrototype;
@@ -30,9 +31,12 @@ import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceTestUtil;
+import com.liferay.portal.service.persistence.CompanyUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.test.TransactionalCallbackAwareExecutionTestListener;
+import com.liferay.portal.util.GroupTestUtil;
+import com.liferay.portal.util.LayoutTestUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.TestPropsValues;
 import com.liferay.portlet.journal.model.JournalArticle;
@@ -54,13 +58,12 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 /**
  * @author Eduardo Garcia
  */
-@PrepareForTest({PortletLocalServiceUtil.class})
-
 @ExecutionTestListeners(
 	listeners = {
 		MainServletExecutionTestListener.class,
 		TransactionalCallbackAwareExecutionTestListener.class
 	})
+@PrepareForTest({PortletLocalServiceUtil.class})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
 @Transactional
 public class PortletExportImportTest extends BaseExportImportTestCase {
@@ -73,12 +76,12 @@ public class PortletExportImportTest extends BaseExportImportTestCase {
 		FinderCacheUtil.clearCache();
 
 		LayoutSetPrototype layoutSetPrototype =
-			ServiceTestUtil.addLayoutSetPrototype(
+			LayoutTestUtil.addLayoutSetPrototype(
 				ServiceTestUtil.randomString());
 
 		_layoutSetPrototypeGroup = layoutSetPrototype.getGroup();
 
-		_layoutSetPrototypeLayout = ServiceTestUtil.addLayout(
+		_layoutSetPrototypeLayout = LayoutTestUtil.addLayout(
 			_layoutSetPrototypeGroup.getGroupId(),
 			ServiceTestUtil.randomString(), true);
 
@@ -95,7 +98,7 @@ public class PortletExportImportTest extends BaseExportImportTestCase {
 
 		// Create site from site template
 
-		_group = ServiceTestUtil.addGroup();
+		_group = GroupTestUtil.addGroup();
 
 		SitesUtil.updateLayoutSetPrototypesLinks(
 			_group, layoutSetPrototype.getLayoutSetPrototypeId(), 0, true,
@@ -197,6 +200,48 @@ public class PortletExportImportTest extends BaseExportImportTestCase {
 			Boolean.FALSE.toString(),
 			jxPreferences.getValue("showAvailableLocales", StringPool.BLANK));
 
+		// Update journal content portlet with a new globally scoped journal
+		// article
+
+		Company company = CompanyUtil.fetchByPrimaryKey(
+			_layoutSetPrototypeLayout.getCompanyId());
+
+		Group companyGroup = company.getGroup();
+
+		JournalArticle globalScopeJournalArticle = addJournalArticle(
+			companyGroup.getGroupId(), 0, "Global Article", "Global Content");
+
+		layoutSetprototypeJxPreferences.setValue(
+			"articleId", globalScopeJournalArticle.getArticleId());
+		layoutSetprototypeJxPreferences.setValue(
+			"groupId", Long.toString(companyGroup.getGroupId()));
+		layoutSetprototypeJxPreferences.setValue(
+			"lfrScopeLayoutUuid", StringPool.BLANK);
+		layoutSetprototypeJxPreferences.setValue("lfrScopeType", "company");
+
+		updatePortletPreferences(
+			_layoutSetPrototypeLayout.getPlid(),
+			_layoutSetPrototypeJournalContentPortletId,
+			layoutSetprototypeJxPreferences);
+
+		jxPreferences = getPortletPreferences(
+			_group.getCompanyId(), layout.getPlid(),
+			_layoutSetPrototypeJournalContentPortletId);
+
+		// Check preferences when journal article is from the global scope
+
+		Assert.assertEquals(
+			globalScopeJournalArticle.getArticleId(),
+			jxPreferences.getValue("articleId", StringPool.BLANK));
+		Assert.assertEquals(
+			String.valueOf(companyGroup.getGroupId()),
+			jxPreferences.getValue("groupId", StringPool.BLANK));
+		Assert.assertEquals(
+			StringPool.BLANK,
+			jxPreferences.getValue("lfrScopeLayoutUuid", StringPool.BLANK));
+		Assert.assertEquals(
+			"company",
+			jxPreferences.getValue("lfrScopeType", StringPool.BLANK));
 	}
 
 	protected JournalArticle addJournalArticle(
@@ -231,7 +276,7 @@ public class PortletExportImportTest extends BaseExportImportTestCase {
 		throws Exception {
 
 		LayoutTypePortlet layoutTypePortlet =
-			(LayoutTypePortlet) layout.getLayoutType();
+			(LayoutTypePortlet)layout.getLayoutType();
 
 		String journalPortletId = layoutTypePortlet.addPortletId(
 			userId, PortletKeys.JOURNAL_CONTENT, columnId, -1);
@@ -277,7 +322,8 @@ public class PortletExportImportTest extends BaseExportImportTestCase {
 	}
 
 	protected JournalArticle updateArticle(
-		JournalArticle journalArticle, String content) throws Exception {
+			JournalArticle journalArticle, String content)
+		throws Exception {
 
 		Locale locale = LocaleUtil.getDefault();
 

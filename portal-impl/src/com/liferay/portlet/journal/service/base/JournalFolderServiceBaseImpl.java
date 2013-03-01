@@ -27,11 +27,20 @@ import com.liferay.portal.service.GroupService;
 import com.liferay.portal.service.ResourceLocalService;
 import com.liferay.portal.service.UserLocalService;
 import com.liferay.portal.service.UserService;
+import com.liferay.portal.service.WorkflowInstanceLinkLocalService;
 import com.liferay.portal.service.persistence.GroupFinder;
 import com.liferay.portal.service.persistence.GroupPersistence;
 import com.liferay.portal.service.persistence.UserFinder;
 import com.liferay.portal.service.persistence.UserPersistence;
+import com.liferay.portal.service.persistence.WorkflowInstanceLinkPersistence;
 
+import com.liferay.portlet.asset.service.AssetEntryLocalService;
+import com.liferay.portlet.asset.service.AssetEntryService;
+import com.liferay.portlet.asset.service.AssetLinkLocalService;
+import com.liferay.portlet.asset.service.persistence.AssetEntryFinder;
+import com.liferay.portlet.asset.service.persistence.AssetEntryPersistence;
+import com.liferay.portlet.asset.service.persistence.AssetLinkFinder;
+import com.liferay.portlet.asset.service.persistence.AssetLinkPersistence;
 import com.liferay.portlet.expando.service.ExpandoValueLocalService;
 import com.liferay.portlet.expando.service.ExpandoValueService;
 import com.liferay.portlet.expando.service.persistence.ExpandoValuePersistence;
@@ -62,6 +71,15 @@ import com.liferay.portlet.journal.service.persistence.JournalStructureFinder;
 import com.liferay.portlet.journal.service.persistence.JournalStructurePersistence;
 import com.liferay.portlet.journal.service.persistence.JournalTemplateFinder;
 import com.liferay.portlet.journal.service.persistence.JournalTemplatePersistence;
+import com.liferay.portlet.social.service.SocialActivityCounterLocalService;
+import com.liferay.portlet.social.service.SocialActivityLocalService;
+import com.liferay.portlet.social.service.persistence.SocialActivityCounterFinder;
+import com.liferay.portlet.social.service.persistence.SocialActivityCounterPersistence;
+import com.liferay.portlet.social.service.persistence.SocialActivityFinder;
+import com.liferay.portlet.social.service.persistence.SocialActivityPersistence;
+import com.liferay.portlet.trash.service.TrashEntryLocalService;
+import com.liferay.portlet.trash.service.TrashEntryService;
+import com.liferay.portlet.trash.service.persistence.TrashEntryPersistence;
 
 import javax.sql.DataSource;
 
@@ -758,6 +776,174 @@ public abstract class JournalFolderServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
+	 * Returns the workflow instance link local service.
+	 *
+	 * @return the workflow instance link local service
+	 */
+	public WorkflowInstanceLinkLocalService getWorkflowInstanceLinkLocalService() {
+		return workflowInstanceLinkLocalService;
+	}
+
+	/**
+	 * Sets the workflow instance link local service.
+	 *
+	 * @param workflowInstanceLinkLocalService the workflow instance link local service
+	 */
+	public void setWorkflowInstanceLinkLocalService(
+		WorkflowInstanceLinkLocalService workflowInstanceLinkLocalService) {
+		this.workflowInstanceLinkLocalService = workflowInstanceLinkLocalService;
+	}
+
+	/**
+	 * Returns the workflow instance link persistence.
+	 *
+	 * @return the workflow instance link persistence
+	 */
+	public WorkflowInstanceLinkPersistence getWorkflowInstanceLinkPersistence() {
+		return workflowInstanceLinkPersistence;
+	}
+
+	/**
+	 * Sets the workflow instance link persistence.
+	 *
+	 * @param workflowInstanceLinkPersistence the workflow instance link persistence
+	 */
+	public void setWorkflowInstanceLinkPersistence(
+		WorkflowInstanceLinkPersistence workflowInstanceLinkPersistence) {
+		this.workflowInstanceLinkPersistence = workflowInstanceLinkPersistence;
+	}
+
+	/**
+	 * Returns the asset entry local service.
+	 *
+	 * @return the asset entry local service
+	 */
+	public AssetEntryLocalService getAssetEntryLocalService() {
+		return assetEntryLocalService;
+	}
+
+	/**
+	 * Sets the asset entry local service.
+	 *
+	 * @param assetEntryLocalService the asset entry local service
+	 */
+	public void setAssetEntryLocalService(
+		AssetEntryLocalService assetEntryLocalService) {
+		this.assetEntryLocalService = assetEntryLocalService;
+	}
+
+	/**
+	 * Returns the asset entry remote service.
+	 *
+	 * @return the asset entry remote service
+	 */
+	public AssetEntryService getAssetEntryService() {
+		return assetEntryService;
+	}
+
+	/**
+	 * Sets the asset entry remote service.
+	 *
+	 * @param assetEntryService the asset entry remote service
+	 */
+	public void setAssetEntryService(AssetEntryService assetEntryService) {
+		this.assetEntryService = assetEntryService;
+	}
+
+	/**
+	 * Returns the asset entry persistence.
+	 *
+	 * @return the asset entry persistence
+	 */
+	public AssetEntryPersistence getAssetEntryPersistence() {
+		return assetEntryPersistence;
+	}
+
+	/**
+	 * Sets the asset entry persistence.
+	 *
+	 * @param assetEntryPersistence the asset entry persistence
+	 */
+	public void setAssetEntryPersistence(
+		AssetEntryPersistence assetEntryPersistence) {
+		this.assetEntryPersistence = assetEntryPersistence;
+	}
+
+	/**
+	 * Returns the asset entry finder.
+	 *
+	 * @return the asset entry finder
+	 */
+	public AssetEntryFinder getAssetEntryFinder() {
+		return assetEntryFinder;
+	}
+
+	/**
+	 * Sets the asset entry finder.
+	 *
+	 * @param assetEntryFinder the asset entry finder
+	 */
+	public void setAssetEntryFinder(AssetEntryFinder assetEntryFinder) {
+		this.assetEntryFinder = assetEntryFinder;
+	}
+
+	/**
+	 * Returns the asset link local service.
+	 *
+	 * @return the asset link local service
+	 */
+	public AssetLinkLocalService getAssetLinkLocalService() {
+		return assetLinkLocalService;
+	}
+
+	/**
+	 * Sets the asset link local service.
+	 *
+	 * @param assetLinkLocalService the asset link local service
+	 */
+	public void setAssetLinkLocalService(
+		AssetLinkLocalService assetLinkLocalService) {
+		this.assetLinkLocalService = assetLinkLocalService;
+	}
+
+	/**
+	 * Returns the asset link persistence.
+	 *
+	 * @return the asset link persistence
+	 */
+	public AssetLinkPersistence getAssetLinkPersistence() {
+		return assetLinkPersistence;
+	}
+
+	/**
+	 * Sets the asset link persistence.
+	 *
+	 * @param assetLinkPersistence the asset link persistence
+	 */
+	public void setAssetLinkPersistence(
+		AssetLinkPersistence assetLinkPersistence) {
+		this.assetLinkPersistence = assetLinkPersistence;
+	}
+
+	/**
+	 * Returns the asset link finder.
+	 *
+	 * @return the asset link finder
+	 */
+	public AssetLinkFinder getAssetLinkFinder() {
+		return assetLinkFinder;
+	}
+
+	/**
+	 * Sets the asset link finder.
+	 *
+	 * @param assetLinkFinder the asset link finder
+	 */
+	public void setAssetLinkFinder(AssetLinkFinder assetLinkFinder) {
+		this.assetLinkFinder = assetLinkFinder;
+	}
+
+	/**
 	 * Returns the expando value local service.
 	 *
 	 * @return the expando value local service
@@ -811,6 +997,176 @@ public abstract class JournalFolderServiceBaseImpl extends BaseServiceImpl
 	public void setExpandoValuePersistence(
 		ExpandoValuePersistence expandoValuePersistence) {
 		this.expandoValuePersistence = expandoValuePersistence;
+	}
+
+	/**
+	 * Returns the social activity local service.
+	 *
+	 * @return the social activity local service
+	 */
+	public SocialActivityLocalService getSocialActivityLocalService() {
+		return socialActivityLocalService;
+	}
+
+	/**
+	 * Sets the social activity local service.
+	 *
+	 * @param socialActivityLocalService the social activity local service
+	 */
+	public void setSocialActivityLocalService(
+		SocialActivityLocalService socialActivityLocalService) {
+		this.socialActivityLocalService = socialActivityLocalService;
+	}
+
+	/**
+	 * Returns the social activity persistence.
+	 *
+	 * @return the social activity persistence
+	 */
+	public SocialActivityPersistence getSocialActivityPersistence() {
+		return socialActivityPersistence;
+	}
+
+	/**
+	 * Sets the social activity persistence.
+	 *
+	 * @param socialActivityPersistence the social activity persistence
+	 */
+	public void setSocialActivityPersistence(
+		SocialActivityPersistence socialActivityPersistence) {
+		this.socialActivityPersistence = socialActivityPersistence;
+	}
+
+	/**
+	 * Returns the social activity finder.
+	 *
+	 * @return the social activity finder
+	 */
+	public SocialActivityFinder getSocialActivityFinder() {
+		return socialActivityFinder;
+	}
+
+	/**
+	 * Sets the social activity finder.
+	 *
+	 * @param socialActivityFinder the social activity finder
+	 */
+	public void setSocialActivityFinder(
+		SocialActivityFinder socialActivityFinder) {
+		this.socialActivityFinder = socialActivityFinder;
+	}
+
+	/**
+	 * Returns the social activity counter local service.
+	 *
+	 * @return the social activity counter local service
+	 */
+	public SocialActivityCounterLocalService getSocialActivityCounterLocalService() {
+		return socialActivityCounterLocalService;
+	}
+
+	/**
+	 * Sets the social activity counter local service.
+	 *
+	 * @param socialActivityCounterLocalService the social activity counter local service
+	 */
+	public void setSocialActivityCounterLocalService(
+		SocialActivityCounterLocalService socialActivityCounterLocalService) {
+		this.socialActivityCounterLocalService = socialActivityCounterLocalService;
+	}
+
+	/**
+	 * Returns the social activity counter persistence.
+	 *
+	 * @return the social activity counter persistence
+	 */
+	public SocialActivityCounterPersistence getSocialActivityCounterPersistence() {
+		return socialActivityCounterPersistence;
+	}
+
+	/**
+	 * Sets the social activity counter persistence.
+	 *
+	 * @param socialActivityCounterPersistence the social activity counter persistence
+	 */
+	public void setSocialActivityCounterPersistence(
+		SocialActivityCounterPersistence socialActivityCounterPersistence) {
+		this.socialActivityCounterPersistence = socialActivityCounterPersistence;
+	}
+
+	/**
+	 * Returns the social activity counter finder.
+	 *
+	 * @return the social activity counter finder
+	 */
+	public SocialActivityCounterFinder getSocialActivityCounterFinder() {
+		return socialActivityCounterFinder;
+	}
+
+	/**
+	 * Sets the social activity counter finder.
+	 *
+	 * @param socialActivityCounterFinder the social activity counter finder
+	 */
+	public void setSocialActivityCounterFinder(
+		SocialActivityCounterFinder socialActivityCounterFinder) {
+		this.socialActivityCounterFinder = socialActivityCounterFinder;
+	}
+
+	/**
+	 * Returns the trash entry local service.
+	 *
+	 * @return the trash entry local service
+	 */
+	public TrashEntryLocalService getTrashEntryLocalService() {
+		return trashEntryLocalService;
+	}
+
+	/**
+	 * Sets the trash entry local service.
+	 *
+	 * @param trashEntryLocalService the trash entry local service
+	 */
+	public void setTrashEntryLocalService(
+		TrashEntryLocalService trashEntryLocalService) {
+		this.trashEntryLocalService = trashEntryLocalService;
+	}
+
+	/**
+	 * Returns the trash entry remote service.
+	 *
+	 * @return the trash entry remote service
+	 */
+	public TrashEntryService getTrashEntryService() {
+		return trashEntryService;
+	}
+
+	/**
+	 * Sets the trash entry remote service.
+	 *
+	 * @param trashEntryService the trash entry remote service
+	 */
+	public void setTrashEntryService(TrashEntryService trashEntryService) {
+		this.trashEntryService = trashEntryService;
+	}
+
+	/**
+	 * Returns the trash entry persistence.
+	 *
+	 * @return the trash entry persistence
+	 */
+	public TrashEntryPersistence getTrashEntryPersistence() {
+		return trashEntryPersistence;
+	}
+
+	/**
+	 * Sets the trash entry persistence.
+	 *
+	 * @param trashEntryPersistence the trash entry persistence
+	 */
+	public void setTrashEntryPersistence(
+		TrashEntryPersistence trashEntryPersistence) {
+		this.trashEntryPersistence = trashEntryPersistence;
 	}
 
 	public void afterPropertiesSet() {
@@ -936,11 +1292,47 @@ public abstract class JournalFolderServiceBaseImpl extends BaseServiceImpl
 	protected UserPersistence userPersistence;
 	@BeanReference(type = UserFinder.class)
 	protected UserFinder userFinder;
+	@BeanReference(type = WorkflowInstanceLinkLocalService.class)
+	protected WorkflowInstanceLinkLocalService workflowInstanceLinkLocalService;
+	@BeanReference(type = WorkflowInstanceLinkPersistence.class)
+	protected WorkflowInstanceLinkPersistence workflowInstanceLinkPersistence;
+	@BeanReference(type = AssetEntryLocalService.class)
+	protected AssetEntryLocalService assetEntryLocalService;
+	@BeanReference(type = AssetEntryService.class)
+	protected AssetEntryService assetEntryService;
+	@BeanReference(type = AssetEntryPersistence.class)
+	protected AssetEntryPersistence assetEntryPersistence;
+	@BeanReference(type = AssetEntryFinder.class)
+	protected AssetEntryFinder assetEntryFinder;
+	@BeanReference(type = AssetLinkLocalService.class)
+	protected AssetLinkLocalService assetLinkLocalService;
+	@BeanReference(type = AssetLinkPersistence.class)
+	protected AssetLinkPersistence assetLinkPersistence;
+	@BeanReference(type = AssetLinkFinder.class)
+	protected AssetLinkFinder assetLinkFinder;
 	@BeanReference(type = ExpandoValueLocalService.class)
 	protected ExpandoValueLocalService expandoValueLocalService;
 	@BeanReference(type = ExpandoValueService.class)
 	protected ExpandoValueService expandoValueService;
 	@BeanReference(type = ExpandoValuePersistence.class)
 	protected ExpandoValuePersistence expandoValuePersistence;
+	@BeanReference(type = SocialActivityLocalService.class)
+	protected SocialActivityLocalService socialActivityLocalService;
+	@BeanReference(type = SocialActivityPersistence.class)
+	protected SocialActivityPersistence socialActivityPersistence;
+	@BeanReference(type = SocialActivityFinder.class)
+	protected SocialActivityFinder socialActivityFinder;
+	@BeanReference(type = SocialActivityCounterLocalService.class)
+	protected SocialActivityCounterLocalService socialActivityCounterLocalService;
+	@BeanReference(type = SocialActivityCounterPersistence.class)
+	protected SocialActivityCounterPersistence socialActivityCounterPersistence;
+	@BeanReference(type = SocialActivityCounterFinder.class)
+	protected SocialActivityCounterFinder socialActivityCounterFinder;
+	@BeanReference(type = TrashEntryLocalService.class)
+	protected TrashEntryLocalService trashEntryLocalService;
+	@BeanReference(type = TrashEntryService.class)
+	protected TrashEntryService trashEntryService;
+	@BeanReference(type = TrashEntryPersistence.class)
+	protected TrashEntryPersistence trashEntryPersistence;
 	private String _beanIdentifier;
 }

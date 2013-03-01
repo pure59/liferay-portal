@@ -7,16 +7,24 @@ AUI.add(
 
 		var RESPONSE_DATA = 'responseData';
 
-		var STR_CHECKENTRY_URL = 'checkEntryURL';
+		var STR_RESTORE_ENTRY_URL = 'restoreEntryURL';
 
 		var RestoreEntry = A.Component.create(
 			{
 				ATTRS: {
-					checkEntryURL: {
+					duplicateEntryURL: {
 						validator: isString
 					},
 
 					namespace: {
+						validator: isString
+					},
+
+					overrideMessage:{
+						validator:isString
+					},
+
+					renameMessage:{
 						validator: isString
 					},
 
@@ -70,10 +78,12 @@ AUI.add(
 							var data = {
 								duplicateEntryId: responseData.duplicateEntryId,
 								oldName: responseData.oldName,
+								overrideMessage: instance.get('overrideMessage'),
+								renameMessage: instance.get('renameMessage'),
 								trashEntryId: responseData.trashEntryId
 							};
 
-							instance._showPopup(data, instance.get('restoreEntryURL'));
+							instance._showPopup(data, instance.get('duplicateEntryURL'));
 						}
 					},
 
@@ -105,11 +115,11 @@ AUI.add(
 						var uri = event.uri;
 
 						A.io.request(
-							instance.get(STR_CHECKENTRY_URL),
+							instance.get(STR_RESTORE_ENTRY_URL),
 							{
 								after: {
-									failure: A.rbind(instance._afterCheckEntryFailure, instance),
-									success: A.rbind(instance._afterCheckEntrySuccess, instance)
+									failure: A.rbind('_afterCheckEntryFailure', instance),
+									success: A.rbind('_afterCheckEntrySuccess', instance)
 								},
 								arguments: uri,
 								data: {
@@ -138,7 +148,7 @@ AUI.add(
 								A.Plugin.IO,
 								{
 									after: {
-										success: A.bind(instance._initializeRestorePopup, instance)
+										success: A.bind('_initializeRestorePopup', instance)
 									},
 									autoLoad: false
 								}
@@ -186,11 +196,11 @@ AUI.add(
 						}
 						else {
 							A.io.request(
-								instance.get(STR_CHECKENTRY_URL),
+								instance.get(STR_RESTORE_ENTRY_URL),
 								{
 									after: {
-										failure: A.rbind(instance._afterPopupCheckEntryFailure, instance),
-										success: A.rbind(instance._afterPopupCheckEntrySuccess, instance)
+										failure: A.rbind('_afterPopupCheckEntryFailure', instance),
+										success: A.rbind('_afterPopupCheckEntrySuccess', instance)
 									},
 									arguments: form,
 									data: {

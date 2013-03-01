@@ -34,6 +34,9 @@
 	</category>
 	<category name="category.community">
 		<portlet id="11" />
+		<portlet id="186" />
+		<portlet id="187" />
+		<portlet id="188" />
 		<portlet id="28" />
 		<portlet id="29" />
 		<portlet id="100" />
@@ -88,6 +91,7 @@
 		<portlet id="179" />
 		<portlet id="182" />
 		<portlet id="183" />
+		<portlet id="185" />
 	</category>
 	<category name="category.news">
 		<portlet id="39" />

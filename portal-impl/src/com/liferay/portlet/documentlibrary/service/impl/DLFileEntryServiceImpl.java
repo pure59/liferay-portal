@@ -17,10 +17,11 @@ package com.liferay.portlet.documentlibrary.service.impl;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Lock;
+import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
@@ -34,7 +35,6 @@ import com.liferay.portlet.documentlibrary.service.base.DLFileEntryServiceBaseIm
 import com.liferay.portlet.documentlibrary.service.permission.DLFileEntryPermission;
 import com.liferay.portlet.documentlibrary.service.permission.DLFolderPermission;
 import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
-import com.liferay.portlet.documentlibrary.util.DLAppUtil;
 import com.liferay.portlet.dynamicdatamapping.storage.Fields;
 
 import java.io.File;
@@ -72,8 +72,9 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		try {
-			DLFileEntryPermission.check(
-				getPermissionChecker(), fileEntryId, ActionKeys.UPDATE);
+			if (!hasFileEntryLock(fileEntryId)) {
+				throw new PrincipalException();
+			}
 		}
 		catch (NoSuchFileEntryException nsfee) {
 		}
@@ -87,8 +88,9 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		try {
-			DLFileEntryPermission.check(
-				getPermissionChecker(), fileEntryId, ActionKeys.UPDATE);
+			if (!hasFileEntryLock(fileEntryId)) {
+				throw new PrincipalException();
+			}
 		}
 		catch (NoSuchFileEntryException nsfee) {
 		}
@@ -111,8 +113,9 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		try {
-			DLFileEntryPermission.check(
-				getPermissionChecker(), fileEntryId, ActionKeys.UPDATE);
+			if (!hasFileEntryLock(fileEntryId)) {
+				throw new PrincipalException();
+			}
 		}
 		catch (NoSuchFileEntryException nsfee) {
 		}
@@ -158,12 +161,6 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 
 		DLFileEntryPermission.check(
 			getPermissionChecker(), fileEntryId, ActionKeys.UPDATE);
-
-		if ((expirationTime <= 0) ||
-			(expirationTime > DLFileEntryImpl.LOCK_EXPIRATION_TIME)) {
-
-			expirationTime = DLFileEntryImpl.LOCK_EXPIRATION_TIME;
-		}
 
 		return dlFileEntryLocalService.checkOutFileEntry(
 			getUserId(), fileEntryId, owner, expirationTime, serviceContext);
@@ -434,21 +431,20 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 			OrderByComparator obc)
 		throws PortalException, SystemException {
 
-		long[] folderIds = dlFolderService.getFolderIds(groupId, rootFolderId);
+		List<Long> folderIds = dlFolderService.getFolderIds(
+			groupId, rootFolderId);
 
-		folderIds = DLAppUtil.filterFolderIds(
-			getPermissionChecker(), groupId, folderIds);
-
-		if (folderIds.length == 0) {
+		if (folderIds.size() == 0) {
 			return Collections.emptyList();
 		}
 		else if (userId <= 0) {
 			return dlFileEntryPersistence.filterFindByG_F(
-				groupId, folderIds, start, end, obc);
+				groupId, ArrayUtil.toLongArray(folderIds), start, end, obc);
 		}
 		else {
 			return dlFileEntryPersistence.filterFindByG_U_F(
-				groupId, userId, folderIds, start, end, obc);
+				groupId, userId, ArrayUtil.toLongArray(folderIds), start, end,
+				obc);
 		}
 	}
 
@@ -457,39 +453,37 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 			int status, int start, int end, OrderByComparator obc)
 		throws PortalException, SystemException {
 
-		long[] folderIds = dlFolderService.getFolderIds(groupId, rootFolderId);
+		List<Long> folderIds = dlFolderService.getFolderIds(
+			groupId, rootFolderId);
 
-		folderIds = DLAppUtil.filterFolderIds(
-			getPermissionChecker(), groupId, folderIds);
-
-		if (folderIds.length == 0) {
+		if (folderIds.size() == 0) {
 			return Collections.emptyList();
 		}
-
-		List<Long> folderIdsList = ListUtil.toList(folderIds);
 
 		QueryDefinition queryDefinition = new QueryDefinition(
 			status, start, end, obc);
 
 		return dlFileEntryFinder.findByG_U_F_M(
-			groupId, userId, folderIdsList, mimeTypes, queryDefinition);
+			groupId, userId, folderIds, mimeTypes, queryDefinition);
 	}
 
 	public int getGroupFileEntriesCount(
 			long groupId, long userId, long rootFolderId)
 		throws PortalException, SystemException {
 
-		long[] folderIds = dlFolderService.getFolderIds(groupId, rootFolderId);
+		List<Long> folderIds = dlFolderService.getFolderIds(
+			groupId, rootFolderId);
 
-		if (folderIds.length == 0) {
+		if (folderIds.size() == 0) {
 			return 0;
 		}
 		else if (userId <= 0) {
-			return dlFileEntryPersistence.filterCountByG_F(groupId, folderIds);
+			return dlFileEntryPersistence.filterCountByG_F(
+				groupId, ArrayUtil.toLongArray(folderIds));
 		}
 		else {
 			return dlFileEntryPersistence.filterCountByG_U_F(
-				groupId, userId, folderIds);
+				groupId, userId, ArrayUtil.toLongArray(folderIds));
 		}
 	}
 
@@ -498,17 +492,15 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 			int status)
 		throws PortalException, SystemException {
 
-		long[] folderIds = dlFolderService.getFolderIds(groupId, rootFolderId);
+		List<Long> folderIds = dlFolderService.getFolderIds(
+			groupId, rootFolderId);
 
-		if (folderIds.length == 0) {
+		if (folderIds.size() == 0) {
 			return 0;
 		}
 
-		List<Long> folderIdsList = ListUtil.toList(folderIds);
-
 		return dlFileEntryFinder.countByG_U_F_M(
-			groupId, userId, folderIdsList, mimeTypes,
-			new QueryDefinition(status));
+			groupId, userId, folderIds, mimeTypes, new QueryDefinition(status));
 	}
 
 	public boolean hasFileEntryLock(long fileEntryId)
@@ -526,6 +518,13 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 			(folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID)) {
 
 			hasLock = dlFolderService.hasInheritableLock(folderId);
+		}
+
+		if (DLFileEntryPermission.contains(
+				getPermissionChecker(), fileEntryId,
+				ActionKeys.OVERRIDE_CHECKOUT)) {
+
+			hasLock = true;
 		}
 
 		return hasLock;

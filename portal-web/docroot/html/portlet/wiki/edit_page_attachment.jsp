@@ -41,6 +41,11 @@ WikiPage wikiPage = (WikiPage)request.getAttribute(WebKeys.WIKI_PAGE);
 	<aui:input name="numOfFiles" type="hidden" value="3" />
 
 	<liferay-ui:error exception="<%= DuplicateFileException.class %>" message="a-file-with-that-name-already-exists" />
+
+	<liferay-ui:error exception="<%= FileExtensionException.class %>">
+		<liferay-ui:message key="document-names-must-end-with-one-of-the-following-extensions" /> <%= StringUtil.merge(PrefsPropsUtil.getStringArray(PropsKeys.DL_FILE_EXTENSIONS, StringPool.COMMA), StringPool.COMMA_AND_SPACE) %>.
+	</liferay-ui:error>
+
 	<liferay-ui:error exception="<%= FileNameException.class %>" message="please-enter-a-file-with-a-valid-file-name" />
 
 	<liferay-ui:error exception="<%= FileSizeException.class %>">
@@ -148,12 +153,13 @@ Ticket ticket = TicketLocalServiceUtil.addTicket(user.getCompanyId(), User.class
 
 <portlet:actionURL var="editMultiplePageAttachmentsURL">
 	<portlet:param name="struts_action" value="/wiki/edit_page_attachment" />
-	<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.ADD_MULTIPLE %>" />
-	<portlet:param name="nodeId" value="<%= String.valueOf(node.getNodeId()) %>" />
-	<portlet:param name="title" value="<%= wikiPage.getTitle() %>" />
 </portlet:actionURL>
 
 <aui:form action="<%= editMultiplePageAttachmentsURL %>" method="post" name="fm2" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "updateMultiplePageAttachments();" %>'>
+	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.ADD_MULTIPLE %>" />
+	<aui:input name="nodeId" type="hidden" value="<%= String.valueOf(node.getNodeId()) %>" />
+	<aui:input name="title" type="hidden" value="<%= wikiPage.getTitle() %>" />
+
 	<span id="<portlet:namespace />selectedFileNameContainer"></span>
 
 	<div class="aui-helper-hidden" id="<portlet:namespace />metadataExplanationContainer"></div>

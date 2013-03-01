@@ -856,6 +856,16 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	}
 
 	public void setExpandoBridgeAttributes(
+		com.liferay.portal.model.BaseModel<?> baseModel) {
+		_dlFileVersion.setExpandoBridgeAttributes(baseModel);
+	}
+
+	public void setExpandoBridgeAttributes(
+		com.liferay.portlet.expando.model.ExpandoBridge expandoBridge) {
+		_dlFileVersion.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_dlFileVersion.setExpandoBridgeAttributes(serviceContext);
 	}
@@ -925,12 +935,12 @@ public class DLFileVersionWrapper implements DLFileVersion,
 		return _dlFileVersion.getIcon();
 	}
 
-	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashFolder() {
-		return _dlFileVersion.getTrashFolder();
+	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashContainer() {
+		return _dlFileVersion.getTrashContainer();
 	}
 
-	public boolean isInTrashFolder() {
-		return _dlFileVersion.isInTrashFolder();
+	public boolean isInTrashContainer() {
+		return _dlFileVersion.isInTrashContainer();
 	}
 
 	public void setExtraSettingsProperties(

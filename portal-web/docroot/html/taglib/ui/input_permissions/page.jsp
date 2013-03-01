@@ -26,7 +26,11 @@ ServiceContext#deriveDefaultPermissions(long, String).
 <%@ page import="com.liferay.taglib.ui.InputPermissionsParamsTag" %>
 
 <%
-String uniqueNamespace = PortalUtil.getUniqueElementId(request, namespace, namespace) + StringPool.UNDERLINE;
+String uniqueNamespace = namespace + PortalUtil.getUniqueElementId(request, namespace, StringPool.BLANK);
+
+if (!uniqueNamespace.endsWith(StringPool.UNDERLINE)) {
+	uniqueNamespace = uniqueNamespace.concat(StringPool.UNDERLINE);
+}
 
 String formName = namespace + request.getAttribute("liferay-ui:input-permissions:formName");
 String modelName = (String)request.getAttribute("liferay-ui:input-permissions:modelName");
@@ -39,23 +43,31 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 	<c:when test="<%= modelName != null %>">
 
 		<%
-		Group parentGroup = GroupLocalServiceUtil.getGroup(themeDisplay.getParentGroupId());
+		Group siteGroup = GroupLocalServiceUtil.getGroup(themeDisplay.getSiteGroupId());
 
-		Role defaultGroupRole = RoleLocalServiceUtil.getDefaultGroupRole(parentGroup.getGroupId());
+		Role defaultGroupRole = RoleLocalServiceUtil.getDefaultGroupRole(siteGroup.getGroupId());
 		Role guestRole = RoleLocalServiceUtil.getRole(themeDisplay.getCompanyId(), RoleConstants.GUEST);
 		Role ownerRole = RoleLocalServiceUtil.getRole(themeDisplay.getCompanyId(), RoleConstants.OWNER);
 
 		String[] roleNames = new String[] {RoleConstants.GUEST, defaultGroupRole.getName()};
 
-		List groupPermissions = ListUtil.fromArray(request.getParameterValues("groupPermissions"));
-		List guestPermissions = ListUtil.fromArray(request.getParameterValues("guestPermissions"));
+		String guestPermissionsName = "guestPermissions";
+		String groupPermissionsName = "groupPermissions";
+
+		if (!uniqueNamespace.equals(namespace)) {
+			guestPermissionsName = guestPermissionsName + StringPool.UNDERLINE + modelName;
+			groupPermissionsName = groupPermissionsName + StringPool.UNDERLINE + modelName;
+		}
+
+		List groupPermissions = ListUtil.fromArray(request.getParameterValues(groupPermissionsName));
+		List guestPermissions = ListUtil.fromArray(request.getParameterValues(guestPermissionsName));
 
 		List supportedActions = (List)request.getAttribute("liferay-ui:input-permissions:supportedActions");
 		List groupDefaultActions = (List)request.getAttribute("liferay-ui:input-permissions:groupDefaultActions");
 		List guestDefaultActions = (List)request.getAttribute("liferay-ui:input-permissions:guestDefaultActions");
 		List guestUnsupportedActions = (List)request.getAttribute("liferay-ui:input-permissions:guestUnsupportedActions");
 
-		boolean submitted = (request.getParameter("groupPermissions") != null);
+		boolean submitted = (request.getParameter(groupPermissionsName) != null);
 
 		boolean inputPermissionsShowOptions = ParamUtil.getBoolean(request, "inputPermissionsShowOptions");
 
@@ -84,11 +96,14 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 							<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.ORGANIZATION_USER) %>">
 								<liferay-ui:message key="organization-members" />
 							</c:when>
+							<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.POWER_USER) %>">
+								<liferay-ui:message key="power-users" />
+							</c:when>
 							<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.SITE_MEMBER) %>">
 								<liferay-ui:message key="site-members" />
 							</c:when>
 							<c:otherwise>
-								<liferay-ui:message key="power-users" />
+								<liferay-ui:message key="user" />
 							</c:otherwise>
 						</c:choose>
 					</option>
@@ -168,11 +183,11 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 
 					if (roleName.equals(RoleConstants.GUEST)) {
 						checkboxFieldId = uniqueNamespace + "guestPermissions";
-						checkboxFieldName = namespace + "guestPermissions";
+						checkboxFieldName = namespace + guestPermissionsName;
 					}
 					else {
 						checkboxFieldId = uniqueNamespace + "groupPermissions";
-						checkboxFieldName = namespace + "groupPermissions";
+						checkboxFieldName = namespace + groupPermissionsName;
 					}
 
 					checkboxFieldId = checkboxFieldId + StringPool.UNDERLINE + action;
@@ -181,7 +196,7 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 					<td style="text-align: center;" <%= (action.equals(ActionKeys.VIEW)) ? "class=\"aui-helper-hidden-accessible\"" : "" %>>
 						<label class="hidden-label" for="<%= checkboxFieldId %>"><liferay-ui:message arguments="<%= new Object[] {ResourceActionsUtil.getAction(pageContext, action), role.getTitle(themeDisplay.getLocale())} %>" key="give-x-permission-to-users-with-role-x" /></label>
 
-						<input <%= checked ? "checked" : "" %> <%= disabled ? "disabled" : "" %> id="<%= checkboxFieldId %>" name="<%= checkboxFieldName %>" type="checkbox" value="<%= action %>" />
+						<input <%= checked ? "checked" : "" %> <%= disabled ? "disabled" : "" %> id="<%= checkboxFieldId %>" name="<%= checkboxFieldName %>" title='<%= LanguageUtil.format(pageContext, "give-x-permission-to-users-with-role-x", new Object[] {ResourceActionsUtil.getAction(pageContext, action), role.getTitle(themeDisplay.getLocale())}) %>' type="checkbox" value="<%= action %>" />
 					</td>
 
 				<%

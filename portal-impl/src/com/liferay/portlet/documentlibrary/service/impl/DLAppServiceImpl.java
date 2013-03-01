@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.Repository;
+import com.liferay.portal.kernel.repository.RepositoryException;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
@@ -30,12 +31,15 @@ import com.liferay.portal.kernel.search.Query;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackRegistryUtil;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.TempFileUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Lock;
 import com.liferay.portal.repository.liferayrepository.LiferayRepository;
@@ -48,6 +52,7 @@ import com.liferay.portlet.documentlibrary.service.base.DLAppServiceBaseImpl;
 import com.liferay.portlet.documentlibrary.service.permission.DLFileEntryPermission;
 import com.liferay.portlet.documentlibrary.service.permission.DLFileShortcutPermission;
 import com.liferay.portlet.documentlibrary.service.permission.DLFolderPermission;
+import com.liferay.portlet.documentlibrary.service.permission.DLPermission;
 import com.liferay.portlet.documentlibrary.util.DLAppUtil;
 import com.liferay.portlet.documentlibrary.util.DLProcessorRegistryUtil;
 import com.liferay.portlet.documentlibrary.util.comparator.RepositoryModelModifiedDateComparator;
@@ -193,8 +198,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 				description, changeLog, null, 0, serviceContext);
 		}
 
-		mimeType = DLAppUtil.getMimeType(
-			sourceFileName, mimeType, title, file, null);
+		mimeType = DLAppUtil.getMimeType(sourceFileName, mimeType, title, file);
 
 		Repository repository = getRepository(repositoryId);
 
@@ -253,8 +257,33 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			size = 0;
 		}
 
-		mimeType = DLAppUtil.getMimeType(
-			sourceFileName, mimeType, title, null, is);
+		if (Validator.isNull(mimeType) ||
+			mimeType.equals(ContentTypes.APPLICATION_OCTET_STREAM)) {
+
+			String extension = DLAppUtil.getExtension(title, sourceFileName);
+
+			if (size == 0) {
+				mimeType = MimeTypesUtil.getExtensionContentType(extension);
+			}
+			else {
+				File file = null;
+
+				try {
+					file = FileUtil.createTempFile(is);
+
+					return addFileEntry(
+						repositoryId, folderId, sourceFileName, mimeType, title,
+						description, changeLog, file, serviceContext);
+				}
+				catch (IOException ioe) {
+					throw new SystemException(
+						"Unable to write temporary file", ioe);
+				}
+				finally {
+					FileUtil.delete(file);
+				}
+			}
+		}
 
 		Repository repository = getRepository(repositoryId);
 
@@ -333,35 +362,35 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * @param  fileName the file's original name
 	 * @param  tempFolderName the temporary folder's name
 	 * @param  file Name the file's original name
+	 * @param  mimeType the file's MIME type
 	 * @return the file's name
-	 * @throws IOException if a problem occurred in the access or storage of the
-	 *         file
 	 * @throws PortalException if the file name was invalid
 	 * @throws SystemException if a system exception occurred
 	 * @see    com.liferay.portal.kernel.util.TempFileUtil
 	 */
-	public String addTempFileEntry(
+	public FileEntry addTempFileEntry(
 			long groupId, long folderId, String fileName, String tempFolderName,
-			File file)
-		throws IOException, PortalException, SystemException {
-
-		DLFolderPermission.check(
-			getPermissionChecker(), groupId, folderId, ActionKeys.ADD_DOCUMENT);
-
-		return TempFileUtil.addTempFile(
-			getUserId(), fileName, tempFolderName, file);
-	}
-
-	public String addTempFileEntry(
-			long groupId, long folderId, String fileName, String tempFolderName,
-			InputStream inputStream)
+			File file, String mimeType)
 		throws PortalException, SystemException {
 
 		DLFolderPermission.check(
 			getPermissionChecker(), groupId, folderId, ActionKeys.ADD_DOCUMENT);
 
 		return TempFileUtil.addTempFile(
-			getUserId(), fileName, tempFolderName, inputStream);
+			groupId, getUserId(), fileName, tempFolderName, file, mimeType);
+	}
+
+	public FileEntry addTempFileEntry(
+			long groupId, long folderId, String fileName, String tempFolderName,
+			InputStream inputStream, String mimeType)
+		throws PortalException, SystemException {
+
+		DLFolderPermission.check(
+			getPermissionChecker(), groupId, folderId, ActionKeys.ADD_DOCUMENT);
+
+		return TempFileUtil.addTempFile(
+			groupId, getUserId(), fileName, tempFolderName, inputStream,
+			mimeType);
 	}
 
 	/**
@@ -479,7 +508,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * </p>
 	 *
 	 * @param  fileEntryId the primary key of the file entry to check in
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @param  serviceContext the service context to be applied
 	 * @throws PortalException if the file entry could not be found
 	 * @throws SystemException if a system exception occurred
@@ -754,7 +783,8 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		DLFolderPermission.check(
 			getPermissionChecker(), groupId, folderId, ActionKeys.ADD_DOCUMENT);
 
-		TempFileUtil.deleteTempFile(getUserId(), fileName, tempFolderName);
+		TempFileUtil.deleteTempFile(
+			groupId, getUserId(), fileName, tempFolderName);
 	}
 
 	/**
@@ -967,7 +997,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 */
 	public int getFileEntriesAndFileShortcutsCount(
 			long repositoryId, long folderId, int status, String[] mimeTypes)
-			throws PortalException, SystemException {
+		throws PortalException, SystemException {
 
 		Repository repository = getRepository(repositoryId);
 
@@ -1061,7 +1091,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	/**
 	 * Returns the file entry with the UUID and group.
 	 *
-	 * @param  uuid the file entry's universally unique identifier
+	 * @param  uuid the file entry's UUID
 	 * @param  groupId the primary key of the file entry's group
 	 * @return the file entry with the UUID and group
 	 * @throws PortalException if the file entry could not be found
@@ -1076,19 +1106,23 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			return repository.getFileEntryByUuid(uuid);
 		}
 		catch (NoSuchFileEntryException nsfee) {
-			List<com.liferay.portal.model.Repository> repositories =
-				repositoryPersistence.findByGroupId(groupId);
+		}
+		catch (RepositoryException re) {
+			throw new NoSuchFileEntryException(re);
+		}
 
-			for (int i = 0; i < repositories.size(); i++) {
-				try {
-					long repositoryId = repositories.get(i).getRepositoryId();
+		List<com.liferay.portal.model.Repository> repositories =
+			repositoryPersistence.findByGroupId(groupId);
 
-					Repository repository = getRepository(repositoryId);
+		for (int i = 0; i < repositories.size(); i++) {
+			try {
+				long repositoryId = repositories.get(i).getRepositoryId();
 
-					return repository.getFileEntryByUuid(uuid);
-				}
-				catch (NoSuchFileEntryException nsfee2) {
-				}
+				Repository repository = getRepository(repositoryId);
+
+				return repository.getFileEntryByUuid(uuid);
+			}
+			catch (NoSuchFileEntryException nsfee) {
 			}
 		}
 
@@ -1964,7 +1998,8 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		DLFolderPermission.check(
 			getPermissionChecker(), groupId, folderId, ActionKeys.ADD_DOCUMENT);
 
-		return TempFileUtil.getTempFileEntryNames(getUserId(), tempFolderName);
+		return TempFileUtil.getTempFileEntryNames(
+			groupId, getUserId(), tempFolderName);
 	}
 
 	/**
@@ -2290,7 +2325,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * Refreshes the lock for the file entry. This method is primarily used by
 	 * WebDAV.
 	 *
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @param  companyId the primary key of the file entry's company
 	 * @param  expirationTime the time in milliseconds before the lock expires.
 	 *         If the value is <code>0</code>, the default expiration time will
@@ -2318,7 +2353,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * Refreshes the lock for the folder. This method is primarily used by
 	 * WebDAV.
 	 *
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @param  companyId the primary key of the file entry's company
 	 * @param  expirationTime the time in milliseconds before the lock expires.
 	 *         If the value is <code>0</code>, the default expiration time will
@@ -2467,6 +2502,45 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	}
 
 	/**
+	 * Subscribe the user to changes in documents of the file entry type. This
+	 * method is only supported by the Liferay repository.
+	 *
+	 * @param  groupId the primary key of the file entry type's group
+	 * @param  fileEntryTypeId the primary key of the file entry type
+	 * @throws PortalException if the user or group could not be found, or if
+	 *         subscribing was not permissible
+	 * @throws SystemException if a system exception occurred
+	 */
+	public void subscribeFileEntryType(long groupId, long fileEntryTypeId)
+		throws PortalException, SystemException {
+
+		DLPermission.check(
+			getPermissionChecker(), groupId, ActionKeys.SUBSCRIBE);
+
+		dlAppLocalService.subscribeFileEntryType(
+			getUserId(), groupId, fileEntryTypeId);
+	}
+
+	/**
+	 * Subscribe the user to document changes in the folder. This method is only
+	 * supported by the Liferay repository.
+	 *
+	 * @param  groupId the primary key of the folder's group
+	 * @param  folderId the primary key of the folder
+	 * @throws PortalException if the user or group could not be found, or if
+	 *         subscribing was not permissible
+	 * @throws SystemException if a system exception occurred
+	 */
+	public void subscribeFolder(long groupId, long folderId)
+		throws PortalException, SystemException {
+
+		DLPermission.check(
+			getPermissionChecker(), groupId, ActionKeys.SUBSCRIBE);
+
+		dlAppLocalService.subscribeFolder(getUserId(), groupId, folderId);
+	}
+
+	/**
 	 * @deprecated Use {@link #checkInFileEntry(long, boolean, String,
 	 *             ServiceContext)}.
 	 */
@@ -2491,7 +2565,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 *
 	 * @param  repositoryId the primary key of the repository
 	 * @param  folderId the primary key of the folder
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @throws PortalException if the repository or folder could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -2509,7 +2583,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * @param  repositoryId the primary key of the repository
 	 * @param  parentFolderId the primary key of the parent folder
 	 * @param  name the folder's name
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @throws PortalException if the repository or folder could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -2521,6 +2595,45 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		Repository repository = getRepository(repositoryId);
 
 		repository.unlockFolder(parentFolderId, name, lockUuid);
+	}
+
+	/**
+	 * Unsubscribe the user from changes in documents of the file entry type.
+	 * This method is only supported by the Liferay repository.
+	 *
+	 * @param  groupId the primary key of the file entry type's group
+	 * @param  fileEntryTypeId the primary key of the file entry type
+	 * @throws PortalException if the user or group could not be found, or if
+	 *         unsubscribing was not permissible
+	 * @throws SystemException if a system exception occurred
+	 */
+	public void unsubscribeFileEntryType(long groupId, long fileEntryTypeId)
+		throws PortalException, SystemException {
+
+		DLPermission.check(
+			getPermissionChecker(), groupId, ActionKeys.SUBSCRIBE);
+
+		dlAppLocalService.unsubscribeFileEntryType(
+			getUserId(), groupId, fileEntryTypeId);
+	}
+
+	/**
+	 * Unsubscribe the user from document changes in the folder. This method is
+	 * only supported by the Liferay repository.
+	 *
+	 * @param  groupId the primary key of the folder's group
+	 * @param  folderId the primary key of the folder
+	 * @throws PortalException if the user or group could not be found, or if
+	 *         unsubscribing was not permissible
+	 * @throws SystemException if a system exception occurred
+	 */
+	public void unsubscribeFolder(long groupId, long folderId)
+		throws PortalException, SystemException {
+
+		DLPermission.check(
+			getPermissionChecker(), groupId, ActionKeys.SUBSCRIBE);
+
+		dlAppLocalService.unsubscribeFolder(getUserId(), groupId, folderId);
 	}
 
 	/**
@@ -2631,8 +2744,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 				changeLog, majorVersion, null, 0, serviceContext);
 		}
 
-		mimeType = DLAppUtil.getMimeType(
-			sourceFileName, mimeType, title, file, null);
+		mimeType = DLAppUtil.getMimeType(sourceFileName, mimeType, title, file);
 
 		Repository repository = getRepository(0, fileEntryId, 0);
 
@@ -2692,8 +2804,34 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		mimeType = DLAppUtil.getMimeType(
-			sourceFileName, mimeType, title, null, is);
+		if (Validator.isNull(mimeType) ||
+			mimeType.equals(ContentTypes.APPLICATION_OCTET_STREAM)) {
+
+			String extension = DLAppUtil.getExtension(title, sourceFileName);
+
+			if (size == 0) {
+				mimeType = MimeTypesUtil.getExtensionContentType(extension);
+			}
+			else {
+				File file = null;
+
+				try {
+					file = FileUtil.createTempFile(is);
+
+					return updateFileEntry(
+						fileEntryId, sourceFileName, mimeType, title,
+						description, changeLog, majorVersion, file,
+						serviceContext);
+				}
+				catch (IOException ioe) {
+					throw new SystemException(
+						"Unable to write temporary file", ioe);
+				}
+				finally {
+					FileUtil.delete(file);
+				}
+			}
+		}
 
 		Repository repository = getRepository(0, fileEntryId, 0);
 
@@ -2852,7 +2990,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 *
 	 * @param  repositoryId the primary key for the repository
 	 * @param  fileEntryId the primary key for the file entry
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @return <code>true</code> if the file entry is checked out;
 	 *         <code>false</code> otherwise
 	 * @throws PortalException if the file entry could not be found
@@ -2882,7 +3020,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 *
 	 * @param  repositoryId the primary key for the repository
 	 * @param  folderId the primary key for the folder
-	 * @param  lockUuid the lock's universally unique identifier
+	 * @param  lockUuid the lock's UUID
 	 * @return <code>true</code> if the inheritable lock exists;
 	 *         <code>false</code> otherwise
 	 * @throws PortalException if the folder could not be found

@@ -57,7 +57,7 @@ import com.liferay.portlet.documentlibrary.NoSuchFolderException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
-import com.liferay.portlet.documentlibrary.util.DLUtil;
+import com.liferay.portlet.documentlibrary.util.DL;
 import com.liferay.portlet.expando.model.ExpandoBridge;
 
 import java.io.File;
@@ -74,6 +74,9 @@ import javax.servlet.http.HttpServletResponse;
  * @author Alexander Chow
  */
 public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
+
+	public static final String MS_OFFICE_2010_TEXT_XML_UTF8 =
+		"text/xml; charset=\"utf-8\"";
 
 	@Override
 	public int copyCollectionResource(
@@ -365,21 +368,15 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 				long groupId = webDavRequest.getGroupId();
 				long parentFolderId = getParentFolderId(companyId, pathArray);
 				String title = WebDAVUtil.getResourceName(pathArray);
+				String extension = FileUtil.getExtension(title);
 
-				String contentType = GetterUtil.get(
-					request.getHeader(HttpHeaders.CONTENT_TYPE),
-					ContentTypes.APPLICATION_OCTET_STREAM);
-
-				if (contentType.equals(ContentTypes.APPLICATION_OCTET_STREAM)) {
-					contentType = MimeTypesUtil.getContentType(
-						request.getInputStream(), title);
-				}
+				String contentType = getContentType(
+					request, null, title, extension);
 
 				String description = StringPool.BLANK;
 				String changeLog = StringPool.BLANK;
 
-				File file = FileUtil.createTempFile(
-					FileUtil.getExtension(title));
+				File file = FileUtil.createTempFile(extension);
 
 				file.createNewFile();
 
@@ -402,7 +399,7 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 				ServiceContext serviceContext = new ServiceContext();
 
 				serviceContext.setAttribute(
-					DLUtil.MANUAL_CHECK_IN_REQUIRED,
+					DL.MANUAL_CHECK_IN_REQUIRED,
 					webDavRequest.isManualCheckInRequired());
 
 				DLAppServiceUtil.checkOutFileEntry(
@@ -512,6 +509,8 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 			String description = folder.getDescription();
 
 			ServiceContext serviceContext = new ServiceContext();
+
+			serviceContext.setUserId(webDavRequest.getUserId());
 
 			int status = HttpServletResponse.SC_CREATED;
 
@@ -675,19 +674,14 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 				isAddGroupPermissions(groupId));
 			serviceContext.setAddGuestPermissions(true);
 
-			String contentType = GetterUtil.get(
-				request.getHeader(HttpHeaders.CONTENT_TYPE),
-				ContentTypes.APPLICATION_OCTET_STREAM);
-
 			String extension = FileUtil.getExtension(title);
 
 			file = FileUtil.createTempFile(extension);
 
 			FileUtil.write(file, request.getInputStream());
 
-			if (contentType.equals(ContentTypes.APPLICATION_OCTET_STREAM)) {
-				contentType = MimeTypesUtil.getContentType(file, title);
-			}
+			String contentType = getContentType(
+				request, file, title, extension);
 
 			try {
 				FileEntry fileEntry = DLAppServiceUtil.getFileEntry(
@@ -790,7 +784,7 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 
 				ServiceContext serviceContext = new ServiceContext();
 
-				serviceContext.setAttribute(DLUtil.WEBDAV_CHECK_IN_MODE, true);
+				serviceContext.setAttribute(DL.WEBDAV_CHECK_IN_MODE, true);
 
 				DLAppServiceUtil.checkInFileEntry(
 					fileEntry.getFileEntryId(), token, serviceContext);
@@ -859,6 +853,22 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 		}
 
 		return false;
+	}
+
+	protected String getContentType(
+		HttpServletRequest request, File file, String title, String extension) {
+
+		String contentType = GetterUtil.getString(
+			request.getHeader(HttpHeaders.CONTENT_TYPE),
+			ContentTypes.APPLICATION_OCTET_STREAM);
+
+		if (contentType.equals(ContentTypes.APPLICATION_OCTET_STREAM) ||
+			contentType.equals(MS_OFFICE_2010_TEXT_XML_UTF8)) {
+
+			contentType = MimeTypesUtil.getContentType(file, title);
+		}
+
+		return contentType;
 	}
 
 	protected List<Resource> getFileEntries(

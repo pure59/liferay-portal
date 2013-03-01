@@ -221,11 +221,10 @@ public class LoginUtil {
 		PortletURL portletURL = PortletURLFactoryUtil.create(
 			request, PortletKeys.LOGIN, plid, PortletRequest.RENDER_PHASE);
 
-		portletURL.setWindowState(WindowState.MAXIMIZED);
-		portletURL.setPortletMode(PortletMode.VIEW);
-
-		portletURL.setParameter("saveLastPath", "0");
+		portletURL.setParameter("saveLastPath", Boolean.FALSE.toString());
 		portletURL.setParameter("struts_action", "/login/login");
+		portletURL.setPortletMode(PortletMode.VIEW);
+		portletURL.setWindowState(WindowState.MAXIMIZED);
 
 		return portletURL;
 	}
@@ -499,7 +498,7 @@ public class LoginUtil {
 			company.getCompanyId(), toAddress, fromName, fromAddress, subject,
 			body, serviceContext);
 
-		SessionMessages.add(actionRequest, "request_processed", toAddress);
+		SessionMessages.add(actionRequest, "requestProcessed", toAddress);
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(LoginUtil.class);

@@ -20,18 +20,22 @@ import java.security.Permission;
 
 /**
  * @author Brian Wing Shun Chan
+ * @author Raymond Augé
  */
 public interface Checker {
 
 	public void afterPropertiesSet();
 
-	public void checkPermission(Permission permission);
+	public AuthorizationProperty generateAuthorizationProperty(
+		Object... arguments);
 
 	public ClassLoader getClassLoader();
 
 	public PACLPolicy getPACLPolicy();
 
 	public String getServletContextName();
+
+	public boolean implies(Permission permission);
 
 	public void setPACLPolicy(PACLPolicy paclPolicy);
 

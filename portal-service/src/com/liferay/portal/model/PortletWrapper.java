@@ -233,6 +233,16 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	}
 
 	public void setExpandoBridgeAttributes(
+		com.liferay.portal.model.BaseModel<?> baseModel) {
+		_portlet.setExpandoBridgeAttributes(baseModel);
+	}
+
+	public void setExpandoBridgeAttributes(
+		com.liferay.portlet.expando.model.ExpandoBridge expandoBridge) {
+		_portlet.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_portlet.setExpandoBridgeAttributes(serviceContext);
 	}
@@ -735,10 +745,10 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	}
 
 	/**
-	* Returns the name of the classes that represent indexers associated with
+	* Returns the names of the classes that represent indexers associated with
 	* the portlet.
 	*
-	* @return the name of the classes that represent indexers associated with
+	* @return the names of the classes that represent indexers associated with
 	the portlet
 	*/
 	public java.util.List<java.lang.String> getIndexerClasses() {
@@ -1313,23 +1323,21 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	}
 
 	/**
-	* Returns the name of the social activity interpreter class of the portlet.
+	* Returns the names of the classes that represent social activity interpreters associated with the portlet.
 	*
-	* @return the name of the social activity interpreter class of the portlet
+	* @return the names of the classes that represent social activity interpreters associated with the portlet
 	*/
-	public java.lang.String getSocialActivityInterpreterClass() {
-		return _portlet.getSocialActivityInterpreterClass();
+	public java.util.List<java.lang.String> getSocialActivityInterpreterClasses() {
+		return _portlet.getSocialActivityInterpreterClasses();
 	}
 
 	/**
-	* Returns the name of the social activity interpreter instance of the
-	* portlet.
+	* Returns the social activity interpreter instances of the portlet.
 	*
-	* @return the name of the social activity interpreter instance of the
-	portlet
+	* @return the social activity interpreter instances of the portlet
 	*/
-	public com.liferay.portlet.social.model.SocialActivityInterpreter getSocialActivityInterpreterInstance() {
-		return _portlet.getSocialActivityInterpreterInstance();
+	public java.util.List<com.liferay.portlet.social.model.SocialActivityInterpreter> getSocialActivityInterpreterInstances() {
+		return _portlet.getSocialActivityInterpreterInstances();
 	}
 
 	/**
@@ -1350,6 +1358,26 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	*/
 	public com.liferay.portlet.social.model.SocialRequestInterpreter getSocialRequestInterpreterInstance() {
 		return _portlet.getSocialRequestInterpreterInstance();
+	}
+
+	/**
+	* Returns the names of the classes that represent staged model data
+	* handlers associated with the portlet.
+	*
+	* @return the names of the classes that represent staged model data
+	handlers associated with the portlet
+	*/
+	public java.util.List<java.lang.String> getStagedModelDataHandlerClasses() {
+		return _portlet.getStagedModelDataHandlerClasses();
+	}
+
+	/**
+	* Returns the staged model data handler instances of the portlet.
+	*
+	* @return the staged model data handler instances of the portlet
+	*/
+	public java.util.List<com.liferay.portal.kernel.lar.StagedModelDataHandler<?>> getStagedModelDataHandlerInstances() {
+		return _portlet.getStagedModelDataHandlerInstances();
 	}
 
 	/**
@@ -1985,7 +2013,7 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	}
 
 	/**
-	* Sets the name of the classes that represent asset types associated with
+	* Sets the names of the classes that represent asset types associated with
 	* the portlet.
 	*
 	* @param assetRendererFactoryClasses the names of the classes that
@@ -1997,7 +2025,7 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	}
 
 	/**
-	* Sets the name of the classes that represent atom collection adapters
+	* Sets the names of the classes that represent atom collection adapters
 	* associated with the portlet.
 	*
 	* @param atomCollectionAdapterClasses the names of the classes that
@@ -2079,7 +2107,7 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	}
 
 	/**
-	* Sets the name of the classes that represent custom attribute displays
+	* Sets the names of the classes that represent custom attribute displays
 	* associated with the portlet.
 	*
 	* @param customAttributesDisplayClasses the names of the classes that
@@ -2289,10 +2317,10 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	}
 
 	/**
-	* Sets the name of the classes that represent indexers associated with the
+	* Sets the names of the classes that represent indexers associated with the
 	* portlet.
 	*
-	* @param indexerClasses the name of the classes that represent indexers
+	* @param indexerClasses the names of the classes that represent indexers
 	associated with the portlet
 	*/
 	public void setIndexerClasses(
@@ -2738,14 +2766,15 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	}
 
 	/**
-	* Sets the name of the social activity interpreter class of the portlet.
+	* Sets the names of the classes that represent social activity interpreters associated with
+	* the portlet.
 	*
-	* @param socialActivityInterpreterClass the name of the activity
-	interpreter class of the portlet
+	* @param socialActivityInterpreterClasses the names of the classes that
+	represent social activity interpreters associated with the portlet
 	*/
-	public void setSocialActivityInterpreterClass(
-		java.lang.String socialActivityInterpreterClass) {
-		_portlet.setSocialActivityInterpreterClass(socialActivityInterpreterClass);
+	public void setSocialActivityInterpreterClasses(
+		java.util.List<java.lang.String> socialActivityInterpreterClasses) {
+		_portlet.setSocialActivityInterpreterClasses(socialActivityInterpreterClasses);
 	}
 
 	/**
@@ -2757,6 +2786,18 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	public void setSocialRequestInterpreterClass(
 		java.lang.String socialRequestInterpreterClass) {
 		_portlet.setSocialRequestInterpreterClass(socialRequestInterpreterClass);
+	}
+
+	/**
+	* Sets the names of the classes that represent staged model data handlers
+	* associated with the portlet.
+	*
+	* @param stagedModelDataHandlerClasses the names of the classes that
+	represent staged model data handlers associated with the portlet
+	*/
+	public void setStagedModelDataHandlerClasses(
+		java.util.List<java.lang.String> stagedModelDataHandlerClasses) {
+		_portlet.setStagedModelDataHandlerClasses(stagedModelDataHandlerClasses);
 	}
 
 	/**
@@ -2821,7 +2862,7 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	}
 
 	/**
-	* Sets the name of the classes that represent trash handlers associated to
+	* Sets the names of the classes that represent trash handlers associated to
 	* the portlet.
 	*
 	* @param trashHandlerClasses the names of the classes that represent trash
@@ -2919,7 +2960,7 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	}
 
 	/**
-	* Sets the name of the classes that represent workflow handlers associated
+	* Sets the names of the classes that represent workflow handlers associated
 	* to the portlet.
 	*
 	* @param workflowHandlerClasses the names of the classes that represent

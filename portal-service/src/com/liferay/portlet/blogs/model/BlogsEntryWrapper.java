@@ -832,6 +832,16 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	}
 
 	public void setExpandoBridgeAttributes(
+		com.liferay.portal.model.BaseModel<?> baseModel) {
+		_blogsEntry.setExpandoBridgeAttributes(baseModel);
+	}
+
+	public void setExpandoBridgeAttributes(
+		com.liferay.portlet.expando.model.ExpandoBridge expandoBridge) {
+		_blogsEntry.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_blogsEntry.setExpandoBridgeAttributes(serviceContext);
 	}
@@ -874,6 +884,11 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	public void persist()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		_blogsEntry.persist();
+	}
+
+	public java.lang.String getEntryImageURL(
+		com.liferay.portal.theme.ThemeDisplay themeDisplay) {
+		return _blogsEntry.getEntryImageURL(themeDisplay);
 	}
 
 	public java.lang.String getSmallImageType()

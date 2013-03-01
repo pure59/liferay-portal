@@ -23,7 +23,7 @@ ResultRow row = (ResultRow)request.getAttribute(WebKeys.SEARCH_CONTAINER_RESULT_
 
 FileEntry attachmentsFileEntry = (FileEntry)row.getObject();
 
-WikiPage wikiPage = WikiPageAttachmentUtil.getPageByFileEntryId(attachmentsFileEntry.getFileEntryId());
+WikiPage wikiPage = WikiPageAttachmentsUtil.getPage(attachmentsFileEntry.getFileEntryId());
 %>
 
 <liferay-ui:icon-menu>

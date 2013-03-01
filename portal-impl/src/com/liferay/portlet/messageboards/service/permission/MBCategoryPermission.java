@@ -20,6 +20,7 @@ import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.portlet.messageboards.NoSuchCategoryException;
 import com.liferay.portlet.messageboards.model.MBCategory;
 import com.liferay.portlet.messageboards.model.MBCategoryConstants;
 import com.liferay.portlet.messageboards.service.MBBanLocalServiceUtil;
@@ -107,62 +108,69 @@ public class MBCategoryPermission {
 
 		long categoryId = category.getCategoryId();
 
-		if (actionId.equals(ActionKeys.VIEW)) {
-			while (categoryId !=
-					MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
+		if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
+			long originalCategoryId = categoryId;
 
-				category = MBCategoryLocalServiceUtil.getCategory(categoryId);
+			try {
+				while (categoryId !=
+							MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
 
-				categoryId = category.getParentCategoryId();
+					category = MBCategoryLocalServiceUtil.getCategory(
+						categoryId);
 
-				if (!permissionChecker.hasOwnerPermission(
-						category.getCompanyId(), MBCategory.class.getName(),
-						category.getCategoryId(), category.getUserId(),
-						actionId) &&
-					!permissionChecker.hasPermission(
-						category.getGroupId(), MBCategory.class.getName(),
-						category.getCategoryId(), actionId)) {
+					if (!permissionChecker.hasOwnerPermission(
+							category.getCompanyId(), MBCategory.class.getName(),
+							categoryId, category.getUserId(),
+							ActionKeys.VIEW) &&
+						!permissionChecker.hasPermission(
+							category.getGroupId(), MBCategory.class.getName(),
+							categoryId, ActionKeys.VIEW)) {
 
-					return false;
+						return false;
+					}
+
+					categoryId = category.getParentCategoryId();
 				}
-
-				if (!PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
-					break;
+			}
+			catch (NoSuchCategoryException nsce) {
+				if (!category.isInTrash()) {
+					throw nsce;
 				}
 			}
 
-			return true;
+			if (actionId.equals(ActionKeys.VIEW)) {
+				return true;
+			}
+
+			categoryId = originalCategoryId;
 		}
-		else {
+
+		try {
 			while (categoryId !=
-					MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
+						MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
 
 				category = MBCategoryLocalServiceUtil.getCategory(categoryId);
-
-				categoryId = category.getParentCategoryId();
 
 				if (permissionChecker.hasOwnerPermission(
 						category.getCompanyId(), MBCategory.class.getName(),
-						category.getCategoryId(), category.getUserId(),
-						actionId)) {
-
-					return true;
-				}
-
-				if (permissionChecker.hasPermission(
+						categoryId, category.getUserId(), actionId) ||
+					permissionChecker.hasPermission(
 						category.getGroupId(), MBCategory.class.getName(),
-						category.getCategoryId(), actionId)) {
+						categoryId, actionId)) {
 
 					return true;
 				}
 
-				if (actionId.equals(ActionKeys.VIEW)) {
-					break;
-				}
+				categoryId = category.getParentCategoryId();
 			}
-
-			return false;
 		}
+		catch (NoSuchCategoryException nsce) {
+			if (!category.isInTrash()) {
+				throw nsce;
+			}
+		}
+
+		return false;
 	}
 
 }

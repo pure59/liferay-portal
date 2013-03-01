@@ -15,6 +15,7 @@
 package com.liferay.portal.service;
 
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
 import com.liferay.portal.model.PermissionedModel;
 import com.liferay.portal.model.ResourceBlockPermissionsContainer;
@@ -50,10 +51,9 @@ public class ResourceBlockLocalServiceTest {
 	public void setUp() throws Exception {
 		Connection connection = DataAccess.getConnection();
 
-		PreparedStatement preparedStatement =
-			connection.prepareStatement(
-				"DELETE FROM ResourceBlock WHERE companyId = ? AND groupId " +
-					"= ? AND name = ?");
+		PreparedStatement preparedStatement = connection.prepareStatement(
+			"DELETE FROM ResourceBlock WHERE companyId = ? AND groupId " +
+				"= ? AND name = ?");
 
 		preparedStatement.setLong(1, _COMPANY_ID);
 		preparedStatement.setLong(2, _GROUP_ID);
@@ -191,9 +191,8 @@ public class ResourceBlockLocalServiceTest {
 
 		Connection connection = DataAccess.getConnection();
 
-		PreparedStatement preparedStatement =
-			connection.prepareStatement(
-				"SELECT * FROM ResourceBlock WHERE resourceBlockId = ?");
+		PreparedStatement preparedStatement = connection.prepareStatement(
+			"SELECT * FROM ResourceBlock WHERE resourceBlockId = ?");
 
 		preparedStatement.setLong(1, resourceBlockId);
 
@@ -210,10 +209,9 @@ public class ResourceBlockLocalServiceTest {
 
 		Connection connection = DataAccess.getConnection();
 
-		PreparedStatement preparedStatement =
-			connection.prepareStatement(
-				"SELECT * FROM ResourceBlock WHERE companyId = ? AND groupId " +
-					"= ? AND name = ?");
+		PreparedStatement preparedStatement = connection.prepareStatement(
+			"SELECT * FROM ResourceBlock WHERE companyId = ? AND groupId " +
+				"= ? AND name = ?");
 
 		preparedStatement.setLong(1, companyId);
 		preparedStatement.setLong(2, groupId);
@@ -232,10 +230,9 @@ public class ResourceBlockLocalServiceTest {
 
 		Connection connection = DataAccess.getConnection();
 
-		PreparedStatement preparedStatement =
-			connection.prepareStatement(
-				"SELECT referenceCount FROM ResourceBlock WHERE " +
-					"resourceBlockId = " + resourceBlockId);
+		PreparedStatement preparedStatement = connection.prepareStatement(
+			"SELECT referenceCount FROM ResourceBlock WHERE " +
+				"resourceBlockId = " + resourceBlockId);
 
 		ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -318,12 +315,20 @@ public class ResourceBlockLocalServiceTest {
 		}
 
 		public Void call() throws Exception {
-			ResourceBlockLocalServiceUtil.updateResourceBlockId(
-				_COMPANY_ID, _GROUP_ID, _MODEL_NAME, _permissionedModel,
-				_permissionsHash, _resourceBlockPermissionsContainer);
+			while (true) {
+				try {
+					ResourceBlockLocalServiceUtil.updateResourceBlockId(
+						_COMPANY_ID, _GROUP_ID, _MODEL_NAME, _permissionedModel,
+						_permissionsHash, _resourceBlockPermissionsContainer);
 
-			if (_semaphore != null) {
-				_semaphore.release();
+					if (_semaphore != null) {
+						_semaphore.release();
+					}
+
+					break;
+				}
+				catch (SystemException se) {
+				}
 			}
 
 			return null;

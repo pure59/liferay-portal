@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ObjectValuePair;
@@ -53,11 +54,14 @@ import java.util.List;
 
 /**
  * @author Eudaldo Alonso
+ * @author Alexander Chow
  */
+@DoPrivileged
 public class PortletFileRepositoryImpl implements PortletFileRepository {
 
 	public void addPortletFileEntries(
-			long groupId, long userId, String portletId, long folderId,
+			long groupId, long userId, String className, long classPK,
+			String portletId, long folderId,
 			List<ObjectValuePair<String, InputStream>> inputStreamOVPs)
 		throws PortalException, SystemException {
 
@@ -65,15 +69,34 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 			ObjectValuePair<String, InputStream> inputStreamOVP =
 				inputStreamOVPs.get(i);
 
-			addPortletFileEntry(
-				groupId, userId, portletId, folderId, inputStreamOVP.getValue(),
-				inputStreamOVP.getKey());
+			InputStream inputStream = inputStreamOVP.getValue();
+			String fileName = inputStreamOVP.getKey();
+
+			File file = null;
+
+			try {
+				file = FileUtil.createTempFile(inputStream);
+
+				String mimeType = MimeTypesUtil.getContentType(file, fileName);
+
+				addPortletFileEntry(
+					groupId, userId, className, classPK, portletId, folderId,
+					file, fileName, mimeType);
+			}
+			catch (IOException ioe) {
+				throw new SystemException(
+					"Unable to write temporary file", ioe);
+			}
+			finally {
+				FileUtil.delete(file);
+			}
 		}
 	}
 
 	public FileEntry addPortletFileEntry(
-			long groupId, long userId, String portletId, long folderId,
-			File file, String fileName)
+			long groupId, long userId, String className, long classPK,
+			String portletId, long folderId, File file, String fileName,
+			String mimeType)
 		throws PortalException, SystemException {
 
 		if (Validator.isNull(fileName)) {
@@ -85,10 +108,11 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 
-		long repositoryId = getPortletRepository(
+		long repositoryId = getPortletRepositoryId(
 			groupId, portletId, serviceContext);
 
-		String contentType = MimeTypesUtil.getContentType(file);
+		serviceContext.setAttribute("className", className);
+		serviceContext.setAttribute("classPK", String.valueOf(classPK));
 
 		boolean dlAppHelperEnabled = DLAppHelperThreadLocal.isEnabled();
 
@@ -96,7 +120,7 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 			DLAppHelperThreadLocal.setEnabled(false);
 
 			return DLAppLocalServiceUtil.addFileEntry(
-				userId, repositoryId, folderId, fileName, contentType, fileName,
+				userId, repositoryId, folderId, fileName, mimeType, fileName,
 				StringPool.BLANK, StringPool.BLANK, file, serviceContext);
 		}
 		finally {
@@ -105,20 +129,19 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 	}
 
 	public FileEntry addPortletFileEntry(
-			long groupId, long userId, String portletId, long folderId,
-			InputStream inputStream, String fileName)
+			long groupId, long userId, String className, long classPK,
+			String portletId, long folderId, InputStream inputStream,
+			String fileName, String mimeType)
 		throws PortalException, SystemException {
 
 		if (inputStream == null) {
 			return null;
 		}
 
-		long size = 0;
+		byte[] bytes = null;
 
 		try {
-			byte[] bytes = FileUtil.getBytes(inputStream, -1, false);
-
-			size = bytes.length;
+			bytes = FileUtil.getBytes(inputStream, -1, false);
 		}
 		catch (IOException ioe) {
 			return null;
@@ -129,11 +152,11 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 
-		long repositoryId = getPortletRepository(
+		long repositoryId = getPortletRepositoryId(
 			groupId, portletId, serviceContext);
 
-		String contentType = MimeTypesUtil.getContentType(
-			inputStream, fileName);
+		serviceContext.setAttribute("className", className);
+		serviceContext.setAttribute("classPK", String.valueOf(classPK));
 
 		boolean dlAppHelperEnabled = DLAppHelperThreadLocal.isEnabled();
 
@@ -141,9 +164,8 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 			DLAppHelperThreadLocal.setEnabled(false);
 
 			return DLAppLocalServiceUtil.addFileEntry(
-				userId, repositoryId, folderId, fileName, contentType, fileName,
-				StringPool.BLANK, StringPool.BLANK, inputStream, size,
-				serviceContext);
+				userId, repositoryId, folderId, fileName, mimeType, fileName,
+				StringPool.BLANK, StringPool.BLANK, bytes, serviceContext);
 		}
 		finally {
 			DLAppHelperThreadLocal.setEnabled(dlAppHelperEnabled);
@@ -213,6 +235,18 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 			groupId, folderId, fileName);
 
 		deletePortletFileEntry(fileEntry.getFileEntryId());
+	}
+
+	public void deletePortletRepository(long groupId, String portletId)
+		throws PortalException, SystemException {
+
+		Repository repository = RepositoryLocalServiceUtil.fetchRepository(
+			groupId, portletId);
+
+		if (repository != null) {
+			RepositoryLocalServiceUtil.deleteRepository(
+				repository.getRepositoryId());
+		}
 	}
 
 	public List<FileEntry> getPortletFileEntries(long groupId, long folderId)
@@ -295,7 +329,7 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 		return folder;
 	}
 
-	public long getPortletRepository(
+	public long getPortletRepositoryId(
 			long groupId, String portletId, ServiceContext serviceContext)
 		throws PortalException, SystemException {
 

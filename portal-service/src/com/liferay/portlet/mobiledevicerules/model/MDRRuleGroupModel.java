@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.GroupedModel;
+import com.liferay.portal.model.StagedModel;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -43,7 +44,8 @@ import java.util.Map;
  * @see com.liferay.portlet.mobiledevicerules.model.impl.MDRRuleGroupModelImpl
  * @generated
  */
-public interface MDRRuleGroupModel extends BaseModel<MDRRuleGroup>, GroupedModel {
+public interface MDRRuleGroupModel extends BaseModel<MDRRuleGroup>, GroupedModel,
+	StagedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -408,6 +410,10 @@ public interface MDRRuleGroupModel extends BaseModel<MDRRuleGroup>, GroupedModel
 	public void setPrimaryKeyObj(Serializable primaryKeyObj);
 
 	public ExpandoBridge getExpandoBridge();
+
+	public void setExpandoBridgeAttributes(BaseModel<?> baseModel);
+
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge);
 
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext);
 

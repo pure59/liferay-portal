@@ -16,19 +16,10 @@
 
 <%
 TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(entry.getClassName());
-
-TrashRenderer trashRenderer = trashHandler.getTrashRenderer(entry.getClassPK());
-
-String restorePath = trashRenderer.getRestorePath(renderRequest);
 %>
 
 <c:choose>
-	<c:when test="<%= Validator.isNotNull(restorePath) %>">
-		<liferay-util:include page="<%= restorePath %>" portletId="<%= trashRenderer.getPortletId() %>">
-			<liferay-util:param name="showHeader" value="<%= Boolean.FALSE.toString() %>" />
-		</liferay-util:include>
-	</c:when>
-	<c:otherwise>
+	<c:when test="<%= trashHandler.isRestorable(entry.getClassPK()) && !trashHandler.isInTrashContainer(entry.getClassPK()) %>">
 		<portlet:actionURL var="restoreEntryURL">
 			<portlet:param name="struts_action" value="/trash/edit_entry" />
 			<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.RESTORE %>" />
@@ -46,5 +37,27 @@ String restorePath = trashRenderer.getRestorePath(renderRequest);
 			onClick="<%= taglibOnClick %>"
 			url="javascript:;"
 		/>
-	</c:otherwise>
+	</c:when>
+	<c:when test="<%= !trashHandler.isRestorable(entry.getClassPK()) && trashHandler.isMovable() %>">
+		<portlet:renderURL var="moveURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+			<portlet:param name="struts_action" value="/trash/view_container_model" />
+			<portlet:param name="className" value="<%= entry.getClassName() %>" />
+			<portlet:param name="classPK" value="<%= String.valueOf(entry.getClassPK()) %>" />
+			<portlet:param name="containerModelClassName" value="<%= trashHandler.getContainerModelClassName() %>" />
+		</portlet:renderURL>
+
+		<%
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		data.put("uri", moveURL);
+		%>
+
+		<liferay-ui:icon
+			cssClass="trash-restore-link"
+			data="<%= data %>"
+			image="undo"
+			message="restore"
+			url="javascript:;"
+		/>
+	</c:when>
 </c:choose>

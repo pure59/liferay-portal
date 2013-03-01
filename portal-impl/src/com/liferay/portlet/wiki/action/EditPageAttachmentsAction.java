@@ -40,6 +40,7 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.documentlibrary.DuplicateFileException;
+import com.liferay.portlet.documentlibrary.FileExtensionException;
 import com.liferay.portlet.documentlibrary.FileNameException;
 import com.liferay.portlet.documentlibrary.FileSizeException;
 import com.liferay.portlet.documentlibrary.action.EditFileEntryAction;
@@ -47,7 +48,7 @@ import com.liferay.portlet.wiki.NoSuchNodeException;
 import com.liferay.portlet.wiki.NoSuchPageException;
 import com.liferay.portlet.wiki.model.WikiPage;
 import com.liferay.portlet.wiki.service.WikiPageServiceUtil;
-import com.liferay.portlet.wiki.util.WikiPageAttachmentUtil;
+import com.liferay.portlet.wiki.util.WikiPageAttachmentsUtil;
 
 import java.io.InputStream;
 
@@ -115,7 +116,7 @@ public class EditPageAttachmentsAction extends EditFileEntryAction {
 				emptyTrash(actionRequest);
 			}
 			else if (cmd.equals(Constants.MOVE_FROM_TRASH)) {
-				moveAttachmentFromTrash(actionRequest, actionResponse);
+				restoreAttachmentFromTrash(actionRequest, actionResponse);
 			}
 			else if (cmd.equals(Constants.MOVE_TO_TRASH)) {
 				deleteAttachment(
@@ -160,7 +161,9 @@ public class EditPageAttachmentsAction extends EditFileEntryAction {
 						ServletResponseConstants.SC_FILE_NAME_EXCEPTION);
 				}
 			}
-			else if (e instanceof FileSizeException) {
+			else if (e instanceof FileExtensionException ||
+					 e instanceof FileSizeException) {
+
 				SessionErrors.add(actionRequest, e.getClass());
 			}
 			else {
@@ -269,15 +272,18 @@ public class EditPageAttachmentsAction extends EditFileEntryAction {
 		long nodeId = ParamUtil.getLong(actionRequest, "nodeId");
 		String title = ParamUtil.getString(actionRequest, "title");
 
-		String tempFileName = TempFileUtil.getTempFileName(
-			themeDisplay.getUserId(), selectedFileName, _TEMP_FOLDER_NAME);
+		FileEntry tempFileEntry = null;
 
 		try {
-			InputStream inputStream = TempFileUtil.getTempFileAsStream(
-				tempFileName);
+			tempFileEntry = TempFileUtil.getTempFile(
+				themeDisplay.getScopeGroupId(), themeDisplay.getUserId(),
+				selectedFileName, _TEMP_FOLDER_NAME);
+
+			InputStream inputStream = tempFileEntry.getContentStream();
+			String mimeType = tempFileEntry.getMimeType();
 
 			WikiPageServiceUtil.addPageAttachment(
-				nodeId, title, selectedFileName, inputStream);
+				nodeId, title, selectedFileName, inputStream, mimeType);
 
 			validFileNames.add(selectedFileName);
 		}
@@ -291,7 +297,9 @@ public class EditPageAttachmentsAction extends EditFileEntryAction {
 			invalidFileNameKVPs.add(invalidFileNameKVP);
 		}
 		finally {
-			TempFileUtil.deleteTempFile(tempFileName);
+			if (tempFileEntry != null) {
+				TempFileUtil.deleteTempFile(tempFileEntry.getFileEntryId());
+			}
 		}
 	}
 
@@ -309,8 +317,11 @@ public class EditPageAttachmentsAction extends EditFileEntryAction {
 		try {
 			inputStream = uploadPortletRequest.getFileAsStream("file");
 
+			String mimeType = uploadPortletRequest.getContentType("file");
+
 			WikiPageServiceUtil.addTempPageAttachment(
-				nodeId, sourceFileName, _TEMP_FOLDER_NAME, inputStream);
+				nodeId, sourceFileName, _TEMP_FOLDER_NAME, inputStream,
+				mimeType);
 		}
 		finally {
 			StreamUtil.cleanUp(inputStream);
@@ -392,24 +403,6 @@ public class EditPageAttachmentsAction extends EditFileEntryAction {
 		WikiPageServiceUtil.deleteTrashPageAttachments(nodeId, title);
 	}
 
-	protected void moveAttachmentFromTrash(
-			ActionRequest actionRequest, ActionResponse actionResponse)
-		throws Exception {
-
-		long nodeId = ParamUtil.getLong(actionRequest, "nodeId");
-		String title = ParamUtil.getString(actionRequest, "title");
-		String attachment = ParamUtil.getString(actionRequest, "fileName");
-
-		JSONObject jsonObject =
-			com.liferay.portlet.trash.action.ActionUtil.checkEntry(
-				actionRequest);
-
-		writeJSON(actionRequest, actionResponse, jsonObject);
-
-		WikiPageServiceUtil.restorePageAttachmentFromTrash(
-			nodeId, title, attachment);
-	}
-
 	protected void restoreAttachment(ActionRequest actionRequest)
 		throws Exception {
 
@@ -420,13 +413,30 @@ public class EditPageAttachmentsAction extends EditFileEntryAction {
 			FileEntry fileEntry = PortletFileRepositoryUtil.getPortletFileEntry(
 				restoreEntryId);
 
-			WikiPage wikiPage = WikiPageAttachmentUtil.getPageByFileEntryId(
+			WikiPage page = WikiPageAttachmentsUtil.getPage(
 				fileEntry.getFileEntryId());
 
 			WikiPageServiceUtil.restorePageAttachmentFromTrash(
-				wikiPage.getNodeId(), wikiPage.getTitle(),
-				fileEntry.getTitle());
+				page.getNodeId(), page.getTitle(), fileEntry.getTitle());
 		}
+	}
+
+	protected void restoreAttachmentFromTrash(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws Exception {
+
+		long nodeId = ParamUtil.getLong(actionRequest, "nodeId");
+		String title = ParamUtil.getString(actionRequest, "title");
+		String fileName = ParamUtil.getString(actionRequest, "fileName");
+
+		JSONObject jsonObject =
+			com.liferay.portlet.trash.action.ActionUtil.checkEntry(
+				actionRequest);
+
+		writeJSON(actionRequest, actionResponse, jsonObject);
+
+		WikiPageServiceUtil.restorePageAttachmentFromTrash(
+			nodeId, title, fileName);
 	}
 
 	private static final String _TEMP_FOLDER_NAME =

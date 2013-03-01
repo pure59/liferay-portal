@@ -124,12 +124,16 @@ public class CreoleWikiEngine implements WikiEngine {
 		catch (RecognitionException re) {
 			if (_log.isDebugEnabled()) {
 				_log.debug("Unable to parse:\n" + creoleCode, re);
+
+				for (String error : creole10Parser.getErrors()) {
+					_log.debug(error);
+				}
 			}
 		}
 
 		return creole10Parser.getWikiPageNode();
 	}
 
-	private Log _log = LogFactoryUtil.getLog(CreoleWikiEngine.class);
+	private static Log _log = LogFactoryUtil.getLog(CreoleWikiEngine.class);
 
 }

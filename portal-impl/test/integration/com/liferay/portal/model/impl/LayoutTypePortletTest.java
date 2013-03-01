@@ -27,7 +27,10 @@ import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.test.TransactionalCallbackAwareExecutionTestListener;
+import com.liferay.portal.util.GroupTestUtil;
+import com.liferay.portal.util.LayoutTestUtil;
 import com.liferay.portal.util.PortletKeys;
+import com.liferay.portal.util.UserTestUtil;
 
 import java.util.List;
 
@@ -176,9 +179,8 @@ public class LayoutTypePortletTest {
 
 		Layout layout = layoutTypePortlet.getLayout();
 
-		User user = ServiceTestUtil.addUser(
-			ServiceTestUtil.randomString(), false,
-			new long[] {layout.getGroupId()});
+		User user = UserTestUtil.addUser(
+			ServiceTestUtil.randomString(), layout.getGroupId());
 
 		String portletId = PortletKeys.JOURNAL_CONTENT;
 
@@ -206,9 +208,8 @@ public class LayoutTypePortletTest {
 
 		Layout layout = layoutTypePortlet.getLayout();
 
-		User user = ServiceTestUtil.addUser(
-			ServiceTestUtil.randomString(), false,
-			new long[] {layout.getGroupId()});
+		User user = UserTestUtil.addUser(
+			ServiceTestUtil.randomString(), layout.getGroupId());
 
 		String portletId = PortletKeys.JOURNAL_CONTENT;
 
@@ -242,9 +243,8 @@ public class LayoutTypePortletTest {
 
 		Layout layout = layoutTypePortlet.getLayout();
 
-		User user = ServiceTestUtil.addUser(
-			ServiceTestUtil.randomString(), false,
-			new long[] {layout.getGroupId()});
+		User user = UserTestUtil.addUser(
+			ServiceTestUtil.randomString(), layout.getGroupId());
 
 		String portletId = ServiceTestUtil.randomString();
 
@@ -262,9 +262,8 @@ public class LayoutTypePortletTest {
 
 		Layout layout = layoutTypePortlet.getLayout();
 
-		User user = ServiceTestUtil.addUser(
-			ServiceTestUtil.randomString(), false,
-			new long[] {layout.getGroupId()});
+		User user = UserTestUtil.addUser(
+			ServiceTestUtil.randomString(), layout.getGroupId());
 
 		String portletId = ServiceTestUtil.randomString();
 
@@ -280,9 +279,8 @@ public class LayoutTypePortletTest {
 
 		Layout layout = layoutTypePortlet.getLayout();
 
-		User user = ServiceTestUtil.addUser(
-			ServiceTestUtil.randomString(), false,
-			new long[] {layout.getGroupId()});
+		User user = UserTestUtil.addUser(
+			ServiceTestUtil.randomString(), layout.getGroupId());
 
 		String portletId = PortletKeys.JOURNAL_CONTENT;
 
@@ -302,9 +300,9 @@ public class LayoutTypePortletTest {
 	}
 
 	protected LayoutTypePortlet getLayoutTypePortlet() throws Exception {
-		Group group = ServiceTestUtil.addGroup();
+		Group group = GroupTestUtil.addGroup();
 
-		Layout layout = ServiceTestUtil.addLayout(
+		Layout layout = LayoutTestUtil.addLayout(
 			group.getGroupId(), ServiceTestUtil.randomString(), false);
 
 		return (LayoutTypePortlet)layout.getLayoutType();

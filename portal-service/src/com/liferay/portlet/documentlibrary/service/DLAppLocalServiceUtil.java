@@ -209,12 +209,14 @@ public class DLAppLocalServiceUtil {
 	* @param fileEntryId the primary key of the file entry
 	* @param serviceContext the service context to be applied
 	* @return the file rank
+	* @throws PortalException if a portal exception occurred
 	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.documentlibrary.model.DLFileRank addFileRank(
 		long repositoryId, long companyId, long userId, long fileEntryId,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
 		return getService()
 				   .addFileRank(repositoryId, companyId, userId, fileEntryId,
 			serviceContext);
@@ -417,7 +419,7 @@ public class DLAppLocalServiceUtil {
 	/**
 	* Returns the file entry with the UUID and group.
 	*
-	* @param uuid the file entry's universally unique identifier
+	* @param uuid the file entry's UUID
 	* @param groupId the primary key of the file entry's group
 	* @return the file entry with the UUID and group
 	* @throws PortalException if the file entry could not be found
@@ -574,6 +576,73 @@ public class DLAppLocalServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		getService().restoreFileEntryFromTrash(userId, fileEntryId);
+	}
+
+	/**
+	* Subscribe the user to changes in documents of the file entry type. This
+	* method is only supported by the Liferay repository.
+	*
+	* @param userId the primary key of the user
+	* @param groupId the primary key of the file entry type's group
+	* @param fileEntryTypeId the primary key of the file entry type
+	* @throws PortalException if the user or group could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static void subscribeFileEntryType(long userId, long groupId,
+		long fileEntryTypeId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().subscribeFileEntryType(userId, groupId, fileEntryTypeId);
+	}
+
+	/**
+	* Subscribe the user to document changes in the folder. This method is only
+	* supported by the Liferay repository.
+	*
+	* @param userId the primary key of the user
+	* @param groupId the primary key of the folder's group
+	* @param folderId the primary key of the folder
+	* @throws PortalException if the user or group could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static void subscribeFolder(long userId, long groupId, long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().subscribeFolder(userId, groupId, folderId);
+	}
+
+	/**
+	* Unsubscribe the user from changes in documents of the file entry type.
+	* This method is only supported by the Liferay repository.
+	*
+	* @param userId the primary key of the user
+	* @param groupId the primary key of the file entry type's group
+	* @param fileEntryTypeId the primary key of the file entry type
+	* @throws PortalException if the user or group could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static void unsubscribeFileEntryType(long userId, long groupId,
+		long fileEntryTypeId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().unsubscribeFileEntryType(userId, groupId, fileEntryTypeId);
+	}
+
+	/**
+	* Unsubscribe the user from document changes in the folder. This method is
+	* only supported by the Liferay repository.
+	*
+	* @param userId the primary key of the user
+	* @param groupId the primary key of the folder's group
+	* @param folderId the primary key of the folder
+	* @throws PortalException if the user or group could not be found
+	* @throws SystemException if a system exception occurred
+	*/
+	public static void unsubscribeFolder(long userId, long groupId,
+		long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().unsubscribeFolder(userId, groupId, folderId);
 	}
 
 	/**
@@ -763,12 +832,14 @@ public class DLAppLocalServiceUtil {
 	* @param fileEntryId the primary key of the file rank's file entry
 	* @param serviceContext the service context to be applied
 	* @return the file rank
+	* @throws PortalException if a portal exception occurred
 	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.documentlibrary.model.DLFileRank updateFileRank(
 		long repositoryId, long companyId, long userId, long fileEntryId,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
 		return getService()
 				   .updateFileRank(repositoryId, companyId, userId,
 			fileEntryId, serviceContext);

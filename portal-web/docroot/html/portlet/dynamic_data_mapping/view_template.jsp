@@ -234,6 +234,22 @@ if (!portletName.equals(PortletKeys.PORTLET_DISPLAY_TEMPLATES)) {
 </aui:form>
 
 <aui:script>
+	function <portlet:namespace />copyTemplate(uri) {
+		Liferay.Util.openWindow(
+			{
+				dialog: {
+					align: Liferay.Util.Window.ALIGN_CENTER,
+					constrain: true,
+					width: 600
+				},
+				id: '<portlet:namespace />copyTemplate',
+				refreshWindow: window,
+				title: '<%= UnicodeLanguageUtil.get(pageContext, "copy-template") %>',
+				uri: uri
+			}
+		);
+	}
+
 	Liferay.provide(
 		window,
 		'<portlet:namespace />deleteTemplates',
@@ -254,7 +270,7 @@ if (!portletName.equals(PortletKeys.PORTLET_DISPLAY_TEMPLATES)) {
 	var buttons = A.all('.delete-templates-button');
 
 	if (buttons.size()) {
-		var toggleDisabled = A.bind(Liferay.Util.toggleDisabled, Liferay.Util, ':button');
+		var toggleDisabled = A.bind('toggleDisabled', Liferay.Util, ':button');
 
 		var resultsGrid = A.one('.results-grid');
 

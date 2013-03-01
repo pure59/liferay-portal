@@ -96,6 +96,11 @@ public class PortalServiceUtil {
 			.testAddClassNameAndTestTransactionPortletBar_Success(transactionPortletBarText);
 	}
 
+	public static void testAutoSyncHibernateSessionStateOnTxCreation()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		getService().testAutoSyncHibernateSessionStateOnTxCreation();
+	}
+
 	public static void testCounterIncrement_Rollback()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		getService().testCounterIncrement_Rollback();

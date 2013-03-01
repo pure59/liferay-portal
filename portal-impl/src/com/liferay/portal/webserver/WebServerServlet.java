@@ -30,8 +30,8 @@ import com.liferay.portal.kernel.servlet.PortalSessionThreadLocal;
 import com.liferay.portal.kernel.servlet.Range;
 import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.template.Template;
+import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.template.TemplateContextType;
-import com.liferay.portal.kernel.template.TemplateManager;
 import com.liferay.portal.kernel.template.TemplateManagerUtil;
 import com.liferay.portal.kernel.template.TemplateResource;
 import com.liferay.portal.kernel.template.URLTemplateResource;
@@ -61,7 +61,6 @@ import com.liferay.portal.repository.liferayrepository.model.LiferayFileEntry;
 import com.liferay.portal.repository.liferayrepository.model.LiferayFileVersion;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
-import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
@@ -70,6 +69,7 @@ import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.ImageLocalServiceUtil;
 import com.liferay.portal.service.ImageServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.service.permission.PortletPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.Portal;
 import com.liferay.portal.util.PortalUtil;
@@ -337,19 +337,19 @@ public class WebServerServlet extends HttpServlet {
 		if (path.startsWith("/company_logo") ||
 			path.startsWith("/layout_set_logo") || path.startsWith("/logo")) {
 
-			return ImageLocalServiceUtil.getDefaultCompanyLogo();
+			return ImageToolUtil.getDefaultCompanyLogo();
 		}
 		else if (path.startsWith("/organization_logo")) {
-			return ImageLocalServiceUtil.getDefaultOrganizationLogo();
+			return ImageToolUtil.getDefaultOrganizationLogo();
 		}
 		else if (path.startsWith("/user_female_portrait")) {
-			return ImageLocalServiceUtil.getDefaultUserFemalePortrait();
+			return ImageToolUtil.getDefaultUserFemalePortrait();
 		}
 		else if (path.startsWith("/user_male_portrait")) {
-			return ImageLocalServiceUtil.getDefaultUserMalePortrait();
+			return ImageToolUtil.getDefaultUserMalePortrait();
 		}
 		else if (path.startsWith("/user_portrait")) {
-			return ImageLocalServiceUtil.getDefaultUserMalePortrait();
+			return ImageToolUtil.getDefaultUserMalePortrait();
 		}
 		else {
 			return null;
@@ -638,10 +638,10 @@ public class WebServerServlet extends HttpServlet {
 			if (imageId == dlFileEntry.getSmallImageId()) {
 				queryString = "&imageThumbnail=1";
 			}
-			else if (imageId == dlFileEntry.getSmallImageId()) {
+			else if (imageId == dlFileEntry.getCustom1ImageId()) {
 				queryString = "&imageThumbnail=2";
 			}
-			else if (imageId == dlFileEntry.getSmallImageId()) {
+			else if (imageId == dlFileEntry.getCustom2ImageId()) {
 				queryString = "&imageThumbnail=3";
 			}
 
@@ -693,10 +693,11 @@ public class WebServerServlet extends HttpServlet {
 			String[] pathArray)
 		throws Exception {
 
-		if (pathArray.length == 4) {
+		if (pathArray.length == 5) {
 			String className = GetterUtil.getString(pathArray[1]);
 			long classPK = GetterUtil.getLong(pathArray[2]);
 			String fieldName = GetterUtil.getString(pathArray[3]);
+			int valueIndex = GetterUtil.getInteger(pathArray[4]);
 
 			Field field = null;
 
@@ -717,7 +718,7 @@ public class WebServerServlet extends HttpServlet {
 				field = fields.get(fieldName);
 			}
 
-			DDMUtil.sendFieldFile(request, response, field);
+			DDMUtil.sendFieldFile(request, response, field, valueIndex);
 		}
 	}
 
@@ -842,7 +843,7 @@ public class WebServerServlet extends HttpServlet {
 				(LiferayFileVersion)fileVersion;
 
 			if (liferayFileVersion.isInTrash() ||
-				liferayFileVersion.isInTrashFolder()) {
+				liferayFileVersion.isInTrashContainer()) {
 
 				int status = ParamUtil.getInteger(
 					request, "status", WorkflowConstants.STATUS_APPROVED);
@@ -854,10 +855,9 @@ public class WebServerServlet extends HttpServlet {
 				PermissionChecker permissionChecker =
 					PermissionThreadLocal.getPermissionChecker();
 
-				if (!permissionChecker.hasPermission(
-						fileEntry.getGroupId(), PortletKeys.TRASH,
-						PortletKeys.TRASH,
-						ActionKeys.ACCESS_IN_CONTROL_PANEL)) {
+				if (!PortletPermissionUtil.hasControlPanelAccessPermission(
+						permissionChecker, fileEntry.getGroupId(),
+						PortletKeys.TRASH)) {
 
 					throw new PrincipalException();
 				}
@@ -869,7 +869,7 @@ public class WebServerServlet extends HttpServlet {
 
 			InputStream inputStream = fileVersion.getContentStream(true);
 
-			Image image = ImageLocalServiceUtil.getImage(inputStream);
+			Image image = ImageToolUtil.getImage(inputStream);
 
 			writeImage(image, request, response);
 
@@ -1137,7 +1137,7 @@ public class WebServerServlet extends HttpServlet {
 		throws Exception {
 
 		Template template = TemplateManagerUtil.getTemplate(
-			TemplateManager.FREEMARKER, _templateResource,
+			TemplateConstants.LANG_TYPE_FTL, _templateResource,
 			TemplateContextType.RESTRICTED);
 
 		template.put("dateFormat", _dateFormat);
@@ -1172,7 +1172,7 @@ public class WebServerServlet extends HttpServlet {
 		String type = image.getType();
 
 		if (!type.equals(ImageConstants.TYPE_NOT_AVAILABLE)) {
-			contentType = MimeTypesUtil.getContentType("A." + type);
+			contentType = MimeTypesUtil.getExtensionContentType(type);
 
 			response.setContentType(contentType);
 		}

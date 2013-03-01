@@ -95,6 +95,15 @@ public class MBMessageServiceWrapper implements MBMessageService,
 	}
 
 	public com.liferay.portlet.messageboards.model.MBMessage addMessage(
+		long categoryId, java.lang.String subject, java.lang.String body,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _mbMessageService.addMessage(categoryId, subject, body,
+			serviceContext);
+	}
+
+	public com.liferay.portlet.messageboards.model.MBMessage addMessage(
 		long parentMessageId, java.lang.String subject, java.lang.String body,
 		java.lang.String format,
 		java.util.List<com.liferay.portal.kernel.util.ObjectValuePair<java.lang.String, java.io.InputStream>> inputStreamOVPs,
@@ -239,6 +248,13 @@ public class MBMessageServiceWrapper implements MBMessageService,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _mbMessageService.getThreadMessagesRSS(threadId, status, max,
 			type, version, displayStyle, feedURL, entryURL, themeDisplay);
+	}
+
+	public void restoreMessageAttachmentFromTrash(long messageId,
+		java.lang.String fileName)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		_mbMessageService.restoreMessageAttachmentFromTrash(messageId, fileName);
 	}
 
 	public void subscribeMessage(long messageId)

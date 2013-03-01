@@ -176,7 +176,14 @@ int sortColumnIndex = -1;
 					</c:if>
 
 						<%
-						String headerNameValue = LanguageUtil.get(pageContext, headerName);
+						String headerNameValue = null;
+
+						if ((rowChecker == null) || (i > 0)) {
+							headerNameValue = LanguageUtil.get(pageContext, HtmlUtil.escape(headerName));
+						}
+						else {
+							headerNameValue = headerName;
+						}
 						%>
 
 						<c:choose>
@@ -231,7 +238,7 @@ int sortColumnIndex = -1;
 			String rowClassName = _ROW_CLASS_NAME_ALTERNATE + " results-row alt";
 			String rowClassHoverName = _ROW_CLASS_NAME_ALTERNATE_HOVER + " results-row alt " + _CLASS_NAME_HOVER;
 
-			primaryKeys.add(row.getPrimaryKey());
+			primaryKeys.add(HtmlUtil.escape(row.getPrimaryKey()));
 
 			if (MathUtil.isEven(i)) {
 				rowClassName = _ROW_CLASS_NAME_BODY + " results-row";

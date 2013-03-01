@@ -20,11 +20,13 @@ import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.ClassedModel;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceTestUtil;
-import com.liferay.portal.test.EnvironmentExecutionTestListener;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
-import com.liferay.portal.test.TransactionalExecutionTestListener;
+import com.liferay.portal.test.MainServletExecutionTestListener;
+import com.liferay.portal.test.Sync;
+import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
 import com.liferay.portal.util.TestPropsValues;
 import com.liferay.portlet.trash.BaseTrashHandlerTestCase;
+import com.liferay.portlet.trash.util.TrashUtil;
 import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.service.WikiNodeLocalServiceUtil;
 
@@ -36,10 +38,11 @@ import org.junit.runner.RunWith;
  */
 @ExecutionTestListeners(
 	listeners = {
-		EnvironmentExecutionTestListener.class,
-		TransactionalExecutionTestListener.class
+		MainServletExecutionTestListener.class,
+		SynchronousDestinationExecutionTestListener.class
 	})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
+@Sync
 public class WikiNodeTrashHandlerTest extends BaseTrashHandlerTestCase {
 
 	@Override
@@ -54,6 +57,11 @@ public class WikiNodeTrashHandlerTest extends BaseTrashHandlerTestCase {
 
 	@Override
 	public void testTrashParentAndDeleteParent() throws Exception {
+		Assert.assertTrue("This test does not apply", true);
+	}
+
+	@Override
+	public void testTrashParentAndDeleteTrashEntries() throws Exception {
 		Assert.assertTrue("This test does not apply", true);
 	}
 
@@ -73,7 +81,7 @@ public class WikiNodeTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Override
-	protected BaseModel<?> addBaseModel(
+	protected BaseModel<?> addBaseModelWithWorkflow(
 			BaseModel<?> parentBaseModel, boolean approved,
 			ServiceContext serviceContext)
 		throws Exception {
@@ -82,9 +90,14 @@ public class WikiNodeTrashHandlerTest extends BaseTrashHandlerTestCase {
 
 		serviceContext.setWorkflowAction(WorkflowConstants.ACTION_PUBLISH);
 
+		String title = getSearchKeywords();
+
+		title += ServiceTestUtil.randomString(
+			_NODE_NAME_MAX_LENGTH - title.length());
+
 		return WikiNodeLocalServiceUtil.addNode(
-			TestPropsValues.getUserId(), getSearchKeywords(),
-			ServiceTestUtil.randomString(), serviceContext);
+			TestPropsValues.getUserId(), title, ServiceTestUtil.randomString(),
+			serviceContext);
 	}
 
 	@Override
@@ -99,13 +112,13 @@ public class WikiNodeTrashHandlerTest extends BaseTrashHandlerTestCase {
 
 	@Override
 	protected String getBaseModelName(ClassedModel classedModel) {
-		WikiNode wikiNode = (WikiNode)classedModel;
+		WikiNode node = (WikiNode)classedModel;
 
-		return wikiNode.getName();
+		return node.getName();
 	}
 
 	@Override
-	protected int getBaseModelsNotInTrashCount(BaseModel<?> parentBaseModel)
+	protected int getNotInTrashBaseModelsCount(BaseModel<?> parentBaseModel)
 		throws Exception {
 
 		return WikiNodeLocalServiceUtil.getNodesCount(
@@ -116,6 +129,13 @@ public class WikiNodeTrashHandlerTest extends BaseTrashHandlerTestCase {
 	@Override
 	protected String getSearchKeywords() {
 		return "Title";
+	}
+
+	@Override
+	protected String getUniqueTitle(BaseModel<?> baseModel) {
+		WikiNode node = (WikiNode)baseModel;
+
+		return TrashUtil.getOriginalTitle(node.getName());
 	}
 
 	@Override
@@ -133,5 +153,7 @@ public class WikiNodeTrashHandlerTest extends BaseTrashHandlerTestCase {
 		WikiNodeLocalServiceUtil.moveNodeToTrash(
 			TestPropsValues.getUserId(), primaryKey);
 	}
+
+	private static final int _NODE_NAME_MAX_LENGTH = 75;
 
 }

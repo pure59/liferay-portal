@@ -29,22 +29,26 @@ import java.util.List;
 
 /**
  * @author Eudaldo Alonso
+ * @author Alexander Chow
  */
 public interface PortletFileRepository {
 
 	public void addPortletFileEntries(
-			long groupId, long userId, String portletId, long folderId,
+			long groupId, long userId, String className, long classPK,
+			String portletId, long folderId,
 			List<ObjectValuePair<String, InputStream>> inputStreamOVPs)
 		throws PortalException, SystemException;
 
 	public FileEntry addPortletFileEntry(
-			long groupId, long userId, String portletId, long folderId,
-			File file, String fileName)
+			long groupId, long userId, String className, long classPK,
+			String portletId, long folderId, File file, String fileName,
+			String mimeType)
 		throws PortalException, SystemException;
 
 	public FileEntry addPortletFileEntry(
-			long groupId, long userId, String portletId, long folderId,
-			InputStream inputStream, String fileName)
+			long groupId, long userId, String className, long classPK,
+			String portletId, long folderId, InputStream inputStream,
+			String fileName, String mimeType)
 		throws PortalException, SystemException;
 
 	public void deleteFolder(long folderId)
@@ -62,6 +66,9 @@ public interface PortletFileRepository {
 
 	public void deletePortletFileEntry(
 			long groupId, long folderId, String fileName)
+		throws PortalException, SystemException;
+
+	public void deletePortletRepository(long groupId, String portletId)
 		throws PortalException, SystemException;
 
 	public List<FileEntry> getPortletFileEntries(long groupId, long folderId)
@@ -98,7 +105,7 @@ public interface PortletFileRepository {
 			String folderName, ServiceContext serviceContext)
 		throws PortalException, SystemException;
 
-	public long getPortletRepository(
+	public long getPortletRepositoryId(
 			long groupId, String portletId, ServiceContext serviceContext)
 		throws PortalException, SystemException;
 

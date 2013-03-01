@@ -213,6 +213,11 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet>
+		<servlet-name>Module Framework Servlet</servlet-name>
+		<servlet-class>com.liferay.portal.module.framework.ModuleFrameworkServletAdapter</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet>
 		<servlet-name>Netvibes Servlet</servlet-name>
 		<servlet-class>com.liferay.portal.servlet.NetvibesServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
@@ -324,6 +329,10 @@
 	<servlet-mapping>
 		<servlet-name>Main Servlet</servlet-name>
 		<url-pattern>/c/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>Module Framework Servlet</servlet-name>
+		<url-pattern>/o/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>Combo Servlet</servlet-name>
@@ -564,6 +573,14 @@
 	<servlet-mapping>
 		<servlet-name>I18n Servlet</servlet-name>
 		<url-pattern>/lo_LA/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>I18n Servlet</servlet-name>
+		<url-pattern>/lt/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>I18n Servlet</servlet-name>
+		<url-pattern>/lt_LT/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>I18n Servlet</servlet-name>
@@ -842,6 +859,10 @@
 			<taglib-location>/WEB-INF/tld/aui.tld</taglib-location>
 		</taglib>
 		<taglib>
+			<taglib-uri>http://liferay.com/tld/ddm</taglib-uri>
+			<taglib-location>/WEB-INF/tld/liferay-ddm.tld</taglib-location>
+		</taglib>
+		<taglib>
 			<taglib-uri>http://liferay.com/tld/portlet</taglib-uri>
 			<taglib-location>/WEB-INF/tld/liferay-portlet-ext.tld</taglib-location>
 		</taglib>
@@ -954,6 +975,8 @@
 			<url-pattern>/ko_KR/c/portal/protected</url-pattern>
 			<url-pattern>/lo/c/portal/protected</url-pattern>
 			<url-pattern>/lo_LA/c/portal/protected</url-pattern>
+			<url-pattern>/lt/c/portal/protected</url-pattern>
+			<url-pattern>/lt_LT/c/portal/protected</url-pattern>
 			<url-pattern>/nb/c/portal/protected</url-pattern>
 			<url-pattern>/nb_NO/c/portal/protected</url-pattern>
 			<url-pattern>/nl/c/portal/protected</url-pattern>

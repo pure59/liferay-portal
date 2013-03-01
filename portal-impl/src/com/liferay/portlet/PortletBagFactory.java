@@ -18,6 +18,8 @@ import com.liferay.portal.dao.shard.ShardPollerProcessorWrapper;
 import com.liferay.portal.kernel.atom.AtomCollectionAdapter;
 import com.liferay.portal.kernel.atom.AtomCollectionAdapterRegistryUtil;
 import com.liferay.portal.kernel.lar.PortletDataHandler;
+import com.liferay.portal.kernel.lar.StagedModelDataHandler;
+import com.liferay.portal.kernel.lar.StagedModelDataHandlerRegistryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.poller.PollerProcessor;
@@ -68,9 +70,9 @@ import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.PortletApp;
 import com.liferay.portal.poller.PollerProcessorUtil;
 import com.liferay.portal.pop.POPServerUtil;
-import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
 import com.liferay.portal.security.permission.PermissionPropagator;
 import com.liferay.portal.service.PortletLocalServiceUtil;
+import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.xmlrpc.XmlRpcServlet;
@@ -115,7 +117,7 @@ public class PortletBagFactory {
 
 			_servletContext = ServletContextPool.get(contextPath);
 
-			_classLoader = PACLClassLoaderUtil.getPortalClassLoader();
+			_classLoader = ClassLoaderUtil.getPortalClassLoader();
 		}
 
 		Class<?> portletClass = null;
@@ -149,6 +151,9 @@ public class PortletBagFactory {
 		PortletDataHandler portletDataHandlerInstance = newPortletDataHandler(
 			portlet);
 
+		List<StagedModelDataHandler<?>> stagedModelDataHandlerInstances =
+			newStagedModelDataHandler(portlet);
+
 		PortletDisplayTemplateHandler portletDisplayTemplateHandlerInstance =
 			newPortletDisplayTemplateHandler(portlet);
 
@@ -165,8 +170,8 @@ public class PortletBagFactory {
 		MessageListener popMessageListenerInstance = newPOPMessageListener(
 			portlet);
 
-		SocialActivityInterpreter socialActivityInterpreterInstance =
-			initSocialActivityInterpreterInstance(portlet);
+		List<SocialActivityInterpreter> socialActivityInterpreterInstances =
+			newSocialActivityInterpreterInstances(portlet);
 
 		SocialRequestInterpreter socialRequestInterpreterInstance = null;
 
@@ -317,9 +322,10 @@ public class PortletBagFactory {
 			portlet.getPortletId(), _servletContext, portletInstance,
 			configurationActionInstance, indexerInstances, openSearchInstance,
 			friendlyURLMapperInstance, urlEncoderInstance,
-			portletDataHandlerInstance, portletDisplayTemplateHandlerInstance,
+			portletDataHandlerInstance, stagedModelDataHandlerInstances,
+			portletDisplayTemplateHandlerInstance,
 			portletLayoutListenerInstance, pollerProcessorInstance,
-			popMessageListenerInstance, socialActivityInterpreterInstance,
+			popMessageListenerInstance, socialActivityInterpreterInstances,
 			socialRequestInterpreterInstance, webDAVStorageInstance,
 			xmlRpcMethodInstance, controlPanelEntryInstance,
 			assetRendererFactoryInstances, atomCollectionAdapterInstances,
@@ -516,7 +522,7 @@ public class PortletBagFactory {
 			schedulerEntry.setTriggerValue(triggerValue);
 		}
 
-		if (_classLoader == PACLClassLoaderUtil.getPortalClassLoader()) {
+		if (_classLoader == ClassLoaderUtil.getPortalClassLoader()) {
 			portletId = null;
 		}
 
@@ -538,28 +544,6 @@ public class PortletBagFactory {
 		for (SchedulerEntry schedulerEntry : schedulerEntries) {
 			initScheduler(schedulerEntry, portlet.getPortletId());
 		}
-	}
-
-	protected SocialActivityInterpreter initSocialActivityInterpreterInstance(
-			Portlet portlet)
-		throws Exception {
-
-		if (Validator.isNull(portlet.getSocialActivityInterpreterClass())) {
-			return null;
-		}
-
-		SocialActivityInterpreter socialActivityInterpreterInstance =
-			(SocialActivityInterpreter)newInstance(
-				SocialActivityInterpreter.class,
-				portlet.getSocialActivityInterpreterClass());
-
-		socialActivityInterpreterInstance = new SocialActivityInterpreterImpl(
-			portlet.getPortletId(), socialActivityInterpreterInstance);
-
-		SocialActivityInterpreterLocalServiceUtil.addActivityInterpreter(
-			socialActivityInterpreterInstance);
-
-		return socialActivityInterpreterInstance;
 	}
 
 	protected AssetRendererFactory newAssetRendererFactoryInstance(
@@ -855,6 +839,70 @@ public class PortletBagFactory {
 		return (PortletLayoutListener)newInstance(
 			PortletLayoutListener.class,
 			portlet.getPortletLayoutListenerClass());
+	}
+
+	protected SocialActivityInterpreter newSocialActivityInterpreterInstance(
+			Portlet portlet, String socialActivityInterpreterClass)
+		throws Exception {
+
+		SocialActivityInterpreter socialActivityInterpreterInstance =
+			(SocialActivityInterpreter)newInstance(
+				SocialActivityInterpreter.class,
+				socialActivityInterpreterClass);
+
+		socialActivityInterpreterInstance = new SocialActivityInterpreterImpl(
+			portlet.getPortletId(), socialActivityInterpreterInstance);
+
+		SocialActivityInterpreterLocalServiceUtil.addActivityInterpreter(
+			socialActivityInterpreterInstance);
+
+		return socialActivityInterpreterInstance;
+	}
+
+	protected List<SocialActivityInterpreter>
+			newSocialActivityInterpreterInstances(Portlet portlet)
+		throws Exception {
+
+		List<SocialActivityInterpreter> socialActivityInterpreterInstances =
+			new ArrayList<SocialActivityInterpreter>();
+
+		for (String socialActivityInterpreterClass :
+				portlet.getSocialActivityInterpreterClasses()) {
+
+			SocialActivityInterpreter socialActivityInterpreterInstance =
+				newSocialActivityInterpreterInstance(
+					portlet, socialActivityInterpreterClass);
+
+			socialActivityInterpreterInstances.add(
+				socialActivityInterpreterInstance);
+		}
+
+		return socialActivityInterpreterInstances;
+	}
+
+	protected List<StagedModelDataHandler<?>> newStagedModelDataHandler(
+			Portlet portlet)
+		throws Exception {
+
+		List<StagedModelDataHandler<?>> stagedModelDataHandlerInstances =
+			new ArrayList<StagedModelDataHandler<?>>();
+
+		List<String> stagedModelDataHandlerClasses =
+			portlet.getStagedModelDataHandlerClasses();
+
+		for (String stagedModelDataHandlerClass :
+				stagedModelDataHandlerClasses) {
+
+			StagedModelDataHandler<?> stagedModelDataHandler =
+				(StagedModelDataHandler<?>)newInstance(
+					StagedModelDataHandler.class, stagedModelDataHandlerClass);
+
+			stagedModelDataHandlerInstances.add(stagedModelDataHandler);
+
+			StagedModelDataHandlerRegistryUtil.register(stagedModelDataHandler);
+		}
+
+		return stagedModelDataHandlerInstances;
 	}
 
 	protected URLEncoder newURLEncoder(Portlet portlet) throws Exception {

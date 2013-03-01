@@ -14,17 +14,33 @@
 
 package com.liferay.portal.jsonwebservice;
 
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.service.ServiceContext;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Igor Spasic
  */
 public class FooService {
+
+	public static BarData bar() {
+		return new BarData();
+	}
+
+	public static String camel(String goodName, String badNAME) {
+		return goodName + '*' + badNAME;
+	}
+
+	public static int complex(
+		List<Long> longs, int[] ints, Map<String, Long> map) {
+
+		return longs.size() + ints.length + map.size();
+	}
 
 	public static FooData getFooData(int id) {
 		FooData fooData = new FooDataImpl();
@@ -68,10 +84,11 @@ public class FooService {
 	}
 
 	public static String hey(
-		Calendar calendar, long[] userIds, List<Locale> locales) {
+		Calendar calendar, long[] userIds, List<Locale> locales, Long[] ids) {
 
 		return calendar.get(Calendar.YEAR) + ", " + userIds[0] + '/' +
-			userIds.length + ", " + locales.get(0) + '/' + locales.size();
+			userIds.length + ", " + locales.get(0) + '/' + locales.size() +
+				", " + ids[0] + '/' + ids.length;
 	}
 
 	public static String methodOne(long id, long nameId) {
@@ -98,6 +115,10 @@ public class FooService {
 		return null;
 	}
 
+	public static String search(String name, String... params) {
+		return "search " + name + '>' + StringUtil.merge(params);
+	}
+
 	public static String srvcctx(ServiceContext serviceContext) {
 		Class<?> clazz = serviceContext.getClass();
 
@@ -105,11 +126,11 @@ public class FooService {
 	}
 
 	public static String use1(FooDataImpl fooData) {
-		return "using #1: " + fooData.getValue();
+		return "using #1: " + fooData.toString();
 	}
 
 	public static String use2(FooData fooData) {
-		return "using #2: " + fooData.getValue();
+		return "using #2: " + fooData.toString();
 	}
 
 }

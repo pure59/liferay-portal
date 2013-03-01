@@ -56,6 +56,10 @@ public class MBMessageAssetRenderer
 		return MBCategoryAssetRendererFactory.CLASS_NAME;
 	}
 
+	public String getClassName() {
+		return MBMessage.class.getName();
+	}
+
 	public long getClassPK() {
 		return _message.getMessageId();
 	}
@@ -81,7 +85,7 @@ public class MBMessageAssetRenderer
 	}
 
 	public String getSummary(Locale locale) {
-		return HtmlUtil.stripHtml(_message.getBody());
+		return HtmlUtil.extractText(_message.getBody());
 	}
 
 	public String getTitle(Locale locale) {
@@ -212,7 +216,7 @@ public class MBMessageAssetRenderer
 
 	@Override
 	protected String getIconPath(ThemeDisplay themeDisplay) {
-		return themeDisplay.getPathThemeImages() + "/common/conversation.png";
+		return themeDisplay.getPathThemeImages() + "/common/message.png";
 	}
 
 	private MBMessage _message;

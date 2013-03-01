@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -35,7 +36,6 @@ import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portlet.dynamicdatamapping.util.DDMXMLUtil;
-import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.journal.DuplicateTemplateIdException;
 import com.liferay.portlet.journal.NoSuchTemplateException;
 import com.liferay.portlet.journal.RequiredTemplateException;
@@ -47,7 +47,6 @@ import com.liferay.portlet.journal.TemplateXslException;
 import com.liferay.portlet.journal.model.JournalArticleConstants;
 import com.liferay.portlet.journal.model.JournalStructure;
 import com.liferay.portlet.journal.model.JournalTemplate;
-import com.liferay.portlet.journal.model.JournalTemplateConstants;
 import com.liferay.portlet.journal.service.base.JournalTemplateLocalServiceBaseImpl;
 import com.liferay.portlet.journal.util.JournalUtil;
 
@@ -83,7 +82,7 @@ public class JournalTemplateLocalServiceImpl
 
 		try {
 			if (formatXsl) {
-				if (langType.equals(JournalTemplateConstants.LANG_TYPE_VM)) {
+				if (langType.equals(TemplateConstants.LANG_TYPE_VM)) {
 					xsl = JournalUtil.formatVM(xsl);
 				}
 				else {
@@ -132,6 +131,7 @@ public class JournalTemplateLocalServiceImpl
 		template.setSmallImage(smallImage);
 		template.setSmallImageId(counterLocalService.increment());
 		template.setSmallImageURL(smallImageURL);
+		template.setExpandoBridgeAttributes(serviceContext);
 
 		journalTemplatePersistence.update(template);
 
@@ -149,12 +149,6 @@ public class JournalTemplateLocalServiceImpl
 				template, serviceContext.getGroupPermissions(),
 				serviceContext.getGuestPermissions());
 		}
-
-		// Expando
-
-		ExpandoBridge expandoBridge = template.getExpandoBridge();
-
-		expandoBridge.setAttributes(serviceContext);
 
 		// Small image
 
@@ -277,6 +271,7 @@ public class JournalTemplateLocalServiceImpl
 		newTemplate.setSmallImage(oldTemplate.isSmallImage());
 		newTemplate.setSmallImageId(counterLocalService.increment());
 		newTemplate.setSmallImageURL(oldTemplate.getSmallImageURL());
+		newTemplate.setExpandoBridgeAttributes(oldTemplate);
 
 		journalTemplatePersistence.update(newTemplate);
 
@@ -416,9 +411,9 @@ public class JournalTemplateLocalServiceImpl
 
 		if (groupId == 0) {
 			_log.error(
-				"No group id was passed for " + templateId + ". Group id is " +
+				"No group ID was passed for " + templateId + ". Group ID is " +
 					"required since 4.2.0. Please update all custom code and " +
-						"data that references templates without a group id.");
+						"data that references templates without a group ID.");
 
 			List<JournalTemplate> templates =
 				journalTemplatePersistence.findByTemplateId(templateId);
@@ -428,7 +423,7 @@ public class JournalTemplateLocalServiceImpl
 			}
 
 			throw new NoSuchTemplateException(
-				"No JournalTemplate exists with the template id " + templateId);
+				"No JournalTemplate exists with the template ID " + templateId);
 		}
 
 		JournalTemplate template = journalTemplatePersistence.fetchByG_T(
@@ -440,7 +435,7 @@ public class JournalTemplateLocalServiceImpl
 
 		if (!includeGlobalTemplates) {
 			throw new NoSuchTemplateException(
-				"No JournalTemplate exists with the template id " + templateId);
+				"No JournalTemplate exists with the template ID " + templateId);
 		}
 
 		Group group = groupPersistence.findByPrimaryKey(groupId);
@@ -548,7 +543,7 @@ public class JournalTemplateLocalServiceImpl
 
 		try {
 			if (formatXsl) {
-				if (langType.equals(JournalTemplateConstants.LANG_TYPE_VM)) {
+				if (langType.equals(TemplateConstants.LANG_TYPE_VM)) {
 					xsl = JournalUtil.formatVM(xsl);
 				}
 				else {
@@ -596,14 +591,9 @@ public class JournalTemplateLocalServiceImpl
 		template.setSmallImage(smallImage);
 		template.setSmallImageURL(smallImageURL);
 		template.setModifiedDate(serviceContext.getModifiedDate(null));
+		template.setExpandoBridgeAttributes(serviceContext);
 
 		journalTemplatePersistence.update(template);
-
-		// Expando
-
-		ExpandoBridge expandoBridge = template.getExpandoBridge();
-
-		expandoBridge.setAttributes(serviceContext);
 
 		// Small image
 

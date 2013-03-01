@@ -45,6 +45,9 @@ import java.util.Map;
 public class OrganizationFinderImpl
 	extends BasePersistenceImpl<Organization> implements OrganizationFinder {
 
+	public static final String COUNT_BY_GROUP_ID =
+		OrganizationFinder.class.getName() + ".countByGroupId";
+
 	public static final String COUNT_BY_ORGANIZATION_ID =
 		OrganizationFinder.class.getName() + ".countByOrganizationId";
 
@@ -56,6 +59,9 @@ public class OrganizationFinderImpl
 
 	public static final String FIND_BY_COMPANY_ID =
 		OrganizationFinder.class.getName() + ".findByCompanyId";
+
+	public static final String FIND_BY_GROUP_ID =
+		OrganizationFinder.class.getName() + ".findByGroupId";
 
 	public static final String FIND_BY_C_PO_N_S_C_Z_R_C =
 		OrganizationFinder.class.getName() + ".findByC_PO_N_S_C_Z_R_C";
@@ -170,14 +176,36 @@ public class OrganizationFinderImpl
 		try {
 			session = openSession();
 
-			String sql = null;
+			StringBundler sb = new StringBundler();
+
+			boolean doUnion = false;
+
+			if (params != null) {
+				Long groupOrganization = (Long)params.get("groupOrganization");
+
+				if (groupOrganization != null) {
+					doUnion = true;
+				}
+			}
+
+			if (doUnion) {
+				sb.append(StringPool.OPEN_PARENTHESIS);
+				sb.append(CustomSQLUtil.get(COUNT_BY_GROUP_ID));
+				sb.append(") UNION ALL (");
+			}
 
 			if (Validator.isNotNull(type)) {
-				sql = CustomSQLUtil.get(COUNT_BY_C_PO_N_L_S_C_Z_R_C);
+				sb.append(CustomSQLUtil.get(COUNT_BY_C_PO_N_L_S_C_Z_R_C));
 			}
 			else {
-				sql = CustomSQLUtil.get(COUNT_BY_C_PO_N_S_C_Z_R_C);
+				sb.append(CustomSQLUtil.get(COUNT_BY_C_PO_N_S_C_Z_R_C));
 			}
+
+			if (doUnion) {
+				sb.append(StringPool.CLOSE_PARENTHESIS);
+			}
+
+			String sql = sb.toString();
 
 			sql = CustomSQLUtil.replaceKeywords(
 				sql, "lower(Organization_.name)", StringPool.LIKE, false,
@@ -241,17 +269,19 @@ public class OrganizationFinderImpl
 			qPos.add(cities, 2);
 			qPos.add(zips, 2);
 
+			int count = 0;
+
 			Iterator<Long> itr = q.iterate();
 
-			if (itr.hasNext()) {
-				Long count = itr.next();
+			while (itr.hasNext()) {
+				Long l = itr.next();
 
-				if (count != null) {
-					return count.intValue();
+				if (l != null) {
+					count += l.intValue();
 				}
 			}
 
-			return 0;
+			return count;
 		}
 		catch (Exception e) {
 			throw new SystemException(e);
@@ -272,7 +302,7 @@ public class OrganizationFinderImpl
 
 		StringBundler sb = new StringBundler();
 
-		sb.append("(");
+		sb.append(StringPool.OPEN_PARENTHESIS);
 
 		String sql = CustomSQLUtil.get(FIND_BY_COMPANY_ID);
 
@@ -280,7 +310,7 @@ public class OrganizationFinderImpl
 		sql = StringUtil.replace(sql, "[$WHERE$]", getWhere(params));
 
 		sb.append(sql);
-		sb.append(")");
+		sb.append(StringPool.CLOSE_PARENTHESIS);
 
 		sql = sb.toString();
 
@@ -393,7 +423,16 @@ public class OrganizationFinderImpl
 
 		StringBundler sb = new StringBundler();
 
-		sb.append("(");
+		sb.append(StringPool.OPEN_PARENTHESIS);
+
+		Long groupOrganization = (Long)params.get("groupOrganization");
+
+		boolean doUnion = Validator.isNotNull(groupOrganization);
+
+		if (doUnion) {
+			sb.append(CustomSQLUtil.get(FIND_BY_GROUP_ID));
+			sb.append(") UNION ALL (");
+		}
 
 		if (Validator.isNotNull(type)) {
 			sb.append(CustomSQLUtil.get(FIND_BY_C_PO_N_L_S_C_Z_R_C));
@@ -632,13 +671,40 @@ public class OrganizationFinderImpl
 					}
 				}
 
-				sb.append(")");
+				sb.append(StringPool.CLOSE_PARENTHESIS);
 
 				join = sb.toString();
 			}
 		}
 		else if (key.equals("organizationsGroups")) {
-			join = CustomSQLUtil.get(JOIN_BY_ORGANIZATIONS_GROUPS);
+			if (value instanceof Long) {
+				join = CustomSQLUtil.get(JOIN_BY_ORGANIZATIONS_GROUPS);
+			}
+			else if (value instanceof Long[]) {
+				Long[] organizationGroupIds = (Long[])value;
+
+				if (organizationGroupIds.length == 0) {
+					join = "WHERE (Groups_Orgs.groupId = -1)";
+				}
+				else {
+					StringBundler sb = new StringBundler(
+						organizationGroupIds.length * 2 + 1);
+
+					sb.append("WHERE (");
+
+					for (int i = 0; i < organizationGroupIds.length; i++) {
+						sb.append("(Groups_Orgs.groupId = ?) ");
+
+						if ((i + 1) < organizationGroupIds.length) {
+							sb.append("OR ");
+						}
+					}
+
+					sb.append(StringPool.CLOSE_PARENTHESIS);
+
+					join = sb.toString();
+				}
+			}
 		}
 		else if (key.equals("organizationsPasswordPolicies")) {
 			join = CustomSQLUtil.get(JOIN_BY_ORGANIZATIONS_PASSWORD_POLICIES);
@@ -664,7 +730,7 @@ public class OrganizationFinderImpl
 					}
 				}
 
-				sb.append(")");
+				sb.append(StringPool.CLOSE_PARENTHESIS);
 
 				join = sb.toString();
 			}

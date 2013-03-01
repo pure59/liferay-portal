@@ -95,6 +95,12 @@ public interface MBMessageService extends BaseService {
 			com.liferay.portal.kernel.exception.SystemException;
 
 	public com.liferay.portlet.messageboards.model.MBMessage addMessage(
+		long categoryId, java.lang.String subject, java.lang.String body,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
+	public com.liferay.portlet.messageboards.model.MBMessage addMessage(
 		long parentMessageId, java.lang.String subject, java.lang.String body,
 		java.lang.String format,
 		java.util.List<com.liferay.portal.kernel.util.ObjectValuePair<java.lang.String, java.io.InputStream>> inputStreamOVPs,
@@ -202,6 +208,11 @@ public interface MBMessageService extends BaseService {
 		java.lang.String displayStyle, java.lang.String feedURL,
 		java.lang.String entryURL,
 		com.liferay.portal.theme.ThemeDisplay themeDisplay)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
+	public void restoreMessageAttachmentFromTrash(long messageId,
+		java.lang.String fileName)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 

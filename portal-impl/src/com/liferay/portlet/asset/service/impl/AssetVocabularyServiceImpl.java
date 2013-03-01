@@ -27,6 +27,8 @@ import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.asset.model.AssetVocabulary;
+import com.liferay.portlet.asset.model.AssetVocabularyDisplay;
+import com.liferay.portlet.asset.model.impl.AssetVocabularyDisplayImpl;
 import com.liferay.portlet.asset.service.base.AssetVocabularyServiceBaseImpl;
 import com.liferay.portlet.asset.service.permission.AssetPermission;
 import com.liferay.portlet.asset.service.permission.AssetVocabularyPermission;
@@ -71,6 +73,18 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 		return assetVocabularyLocalService.addVocabulary(
 			getUserId(), title, titleMap, descriptionMap, settings,
 			serviceContext);
+	}
+
+	public AssetVocabulary addVocabulary(
+			String title, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		AssetPermission.check(
+			getPermissionChecker(), serviceContext.getScopeGroupId(),
+			ActionKeys.ADD_VOCABULARY);
+
+		return assetVocabularyLocalService.addVocabulary(
+			getUserId(), title, serviceContext);
 	}
 
 	public void deleteVocabularies(long[] vocabularyIds)
@@ -125,6 +139,15 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 	}
 
 	public List<AssetVocabulary> getGroupVocabularies(
+			long groupId, boolean createDefaultVocabulary)
+		throws PortalException, SystemException {
+
+		return filterVocabularies(
+			assetVocabularyLocalService.getGroupVocabularies(
+				groupId, createDefaultVocabulary));
+	}
+
+	public List<AssetVocabulary> getGroupVocabularies(
 			long groupId, int start, int end, OrderByComparator obc)
 		throws SystemException {
 
@@ -151,6 +174,29 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 		return assetVocabularyFinder.filterCountByG_N(groupId, name);
 	}
 
+	public AssetVocabularyDisplay getGroupVocabulariesDisplay(
+			long groupId, String name, int start, int end,
+			OrderByComparator obc)
+		throws SystemException {
+
+		List<AssetVocabulary> vocabularies;
+		int total = 0;
+
+		if (Validator.isNotNull(name)) {
+			name = (CustomSQLUtil.keywords(name))[0];
+
+			vocabularies = getGroupVocabularies(groupId, name, start, end, obc);
+			total = getGroupVocabulariesCount(groupId, name);
+		}
+		else {
+			vocabularies = getGroupVocabularies(groupId, start, end, obc);
+			total = getGroupVocabulariesCount(groupId);
+		}
+
+		return new AssetVocabularyDisplayImpl(vocabularies, total, start, end);
+	}
+
+	@Deprecated
 	public JSONObject getJSONGroupVocabularies(
 			long groupId, String name, int start, int end,
 			OrderByComparator obc)

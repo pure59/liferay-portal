@@ -20,9 +20,11 @@ import com.liferay.portal.kernel.security.pacl.PACLConstants;
 import com.liferay.portal.kernel.util.PathUtil;
 import com.liferay.portal.kernel.util.ServerDetector;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
 import com.liferay.portal.security.pacl.PACLClassUtil;
 import com.liferay.portal.security.pacl.PACLPolicy;
+import com.liferay.portal.util.ClassLoaderUtil;
+import com.liferay.portal.util.PortalImpl;
+import com.liferay.portal.util.PortalUtil;
 
 import java.util.Properties;
 import java.util.Set;
@@ -41,6 +43,12 @@ public abstract class BaseChecker implements Checker, PACLConstants {
 		_portalClassLoader = portalClassLoader;
 		_commonClassLoader = portalClassLoader.getParent();
 		_systemClassLoader = ClassLoader.getSystemClassLoader();
+	}
+
+	public AuthorizationProperty generateAuthorizationProperty(
+		Object... arguments) {
+
+		throw new UnsupportedOperationException();
 	}
 
 	public ClassLoader getClassLoader() {
@@ -133,7 +141,7 @@ public abstract class BaseChecker implements Checker, PACLConstants {
 			else if (ServerDetector.isJBoss()) {
 				if (callerClassName.equals(_ClASS_NAME_COMPILER)) {
 					ClassLoader callerClassLoader =
-						PACLClassLoaderUtil.getClassLoader(callerClass);
+						ClassLoaderUtil.getClassLoader(callerClass);
 
 					String callerClassLoaderString =
 						callerClassLoader.toString();
@@ -147,7 +155,7 @@ public abstract class BaseChecker implements Checker, PACLConstants {
 					callerClassName.equals(_ClASS_NAME_JASPER_LOADER)) {
 
 					ClassLoader callerClassLoader =
-						PACLClassLoaderUtil.getClassLoader(callerClass);
+						ClassLoaderUtil.getClassLoader(callerClass);
 
 					allowed = (callerClassLoader == _commonClassLoader);
 				}
@@ -185,7 +193,7 @@ public abstract class BaseChecker implements Checker, PACLConstants {
 					callerClassName.equals(_ClASS_NAME_TAG_HANDLER_POOL)) {
 
 					ClassLoader callerClassLoader =
-						PACLClassLoaderUtil.getClassLoader(callerClass);
+						ClassLoaderUtil.getClassLoader(callerClass);
 
 					allowed = (callerClassLoader == _commonClassLoader);
 				}
@@ -251,13 +259,32 @@ public abstract class BaseChecker implements Checker, PACLConstants {
 		}
 	}
 
-	protected void throwSecurityException(Log log, String message) {
+	protected boolean isTrustedCallerClass(Class<?> callerClass) {
+		String callerClassLocation = PACLClassUtil.getClassLocation(
+			callerClass);
+
+		if (callerClassLocation.startsWith(portalImplJarLocation) ||
+			callerClassLocation.startsWith(portalServiceJarLocation) ||
+			callerClassLocation.contains("/util-bridges.jar!/") ||
+			callerClassLocation.contains("/util-java.jar!/") ||
+			callerClassLocation.contains("/util-taglib.jar!/")) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	protected void logSecurityException(Log log, String message) {
 		if (log.isWarnEnabled()) {
 			log.warn(message);
 		}
-
-		throw new SecurityException(message);
 	}
+
+	protected String portalImplJarLocation = PACLClassUtil.getJarLocation(
+		PortalImpl.class);
+	protected String portalServiceJarLocation = PACLClassUtil.getJarLocation(
+		PortalUtil.class);
 
 	private static final String _ClASS_NAME_COMPILER =
 		"org.apache.jasper.compiler.Compiler";

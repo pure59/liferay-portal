@@ -15,6 +15,7 @@
 package com.liferay.portlet.dynamicdatamapping.model.impl;
 
 import com.liferay.portal.LocaleException;
+import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
@@ -23,6 +24,9 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -33,6 +37,10 @@ import com.liferay.portal.kernel.xml.Node;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.kernel.xml.XPath;
 import com.liferay.portal.model.CacheField;
+import com.liferay.portal.model.Group;
+import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.dynamicdatamapping.StructureFieldException;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
@@ -40,6 +48,7 @@ import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUt
 import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.util.DDMXMLUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,9 +62,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DDMStructureImpl extends DDMStructureBaseImpl {
 
-	public DDMStructureImpl() {
-	}
-
 	public List<String> getAvailableLanguageIds() {
 		Document document = getDocument();
 
@@ -65,6 +71,26 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 			"available-locales");
 
 		return ListUtil.fromArray(StringUtil.split(availableLocales));
+	}
+
+	public List<String> getChildrenFieldNames(String fieldName)
+		throws PortalException, SystemException {
+
+		List<String> fieldNames = new ArrayList<String>();
+
+		Map<String, Map<String, String>> fieldsMap = getFieldsMap();
+
+		for (Map<String, String> field : fieldsMap.values()) {
+			String parentNameKey = _getPrivateAttributeKey("parentName");
+
+			String parentName = field.get(parentNameKey);
+
+			if (fieldName.equals(parentName)) {
+				fieldNames.add(field.get("name"));
+			}
+		}
+
+		return fieldNames;
 	}
 
 	public String getCompleteXsd() throws PortalException, SystemException {
@@ -244,6 +270,28 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 		return _localizedTransientFieldsMap;
 	}
 
+	public List<String> getRootFieldNames()
+		throws PortalException, SystemException {
+
+		List<String> fieldNames = new ArrayList<String>();
+
+		Map<String, Map<String, String>> fieldsMap = getFieldsMap();
+
+		for (Map.Entry<String, Map<String, String>> entry :
+				fieldsMap.entrySet()) {
+
+			Map<String, String> field = entry.getValue();
+
+			String parentNameKey = _getPrivateAttributeKey("parentName");
+
+			if (!field.containsKey(parentNameKey)) {
+				fieldNames.add(entry.getKey());
+			}
+		}
+
+		return fieldNames;
+	}
+
 	public List<DDMTemplate> getTemplates() throws SystemException {
 		return DDMTemplateLocalServiceUtil.getTemplates(getStructureId());
 	}
@@ -257,6 +305,38 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 			_localizedTransientFieldsMap.get(locale);
 
 		return fieldsMap;
+	}
+
+	public String getWebDavURL(ThemeDisplay themeDisplay) {
+		StringBundler sb = new StringBundler(11);
+
+		boolean secure = false;
+
+		if (themeDisplay.isSecure() ||
+			PropsValues.WEBDAV_SERVLET_HTTPS_REQUIRED) {
+
+			secure = true;
+		}
+
+		String portalURL = PortalUtil.getPortalURL(
+			themeDisplay.getServerName(), themeDisplay.getServerPort(), secure);
+
+		sb.append(portalURL);
+
+		sb.append(themeDisplay.getPathContext());
+		sb.append(StringPool.SLASH);
+		sb.append("webdav");
+
+		Group group = themeDisplay.getScopeGroup();
+
+		sb.append(group.getFriendlyURL());
+
+		sb.append(StringPool.SLASH);
+		sb.append("Structures");
+		sb.append(StringPool.SLASH);
+		sb.append(getStructureId());
+
+		return sb.toString();
 	}
 
 	public boolean hasField(String fieldName)
@@ -275,6 +355,18 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 		}
 
 		return hasField;
+	}
+
+	public boolean isFieldPrivate(String fieldName)
+		throws PortalException, SystemException {
+
+		return GetterUtil.getBoolean(getFieldProperty(fieldName, "private"));
+	}
+
+	public boolean isFieldRepeatable(String fieldName)
+		throws PortalException, SystemException {
+
+		return GetterUtil.getBoolean(getFieldProperty(fieldName, "repeatable"));
 	}
 
 	@Override
@@ -378,6 +470,26 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 			StringPool.UNDERLINE);
 	}
 
+	private Map<String, String> _getPrivateField(String privateFieldName) {
+		Map<String, String> privateField = new HashMap<String, String>();
+
+		String dataType = PropsUtil.get(
+			PropsKeys.DYNAMIC_DATA_MAPPING_STRUCTURE_PRIVATE_FIELD_DATATYPE,
+			new Filter(privateFieldName));
+
+		privateField.put("dataType", dataType);
+
+		privateField.put("private", Boolean.TRUE.toString());
+
+		String repeatable = PropsUtil.get(
+			PropsKeys.DYNAMIC_DATA_MAPPING_STRUCTURE_PRIVATE_FIELD_REPEATABLE,
+			new Filter(privateFieldName));
+
+		privateField.put("repeatable", repeatable);
+
+		return privateField;
+	}
+
 	private void _indexFieldsMap(String locale)
 		throws PortalException, SystemException {
 
@@ -419,6 +531,16 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 			else {
 				transientFieldsMap.put(name, _getField(element, locale));
 			}
+		}
+
+		String[] privateFieldNames =
+			PropsValues.DYNAMIC_DATA_MAPPING_STRUCTURE_PRIVATE_FIELD_NAMES;
+
+		for (String privateFieldName : privateFieldNames) {
+			Map<String, String> privateField = _getPrivateField(
+				privateFieldName);
+
+			fieldsMap.put(privateFieldName, privateField);
 		}
 
 		_localizedFieldsMap.put(locale, fieldsMap);

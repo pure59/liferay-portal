@@ -182,16 +182,6 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 		Company company = companyPersistence.fetchByWebId(webId);
 
 		if (company == null) {
-			String name = webId;
-			String legalName = null;
-			String legalId = null;
-			String legalType = null;
-			String sicCode = null;
-			String tickerSymbol = null;
-			String industry = null;
-			String type = null;
-			String size = null;
-
 			long companyId = counterLocalService.increment();
 
 			company = companyPersistence.create(companyId);
@@ -215,6 +205,21 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 				Company.class.getName(), companyId, shardName);
 
 			// Account
+
+			String name = webId;
+
+			if (webId.equals(PropsValues.COMPANY_DEFAULT_WEB_ID)) {
+				name = PropsValues.COMPANY_DEFAULT_NAME;
+			}
+
+			String legalName = null;
+			String legalId = null;
+			String legalType = null;
+			String sicCode = null;
+			String tickerSymbol = null;
+			String industry = null;
+			String type = null;
+			String size = null;
 
 			updateAccount(
 				company, name, legalName, legalId, legalType, sicCode,
@@ -1158,26 +1163,27 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 		throws CompanyVirtualHostException, SystemException {
 
 		if (Validator.isNotNull(virtualHostname)) {
-			try {
-				VirtualHost virtualHost = virtualHostPersistence.findByHostname(
-					virtualHostname);
+			VirtualHost virtualHost = virtualHostPersistence.fetchByHostname(
+				virtualHostname);
 
+			if (virtualHost == null) {
+				virtualHostLocalService.updateVirtualHost(
+					companyId, 0, virtualHostname);
+			}
+			else {
 				if ((virtualHost.getCompanyId() != companyId) ||
 					(virtualHost.getLayoutSetId() != 0)) {
 
 					throw new CompanyVirtualHostException();
 				}
 			}
-			catch (NoSuchVirtualHostException nsvhe) {
-				virtualHostLocalService.updateVirtualHost(
-					companyId, 0, virtualHostname);
-			}
 		}
 		else {
-			try {
-				virtualHostPersistence.removeByC_L(companyId, 0);
-			}
-			catch (NoSuchVirtualHostException nsvhe) {
+			VirtualHost virtualHost = virtualHostPersistence.fetchByC_L(
+				companyId, 0);
+
+			if (virtualHost != null) {
+				virtualHostPersistence.remove(virtualHost);
 			}
 		}
 	}

@@ -24,9 +24,9 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.PreloadClassLoader;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.security.lang.PortalSecurityManagerThreadLocal;
-import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
 import com.liferay.portal.security.pacl.PACLPolicyManager;
 import com.liferay.portal.spring.util.FilterClassLoader;
+import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portal.util.PropsValues;
 
 import java.io.FileNotFoundException;
@@ -69,7 +69,7 @@ public class PortletApplicationContext extends XmlWebApplicationContext {
 			AggregateClassLoader.getAggregateClassLoader(
 				new ClassLoader[] {
 					PortletClassLoaderUtil.getClassLoader(),
-					PACLClassLoaderUtil.getPortalClassLoader()
+					ClassLoaderUtil.getPortalClassLoader()
 				});
 
 		return new FilterClassLoader(beanClassLoader);
@@ -171,8 +171,8 @@ public class PortletApplicationContext extends XmlWebApplicationContext {
 			try {
 				clazz = Class.forName(className);
 			}
-			catch (ClassNotFoundException e) {
-				_log.error(e, e);
+			catch (ClassNotFoundException cnfe) {
+				_log.error(cnfe, cnfe);
 			}
 
 			_classes.put(clazz.getName(), clazz);

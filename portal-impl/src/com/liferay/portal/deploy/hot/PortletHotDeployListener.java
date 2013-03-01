@@ -24,6 +24,8 @@ import com.liferay.portal.kernel.deploy.hot.HotDeployEvent;
 import com.liferay.portal.kernel.deploy.hot.HotDeployException;
 import com.liferay.portal.kernel.javadoc.JavadocManagerUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.lar.StagedModelDataHandler;
+import com.liferay.portal.kernel.lar.StagedModelDataHandlerRegistryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletBag;
@@ -78,6 +80,7 @@ import com.liferay.portlet.PortletResourceBundles;
 import com.liferay.portlet.PortletURLListenerFactory;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
+import com.liferay.portlet.social.model.SocialActivityInterpreter;
 import com.liferay.portlet.social.service.SocialActivityInterpreterLocalServiceUtil;
 import com.liferay.portlet.social.service.SocialRequestInterpreterLocalServiceUtil;
 import com.liferay.util.bridges.php.PHPPortlet;
@@ -221,12 +224,29 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 			}
 		}
 
+		List<StagedModelDataHandler<?>> stagedModelDataHandlers =
+			portlet.getStagedModelDataHandlerInstances();
+
+		if (stagedModelDataHandlers != null) {
+			StagedModelDataHandlerRegistryUtil.unregister(
+				stagedModelDataHandlers);
+		}
+
 		PollerProcessorUtil.deletePollerProcessor(portlet.getPortletId());
 
 		POPServerUtil.deleteListener(portlet.getPopMessageListenerInstance());
 
-		SocialActivityInterpreterLocalServiceUtil.deleteActivityInterpreter(
-			portlet.getSocialActivityInterpreterInstance());
+		List<SocialActivityInterpreter> socialActivityInterpreters =
+			portlet.getSocialActivityInterpreterInstances();
+
+		if (socialActivityInterpreters != null) {
+			for (SocialActivityInterpreter socialActivityInterpreter :
+					socialActivityInterpreters) {
+
+				SocialActivityInterpreterLocalServiceUtil.
+					deleteActivityInterpreter(socialActivityInterpreter);
+			}
+		}
 
 		SocialRequestInterpreterLocalServiceUtil.deleteRequestInterpreter(
 			portlet.getSocialRequestInterpreterInstance());

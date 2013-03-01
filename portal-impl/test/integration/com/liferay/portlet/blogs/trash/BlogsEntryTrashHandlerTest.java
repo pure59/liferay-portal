@@ -20,9 +20,10 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.test.EnvironmentExecutionTestListener;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
-import com.liferay.portal.test.TransactionalExecutionTestListener;
+import com.liferay.portal.test.MainServletExecutionTestListener;
+import com.liferay.portal.test.Sync;
+import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
 import com.liferay.portal.util.TestPropsValues;
 import com.liferay.portlet.blogs.model.BlogsEntry;
 import com.liferay.portlet.blogs.service.BlogsEntryLocalServiceUtil;
@@ -39,10 +40,11 @@ import org.junit.runner.RunWith;
  */
 @ExecutionTestListeners(
 	listeners = {
-		EnvironmentExecutionTestListener.class,
-		TransactionalExecutionTestListener.class
+		MainServletExecutionTestListener.class,
+		SynchronousDestinationExecutionTestListener.class
 	})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
+@Sync
 public class BlogsEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 
 	@Override
@@ -52,6 +54,11 @@ public class BlogsEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 
 	@Override
 	public void testTrashParentAndDeleteParent() throws Exception {
+		Assert.assertTrue("This test does not apply", true);
+	}
+
+	@Override
+	public void testTrashParentAndDeleteTrashEntries() throws Exception {
 		Assert.assertTrue("This test does not apply", true);
 	}
 
@@ -71,7 +78,7 @@ public class BlogsEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Override
-	protected BaseModel<?> addBaseModel(
+	protected BaseModel<?> addBaseModelWithWorkflow(
 			BaseModel<?> parentBaseModel, boolean approved,
 			ServiceContext serviceContext)
 		throws Exception {
@@ -104,7 +111,7 @@ public class BlogsEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 			smallImageInputStream, serviceContext);
 
 		if (approved) {
-			BlogsEntryLocalServiceUtil.updateStatus(
+			entry = BlogsEntryLocalServiceUtil.updateStatus(
 				TestPropsValues.getUserId(), entry.getEntryId(),
 				WorkflowConstants.STATUS_APPROVED, serviceContext);
 		}
@@ -123,7 +130,7 @@ public class BlogsEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Override
-	protected int getBaseModelsNotInTrashCount(BaseModel<?> parentBaseModel)
+	protected int getNotInTrashBaseModelsCount(BaseModel<?> parentBaseModel)
 		throws Exception {
 
 		QueryDefinition queryDefinition = new QueryDefinition(
@@ -136,6 +143,11 @@ public class BlogsEntryTrashHandlerTest extends BaseTrashHandlerTestCase {
 	@Override
 	protected String getSearchKeywords() {
 		return "Title";
+	}
+
+	@Override
+	protected String getUniqueTitle(BaseModel<?> baseModel) {
+		return null;
 	}
 
 	@Override

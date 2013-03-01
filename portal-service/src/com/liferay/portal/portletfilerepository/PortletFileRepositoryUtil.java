@@ -30,34 +30,41 @@ import java.util.List;
 
 /**
  * @author Eudaldo Alonso
+ * @author Alexander Chow
  */
 public class PortletFileRepositoryUtil {
 
 	public static void addPortletFileEntries(
-			long groupId, long userId, String portletId, long folderId,
+			long groupId, long userId, String className, long classPK,
+			String portletId, long folderId,
 			List<ObjectValuePair<String, InputStream>> inputStreamOVPs)
 		throws PortalException, SystemException {
 
 		getPortletFileRepository().addPortletFileEntries(
-			groupId, userId, portletId, folderId, inputStreamOVPs);
+			groupId, userId, className, classPK, portletId, folderId,
+			inputStreamOVPs);
 	}
 
 	public static FileEntry addPortletFileEntry(
-			long groupId, long userId, String portletId, long folderId,
-			File file, String fileName)
+			long groupId, long userId, String className, long classPK,
+			String portletId, long folderId, File file, String fileName,
+			String mimeType)
 		throws PortalException, SystemException {
 
 		return getPortletFileRepository().addPortletFileEntry(
-			groupId, userId, portletId, folderId, file, fileName);
+			groupId, userId, className, classPK, portletId, folderId, file,
+			fileName, mimeType);
 	}
 
 	public static FileEntry addPortletFileEntry(
-			long groupId, long userId, String portletId, long folderId,
-			InputStream inputStream, String fileName)
+			long groupId, long userId, String className, long classPK,
+			String portletId, long folderId, InputStream inputStream,
+			String fileName, String mimeType)
 		throws PortalException, SystemException {
 
 		return getPortletFileRepository().addPortletFileEntry(
-			groupId, userId, portletId, folderId, inputStream, fileName);
+			groupId, userId, className, classPK, portletId, folderId,
+			inputStream, fileName, mimeType);
 	}
 
 	public static void deleteFolder(long folderId)
@@ -92,6 +99,12 @@ public class PortletFileRepositoryUtil {
 
 		getPortletFileRepository().deletePortletFileEntry(
 			groupId, folderId, fileName);
+	}
+
+	public static void deletePortletRepository(long groupId, String portletId)
+		throws PortalException, SystemException {
+
+		getPortletFileRepository().deletePortletRepository(groupId, portletId);
 	}
 
 	public static List<FileEntry> getPortletFileEntries(
@@ -170,11 +183,11 @@ public class PortletFileRepositoryUtil {
 			userId, repositoryId, parentFolderId, folderName, serviceContext);
 	}
 
-	public static long getPortletRepository(
+	public static long getPortletRepositoryId(
 			long groupId, String portletId, ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		return getPortletFileRepository().getPortletRepository(
+		return getPortletFileRepository().getPortletRepositoryId(
 			groupId, portletId, serviceContext);
 	}
 

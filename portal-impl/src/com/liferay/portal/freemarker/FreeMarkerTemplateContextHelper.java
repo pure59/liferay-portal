@@ -14,8 +14,8 @@
 
 package com.liferay.portal.freemarker;
 
-import com.liferay.portal.kernel.template.TemplateResource;
-import com.liferay.portal.kernel.templateparser.TemplateContext;
+import com.liferay.portal.kernel.template.Template;
+import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -41,8 +41,68 @@ import javax.servlet.http.HttpServletRequest;
 public class FreeMarkerTemplateContextHelper extends TemplateContextHelper {
 
 	@Override
-	public Map<String, Object> getHelperUtilities() {
-		Map<String, Object> helperUtilities = super.getHelperUtilities();
+	public Set<String> getRestrictedVariables() {
+		return SetUtil.fromArray(
+			PropsValues.JOURNAL_TEMPLATE_FREEMARKER_RESTRICTED_VARIABLES);
+	}
+
+	@Override
+	public void prepare(Template template, HttpServletRequest request) {
+		super.prepare(template, request);
+
+		// Theme display
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		if (themeDisplay != null) {
+			Theme theme = themeDisplay.getTheme();
+
+			// Full css and templates path
+
+			String servletContextName = GetterUtil.getString(
+				theme.getServletContextName());
+
+			template.put(
+				"fullCssPath",
+				StringPool.SLASH + servletContextName +
+					theme.getFreeMarkerTemplateLoader() + theme.getCssPath());
+
+			template.put(
+				"fullTemplatesPath",
+				StringPool.SLASH + servletContextName +
+					theme.getFreeMarkerTemplateLoader() +
+						theme.getTemplatesPath());
+
+			// Init
+
+			template.put(
+				"init",
+				StringPool.SLASH + themeDisplay.getPathContext() +
+					TemplateConstants.SERVLET_SEPARATOR +
+						"/html/themes/_unstyled/templates/init.ftl");
+		}
+
+		// Insert custom ftl variables
+
+		Map<String, Object> ftlVariables =
+			(Map<String, Object>)request.getAttribute(WebKeys.FTL_VARIABLES);
+
+		if (ftlVariables != null) {
+			for (Map.Entry<String, Object> entry : ftlVariables.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+
+				if (Validator.isNotNull(key)) {
+					template.put(key, value);
+				}
+			}
+		}
+	}
+
+	@Override
+	protected void populateExtraHelperUtilities(
+		Map<String, Object> helperUtilities) {
 
 		// Enum util
 
@@ -62,70 +122,6 @@ public class FreeMarkerTemplateContextHelper extends TemplateContextHelper {
 
 		helperUtilities.put(
 			"staticUtil", BeansWrapper.getDefaultInstance().getStaticModels());
-
-		return helperUtilities;
-	}
-
-	@Override
-	public Set<String> getRestrictedVariables() {
-		return SetUtil.fromArray(
-			PropsValues.JOURNAL_TEMPLATE_FREEMARKER_RESTRICTED_VARIABLES);
-	}
-
-	@Override
-	public void prepare(
-		TemplateContext templateContext, HttpServletRequest request) {
-
-		super.prepare(templateContext, request);
-
-		// Theme display
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		if (themeDisplay != null) {
-			Theme theme = themeDisplay.getTheme();
-
-			// Full css and templates path
-
-			String servletContextName = GetterUtil.getString(
-				theme.getServletContextName());
-
-			templateContext.put(
-				"fullCssPath",
-				StringPool.SLASH + servletContextName +
-					theme.getFreeMarkerTemplateLoader() + theme.getCssPath());
-
-			templateContext.put(
-				"fullTemplatesPath",
-				StringPool.SLASH + servletContextName +
-					theme.getFreeMarkerTemplateLoader() +
-						theme.getTemplatesPath());
-
-			// Init
-
-			templateContext.put(
-				"init",
-				StringPool.SLASH + themeDisplay.getPathContext() +
-					TemplateResource.SERVLET_SEPARATOR +
-						"/html/themes/_unstyled/templates/init.ftl");
-		}
-
-		// Insert custom ftl variables
-
-		Map<String, Object> ftlVariables =
-			(Map<String, Object>)request.getAttribute(WebKeys.FTL_VARIABLES);
-
-		if (ftlVariables != null) {
-			for (Map.Entry<String, Object> entry : ftlVariables.entrySet()) {
-				String key = entry.getKey();
-				Object value = entry.getValue();
-
-				if (Validator.isNotNull(key)) {
-					templateContext.put(key, value);
-				}
-			}
-		}
 	}
 
 }

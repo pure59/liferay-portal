@@ -121,6 +121,23 @@ public class AssetVocabularyServiceSoap {
 		}
 	}
 
+	public static com.liferay.portlet.asset.model.AssetVocabularySoap addVocabulary(
+		java.lang.String title,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws RemoteException {
+		try {
+			com.liferay.portlet.asset.model.AssetVocabulary returnValue = AssetVocabularyServiceUtil.addVocabulary(title,
+					serviceContext);
+
+			return com.liferay.portlet.asset.model.AssetVocabularySoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	public static void deleteVocabularies(long[] vocabularyIds)
 		throws RemoteException {
 		try {
@@ -207,6 +224,23 @@ public class AssetVocabularyServiceSoap {
 	}
 
 	public static com.liferay.portlet.asset.model.AssetVocabularySoap[] getGroupVocabularies(
+		long groupId, boolean createDefaultVocabulary)
+		throws RemoteException {
+		try {
+			java.util.List<com.liferay.portlet.asset.model.AssetVocabulary> returnValue =
+				AssetVocabularyServiceUtil.getGroupVocabularies(groupId,
+					createDefaultVocabulary);
+
+			return com.liferay.portlet.asset.model.AssetVocabularySoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.asset.model.AssetVocabularySoap[] getGroupVocabularies(
 		long groupId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator obc)
 		throws RemoteException {
@@ -261,6 +295,23 @@ public class AssetVocabularyServiceSoap {
 		try {
 			int returnValue = AssetVocabularyServiceUtil.getGroupVocabulariesCount(groupId,
 					name);
+
+			return returnValue;
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.asset.model.AssetVocabularyDisplay getGroupVocabulariesDisplay(
+		long groupId, java.lang.String name, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator obc)
+		throws RemoteException {
+		try {
+			com.liferay.portlet.asset.model.AssetVocabularyDisplay returnValue = AssetVocabularyServiceUtil.getGroupVocabulariesDisplay(groupId,
+					name, start, end, obc);
 
 			return returnValue;
 		}

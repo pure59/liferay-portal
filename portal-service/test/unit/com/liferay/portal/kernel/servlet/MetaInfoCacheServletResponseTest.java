@@ -508,8 +508,8 @@ public class MetaInfoCacheServletResponseTest extends TestCase {
 
 		// Send error
 
-		fromMetaInfoCacheServletResponse =
-			new MetaInfoCacheServletResponse(stubHttpServletResponse);
+		fromMetaInfoCacheServletResponse = new MetaInfoCacheServletResponse(
+			stubHttpServletResponse);
 
 		fromMetaInfoCacheServletResponse.sendError(400, "Bad Page");
 
@@ -529,8 +529,8 @@ public class MetaInfoCacheServletResponseTest extends TestCase {
 
 		// Normal
 
-		fromMetaInfoCacheServletResponse =
-			new MetaInfoCacheServletResponse(stubHttpServletResponse);
+		fromMetaInfoCacheServletResponse = new MetaInfoCacheServletResponse(
+			stubHttpServletResponse);
 
 		fromMetaInfoCacheServletResponse.setContentLength(2048);
 		fromMetaInfoCacheServletResponse.setContentType(
@@ -564,8 +564,8 @@ public class MetaInfoCacheServletResponseTest extends TestCase {
 
 		// Finish response after commit
 
-		fromMetaInfoCacheServletResponse =
-			new MetaInfoCacheServletResponse(stubHttpServletResponse);
+		fromMetaInfoCacheServletResponse = new MetaInfoCacheServletResponse(
+			stubHttpServletResponse);
 
 		fromMetaInfoCacheServletResponse.sendRedirect("testURL");
 
@@ -1131,6 +1131,9 @@ public class MetaInfoCacheServletResponseTest extends TestCase {
 	public void testSendRedirect() throws IOException {
 		final AtomicReference<String> locationReference =
 			new AtomicReference<String>();
+		final AtomicReference<String> messageReference =
+			new AtomicReference<String>();
+		final AtomicInteger statusReference = new AtomicInteger();
 
 		StubHttpServletResponse stubHttpServletResponse =
 			new StubHttpServletResponse() {
@@ -1149,6 +1152,11 @@ public class MetaInfoCacheServletResponseTest extends TestCase {
 					locationReference.set(location);
 				}
 
+				@Override
+				public void setStatus(int status, String message) {
+					statusReference.set(status);
+					messageReference.set(message);
+				}
 			};
 
 		MetaInfoCacheServletResponse metaInfoCacheServletResponse =

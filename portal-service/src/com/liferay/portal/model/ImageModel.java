@@ -86,21 +86,6 @@ public interface ImageModel extends BaseModel<Image> {
 	public void setModifiedDate(Date modifiedDate);
 
 	/**
-	 * Returns the text of this image.
-	 *
-	 * @return the text of this image
-	 */
-	@AutoEscape
-	public String getText();
-
-	/**
-	 * Sets the text of this image.
-	 *
-	 * @param text the text of this image
-	 */
-	public void setText(String text);
-
-	/**
 	 * Returns the type of this image.
 	 *
 	 * @return the type of this image
@@ -172,6 +157,10 @@ public interface ImageModel extends BaseModel<Image> {
 	public void setPrimaryKeyObj(Serializable primaryKeyObj);
 
 	public ExpandoBridge getExpandoBridge();
+
+	public void setExpandoBridgeAttributes(BaseModel<?> baseModel);
+
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge);
 
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext);
 

@@ -121,7 +121,7 @@
 	</portlet>
 	<portlet>
 		<portlet-name>11</portlet-name>
-		<display-name>Directory</display-name>
+		<display-name>Portal Directory</display-name>
 		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
 		<init-param>
 			<name>template-path</name>
@@ -150,6 +150,10 @@
 		<init-param>
 			<name>config-template</name>
 			<value>/html/portlet/journal/configuration.jsp</value>
+		</init-param>
+		<init-param>
+			<name>ddm-resource</name>
+			<value>com.liferay.portlet.journal</value>
 		</init-param>
 		<init-param>
 			<name>template-path</name>
@@ -930,6 +934,10 @@
 		<init-param>
 			<name>config-template</name>
 			<value>/html/portlet/journal_articles/configuration.jsp</value>
+		</init-param>
+		<init-param>
+			<name>ddm-resource</name>
+			<value>com.liferay.portlet.journal</value>
 		</init-param>
 		<init-param>
 			<name>template-path</name>
@@ -3329,6 +3337,105 @@
 		<security-role-ref>
 			<role-name>guest</role-name>
 		</security-role-ref>
+		<security-role-ref>
+			<role-name>power-user</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>user</role-name>
+		</security-role-ref>
+	</portlet>
+	<portlet>
+		<portlet-name>185</portlet-name>
+		<display-name>Site Browser</display-name>
+		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<init-param>
+			<name>template-path</name>
+			<value>/html/portlet/site_browser/</value>
+		</init-param>
+		<init-param>
+			<name>view-action</name>
+			<value>/site_browser/view</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
+		<security-role-ref>
+			<role-name>guest</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>power-user</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>user</role-name>
+		</security-role-ref>
+	</portlet>
+	<portlet>
+		<portlet-name>186</portlet-name>
+		<display-name>Friends Directory</display-name>
+		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<init-param>
+			<name>template-path</name>
+			<value>/html/portlet/directory/</value>
+		</init-param>
+		<init-param>
+			<name>view-action</name>
+			<value>/directory/view</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
+		<security-role-ref>
+			<role-name>power-user</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>user</role-name>
+		</security-role-ref>
+	</portlet>
+	<portlet>
+		<portlet-name>187</portlet-name>
+		<display-name>Site Members Directory</display-name>
+		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<init-param>
+			<name>template-path</name>
+			<value>/html/portlet/directory/</value>
+		</init-param>
+		<init-param>
+			<name>view-action</name>
+			<value>/directory/view</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
+		<security-role-ref>
+			<role-name>power-user</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>user</role-name>
+		</security-role-ref>
+	</portlet>
+	<portlet>
+		<portlet-name>188</portlet-name>
+		<display-name>My Sites Directory</display-name>
+		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<init-param>
+			<name>template-path</name>
+			<value>/html/portlet/directory/</value>
+		</init-param>
+		<init-param>
+			<name>view-action</name>
+			<value>/directory/view</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
 		<security-role-ref>
 			<role-name>power-user</role-name>
 		</security-role-ref>

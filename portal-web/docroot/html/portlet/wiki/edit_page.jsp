@@ -95,15 +95,15 @@ if ((templateNodeId > 0) && Validator.isNotNull(templateTitle)) {
 		templatePage = WikiPageServiceUtil.getPage(templateNodeId, templateTitle);
 
 		if (Validator.isNull(parentTitle)) {
-	parentTitle = templatePage.getParentTitle();
+			parentTitle = templatePage.getParentTitle();
 
-	if (wikiPage.isNew()) {
-		format = templatePage.getFormat();
+			if (wikiPage.isNew()) {
+				format = templatePage.getFormat();
 
-		wikiPage.setContent(templatePage.getContent());
-		wikiPage.setFormat(format);
-		wikiPage.setParentTitle(parentTitle);
-	}
+				wikiPage.setContent(templatePage.getContent());
+				wikiPage.setFormat(format);
+				wikiPage.setParentTitle(parentTitle);
+			}
 		}
 	}
 	catch (Exception e) {
@@ -146,6 +146,13 @@ if (Validator.isNull(redirect)) {
 	<%
 	if (wikiPage == null) {
 		wikiPage = new WikiPageImpl();
+	}
+
+	try {
+		content = SanitizerUtil.sanitize(themeDisplay.getCompanyId(), scopeGroupId, themeDisplay.getUserId(), WikiPage.class.getName(), 0, "text/" + format, content);
+	}
+	catch (SanitizerException se) {
+		content = StringPool.BLANK;
 	}
 
 	wikiPage.setContent(content);
@@ -220,7 +227,7 @@ if (Validator.isNull(redirect)) {
 					<liferay-ui:message key="this-page-does-not-exist-yet-and-the-title-is-not-valid" />
 				</div>
 
-				<input type="button" value="<liferay-ui:message key="cancel" />" onClick="document.location = '<%= HtmlUtil.escape(PortalUtil.escapeRedirect(redirect)) %>'" />
+				<input onClick="document.location = '<%= HtmlUtil.escape(PortalUtil.escapeRedirect(redirect)) %>'" type="button" value="<liferay-ui:message key="cancel" />" />
 			</c:otherwise>
 		</c:choose>
 	</c:if>

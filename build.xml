@@ -18,9 +18,13 @@
 
 		<ant dir="util-bridges" target="clean" inheritAll="false" />
 		<ant dir="util-java" target="clean" inheritAll="false" />
+		<ant dir="util-slf4j" target="clean" inheritAll="false" />
 		<ant dir="util-taglib" target="clean" inheritAll="false" />
 
 		<ant dir="portal-impl" target="clean" inheritAll="false" />
+
+		<ant dir="osgi/bootstrap" target="clean" inheritAll="false" />
+		<ant dir="osgi/modules" target="clean" inheritAll="false" />
 
 		<ant dir="portal-web" target="clean" inheritAll="false" />
 
@@ -45,6 +49,8 @@
 				includes="${database.name}.*"
 			/>
 		</delete>
+
+		<delete dir="${module.framework.base.dir}" />
 
 		<if>
 			<equals arg1="${app.server.type}" arg2="glassfish" />
@@ -137,9 +143,13 @@
 
 		<ant dir="util-bridges" target="compile" inheritAll="false" />
 		<ant dir="util-java" target="compile" inheritAll="false" />
+		<ant dir="util-slf4j" target="compile" inheritAll="false" />
 		<ant dir="util-taglib" target="compile" inheritAll="false" />
 
 		<ant dir="portal-impl" target="compile" inheritAll="false" />
+
+		<ant dir="osgi/bootstrap" target="deploy" inheritAll="false" />
+		<ant dir="osgi/modules" target="deploy" inheritAll="false" />
 	</target>
 
 	<target name="deploy">
@@ -177,6 +187,7 @@ ${app.server.tomcat.dir}, then run "ant -buildfile build-dist.xml unzip-tomcat".
 
 		<ant dir="util-bridges" target="deploy" inheritAll="false" />
 		<ant dir="util-java" target="deploy" inheritAll="false" />
+		<ant dir="util-slf4j" target="deploy" inheritAll="false" />
 		<ant dir="util-taglib" target="deploy" inheritAll="false" />
 
 		<ant dir="portal-impl" target="deploy" inheritAll="false" />
@@ -212,6 +223,32 @@ ${app.server.tomcat.dir}, then run "ant -buildfile build-dist.xml unzip-tomcat".
 		<copy todir="${app.server.lib.portal.dir}">
 			<fileset dir="lib/portal" />
 		</copy>
+
+		<if>
+			<and>
+				<equals arg1="${app.server.type}" arg2="geronimo" />
+				<equals arg1="${app.server.geronimo.version}" arg2="2.2.1" />
+				<not>
+					<available file="${app.server.geronimo.dir}/repository/org/apache/geronimo/specs/geronimo-el_2.2_spec/1.0.3/geronimo-el_2.2_spec-1.0.3.jar" />
+				</not>
+			</and>
+			<then>
+				<mkdir dir="${app.server.geronimo.dir}/repository/org/apache/geronimo/specs/geronimo-el_2.2_spec/1.0.3" />
+
+				<get
+					dest="${app.server.geronimo.dir}/repository/org/apache/geronimo/specs/geronimo-el_2.2_spec/1.0.3/geronimo-el_2.2_spec-1.0.3.jar"
+					src="http://repo1.maven.org/maven2/org/apache/geronimo/specs/geronimo-el_2.2_spec/1.0.3/geronimo-el_2.2_spec-1.0.3.jar"
+					verbose="true"
+				/>
+
+				<concat
+					append="true"
+					destfile="${app.server.geronimo.dir}/var/config/artifact_aliases.properties"
+				>
+					org.apache.geronimo.specs/geronimo-el_1.0_spec/1.0.2/jar=org.apache.geronimo.specs/geronimo-el_2.2_spec/1.0.3/jar
+				</concat>
+			</then>
+		</if>
 
 		<if>
 			<equals arg1="${app.server.type}" arg2="jboss" />
@@ -437,7 +474,11 @@ ${app.server.tomcat.dir}, then run "ant -buildfile build-dist.xml unzip-tomcat".
 		<if>
 			<equals arg1="${app.server.type}" arg2="websphere" />
 			<then>
-				<exec dir="${app.server.websphere.bin.dir}" executable="cmd.exe">
+				<exec dir="${app.server.websphere.bin.dir}" executable="/bin/sh" os="${os.unix}">
+					<arg line="startServer.sh server1" />
+				</exec>
+
+				<exec dir="${app.server.websphere.bin.dir}" executable="cmd.exe" os="${os.windows}">
 					<arg line="/c startServer.bat server1" />
 				</exec>
 
@@ -475,13 +516,21 @@ print AdminConfig.save()
 print AdminControl.invoke(appManager, 'startApplication', 'liferay-portal')
 				</echo>
 
-				<exec dir="${app.server.websphere.bin.dir}" executable="cmd.exe">
+				<exec dir="${app.server.websphere.bin.dir}" executable="/bin/sh" os="${os.unix}">
+					<arg line="wsadmin.sh -f ${basedir}/wsadmin.py" />
+				</exec>
+
+				<exec dir="${app.server.websphere.bin.dir}" executable="cmd.exe" os="${os.windows}">
 					<arg line="/c wsadmin.bat -f ${basedir}\wsadmin.py" />
 				</exec>
 
 				<delete file="wsadmin.py" />
 
-				<exec dir="${app.server.websphere.bin.dir}" executable="cmd.exe">
+				<exec dir="${app.server.websphere.bin.dir}" executable="/bin/sh" os="${os.unix}">
+					<arg line="stopServer.sh server1" />
+				</exec>
+
+				<exec dir="${app.server.websphere.bin.dir}" executable="cmd.exe" os="${os.windows}">
 					<arg line="/c stopServer.bat server1" />
 				</exec>
 			</then>
@@ -532,6 +581,7 @@ print AdminControl.invoke(appManager, 'startApplication', 'liferay-portal')
 
 		<ant dir="util-bridges" target="jar" inheritAll="false" />
 		<ant dir="util-java" target="jar" inheritAll="false" />
+		<ant dir="util-slf4j" target="jar" inheritAll="false" />
 		<ant dir="util-taglib" target="jar" inheritAll="false" />
 
 		<ant dir="portal-impl" target="jar" inheritAll="false" />
@@ -576,6 +626,7 @@ print AdminControl.invoke(appManager, 'startApplication', 'liferay-portal')
 			<packageset dir="portal-service/src" />
 			<packageset dir="util-bridges/src" />
 			<packageset dir="util-java/src" />
+			<packageset dir="util-slf4j/src" />
 
 			<tag name="generated" description="" />
 		</javadoc>
@@ -614,6 +665,7 @@ print AdminControl.invoke(appManager, 'startApplication', 'liferay-portal')
 			<packageset dir="portal-service/src" />
 			<packageset dir="util-bridges/src" />
 			<packageset dir="util-java/src" />
+			<packageset dir="util-slf4j/src" />
 			<packageset dir="util-taglib/src" />
 
 			<tag name="generated" description="ServiceBuilder generated this class. Modifications in this class will be overwritten the next time it is generated." />
@@ -646,7 +698,7 @@ print AdminControl.invoke(appManager, 'startApplication', 'liferay-portal')
 		<echo file="svn-revision">Revision: ${svn.info.revision}
 Username: ${svn.username}
 Password: ${svn.password}
-Portal: ${project.dir}
+Portal: ${lp.source.dir}
 Plugins: ${lp.plugins.dir}</echo>
 	</target>
 
@@ -656,7 +708,7 @@ Plugins: ${lp.plugins.dir}</echo>
 		<ant dir="util-taglib" target="jar" inheritAll="false" />
 
 		<ant dir="sql" target="build-db" inheritAll="false" />
-		<ant dir="sql" target="rebuild-hypersonic" inheritAll="false" />
+		<!--<ant dir="sql" target="rebuild-hypersonic" inheritAll="false" />-->
 
 		<ant dir="portal-impl" target="build-themes" inheritAll="false" />
 

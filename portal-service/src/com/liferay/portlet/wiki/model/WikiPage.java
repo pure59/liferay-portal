@@ -40,7 +40,7 @@ public interface WikiPage extends WikiPageModel, PersistedModel {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
-	public int getAttachmentsFilesCount()
+	public int getAttachmentsFileEntriesCount()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
@@ -65,13 +65,23 @@ public interface WikiPage extends WikiPageModel, PersistedModel {
 
 	public com.liferay.portlet.wiki.model.WikiNode getNode();
 
+	public long getNodeAttachmentsFolderId()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
 	public com.liferay.portlet.wiki.model.WikiPage getParentPage();
 
 	public java.util.List<com.liferay.portlet.wiki.model.WikiPage> getParentPages();
 
 	public com.liferay.portlet.wiki.model.WikiPage getRedirectPage();
 
-	public boolean isInTrashFolder();
+	public java.util.List<com.liferay.portlet.wiki.model.WikiPage> getViewableChildPages();
+
+	public com.liferay.portlet.wiki.model.WikiPage getViewableParentPage();
+
+	public java.util.List<com.liferay.portlet.wiki.model.WikiPage> getViewableParentPages();
+
+	public boolean isInTrashContainer();
 
 	public boolean isResourceMain();
 

@@ -113,7 +113,7 @@ public class UserGroupLocalServiceUtil {
 	* Performs a dynamic query on the database and returns a range of the matching rows.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.UserGroupModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param dynamicQuery the dynamic query
@@ -133,7 +133,7 @@ public class UserGroupLocalServiceUtil {
 	* Performs a dynamic query on the database and returns an ordered range of the matching rows.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.UserGroupModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param dynamicQuery the dynamic query
@@ -198,7 +198,7 @@ public class UserGroupLocalServiceUtil {
 	* Returns a range of all the user groups.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.UserGroupModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param start the lower bound of the range of user groups
@@ -336,6 +336,12 @@ public class UserGroupLocalServiceUtil {
 			serviceContext);
 	}
 
+	public static void checkMembershipPolicy(com.liferay.portal.model.User user)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().checkMembershipPolicy(user);
+	}
+
 	/**
 	* Clears all associations between the user and its user groups and clears
 	* the permissions cache.
@@ -350,6 +356,22 @@ public class UserGroupLocalServiceUtil {
 	public static void clearUserUserGroups(long userId)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		getService().clearUserUserGroups(userId);
+	}
+
+	/**
+	* Copies the user group's layout to the user.
+	*
+	* @param userGroupId the primary key of the user group
+	* @param userId the primary key of the user
+	* @throws PortalException if a user with the primary key could not be
+	found or if a portal exception occurred
+	* @throws SystemException if a system exception occurred
+	* @deprecated
+	*/
+	public static void copyUserGroupLayouts(long userGroupId, long userId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().copyUserGroupLayouts(userGroupId, userId);
 	}
 
 	/**
@@ -383,22 +405,6 @@ public class UserGroupLocalServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		getService().copyUserGroupLayouts(userGroupIds, userId);
-	}
-
-	/**
-	* Copies the user group's layout to the user.
-	*
-	* @param userGroupId the primary key of the user group
-	* @param userId the primary key of the user
-	* @throws PortalException if a user with the primary key could not be
-	found or if a portal exception occurred
-	* @throws SystemException if a system exception occurred
-	* @deprecated
-	*/
-	public static void copyUserGroupLayouts(long userGroupId, long userId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		getService().copyUserGroupLayouts(userGroupId, userId);
 	}
 
 	/**
@@ -604,45 +610,6 @@ public class UserGroupLocalServiceUtil {
 	}
 
 	/**
-	* Returns an ordered range of all the user groups that match the name and
-	* description.
-	*
-	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end -
-	* start</code> instances. <code>start</code> and <code>end</code> are not
-	* primary keys, they are indexes in the result set. Thus, <code>0</code>
-	* refers to the first result in the set. Setting both <code>start</code>
-	* and <code>end</code> to {@link
-	* com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
-	* result set.
-	* </p>
-	*
-	* @param companyId the primary key of the user group's company
-	* @param name the user group's name (optionally <code>null</code>)
-	* @param description the user group's description (optionally
-	<code>null</code>)
-	* @param params the finder params (optionally <code>null</code>). For more
-	information see {@link
-	com.liferay.portal.service.persistence.UserGroupFinder}
-	* @param start the lower bound of the range of user groups to return
-	* @param end the upper bound of the range of user groups to return (not
-	inclusive)
-	* @param obc the comparator to order the user groups (optionally
-	<code>null</code>)
-	* @return the matching user groups ordered by comparator <code>obc</code>
-	* @throws SystemException if a system exception occurred
-	* @see com.liferay.portal.service.persistence.UserGroupFinder
-	*/
-	public static java.util.List<com.liferay.portal.model.UserGroup> search(
-		long companyId, java.lang.String name, java.lang.String description,
-		java.util.LinkedHashMap<java.lang.String, java.lang.Object> params,
-		int start, int end, com.liferay.portal.kernel.util.OrderByComparator obc)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		return getService()
-				   .search(companyId, name, description, params, start, end, obc);
-	}
-
-	/**
 	* Returns the number of user groups that match the keywords
 	*
 	* @param companyId the primary key of the user group's company
@@ -659,27 +626,6 @@ public class UserGroupLocalServiceUtil {
 		java.util.LinkedHashMap<java.lang.String, java.lang.Object> params)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService().searchCount(companyId, keywords, params);
-	}
-
-	/**
-	* Returns the number of user groups that match the name and description.
-	*
-	* @param companyId the primary key of the user group's company
-	* @param name the user group's name (optionally <code>null</code>)
-	* @param description the user group's description (optionally
-	<code>null</code>)
-	* @param params the finder params (optionally <code>null</code>). For more
-	information see {@link
-	com.liferay.portal.service.persistence.UserGroupFinder}
-	* @return the number of matching user groups
-	* @throws SystemException if a system exception occurred
-	* @see com.liferay.portal.service.persistence.UserGroupFinder
-	*/
-	public static int searchCount(long companyId, java.lang.String name,
-		java.lang.String description,
-		java.util.LinkedHashMap<java.lang.String, java.lang.Object> params)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		return getService().searchCount(companyId, name, description, params);
 	}
 
 	/**

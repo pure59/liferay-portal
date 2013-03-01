@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.staging.StagingConstants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
@@ -91,10 +92,25 @@ public class GroupImpl extends GroupBaseImpl {
 	public GroupImpl() {
 	}
 
-	public List<Group> getAncestors() throws PortalException, SystemException {
-		List<Group> groups = new ArrayList<Group>();
+	public String buildTreePath() throws PortalException, SystemException {
+		StringBundler sb = new StringBundler();
 
-		Group group = this;
+		buildTreePath(sb, this);
+
+		return sb.toString();
+	}
+
+	public List<Group> getAncestors() throws PortalException, SystemException {
+		Group group = null;
+
+		if (isStagingGroup()) {
+			group = getLiveGroup();
+		}
+		else {
+			group = this;
+		}
+
+		List<Group> groups = new ArrayList<Group>();
 
 		while (!group.isRoot()) {
 			group = group.getParentGroup();
@@ -142,6 +158,28 @@ public class GroupImpl extends GroupBaseImpl {
 		return GroupLocalServiceUtil.getGroupDescriptiveName(this, locale);
 	}
 
+	public String getIconURL(ThemeDisplay themeDisplay) {
+		String iconURL = themeDisplay.getPathThemeImages() + "/common/";
+
+		if (isCompany()) {
+			iconURL = iconURL.concat("global.png");
+		}
+		else if (isLayout()) {
+			iconURL = iconURL.concat("page.png");
+		}
+		else if (isOrganization()) {
+			iconURL = iconURL.concat("organization_icon.png");
+		}
+		else if (isUser()) {
+			iconURL = iconURL.concat("user_icon.png");
+		}
+		else {
+			iconURL = iconURL.concat("site_icon.png");
+		}
+
+		return iconURL;
+	}
+
 	public Group getLiveGroup() {
 		if (!isStagingGroup()) {
 			return null;
@@ -159,6 +197,13 @@ public class GroupImpl extends GroupBaseImpl {
 
 			return null;
 		}
+	}
+
+	public String getLiveParentTypeSettingsProperty(String key) {
+		UnicodeProperties typeSettingsProperties =
+			getParentLiveGroupTypeSettingsProperties();
+
+		return typeSettingsProperties.getProperty(key);
 	}
 
 	public long getOrganizationId() {
@@ -184,6 +229,27 @@ public class GroupImpl extends GroupBaseImpl {
 		}
 
 		return GroupLocalServiceUtil.getGroup(parentGroupId);
+	}
+
+	public UnicodeProperties getParentLiveGroupTypeSettingsProperties() {
+		try {
+			if (isLayout()) {
+				Group parentGroup = GroupLocalServiceUtil.getGroup(
+					getParentGroupId());
+
+				return parentGroup.getParentLiveGroupTypeSettingsProperties();
+			}
+
+			if (isStagingGroup()) {
+				Group liveGroup = getLiveGroup();
+
+				return liveGroup.getTypeSettingsProperties();
+			}
+		}
+		catch (Exception e) {
+		}
+
+		return getTypeSettingsProperties();
 	}
 
 	public String getPathFriendlyURL(
@@ -305,6 +371,27 @@ public class GroupImpl extends GroupBaseImpl {
 		UnicodeProperties typeSettingsProperties = getTypeSettingsProperties();
 
 		return typeSettingsProperties.getProperty(key);
+	}
+
+	public boolean hasAncestor(long groupId) {
+		Group group = null;
+
+		if (isStagingGroup()) {
+			group = getLiveGroup();
+		}
+		else {
+			group = this;
+		}
+
+		String treePath = group.getTreePath();
+
+		if ((groupId != group.getGroupId()) &&
+			treePath.contains(StringPool.SLASH + groupId + StringPool.SLASH)) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public boolean hasPrivateLayouts() {
@@ -497,24 +584,17 @@ public class GroupImpl extends GroupBaseImpl {
 	}
 
 	public boolean isStaged() {
-		return GetterUtil.getBoolean(getTypeSettingsProperty("staged"));
+		return GetterUtil.getBoolean(
+			getLiveParentTypeSettingsProperty("staged"));
 	}
 
 	public boolean isStagedPortlet(String portletId) {
-		try {
-			if (isLayout()) {
-				Group parentGroup = GroupLocalServiceUtil.getGroup(
-					getParentGroupId());
-
-				return parentGroup.isStagedPortlet(portletId);
-			}
-		}
-		catch (Exception e) {
-		}
+		UnicodeProperties typeSettingsProperties =
+			getParentLiveGroupTypeSettingsProperties();
 
 		portletId = PortletConstants.getRootPortletId(portletId);
 
-		String typeSettingsProperty = getTypeSettingsProperty(
+		String typeSettingsProperty = typeSettingsProperties.getProperty(
 			StagingConstants.STAGED_PORTLET.concat(portletId));
 
 		if (Validator.isNotNull(typeSettingsProperty)) {
@@ -530,9 +610,6 @@ public class GroupImpl extends GroupBaseImpl {
 			if (Validator.isNull(portletDataHandlerClass)) {
 				return true;
 			}
-
-			UnicodeProperties typeSettingsProperties =
-				getTypeSettingsProperties();
 
 			for (Map.Entry<String, String> entry :
 					typeSettingsProperties.entrySet()) {
@@ -563,7 +640,8 @@ public class GroupImpl extends GroupBaseImpl {
 	}
 
 	public boolean isStagedRemotely() {
-		return GetterUtil.getBoolean(getTypeSettingsProperty("stagedRemotely"));
+		return GetterUtil.getBoolean(
+			getLiveParentTypeSettingsProperty("stagedRemotely"));
 	}
 
 	public boolean isStagingGroup() {
@@ -600,6 +678,20 @@ public class GroupImpl extends GroupBaseImpl {
 		_typeSettingsProperties = typeSettingsProperties;
 
 		super.setTypeSettings(_typeSettingsProperties.toString());
+	}
+
+	protected void buildTreePath(StringBundler sb, Group group)
+		throws PortalException, SystemException {
+
+		if (group == null) {
+			sb.append(StringPool.SLASH);
+		}
+		else {
+			buildTreePath(sb, group.getParentGroup());
+
+			sb.append(group.getGroupId());
+			sb.append(StringPool.SLASH);
+		}
 	}
 
 	protected long getDefaultPlid(boolean privateLayout) {

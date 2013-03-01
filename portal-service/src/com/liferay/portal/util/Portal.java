@@ -46,6 +46,7 @@ import java.util.TimeZone;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletConfig;
+import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
@@ -74,6 +75,8 @@ public interface Portal {
 	public static final String PATH_IMAGE = "/image";
 
 	public static final String PATH_MAIN = "/c";
+
+	public static final String PATH_MODULE = "/o/";
 
 	public static final String PATH_PORTAL_LAYOUT = "/portal/layout";
 
@@ -635,6 +638,9 @@ public interface Portal {
 
 	public String getFirstPageLayoutTypes(PageContext pageContext);
 
+	public String getFullName(
+		String firstName, String middleName, String lastName);
+
 	public String getGlobalLibDir();
 
 	public String getGoogleGadgetURL(Portlet portlet, ThemeDisplay themeDisplay)
@@ -644,13 +650,30 @@ public interface Portal {
 			Group group, boolean privateLayoutSet, ThemeDisplay themeDisplay)
 		throws PortalException, SystemException;
 
+	public String getGroupFriendlyURL(
+			Group group, boolean privateLayoutSet, ThemeDisplay themeDisplay,
+			Locale locale)
+		throws PortalException, SystemException;
+
 	public String[] getGroupPermissions(HttpServletRequest request);
+
+	public String[] getGroupPermissions(
+		HttpServletRequest request, String className);
 
 	public String[] getGroupPermissions(PortletRequest portletRequest);
 
+	public String[] getGroupPermissions(
+		PortletRequest portletRequest, String className);
+
 	public String[] getGuestPermissions(HttpServletRequest request);
 
+	public String[] getGuestPermissions(
+		HttpServletRequest request, String className);
+
 	public String[] getGuestPermissions(PortletRequest portletRequest);
+
+	public String[] getGuestPermissions(
+		PortletRequest portletRequest, String className);
 
 	public String getHomeURL(HttpServletRequest request)
 		throws PortalException, SystemException;
@@ -666,8 +689,9 @@ public interface Portal {
 		PortletResponse portletResponse);
 
 	public String getJournalArticleActualURL(
-			long groupId, String mainPath, String friendlyURL,
-			Map<String, String[]> params, Map<String, Object> requestContext)
+			long groupId, boolean privateLayout, String mainPath,
+			String friendlyURL, Map<String, String[]> params,
+			Map<String, Object> requestContext)
 		throws PortalException, SystemException;
 
 	public String getJsSafePortletId(String portletId);
@@ -756,6 +780,9 @@ public interface Portal {
 	public HttpServletRequest getOriginalServletRequest(
 		HttpServletRequest request);
 
+	/**
+	 * @deprecated As of 6.2 renamed to {@link #getSiteGroupId(long)}
+	 */
 	public long getParentGroupId(long scopeGroupId)
 		throws PortalException, SystemException;
 
@@ -770,6 +797,8 @@ public interface Portal {
 	public String getPathImage();
 
 	public String getPathMain();
+
+	public String getPathModule();
 
 	public String getPathProxy();
 
@@ -824,6 +853,10 @@ public interface Portal {
 
 	public List<BreadcrumbEntry> getPortletBreadcrumbs(
 		HttpServletRequest request);
+
+	public PortletConfig getPortletConfig(
+			long companyId, String portletId, ServletContext servletContext)
+		throws PortletException, SystemException;
 
 	public String getPortletDescription(
 		Portlet portlet, ServletContext servletContext, Locale locale);
@@ -923,6 +956,9 @@ public interface Portal {
 		throws PortalException, SystemException;
 
 	public long[] getSiteAndCompanyGroupIds(ThemeDisplay themeDisplay)
+		throws PortalException, SystemException;
+
+	public long getSiteGroupId(long groupId)
 		throws PortalException, SystemException;
 
 	/**
@@ -1071,6 +1107,9 @@ public interface Portal {
 		throws SystemException;
 
 	public boolean isGroupAdmin(User user, long groupId) throws Exception;
+
+	public boolean isGroupFriendlyURL(
+		String fullURL, String groupFriendlyURL, String layoutFriendlyURL);
 
 	public boolean isGroupOwner(User user, long groupId) throws Exception;
 

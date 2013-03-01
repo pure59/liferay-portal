@@ -63,6 +63,8 @@ public class ClusterGroupModelImpl extends BaseModelImpl<ClusterGroup>
 		};
 	public static final String TABLE_SQL_CREATE = "create table ClusterGroup (clusterGroupId LONG not null primary key,name VARCHAR(75) null,clusterNodeIds VARCHAR(75) null,wholeCluster BOOLEAN)";
 	public static final String TABLE_SQL_DROP = "drop table ClusterGroup";
+	public static final String ORDER_BY_JPQL = " ORDER BY clusterGroup.clusterGroupId ASC";
+	public static final String ORDER_BY_SQL = " ORDER BY ClusterGroup.clusterGroupId ASC";
 	public static final String DATA_SOURCE = "liferayDataSource";
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
@@ -88,7 +90,7 @@ public class ClusterGroupModelImpl extends BaseModelImpl<ClusterGroup>
 	}
 
 	public Serializable getPrimaryKeyObj() {
-		return new Long(_clusterGroupId);
+		return _clusterGroupId;
 	}
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {

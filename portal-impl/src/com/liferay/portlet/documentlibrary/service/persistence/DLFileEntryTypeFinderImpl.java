@@ -97,9 +97,9 @@ public class DLFileEntryTypeFinderImpl
 	}
 
 	public List<DLFileEntryType> filterFindByKeywords(
-		long companyId, long[] groupIds, String keywords,
-		boolean includeBasicFileEntryType, int start, int end,
-		OrderByComparator orderByComparator)
+			long companyId, long[] groupIds, String keywords,
+			boolean includeBasicFileEntryType, int start, int end,
+			OrderByComparator orderByComparator)
 		throws SystemException {
 
 		String[] names = null;
@@ -285,7 +285,7 @@ public class DLFileEntryTypeFinderImpl
 
 		StringBundler sb = new StringBundler(groupIds.length * 2);
 
-		sb.append("(");
+		sb.append(StringPool.OPEN_PARENTHESIS);
 
 		for (int i = 0; i < groupIds.length; i++) {
 			sb.append("groupId = ?");

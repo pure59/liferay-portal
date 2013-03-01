@@ -32,8 +32,6 @@ import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.model.AssetEntry;
 import com.liferay.portlet.asset.model.AssetRenderer;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
-import com.liferay.portlet.asset.service.AssetEntryServiceUtil;
-import com.liferay.portlet.asset.service.persistence.AssetEntryQuery;
 import com.liferay.portlet.assetpublisher.util.AssetPublisherUtil;
 import com.liferay.util.RSSUtil;
 
@@ -64,7 +62,7 @@ public class RSSAction extends com.liferay.portal.struts.RSSAction {
 
 	protected String exportToRSS(
 			PortletRequest portletRequest, PortletResponse portletResponse,
-			String name, String description, String type, double version,
+			String name, String description, String format, double version,
 			String displayStyle, String linkBehavior,
 			List<AssetEntry> assetEntries)
 		throws Exception {
@@ -108,7 +106,7 @@ public class RSSAction extends com.liferay.portal.struts.RSSAction {
 
 			syndEntry.setLink(link);
 
-			syndEntry.setPublishedDate(assetEntry.getCreateDate());
+			syndEntry.setPublishedDate(assetEntry.getPublishDate());
 			syndEntry.setTitle(assetEntry.getTitle(languageId, true));
 			syndEntry.setUpdatedDate(assetEntry.getModifiedDate());
 			syndEntry.setUri(syndEntry.getLink());
@@ -116,7 +114,7 @@ public class RSSAction extends com.liferay.portal.struts.RSSAction {
 			syndEntries.add(syndEntry);
 		}
 
-		syndFeed.setFeedType(RSSUtil.getFeedType(type, version));
+		syndFeed.setFeedType(RSSUtil.getFeedType(format, version));
 
 		List<SyndLink> syndLinks = new ArrayList<SyndLink>();
 
@@ -146,78 +144,12 @@ public class RSSAction extends com.liferay.portal.struts.RSSAction {
 		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		AssetEntryQuery assetEntryQuery = AssetPublisherUtil.getAssetEntryQuery(
-			preferences, new long[] {themeDisplay.getScopeGroupId()});
-
-		boolean anyAssetType = GetterUtil.getBoolean(
-			preferences.getValue("anyAssetType", null), true);
-
-		if (!anyAssetType) {
-			long[] availableClassNameIds =
-				AssetRendererFactoryRegistryUtil.getClassNameIds();
-
-			long[] classNameIds = AssetPublisherUtil.getClassNameIds(
-				preferences, availableClassNameIds);
-
-			assetEntryQuery.setClassNameIds(classNameIds);
-		}
-
-		long[] classTypeIds = GetterUtil.getLongValues(
-			preferences.getValues("classTypeIds", null));
-
-		assetEntryQuery.setClassTypeIds(classTypeIds);
-
-		boolean enablePermissions = GetterUtil.getBoolean(
-			preferences.getValue("enablePermissions", null));
-
-		assetEntryQuery.setEnablePermissions(enablePermissions);
-
 		int rssDelta = GetterUtil.getInteger(
 			preferences.getValue("rssDelta", "20"));
 
-		assetEntryQuery.setEnd(rssDelta);
-
-		boolean excludeZeroViewCount = GetterUtil.getBoolean(
-			preferences.getValue("excludeZeroViewCount", null));
-
-		assetEntryQuery.setExcludeZeroViewCount(excludeZeroViewCount);
-
-		long[] groupIds = AssetPublisherUtil.getGroupIds(
-			preferences, themeDisplay.getScopeGroupId(),
-			themeDisplay.getLayout());
-
-		assetEntryQuery.setGroupIds(groupIds);
-
-		boolean showOnlyLayoutAssets = GetterUtil.getBoolean(
-			preferences.getValue("showOnlyLayoutAssets", null));
-
-		if (showOnlyLayoutAssets) {
-			assetEntryQuery.setLayout(themeDisplay.getLayout());
-		}
-
-		String orderByColumn1 = GetterUtil.getString(
-			preferences.getValue("orderByColumn1", "modifiedDate"));
-
-		assetEntryQuery.setOrderByCol1(orderByColumn1);
-
-		String orderByColumn2 = GetterUtil.getString(
-			preferences.getValue("orderByColumn2", "title"));
-
-		assetEntryQuery.setOrderByCol2(orderByColumn2);
-
-		String orderByType1 = GetterUtil.getString(
-			preferences.getValue("orderByType1", "DESC"));
-
-		assetEntryQuery.setOrderByType1(orderByType1);
-
-		String orderByType2 = GetterUtil.getString(
-			preferences.getValue("orderByType2", "ASC"));
-
-		assetEntryQuery.setOrderByType2(orderByType2);
-
-		assetEntryQuery.setStart(0);
-
-		return AssetEntryServiceUtil.getEntries(assetEntryQuery);
+		return AssetPublisherUtil.getAssetEntries(
+			preferences, themeDisplay.getLayout(),
+			themeDisplay.getScopeGroupId(), rssDelta, true);
 	}
 
 	protected String getAssetPublisherURL(PortletRequest portletRequest)
@@ -336,18 +268,21 @@ public class RSSAction extends com.liferay.portal.struts.RSSAction {
 			return new byte[0];
 		}
 
-		String rssName = preferences.getValue("rssName", null);
-		String rssFormat = preferences.getValue("rssFormat", "atom10");
-		String rssDisplayStyle = preferences.getValue(
-			"rssDisplayStyle", RSSUtil.DISPLAY_STYLE_ABSTRACT);
 		String assetLinkBehavior = preferences.getValue(
 			"assetLinkBehavior", "showFullContent");
+		String rssDisplayStyle = preferences.getValue(
+			"rssDisplayStyle", RSSUtil.DISPLAY_STYLE_ABSTRACT);
+		String rssFeedType = preferences.getValue(
+			"rssFeedType", RSSUtil.FEED_TYPE_DEFAULT);
+		String rssName = preferences.getValue("rssName", null);
+
+		String format = RSSUtil.getFeedTypeFormat(rssFeedType);
+		double version = RSSUtil.getFeedTypeVersion(rssFeedType);
 
 		String rss = exportToRSS(
-			portletRequest, portletResponse, rssName, null,
-			RSSUtil.getFormatType(rssFormat),
-			RSSUtil.getFormatVersion(rssFormat), rssDisplayStyle,
-			assetLinkBehavior, getAssetEntries(portletRequest, preferences));
+			portletRequest, portletResponse, rssName, null, format, version,
+			rssDisplayStyle, assetLinkBehavior,
+			getAssetEntries(portletRequest, preferences));
 
 		return rss.getBytes(StringPool.UTF8);
 	}

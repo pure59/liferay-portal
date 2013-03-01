@@ -14,7 +14,7 @@
 
 package com.liferay.portlet.social.model;
 
-import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.service.ServiceContext;
 
 /**
  * @author Brian Wing Shun Chan
@@ -23,7 +23,12 @@ public interface SocialActivityInterpreter {
 
 	public String[] getClassNames();
 
+	public String getSelector();
+
 	public SocialActivityFeedEntry interpret(
-		SocialActivity activity, ThemeDisplay themeDisplay);
+		SocialActivity activity, ServiceContext serviceContext);
+
+	public SocialActivityFeedEntry interpret(
+		SocialActivitySet activitySet, ServiceContext serviceContext);
 
 }

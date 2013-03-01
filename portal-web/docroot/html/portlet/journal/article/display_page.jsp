@@ -30,15 +30,25 @@ String layoutBreadcrumb = StringPool.BLANK;
 
 if (Validator.isNotNull(layoutUuid)) {
 	try {
-		selLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(layoutUuid, themeDisplay.getParentGroupId());
+		selLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(layoutUuid, themeDisplay.getSiteGroupId(), false);
 
 		layoutBreadcrumb = _getLayoutBreadcrumb(selLayout, locale);
 	}
 	catch (NoSuchLayoutException nsle) {
 	}
+
+	if (selLayout == null) {
+		try {
+			selLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(layoutUuid, themeDisplay.getSiteGroupId(), true);
+
+			layoutBreadcrumb = _getLayoutBreadcrumb(selLayout, locale);
+		}
+		catch (NoSuchLayoutException nsle) {
+		}
+	}
 }
 
-Group parentGroup = themeDisplay.getParentGroup();
+Group parentGroup = themeDisplay.getSiteGroup();
 %>
 
 <liferay-ui:error-marker key="errorSection" value="display-page" />
@@ -107,7 +117,7 @@ Group parentGroup = themeDisplay.getParentGroup();
 			<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" var="treeUrlPublicPages">
 				<portlet:param name="struts_action" value="/journal/select_display_page" />
 				<portlet:param name="cmd" value="<%= ActionKeys.VIEW_TREE %>" />
-				<portlet:param name="groupId" value="<%= String.valueOf(themeDisplay.getParentGroupId()) %>" />
+				<portlet:param name="groupId" value="<%= String.valueOf(themeDisplay.getSiteGroupId()) %>" />
 
 				<c:if test="<%= selLayout != null && !selLayout.isPrivateLayout() %>">
 					<portlet:param name="selPlid" value="<%= String.valueOf(selLayout.getPlid()) %>" />
@@ -115,6 +125,7 @@ Group parentGroup = themeDisplay.getParentGroup();
 
 				<portlet:param name="treeId" value="treeContainerPublicPages" />
 				<portlet:param name="checkContentDisplayPage" value="<%= Boolean.TRUE.toString() %>" />
+				<portlet:param name="draggableTree" value="<%= Boolean.FALSE.toString() %>" />
 				<portlet:param name="expandFirstNode" value="<%= Boolean.TRUE.toString() %>" />
 				<portlet:param name="saveState" value="<%= Boolean.FALSE.toString() %>" />
 			</liferay-portlet:resourceURL>
@@ -123,7 +134,7 @@ Group parentGroup = themeDisplay.getParentGroup();
 				<portlet:param name="struts_action" value="/journal/select_display_page" />
 				<portlet:param name="<%= Constants.CMD %>" value="<%= ActionKeys.VIEW_TREE %>" />
 				<portlet:param name="tabs1" value="private-pages" />
-				<portlet:param name="groupId" value="<%= String.valueOf(themeDisplay.getParentGroupId()) %>" />
+				<portlet:param name="groupId" value="<%= String.valueOf(themeDisplay.getSiteGroupId()) %>" />
 
 				<c:if test="<%= selLayout != null && selLayout.isPrivateLayout() %>">
 					<portlet:param name="selPlid" value="<%= String.valueOf(selLayout.getPlid()) %>" />
@@ -543,7 +554,14 @@ Group parentGroup = themeDisplay.getParentGroup();
 <c:if test="<%= (article != null) && Validator.isNotNull(layoutUuid) %>">
 
 	<%
-	Layout defaultDisplayLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(layoutUuid, scopeGroupId);
+	Layout defaultDisplayLayout = null;
+
+	try {
+		defaultDisplayLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(layoutUuid, scopeGroupId, false);
+	}
+	catch (NoSuchLayoutException nsle) {
+		defaultDisplayLayout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(layoutUuid, scopeGroupId, true);
+	}
 
 	defaultDisplayLayout = defaultDisplayLayout.toEscapedModel();
 

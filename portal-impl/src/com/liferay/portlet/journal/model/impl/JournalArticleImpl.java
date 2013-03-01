@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.templateparser.TransformerListener;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
@@ -26,6 +27,8 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Image;
 import com.liferay.portal.service.ImageLocalServiceUtil;
+import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.webserver.WebServerServletTokenUtil;
 import com.liferay.portlet.journal.model.JournalArticleResource;
 import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.journal.service.JournalArticleResourceLocalServiceUtil;
@@ -46,15 +49,28 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 	public static String getContentByLocale(
 		String content, boolean templateDriven, String languageId) {
 
-		LocaleTransformerListener listener = new LocaleTransformerListener();
+		TransformerListener transformerListener =
+			new LocaleTransformerListener();
 
-		listener.setTemplateDriven(templateDriven);
-		listener.setLanguageId(languageId);
-
-		return listener.onXml(content);
+		return transformerListener.onXml(content, languageId, null);
 	}
 
 	public JournalArticleImpl() {
+	}
+
+	public String getArticleImageURL(ThemeDisplay themeDisplay) {
+		if (!isSmallImage()) {
+			return null;
+		}
+
+		if (Validator.isNotNull(getSmallImageURL())) {
+			return getSmallImageURL();
+		}
+
+		return
+			themeDisplay.getPathImage() + "/journal/article?img_id=" +
+				getSmallImageId() + "&t=" +
+					WebServerServletTokenUtil.getToken(getSmallImageId());
 	}
 
 	public JournalArticleResource getArticleResource()
@@ -179,6 +195,25 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 		}
 		finally {
 			LocaleThreadLocal.setDefaultLocale(defaultLocale);
+		}
+	}
+
+	public JournalFolder getTrashContainer() {
+		JournalFolder folder = getFolder();
+
+		if (folder.isInTrash()) {
+			return folder;
+		}
+
+		return folder.getTrashContainer();
+	}
+
+	public boolean isInTrashContainer() {
+		if (getTrashContainer() != null) {
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 

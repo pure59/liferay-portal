@@ -20,7 +20,6 @@ import com.liferay.portal.NoSuchLockException;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -162,7 +161,7 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 		return dlFolder;
 	}
 
-	public long[] getFolderIds(long groupId, long folderId)
+	public List<Long> getFolderIds(long groupId, long folderId)
 		throws PortalException, SystemException {
 
 		DLFolderPermission.check(
@@ -172,7 +171,7 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 
 		folderIds.add(0, folderId);
 
-		return ArrayUtil.toArray(folderIds.toArray(new Long[folderIds.size()]));
+		return folderIds;
 	}
 
 	public List<DLFolder> getFolders(
@@ -185,12 +184,12 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 			getPermissionChecker(), groupId, parentFolderId, ActionKeys.VIEW);
 
 		if (includeMountfolders) {
-			return dlFolderPersistence.filterFindByG_P_S(
-				groupId, parentFolderId, status, start, end, obc);
+			return dlFolderPersistence.filterFindByG_P_H_S(
+				groupId, parentFolderId, false, status, start, end, obc);
 		}
 		else {
-			return dlFolderPersistence.filterFindByG_M_P_S(
-				groupId, false, parentFolderId, status, start, end, obc);
+			return dlFolderPersistence.filterFindByG_M_P_H_S(
+				groupId, false, parentFolderId, false, status, start, end, obc);
 		}
 	}
 
@@ -285,12 +284,12 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 		throws SystemException {
 
 		if (includeMountfolders) {
-			return dlFolderPersistence.filterCountByG_P_S(
-				groupId, parentFolderId, status);
+			return dlFolderPersistence.filterCountByG_P_H_S(
+				groupId, parentFolderId, false, status);
 		}
 		else {
-			return dlFolderPersistence.filterCountByG_M_P_S(
-				groupId, false, parentFolderId, status);
+			return dlFolderPersistence.filterCountByG_M_P_H_S(
+				groupId, false, parentFolderId, false, status);
 		}
 	}
 
@@ -320,10 +319,14 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 		DLFolderPermission.check(
 			getPermissionChecker(), groupId, folderId, ActionKeys.VIEW);
 
-		List<DLFolder> dlFolders = dlFolderPersistence.filterFindByG_P(
-			groupId, folderId);
+		List<DLFolder> dlFolders = dlFolderPersistence.filterFindByG_P_H_S(
+			groupId, folderId, false, WorkflowConstants.STATUS_APPROVED);
 
 		for (DLFolder dlFolder : dlFolders) {
+			if (dlFolder.isInHiddenFolder() || dlFolder.isInTrashContainer()) {
+				continue;
+			}
+
 			folderIds.add(dlFolder.getFolderId());
 
 			getSubfolderIds(
@@ -407,8 +410,7 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 			permissionChecker, serviceContext.getScopeGroupId(), parentFolderId,
 			ActionKeys.ADD_FOLDER);
 
-		boolean hasLock = lockLocalService.hasLock(
-			getUserId(), DLFolder.class.getName(), folderId);
+		boolean hasLock = hasFolderLock(folderId);
 
 		Lock lock = null;
 
@@ -474,8 +476,7 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 			getPermissionChecker(), serviceContext.getScopeGroupId(), folderId,
 			ActionKeys.UPDATE);
 
-		boolean hasLock = lockLocalService.hasLock(
-			getUserId(), DLFolder.class.getName(), folderId);
+		boolean hasLock = hasFolderLock(folderId);
 
 		Lock lock = null;
 

@@ -28,12 +28,15 @@ import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.documentlibrary.DuplicateFileEntryTypeException;
 import com.liferay.portlet.documentlibrary.NoSuchFileEntryTypeException;
 import com.liferay.portlet.documentlibrary.NoSuchMetadataSetException;
+import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryType;
+import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryTypeServiceUtil;
 import com.liferay.portlet.documentlibrary.util.DLUtil;
 import com.liferay.portlet.dynamicdatamapping.NoSuchStructureException;
@@ -74,6 +77,12 @@ public class EditFileEntryTypeAction extends PortletAction {
 			}
 			else if (cmd.equals(Constants.DELETE)) {
 				deleteFileEntryType(actionRequest, actionResponse);
+			}
+			else if (cmd.equals(Constants.SUBSCRIBE)) {
+				subscribeFileEntryType(actionRequest);
+			}
+			else if (cmd.equals(Constants.UNSUBSCRIBE)) {
+				unsubscribeFileEntryType(actionRequest);
 			}
 
 			if (SessionErrors.isEmpty(actionRequest)) {
@@ -138,11 +147,13 @@ public class EditFileEntryTypeAction extends PortletAction {
 				DDMStructure ddmStructure =
 					DDMStructureLocalServiceUtil.fetchStructure(
 						dlFileEntryType.getGroupId(),
+						PortalUtil.getClassNameId(DLFileEntry.class),
 						DLUtil.getDDMStructureKey(dlFileEntryType));
 
 				if (ddmStructure == null) {
 					ddmStructure = DDMStructureLocalServiceUtil.fetchStructure(
 						dlFileEntryType.getGroupId(),
+						PortalUtil.getClassNameId(DLFileEntry.class),
 						DLUtil.getDeprecatedDDMStructureKey(dlFileEntryType));
 				}
 
@@ -187,6 +198,32 @@ public class EditFileEntryTypeAction extends PortletAction {
 		}
 
 		return StringUtil.split(GetterUtil.getString(value), 0L);
+	}
+
+	protected void subscribeFileEntryType(ActionRequest actionRequest)
+		throws Exception {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		long fileEntryTypeId = ParamUtil.getLong(
+			actionRequest, "fileEntryTypeId");
+
+		DLAppServiceUtil.subscribeFileEntryType(
+			themeDisplay.getScopeGroupId(), fileEntryTypeId);
+	}
+
+	protected void unsubscribeFileEntryType(ActionRequest actionRequest)
+		throws Exception {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		long fileEntryTypeId = ParamUtil.getLong(
+			actionRequest, "fileEntryTypeId");
+
+		DLAppServiceUtil.unsubscribeFileEntryType(
+			themeDisplay.getScopeGroupId(), fileEntryTypeId);
 	}
 
 	protected void updateFileEntryType(

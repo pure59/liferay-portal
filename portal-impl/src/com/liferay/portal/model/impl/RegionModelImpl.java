@@ -86,6 +86,7 @@ public class RegionModelImpl extends BaseModelImpl<Region>
 	public static long ACTIVE_COLUMN_BITMASK = 1L;
 	public static long COUNTRYID_COLUMN_BITMASK = 2L;
 	public static long REGIONCODE_COLUMN_BITMASK = 4L;
+	public static long NAME_COLUMN_BITMASK = 8L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -144,7 +145,7 @@ public class RegionModelImpl extends BaseModelImpl<Region>
 	}
 
 	public Serializable getPrimaryKeyObj() {
-		return new Long(_regionId);
+		return _regionId;
 	}
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {

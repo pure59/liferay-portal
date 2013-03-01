@@ -30,6 +30,7 @@ import java.util.Properties;
 
 /**
  * @author Brian Wing Shun Chan
+ * @author Raymond Augé
  */
 public class ActivePACLPolicy extends BasePACLPolicy {
 
@@ -49,10 +50,16 @@ public class ActivePACLPolicy extends BasePACLPolicy {
 		}
 	}
 
-	public void checkPermission(Permission permission) {
-		Checker checker = getChecker(permission.getClass());
+	public JNDIChecker getJndiChecker() {
+		return _jndiChecker;
+	}
 
-		checker.checkPermission(permission);
+	public PortalServiceChecker getPortalServiceChecker() {
+		return _portalServiceChecker;
+	}
+
+	public SQLChecker getSqlChecker() {
+		return _sqlChecker;
 	}
 
 	public boolean hasJNDI(String name) {
@@ -67,6 +74,12 @@ public class ActivePACLPolicy extends BasePACLPolicy {
 
 	public boolean hasSQL(String sql) {
 		return _sqlChecker.hasSQL(sql);
+	}
+
+	public boolean implies(Permission permission) {
+		Checker checker = getChecker(permission.getClass());
+
+		return checker.implies(permission);
 	}
 
 	public boolean isActive() {

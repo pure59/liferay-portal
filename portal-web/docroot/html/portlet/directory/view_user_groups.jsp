@@ -33,11 +33,26 @@ PortletURL portletURL = (PortletURL)request.getAttribute("view.jsp-portletURL");
 	UserGroupSearchTerms searchTerms = (UserGroupSearchTerms)searchContainer.getSearchTerms();
 
 	LinkedHashMap<String, Object> userGroupParams = new LinkedHashMap<String, Object>();
+
+	if (portletName.equals(PortletKeys.MY_SITES_DIRECTORY)) {
+		LinkedHashMap<String, Object> groupParams = new LinkedHashMap<String, Object>();
+
+		groupParams.put("inherit", Boolean.FALSE);
+		groupParams.put("site", Boolean.TRUE);
+		groupParams.put("usersGroups", user.getUserId());
+
+		List<Group> groups = GroupLocalServiceUtil.search(user.getCompanyId(), groupParams, QueryUtil.ALL_POS,QueryUtil.ALL_POS);
+
+		userGroupParams.put("userGroupsGroups", SitesUtil.filterGroups(groups, PropsValues.MY_SITES_DIRECTORY_SITE_EXCLUDES));
+	}
+	else if (portletName.equals(PortletKeys.SITE_MEMBERS_DIRECTORY)) {
+		userGroupParams.put("userGroupsGroups", new Long(themeDisplay.getScopeGroupId()));
+	}
 	%>
 
 	<liferay-ui:search-container-results>
 		<c:choose>
-			<c:when test="<%= PropsValues.USER_GROUPS_INDEXER_ENABLED && PropsValues.USER_GROUPS_SEARCH_WITH_INDEX %>">
+			<c:when test="<%= portletName.equals(PortletKeys.DIRECTORY) && PropsValues.USER_GROUPS_INDEXER_ENABLED && PropsValues.USER_GROUPS_SEARCH_WITH_INDEX %>">
 				<%@ include file="/html/portlet/user_groups_admin/user_group_search_results_index.jspf" %>
 			</c:when>
 			<c:otherwise>

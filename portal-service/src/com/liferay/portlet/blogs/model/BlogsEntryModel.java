@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.GroupedModel;
+import com.liferay.portal.model.StagedModel;
 import com.liferay.portal.model.WorkflowedModel;
 import com.liferay.portal.service.ServiceContext;
 
@@ -42,7 +43,7 @@ import java.util.Date;
  * @generated
  */
 public interface BlogsEntryModel extends BaseModel<BlogsEntry>, GroupedModel,
-	WorkflowedModel {
+	StagedModel, WorkflowedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -528,6 +529,10 @@ public interface BlogsEntryModel extends BaseModel<BlogsEntry>, GroupedModel,
 	public void setPrimaryKeyObj(Serializable primaryKeyObj);
 
 	public ExpandoBridge getExpandoBridge();
+
+	public void setExpandoBridgeAttributes(BaseModel<?> baseModel);
+
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge);
 
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext);
 

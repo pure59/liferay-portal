@@ -97,6 +97,7 @@ public class SCProductVersionModelImpl extends BaseModelImpl<SCProductVersion>
 			true);
 	public static long DIRECTDOWNLOADURL_COLUMN_BITMASK = 1L;
 	public static long PRODUCTENTRYID_COLUMN_BITMASK = 2L;
+	public static long CREATEDATE_COLUMN_BITMASK = 4L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -176,7 +177,7 @@ public class SCProductVersionModelImpl extends BaseModelImpl<SCProductVersion>
 	}
 
 	public Serializable getPrimaryKeyObj() {
-		return new Long(_productVersionId);
+		return _productVersionId;
 	}
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {

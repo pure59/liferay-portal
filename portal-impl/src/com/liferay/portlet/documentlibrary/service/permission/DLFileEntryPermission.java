@@ -83,7 +83,7 @@ public class DLFileEntryPermission {
 		}
 
 		DLFileVersion latestDLFileVersion = dlFileEntry.getLatestFileVersion(
-			false);
+			true);
 
 		if (latestDLFileVersion.isPending()) {
 			hasPermission = WorkflowPermissionUtil.hasPermission(
@@ -96,26 +96,32 @@ public class DLFileEntryPermission {
 			}
 		}
 
-		if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
-			if (dlFileEntry.getFolderId() !=
-					DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+		if (dlFileEntry.getFolderId() !=
+				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-				try {
-					DLFolder dlFolder = DLFolderLocalServiceUtil.getFolder(
-						dlFileEntry.getFolderId());
+			try {
+				DLFolder dlFolder = DLFolderLocalServiceUtil.getFolder(
+					dlFileEntry.getFolderId());
 
-					if (!DLFolderPermission.contains(
-							permissionChecker, dlFolder, ActionKeys.ACCESS) &&
-						!DLFolderPermission.contains(
-							permissionChecker, dlFolder, ActionKeys.VIEW)) {
+				if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE &&
+					!DLFolderPermission.contains(
+						permissionChecker, dlFolder, ActionKeys.ACCESS) &&
+					!DLFolderPermission.contains(
+						permissionChecker, dlFolder, ActionKeys.VIEW)) {
 
-						return false;
-					}
+					return false;
 				}
-				catch (NoSuchFolderException nsfe) {
-					if (!latestDLFileVersion.isInTrash()) {
-						throw nsfe;
-					}
+
+				if (!actionId.equals(ActionKeys.OVERRIDE_CHECKOUT) &&
+					DLFolderPermission.contains(
+						permissionChecker, dlFolder, actionId)) {
+
+					return true;
+				}
+			}
+			catch (NoSuchFolderException nsfe) {
+				if (!latestDLFileVersion.isInTrash()) {
+					throw nsfe;
 				}
 			}
 		}

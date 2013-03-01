@@ -618,7 +618,6 @@ AUI.add(
 					var form = instance.getPrincipalForm();
 
 					var groupId = instance.getByName(form, 'groupId');
-					var structureGroupId = instance.getByName(form, 'structureGroupId');
 					var structureIdInput = instance.getByName(form, 'structureId');
 					var structureNameInput = instance.getByName(form, 'structureName');
 					var structureDescriptionInput = instance.getByName(form, 'structureDescription');
@@ -1989,8 +1988,8 @@ AUI.add(
 
 				var variableNameSelector = '[name="' + instance.portletNamespace + 'variableName"]';
 
-				container.delegate('keypress', A.bind(instance._onKeypressVariableName, instance), variableNameSelector);
-				container.delegate('keyup', A.bind(instance._onKeyupVariableName, instance), variableNameSelector);
+				container.delegate('keypress', A.bind('_onKeypressVariableName', instance), variableNameSelector);
+				container.delegate('keyup', A.bind('_onKeyupVariableName', instance), variableNameSelector);
 
 				instance._attachDelegatedEvents = Lang.emptyFn;
 			},
@@ -2251,7 +2250,7 @@ AUI.add(
 				instance.editContainerContextPanel = new A.OverlayContextPanel(
 					{
 						after: {
-							hide: A.bind(instance.unselectFields, instance),
+							hide: A.bind('unselectFields', instance),
 							show: function() {
 								A.later(
 									0,
@@ -2394,39 +2393,6 @@ AUI.add(
 						'click',
 						function() {
 							instance.previewArticle();
-						}
-					);
-				}
-
-				if (publishButton) {
-					publishButton.detach('click');
-
-					publishButton.on(
-						'click',
-						function() {
-							instance.saveArticle('publish');
-						}
-					);
-				}
-
-				if (saveButton) {
-					saveButton.detach('click');
-
-					saveButton.on(
-						'click',
-						function() {
-							instance.saveArticle();
-						}
-					);
-				}
-
-				if (translateButton) {
-					translateButton.detach('click');
-
-					translateButton.on(
-						'click',
-						function() {
-							instance.translateArticle();
 						}
 					);
 				}
@@ -3165,7 +3131,7 @@ AUI.add(
 									content = imageInputValue;
 								}
 								else {
-									var imageContent = instance.getByName(componentContainer, 'journalImageContent');
+									var imageContent = componentContainer.one('.journal-image-preview input.journal-image-preview-content');
 
 									if (imageContent) {
 										content = imageContent.val();

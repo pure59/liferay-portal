@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.GroupedModel;
+import com.liferay.portal.model.StagedModel;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -40,7 +41,8 @@ import java.util.Date;
  * @see com.liferay.portlet.calendar.model.impl.CalEventModelImpl
  * @generated
  */
-public interface CalEventModel extends BaseModel<CalEvent>, GroupedModel {
+public interface CalEventModel extends BaseModel<CalEvent>, GroupedModel,
+	StagedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -440,6 +442,10 @@ public interface CalEventModel extends BaseModel<CalEvent>, GroupedModel {
 	public void setPrimaryKeyObj(Serializable primaryKeyObj);
 
 	public ExpandoBridge getExpandoBridge();
+
+	public void setExpandoBridgeAttributes(BaseModel<?> baseModel);
+
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge);
 
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext);
 

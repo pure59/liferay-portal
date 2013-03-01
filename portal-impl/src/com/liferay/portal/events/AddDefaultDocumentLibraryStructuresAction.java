@@ -79,7 +79,8 @@ public class AddDefaultDocumentLibraryStructuresAction
 
 			DDMStructure ddmStructure =
 				DDMStructureLocalServiceUtil.fetchStructure(
-					groupId, ddmStructureKey);
+					groupId, PortalUtil.getClassNameId(DLFileEntry.class),
+					ddmStructureKey);
 
 			if (ddmStructure == null) {
 				continue;
@@ -159,7 +160,7 @@ public class AddDefaultDocumentLibraryStructuresAction
 	}
 
 	protected void addDLRawMetadataStructures(
-		long userId, long groupId, ServiceContext serviceContext)
+			long userId, long groupId, ServiceContext serviceContext)
 		throws Exception {
 
 		String xsd = buildDLRawMetadataXML(
@@ -182,7 +183,9 @@ public class AddDefaultDocumentLibraryStructuresAction
 				structureElementRootElement.asXML();
 
 			DDMStructure ddmStructure =
-				DDMStructureLocalServiceUtil.fetchStructure(groupId, name);
+				DDMStructureLocalServiceUtil.fetchStructure(
+					groupId, PortalUtil.getClassNameId(DLFileEntry.class),
+					name);
 
 			if (ddmStructure != null) {
 				ddmStructure.setXsd(structureElementRootXML);

@@ -17,6 +17,7 @@ package com.liferay.portal.parsers.bbcode;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.parsers.bbcode.BBCodeTranslator;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.IntegerWrapper;
@@ -35,16 +36,17 @@ import java.util.regex.Pattern;
 /**
  * @author Iliyan Peychev
  */
+@DoPrivileged
 public class HtmlBBCodeTranslatorImpl implements BBCodeTranslator {
 
 	public HtmlBBCodeTranslatorImpl() {
 		_listStyles = new HashMap<String, String>();
 
-		_listStyles.put("a", "list-style: lower-alpha inside;");
-		_listStyles.put("A", "list-style: upper-alpha inside;");
-		_listStyles.put("1", "list-style: decimal inside;");
-		_listStyles.put("i", "list-style: lower-roman inside;");
-		_listStyles.put("I", "list-style: upper-roman inside;");
+		_listStyles.put("a", "list-style: lower-alpha outside;");
+		_listStyles.put("A", "list-style: upper-alpha outside;");
+		_listStyles.put("1", "list-style: decimal outside;");
+		_listStyles.put("i", "list-style: lower-roman outside;");
+		_listStyles.put("I", "list-style: upper-roman outside;");
 
 		_excludeNewLineTypes = new HashMap<String, Integer>();
 
@@ -393,7 +395,7 @@ public class HtmlBBCodeTranslatorImpl implements BBCodeTranslator {
 			tag = "ol";
 		}
 		else {
-			tag = "ul style=\"list-style: disc inside;\"";
+			tag = "ul style=\"list-style: disc outside;\"";
 		}
 
 		if (listStyle == null) {

@@ -76,6 +76,14 @@ public class AssetVocabularyServiceWrapper implements AssetVocabularyService,
 			descriptionMap, settings, serviceContext);
 	}
 
+	public com.liferay.portlet.asset.model.AssetVocabulary addVocabulary(
+		java.lang.String title,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _assetVocabularyService.addVocabulary(title, serviceContext);
+	}
+
 	public void deleteVocabularies(long[] vocabularyIds)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
@@ -117,6 +125,14 @@ public class AssetVocabularyServiceWrapper implements AssetVocabularyService,
 	}
 
 	public java.util.List<com.liferay.portlet.asset.model.AssetVocabulary> getGroupVocabularies(
+		long groupId, boolean createDefaultVocabulary)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _assetVocabularyService.getGroupVocabularies(groupId,
+			createDefaultVocabulary);
+	}
+
+	public java.util.List<com.liferay.portlet.asset.model.AssetVocabulary> getGroupVocabularies(
 		long groupId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator obc)
 		throws com.liferay.portal.kernel.exception.SystemException {
@@ -140,6 +156,14 @@ public class AssetVocabularyServiceWrapper implements AssetVocabularyService,
 	public int getGroupVocabulariesCount(long groupId, java.lang.String name)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _assetVocabularyService.getGroupVocabulariesCount(groupId, name);
+	}
+
+	public com.liferay.portlet.asset.model.AssetVocabularyDisplay getGroupVocabulariesDisplay(
+		long groupId, java.lang.String name, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator obc)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _assetVocabularyService.getGroupVocabulariesDisplay(groupId,
+			name, start, end, obc);
 	}
 
 	public com.liferay.portal.kernel.json.JSONObject getJSONGroupVocabularies(

@@ -172,7 +172,7 @@ AUI.add(
 
 						journalContainer.delegate(
 							STR_CLICK,
-							A.bind(instance._onOpenAdvancedSearch, instance),
+							A.bind('_onOpenAdvancedSearch', instance),
 							'.article-advanced-search-icon'
 						);
 
@@ -180,7 +180,7 @@ AUI.add(
 
 						instance._eventHandles = eventHandles;
 
-						eventHandles.push(Liferay.on(config.portletId + ':portletRefreshed', A.bind(instance.destructor, instance)));
+						eventHandles.push(Liferay.on(config.portletId + ':portletRefreshed', A.bind('destructor', instance)));
 
 						var searchFormNode = instance.one('#fm1');
 
@@ -323,11 +323,11 @@ AUI.add(
 						var content = A.Node.create(responseData);
 
 						if (content) {
+							instance._setSearchResults(content);
+
 							instance._appViewFolders.processData(content);
 
 							instance._appViewSelect.syncDisplayStyleToolbar();
-
-							instance._setSearchResults(content);
 						}
 					},
 
@@ -437,8 +437,6 @@ AUI.add(
 						if (searchInfo) {
 							entriesContainer.empty();
 
-							entriesContainer.plug(A.Plugin.ParseContent);
-
 							entriesContainer.setContent(searchInfo);
 						}
 
@@ -452,8 +450,6 @@ AUI.add(
 							if (searchResults) {
 								searchResults.empty();
 
-								searchResults.plug(A.Plugin.ParseContent);
-
 								searchResults.setContent(fragmentSearchResults.html());
 							}
 						}
@@ -465,9 +461,11 @@ AUI.add(
 								entriesContainer.empty();
 							}
 
-							entriesContainer.plug(A.Plugin.ParseContent);
-
 							entriesContainer.append(searchResultsContainer);
+						}
+
+						if (searchResultsContainer || fragmentSearchResults) {
+							instance.all('#addButtonContainer, #sortButtonContainer').hide();
 						}
 					}
 				}

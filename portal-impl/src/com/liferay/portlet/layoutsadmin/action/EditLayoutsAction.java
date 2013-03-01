@@ -33,9 +33,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
@@ -83,7 +81,6 @@ import com.liferay.portal.service.permission.GroupPermissionUtil;
 import com.liferay.portal.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.service.permission.LayoutPrototypePermissionUtil;
 import com.liferay.portal.service.permission.LayoutSetPrototypePermissionUtil;
-import com.liferay.portal.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.service.permission.UserPermissionUtil;
 import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
@@ -151,11 +148,11 @@ public class EditLayoutsAction extends PortletAction {
 
 		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
 
-		try {
-			String redirect = ParamUtil.getString(actionRequest, "redirect");
-			String closeRedirect = ParamUtil.getString(
-				actionRequest, "closeRedirect");
+		String redirect = ParamUtil.getString(actionRequest, "redirect");
+		String closeRedirect = ParamUtil.getString(
+			actionRequest, "closeRedirect");
 
+		try {
 			Layout layout = null;
 			String oldFriendlyURL = StringPool.BLANK;
 
@@ -247,18 +244,9 @@ public class EditLayoutsAction extends PortletAction {
 				updateLayoutRevision(actionRequest, themeDisplay);
 			}
 
-			if (Validator.isNotNull(closeRedirect)) {
-				LiferayPortletConfig liferayPortletConfig =
-					(LiferayPortletConfig)portletConfig;
-
-				SessionMessages.add(
-					actionRequest,
-					liferayPortletConfig.getPortletId() +
-						SessionMessages.KEY_SUFFIX_CLOSE_REDIRECT,
-					closeRedirect);
-			}
-
-			sendRedirect(actionRequest, actionResponse, redirect);
+			sendRedirect(
+				portletConfig, actionRequest, actionResponse, redirect,
+				closeRedirect);
 		}
 		catch (Exception e) {
 			if (e instanceof NoSuchLayoutException ||
@@ -286,6 +274,10 @@ public class EditLayoutsAction extends PortletAction {
 				else {
 					SessionErrors.add(actionRequest, e.getClass(), e);
 				}
+
+				sendRedirect(
+					portletConfig, actionRequest, actionResponse, redirect,
+					closeRedirect);
 			}
 			else if (e instanceof DuplicateLockException ||
 					 e instanceof LayoutPrototypeException ||
@@ -295,10 +287,11 @@ public class EditLayoutsAction extends PortletAction {
 
 				SessionErrors.add(actionRequest, e.getClass(), e);
 
-				String redirect = ParamUtil.getString(
-					actionRequest, "pagesRedirect");
+				redirect = ParamUtil.getString(actionRequest, "pagesRedirect");
 
-				sendRedirect(actionRequest, actionResponse, redirect);
+				sendRedirect(
+					portletConfig, actionRequest, actionResponse, redirect,
+					closeRedirect);
 			}
 			else {
 				throw e;
@@ -374,10 +367,23 @@ public class EditLayoutsAction extends PortletAction {
 		portletRequestDispatcher.include(resourceRequest, resourceResponse);
 	}
 
+	protected void checkPermission(
+			PermissionChecker permissionChecker, Group group, Layout layout,
+			long selPlid)
+		throws PortalException, SystemException {
+
+		if (selPlid > 0) {
+			LayoutPermissionUtil.check(
+				permissionChecker, layout, ActionKeys.VIEW);
+		}
+		else {
+			GroupPermissionUtil.check(
+				permissionChecker, group, ActionKeys.VIEW);
+		}
+	}
+
 	protected void checkPermissions(PortletRequest portletRequest)
 		throws Exception {
-
-		// LEP-850
 
 		Group group = getGroup(portletRequest);
 
@@ -411,9 +417,6 @@ public class EditLayoutsAction extends PortletAction {
 
 					throw new PrincipalException();
 				}
-				else {
-					return;
-				}
 			}
 			else {
 				layout = LayoutLocalServiceUtil.getLayout(parentPlid);
@@ -423,9 +426,6 @@ public class EditLayoutsAction extends PortletAction {
 
 					throw new PrincipalException();
 				}
-				else {
-					return;
-				}
 			}
 		}
 		else if (cmd.equals(Constants.DELETE)) {
@@ -434,8 +434,55 @@ public class EditLayoutsAction extends PortletAction {
 
 				throw new PrincipalException();
 			}
+		}
+		else if (cmd.equals(Constants.UPDATE)) {
+			if (group.isCompany()) {
+				if (!permissionChecker.isCompanyAdmin()) {
+					throw new PrincipalException();
+				}
+			}
+			else if (group.isLayoutPrototype()) {
+				LayoutPrototypePermissionUtil.check(
+					permissionChecker, group.getClassPK(), ActionKeys.UPDATE);
+			}
+			else if (group.isLayoutSetPrototype()) {
+				LayoutSetPrototypePermissionUtil.check(
+					permissionChecker, group.getClassPK(), ActionKeys.UPDATE);
+			}
+			else if (group.isUser()) {
+				long groupUserId = group.getClassPK();
+
+				User groupUser = UserLocalServiceUtil.getUserById(groupUserId);
+
+				long[] organizationIds = groupUser.getOrganizationIds();
+
+				UserPermissionUtil.check(
+					permissionChecker, groupUserId, organizationIds,
+					ActionKeys.UPDATE);
+			}
 			else {
-				return;
+				checkPermission(permissionChecker, group, layout, selPlid);
+			}
+		}
+		else if (cmd.equals("publish_to_live")) {
+			boolean hasUpdateLayoutPermission = false;
+
+			if (layout != null) {
+				hasUpdateLayoutPermission = LayoutPermissionUtil.contains(
+					permissionChecker, layout, ActionKeys.UPDATE);
+			}
+
+			if (group.isCompany() || group.isSite()) {
+				boolean publishToLive = GroupPermissionUtil.contains(
+					permissionChecker, group.getGroupId(),
+					ActionKeys.PUBLISH_STAGING);
+
+				if (!hasUpdateLayoutPermission && !publishToLive) {
+					throw new PrincipalException();
+				}
+			}
+			else {
+				checkPermission(permissionChecker, group, layout, selPlid);
 			}
 		}
 		else if (cmd.equals("reset_customized_view")) {
@@ -444,81 +491,28 @@ public class EditLayoutsAction extends PortletAction {
 
 				throw new PrincipalException();
 			}
-			else {
-				return;
-			}
 		}
 		else if (cmd.equals("reset_prototype")) {
 			if (!LayoutPermissionUtil.contains(
-					permissionChecker, layout, ActionKeys.UPDATE) ||
-				!GroupPermissionUtil.contains(
-					permissionChecker, layout.getGroupId(),
-					ActionKeys.UPDATE)) {
+					permissionChecker, layout, ActionKeys.UPDATE)) {
 
 				throw new PrincipalException();
 			}
-			else {
-				return;
+			else if (!group.isUser() &&
+					 !GroupPermissionUtil.contains(
+						permissionChecker, layout.getGroupId(),
+						ActionKeys.UPDATE)) {
+
+				throw new PrincipalException();
+			}
+			else if (group.isUser() &&
+					 (permissionChecker.getUserId() != group.getClassPK())) {
+
+				throw new PrincipalException();
 			}
 		}
-
-		boolean hasUpdateLayoutPermission = false;
-
-		if (layout != null) {
-			hasUpdateLayoutPermission = LayoutPermissionUtil.contains(
-				permissionChecker, layout, ActionKeys.UPDATE);
-		}
-
-		boolean hasPermission = true;
-
-		if (cmd.equals("publish_to_live")) {
-			if (group.isSite()) {
-				boolean publishToLive = GroupPermissionUtil.contains(
-					permissionChecker, group.getGroupId(),
-					ActionKeys.PUBLISH_STAGING);
-
-				if (!hasUpdateLayoutPermission && !publishToLive) {
-					hasPermission = false;
-				}
-			}
-			else if (group.isOrganization()) {
-				boolean publishToLive = OrganizationPermissionUtil.contains(
-					permissionChecker, group.getOrganizationId(),
-					ActionKeys.PUBLISH_STAGING);
-
-				if (!hasUpdateLayoutPermission && !publishToLive) {
-					hasPermission = false;
-				}
-			}
-		}
-
-		if (group.isCompany()) {
-			if (!permissionChecker.isCompanyAdmin()) {
-				hasPermission = false;
-			}
-		}
-		else if (group.isLayoutPrototype()) {
-			LayoutPrototypePermissionUtil.check(
-				permissionChecker, group.getClassPK(), ActionKeys.UPDATE);
-		}
-		else if (group.isLayoutSetPrototype()) {
-			LayoutSetPrototypePermissionUtil.check(
-				permissionChecker, group.getClassPK(), ActionKeys.UPDATE);
-		}
-		else if (group.isUser()) {
-			long groupUserId = group.getClassPK();
-
-			User groupUser = UserLocalServiceUtil.getUserById(groupUserId);
-
-			long[] organizationIds = groupUser.getOrganizationIds();
-
-			UserPermissionUtil.check(
-				permissionChecker, groupUserId, organizationIds,
-				ActionKeys.UPDATE);
-		}
-
-		if (!hasPermission) {
-			throw new PrincipalException();
+		else {
+			checkPermission(permissionChecker, group, layout, selPlid);
 		}
 	}
 
@@ -763,7 +757,9 @@ public class EditLayoutsAction extends PortletAction {
 				value = ParamUtil.getString(actionRequest, property);
 			}
 
-			if (!value.equals(layoutSet.getThemeSetting(key, device))) {
+			if (!Validator.equals(
+					value, layoutSet.getThemeSetting(key, device))) {
+
 				typeSettingsProperties.setProperty(
 					ThemeSettingImpl.namespaceProperty(device, key), value);
 			}
@@ -1046,15 +1042,16 @@ public class EditLayoutsAction extends PortletAction {
 
 		LayoutRevision enableLayoutRevision =
 			LayoutRevisionLocalServiceUtil.updateLayoutRevision(
-			serviceContext.getUserId(), layoutRevisionId,
-			layoutRevision.getLayoutBranchId(), layoutRevision.getName(),
-			layoutRevision.getTitle(), layoutRevision.getDescription(),
-			layoutRevision.getKeywords(), layoutRevision.getRobots(),
-			layoutRevision.getTypeSettings(), layoutRevision.getIconImage(),
-			layoutRevision.getIconImageId(), layoutRevision.getThemeId(),
-			layoutRevision.getColorSchemeId(), layoutRevision.getWapThemeId(),
-			layoutRevision.getWapColorSchemeId(), layoutRevision.getCss(),
-			serviceContext);
+				serviceContext.getUserId(), layoutRevisionId,
+				layoutRevision.getLayoutBranchId(), layoutRevision.getName(),
+				layoutRevision.getTitle(), layoutRevision.getDescription(),
+				layoutRevision.getKeywords(), layoutRevision.getRobots(),
+				layoutRevision.getTypeSettings(), layoutRevision.getIconImage(),
+				layoutRevision.getIconImageId(), layoutRevision.getThemeId(),
+				layoutRevision.getColorSchemeId(),
+				layoutRevision.getWapThemeId(),
+				layoutRevision.getWapColorSchemeId(), layoutRevision.getCss(),
+				serviceContext);
 
 		if (layoutRevision.getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
 			LayoutRevision lastLayoutRevision =
@@ -1070,7 +1067,7 @@ public class EditLayoutsAction extends PortletAction {
 						enableLayoutRevision.getLayoutRevisionId(), false,
 						layoutRevision.getPlid(),
 						lastLayoutRevision.getLayoutRevisionId(),
-						lastLayoutRevision.getPrivateLayout(),
+						lastLayoutRevision.isPrivateLayout(),
 						lastLayoutRevision.getName(),
 						lastLayoutRevision.getTitle(),
 						lastLayoutRevision.getDescription(),

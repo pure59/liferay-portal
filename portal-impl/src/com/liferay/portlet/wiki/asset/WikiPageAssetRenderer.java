@@ -50,7 +50,7 @@ public class WikiPageAssetRenderer
 
 	public static long getClassPK(WikiPage page) {
 		if (!page.isApproved() && !page.isDraft() && !page.isPending() &&
-			!page.isInTrash() &&
+			!page.isInTrash() && !page.isInTrashContainer() &&
 			(page.getVersion() != WikiPageConstants.VERSION_DEFAULT)) {
 
 			return page.getPageId();
@@ -66,6 +66,10 @@ public class WikiPageAssetRenderer
 
 	public String getAssetRendererFactoryClassName() {
 		return WikiPageAssetRendererFactory.CLASS_NAME;
+	}
+
+	public String getClassName() {
+		return WikiPage.class.getName();
 	}
 
 	public long getClassPK() {
@@ -108,7 +112,7 @@ public class WikiPageAssetRenderer
 			return _page.getTitle();
 		}
 
-		return TrashUtil.stripTrashNamespace(_page.getTitle());
+		return TrashUtil.getOriginalTitle(_page.getTitle());
 	}
 
 	public String getType() {

@@ -251,6 +251,20 @@
 		margin-left: 5px;
 	}
 
+	.page-activities {
+		.activity-status {
+			color: #666;
+			font-weight: bold;
+			text-transform: uppercase;
+		}
+
+		.activity-summary {
+			color: #999;
+			display: block;
+			margin-left: 3em;
+		}
+	}
+
 	.entry-links h2 {
 		border-width: 0;
 		font-size: 1em;
@@ -340,6 +354,11 @@
 	.top-links .page-search {
 		float: right;
 		margin: 0 0 0.5em 0.5em;
+	}
+
+	.search-root-entry {
+		color: #999;
+		float: right;
 	}
 
 	.top-links-configuration {

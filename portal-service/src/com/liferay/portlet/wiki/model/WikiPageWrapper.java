@@ -827,6 +827,16 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	}
 
 	public void setExpandoBridgeAttributes(
+		com.liferay.portal.model.BaseModel<?> baseModel) {
+		_wikiPage.setExpandoBridgeAttributes(baseModel);
+	}
+
+	public void setExpandoBridgeAttributes(
+		com.liferay.portlet.expando.model.ExpandoBridge expandoBridge) {
+		_wikiPage.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_wikiPage.setExpandoBridgeAttributes(serviceContext);
 	}
@@ -884,10 +894,10 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 		return _wikiPage.getAttachmentsFileEntries(start, end);
 	}
 
-	public int getAttachmentsFilesCount()
+	public int getAttachmentsFileEntriesCount()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return _wikiPage.getAttachmentsFilesCount();
+		return _wikiPage.getAttachmentsFileEntriesCount();
 	}
 
 	public long getAttachmentsFolderId()
@@ -923,6 +933,12 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 		return _wikiPage.getNode();
 	}
 
+	public long getNodeAttachmentsFolderId()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _wikiPage.getNodeAttachmentsFolderId();
+	}
+
 	public com.liferay.portlet.wiki.model.WikiPage getParentPage() {
 		return _wikiPage.getParentPage();
 	}
@@ -935,8 +951,20 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 		return _wikiPage.getRedirectPage();
 	}
 
-	public boolean isInTrashFolder() {
-		return _wikiPage.isInTrashFolder();
+	public java.util.List<com.liferay.portlet.wiki.model.WikiPage> getViewableChildPages() {
+		return _wikiPage.getViewableChildPages();
+	}
+
+	public com.liferay.portlet.wiki.model.WikiPage getViewableParentPage() {
+		return _wikiPage.getViewableParentPage();
+	}
+
+	public java.util.List<com.liferay.portlet.wiki.model.WikiPage> getViewableParentPages() {
+		return _wikiPage.getViewableParentPages();
+	}
+
+	public boolean isInTrashContainer() {
+		return _wikiPage.isInTrashContainer();
 	}
 
 	public void setAttachmentsFolderId(long attachmentsFolderId) {

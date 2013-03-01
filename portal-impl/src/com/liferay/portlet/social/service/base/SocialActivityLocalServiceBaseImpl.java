@@ -54,6 +54,7 @@ import com.liferay.portlet.social.service.SocialActivityCounterLocalService;
 import com.liferay.portlet.social.service.SocialActivityInterpreterLocalService;
 import com.liferay.portlet.social.service.SocialActivityLimitLocalService;
 import com.liferay.portlet.social.service.SocialActivityLocalService;
+import com.liferay.portlet.social.service.SocialActivitySetLocalService;
 import com.liferay.portlet.social.service.SocialActivitySettingLocalService;
 import com.liferay.portlet.social.service.SocialActivitySettingService;
 import com.liferay.portlet.social.service.SocialRelationLocalService;
@@ -66,6 +67,7 @@ import com.liferay.portlet.social.service.persistence.SocialActivityCounterPersi
 import com.liferay.portlet.social.service.persistence.SocialActivityFinder;
 import com.liferay.portlet.social.service.persistence.SocialActivityLimitPersistence;
 import com.liferay.portlet.social.service.persistence.SocialActivityPersistence;
+import com.liferay.portlet.social.service.persistence.SocialActivitySetPersistence;
 import com.liferay.portlet.social.service.persistence.SocialActivitySettingPersistence;
 import com.liferay.portlet.social.service.persistence.SocialRelationPersistence;
 import com.liferay.portlet.social.service.persistence.SocialRequestPersistence;
@@ -173,7 +175,7 @@ public abstract class SocialActivityLocalServiceBaseImpl
 	 * Performs a dynamic query on the database and returns a range of the matching rows.
 	 *
 	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.social.model.impl.SocialActivityModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param dynamicQuery the dynamic query
@@ -193,7 +195,7 @@ public abstract class SocialActivityLocalServiceBaseImpl
 	 * Performs a dynamic query on the database and returns an ordered range of the matching rows.
 	 *
 	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.social.model.impl.SocialActivityModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param dynamicQuery the dynamic query
@@ -249,7 +251,7 @@ public abstract class SocialActivityLocalServiceBaseImpl
 	 * Returns a range of all the social activities.
 	 *
 	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.social.model.impl.SocialActivityModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param start the lower bound of the range of social activities
@@ -492,6 +494,44 @@ public abstract class SocialActivityLocalServiceBaseImpl
 	public void setSocialActivityLimitPersistence(
 		SocialActivityLimitPersistence socialActivityLimitPersistence) {
 		this.socialActivityLimitPersistence = socialActivityLimitPersistence;
+	}
+
+	/**
+	 * Returns the social activity set local service.
+	 *
+	 * @return the social activity set local service
+	 */
+	public SocialActivitySetLocalService getSocialActivitySetLocalService() {
+		return socialActivitySetLocalService;
+	}
+
+	/**
+	 * Sets the social activity set local service.
+	 *
+	 * @param socialActivitySetLocalService the social activity set local service
+	 */
+	public void setSocialActivitySetLocalService(
+		SocialActivitySetLocalService socialActivitySetLocalService) {
+		this.socialActivitySetLocalService = socialActivitySetLocalService;
+	}
+
+	/**
+	 * Returns the social activity set persistence.
+	 *
+	 * @return the social activity set persistence
+	 */
+	public SocialActivitySetPersistence getSocialActivitySetPersistence() {
+		return socialActivitySetPersistence;
+	}
+
+	/**
+	 * Sets the social activity set persistence.
+	 *
+	 * @param socialActivitySetPersistence the social activity set persistence
+	 */
+	public void setSocialActivitySetPersistence(
+		SocialActivitySetPersistence socialActivitySetPersistence) {
+		this.socialActivitySetPersistence = socialActivitySetPersistence;
 	}
 
 	/**
@@ -1069,6 +1109,10 @@ public abstract class SocialActivityLocalServiceBaseImpl
 	protected SocialActivityLimitLocalService socialActivityLimitLocalService;
 	@BeanReference(type = SocialActivityLimitPersistence.class)
 	protected SocialActivityLimitPersistence socialActivityLimitPersistence;
+	@BeanReference(type = SocialActivitySetLocalService.class)
+	protected SocialActivitySetLocalService socialActivitySetLocalService;
+	@BeanReference(type = SocialActivitySetPersistence.class)
+	protected SocialActivitySetPersistence socialActivitySetPersistence;
 	@BeanReference(type = SocialActivitySettingLocalService.class)
 	protected SocialActivitySettingLocalService socialActivitySettingLocalService;
 	@BeanReference(type = SocialActivitySettingService.class)

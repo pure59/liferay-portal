@@ -14,7 +14,6 @@
 
 package com.liferay.portlet.social.model;
 
-import com.liferay.portal.kernel.bean.AutoEscape;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.AttachedModel;
 import com.liferay.portal.model.BaseModel;
@@ -146,6 +145,20 @@ public interface SocialActivityModel extends AttachedModel,
 	public void setCreateDate(long createDate);
 
 	/**
+	 * Returns the activity set ID of this social activity.
+	 *
+	 * @return the activity set ID of this social activity
+	 */
+	public long getActivitySetId();
+
+	/**
+	 * Sets the activity set ID of this social activity.
+	 *
+	 * @param activitySetId the activity set ID of this social activity
+	 */
+	public void setActivitySetId(long activitySetId);
+
+	/**
 	 * Returns the mirror activity ID of this social activity.
 	 *
 	 * @return the mirror activity ID of this social activity
@@ -215,7 +228,6 @@ public interface SocialActivityModel extends AttachedModel,
 	 *
 	 * @return the extra data of this social activity
 	 */
-	@AutoEscape
 	public String getExtraData();
 
 	/**
@@ -269,6 +281,10 @@ public interface SocialActivityModel extends AttachedModel,
 	public void setPrimaryKeyObj(Serializable primaryKeyObj);
 
 	public ExpandoBridge getExpandoBridge();
+
+	public void setExpandoBridgeAttributes(BaseModel<?> baseModel);
+
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge);
 
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext);
 

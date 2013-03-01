@@ -21,8 +21,8 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.security.lang.PortalSecurityManager;
 import com.liferay.portal.security.lang.PortalSecurityManagerThreadLocal;
+import com.liferay.portal.security.lang.SecurityManagerUtil;
 import com.liferay.portal.spring.aop.ServiceBeanAopCacheManagerUtil;
-import com.liferay.portal.util.PropsValues;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +30,7 @@ import java.util.Properties;
 
 /**
  * @author Brian Wing Shun Chan
+ * @author Raymond Augé
  */
 public class PACLPolicyManager {
 
@@ -37,21 +38,22 @@ public class PACLPolicyManager {
 		String servletContextName, ClassLoader classLoader,
 		Properties properties) {
 
-		boolean active = GetterUtil.getBoolean(
-			properties.get("security-manager-enabled"));
+		String value = properties.getProperty(
+			"security-manager-enabled", "false");
 
-		PACLPolicy paclPolicy = null;
+		if (value.equals("generate")) {
+			return new GeneratingPACLPolicy(
+				servletContextName, classLoader, properties);
+		}
 
-		if (active) {
-			paclPolicy = new ActivePACLPolicy(
+		if (GetterUtil.getBoolean(value)) {
+			return new ActivePACLPolicy(
 				servletContextName, classLoader, properties);
 		}
 		else {
-			paclPolicy = new InactivePACLPolicy(
+			return new InactivePACLPolicy(
 				servletContextName, classLoader, properties);
 		}
-
-		return paclPolicy;
 	}
 
 	public static int getActiveCount() {
@@ -123,10 +125,7 @@ public class PACLPolicyManager {
 			return;
 		}
 
-		String portalSecurityManagerStrategy =
-			PropsValues.PORTAL_SECURITY_MANAGER_STRATEGY;
-
-		if (!portalSecurityManagerStrategy.equals("smart")) {
+		if (!SecurityManagerUtil.isSmart()) {
 			if (_log.isInfoEnabled()) {
 				StringBundler sb = new StringBundler(4);
 
@@ -148,7 +147,10 @@ public class PACLPolicyManager {
 						"plugin security management");
 			}
 
-			System.setSecurityManager(new PortalSecurityManager());
+			SecurityManager securityManager =
+				(SecurityManager)SecurityManagerUtil.getPortalSecurityManager();
+
+			System.setSecurityManager(securityManager);
 		}
 		catch (SecurityException se) {
 			_log.error(
@@ -164,10 +166,7 @@ public class PACLPolicyManager {
 			return;
 		}
 
-		String portalSecurityManagerStrategy =
-			PropsValues.PORTAL_SECURITY_MANAGER_STRATEGY;
-
-		if (!portalSecurityManagerStrategy.equals("smart")) {
+		if (!SecurityManagerUtil.isSmart()) {
 			return;
 		}
 

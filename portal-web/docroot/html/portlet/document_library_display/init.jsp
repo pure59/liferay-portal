@@ -22,10 +22,11 @@ page import="com.liferay.portal.kernel.repository.model.FileVersion" %><%@
 page import="com.liferay.portal.kernel.repository.model.Folder" %><%@
 page import="com.liferay.portal.kernel.search.Document" %><%@
 page import="com.liferay.portal.kernel.search.Hits" %><%@
-page import="com.liferay.portal.kernel.search.Indexer" %><%@
-page import="com.liferay.portal.kernel.search.IndexerRegistryUtil" %><%@
+page import="com.liferay.portal.kernel.search.QueryConfig" %><%@
 page import="com.liferay.portal.kernel.search.SearchContext" %><%@
 page import="com.liferay.portal.kernel.search.SearchContextFactory" %><%@
+page import="com.liferay.portal.kernel.search.SearchResultUtil" %><%@
+page import="com.liferay.portal.kernel.search.Summary" %><%@
 page import="com.liferay.portlet.asset.model.AssetEntry" %><%@
 page import="com.liferay.portlet.asset.model.AssetTag" %><%@
 page import="com.liferay.portlet.asset.service.AssetEntryServiceUtil" %><%@
@@ -33,9 +34,11 @@ page import="com.liferay.portlet.asset.service.AssetTagLocalServiceUtil" %><%@
 page import="com.liferay.portlet.asset.service.persistence.AssetEntryQuery" %><%@
 page import="com.liferay.portlet.asset.util.AssetUtil" %><%@
 page import="com.liferay.portlet.documentlibrary.NoSuchFolderException" %><%@
+page import="com.liferay.portlet.documentlibrary.model.DLFileEntry" %><%@
 page import="com.liferay.portlet.documentlibrary.model.DLFileEntryConstants" %><%@
 page import="com.liferay.portlet.documentlibrary.model.DLFileEntryType" %><%@
 page import="com.liferay.portlet.documentlibrary.model.DLFileShortcut" %><%@
+page import="com.liferay.portlet.documentlibrary.model.DLFolder" %><%@
 page import="com.liferay.portlet.documentlibrary.model.DLFolderConstants" %><%@
 page import="com.liferay.portlet.documentlibrary.search.EntriesChecker" %><%@
 page import="com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil" %><%@
@@ -117,7 +120,7 @@ int fileEntriesPerPage = PrefsParamUtil.getInteger(preferences, request, "fileEn
 
 String defaultFileEntryColumns = "name,size";
 
-if (PropsValues.DL_FILE_ENTRY_READ_COUNT_ENABLED) {
+if (PropsValues.DL_FILE_ENTRY_BUFFERED_INCREMENT_ENABLED) {
 	defaultFileEntryColumns += ",downloads";
 }
 

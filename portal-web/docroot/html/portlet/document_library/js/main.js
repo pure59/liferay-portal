@@ -5,7 +5,7 @@ AUI.add(
 		var Lang = A.Lang;
 		var History = Liferay.HistoryManager;
 
-		var UA = A.UA;
+		var IE = A.UA.ie;
 
 		var CSS_SYNC_MESSAGE_HIDDEN = 'sync-message-hidden';
 
@@ -61,7 +61,7 @@ AUI.add(
 
 		var DocumentLibrary = A.Component.create(
 			{
-				AUGMENTS: [Liferay.PortletBase],
+				AUGMENTS: [Liferay.PortletBase, Liferay.DocumentLibraryUpload],
 
 				EXTENDS: A.Base,
 
@@ -183,7 +183,7 @@ AUI.add(
 
 						instance._repositoriesData = {};
 
-						eventHandles.push(Liferay.on(config.portletId + ':portletRefreshed', A.bind(instance.destructor, instance)));
+						eventHandles.push(Liferay.on(config.portletId + ':portletRefreshed', A.bind('destructor', instance)));
 
 						var searchFormNode = instance.one('#fm1');
 
@@ -310,11 +310,11 @@ AUI.add(
 						var content = A.Node.create(responseData);
 
 						if (content) {
+							instance._setSearchResults(content);
+
 							instance._appViewFolders.processData(content);
 
 							instance._appViewSelect.syncDisplayStyleToolbar();
-
-							instance._setSearchResults(content);
 						}
 
 						Liferay.fire(instance._eventDataProcessed);
@@ -412,15 +412,10 @@ AUI.add(
 					_openDocument: function(event) {
 						var instance = this;
 
-						var webDavUrl = event.webDavUrl;
-
-						if (webDavUrl && UA.ie) {
-							try {
-								var executor = new WIN.ActiveXObject('SharePoint.OpenDocuments');
-
-								executor.EditDocument(webDavUrl);
-							}
-							catch (exception) {
+						Liferay.Util.openDocument(
+							event.webDavUrl,
+							null,
+							function(exception) {
 								var errorMessage = Lang.sub(
 									Liferay.Language.get('cannot-open-the-requested-document-due-to-the-following-reason'),
 									[exception.message]
@@ -428,7 +423,7 @@ AUI.add(
 
 								instance._appViewFolders.displayMessage(MESSAGE_TYPE_ERROR, errorMessage);
 							}
-						}
+						);
 					},
 
 					_searchFileEntry: function(searchData) {
@@ -483,8 +478,6 @@ AUI.add(
 						if (searchInfo) {
 							entriesContainer.empty();
 
-							entriesContainer.plug(A.Plugin.ParseContent);
-
 							entriesContainer.setContent(searchInfo);
 						}
 
@@ -498,8 +491,6 @@ AUI.add(
 							if (searchResults) {
 								searchResults.empty();
 
-								searchResults.plug(A.Plugin.ParseContent);
-
 								searchResults.setContent(fragmentSearchResults.html());
 							}
 						}
@@ -512,8 +503,6 @@ AUI.add(
 							if (!searchInfo) {
 								entriesContainer.empty();
 							}
-
-							entriesContainer.plug(A.Plugin.ParseContent);
 
 							entriesContainer.append(searchResultsContainer);
 						}
@@ -531,9 +520,11 @@ AUI.add(
 								resultsContainer.empty();
 							}
 
-							resultsContainer.plug(A.Plugin.ParseContent);
-
 							resultsContainer.append(repositorySearchResults);
+						}
+
+						if (searchResults || repositorySearchResults) {
+							instance.all('#addButtonContainer, #sortButtonContainer').hide();
 						}
 
 						var repositoryName = instance._getRepositoryName(repositoryId);
@@ -602,6 +593,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-loading-mask', 'aui-parse-content', 'event-simulate', 'liferay-app-view-folders', 'liferay-app-view-move', 'liferay-app-view-paginator', 'liferay-app-view-select', 'liferay-history-manager', 'liferay-message', 'liferay-portlet-base', 'querystring-parse-simple']
+		requires: ['aui-loading-mask', 'aui-parse-content', 'document-library-upload', 'event-simulate', 'liferay-app-view-folders', 'liferay-app-view-move', 'liferay-app-view-paginator', 'liferay-app-view-select', 'liferay-history-manager', 'liferay-message', 'liferay-portlet-base', 'querystring-parse-simple']
 	}
 );

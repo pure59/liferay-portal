@@ -16,12 +16,14 @@ package com.liferay.portlet.sites.action;
 
 import com.liferay.portal.NoSuchGroupException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.liveusers.LiveUsers;
 import com.liferay.portal.model.User;
+import com.liferay.portal.security.auth.MembershipPolicyException;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.service.OrganizationServiceUtil;
 import com.liferay.portal.service.ServiceContext;
@@ -29,11 +31,15 @@ import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.service.UserGroupGroupRoleServiceUtil;
 import com.liferay.portal.service.UserGroupRoleServiceUtil;
 import com.liferay.portal.service.UserGroupServiceUtil;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.UserServiceUtil;
 import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -87,7 +93,10 @@ public class EditGroupAssignmentsAction extends PortletAction {
 			}
 		}
 		catch (Exception e) {
-			if (e instanceof NoSuchGroupException ||
+			if (e instanceof MembershipPolicyException) {
+				SessionErrors.add(actionRequest, e.getClass(), e);
+			}
+			else if (e instanceof NoSuchGroupException ||
 				e instanceof PrincipalException) {
 
 				SessionErrors.add(actionRequest, e.getClass());
@@ -125,6 +134,36 @@ public class EditGroupAssignmentsAction extends PortletAction {
 		return mapping.findForward(
 			getForward(
 				renderRequest, "portlet.sites_admin.edit_site_assignments"));
+	}
+
+	protected long[] filterAddUserIds(long groupId, long[] userIds)
+		throws Exception {
+
+		Set<Long> filteredUserIds = new HashSet<Long>(userIds.length);
+
+		for (long userId : userIds) {
+			if (!UserLocalServiceUtil.hasGroupUser(groupId, userId)) {
+				filteredUserIds.add(userId);
+			}
+		}
+
+		return ArrayUtil.toArray(
+			filteredUserIds.toArray(new Long[filteredUserIds.size()]));
+	}
+
+	protected long[] filterRemoveUserIds(long groupId, long[] userIds)
+		throws Exception {
+
+		Set<Long> filteredUserIds = new HashSet<Long>(userIds.length);
+
+		for (long userId : userIds) {
+			if (UserLocalServiceUtil.hasGroupUser(groupId, userId)) {
+				filteredUserIds.add(userId);
+			}
+		}
+
+		return ArrayUtil.toArray(
+			filteredUserIds.toArray(new Long[filteredUserIds.size()]));
 	}
 
 	protected void updateGroupOrganizations(ActionRequest actionRequest)
@@ -167,8 +206,13 @@ public class EditGroupAssignmentsAction extends PortletAction {
 
 		long[] addUserIds = StringUtil.split(
 			ParamUtil.getString(actionRequest, "addUserIds"), 0L);
+
+		addUserIds = filterAddUserIds(groupId, addUserIds);
+
 		long[] removeUserIds = StringUtil.split(
 			ParamUtil.getString(actionRequest, "removeUserIds"), 0L);
+
+		removeUserIds = filterRemoveUserIds(groupId, removeUserIds);
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			actionRequest);

@@ -48,7 +48,7 @@ long classPK = ParamUtil.getLong(request, "classPK");
 					<portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" />
 					<portlet:param name="classNameId" value="<%= String.valueOf(classNameId) %>" />
 					<portlet:param name="classPK" value="<%= String.valueOf(classPK) %>" />
-					<portlet:param name="structureAvailableFields" value='<%= renderResponse.getNamespace() + "structureAvailableFields" %>' />
+					<portlet:param name="structureAvailableFields" value='<%= renderResponse.getNamespace() + "getAvailableFields" %>' />
 				</portlet:renderURL>
 
 				<%
@@ -106,6 +106,7 @@ long classPK = ParamUtil.getLong(request, "classPK");
 						<portlet:param name="backURL" value="<%= viewTemplatesURL %>" />
 						<portlet:param name="groupId" value="<%= String.valueOf(scopeGroupId) %>" />
 						<portlet:param name="type" value="<%= DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY %>" />
+						<portlet:param name="ddmResourceActionId" value="<%= ActionKeys.ADD_PORTLET_DISPLAY_TEMPLATE %>" />
 					</liferay-portlet:renderURL>
 
 					<%

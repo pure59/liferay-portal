@@ -14,11 +14,13 @@
 
 package com.liferay.portlet.dynamicdatamapping.service;
 
+import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.service.ServiceTestUtil;
+import com.liferay.portal.util.GroupTestUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.TestPropsValues;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
@@ -43,14 +45,14 @@ public class BaseDDMServiceTestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		group = ServiceTestUtil.addGroup();
+		group = GroupTestUtil.addGroup();
 	}
 
 	protected DDMTemplate addDisplayTemplate(
 			long classNameId, long classPK, String name)
 		throws Exception {
 
-		String language = DDMTemplateConstants.LANG_TYPE_VM;
+		String language = TemplateConstants.LANG_TYPE_VM;
 
 		return addTemplate(
 			classNameId, classPK, name,
@@ -156,7 +158,7 @@ public class BaseDDMServiceTestCase {
 	protected String getTestTemplateScript(String language) throws Exception {
 		String text = StringPool.BLANK;
 
-		if (language.equals(DDMTemplateConstants.LANG_TYPE_VM)) {
+		if (language.equals(TemplateConstants.LANG_TYPE_VM)) {
 			text = "#set ($preferences = $renderRequest.getPreferences())";
 		}
 		else if (language.equals("xsd")) {

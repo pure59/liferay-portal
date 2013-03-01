@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.process.ClassPathUtil;
 import com.liferay.portal.kernel.process.ProcessCallable;
 import com.liferay.portal.kernel.process.ProcessException;
 import com.liferay.portal.kernel.process.ProcessExecutor;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FileComparator;
@@ -34,7 +35,6 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SystemProperties;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
 import com.liferay.util.PwdGenerator;
 import com.liferay.util.ant.ExpandTask;
 
@@ -72,6 +72,7 @@ import org.mozilla.intl.chardet.nsPSMDetector;
  * @author Brian Wing Shun Chan
  * @author Alexander Chow
  */
+@DoPrivileged
 public class FileImpl implements com.liferay.portal.kernel.util.File {
 
 	public static FileImpl getInstance() {
@@ -92,14 +93,16 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 				if (fileArray[i].isDirectory()) {
 					copyDirectory(
 						fileArray[i],
-						new File(destination.getPath() + File.separator +
-							fileArray[i].getName()));
+						new File(
+							destination.getPath() + File.separator +
+								fileArray[i].getName()));
 				}
 				else {
 					copyFile(
 						fileArray[i],
-						new File(destination.getPath() + File.separator +
-							fileArray[i].getName()));
+						new File(
+							destination.getPath() + File.separator +
+								fileArray[i].getName()));
 				}
 			}
 		}
@@ -286,15 +289,14 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 	public String extractText(InputStream is, String fileName) {
 		String text = null;
 
-		ClassLoader portalClassLoader =
-			PACLClassLoaderUtil.getPortalClassLoader();
+		ClassLoader portalClassLoader = ClassLoaderUtil.getPortalClassLoader();
 
 		ClassLoader contextClassLoader =
-			PACLClassLoaderUtil.getContextClassLoader();
+			ClassLoaderUtil.getContextClassLoader();
 
 		try {
 			if (contextClassLoader != portalClassLoader) {
-				PACLClassLoaderUtil.setContextClassLoader(portalClassLoader);
+				ClassLoaderUtil.setContextClassLoader(portalClassLoader);
 			}
 
 			Tika tika = new Tika();
@@ -341,7 +343,7 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 		}
 		finally {
 			if (contextClassLoader != portalClassLoader) {
-				PACLClassLoaderUtil.setContextClassLoader(contextClassLoader);
+				ClassLoaderUtil.setContextClassLoader(contextClassLoader);
 			}
 		}
 
@@ -372,6 +374,14 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 			if (directory.charAt(directory.length() - 1) == CharPool.SLASH) {
 				directory = directory.substring(0, directory.length() - 1);
 			}
+		}
+
+		if (!exists(directory)) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Directory " + directory + " does not exist");
+			}
+
+			return new String[0];
 		}
 
 		DirectoryScanner directoryScanner = new DirectoryScanner();
@@ -919,6 +929,8 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 				throw new ProcessException(e);
 			}
 		}
+
+		private static final long serialVersionUID = 1L;
 
 		private byte[] _data;
 

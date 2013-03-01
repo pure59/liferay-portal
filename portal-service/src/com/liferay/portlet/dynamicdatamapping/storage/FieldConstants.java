@@ -20,9 +20,11 @@ import com.liferay.portal.kernel.util.Validator;
 import java.io.Serializable;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Marcellus Tavares
+ * @author Eduardo Lundgren
  */
 public class FieldConstants {
 
@@ -44,6 +46,8 @@ public class FieldConstants {
 
 	public static final String HTML = "html";
 
+	public static final String IMAGE = "image";
+
 	public static final String INTEGER = "integer";
 
 	public static final String LABEL = "label";
@@ -54,7 +58,7 @@ public class FieldConstants {
 
 	public static final String NUMBER = "number";
 
-	public static final String PREDIFINED_VALUE = "predefinedValue";
+	public static final String PREDEFINED_VALUE = "predefinedValue";
 
 	public static final String REQUIRED = "required";
 
@@ -71,7 +75,43 @@ public class FieldConstants {
 	public static final String VALUE = "value";
 
 	public static final Serializable getSerializable(
+		String type, List<Serializable> values) {
+
+		if (type.equals(FieldConstants.BOOLEAN)) {
+			return values.toArray(new Boolean[values.size()]);
+		}
+		else if (type.equals(FieldConstants.DATE)) {
+			return values.toArray(new Date[values.size()]);
+		}
+		else if (type.equals(FieldConstants.DOUBLE)) {
+			return values.toArray(new Double[values.size()]);
+		}
+		else if (type.equals(FieldConstants.FLOAT)) {
+			return values.toArray(new Float[values.size()]);
+		}
+		else if (type.equals(FieldConstants.INTEGER)) {
+			return values.toArray(new Integer[values.size()]);
+		}
+		else if (type.equals(FieldConstants.LONG)) {
+			return values.toArray(new Long[values.size()]);
+		}
+		else if (type.equals(FieldConstants.NUMBER)) {
+			return values.toArray(new Number[values.size()]);
+		}
+		else if (type.equals(FieldConstants.SHORT)) {
+			return values.toArray(new Short[values.size()]);
+		}
+		else {
+			return values.toArray(new String[values.size()]);
+		}
+	}
+
+	public static final Serializable getSerializable(
 		String type, String value) {
+
+		if (isNumericType(type) && Validator.isNull(value)) {
+			return null;
+		}
 
 		if (type.equals(BOOLEAN)) {
 			return GetterUtil.getBoolean(value);
@@ -100,6 +140,16 @@ public class FieldConstants {
 		else {
 			return value;
 		}
+	}
+
+	public static final boolean isNumericType(String type) {
+		if (type.equals(DOUBLE) || type.equals(FLOAT) || type.equals(INTEGER) ||
+			type.equals(LONG) || type.equals(NUMBER) || type.equals(SHORT)) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 }

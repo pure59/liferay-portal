@@ -30,6 +30,7 @@ import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
 import com.liferay.portlet.documentlibrary.NoSuchFolderException;
 import com.liferay.portlet.documentlibrary.model.DLFileShortcut;
+import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
 import com.liferay.portlet.documentlibrary.service.permission.DLPermission;
@@ -112,7 +113,7 @@ public class ActionUtil {
 
 			String cmd = ParamUtil.getString(request, Constants.CMD);
 
-			if (fileVersion.isInTrash() &&
+			if ((fileVersion.isInTrash() || fileVersion.isInTrashContainer()) &&
 				!cmd.equals(Constants.MOVE_FROM_TRASH)) {
 
 				throw new NoSuchFileEntryException();
@@ -193,6 +194,14 @@ public class ActionUtil {
 			(folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID)) {
 
 			folder = DLAppServiceUtil.getFolder(folderId);
+
+			if (folder.getModel() instanceof DLFolder) {
+				DLFolder dlFolder = (DLFolder)folder.getModel();
+
+				if (dlFolder.isInTrash() || dlFolder.isInTrashContainer()) {
+					throw new NoSuchFolderException();
+				}
+			}
 		}
 		else {
 			DLPermission.check(

@@ -39,6 +39,7 @@ import com.liferay.portal.model.Team;
 import com.liferay.portal.model.User;
 import com.liferay.portal.model.UserGroup;
 import com.liferay.portal.model.UserGroupConstants;
+import com.liferay.portal.security.auth.MembershipPolicyUtil;
 import com.liferay.portal.security.ldap.LDAPUserGroupTransactionThreadLocal;
 import com.liferay.portal.security.permission.PermissionCacheUtil;
 import com.liferay.portal.service.ServiceContext;
@@ -53,6 +54,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The implementation of the user group local service.
@@ -187,6 +189,31 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 		return userGroup;
 	}
 
+	public void checkMembershipPolicy(User user)
+		throws PortalException, SystemException {
+
+		List<UserGroup> userGroups = getUserUserGroups(user.getUserId());
+
+		for (UserGroup userGroup : userGroups) {
+			if (!MembershipPolicyUtil.isMembershipAllowed(userGroup, user)) {
+				userLocalService.unsetUserGroupUsers(
+					userGroup.getUserGroupId(), new long[] {user.getUserId()});
+			}
+		}
+
+		Set<UserGroup> mandatoryUserGroups =
+			MembershipPolicyUtil.getMandatoryUserGroups(user);
+
+		for (UserGroup userGroup : mandatoryUserGroups) {
+			if (!userLocalService.hasUserGroupUser(
+					userGroup.getUserGroupId(), user.getUserId())) {
+
+				userLocalService.addUserGroupUsers(
+					userGroup.getUserGroupId(), new long[] {user.getUserId()});
+			}
+		}
+	}
+
 	/**
 	 * Clears all associations between the user and its user groups and clears
 	 * the permissions cache.
@@ -205,6 +232,37 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 	}
 
 	/**
+	 * Copies the user group's layout to the user.
+	 *
+	 * @param      userGroupId the primary key of the user group
+	 * @param      userId the primary key of the user
+	 * @throws     PortalException if a user with the primary key could not be
+	 *             found or if a portal exception occurred
+	 * @throws     SystemException if a system exception occurred
+	 * @deprecated
+	 */
+	public void copyUserGroupLayouts(long userGroupId, long userId)
+		throws PortalException, SystemException {
+
+		Map<String, String[]> parameterMap = getLayoutTemplatesParameters();
+
+		File[] files = exportLayouts(userGroupId, parameterMap);
+
+		try {
+			importLayouts(userId, parameterMap, files[0], files[1]);
+		}
+		finally {
+			if (files[0] != null) {
+				files[0].delete();
+			}
+
+			if (files[1] != null) {
+				files[1].delete();
+			}
+		}
+	}
+
+	/**
 	 * Copies the user group's layouts to the users who are not already members
 	 * of the user group.
 	 *
@@ -215,7 +273,7 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 	 * @throws     SystemException if a system exception occurred
 	 * @deprecated
 	 */
-	public void copyUserGroupLayouts(long userGroupId, long userIds[])
+	public void copyUserGroupLayouts(long userGroupId, long[] userIds)
 		throws PortalException, SystemException {
 
 		Map<String, String[]> parameterMap = getLayoutTemplatesParameters();
@@ -250,43 +308,12 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 	 * @throws     SystemException if a system exception occurred
 	 * @deprecated
 	 */
-	public void copyUserGroupLayouts(long userGroupIds[], long userId)
+	public void copyUserGroupLayouts(long[] userGroupIds, long userId)
 		throws PortalException, SystemException {
 
 		for (long userGroupId : userGroupIds) {
 			if (!userGroupPersistence.containsUser(userGroupId, userId)) {
 				copyUserGroupLayouts(userGroupId, userId);
-			}
-		}
-	}
-
-	/**
-	 * Copies the user group's layout to the user.
-	 *
-	 * @param      userGroupId the primary key of the user group
-	 * @param      userId the primary key of the user
-	 * @throws     PortalException if a user with the primary key could not be
-	 *             found or if a portal exception occurred
-	 * @throws     SystemException if a system exception occurred
-	 * @deprecated
-	 */
-	public void copyUserGroupLayouts(long userGroupId, long userId)
-		throws PortalException, SystemException {
-
-		Map<String, String[]> parameterMap = getLayoutTemplatesParameters();
-
-		File[] files = exportLayouts(userGroupId, parameterMap);
-
-		try {
-			importLayouts(userId, parameterMap, files[0], files[1]);
-		}
-		finally {
-			if (files[0] != null) {
-				files[0].delete();
-			}
-
-			if (files[1] != null) {
-				files[1].delete();
 			}
 		}
 	}
@@ -642,46 +669,6 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 	}
 
 	/**
-	 * Returns an ordered range of all the user groups that match the name and
-	 * description.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end -
-	 * start</code> instances. <code>start</code> and <code>end</code> are not
-	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
-	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
-	 * result set.
-	 * </p>
-	 *
-	 * @param  companyId the primary key of the user group's company
-	 * @param  name the user group's name (optionally <code>null</code>)
-	 * @param  description the user group's description (optionally
-	 *         <code>null</code>)
-	 * @param  params the finder params (optionally <code>null</code>). For more
-	 *         information see {@link
-	 *         com.liferay.portal.service.persistence.UserGroupFinder}
-	 * @param  start the lower bound of the range of user groups to return
-	 * @param  end the upper bound of the range of user groups to return (not
-	 *         inclusive)
-	 * @param  obc the comparator to order the user groups (optionally
-	 *         <code>null</code>)
-	 * @return the matching user groups ordered by comparator <code>obc</code>
-	 * @throws SystemException if a system exception occurred
-	 * @see    com.liferay.portal.service.persistence.UserGroupFinder
-	 */
-	public List<UserGroup> search(
-			long companyId, String name, String description,
-			LinkedHashMap<String, Object> params, int start, int end,
-			OrderByComparator obc)
-		throws SystemException {
-
-		return userGroupFinder.findByC_N_D(
-			companyId, name, description, params, false, start, end, obc);
-	}
-
-	/**
 	 * Returns the number of user groups that match the keywords
 	 *
 	 * @param  companyId the primary key of the user group's company
@@ -700,29 +687,6 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 		throws SystemException {
 
 		return userGroupFinder.countByKeywords(companyId, keywords, params);
-	}
-
-	/**
-	 * Returns the number of user groups that match the name and description.
-	 *
-	 * @param  companyId the primary key of the user group's company
-	 * @param  name the user group's name (optionally <code>null</code>)
-	 * @param  description the user group's description (optionally
-	 *         <code>null</code>)
-	 * @param  params the finder params (optionally <code>null</code>). For more
-	 *         information see {@link
-	 *         com.liferay.portal.service.persistence.UserGroupFinder}
-	 * @return the number of matching user groups
-	 * @throws SystemException if a system exception occurred
-	 * @see    com.liferay.portal.service.persistence.UserGroupFinder
-	 */
-	public int searchCount(
-			long companyId, String name, String description,
-			LinkedHashMap<String, Object> params)
-		throws SystemException {
-
-		return userGroupFinder.countByC_N_D(
-			companyId, name, description, params, false);
 	}
 
 	/**

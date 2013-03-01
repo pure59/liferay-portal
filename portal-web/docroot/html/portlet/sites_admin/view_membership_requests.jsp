@@ -36,7 +36,7 @@ else {
 Group group = (Group)request.getAttribute(WebKeys.GROUP);
 %>
 
-<liferay-ui:success key="membership_reply_sent" message="your-reply-will-be-sent-to-the-user-by-email" />
+<liferay-ui:success key="membershipReplySent" message="your-reply-will-be-sent-to-the-user-by-email" />
 
 <liferay-ui:header
 	backURL="<%= redirect %>"
@@ -107,7 +107,7 @@ for (int i = 0; i < results.size(); i++) {
 	sb.append(HtmlUtil.escape(user2.getFullName()));
 	sb.append(" (");
 	sb.append(user2.getEmailAddress());
-	sb.append(")");
+	sb.append(StringPool.CLOSE_PARENTHESIS);
 
 	row.addText(sb.toString());
 

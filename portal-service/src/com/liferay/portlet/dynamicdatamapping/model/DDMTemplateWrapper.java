@@ -897,6 +897,16 @@ public class DDMTemplateWrapper implements DDMTemplate,
 	}
 
 	public void setExpandoBridgeAttributes(
+		com.liferay.portal.model.BaseModel<?> baseModel) {
+		_ddmTemplate.setExpandoBridgeAttributes(baseModel);
+	}
+
+	public void setExpandoBridgeAttributes(
+		com.liferay.portlet.expando.model.ExpandoBridge expandoBridge) {
+		_ddmTemplate.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_ddmTemplate.setExpandoBridgeAttributes(serviceContext);
 	}
@@ -956,6 +966,11 @@ public class DDMTemplateWrapper implements DDMTemplate,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _ddmTemplate.getSmallImageType();
+	}
+
+	public java.lang.String getWebDavURL(
+		com.liferay.portal.theme.ThemeDisplay themeDisplay) {
+		return _ddmTemplate.getWebDavURL(themeDisplay);
 	}
 
 	public void setSmallImageType(java.lang.String smallImageType) {

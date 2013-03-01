@@ -31,7 +31,8 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
+import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
+import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portal.velocity.VelocityUtil;
 import com.liferay.util.SimpleCounter;
 
@@ -217,6 +218,10 @@ public abstract class BaseDB implements DB {
 		return _SUPPORTS_INLINE_DISTINCT;
 	}
 
+	public boolean isSupportsQueryingAfterException() {
+		return _SUPPORTS_QUERYING_AFTER_EXCEPTION;
+	}
+
 	public boolean isSupportsScrollableResults() {
 		return _SUPPORTS_SCROLLABLE_RESULTS;
 	}
@@ -297,7 +302,7 @@ public abstract class BaseDB implements DB {
 	public void runSQLTemplate(String path, boolean failOnError)
 		throws IOException, NamingException, SQLException {
 
-		ClassLoader classLoader = PACLClassLoaderUtil.getContextClassLoader();
+		ClassLoader classLoader = ClassLoaderUtil.getContextClassLoader();
 
 		InputStream is = classLoader.getResourceAsStream(
 			"com/liferay/portal/tools/sql/dependencies/" + path);
@@ -318,8 +323,6 @@ public abstract class BaseDB implements DB {
 		}
 
 		String template = StringUtil.read(is);
-
-		is.close();
 
 		boolean evaluate = path.endsWith(".vm");
 
@@ -354,7 +357,7 @@ public abstract class BaseDB implements DB {
 					String includeFileName = line.substring(pos + 1);
 
 					ClassLoader classLoader =
-						PACLClassLoaderUtil.getContextClassLoader();
+						ClassLoaderUtil.getContextClassLoader();
 
 					InputStream is = classLoader.getResourceAsStream(
 						"com/liferay/portal/tools/sql/dependencies/" +
@@ -365,8 +368,6 @@ public abstract class BaseDB implements DB {
 					}
 
 					String include = StringUtil.read(is);
-
-					is.close();
 
 					if (includeFileName.endsWith(".vm")) {
 						try {
@@ -705,17 +706,18 @@ public abstract class BaseDB implements DB {
 		Map<String, Object> variables = new HashMap<String, Object>();
 
 		variables.put("counter", new SimpleCounter());
+		variables.put("portalUUIDUtil", PortalUUIDUtil.class);
 
-		ClassLoader classLoader = PACLClassLoaderUtil.getContextClassLoader();
+		ClassLoader classLoader = ClassLoaderUtil.getContextClassLoader();
 
 		try {
-			PACLClassLoaderUtil.setContextClassLoader(
-				PACLClassLoaderUtil.getPortalClassLoader());
+			ClassLoaderUtil.setContextClassLoader(
+				ClassLoaderUtil.getPortalClassLoader());
 
 			template = VelocityUtil.evaluate(template, variables);
 		}
 		finally {
-			PACLClassLoaderUtil.setContextClassLoader(classLoader);
+			ClassLoaderUtil.setContextClassLoader(classLoader);
 		}
 
 		// Trim insert statements because it breaks MySQL Query Browser
@@ -1016,6 +1018,8 @@ public abstract class BaseDB implements DB {
 	private static final boolean _SUPPORTS_DATE_MILLISECONDS = true;
 
 	private static final boolean _SUPPORTS_INLINE_DISTINCT = true;
+
+	private static final boolean _SUPPORTS_QUERYING_AFTER_EXCEPTION = true;
 
 	private static final boolean _SUPPORTS_SCROLLABLE_RESULTS = true;
 

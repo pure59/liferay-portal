@@ -21,7 +21,6 @@ import com.liferay.portal.kernel.jsonwebservice.JSONWebServiceConfigurator;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import java.io.BufferedInputStream;
@@ -31,6 +30,9 @@ import java.io.UnsupportedEncodingException;
 
 import java.net.URL;
 import java.net.URLDecoder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 
@@ -60,7 +62,8 @@ public class JSONWebServiceConfiguratorImpl extends ClassFinder
 				File[] classPathFiles = null;
 
 				if (getClassLoader() !=
-						PACLClassLoaderUtil.getPortalClassLoader()) {
+						com.liferay.portal.util.ClassLoaderUtil.
+							getPortalClassLoader()) {
 
 					classPathFiles = getPluginClassPathFiles();
 				}
@@ -90,8 +93,9 @@ public class JSONWebServiceConfiguratorImpl extends ClassFinder
 		_baseJSONWebServiceConfigurator.init(servletContext, classLoader);
 
 		setIncludedJars(
-			"*_wl_cls_gen.jar", "*-hook-service*.jar", "*-portlet-service*.jar",
-			"*-web-service*.jar", "*portal-impl.jar", "*portal-service.jar");
+			"**/_wl_cls_gen.jar", "**/*-hook-service*.jar",
+			"**/*-portlet-service*.jar", "**/*-web-service*.jar",
+			"**/portal-impl.jar", "**/portal-service.jar");
 	}
 
 	public void registerClass(String className, InputStream inputStream)
@@ -139,24 +143,32 @@ public class JSONWebServiceConfiguratorImpl extends ClassFinder
 			libDir = new File(classPathFile.getParent(), "lib");
 		}
 
-		File[] classPathFiles = new File[2];
+		List<File> classPaths = new ArrayList<File>();
 
-		classPathFiles[0] = classPathFile;
+		classPaths.add(classPathFile);
 
-		FindFile findFile = new RegExpFindFile(
+		FindFile<?> findFile = new RegExpFindFile(
 			".*-(hook|portlet|web)-service.*\\.jar");
 
 		findFile.searchPath(libDir);
 
-		classPathFiles[1] = findFile.nextFile();
+		File file = null;
 
-		if (classPathFiles[1] == null) {
-			File classesDir = new File(libDir.getParent(), "classes");
+		while ((file = findFile.nextFile()) != null) {
+			if (classPaths.contains(file)) {
+				continue;
+			}
 
-			classPathFiles[1] = classesDir;
+			classPaths.add(file);
 		}
 
-		return classPathFiles;
+		File classesDir = new File(libDir.getParent(), "classes");
+
+		if (!classPaths.contains(classesDir)) {
+			classPaths.add(classesDir);
+		}
+
+		return classPaths.toArray(new File[classPaths.size()]);
 	}
 
 	protected File[] getPortalClassPathFiles() {

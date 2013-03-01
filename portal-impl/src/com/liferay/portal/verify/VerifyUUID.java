@@ -77,6 +77,9 @@ public class VerifyUUID extends VerifyProcess {
 
 	private static final String[][] _MODELS = new String[][] {
 		new String[] {
+			"DLFileRank", "fileRankId"
+		},
+		new String[] {
 			"DLFileVersion", "fileVersionId"
 		},
 		new String[] {
@@ -86,12 +89,6 @@ public class VerifyUUID extends VerifyProcess {
 			"JournalFeed", "id_"
 		},
 		new String[] {
-			"JournalStructure", "id_"
-		},
-		new String[] {
-			"JournalTemplate", "id_"
-		},
-		new String[] {
 			"Layout", "plid"
 		},
 		new String[] {
@@ -99,6 +96,12 @@ public class VerifyUUID extends VerifyProcess {
 		},
 		new String[] {
 			"LayoutSetPrototype", "layoutSetPrototypeId"
+		},
+		new String[] {
+			"MBBan", "banId"
+		},
+		new String[] {
+			"MBThreadFlag", "threadFlagId"
 		},
 		new String[] {
 			"WikiPageResource", "resourcePrimKey"

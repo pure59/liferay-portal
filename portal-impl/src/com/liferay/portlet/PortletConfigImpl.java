@@ -17,6 +17,7 @@ package com.liferay.portlet;
 import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.PortletBag;
 import com.liferay.portal.kernel.portlet.PortletBagPool;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
@@ -60,6 +61,9 @@ public class PortletConfigImpl implements LiferayPortletConfig {
 
 		_portletContext = portletContext;
 		_resourceBundles = new ConcurrentHashMap<String, ResourceBundle>();
+
+		_copyRequestParameters = GetterUtil.getBoolean(
+			getInitParameter("copy-request-parameters"));
 	}
 
 	public Map<String, String[]> getContainerRuntimeOptions() {
@@ -187,6 +191,10 @@ public class PortletConfigImpl implements LiferayPortletConfig {
 		return Collections.enumeration(supportedLocales);
 	}
 
+	public boolean isCopyRequestParameters() {
+		return _copyRequestParameters;
+	}
+
 	public boolean isWARFile() {
 		return _portletApp.isWARFile();
 	}
@@ -207,6 +215,7 @@ public class PortletConfigImpl implements LiferayPortletConfig {
 		return javaxQNames;
 	}
 
+	private boolean _copyRequestParameters;
 	private Portlet _portlet;
 	private PortletApp _portletApp;
 	private PortletContext _portletContext;

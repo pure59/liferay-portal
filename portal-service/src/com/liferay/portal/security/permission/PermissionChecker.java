@@ -63,6 +63,8 @@ public interface PermissionChecker extends Cloneable {
 	 */
 	public long[] getRoleIds(long userId, long groupId);
 
+	public User getUser();
+
 	/**
 	 * Returns the primary key of the user.
 	 *
@@ -244,6 +246,16 @@ public interface PermissionChecker extends Cloneable {
 	 *         organization; <code>false</code> otherwise
 	 */
 	public boolean isOrganizationAdmin(long organizationId);
+
+	/**
+	 * Returns <code>true</code> if the user is an owner of the
+	 * organization.
+	 *
+	 * @param  organizationId the primary key of the organization
+	 * @return <code>true</code> if the user is an owner of the
+	 *         organization; <code>false</code> otherwise
+	 */
+	public boolean isOrganizationOwner(long organizationId);
 
 	/**
 	 * Returns <code>true</code> if the user is signed in.

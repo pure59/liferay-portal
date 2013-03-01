@@ -640,6 +640,16 @@ public class DLFileShortcutWrapper implements DLFileShortcut,
 	}
 
 	public void setExpandoBridgeAttributes(
+		com.liferay.portal.model.BaseModel<?> baseModel) {
+		_dlFileShortcut.setExpandoBridgeAttributes(baseModel);
+	}
+
+	public void setExpandoBridgeAttributes(
+		com.liferay.portlet.expando.model.ExpandoBridge expandoBridge) {
+		_dlFileShortcut.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_dlFileShortcut.setExpandoBridgeAttributes(serviceContext);
 	}
@@ -693,12 +703,12 @@ public class DLFileShortcutWrapper implements DLFileShortcut,
 		return _dlFileShortcut.getToTitle();
 	}
 
-	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashFolder() {
-		return _dlFileShortcut.getTrashFolder();
+	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashContainer() {
+		return _dlFileShortcut.getTrashContainer();
 	}
 
-	public boolean isInTrashFolder() {
-		return _dlFileShortcut.isInTrashFolder();
+	public boolean isInTrashContainer() {
+		return _dlFileShortcut.isInTrashContainer();
 	}
 
 	/**

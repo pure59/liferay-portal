@@ -14,6 +14,7 @@
 
 package com.liferay.portal.util;
 
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Html;
 import com.liferay.portal.kernel.util.HttpUtil;
@@ -25,6 +26,7 @@ import com.liferay.portal.kernel.util.Validator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.TextExtractor;
 
@@ -36,6 +38,7 @@ import net.htmlparser.jericho.TextExtractor;
  * @author Connor McKay
  * @author Shuyang Zhou
  */
+@DoPrivileged
 public class HtmlImpl implements Html {
 
 	public static final int ESCAPE_MODE_ATTRIBUTE = 1;
@@ -300,6 +303,18 @@ public class HtmlImpl implements Html {
 
 	public String fromInputSafe(String text) {
 		return StringUtil.replace(text, "&amp;", "&");
+	}
+
+	public String render(String html) {
+		if (html == null) {
+			return null;
+		}
+
+		Source source = new Source(html);
+
+		Renderer renderer = source.getRenderer();
+
+		return renderer.toString();
 	}
 
 	public String replaceMsWordCharacters(String text) {

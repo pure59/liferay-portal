@@ -14,9 +14,11 @@
 
 package com.liferay.portlet.journal.service.impl;
 
+import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PropsValues;
@@ -57,6 +59,17 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 		journalFolderLocalService.deleteFolder(folderId);
 	}
 
+	public void deleteFolder(long folderId, boolean includeTrashedEntries)
+		throws PortalException, SystemException {
+
+		JournalFolder folder = journalFolderLocalService.getFolder(folderId);
+
+		JournalFolderPermission.check(
+			getPermissionChecker(), folder, ActionKeys.DELETE);
+
+		journalFolderLocalService.deleteFolder(folderId, includeTrashedEntries);
+	}
+
 	public JournalFolder getFolder(long folderId)
 		throws PortalException, SystemException {
 
@@ -75,16 +88,33 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 	public List<JournalFolder> getFolders(long groupId, long parentFolderId)
 		throws SystemException {
 
-		return journalFolderPersistence.filterFindByG_P(
-			groupId, parentFolderId);
+		return getFolders(
+			groupId, parentFolderId, WorkflowConstants.STATUS_APPROVED);
+	}
+
+	public List<JournalFolder> getFolders(
+			long groupId, long parentFolderId, int status)
+		throws SystemException {
+
+		return journalFolderPersistence.filterFindByG_P_S(
+			groupId, parentFolderId, status);
 	}
 
 	public List<JournalFolder> getFolders(
 			long groupId, long parentFolderId, int start, int end)
 		throws SystemException {
 
-		return journalFolderPersistence.filterFindByG_P(
-			groupId, parentFolderId, start, end);
+		return getFolders(
+			groupId, parentFolderId, WorkflowConstants.STATUS_APPROVED, start,
+			end);
+	}
+
+	public List<JournalFolder> getFolders(
+			long groupId, long parentFolderId, int status, int start, int end)
+		throws SystemException {
+
+		return journalFolderPersistence.filterFindByG_P_S(
+			groupId, parentFolderId, status, start, end);
 	}
 
 	public List<Object> getFoldersAndArticles(
@@ -92,24 +122,29 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 			OrderByComparator obc)
 		throws SystemException {
 
-		return journalFolderFinder.filterFindF_AByG_F(
-			groupId, folderId, start, end, obc);
+		QueryDefinition queryDefinition = new QueryDefinition(
+			WorkflowConstants.STATUS_ANY, start, end, obc);
+
+		return journalFolderFinder.filterFindF_A_ByG_F(
+			groupId, folderId, queryDefinition);
 	}
 
 	public int getFoldersAndArticlesCount(
 			long groupId, List<Long> folderIds, int status)
 		throws SystemException {
 
+		QueryDefinition queryDefinition = new QueryDefinition(status);
+
 		if (folderIds.size() <= PropsValues.SQL_DATA_MAX_PARAMETERS) {
-			return journalArticleFinder.filterCountByG_F_S(
-				groupId, folderIds, status);
+			return journalArticleFinder.filterCountByG_F(
+				groupId, folderIds, queryDefinition);
 		}
 		else {
 			int start = 0;
 			int end = PropsValues.SQL_DATA_MAX_PARAMETERS;
 
-			int articlesCount = journalArticleFinder.filterCountByG_F_S(
-				groupId, folderIds.subList(start, end), status);
+			int articlesCount = journalArticleFinder.filterCountByG_F(
+				groupId, folderIds.subList(start, end), queryDefinition);
 
 			folderIds.subList(start, end).clear();
 
@@ -123,7 +158,16 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 	public int getFoldersAndArticlesCount(long groupId, long folderId)
 		throws SystemException {
 
-		return journalFolderFinder.filterCountF_A_ByG_F(groupId, folderId);
+		return getFoldersAndArticlesCount(
+			groupId, folderId, WorkflowConstants.STATUS_ANY);
+	}
+
+	public int getFoldersAndArticlesCount(
+			long groupId, long folderId, int status)
+		throws SystemException {
+
+		return journalFolderFinder.filterCountF_A_ByG_F(
+			groupId, folderId, new QueryDefinition(status));
 	}
 
 	public int getFoldersCount(long groupId, long parentFolderId)
@@ -172,6 +216,41 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 			folderId, parentFolderId, serviceContext);
 	}
 
+	public JournalFolder moveFolderFromTrash(
+			long folderId, long parentFolderId, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		JournalFolder folder = journalFolderLocalService.getFolder(folderId);
+
+		JournalFolderPermission.check(
+			getPermissionChecker(), folder, ActionKeys.UPDATE);
+
+		return journalFolderLocalService.moveFolderFromTrash(
+			getUserId(), folderId, parentFolderId, serviceContext);
+	}
+
+	public void moveFolderToTrash(long folderId)
+		throws PortalException, SystemException {
+
+		JournalFolder folder = journalFolderLocalService.getFolder(folderId);
+
+		JournalFolderPermission.check(
+			getPermissionChecker(), folder, ActionKeys.DELETE);
+
+		journalFolderLocalService.moveFolderToTrash(getUserId(), folderId);
+	}
+
+	public void restoreFolderFromTrash(long folderId)
+			throws PortalException, SystemException {
+
+		JournalFolder folder = journalFolderLocalService.getFolder(folderId);
+
+		JournalFolderPermission.check(
+			getPermissionChecker(), folder, ActionKeys.UPDATE);
+
+		journalFolderLocalService.restoreFolderFromTrash(getUserId(), folderId);
+	}
+
 	public JournalFolder updateFolder(
 			long folderId, long parentFolderId, String name, String description,
 			boolean mergeWithParentFolder, ServiceContext serviceContext)
@@ -183,8 +262,8 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 			getPermissionChecker(), folder, ActionKeys.UPDATE);
 
 		return journalFolderLocalService.updateFolder(
-			folderId, parentFolderId, name, description, mergeWithParentFolder,
-			serviceContext);
+			getUserId(), folderId, parentFolderId, name, description,
+			mergeWithParentFolder, serviceContext);
 	}
 
 }

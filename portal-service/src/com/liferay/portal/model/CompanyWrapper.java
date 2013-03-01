@@ -367,6 +367,16 @@ public class CompanyWrapper implements Company, ModelWrapper<Company> {
 	}
 
 	public void setExpandoBridgeAttributes(
+		com.liferay.portal.model.BaseModel<?> baseModel) {
+		_company.setExpandoBridgeAttributes(baseModel);
+	}
+
+	public void setExpandoBridgeAttributes(
+		com.liferay.portlet.expando.model.ExpandoBridge expandoBridge) {
+		_company.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_company.setExpandoBridgeAttributes(serviceContext);
 	}
@@ -532,6 +542,10 @@ public class CompanyWrapper implements Company, ModelWrapper<Company> {
 
 	public void setKeyObj(java.security.Key keyObj) {
 		_company.setKeyObj(keyObj);
+	}
+
+	public void setVirtualHostname(java.lang.String virtualHostname) {
+		_company.setVirtualHostname(virtualHostname);
 	}
 
 	/**

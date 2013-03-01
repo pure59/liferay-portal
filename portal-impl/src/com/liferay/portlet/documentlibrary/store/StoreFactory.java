@@ -19,13 +19,14 @@ import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.kernel.util.InstanceFactory;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
 import com.liferay.portal.spring.aop.MethodInterceptorInvocationHandler;
+import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 
@@ -110,14 +111,14 @@ public class StoreFactory {
 
 	public static void setInstance(Store store) {
 		if (_log.isDebugEnabled()) {
-			_log.debug("Set " + store.getClass().getName());
+			_log.debug("Set " + ClassUtil.getClassName(store));
 		}
 
 		_store = store;
 	}
 
 	private static Store _getInstance() throws Exception {
-		ClassLoader classLoader = PACLClassLoaderUtil.getPortalClassLoader();
+		ClassLoader classLoader = ClassLoaderUtil.getPortalClassLoader();
 
 		Store store = (Store)InstanceFactory.newInstance(
 			classLoader, PropsValues.DL_STORE_IMPL);
@@ -135,10 +136,9 @@ public class StoreFactory {
 				MethodInterceptor tempFileMethodInterceptor =
 					new TempFileMethodInterceptor();
 
-				List<MethodInterceptor> methodInterceptors =
-					Arrays.asList(
-						transactionAdviceMethodInterceptor,
-						tempFileMethodInterceptor);
+				List<MethodInterceptor> methodInterceptors = Arrays.asList(
+					transactionAdviceMethodInterceptor,
+					tempFileMethodInterceptor);
 
 				store = (Store)ProxyUtil.newProxyInstance(
 					classLoader, new Class<?>[] {Store.class},

@@ -55,6 +55,7 @@ import java.io.Serializable;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -197,6 +198,30 @@ public class DDLRecordLocalServiceImpl extends DDLRecordLocalServiceBaseImpl {
 		DDLRecord record = ddlRecordPersistence.findByPrimaryKey(recordId);
 
 		deleteRecord(record);
+	}
+
+	public DDLRecord deleteRecordLocale(
+			long recordId, Locale locale, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		DDLRecord record = ddlRecordPersistence.findByPrimaryKey(recordId);
+
+		Fields fields = StorageEngineUtil.getFields(record.getDDMStorageId());
+
+		Iterator<Field> itr = fields.iterator();
+
+		while (itr.hasNext()) {
+			Field field = itr.next();
+
+			Map<Locale, List<Serializable>> valuesMap = field.getValuesMap();
+
+			valuesMap.remove(locale);
+		}
+
+		return updateRecord(
+			serviceContext.getUserId(), recordId, false,
+			DDLRecordConstants.DISPLAY_INDEX_DEFAULT, fields, false,
+			serviceContext);
 	}
 
 	public void deleteRecords(long recordSetId)
@@ -405,8 +430,15 @@ public class DDLRecordLocalServiceImpl extends DDLRecordLocalServiceBaseImpl {
 
 		DDLRecordSet recordSet = record.getRecordSet();
 
+		DDMStructure ddmStructure = recordSet.getDDMStructure();
+
+		String ddmStructureName = ddmStructure.getName(locale);
+
+		String recordSetName = recordSet.getName(locale);
+
 		String title = LanguageUtil.format(
-			locale, "new-record-for-list-x", recordSet.getName(locale));
+			locale, "new-x-for-list-x",
+			new Object[] {ddmStructureName, recordSetName});
 
 		if (addDraftAssetEntry) {
 			assetEntryLocalService.updateEntry(
@@ -449,6 +481,13 @@ public class DDLRecordLocalServiceImpl extends DDLRecordLocalServiceBaseImpl {
 
 		if (recordVersion.isApproved()) {
 			DDLRecordSet recordSet = record.getRecordSet();
+
+			if (mergeFields) {
+				Fields existingFields = StorageEngineUtil.getFields(
+					recordVersion.getDDMStorageId());
+
+				fields = DDMUtil.mergeFields(fields, existingFields);
+			}
 
 			long ddmStorageId = StorageEngineUtil.create(
 				recordSet.getCompanyId(), recordSet.getDDMStructureId(), fields,

@@ -107,6 +107,7 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 	public static long MAILING_COLUMN_BITMASK = 8L;
 	public static long PRIMARY_COLUMN_BITMASK = 16L;
 	public static long USERID_COLUMN_BITMASK = 32L;
+	public static long CREATEDATE_COLUMN_BITMASK = 64L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -178,7 +179,7 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 	}
 
 	public Serializable getPrimaryKeyObj() {
-		return new Long(_addressId);
+		return _addressId;
 	}
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {

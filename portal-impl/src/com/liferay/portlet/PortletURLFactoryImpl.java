@@ -15,6 +15,7 @@
 package com.liferay.portlet;
 
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 
 import javax.portlet.PortletRequest;
 
@@ -23,20 +24,21 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author Brian Wing Shun Chan
  */
+@DoPrivileged
 public class PortletURLFactoryImpl implements PortletURLFactory {
 
 	public LiferayPortletURL create(
-		HttpServletRequest request, String portletName, long plid,
+		HttpServletRequest request, String portletId, long plid,
 		String lifecycle) {
 
-		return new PortletURLImpl(request, portletName, plid, lifecycle);
+		return new PortletURLImpl(request, portletId, plid, lifecycle);
 	}
 
 	public LiferayPortletURL create(
-		PortletRequest portletRequest, String portletName, long plid,
+		PortletRequest portletRequest, String portletId, long plid,
 		String lifecycle) {
 
-		return new PortletURLImpl(portletRequest, portletName, plid, lifecycle);
+		return new PortletURLImpl(portletRequest, portletId, plid, lifecycle);
 	}
 
 }

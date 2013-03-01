@@ -16,6 +16,7 @@ package com.liferay.portal.model;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -49,6 +50,7 @@ import java.util.TreeSet;
  * @author Brian Wing Shun Chan
  * @author Tomas Polesovsky
  */
+@DoPrivileged
 public class ModelHintsImpl implements ModelHints {
 
 	public void afterPropertiesSet() {
@@ -126,8 +128,8 @@ public class ModelHintsImpl implements ModelHints {
 	}
 
 	public Map<String, String> getHints(String model, String field) {
-		Map<String, Object> fields =
-			(Map<String, Object>)_modelFields.get(model);
+		Map<String, Object> fields = (Map<String, Object>)_modelFields.get(
+			model);
 
 		if (fields == null) {
 			return null;
@@ -135,6 +137,21 @@ public class ModelHintsImpl implements ModelHints {
 		else {
 			return (Map<String, String>)fields.get(field + _HINTS_SUFFIX);
 		}
+	}
+
+	public int getMaxLength(String model, String field) {
+		Map<String, String> hints = getHints(model, field);
+
+		if (hints == null) {
+			return Integer.MAX_VALUE;
+		}
+
+		int maxLength = GetterUtil.getInteger(
+			ModelHintsConstants.TEXT_MAX_LENGTH);
+
+		maxLength = GetterUtil.getInteger(hints.get("max-length"), maxLength);
+
+		return maxLength;
 	}
 
 	public List<String> getModels() {
@@ -429,16 +446,7 @@ public class ModelHintsImpl implements ModelHints {
 			return value;
 		}
 
-		Map<String, String> hints = getHints(model, field);
-
-		if (hints == null) {
-			return value;
-		}
-
-		int maxLength = GetterUtil.getInteger(
-			ModelHintsConstants.TEXT_MAX_LENGTH);
-
-		maxLength = GetterUtil.getInteger(hints.get("max-length"), maxLength);
+		int maxLength = getMaxLength(model, field);
 
 		if (value.length() > maxLength) {
 			return value.substring(0, maxLength);

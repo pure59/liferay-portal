@@ -37,7 +37,8 @@ import java.util.Date;
  * @see com.liferay.portal.model.impl.RepositoryModelImpl
  * @generated
  */
-public interface RepositoryModel extends BaseModel<Repository>, GroupedModel {
+public interface RepositoryModel extends BaseModel<Repository>, GroupedModel,
+	StagedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -299,6 +300,10 @@ public interface RepositoryModel extends BaseModel<Repository>, GroupedModel {
 	public void setPrimaryKeyObj(Serializable primaryKeyObj);
 
 	public ExpandoBridge getExpandoBridge();
+
+	public void setExpandoBridgeAttributes(BaseModel<?> baseModel);
+
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge);
 
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext);
 

@@ -78,6 +78,7 @@ public class ListTypeModelImpl extends BaseModelImpl<ListType>
 				"value.object.column.bitmask.enabled.com.liferay.portal.model.ListType"),
 			true);
 	public static long TYPE_COLUMN_BITMASK = 1L;
+	public static long NAME_COLUMN_BITMASK = 2L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -134,7 +135,7 @@ public class ListTypeModelImpl extends BaseModelImpl<ListType>
 	}
 
 	public Serializable getPrimaryKeyObj() {
-		return new Integer(_listTypeId);
+		return _listTypeId;
 	}
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
@@ -260,8 +261,7 @@ public class ListTypeModelImpl extends BaseModelImpl<ListType>
 	public int compareTo(ListType listType) {
 		int value = 0;
 
-		value = getName().toLowerCase()
-					.compareTo(listType.getName().toLowerCase());
+		value = getName().compareToIgnoreCase(listType.getName());
 
 		if (value != 0) {
 			return value;

@@ -42,19 +42,25 @@ if ((structure == null) && (template != null)) {
 
 String type = BeanParamUtil.getString(template, request, "type", DDMTemplateConstants.TEMPLATE_TYPE_FORM);
 String mode = BeanParamUtil.getString(template, request, "mode", DDMTemplateConstants.TEMPLATE_MODE_CREATE);
-String language = BeanParamUtil.getString(template, request, "language", DDMTemplateConstants.LANG_TYPE_VM);
+String language = BeanParamUtil.getString(template, request, "language", TemplateConstants.LANG_TYPE_VM);
 String script = BeanParamUtil.getString(template, request, "script");
+Set<String> supportedLanguageTypes = TemplateManagerUtil.getTemplateManagerNames();
 
 if (Validator.isNull(script)) {
-	if (classNameId > 0) {
-		PortletDisplayTemplateHandler portletDisplayTemplateHandler = PortletDisplayTemplateHandlerRegistryUtil.getPortletDisplayTemplateHandler(classNameId);
+	PortletDisplayTemplateHandler portletDisplayTemplateHandler = PortletDisplayTemplateHandlerRegistryUtil.getPortletDisplayTemplateHandler(classNameId);
 
-		if (portletDisplayTemplateHandler != null) {
-			script = ContentUtil.get(portletDisplayTemplateHandler.getTemplatesHelpPath(language));
-		}
+	if (portletDisplayTemplateHandler != null) {
+		script = ContentUtil.get(portletDisplayTemplateHandler.getTemplatesHelpPath(language));
+
+		String propertyNamePrefix = portletDisplayTemplateHandler.getTemplatesHelpPropertyKey();
+
+		supportedLanguageTypes = TemplateManagerUtil.getSupportedLanguageTypes(propertyNamePrefix);
+	}
+	else if ((structure != null) && Validator.equals(structure.getClassName(), JournalArticle.class)) {
+		script = ContentUtil.get(PropsUtil.get(PropsKeys.JOURNAL_TEMPLATE_LANGUAGE_CONTENT, new Filter(TemplateConstants.LANG_TYPE_VM)));
 	}
 	else if (!type.equals(DDMTemplateConstants.TEMPLATE_TYPE_FORM)) {
-		script = ContentUtil.get(PropsUtil.get(PropsKeys.DYNAMIC_DATA_MAPPING_TEMPLATE_LANGUAGE_CONTENT, new Filter(DDMTemplateConstants.LANG_TYPE_VM)));
+		script = ContentUtil.get(PropsUtil.get(PropsKeys.DYNAMIC_DATA_MAPPING_TEMPLATE_LANGUAGE_CONTENT, new Filter(TemplateConstants.LANG_TYPE_VM)));
 	}
 }
 
@@ -163,12 +169,7 @@ if (Validator.isNotNull(structureAvailableFields)) {
 
 					<c:if test="<%= portletDisplay.isWebDAVEnabled() %>">
 						<aui:field-wrapper label="webdav-url">
-
-							<%
-							Group group = GroupLocalServiceUtil.getGroup(groupId);
-							%>
-
-							<liferay-ui:input-resource url='<%= themeDisplay.getPortalURL() + themeDisplay.getPathContext() + "/webdav" + group.getFriendlyURL() + "/dynamic_data_mapping/ddmTemplates/" + templateId %>' />
+							<liferay-ui:input-resource url="<%= template.getWebDavURL(themeDisplay) %>" />
 						</aui:field-wrapper>
 					</c:if>
 				</c:if>
@@ -179,51 +180,35 @@ if (Validator.isNotNull(structureAvailableFields)) {
 							<aui:option label="create" />
 							<aui:option label="edit" />
 						</aui:select>
-
-						<aui:script use="aui-base,event-valuechange">
-							A.one('#<portlet:namespace />mode').on(
-								'valueChange',
-								function(event) {
-									<portlet:namespace />toggleMode(event.newVal);
-								}
-							);
-						</aui:script>
 					</c:when>
 					<c:otherwise>
 						<div id="<portlet:namespace />smallImageContainer">
 							<div class="lfr-ddm-small-image-header">
 								<aui:input name="smallImage" />
 							</div>
+
 							<div class="lfr-ddm-small-image-content aui-toggler-content-collapsed">
-								<table>
-									<tr>
-										<th>
-											<c:if test="<%= smallImage && (template != null) %>">
-												<img alt="<liferay-ui:message key="preview" />" class="lfr-ddm-small-image-preview" src="<%= Validator.isNotNull(template.getSmallImageURL()) ? template.getSmallImageURL() : themeDisplay.getPathImage() + "/template?img_id=" + template.getSmallImageId() + "&t=" + WebServerServletTokenUtil.getToken(template.getSmallImageId()) %>" />
-											</c:if>
-										</th>
-										<td>
-											<table>
-												<tr>
-													<th>
-														<aui:input inputCssClass="lfr-ddm-small-image-type" label="small-image-url" name="type" type="radio" />
-													</th>
-													<td>
-														<aui:input inputCssClass="lfr-ddm-small-image-value" label="" name="smallImageURL" />
-													</td>
-												</tr>
-												<tr>
-													<th>
-														<aui:input inputCssClass="lfr-ddm-small-image-type" label="small-image" name="type" type="radio" />
-													</th>
-													<td>
-														<aui:input inputCssClass="lfr-ddm-small-image-value" label="" name="smallImageFile" type="file" />
-													</td>
-												</tr>
-											</table>
-										</td>
-									</tr>
-								</table>
+								<aui:layout>
+									<c:if test="<%= smallImage && (template != null) %>">
+										<aui:column>
+											<img alt="<liferay-ui:message key="preview" />" class="lfr-ddm-small-image-preview" src="<%= Validator.isNotNull(template.getSmallImageURL()) ? template.getSmallImageURL() : themeDisplay.getPathImage() + "/template?img_id=" + template.getSmallImageId() + "&t=" + WebServerServletTokenUtil.getToken(template.getSmallImageId()) %>" />
+										</aui:column>
+									</c:if>
+
+									<aui:column>
+										<aui:fieldset>
+											<aui:input inlineField="<%= true %>" inputCssClass="lfr-ddm-small-image-type" label="small-image-url" name="type" type="radio" />
+
+											<aui:input inlineField="<%= true %>" inputCssClass="lfr-ddm-small-image-value" label="" name="smallImageURL" />
+										</aui:fieldset>
+
+										<aui:fieldset>
+											<aui:input inlineField="<%= true %>" inputCssClass="lfr-ddm-small-image-type" label="small-image" name="type" type="radio" />
+
+											<aui:input inlineField="<%= true %>" inputCssClass="lfr-ddm-small-image-value" label="" name="smallImageFile" type="file" />
+										</aui:fieldset>
+									</aui:column>
+								</aui:layout>
 							</div>
 						</div>
 					</c:otherwise>
@@ -247,44 +232,67 @@ if (Validator.isNotNull(structureAvailableFields)) {
 		<%@ include file="/html/portlet/dynamic_data_mapping/form_builder.jspf" %>
 
 		<aui:script>
-			var <portlet:namespace />hiddenAttributesMap = window.<portlet:namespace />formBuilder.MAP_HIDDEN_FIELD_ATTRS;
+			Liferay.provide(
+				window,
+				'<portlet:namespace />attachValueChange',
+				function(mode) {
+					var A = AUI();
 
-			var <portlet:namespace />getFieldHiddenAttributes = function(mode, field) {
-				var hiddenAttributes = <portlet:namespace />hiddenAttributesMap[field.get('type')] || <portlet:namespace />hiddenAttributesMap.DEFAULT;
+					A.one('#<portlet:namespace />mode').on(
+						'valueChange',
+						function(event) {
+							<portlet:namespace />toggleMode(event.newVal);
+						}
+					);
+				},
+				['event-valuechange']
+			);
 
-				hiddenAttributes = A.Array(hiddenAttributes);
+			Liferay.on(
+				'<portlet:namespace />formBuilderLoaded',
+				function(event) {
+					<portlet:namespace />attachValueChange();
 
-				if (mode === '<%= DDMTemplateConstants.TEMPLATE_MODE_EDIT %>') {
-					A.Array.removeItem(hiddenAttributes, 'readOnly');
+					<portlet:namespace />toggleMode('<%= HtmlUtil.escape(mode) %>');
 				}
+			);
 
-				return hiddenAttributes;
-			};
+			Liferay.provide(
+				window,
+				'<portlet:namespace />setFieldsHiddenAttributes',
+				function(item, index, collection, mode) {
+					var A = AUI();
 
-			var <portlet:namespace />setFieldsHiddenAttributes = function(item, index, collection) {
-				var hiddenAttributes = <portlet:namespace />getFieldHiddenAttributes(mode, item);
+					var hiddenAttributesMap = window.<portlet:namespace />formBuilder.MAP_HIDDEN_FIELD_ATTRS;
+					var hiddenAttributes = hiddenAttributesMap[item.get('type')] || hiddenAttributesMap.DEFAULT;
 
-				item.set('hiddenAttributes', hiddenAttributes);
-			};
+					hiddenAttributes = A.Array(hiddenAttributes);
+
+					if (mode === '<%= DDMTemplateConstants.TEMPLATE_MODE_EDIT %>') {
+						A.Array.removeItem(hiddenAttributes, 'readOnly');
+					}
+
+					item.set('hiddenAttributes', hiddenAttributes);
+				},
+				['aui-base']
+			);
 
 			Liferay.provide(
 				window,
 				'<portlet:namespace />toggleMode',
 				function(mode) {
+					var A = AUI();
+
 					var modeEdit = (mode === '<%= DDMTemplateConstants.TEMPLATE_MODE_EDIT %>');
 
 					window.<portlet:namespace />formBuilder.set('allowRemoveRequiredFields', modeEdit);
 
-					window.<portlet:namespace />formBuilder.get('fields').each(<portlet:namespace />setFieldsHiddenAttributes);
+					window.<portlet:namespace />formBuilder.get('fields').each(A.rbind('<portlet:namespace />setFieldsHiddenAttributes', window, mode));
 
-					A.Array.each(window.<portlet:namespace />formBuilder.get('availableFields'), <portlet:namespace />setFieldsHiddenAttributes);
+					A.Array.each(window.<portlet:namespace />formBuilder.get('availableFields'), A.rbind('<portlet:namespace />setFieldsHiddenAttributes', window, mode));
 				},
 				['aui-base']
 			);
-		</aui:script>
-
-		<aui:script>
-			<portlet:namespace />toggleMode('<%= HtmlUtil.escape(mode) %>');
 		</aui:script>
 	</c:when>
 	<c:otherwise>
@@ -352,7 +360,20 @@ if (Validator.isNotNull(structureAvailableFields)) {
 </c:choose>
 
 <aui:button-row>
-	<aui:button onClick='<%= renderResponse.getNamespace() + "saveTemplate();" %>' value='<%= LanguageUtil.get(pageContext, "save") %>' />
+	<aui:script>
+		Liferay.after(
+			'<portlet:namespace />saveTemplate',
+			function(){
+				submitForm(document.<portlet:namespace />fm);
+			}
+		);
+	</aui:script>
+
+	<%
+	String taglibOnClick = "Liferay.fire('" + liferayPortletResponse.getNamespace() + "saveTemplate');";
+	%>
+
+	<aui:button onClick="<%= taglibOnClick %>" value='<%= LanguageUtil.get(pageContext, "save") %>' />
 
 	<aui:button href="<%= redirect %>" type="cancel" />
 </aui:button-row>

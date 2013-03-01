@@ -83,7 +83,7 @@ public class ViewAction extends PortletAction {
 
 		List<SocialActivitySetting> activitySettings =
 			SocialActivitySettingLocalServiceUtil.getActivitySettings(
-				themeDisplay.getScopeGroupIdOrLiveGroupId());
+				themeDisplay.getSiteGroupIdOrLiveGroupId());
 
 		String[] modelNames = SocialConfigurationUtil.getActivityModelNames();
 
@@ -93,7 +93,19 @@ public class ViewAction extends PortletAction {
 		Arrays.sort(modelNames, comparator);
 
 		for (String modelName : modelNames) {
-			activitySettingsMap.put(modelName, false);
+			List<SocialActivityDefinition> activityDefinitions =
+				SocialActivitySettingLocalServiceUtil.getActivityDefinitions(
+					themeDisplay.getScopeGroupId(), modelName);
+
+			for (SocialActivityDefinition activityDefinition :
+					activityDefinitions) {
+
+				if (activityDefinition.isCountersEnabled()) {
+					activitySettingsMap.put(modelName, false);
+
+					break;
+				}
+			}
 		}
 
 		for (SocialActivitySetting activitySetting : activitySettings) {
@@ -190,7 +202,7 @@ public class ViewAction extends PortletAction {
 
 			SocialActivityDefinition activityDefinition =
 				SocialActivitySettingLocalServiceUtil.getActivityDefinition(
-					themeDisplay.getScopeGroupIdOrLiveGroupId(), modelName,
+					themeDisplay.getSiteGroupIdOrLiveGroupId(), modelName,
 					activityType);
 
 			if (activityDefinition == null) {
@@ -216,7 +228,7 @@ public class ViewAction extends PortletAction {
 					SocialActivityCounterConstants.NAME_POPULARITY));
 
 			SocialActivitySettingServiceUtil.updateActivitySettings(
-				themeDisplay.getScopeGroupIdOrLiveGroupId(), modelName,
+				themeDisplay.getSiteGroupIdOrLiveGroupId(), modelName,
 				activityType, activityCounterDefinitions);
 		}
 	}

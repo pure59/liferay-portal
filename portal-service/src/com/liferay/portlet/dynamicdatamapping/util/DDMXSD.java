@@ -14,10 +14,10 @@
 
 package com.liferay.portlet.dynamicdatamapping.util;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
-import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.xml.Document;
-import com.liferay.portal.kernel.xml.DocumentException;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
@@ -33,38 +33,62 @@ import javax.servlet.jsp.PageContext;
  */
 public interface DDMXSD {
 
+	public String getFieldHTML(
+			PageContext pageContext, Element element, Fields fields,
+			String portletNamespace, String namespace, String mode,
+			boolean readOnly, Locale locale)
+		throws Exception;
+
+	public String getFieldHTMLByName(
+			PageContext pageContext, long classNameId, long classPK,
+			String fieldName, Fields fields, String portletNamespace,
+			String namespace, String mode, boolean readOnly, Locale locale)
+		throws Exception;
+
 	public String getHTML(
 			PageContext pageContext, DDMStructure ddmStructure, Fields fields,
-			String namespace, boolean readOnly, Locale locale)
+			String portletNamespace, String namespace, boolean readOnly,
+			Locale locale)
 		throws Exception;
 
 	public String getHTML(
 			PageContext pageContext, DDMTemplate ddmTemplate, Fields fields,
-			String namespace, boolean readOnly, Locale locale)
-		throws Exception;
-
-	public String getHTML(
-			PageContext pageContext, String xml, Fields fields, Locale locale)
-		throws Exception;
-
-	public String getHTML(
-			PageContext pageContext, String xml, Fields fields,
-			String namespace, boolean readOnly, Locale locale)
+			String portletNamespace, String namespace, boolean readOnly,
+			Locale locale)
 		throws Exception;
 
 	public String getHTML(
 			PageContext pageContext, String xml, Fields fields,
-			String namespace, Locale locale)
+			String portletNamespace, Locale locale)
 		throws Exception;
 
-	public String getHTML(PageContext pageContext, String xml, Locale locale)
+	public String getHTML(
+			PageContext pageContext, String xml, Fields fields,
+			String portletNamespace, String namespace, boolean readOnly,
+			Locale locale)
 		throws Exception;
 
-	public JSONArray getJSONArray(Document document) throws JSONException;
+	public String getHTML(
+			PageContext pageContext, String xml, Fields fields,
+			String portletNamespace, String namespace, Locale locale)
+		throws Exception;
 
-	public JSONArray getJSONArray(Element element) throws JSONException;
+	public String getHTML(
+			PageContext pageContext, String xml, String portletNamespace,
+			Locale locale)
+		throws Exception;
+
+	public JSONArray getJSONArray(DDMStructure structure, String xsd)
+		throws PortalException, SystemException;
+
+	public JSONArray getJSONArray(Document document) throws PortalException;
+
+	public JSONArray getJSONArray(Element element) throws PortalException;
 
 	public JSONArray getJSONArray(String xml)
-		throws DocumentException, JSONException;
+		throws PortalException, SystemException;
+
+	public String getXSD(long classNameId, long classPK)
+		throws PortalException, SystemException;
 
 }

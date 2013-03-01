@@ -16,25 +16,26 @@ package com.liferay.portlet.portletdisplaytemplate.util;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.servlet.GenericServletWrapper;
 import com.liferay.portal.kernel.servlet.PipingServletResponse;
-import com.liferay.portal.kernel.staging.StagingConstants;
-import com.liferay.portal.kernel.templateparser.Transformer;
-import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.template.TemplateConstants;
+import com.liferay.portal.kernel.template.TemplateContextType;
 import com.liferay.portal.kernel.util.JavaConstants;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.service.GroupLocalServiceUtil;
+import com.liferay.portal.templateparser.Transformer;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.PortletURLUtil;
-import com.liferay.portlet.dynamicdatalists.util.DDLTransformer;
 import com.liferay.portlet.dynamicdatamapping.NoSuchTemplateException;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
-import com.liferay.portlet.dynamicdatamapping.model.DDMTemplateConstants;
 import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil;
 import com.liferay.taglib.util.VelocityTaglib;
+import com.liferay.taglib.util.VelocityTaglibImpl;
 import com.liferay.util.freemarker.FreeMarkerTaglibFactoryUtil;
 
 import freemarker.ext.servlet.HttpRequestHashModel;
@@ -65,6 +66,7 @@ import javax.servlet.jsp.PageContext;
  * @author Juan Fernández
  * @author Brian Wing Shun Chan
  */
+@DoPrivileged
 public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 
 	public DDMTemplate fetchDDMTemplate(long groupId, String displayStyle) {
@@ -113,29 +115,21 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 		try {
 			Group scopeGroup = themeDisplay.getScopeGroup();
 
-			if (scopeGroup.hasStagingGroup()) {
-				Group stagingGroup = GroupLocalServiceUtil.getStagingGroup(
-					scopeGroup.getGroupId());
-
-				if (GetterUtil.getBoolean(
-						scopeGroup.getTypeSettingsProperty(
-							StagingConstants.STAGED_PORTLET +
-								PortletKeys.PORTLET_DISPLAY_TEMPLATES))) {
-
-					return stagingGroup.getGroupId();
-				}
+			if (scopeGroup.isLayout()) {
+				scopeGroup = scopeGroup.getParentGroup();
 			}
-			else if (scopeGroup.getLiveGroupId() > 0) {
+
+			if (scopeGroup.isStagingGroup()) {
 				Group liveGroup = scopeGroup.getLiveGroup();
 
-				if (!GetterUtil.getBoolean(
-						liveGroup.getTypeSettingsProperty(
-							StagingConstants.STAGED_PORTLET +
-								PortletKeys.PORTLET_DISPLAY_TEMPLATES))) {
+				if (!liveGroup.isStagedPortlet(
+						PortletKeys.PORTLET_DISPLAY_TEMPLATES)) {
 
 					return liveGroup.getGroupId();
 				}
 			}
+
+			return scopeGroup.getGroupId();
 		}
 		catch (Exception e) {
 			if (_log.isWarnEnabled()) {
@@ -230,10 +224,10 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 
 		String language = ddmTemplate.getLanguage();
 
-		if (language.equals(DDMTemplateConstants.LANG_TYPE_FTL)) {
+		if (language.equals(TemplateConstants.LANG_TYPE_FTL)) {
 			_addTaglibSupportFTL(contextObjects, pageContext);
 		}
-		else if (language.equals(DDMTemplateConstants.LANG_TYPE_VM)) {
+		else if (language.equals(TemplateConstants.LANG_TYPE_VM)) {
 			_addTaglibSupportVM(contextObjects, pageContext);
 		}
 
@@ -342,7 +336,7 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 		HttpServletResponse response =
 			(HttpServletResponse)pageContext.getResponse();
 
-		VelocityTaglib velocityTaglib = new VelocityTaglib(
+		VelocityTaglib velocityTaglib = new VelocityTaglibImpl(
 			servletContext, request,
 			new PipingServletResponse(response, pageContext.getOut()),
 			pageContext, null);
@@ -353,6 +347,9 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 	private static Log _log = LogFactoryUtil.getLog(
 		PortletDisplayTemplateImpl.class);
 
-	private Transformer _transformer = new DDLTransformer();
+	private Transformer _transformer = new Transformer(
+		PropsKeys.DYNAMIC_DATA_LISTS_TRANSFORMER_LISTENER,
+		PropsKeys.DYNAMIC_DATA_LISTS_ERROR_TEMPLATE,
+		TemplateContextType.STANDARD);
 
 }

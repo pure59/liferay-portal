@@ -20,12 +20,14 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.ActionResult;
+import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.LiferayPortletMode;
 import com.liferay.portal.kernel.portlet.PortletContainer;
 import com.liferay.portal.kernel.portlet.PortletContainerException;
 import com.liferay.portal.kernel.portlet.PortletContainerUtil;
 import com.liferay.portal.kernel.portlet.PortletModeFactory;
 import com.liferay.portal.kernel.portlet.WindowStateFactory;
+import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.servlet.BufferCacheServletResponse;
 import com.liferay.portal.kernel.servlet.DirectRequestDispatcherFactoryUtil;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
@@ -92,7 +94,9 @@ import javax.servlet.http.HttpSession;
 
 /**
  * @author Shuyang Zhou
+ * @author Raymond Augé
  */
+@DoPrivileged
 public class PortletContainerImpl implements PortletContainer {
 
 	public void preparePortlet(HttpServletRequest request, Portlet portlet)
@@ -330,8 +334,10 @@ public class PortletContainerImpl implements PortletContainer {
 
 		long scopeGroupId = PortalUtil.getScopeGroupId(
 			request, portlet.getPortletId());
+		long siteGroupId = PortalUtil.getSiteGroupId(scopeGroupId);
 
 		themeDisplay.setScopeGroupId(scopeGroupId);
+		themeDisplay.setSiteGroupId(siteGroupId);
 
 		if (user != null) {
 			HttpSession session = request.getSession();
@@ -428,18 +434,9 @@ public class PortletContainerImpl implements PortletContainer {
 			PortletPreferencesFactoryUtil.getPortletPreferencesIds(
 				request, portlet.getPortletId());
 
-		PortletPreferences portletPreferences = null;
-
-		if (allowAddPortletDefaultResource) {
-			portletPreferences =
-				PortletPreferencesLocalServiceUtil.getPreferences(
-					portletPreferencesIds);
-		}
-		else {
-			portletPreferences =
-				PortletPreferencesLocalServiceUtil.getStrictPreferences(
-					portletPreferencesIds);
-		}
+		PortletPreferences portletPreferences =
+			PortletPreferencesLocalServiceUtil.getPreferences(
+				portletPreferencesIds);
 
 		ServletContext servletContext = (ServletContext)request.getAttribute(
 			WebKeys.CTX);
@@ -463,12 +460,12 @@ public class PortletContainerImpl implements PortletContainer {
 			if ((contentType != null) &&
 				contentType.startsWith(ContentTypes.MULTIPART_FORM_DATA)) {
 
-				PortletConfigImpl invokerPortletConfigImpl =
-					(PortletConfigImpl)invokerPortlet.getPortletConfig();
+				LiferayPortletConfig liferayPortletConfig =
+					(LiferayPortletConfig)invokerPortlet.getPortletConfig();
 
 				if (invokerPortlet.isStrutsPortlet() ||
-					((invokerPortletConfigImpl != null) &&
-						!invokerPortletConfigImpl.isWARFile())) {
+					liferayPortletConfig.isCopyRequestParameters() ||
+					!liferayPortletConfig.isWARFile()) {
 
 					uploadServletRequest = new UploadServletRequestImpl(
 						request);
@@ -882,18 +879,9 @@ public class PortletContainerImpl implements PortletContainer {
 			PortletPreferencesFactoryUtil.getPortletPreferencesIds(
 				request, portlet.getPortletId());
 
-		PortletPreferences portletPreferences = null;
-
-		if (allowAddPortletDefaultResource) {
-			portletPreferences =
-				PortletPreferencesLocalServiceUtil.getPreferences(
-					portletPreferencesIds);
-		}
-		else {
-			portletPreferences =
-				PortletPreferencesLocalServiceUtil.getStrictPreferences(
-					portletPreferencesIds);
-		}
+		PortletPreferences portletPreferences =
+			PortletPreferencesLocalServiceUtil.getPreferences(
+				portletPreferencesIds);
 
 		ServletContext servletContext = (ServletContext)request.getAttribute(
 			WebKeys.CTX);

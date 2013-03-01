@@ -941,7 +941,7 @@ public class CalEventLocalServiceImpl extends CalEventLocalServiceBaseImpl {
 		Calendar cal, Calendar tzICal, CalEvent event) {
 
 		Calendar eventCal = CalendarFactoryUtil.getCalendar(
-			TimeZoneUtil.getTimeZone(StringPool.UTC));
+			TimeZoneUtil.getDefault());
 
 		eventCal.setTime(event.getStartDate());
 
@@ -1405,7 +1405,7 @@ public class CalEventLocalServiceImpl extends CalEventLocalServiceBaseImpl {
 	}
 
 	protected net.fortuna.ical4j.model.Calendar toICalCalendar(
-		long userId, List<CalEvent> events)
+			long userId, List<CalEvent> events)
 		throws PortalException, SystemException {
 
 		net.fortuna.ical4j.model.Calendar iCal =
@@ -1566,7 +1566,7 @@ public class CalEventLocalServiceImpl extends CalEventLocalServiceBaseImpl {
 		// Description
 
 		Description description = new Description(
-			HtmlUtil.extractText(event.getDescription()));
+			HtmlUtil.render(event.getDescription()));
 
 		eventProps.add(description);
 

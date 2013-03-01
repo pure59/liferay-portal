@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.model.Contact;
+import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutSetBranch;
 import com.liferay.portal.model.PasswordPolicy;
 import com.liferay.portal.model.ResourceConstants;
@@ -28,6 +29,7 @@ import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.Team;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ContactLocalServiceUtil;
+import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.ResourceLocalServiceUtil;
 import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
@@ -46,8 +48,6 @@ import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
 import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.journal.model.JournalFeed;
-import com.liferay.portlet.journal.model.JournalStructure;
-import com.liferay.portlet.journal.model.JournalTemplate;
 import com.liferay.portlet.messageboards.model.MBCategory;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.polls.model.PollsQuestion;
@@ -62,8 +62,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import java.util.List;
+
 /**
  * @author Raymond Augé
+ * @author James Lefeu
  */
 public class VerifyResourcePermissions extends VerifyProcess {
 
@@ -78,6 +81,19 @@ public class VerifyResourcePermissions extends VerifyProcess {
 			for (String[] model : _MODELS) {
 				verifyModel(role, model[0], model[1], model[2]);
 			}
+
+			verifyLayout(role);
+		}
+	}
+
+	protected void verifyLayout(Role role) throws Exception {
+		List<Layout> layouts = LayoutLocalServiceUtil.getNoPermissionLayouts(
+			role.getRoleId());
+
+		for (Layout layout : layouts) {
+			verifyModel(
+				role.getCompanyId(), Layout.class.getName(), layout.getPlid(),
+				role, 0);
 		}
 	}
 
@@ -210,12 +226,6 @@ public class VerifyResourcePermissions extends VerifyProcess {
 		},
 		new String[] {
 			JournalFeed.class.getName(), "JournalFeed", "id_"
-		},
-		new String[] {
-			JournalStructure.class.getName(), "JournalStructure", "id_"
-		},
-		new String[] {
-			JournalTemplate.class.getName(), "JournalTemplate", "id_"
 		},
 		new String[] {
 			LayoutSetBranch.class.getName(), "LayoutSetBranch",

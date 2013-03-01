@@ -21,12 +21,11 @@ import com.liferay.portal.kernel.servlet.PipingServletResponse;
 import com.liferay.portal.kernel.servlet.PluginContextListener;
 import com.liferay.portal.kernel.servlet.ServletContextPool;
 import com.liferay.portal.kernel.template.Template;
+import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.template.TemplateContextType;
-import com.liferay.portal.kernel.template.TemplateManager;
 import com.liferay.portal.kernel.template.TemplateManagerUtil;
 import com.liferay.portal.kernel.template.TemplateResource;
 import com.liferay.portal.kernel.template.TemplateResourceLoaderUtil;
-import com.liferay.portal.kernel.templateparser.TemplateContext;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.ThemeHelper;
@@ -152,30 +151,25 @@ public class ThemeUtil {
 		ClassLoader pluginClassLoader = null;
 
 		if (pluginServletContext != null) {
-			pluginClassLoader =
-				(ClassLoader)pluginServletContext.getAttribute(
-					PluginContextListener.PLUGIN_CLASS_LOADER);
+			pluginClassLoader = (ClassLoader)pluginServletContext.getAttribute(
+				PluginContextListener.PLUGIN_CLASS_LOADER);
 		}
 
 		Thread currentThread = Thread.currentThread();
 
 		ClassLoader contextClassLoader = currentThread.getContextClassLoader();
 
-		TemplateContextType templateContextType = TemplateContextType.STANDARD;
-
 		if ((pluginClassLoader != null) &&
 			(pluginClassLoader != contextClassLoader)) {
 
 			currentThread.setContextClassLoader(pluginClassLoader);
-
-			templateContextType = TemplateContextType.CLASS_LOADER;
 		}
 
 		try {
 			if (extension.equals(ThemeHelper.TEMPLATE_EXTENSION_FTL)) {
 				return doIncludeFTL(
 					servletContext, request, pageContext, path, theme,
-					templateContextType, write);
+					TemplateContextType.STANDARD, write);
 			}
 			else if (extension.equals(ThemeHelper.TEMPLATE_EXTENSION_JSP)) {
 				doIncludeJSP(servletContext, request, response, path, theme);
@@ -183,7 +177,7 @@ public class ThemeUtil {
 			else if (extension.equals(ThemeHelper.TEMPLATE_EXTENSION_VM)) {
 				return doIncludeVM(
 					servletContext, request, pageContext, path, theme,
-					templateContextType, write);
+					TemplateContextType.STANDARD, write);
 			}
 
 			return null;
@@ -228,7 +222,7 @@ public class ThemeUtil {
 		if (Validator.isNotNull(portletId) &&
 			PortletConstants.hasInstanceId(portletId) &&
 			!TemplateResourceLoaderUtil.hasTemplateResource(
-				TemplateManager.FREEMARKER, resourcePath)) {
+				TemplateConstants.LANG_TYPE_FTL, resourcePath)) {
 
 			String rootPortletId = PortletConstants.getRootPortletId(portletId);
 
@@ -238,13 +232,13 @@ public class ThemeUtil {
 
 		if (Validator.isNotNull(portletId) &&
 			!TemplateResourceLoaderUtil.hasTemplateResource(
-				TemplateManager.FREEMARKER, resourcePath)) {
+				TemplateConstants.LANG_TYPE_FTL, resourcePath)) {
 
 			resourcePath = theme.getResourcePath(servletContext, null, path);
 		}
 
 		if (!TemplateResourceLoaderUtil.hasTemplateResource(
-				TemplateManager.FREEMARKER, resourcePath)) {
+				TemplateConstants.LANG_TYPE_FTL, resourcePath)) {
 
 			_log.error(resourcePath + " does not exist");
 
@@ -253,11 +247,11 @@ public class ThemeUtil {
 
 		TemplateResource templateResource =
 			TemplateResourceLoaderUtil.getTemplateResource(
-				TemplateManager.FREEMARKER, resourcePath);
+				TemplateConstants.LANG_TYPE_FTL, resourcePath);
 
 		Template template = TemplateManagerUtil.getTemplate(
-			TemplateManager.FREEMARKER, templateResource,
-			TemplateContextType.STANDARD);
+			TemplateConstants.LANG_TYPE_FTL, templateResource,
+			templateContextType);
 
 		// FreeMarker variables
 
@@ -287,11 +281,11 @@ public class ThemeUtil {
 			writer = new UnsyncStringWriter();
 		}
 
-		VelocityTaglib velocityTaglib = new VelocityTaglib(
+		VelocityTaglib velocityTaglib = new VelocityTaglibImpl(
 			servletContext, request,
 			new PipingServletResponse(response, writer), pageContext, template);
 
-		template.put(TemplateContext.WRITER, writer);
+		template.put(TemplateConstants.WRITER, writer);
 		template.put("taglibLiferay", velocityTaglib);
 		template.put("theme", velocityTaglib);
 
@@ -317,7 +311,7 @@ public class ThemeUtil {
 		GenericServlet genericServlet = null;
 
 		if (servlet instanceof GenericServlet) {
-			genericServlet = (GenericServlet) servlet;
+			genericServlet = (GenericServlet)servlet;
 		}
 		else {
 			genericServlet = new GenericServlet() {
@@ -437,7 +431,7 @@ public class ThemeUtil {
 			if (PortletConstants.hasInstanceId(portletId) &&
 				(checkResourceExists = !
 				TemplateResourceLoaderUtil.hasTemplateResource(
-					TemplateManager.VELOCITY, resourcePath))) {
+					TemplateConstants.LANG_TYPE_VM, resourcePath))) {
 
 				String rootPortletId = PortletConstants.getRootPortletId(
 					portletId);
@@ -449,7 +443,7 @@ public class ThemeUtil {
 			if (checkResourceExists &&
 				(checkResourceExists = !
 				TemplateResourceLoaderUtil.hasTemplateResource(
-					TemplateManager.VELOCITY, resourcePath))) {
+					TemplateConstants.LANG_TYPE_VM, resourcePath))) {
 
 				resourcePath = theme.getResourcePath(
 					servletContext, null, page);
@@ -458,7 +452,7 @@ public class ThemeUtil {
 
 		if (checkResourceExists &&
 			!TemplateResourceLoaderUtil.hasTemplateResource(
-				TemplateManager.VELOCITY, resourcePath)) {
+				TemplateConstants.LANG_TYPE_VM, resourcePath)) {
 
 			_log.error(resourcePath + " does not exist");
 
@@ -467,7 +461,7 @@ public class ThemeUtil {
 
 		TemplateResource templateResource =
 			TemplateResourceLoaderUtil.getTemplateResource(
-				TemplateManager.VELOCITY, resourcePath);
+				TemplateConstants.LANG_TYPE_VM, resourcePath);
 
 		if (templateResource == null) {
 			throw new Exception(
@@ -475,8 +469,8 @@ public class ThemeUtil {
 		}
 
 		Template template = TemplateManagerUtil.getTemplate(
-			TemplateManager.VELOCITY, templateResource,
-			TemplateContextType.STANDARD);
+			TemplateConstants.LANG_TYPE_VM, templateResource,
+			templateContextType);
 
 		// Velocity variables
 
@@ -507,11 +501,11 @@ public class ThemeUtil {
 			writer = new UnsyncStringWriter();
 		}
 
-		VelocityTaglib velocityTaglib = new VelocityTaglib(
+		VelocityTaglib velocityTaglib = new VelocityTaglibImpl(
 			servletContext, request,
 			new PipingServletResponse(response, writer), pageContext, template);
 
-		template.put(TemplateContext.WRITER, writer);
+		template.put(TemplateConstants.WRITER, writer);
 		template.put("taglibLiferay", velocityTaglib);
 		template.put("theme", velocityTaglib);
 

@@ -105,7 +105,7 @@ public interface RoleLocalService extends BaseLocalService,
 	* Performs a dynamic query on the database and returns a range of the matching rows.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.RoleModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param dynamicQuery the dynamic query
@@ -123,7 +123,7 @@ public interface RoleLocalService extends BaseLocalService,
 	* Performs a dynamic query on the database and returns an ordered range of the matching rows.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.RoleModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param dynamicQuery the dynamic query
@@ -178,7 +178,7 @@ public interface RoleLocalService extends BaseLocalService,
 	* Returns a range of all the roles.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.RoleModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param start the lower bound of the range of roles
@@ -242,7 +242,7 @@ public interface RoleLocalService extends BaseLocalService,
 	primary key could not be found
 	* @throws SystemException if a system exception occurred
 	* @deprecated {@link #addRole(long, String, long, String, Map, Map, int,
-	String)}
+	String, ServiceContext)}
 	*/
 	public com.liferay.portal.model.Role addRole(long userId, long companyId,
 		java.lang.String name,
@@ -274,7 +274,7 @@ public interface RoleLocalService extends BaseLocalService,
 	primary key could not be found
 	* @throws SystemException if a system exception occurred
 	* @deprecated {@link #addRole(long, String, long, String, Map, Map, int,
-	String)}
+	String, ServiceContext)}
 	*/
 	public com.liferay.portal.model.Role addRole(long userId, long companyId,
 		java.lang.String name,
@@ -299,6 +299,10 @@ public interface RoleLocalService extends BaseLocalService,
 	* @param descriptionMap the role's localized descriptions (optionally
 	<code>null</code>)
 	* @param type the role's type (optionally <code>0</code>)
+	* @param subType the role's subtype (optionally <code>null</code>)
+	* @param serviceContext the roles's service context (optionally
+	<code>null</code>). Can set expando bridge attributes for the
+	role.
 	* @return the role
 	* @throws PortalException if the class name or the role name were invalid,
 	if the role is a duplicate, or if a user with the primary key
@@ -309,7 +313,8 @@ public interface RoleLocalService extends BaseLocalService,
 		java.lang.String className, long classPK, java.lang.String name,
 		java.util.Map<java.util.Locale, java.lang.String> titleMap,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
-		int type, java.lang.String subType)
+		int type, java.lang.String subType,
+		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
@@ -325,6 +330,10 @@ public interface RoleLocalService extends BaseLocalService,
 	long, long[])
 	*/
 	public void addUserRoles(long userId, long[] roleIds)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
+	public void checkMembershipPolicy(com.liferay.portal.model.User user)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
@@ -977,6 +986,9 @@ public interface RoleLocalService extends BaseLocalService,
 	* @param descriptionMap the new localized descriptions (optionally
 	<code>null</code>) to replace those existing for the role
 	* @param subtype the role's new subtype (optionally <code>null</code>)
+	* @param serviceContext the roles's service context (optionally
+	<code>null</code>). Can set expando bridge attributes for the
+	role.
 	* @return the role with the primary key
 	* @throws PortalException if a role with the primary could not be found or
 	if the role's name was invalid
@@ -986,7 +998,8 @@ public interface RoleLocalService extends BaseLocalService,
 		java.lang.String name,
 		java.util.Map<java.util.Locale, java.lang.String> titleMap,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
-		java.lang.String subtype)
+		java.lang.String subtype,
+		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 }

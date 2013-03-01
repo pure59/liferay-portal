@@ -49,6 +49,7 @@ public class GroupWrapper implements Group, ModelWrapper<Group> {
 		attributes.put("classPK", getClassPK());
 		attributes.put("parentGroupId", getParentGroupId());
 		attributes.put("liveGroupId", getLiveGroupId());
+		attributes.put("treePath", getTreePath());
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
 		attributes.put("type", getType());
@@ -101,6 +102,12 @@ public class GroupWrapper implements Group, ModelWrapper<Group> {
 
 		if (liveGroupId != null) {
 			setLiveGroupId(liveGroupId);
+		}
+
+		String treePath = (String)attributes.get("treePath");
+
+		if (treePath != null) {
+			setTreePath(treePath);
 		}
 
 		String name = (String)attributes.get("name");
@@ -324,6 +331,24 @@ public class GroupWrapper implements Group, ModelWrapper<Group> {
 	}
 
 	/**
+	* Returns the tree path of this group.
+	*
+	* @return the tree path of this group
+	*/
+	public java.lang.String getTreePath() {
+		return _group.getTreePath();
+	}
+
+	/**
+	* Sets the tree path of this group.
+	*
+	* @param treePath the tree path of this group
+	*/
+	public void setTreePath(java.lang.String treePath) {
+		_group.setTreePath(treePath);
+	}
+
+	/**
 	* Returns the name of this group.
 	*
 	* @return the name of this group
@@ -500,6 +525,16 @@ public class GroupWrapper implements Group, ModelWrapper<Group> {
 	}
 
 	public void setExpandoBridgeAttributes(
+		com.liferay.portal.model.BaseModel<?> baseModel) {
+		_group.setExpandoBridgeAttributes(baseModel);
+	}
+
+	public void setExpandoBridgeAttributes(
+		com.liferay.portlet.expando.model.ExpandoBridge expandoBridge) {
+		_group.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_group.setExpandoBridgeAttributes(serviceContext);
 	}
@@ -542,6 +577,12 @@ public class GroupWrapper implements Group, ModelWrapper<Group> {
 	public void persist()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		_group.persist();
+	}
+
+	public java.lang.String buildTreePath()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _group.buildTreePath();
 	}
 
 	public java.util.List<com.liferay.portal.model.Group> getAncestors()
@@ -587,8 +628,18 @@ public class GroupWrapper implements Group, ModelWrapper<Group> {
 		return _group.getDescriptiveName(locale);
 	}
 
+	public java.lang.String getIconURL(
+		com.liferay.portal.theme.ThemeDisplay themeDisplay) {
+		return _group.getIconURL(themeDisplay);
+	}
+
 	public com.liferay.portal.model.Group getLiveGroup() {
 		return _group.getLiveGroup();
+	}
+
+	public java.lang.String getLiveParentTypeSettingsProperty(
+		java.lang.String key) {
+		return _group.getLiveParentTypeSettingsProperty(key);
 	}
 
 	public long getOrganizationId() {
@@ -599,6 +650,10 @@ public class GroupWrapper implements Group, ModelWrapper<Group> {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _group.getParentGroup();
+	}
+
+	public com.liferay.portal.kernel.util.UnicodeProperties getParentLiveGroupTypeSettingsProperties() {
+		return _group.getParentLiveGroupTypeSettingsProperties();
 	}
 
 	public java.lang.String getPathFriendlyURL(boolean privateLayout,
@@ -636,6 +691,10 @@ public class GroupWrapper implements Group, ModelWrapper<Group> {
 
 	public java.lang.String getTypeSettingsProperty(java.lang.String key) {
 		return _group.getTypeSettingsProperty(key);
+	}
+
+	public boolean hasAncestor(long groupId) {
+		return _group.hasAncestor(groupId);
 	}
 
 	public boolean hasPrivateLayouts() {

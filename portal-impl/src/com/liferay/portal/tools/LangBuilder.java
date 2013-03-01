@@ -142,6 +142,7 @@ public class LangBuilder {
 		_createProperties(content, "ja"); // Japanese
 		_createProperties(content, "ko"); // Korean
 		_createProperties(content, "lo"); // Lao
+		_createProperties(content, "lt"); // Lithuanian
 		_createProperties(content, "nb"); // Norwegian Bokmål
 		_createProperties(content, "fa"); // Persian
 		_createProperties(content, "pl"); // Polish
@@ -435,6 +436,10 @@ public class LangBuilder {
 	}
 
 	private String _fixEnglishTranslation(String key, String value) {
+
+		// http://en.wikibooks.org/wiki/Basic_Book_Design/Capitalizing_Words_in_Titles
+		// http://www.imdb.com
+
 		if (value.contains(" this ")) {
 			if (value.contains(".") || value.contains("?") ||
 				value.contains(":") ||
@@ -581,6 +586,7 @@ public class LangBuilder {
 			toLanguageId.equals("hu") ||
 			toLanguageId.equals("in") ||
 			toLanguageId.equals("lo") ||
+			toLanguageId.equals("lt") ||
 			toLanguageId.equals("nb") ||
 			toLanguageId.equals("fa") ||
 			toLanguageId.equals("pl") ||

@@ -63,8 +63,8 @@ if (dataJSONObject.has("values")) {
 				<aui:script use="liferay-token-list">
 					Liferay.Search.tokenList.add(
 						{
-							clearFields: '<%= UnicodeFormatter.toString(renderResponse.getNamespace() + facet.getFieldName()) %>',
-							text: '<%= UnicodeFormatter.toString(ResourceActionsUtil.getModelResource(locale, assetType)) %>'
+							clearFields: '<%= renderResponse.getNamespace() + facet.getFieldName() %>',
+							text: '<%= HtmlUtil.escapeJS(ResourceActionsUtil.getModelResource(locale, assetType)) %>'
 						}
 					);
 				</aui:script>
@@ -85,7 +85,7 @@ if (dataJSONObject.has("values")) {
 		%>
 
 			<li class="facet-value <%= fieldParam.equals(termCollector.getTerm()) ? "current-term" : StringPool.BLANK %>">
-				<a data-value="<%= HtmlUtil.escapeAttribute(assetType) %>" href="javascript:;"><c:if test="<%= assetRendererFactory != null %>"><img alt="" src="<%= assetRendererFactory.getIconPath(renderRequest) %>" /></c:if><%= ResourceActionsUtil.getModelResource(locale, assetType) %></a> <span class="frequency">(<%= frequency %>)</span>
+				<a data-value="<%= HtmlUtil.escapeAttribute(assetType) %>" href="javascript:;"><c:if test="<%= assetRendererFactory != null %>"><img alt="" src="<%= assetRendererFactory.getIconPath(renderRequest) %>" /></c:if><%= assetRendererFactory.getTypeName(locale, false) %></a> <span class="frequency">(<%= frequency %>)</span>
 			</li>
 
 		<%

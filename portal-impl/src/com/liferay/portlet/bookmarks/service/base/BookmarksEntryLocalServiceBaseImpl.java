@@ -60,13 +60,20 @@ import com.liferay.portlet.bookmarks.service.BookmarksFolderLocalService;
 import com.liferay.portlet.bookmarks.service.BookmarksFolderService;
 import com.liferay.portlet.bookmarks.service.persistence.BookmarksEntryFinder;
 import com.liferay.portlet.bookmarks.service.persistence.BookmarksEntryPersistence;
+import com.liferay.portlet.bookmarks.service.persistence.BookmarksFolderFinder;
 import com.liferay.portlet.bookmarks.service.persistence.BookmarksFolderPersistence;
 import com.liferay.portlet.expando.service.ExpandoValueLocalService;
 import com.liferay.portlet.expando.service.ExpandoValueService;
 import com.liferay.portlet.expando.service.persistence.ExpandoValuePersistence;
+import com.liferay.portlet.social.service.SocialActivityCounterLocalService;
 import com.liferay.portlet.social.service.SocialActivityLocalService;
+import com.liferay.portlet.social.service.persistence.SocialActivityCounterFinder;
+import com.liferay.portlet.social.service.persistence.SocialActivityCounterPersistence;
 import com.liferay.portlet.social.service.persistence.SocialActivityFinder;
 import com.liferay.portlet.social.service.persistence.SocialActivityPersistence;
+import com.liferay.portlet.trash.service.TrashEntryLocalService;
+import com.liferay.portlet.trash.service.TrashEntryService;
+import com.liferay.portlet.trash.service.persistence.TrashEntryPersistence;
 
 import java.io.Serializable;
 
@@ -171,7 +178,7 @@ public abstract class BookmarksEntryLocalServiceBaseImpl
 	 * Performs a dynamic query on the database and returns a range of the matching rows.
 	 *
 	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.bookmarks.model.impl.BookmarksEntryModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param dynamicQuery the dynamic query
@@ -191,7 +198,7 @@ public abstract class BookmarksEntryLocalServiceBaseImpl
 	 * Performs a dynamic query on the database and returns an ordered range of the matching rows.
 	 *
 	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.bookmarks.model.impl.BookmarksEntryModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param dynamicQuery the dynamic query
@@ -261,7 +268,7 @@ public abstract class BookmarksEntryLocalServiceBaseImpl
 	 * Returns a range of all the bookmarks entries.
 	 *
 	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.bookmarks.model.impl.BookmarksEntryModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param start the lower bound of the range of bookmarks entries
@@ -428,6 +435,25 @@ public abstract class BookmarksEntryLocalServiceBaseImpl
 	public void setBookmarksFolderPersistence(
 		BookmarksFolderPersistence bookmarksFolderPersistence) {
 		this.bookmarksFolderPersistence = bookmarksFolderPersistence;
+	}
+
+	/**
+	 * Returns the bookmarks folder finder.
+	 *
+	 * @return the bookmarks folder finder
+	 */
+	public BookmarksFolderFinder getBookmarksFolderFinder() {
+		return bookmarksFolderFinder;
+	}
+
+	/**
+	 * Sets the bookmarks folder finder.
+	 *
+	 * @param bookmarksFolderFinder the bookmarks folder finder
+	 */
+	public void setBookmarksFolderFinder(
+		BookmarksFolderFinder bookmarksFolderFinder) {
+		this.bookmarksFolderFinder = bookmarksFolderFinder;
 	}
 
 	/**
@@ -969,6 +995,119 @@ public abstract class BookmarksEntryLocalServiceBaseImpl
 		this.socialActivityFinder = socialActivityFinder;
 	}
 
+	/**
+	 * Returns the social activity counter local service.
+	 *
+	 * @return the social activity counter local service
+	 */
+	public SocialActivityCounterLocalService getSocialActivityCounterLocalService() {
+		return socialActivityCounterLocalService;
+	}
+
+	/**
+	 * Sets the social activity counter local service.
+	 *
+	 * @param socialActivityCounterLocalService the social activity counter local service
+	 */
+	public void setSocialActivityCounterLocalService(
+		SocialActivityCounterLocalService socialActivityCounterLocalService) {
+		this.socialActivityCounterLocalService = socialActivityCounterLocalService;
+	}
+
+	/**
+	 * Returns the social activity counter persistence.
+	 *
+	 * @return the social activity counter persistence
+	 */
+	public SocialActivityCounterPersistence getSocialActivityCounterPersistence() {
+		return socialActivityCounterPersistence;
+	}
+
+	/**
+	 * Sets the social activity counter persistence.
+	 *
+	 * @param socialActivityCounterPersistence the social activity counter persistence
+	 */
+	public void setSocialActivityCounterPersistence(
+		SocialActivityCounterPersistence socialActivityCounterPersistence) {
+		this.socialActivityCounterPersistence = socialActivityCounterPersistence;
+	}
+
+	/**
+	 * Returns the social activity counter finder.
+	 *
+	 * @return the social activity counter finder
+	 */
+	public SocialActivityCounterFinder getSocialActivityCounterFinder() {
+		return socialActivityCounterFinder;
+	}
+
+	/**
+	 * Sets the social activity counter finder.
+	 *
+	 * @param socialActivityCounterFinder the social activity counter finder
+	 */
+	public void setSocialActivityCounterFinder(
+		SocialActivityCounterFinder socialActivityCounterFinder) {
+		this.socialActivityCounterFinder = socialActivityCounterFinder;
+	}
+
+	/**
+	 * Returns the trash entry local service.
+	 *
+	 * @return the trash entry local service
+	 */
+	public TrashEntryLocalService getTrashEntryLocalService() {
+		return trashEntryLocalService;
+	}
+
+	/**
+	 * Sets the trash entry local service.
+	 *
+	 * @param trashEntryLocalService the trash entry local service
+	 */
+	public void setTrashEntryLocalService(
+		TrashEntryLocalService trashEntryLocalService) {
+		this.trashEntryLocalService = trashEntryLocalService;
+	}
+
+	/**
+	 * Returns the trash entry remote service.
+	 *
+	 * @return the trash entry remote service
+	 */
+	public TrashEntryService getTrashEntryService() {
+		return trashEntryService;
+	}
+
+	/**
+	 * Sets the trash entry remote service.
+	 *
+	 * @param trashEntryService the trash entry remote service
+	 */
+	public void setTrashEntryService(TrashEntryService trashEntryService) {
+		this.trashEntryService = trashEntryService;
+	}
+
+	/**
+	 * Returns the trash entry persistence.
+	 *
+	 * @return the trash entry persistence
+	 */
+	public TrashEntryPersistence getTrashEntryPersistence() {
+		return trashEntryPersistence;
+	}
+
+	/**
+	 * Sets the trash entry persistence.
+	 *
+	 * @param trashEntryPersistence the trash entry persistence
+	 */
+	public void setTrashEntryPersistence(
+		TrashEntryPersistence trashEntryPersistence) {
+		this.trashEntryPersistence = trashEntryPersistence;
+	}
+
 	public void afterPropertiesSet() {
 		persistedModelLocalServiceRegistry.register("com.liferay.portlet.bookmarks.model.BookmarksEntry",
 			bookmarksEntryLocalService);
@@ -1038,6 +1177,8 @@ public abstract class BookmarksEntryLocalServiceBaseImpl
 	protected BookmarksFolderService bookmarksFolderService;
 	@BeanReference(type = BookmarksFolderPersistence.class)
 	protected BookmarksFolderPersistence bookmarksFolderPersistence;
+	@BeanReference(type = BookmarksFolderFinder.class)
+	protected BookmarksFolderFinder bookmarksFolderFinder;
 	@BeanReference(type = CounterLocalService.class)
 	protected CounterLocalService counterLocalService;
 	@BeanReference(type = PortletPreferencesLocalService.class)
@@ -1096,6 +1237,18 @@ public abstract class BookmarksEntryLocalServiceBaseImpl
 	protected SocialActivityPersistence socialActivityPersistence;
 	@BeanReference(type = SocialActivityFinder.class)
 	protected SocialActivityFinder socialActivityFinder;
+	@BeanReference(type = SocialActivityCounterLocalService.class)
+	protected SocialActivityCounterLocalService socialActivityCounterLocalService;
+	@BeanReference(type = SocialActivityCounterPersistence.class)
+	protected SocialActivityCounterPersistence socialActivityCounterPersistence;
+	@BeanReference(type = SocialActivityCounterFinder.class)
+	protected SocialActivityCounterFinder socialActivityCounterFinder;
+	@BeanReference(type = TrashEntryLocalService.class)
+	protected TrashEntryLocalService trashEntryLocalService;
+	@BeanReference(type = TrashEntryService.class)
+	protected TrashEntryService trashEntryService;
+	@BeanReference(type = TrashEntryPersistence.class)
+	protected TrashEntryPersistence trashEntryPersistence;
 	@BeanReference(type = PersistedModelLocalServiceRegistry.class)
 	protected PersistedModelLocalServiceRegistry persistedModelLocalServiceRegistry;
 	private String _beanIdentifier;

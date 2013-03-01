@@ -125,6 +125,7 @@ else if (((folderId != rootFolderId) && (parentFolderId == 0)) || ((folderId == 
 
 				Map<String, Object> dataView = new HashMap<String, Object>();
 
+				dataView.put("folder", Boolean.TRUE.toString());
 				dataView.put("folder-id", rootFolderId);
 				dataView.put("navigation", "home");
 				dataView.put("title", LanguageUtil.get(pageContext, "home"));
@@ -226,6 +227,7 @@ else if (((folderId != rootFolderId) && (parentFolderId == 0)) || ((folderId == 
 
 					<%
 					for (DLFileEntryType fileEntryType : fileEntryTypes) {
+						request.setAttribute("view_folders.jsp-fileEntryType", fileEntryType);
 					%>
 
 						<liferay-portlet:renderURL varImpl="viewFileEntryTypeURL">
@@ -285,6 +287,7 @@ else if (((folderId != rootFolderId) && (parentFolderId == 0)) || ((folderId == 
 
 							dataView = new HashMap<String, Object>();
 
+							dataView.put("folder", Boolean.TRUE.toString());
 							dataView.put("folder-id", mountFolder.getFolderId());
 							dataView.put("repository-id", mountFolder.getRepositoryId());
 							dataView.put("title", mountFolder.getName());
@@ -305,6 +308,9 @@ else if (((folderId != rootFolderId) && (parentFolderId == 0)) || ((folderId == 
 					<%
 						}
 						catch (Exception e) {
+							if (_log.isWarnEnabled()) {
+								_log.warn("Unable to access repository", e);
+							}
 					%>
 
 							<li class="app-view-navigation-entry folder error" title="<%= LanguageUtil.get(pageContext, "an-unexpected-error-occurred-while-connecting-to-the-repository") %>">
@@ -368,9 +374,6 @@ else if (((folderId != rootFolderId) && (parentFolderId == 0)) || ((folderId == 
 
 				<%
 				for (Folder curFolder : folders) {
-					int foldersCount = DLAppServiceUtil.getFoldersCount(repositoryId, curFolder.getFolderId());
-					int fileEntriesCount = DLAppServiceUtil.getFileEntriesAndFileShortcutsCount(repositoryId, curFolder.getFolderId(), WorkflowConstants.STATUS_APPROVED);
-
 					request.setAttribute("view_entries.jsp-folder", curFolder);
 					request.setAttribute("view_entries.jsp-folderId", String.valueOf(curFolder.getFolderId()));
 					request.setAttribute("view_entries.jsp-repositoryId", String.valueOf(curFolder.getRepositoryId()));
@@ -409,9 +412,9 @@ else if (((folderId != rootFolderId) && (parentFolderId == 0)) || ((folderId == 
 						dataView="<%= dataView %>"
 						entryTitle="<%= curFolder.getName() %>"
 						expandURL="<%= expandViewURL.toString() %>"
-						iconImage='<%= (foldersCount + fileEntriesCount) > 0 ? "folder_full_document" : "folder_empty" %>'
+						iconImage='<%= (DLAppServiceUtil.getFoldersAndFileEntriesAndFileShortcutsCount(curFolder.getRepositoryId(), curFolder.getFolderId(), WorkflowConstants.STATUS_APPROVED, true) > 0) ? "folder_full_document" : "folder_empty" %>'
 						selected="<%= (curFolder.getFolderId() == folderId) %>"
-						showExpand="<%= foldersCount > 0 %>"
+						showExpand="<%= DLAppServiceUtil.getFoldersCount(repositoryId, curFolder.getFolderId()) > 0 %>"
 						viewURL="<%= viewURL.toString() %>"
 					/>
 
@@ -439,3 +442,7 @@ else if (((folderId != rootFolderId) && (parentFolderId == 0)) || ((folderId == 
 		);
 	</aui:script>
 </liferay-ui:app-view-navigation>
+
+<%!
+private static Log _log = LogFactoryUtil.getLog("portal-web.docroot.html.portlet.document_library.view_folders_jsp");
+%>
