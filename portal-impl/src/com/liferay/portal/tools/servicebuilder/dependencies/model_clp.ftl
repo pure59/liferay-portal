@@ -295,6 +295,7 @@ public class ${entity.name}Clp extends BaseModelImpl<${entity.name}> implements 
 		<#if !method.isConstructor() && !method.isStatic() && method.isPublic() && !(entity.isResourcedModel() && (method.name == "isResourceMain") && (method.parameters?size == 0))>
 			public ${serviceBuilder.getTypeGenericsName(method.returns)} ${method.name} (
 
+			<#assign returnTypeName = serviceBuilder.getPrimitiveObj(serviceBuilder.getTypeGenericsName(method.returns))>
 			<#assign parameters = method.parameters>
 
 			<#list parameters as parameter>
@@ -320,7 +321,35 @@ public class ${entity.name}Clp extends BaseModelImpl<${entity.name}> implements 
 			</#list>-->
 
 			{
-				throw new UnsupportedOperationException();
+				try {
+					Class<?> clazz = _${entity.varName}RemoteModel.getClass();
+					java.lang.reflect.Method method = clazz.getMethod(
+						"${method.name}"
+					<#list parameters as parameter>
+						,
+						${serviceBuilder.getPrimitiveObjClass(parameter.type.getValue())}
+					</#list>
+					);
+
+					<#if returnTypeName != "void">
+						${returnTypeName} returnObj = (${returnTypeName})
+					</#if>
+
+					method.invoke(
+						_${entity.varName}RemoteModel
+					<#list parameters as parameter>
+						,
+						${parameter.name}
+					</#list>
+					);
+
+					<#if returnTypeName != "void">
+						return returnObj;
+					</#if>
+				}
+				catch (Exception e) {
+					throw new UnsupportedOperationException(e);
+				}
 			}
 		</#if>
 	</#list>
