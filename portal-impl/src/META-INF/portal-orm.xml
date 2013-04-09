@@ -304,7 +304,9 @@
 				<column name="TYPE_" />
 			</basic>
 			<basic name="typeSettings" />
-			<basic name="hidden" />
+			<basic name="hidden">
+				<column name="HIDDEN_" />
+			</basic>
 			<basic name="friendlyURL" />
 			<basic name="iconImage" />
 			<basic name="iconImageId" />
@@ -587,6 +589,9 @@
 	<mapped-superclass class="com.liferay.portal.model.impl.OrganizationModelImpl">
 		<attributes>
 			<id name="organizationId" />
+			<basic name="uuid">
+				<column name="UUID_" />
+			</basic>
 			<basic name="companyId" />
 			<basic name="parentOrganizationId" />
 			<basic name="treePath" />
@@ -642,6 +647,9 @@
 	<mapped-superclass class="com.liferay.portal.model.impl.PasswordPolicyModelImpl">
 		<attributes>
 			<id name="passwordPolicyId" />
+			<basic name="uuid">
+				<column name="UUID_" />
+			</basic>
 			<basic name="companyId" />
 			<basic name="userId" />
 			<basic name="userName" />
@@ -977,6 +985,9 @@
 	<mapped-superclass class="com.liferay.portal.model.impl.RoleModelImpl">
 		<attributes>
 			<id name="roleId" />
+			<basic name="uuid">
+				<column name="UUID_" />
+			</basic>
 			<basic name="companyId" />
 			<basic name="classNameId" />
 			<basic name="classPK" />
@@ -1160,6 +1171,9 @@
 	<mapped-superclass class="com.liferay.portal.model.impl.UserGroupModelImpl">
 		<attributes>
 			<id name="userGroupId" />
+			<basic name="uuid">
+				<column name="UUID_" />
+			</basic>
 			<basic name="companyId" />
 			<basic name="parentUserGroupId" />
 			<basic name="name" />
@@ -2068,7 +2082,9 @@
 				<temporal>TIMESTAMP</temporal>
 			</basic>
 			<basic name="defaultFileEntryTypeId" />
-			<basic name="hidden" />
+			<basic name="hidden">
+				<column name="HIDDEN_" />
+			</basic>
 			<basic name="overrideFileEntryTypes" />
 			<basic name="status" />
 			<basic name="statusByUserId" />

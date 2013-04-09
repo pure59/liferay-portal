@@ -117,7 +117,8 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 			long userId, long companyId, String name, String description)
 		throws PortalException, SystemException {
 
-		return addUserGroup(userId, companyId, name, description, null);
+		return addUserGroup(
+			userId, companyId, name, description, new ServiceContext());
 	}
 
 	/**
@@ -153,6 +154,10 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 		long userGroupId = counterLocalService.increment();
 
 		UserGroup userGroup = userGroupPersistence.create(userGroupId);
+
+		if (serviceContext != null) {
+			userGroup.setUuid(serviceContext.getUuid());
+		}
 
 		userGroup.setCompanyId(companyId);
 		userGroup.setParentUserGroupId(
@@ -368,6 +373,13 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 		PermissionCacheUtil.clearCache();
 
 		return userGroup;
+	}
+
+	public UserGroup fetchUserGroupByUuidAndCompanyId(
+			String uuid, long companyId)
+		throws SystemException {
+
+		return userGroupPersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**

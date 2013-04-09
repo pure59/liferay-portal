@@ -20,11 +20,14 @@ import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
 import com.liferay.portal.kernel.util.IntegerWrapper;
+import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.UserGroup;
 import com.liferay.portal.model.impl.UserGroupModelImpl;
@@ -110,6 +113,8 @@ public class UserGroupPersistenceTest {
 
 		UserGroup newUserGroup = _persistence.create(pk);
 
+		newUserGroup.setUuid(ServiceTestUtil.randomString());
+
 		newUserGroup.setCompanyId(ServiceTestUtil.nextLong());
 
 		newUserGroup.setParentUserGroupId(ServiceTestUtil.nextLong());
@@ -124,6 +129,7 @@ public class UserGroupPersistenceTest {
 
 		UserGroup existingUserGroup = _persistence.findByPrimaryKey(newUserGroup.getPrimaryKey());
 
+		Assert.assertEquals(existingUserGroup.getUuid(), newUserGroup.getUuid());
 		Assert.assertEquals(existingUserGroup.getUserGroupId(),
 			newUserGroup.getUserGroupId());
 		Assert.assertEquals(existingUserGroup.getCompanyId(),
@@ -157,6 +163,23 @@ public class UserGroupPersistenceTest {
 		}
 		catch (NoSuchUserGroupException nsee) {
 		}
+	}
+
+	@Test
+	public void testFindAll() throws Exception {
+		try {
+			_persistence.findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				getOrderByComparator());
+		}
+		catch (Exception e) {
+			Assert.fail(e.getMessage());
+		}
+	}
+
+	protected OrderByComparator getOrderByComparator() {
+		return OrderByComparatorFactoryUtil.create("UserGroup", "uuid", true,
+			"userGroupId", true, "companyId", true, "parentUserGroupId", true,
+			"name", true, "description", true, "addedByLDAPImport", true);
 	}
 
 	@Test
@@ -292,6 +315,8 @@ public class UserGroupPersistenceTest {
 		long pk = ServiceTestUtil.nextLong();
 
 		UserGroup userGroup = _persistence.create(pk);
+
+		userGroup.setUuid(ServiceTestUtil.randomString());
 
 		userGroup.setCompanyId(ServiceTestUtil.nextLong());
 

@@ -14,6 +14,7 @@
 
 package com.liferay.portal.tools.seleniumbuilder;
 
+import com.liferay.portal.freemarker.FreeMarkerUtil;
 import com.liferay.portal.kernel.io.unsync.UnsyncBufferedReader;
 import com.liferay.portal.kernel.io.unsync.UnsyncStringReader;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -26,14 +27,17 @@ import com.liferay.portal.kernel.util.TextFormatter;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Attribute;
 import com.liferay.portal.kernel.xml.Document;
+import com.liferay.portal.kernel.xml.DocumentException;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.tools.servicebuilder.ServiceBuilder;
 
 import java.io.File;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -149,6 +153,30 @@ public class SeleniumBuilderFileUtil {
 	public String getNormalizedContent(String fileName) throws Exception {
 		String content = readFile(fileName);
 
+		if (fileName.endsWith(".path")) {
+			int x = content.indexOf("<tbody>");
+			int y = content.indexOf("</tbody>");
+
+			if ((x == -1) || (y == -1)) {
+				throwValidationException(1002, fileName, "tbody");
+			}
+
+			String pathTbody = content.substring(x, y + 8);
+
+			Map<String, Object> context = new HashMap<String, Object>();
+
+			context.put("pathName", getName(fileName));
+			context.put("pathTbody", pathTbody);
+
+			String newContent = processTemplate("path_xml.ftl", context);
+
+			if (!content.equals(newContent)) {
+				content = newContent;
+
+				writeFile(getBaseDir(), fileName, newContent, false);
+			}
+		}
+
 		StringBundler sb = new StringBundler();
 
 		int lineNumber = 1;
@@ -215,13 +243,20 @@ public class SeleniumBuilderFileUtil {
 	public Element getRootElement(String fileName) throws Exception {
 		String content = getNormalizedContent(fileName);
 
-		Document document = SAXReaderUtil.read(content, true);
+		try {
+			Document document = SAXReaderUtil.read(content, true);
 
-		Element rootElement = document.getRootElement();
+			Element rootElement = document.getRootElement();
 
-		validate(fileName, rootElement);
+			validate(fileName, rootElement);
 
-		return rootElement;
+			return rootElement;
+		}
+		catch (DocumentException de) {
+			throwValidationException(1007, fileName, de);
+		}
+
+		return null;
 	}
 
 	public String getSimpleClassName(String fileName) {
@@ -250,7 +285,14 @@ public class SeleniumBuilderFileUtil {
 	public void writeFile(String fileName, String content, boolean format)
 		throws Exception {
 
-		File file = new File(getBaseDir() + "-generated/" + fileName);
+		writeFile(getBaseDir() + "-generated", fileName, content, format);
+	}
+
+	public void writeFile(
+			String baseDir, String fileName, String content, boolean format)
+		throws Exception {
+
+		File file = new File(baseDir + "/" + fileName);
 
 		if (format) {
 			ServiceBuilder.writeFile(file, content);
@@ -262,31 +304,41 @@ public class SeleniumBuilderFileUtil {
 		}
 	}
 
+	protected String processTemplate(String name, Map<String, Object> context)
+		throws Exception {
+
+		return StringUtil.strip(
+			FreeMarkerUtil.process(_TPL_ROOT + name, context), '\r');
+	}
+
 	protected void throwValidationException(int errorCode, String fileName) {
-		throwValidationException(errorCode, fileName, null, null, null);
+		throwValidationException(errorCode, fileName, null, null, null, null);
 	}
 
 	protected void throwValidationException(
 		int errorCode, String fileName, Element element) {
 
-		throwValidationException(errorCode, fileName, element, null, null);
+		throwValidationException(
+			errorCode, fileName, element, null, null, null);
 	}
 
 	protected void throwValidationException(
 		int errorCode, String fileName, Element element, String string) {
 
-		throwValidationException(errorCode, fileName, element, null, string);
+		throwValidationException(
+			errorCode, fileName, element, null, string, null);
 	}
 
 	protected void throwValidationException(
 		int errorCode, String fileName, Element element, String[] array) {
 
-		throwValidationException(errorCode, fileName, element, array, null);
+		throwValidationException(
+			errorCode, fileName, element, array, null, null);
 	}
 
 	protected void throwValidationException(
 		int errorCode, String fileName, Element element, String[] array,
-		String string) {
+		String string, Exception e) {
 
 		String prefix = "Error " + errorCode + ": ";
 		String suffix = fileName;
@@ -325,6 +377,14 @@ public class SeleniumBuilderFileUtil {
 			throw new IllegalArgumentException(
 				prefix + "Invalid " + string + " attribute value in " + suffix);
 		}
+		else if (errorCode == 1007) {
+			throw new IllegalArgumentException(
+				prefix + "Poorly formed XML in " + suffix, e);
+		}
+		else if (errorCode == 1008) {
+			throw new IllegalArgumentException(
+				prefix + "Duplicate name " + string + " at " + suffix);
+		}
 		else if (errorCode == 2000) {
 			throw new IllegalArgumentException(
 				prefix + "Too many child elements in the " + string +
@@ -333,6 +393,18 @@ public class SeleniumBuilderFileUtil {
 		else {
 			throw new IllegalArgumentException(prefix + suffix);
 		}
+	}
+
+	protected void throwValidationException(
+		int errorCode, String fileName, Exception e) {
+
+		throwValidationException(errorCode, fileName, null, null, null, e);
+	}
+
+	protected void throwValidationException(
+		int errorCode, String fileName, String string) {
+
+		throwValidationException(errorCode, fileName, null, null, string, null);
 	}
 
 	protected void validate(String fileName, Element rootElement)
@@ -349,6 +421,12 @@ public class SeleniumBuilderFileUtil {
 		}
 		else if (fileName.endsWith(".path")) {
 			validatePathDocument(fileName, rootElement);
+		}
+		else if (fileName.endsWith(".testcase")) {
+			validateTestCaseDocument(fileName, rootElement);
+		}
+		else if (fileName.endsWith(".testsuite")) {
+			validateTestSuiteDocument(fileName, rootElement);
 		}
 	}
 
@@ -675,18 +753,42 @@ public class SeleniumBuilderFileUtil {
 				}
 			}
 		}
-		else if (Validator.isNotNull(testCase) &&
-				 testCase.matches(allowedExecuteAttributeValuesRegex)) {
+		else if (testCase != null) {
+			if (Validator.isNull(testCase) ||
+				!testCase.matches(allowedExecuteAttributeValuesRegex)) {
 
-			if (attributes.size() != 2) {
-				throwValidationException(0, fileName);
+				throwValidationException(
+					1006, fileName, executeElement, "test-case");
+			}
+
+			for (Attribute attribute : attributes) {
+				String attributeName = attribute.getName();
+
+				if (!attributeName.equals("line-number") &&
+					!attributeName.equals("test-case")) {
+
+					throwValidationException(
+						1005, fileName, executeElement, attributeName);
+				}
 			}
 		}
-		else if (Validator.isNotNull(testSuite) &&
-				 testSuite.matches(allowedExecuteAttributeValuesRegex)) {
+		else if (testSuite != null) {
+			if (Validator.isNull(testSuite) ||
+				!testSuite.matches(allowedExecuteAttributeValuesRegex)) {
 
-			if (attributes.size() != 2) {
-				throwValidationException(0, fileName);
+				throwValidationException(
+					1006, fileName, executeElement, "test-suite");
+			}
+
+			for (Attribute attribute : attributes) {
+				String attributeName = attribute.getName();
+
+				if (!attributeName.equals("line-number") &&
+					!attributeName.equals("test-suite")) {
+
+					throwValidationException(
+						1005, fileName, executeElement, attributeName);
+				}
 			}
 		}
 		else {
@@ -829,8 +931,7 @@ public class SeleniumBuilderFileUtil {
 				validateVarElement(fileName, element);
 			}
 			else {
-				throwValidationException(
-					1002, fileName, rootElement, elementName);
+				throwValidationException(1002, fileName, element, elementName);
 			}
 		}
 	}
@@ -865,6 +966,132 @@ public class SeleniumBuilderFileUtil {
 
 		if ((tdText == null) || !shortFileName.equals(tdText)) {
 			throwValidationException(0, fileName);
+		}
+
+		Element tbodyElement = tableElement.element("tbody");
+
+		List<Element> elements = tbodyElement.elements();
+
+		for (Element element : elements) {
+			String elementName = element.getName();
+
+			if (elementName.equals("tr")) {
+				validatePathTrElement(fileName, element);
+			}
+			else {
+				throwValidationException(1002, fileName, element, elementName);
+			}
+		}
+	}
+
+	protected void validatePathTrElement(String fileName, Element trElement) {
+		List<Element> elements = trElement.elements();
+
+		for (Element element : elements) {
+			String elementName = element.getName();
+
+			if (!elementName.equals("td")) {
+				throwValidationException(1002, fileName, element, elementName);
+			}
+		}
+
+		if (elements.size() < 3) {
+			throwValidationException(
+				1001, fileName, trElement, new String[] {"td"});
+		}
+
+		if (elements.size() > 3) {
+			Element element = elements.get(3);
+
+			String elementName = element.getName();
+
+			throwValidationException(1002, fileName, element, elementName);
+		}
+	}
+
+	protected void validateTestCaseDocument(
+		String fileName, Element rootElement) {
+
+		if (!Validator.equals(rootElement.getName(), "definition")) {
+			throwValidationException(1000, fileName, rootElement);
+		}
+
+		List<Element> elements = rootElement.elements();
+
+		if (elements.isEmpty()) {
+			throwValidationException(
+				1001, fileName, rootElement, new String[] {"command"});
+		}
+
+		for (Element element : elements) {
+			String elementName = element.getName();
+
+			if (elementName.equals("command")) {
+				String attributeValue = element.attributeValue("name");
+
+				if (attributeValue == null) {
+					throwValidationException(1003, fileName, element, "name");
+				}
+				else if (Validator.isNull(attributeValue)) {
+					throwValidationException(1006, fileName, element, "name");
+				}
+
+				validateBlockElement(
+					fileName, element, new String[] {"execute", "var"},
+					new String[] {"action", "macro"}, new String[] {"var"});
+			}
+			else if (elementName.equals("set-up") ||
+					 elementName.equals("tear-down")) {
+
+				List<Attribute> attributes = element.attributes();
+
+				for (Attribute attribute : attributes) {
+					String attributeName = attribute.getName();
+
+					if (!attributeName.equals("line-number")) {
+						throwValidationException(
+							1005, fileName, element, attributeName);
+					}
+				}
+
+				validateBlockElement(
+					fileName, element, new String[] {"execute", "var"},
+					new String[] {"action", "macro"}, new String[] {"var"});
+			}
+			else if (elementName.equals("var")) {
+				validateVarElement(fileName, element);
+			}
+			else {
+				throwValidationException(1002, fileName, element, elementName);
+			}
+		}
+	}
+
+	protected void validateTestSuiteDocument(
+		String fileName, Element rootElement) {
+
+		if (!Validator.equals(rootElement.getName(), "definition")) {
+			throwValidationException(1000, fileName, rootElement);
+		}
+
+		List<Element> elements = rootElement.elements();
+
+		if (elements.isEmpty()) {
+			throwValidationException(
+				1001, fileName, rootElement, new String[] {"execute"});
+		}
+
+		for (Element element : elements) {
+			String elementName = element.getName();
+
+			if (elementName.equals("execute")) {
+				validateExecuteElement(
+					fileName, element, new String[] {"test-case", "test-suite"},
+					".+", new String[0]);
+			}
+			else {
+				throwValidationException(1002, fileName, element, elementName);
+			}
 		}
 	}
 
@@ -954,6 +1181,9 @@ public class SeleniumBuilderFileUtil {
 				new String[] {"condition", "then"});
 		}
 	}
+
+	private static final String _TPL_ROOT =
+		"com/liferay/portal/tools/seleniumbuilder/dependencies/";
 
 	private String _baseDir;
 

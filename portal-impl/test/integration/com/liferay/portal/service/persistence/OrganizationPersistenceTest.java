@@ -20,11 +20,14 @@ import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
 import com.liferay.portal.kernel.util.IntegerWrapper;
+import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Organization;
 import com.liferay.portal.model.impl.OrganizationModelImpl;
@@ -110,6 +113,8 @@ public class OrganizationPersistenceTest {
 
 		Organization newOrganization = _persistence.create(pk);
 
+		newOrganization.setUuid(ServiceTestUtil.randomString());
+
 		newOrganization.setCompanyId(ServiceTestUtil.nextLong());
 
 		newOrganization.setParentOrganizationId(ServiceTestUtil.nextLong());
@@ -134,6 +139,8 @@ public class OrganizationPersistenceTest {
 
 		Organization existingOrganization = _persistence.findByPrimaryKey(newOrganization.getPrimaryKey());
 
+		Assert.assertEquals(existingOrganization.getUuid(),
+			newOrganization.getUuid());
 		Assert.assertEquals(existingOrganization.getOrganizationId(),
 			newOrganization.getOrganizationId());
 		Assert.assertEquals(existingOrganization.getCompanyId(),
@@ -179,6 +186,25 @@ public class OrganizationPersistenceTest {
 		}
 		catch (NoSuchOrganizationException nsee) {
 		}
+	}
+
+	@Test
+	public void testFindAll() throws Exception {
+		try {
+			_persistence.findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				getOrderByComparator());
+		}
+		catch (Exception e) {
+			Assert.fail(e.getMessage());
+		}
+	}
+
+	protected OrderByComparator getOrderByComparator() {
+		return OrderByComparatorFactoryUtil.create("Organization_", "uuid",
+			true, "organizationId", true, "companyId", true,
+			"parentOrganizationId", true, "treePath", true, "name", true,
+			"type", true, "recursable", true, "regionId", true, "countryId",
+			true, "statusId", true, "comments", true);
 	}
 
 	@Test
@@ -316,6 +342,8 @@ public class OrganizationPersistenceTest {
 		long pk = ServiceTestUtil.nextLong();
 
 		Organization organization = _persistence.create(pk);
+
+		organization.setUuid(ServiceTestUtil.randomString());
 
 		organization.setCompanyId(ServiceTestUtil.nextLong());
 

@@ -585,8 +585,8 @@ public class SourceFormatter {
 				lastCriteriumLineLeadingWhiteSpace = line.indexOf(
 					StringPool.OPEN_PARENTHESIS);
 			}
-			else if (previousLine.endsWith("||") ||
-					 previousLine.endsWith("&&")) {
+			else if (previousLine.endsWith("|") || previousLine.endsWith("&") ||
+					 previousLine.endsWith("^")) {
 
 				int expectedLeadingWhiteSpace =
 					lastCriteriumLineLeadingWhiteSpace +
@@ -3551,6 +3551,10 @@ public class SourceFormatter {
 			}
 
 			return null;
+		}
+
+		if (previousLine.endsWith(" extends")) {
+			return new Tuple(previousLine, "extends ", false);
 		}
 
 		if (previousLine.endsWith(" implements")) {

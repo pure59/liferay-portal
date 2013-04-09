@@ -310,7 +310,7 @@ update DLFileShortcut set active_ = TRUE;
 
 alter table DLFileVersion add checksum VARCHAR(75) null;
 
-alter table DLFolder add hidden BOOLEAN;
+alter table DLFolder add hidden_ BOOLEAN;
 alter table DLFolder add status INTEGER;
 alter table DLFolder add statusByUserId LONG;
 alter table DLFolder add statusByUserName VARCHAR(75) null;
@@ -318,7 +318,7 @@ alter table DLFolder add statusDate DATE null;
 
 COMMIT_TRANSACTION;
 
-update DLFolder set hidden = FALSE;
+update DLFolder set hidden_ = FALSE;
 update DLFolder set status = 0;
 update DLFolder set statusByUserId = userId;
 update DLFolder set statusByUserName = userName;
@@ -399,8 +399,11 @@ alter table MBThreadFlag add companyId LONG;
 alter table MBThreadFlag add userName VARCHAR(75) null;
 alter table MBThreadFlag add createDate DATE null;
 
+alter table Organization_ add uuid_ VARCHAR(75) null;
+
 drop table OrgGroupPermission;
 
+alter table PasswordPolicy add uuid_ VARCHAR(75) null;
 alter table PasswordPolicy add regex VARCHAR(75) null;
 
 drop index IX_C3A17327 on PasswordPolicyRel;
@@ -434,6 +437,8 @@ drop index IX_C94C7708 on ResourcePermission;
 drop index IX_8D83D0CE on ResourcePermission;
 drop index IX_4A1F4402 on ResourcePermission;
 drop index IX_8DB864A9 on ResourcePermission;
+
+alter table Role_ add uuid_ VARCHAR(75) null;
 
 drop table Roles_Permissions;
 
@@ -484,6 +489,8 @@ alter table User_ add ldapServerId LONG;
 COMMIT_TRANSACTION;
 
 update User_ set ldapServerId = -1;
+
+alter table UserGroup add uuid_ VARCHAR(75) null;
 
 drop table Users_Permissions;
 

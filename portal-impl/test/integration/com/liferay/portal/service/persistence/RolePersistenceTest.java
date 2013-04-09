@@ -20,11 +20,14 @@ import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
 import com.liferay.portal.kernel.util.IntegerWrapper;
+import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.impl.RoleModelImpl;
@@ -110,6 +113,8 @@ public class RolePersistenceTest {
 
 		Role newRole = _persistence.create(pk);
 
+		newRole.setUuid(ServiceTestUtil.randomString());
+
 		newRole.setCompanyId(ServiceTestUtil.nextLong());
 
 		newRole.setClassNameId(ServiceTestUtil.nextLong());
@@ -130,6 +135,7 @@ public class RolePersistenceTest {
 
 		Role existingRole = _persistence.findByPrimaryKey(newRole.getPrimaryKey());
 
+		Assert.assertEquals(existingRole.getUuid(), newRole.getUuid());
 		Assert.assertEquals(existingRole.getRoleId(), newRole.getRoleId());
 		Assert.assertEquals(existingRole.getCompanyId(), newRole.getCompanyId());
 		Assert.assertEquals(existingRole.getClassNameId(),
@@ -163,6 +169,24 @@ public class RolePersistenceTest {
 		}
 		catch (NoSuchRoleException nsee) {
 		}
+	}
+
+	@Test
+	public void testFindAll() throws Exception {
+		try {
+			_persistence.findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				getOrderByComparator());
+		}
+		catch (Exception e) {
+			Assert.fail(e.getMessage());
+		}
+	}
+
+	protected OrderByComparator getOrderByComparator() {
+		return OrderByComparatorFactoryUtil.create("Role_", "uuid", true,
+			"roleId", true, "companyId", true, "classNameId", true, "classPK",
+			true, "name", true, "title", true, "description", true, "type",
+			true, "subtype", true);
 	}
 
 	@Test
@@ -304,6 +328,8 @@ public class RolePersistenceTest {
 		long pk = ServiceTestUtil.nextLong();
 
 		Role role = _persistence.create(pk);
+
+		role.setUuid(ServiceTestUtil.randomString());
 
 		role.setCompanyId(ServiceTestUtil.nextLong());
 

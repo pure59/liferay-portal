@@ -188,6 +188,10 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 
 		Role role = rolePersistence.create(roleId);
 
+		if (serviceContext != null) {
+			role.setUuid(serviceContext.getUuid());
+		}
+
 		role.setCompanyId(user.getCompanyId());
 		role.setClassNameId(classNameId);
 		role.setClassPK(classPK);
@@ -458,6 +462,12 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 		}
 
 		return roleLocalService.loadFetchRole(companyId, name);
+	}
+
+	public Role fetchRoleByUuidAndCompanyId(String uuid, long companyId)
+		throws SystemException {
+
+		return rolePersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**

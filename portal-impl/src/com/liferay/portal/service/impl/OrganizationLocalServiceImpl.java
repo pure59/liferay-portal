@@ -230,6 +230,10 @@ public class OrganizationLocalServiceImpl
 		Organization organization = organizationPersistence.create(
 			organizationId);
 
+		if (serviceContext != null) {
+			organization.setUuid(serviceContext.getUuid());
+		}
+
 		organization.setCompanyId(user.getCompanyId());
 		organization.setParentOrganizationId(parentOrganizationId);
 
@@ -500,6 +504,14 @@ public class OrganizationLocalServiceImpl
 		PermissionCacheUtil.clearCache();
 
 		return organization;
+	}
+
+	public Organization fetchOrganizationByUuidAndCompanyId(
+			String uuid, long companyId)
+		throws SystemException {
+
+		return organizationPersistence.fetchByUuid_C_First(
+			uuid, companyId, null);
 	}
 
 	/**

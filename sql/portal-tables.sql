@@ -681,7 +681,7 @@ create table DLFolder (
 	description STRING null,
 	lastPostDate DATE null,
 	defaultFileEntryTypeId LONG,
-	hidden BOOLEAN,
+	hidden_ BOOLEAN,
 	overrideFileEntryTypes BOOLEAN,
 	status INTEGER,
 	statusByUserId LONG,
@@ -962,7 +962,7 @@ create table Layout (
 	robots STRING null,
 	type_ VARCHAR(75) null,
 	typeSettings TEXT null,
-	hidden BOOLEAN,
+	hidden_ BOOLEAN,
 	friendlyURL VARCHAR(255) null,
 	iconImage BOOLEAN,
 	iconImageId LONG,
@@ -1335,6 +1335,7 @@ create table MembershipRequest (
 );
 
 create table Organization_ (
+	uuid_ VARCHAR(75) null,
 	organizationId LONG not null primary key,
 	companyId LONG,
 	parentOrganizationId LONG,
@@ -1376,6 +1377,7 @@ create table OrgLabor (
 );
 
 create table PasswordPolicy (
+	uuid_ VARCHAR(75) null,
 	passwordPolicyId LONG not null primary key,
 	companyId LONG,
 	userId LONG,
@@ -1645,6 +1647,7 @@ create table ResourceTypePermission (
 );
 
 create table Role_ (
+	uuid_ VARCHAR(75) null,
 	roleId LONG not null primary key,
 	companyId LONG,
 	classNameId LONG,
@@ -2126,6 +2129,7 @@ create table User_ (
 );
 
 create table UserGroup (
+	uuid_ VARCHAR(75) null,
 	userGroupId LONG not null primary key,
 	companyId LONG,
 	parentUserGroupId LONG,
