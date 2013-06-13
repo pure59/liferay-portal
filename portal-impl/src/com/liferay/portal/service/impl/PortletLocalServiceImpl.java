@@ -1209,10 +1209,32 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 		portletModel.setIcon(
 			GetterUtil.getString(
 				portletElement.elementText("icon"), portletModel.getIcon()));
-		portletModel.setVirtualPath(
-			GetterUtil.getString(
-				portletElement.elementText("virtual-path"),
-				portletModel.getVirtualPath()));
+
+		String virtualPath = GetterUtil.getString(
+			portletElement.elementText("virtual-path"),
+			portletModel.getVirtualPath());
+
+		if (Validator.isNotNull(virtualPath)) {
+			int x = virtualPath.indexOf(_PROPERTY_PREFIX);
+
+			while (x >= 0) {
+				int y = virtualPath.indexOf(StringPool.CLOSE_CURLY_BRACE, x);
+
+				String propertyName = virtualPath.substring(x + 2, y);
+
+				String propertyValue = GetterUtil.getString(
+					System.getenv(propertyName));
+
+				virtualPath = StringUtil.replace(
+					virtualPath, _PROPERTY_PREFIX + propertyName +
+					StringPool.CLOSE_CURLY_BRACE, propertyValue);
+
+				x = virtualPath.indexOf(_PROPERTY_PREFIX, y + 1);
+			}
+		}
+
+		portletModel.setVirtualPath(virtualPath);
+
 		portletModel.setStrutsPath(
 			GetterUtil.getString(
 				portletElement.elementText("struts-path"),
@@ -2390,6 +2412,8 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 		ModelHintsUtil.getMaxLength(Portlet.class.getName(), "portletId") -
 			PortletConstants.INSTANCE_SEPARATOR.length() +
 				PortletConstants.USER_SEPARATOR.length() + 39;
+
+	private static final String _PROPERTY_PREFIX = "${";
 
 	private static Log _log = LogFactoryUtil.getLog(
 		PortletLocalServiceImpl.class);
