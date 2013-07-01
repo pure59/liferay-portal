@@ -319,14 +319,11 @@ public class FileChecker extends BaseChecker {
 	protected void getPermissions(String key, String actions) {
 		String value = getProperty(key);
 
+		String[] properties = StringUtil.extractBetween(
+			value, _ENV_PREFIX, StringPool.CLOSE_CURLY_BRACE);
+
 		if (value != null) {
-			int x = value.indexOf(_ENV_PREFIX);
-
-			while (x >= 0) {
-				int y = value.indexOf(StringPool.CLOSE_CURLY_BRACE, x);
-
-				String propertyName = value.substring(x + 6, y);
-
+			for (String propertyName : properties) {
 				String propertyValue = GetterUtil.getString(
 					System.getenv(propertyName));
 
@@ -341,8 +338,6 @@ public class FileChecker extends BaseChecker {
 					_defaultReadPathsToArray = ArrayUtil.append(
 						_defaultReadPathsToArray, propertyValue);
 				}
-
-				x = value.indexOf(_ENV_PREFIX, y + 1);
 			}
 
 			value = StringUtil.replace(

@@ -51,6 +51,15 @@ public class StringUtilTest {
 	}
 
 	@Test
+	public void testExtractBetween() throws Exception {
+		Assert.assertEquals(
+			new String[]{"Hello World", "{Hello World", "Liferay"},
+			StringUtil.extractBetween(
+				"{Hello World}} {{Hello World}} Liferay {Liferay} {",
+			StringPool.OPEN_CURLY_BRACE, StringPool.CLOSE_CURLY_BRACE));
+	}
+
+	@Test
 	public void testHighlight() throws Exception {
 		Assert.assertEquals(
 			"<span class=\"highlight\">Hello</span> World <span " +

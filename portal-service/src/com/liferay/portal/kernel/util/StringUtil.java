@@ -414,6 +414,42 @@ public class StringUtil {
 	}
 
 	/**
+	 * Returns the array of strings found in string <code>s</code> between the
+	 * prefix <code>prefix</code> and suffix <code>suffix</code>.
+	 *
+	 * @param  s the string from which to extract strings
+	 * @param  prefix the string that marks the start of a string to extract
+	 * @param  suffix the string that marks the end of a string to extract
+	 * @return the array of extracted strings, or <code>null</code> if the given
+	 *         strings are <code>null</code>
+	 */
+	public static String[] extractBetween(
+		String s, String prefix, String suffix) {
+
+		if ((s == null) || (prefix == null) || (suffix == null)) {
+			return null;
+		}
+
+		List<String> values = new ArrayList<String>();
+
+		int x = s.indexOf(prefix);
+
+		while (x >= 0) {
+			int y = s.indexOf(suffix, x);
+
+			if (y == -1) {
+				break;
+			}
+
+			values.add(s.substring(x + prefix.length(), y));
+
+			x = s.indexOf(prefix, y + 1);
+		}
+
+		return values.toArray(new String[values.size()]);
+	}
+
+	/**
 	 * Returns the substring of English characters from the string.
 	 *
 	 * @param  s the string from which to extract characters

@@ -1210,10 +1210,13 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 		portletModel.setIcon(
 			GetterUtil.getString(
 				portletElement.elementText("icon"), portletModel.getIcon()));
-		portletModel.setVirtualPath(
-			GetterUtil.getString(
-				portletElement.elementText("virtual-path"),
-				portletModel.getVirtualPath()));
+
+		String virtualPath = GetterUtil.getString(
+			portletElement.elementText("virtual-path"),
+			portletModel.getVirtualPath());
+
+		portletModel.setVirtualPath(_replaceSystemEnv(virtualPath));
+
 		portletModel.setStrutsPath(
 			GetterUtil.getString(
 				portletElement.elementText("struts-path"),
@@ -2343,6 +2346,26 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 		}
 
 		return servletURLPatterns;
+	}
+
+	private String _replaceSystemEnv(String element) {
+		String prefix = "${";
+
+		String[] properties = StringUtil.extractBetween(
+			element, prefix, StringPool.CLOSE_CURLY_BRACE);
+
+		for (String property : properties) {
+			String propertyValue = GetterUtil.getString(
+				System.getenv(property));
+
+			String fullPropertyName =
+				prefix + property + StringPool.CLOSE_CURLY_BRACE;
+
+			element = StringUtil.replace(
+				element, fullPropertyName, propertyValue);
+		}
+
+		return element;
 	}
 
 	private void _setSpriteImages(
