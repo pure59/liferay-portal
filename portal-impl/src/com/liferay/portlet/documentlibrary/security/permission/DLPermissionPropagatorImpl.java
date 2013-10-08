@@ -171,9 +171,11 @@ public class DLPermissionPropagatorImpl extends BasePermissionPropagator {
 
 		DLFolder folder = DLFolderLocalServiceUtil.getFolder(folderId);
 
+		long folderGroupId = folder.getGroupId();
+
 		List<Object> foldersAndFileEntriesAndFileShortcuts =
 			DLFolderLocalServiceUtil.getFoldersAndFileEntriesAndFileShortcuts(
-				folder.getGroupId(), folderId, null, false,
+				folderGroupId, folderId, null, false,
 				new QueryDefinition(WorkflowConstants.STATUS_ANY));
 
 		for (Object folderOrFile : foldersAndFileEntriesAndFileShortcuts) {
@@ -199,7 +201,7 @@ public class DLPermissionPropagatorImpl extends BasePermissionPropagator {
 				folderIds.add(folder.getFolderId());
 
 				DLFolderLocalServiceUtil.getSubfolderIds(
-					folderIds, folder.getGroupId(), folder.getFolderId());
+					folderIds, folderGroupId, folderIds.get(0));
 
 				for (final long addFolderId : folderIds) {
 					propagateFolderRolePermissions(
@@ -230,8 +232,7 @@ public class DLPermissionPropagatorImpl extends BasePermissionPropagator {
 
 					};
 
-					fileEntryActionableDynamicQuery.setGroupId(
-						folder.getGroupId());
+					fileEntryActionableDynamicQuery.setGroupId(folderGroupId);
 
 					fileEntryActionableDynamicQuery.performActions();
 
@@ -261,7 +262,7 @@ public class DLPermissionPropagatorImpl extends BasePermissionPropagator {
 					};
 
 					fileShortcutActionableDynamicQuery.setGroupId(
-						folder.getGroupId());
+						folderGroupId);
 
 					fileShortcutActionableDynamicQuery.performActions();
 				}
