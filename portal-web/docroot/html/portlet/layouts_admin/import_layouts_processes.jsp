@@ -23,7 +23,7 @@ boolean privateLayout = ParamUtil.getBoolean(request, "privateLayout");
 PortletURL portletURL = liferayPortletResponse.createRenderURL();
 
 portletURL.setParameter("struts_action", "/layouts_admin/import_layouts");
-portletURL.setParameter("tabs2", "all-import-processes");
+portletURL.setParameter("tabs2", "current-and-previous");
 portletURL.setParameter("groupId", String.valueOf(groupId));
 portletURL.setParameter("privateLayout", String.valueOf(privateLayout));
 
@@ -39,7 +39,7 @@ else {
 	orderByType = portalPreferences.getValue(PortletKeys.BACKGROUND_TASK, "entries-order-by-type", "desc");
 }
 
-OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderByComparator(orderByCol, orderByType);
+OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBackgroundTaskOrderByComparator(orderByCol, orderByType);
 %>
 
 <liferay-ui:search-container
@@ -61,7 +61,7 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 	>
 		<liferay-ui:search-container-column-text
 			name="user-name"
-			value="<%= backgroundTask.getUserName() %>"
+			value="<%= HtmlUtil.escape(backgroundTask.getUserName()) %>"
 		/>
 
 		<liferay-ui:search-container-column-jsp
@@ -105,3 +105,13 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 
 	<liferay-ui:search-iterator />
 </liferay-ui:search-container>
+
+<%
+int incompleteBackgroundTaskCount = BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(groupId, LayoutImportBackgroundTaskExecutor.class.getName(), false);
+%>
+
+<div class="hide incomplete-process-message">
+	<liferay-util:include page="/html/portlet/layouts_admin/incomplete_processes_message.jsp">
+		<liferay-util:param name="incompleteBackgroundTaskCount" value="<%= String.valueOf(incompleteBackgroundTaskCount) %>" />
+	</liferay-util:include>
+</div>

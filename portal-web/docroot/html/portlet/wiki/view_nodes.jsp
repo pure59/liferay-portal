@@ -30,21 +30,16 @@ headerNames.add(StringPool.BLANK);
 
 SearchContainer searchContainer = new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, portletURL, headerNames, null);
 
-int total = WikiNodeLocalServiceUtil.getNodesCount(scopeGroupId);
+int total = WikiNodeServiceUtil.getNodesCount(scopeGroupId);
 
 searchContainer.setTotal(total);
 
-List results = WikiNodeLocalServiceUtil.getNodes(scopeGroupId, searchContainer.getStart(), searchContainer.getEnd());
+List results = WikiNodeServiceUtil.getNodes(scopeGroupId, searchContainer.getStart(), searchContainer.getEnd());
 
 searchContainer.setResults(results);
 %>
 
-<portlet:actionURL var="undoTrashURL">
-	<portlet:param name="struts_action" value="/wiki/edit_node" />
-	<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.RESTORE %>" />
-</portlet:actionURL>
-
-<liferay-ui:trash-undo portletURL="<%= undoTrashURL %>" />
+<liferay-ui:trash-undo />
 
 <liferay-ui:error exception="<%= RequiredNodeException.class %>" message="the-last-main-node-is-required-and-cannot-be-deleted" />
 
@@ -77,7 +72,7 @@ searchContainer.setResults(results);
 
 		// Number of pages
 
-		int pagesCount = WikiPageLocalServiceUtil.getPagesCount(node.getNodeId(), true);
+		int pagesCount = WikiPageServiceUtil.getPagesCount(scopeGroupId, node.getNodeId(), true);
 
 		row.addText(String.valueOf(pagesCount), rowURL);
 
@@ -122,9 +117,10 @@ searchContainer.setResults(results);
 						modelResourceDescription="<%= HtmlUtil.escape(themeDisplay.getScopeGroupName()) %>"
 						resourcePrimKey="<%= String.valueOf(scopeGroupId) %>"
 						var="permissionsURL"
+						windowState="<%= LiferayWindowState.POP_UP.toString() %>"
 					/>
 
-					<aui:button href="<%= permissionsURL %>" name="permissionsButton" value="permissions" />
+					<aui:button href="<%= permissionsURL %>" name="permissionsButton" useDialog="<%= true %>" value="permissions" />
 				</c:if>
 			</aui:button-row>
 		</c:if>

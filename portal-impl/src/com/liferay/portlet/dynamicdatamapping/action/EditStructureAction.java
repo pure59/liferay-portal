@@ -15,10 +15,10 @@
 package com.liferay.portlet.dynamicdatamapping.action;
 
 import com.liferay.portal.LocaleException;
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -29,7 +29,6 @@ import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.PortletURLImpl;
 import com.liferay.portlet.dynamicdatamapping.NoSuchStructureException;
@@ -84,6 +83,19 @@ public class EditStructureAction extends PortletAction {
 			if (Validator.isNotNull(cmd)) {
 				String redirect = ParamUtil.getString(
 					actionRequest, "redirect");
+				String closeRedirect = ParamUtil.getString(
+					actionRequest, "closeRedirect");
+
+				if (Validator.isNotNull(closeRedirect)) {
+					redirect = HttpUtil.setParameter(
+						redirect, "closeRedirect", closeRedirect);
+
+					SessionMessages.add(
+						actionRequest,
+						PortalUtil.getPortletId(actionRequest) +
+							SessionMessages.KEY_SUFFIX_CLOSE_REDIRECT,
+						closeRedirect);
+				}
 
 				if (structure != null) {
 					boolean saveAndContinue = ParamUtil.getBoolean(
@@ -93,17 +105,6 @@ public class EditStructureAction extends PortletAction {
 						redirect = getSaveAndContinueRedirect(
 							portletConfig, actionRequest, structure, redirect);
 					}
-				}
-
-				if (SessionErrors.isEmpty(actionRequest)) {
-					LiferayPortletConfig liferayPortletConfig =
-						(LiferayPortletConfig)portletConfig;
-
-					SessionMessages.add(
-						actionRequest,
-						liferayPortletConfig.getPortletId() +
-							SessionMessages.KEY_SUFFIX_REFRESH_PORTLET,
-						PortletKeys.JOURNAL);
 				}
 
 				sendRedirect(actionRequest, actionResponse, redirect);

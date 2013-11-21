@@ -16,9 +16,11 @@ package com.liferay.portlet.bookmarks.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.staging.permission.StagingPermissionUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.bookmarks.NoSuchFolderException;
 import com.liferay.portlet.bookmarks.model.BookmarksEntry;
@@ -56,12 +58,28 @@ public class BookmarksEntryPermission {
 			String actionId)
 		throws PortalException, SystemException {
 
+		Boolean hasPermission = StagingPermissionUtil.hasPermission(
+			permissionChecker, entry.getGroupId(),
+			BookmarksEntry.class.getName(), entry.getEntryId(),
+			PortletKeys.BOOKMARKS, actionId);
+
+		if (hasPermission != null) {
+			return hasPermission.booleanValue();
+		}
+
 		if (actionId.equals(ActionKeys.VIEW) &&
 			PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
 
 			long folderId = entry.getFolderId();
 
-			if (folderId != BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+			if (folderId == BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+				if (!BookmarksPermission.contains(
+						permissionChecker, entry.getGroupId(), actionId)) {
+
+					return false;
+				}
+			}
+			else {
 				try {
 					BookmarksFolder folder =
 						BookmarksFolderLocalServiceUtil.getFolder(folderId);

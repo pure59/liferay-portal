@@ -15,7 +15,6 @@
 package com.liferay.portal.service;
 
 import com.liferay.counter.service.CounterLocalServiceUtil;
-import com.liferay.portal.NoSuchRoleException;
 import com.liferay.portal.jcr.JCRFactoryUtil;
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -33,6 +32,7 @@ import com.liferay.portal.kernel.template.TemplateManagerUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.User;
@@ -40,6 +40,7 @@ import com.liferay.portal.model.impl.PortletImpl;
 import com.liferay.portal.repository.liferayrepository.LiferayRepository;
 import com.liferay.portal.search.lucene.LuceneHelperUtil;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
+import com.liferay.portal.security.lang.DoPrivilegedUtil;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
@@ -50,8 +51,8 @@ import com.liferay.portal.util.PortalInstances;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.portal.util.RoleTestUtil;
 import com.liferay.portal.util.TestPropsValues;
-import com.liferay.util.PwdGenerator;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -73,57 +74,51 @@ public class ServiceTestUtil {
 
 	public static final int THREAD_COUNT = 25;
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
 	public static void addResourcePermission(
 			Role role, String resourceName, int scope, String primKey,
 			String actionId)
 		throws Exception {
 
-		ResourcePermissionLocalServiceUtil.addResourcePermission(
-			role.getCompanyId(), resourceName, scope, primKey, role.getRoleId(),
-			actionId);
+		RoleTestUtil.addResourcePermission(
+			role, resourceName, scope, primKey, actionId);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
 	public static void addResourcePermission(
 			String roleName, String resourceName, int scope, String primKey,
 			String actionId)
 		throws Exception {
 
-		Role role = RoleLocalServiceUtil.getRole(
-			TestPropsValues.getCompanyId(), roleName);
-
-		addResourcePermission(role, resourceName, scope, primKey, actionId);
+		RoleTestUtil.addResourcePermission(
+			roleName, resourceName, scope, primKey, actionId);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
 	public static Role addRole(String roleName, int roleType) throws Exception {
-		Role role = null;
-
-		try {
-			role = RoleLocalServiceUtil.getRole(
-				TestPropsValues.getCompanyId(), roleName);
-		}
-		catch (NoSuchRoleException nsre) {
-			role = RoleLocalServiceUtil.addRole(
-				TestPropsValues.getUserId(), null, 0, roleName, null, null,
-				roleType, null, null);
-		}
-
-		return role;
+		return RoleTestUtil.addRole(roleName, roleType);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
 	public static Role addRole(
 			String roleName, int roleType, String resourceName, int scope,
 			String primKey, String actionId)
 		throws Exception {
 
-		Role role = addRole(roleName, roleType);
-
-		addResourcePermission(role, resourceName, scope, primKey, actionId);
-
-		return role;
+		return RoleTestUtil.addRole(
+			roleName, roleType, resourceName, scope, primKey, actionId);
 	}
 
 	public static void destroyServices() {
-		_deleteDLDirectories();
+		_deleteDirectories();
 	}
 
 	public static SearchContext getSearchContext() throws Exception {
@@ -188,24 +183,10 @@ public class ServiceTestUtil {
 	public static void initServices() {
 		InitUtil.initWithSpring();
 
-		_deleteDLDirectories();
-
 		// JCR
 
 		try {
 			JCRFactoryUtil.prepare();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		// Lucene
-
-		try {
-			FileUtil.mkdirs(
-				PropsValues.LUCENE_DIR + TestPropsValues.getCompanyId());
-
-			LuceneHelperUtil.startup(TestPropsValues.getCompanyId());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -245,7 +226,9 @@ public class ServiceTestUtil {
 				SynchronousMessageSender.class.getName());
 
 		MessageBusUtil.init(
-			messageBus, messageSender, synchronousMessageSender);
+			DoPrivilegedUtil.wrap(messageBus),
+			DoPrivilegedUtil.wrap(messageSender),
+			DoPrivilegedUtil.wrap(synchronousMessageSender));
 
 		if (TestPropsValues.DL_FILE_ENTRY_PROCESSORS_TRIGGER_SYNCHRONOUSLY) {
 			_replaceWithSynchronousDestination(
@@ -312,6 +295,22 @@ public class ServiceTestUtil {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		// Directories
+
+		_deleteDirectories();
+
+		// Lucene
+
+		try {
+			FileUtil.mkdirs(
+				PropsValues.LUCENE_DIR + TestPropsValues.getCompanyId());
+
+			LuceneHelperUtil.startup(TestPropsValues.getCompanyId());
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static Date newDate() throws Exception {
@@ -348,6 +347,20 @@ public class ServiceTestUtil {
 		return _random.nextBoolean();
 	}
 
+	public static int randomInt() throws Exception {
+		int value = _random.nextInt();
+
+		if (value > 0) {
+			return value;
+		}
+		else if (value == 0) {
+			return randomInt();
+		}
+		else {
+			return -value;
+		}
+	}
+
 	public static Map<Locale, String> randomLocaleStringMap() throws Exception {
 		return randomLocaleStringMap(LocaleUtil.getDefault());
 	}
@@ -377,14 +390,18 @@ public class ServiceTestUtil {
 	}
 
 	public static String randomString() throws Exception {
-		return PwdGenerator.getPassword();
+		return StringUtil.randomString();
 	}
 
 	public static String randomString(int length) throws Exception {
-		return PwdGenerator.getPassword(length);
+		return StringUtil.randomString(length);
 	}
 
 	public static void setUser(User user) throws Exception {
+		if (user == null) {
+			return;
+		}
+
 		PrincipalThreadLocal.setName(user.getUserId());
 
 		PermissionChecker permissionChecker =
@@ -425,7 +442,7 @@ public class ServiceTestUtil {
 		}
 	}
 
-	private static void _deleteDLDirectories() {
+	private static void _deleteDirectories() {
 		FileUtil.deltree(PropsValues.DL_STORE_FILE_SYSTEM_ROOT_DIR);
 
 		FileUtil.deltree(

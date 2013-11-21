@@ -42,12 +42,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.powermock.api.mockito.PowerMockito;
-
 /**
  * @author Zsolt Berentey
  */
-public abstract class BasePortletDataHandlerTestCase extends PowerMockito {
+public abstract class BasePortletDataHandlerTestCase {
 
 	@Before
 	public void setUp() throws Exception {
@@ -126,14 +124,15 @@ public abstract class BasePortletDataHandlerTestCase extends PowerMockito {
 
 			LongWrapper expectedModelAdditionCounter =
 				expectedModelAdditionCounters.get(manifestSummaryKey);
+			LongWrapper modelAdditionCounter = modelAdditionCounters.get(
+				manifestSummaryKey);
 
-			if (expectedModelAdditionCounter.getValue() == 0) {
+			if ((expectedModelAdditionCounter.getValue() == 0) &&
+				(modelAdditionCounter == null)) {
+
 				expectedModelAdditionCountersSize--;
 			}
 			else {
-				LongWrapper modelAdditionCounter = modelAdditionCounters.get(
-					manifestSummaryKey);
-
 				Assert.assertEquals(
 					expectedModelAdditionCounter.getValue(),
 					modelAdditionCounter.getValue());
@@ -141,7 +140,7 @@ public abstract class BasePortletDataHandlerTestCase extends PowerMockito {
 		}
 
 		Assert.assertEquals(
-			modelAdditionCounters.size(), expectedModelAdditionCountersSize);
+			expectedModelAdditionCountersSize, modelAdditionCounters.size());
 	}
 
 	protected abstract PortletDataHandler createPortletDataHandler();

@@ -47,6 +47,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The base model implementation for the DDMTemplate service. Represents a row in the &quot;DDMTemplate&quot; database table, with each column mapped to a property of this class.
@@ -373,8 +375,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -397,8 +399,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getTemplateId() {
 		return _templateId;
 	}
@@ -408,8 +410,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		_templateId = templateId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -431,8 +433,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -454,8 +456,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -475,8 +477,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -491,8 +493,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -502,8 +504,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -533,8 +535,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		setClassNameId(classNameId);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassNameId() {
 		return _classNameId;
 	}
@@ -556,8 +558,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		return _originalClassNameId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassPK() {
 		return _classPK;
 	}
@@ -579,8 +581,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		return _originalClassPK;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getTemplateKey() {
 		if (_templateKey == null) {
 			return StringPool.BLANK;
@@ -605,8 +607,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		return GetterUtil.getString(_originalTemplateKey);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -666,7 +668,7 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 
 	@Override
 	public void setName(String name, Locale locale) {
-		setName(name, locale, LocaleUtil.getDefault());
+		setName(name, locale, LocaleUtil.getSiteDefault());
 	}
 
 	@Override
@@ -691,7 +693,7 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 
 	@Override
 	public void setNameMap(Map<Locale, String> nameMap) {
-		setNameMap(nameMap, LocaleUtil.getDefault());
+		setNameMap(nameMap, LocaleUtil.getSiteDefault());
 	}
 
 	@Override
@@ -704,8 +706,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 				LocaleUtil.toLanguageId(defaultLocale)));
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -765,7 +767,7 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 
 	@Override
 	public void setDescription(String description, Locale locale) {
-		setDescription(description, locale, LocaleUtil.getDefault());
+		setDescription(description, locale, LocaleUtil.getSiteDefault());
 	}
 
 	@Override
@@ -792,7 +794,7 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 
 	@Override
 	public void setDescriptionMap(Map<Locale, String> descriptionMap) {
-		setDescriptionMap(descriptionMap, LocaleUtil.getDefault());
+		setDescriptionMap(descriptionMap, LocaleUtil.getSiteDefault());
 	}
 
 	@Override
@@ -807,8 +809,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 				LocaleUtil.toLanguageId(defaultLocale)));
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getType() {
 		if (_type == null) {
 			return StringPool.BLANK;
@@ -833,8 +835,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		return GetterUtil.getString(_originalType);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getMode() {
 		if (_mode == null) {
 			return StringPool.BLANK;
@@ -859,8 +861,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		return GetterUtil.getString(_originalMode);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getLanguage() {
 		if (_language == null) {
 			return StringPool.BLANK;
@@ -885,8 +887,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		return GetterUtil.getString(_originalLanguage);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getScript() {
 		if (_script == null) {
 			return StringPool.BLANK;
@@ -901,8 +903,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		_script = script;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getCacheable() {
 		return _cacheable;
 	}
@@ -917,8 +919,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		_cacheable = cacheable;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getSmallImage() {
 		return _smallImage;
 	}
@@ -933,8 +935,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		_smallImage = smallImage;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getSmallImageId() {
 		return _smallImageId;
 	}
@@ -956,8 +958,8 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 		return _originalSmallImageId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getSmallImageURL() {
 		if (_smallImageURL == null) {
 			return StringPool.BLANK;
@@ -996,13 +998,76 @@ public class DDMTemplateModelImpl extends BaseModelImpl<DDMTemplate>
 	}
 
 	@Override
+	public String[] getAvailableLanguageIds() {
+		Set<String> availableLanguageIds = new TreeSet<String>();
+
+		Map<Locale, String> nameMap = getNameMap();
+
+		for (Map.Entry<Locale, String> entry : nameMap.entrySet()) {
+			Locale locale = entry.getKey();
+			String value = entry.getValue();
+
+			if (Validator.isNotNull(value)) {
+				availableLanguageIds.add(LocaleUtil.toLanguageId(locale));
+			}
+		}
+
+		Map<Locale, String> descriptionMap = getDescriptionMap();
+
+		for (Map.Entry<Locale, String> entry : descriptionMap.entrySet()) {
+			Locale locale = entry.getKey();
+			String value = entry.getValue();
+
+			if (Validator.isNotNull(value)) {
+				availableLanguageIds.add(LocaleUtil.toLanguageId(locale));
+			}
+		}
+
+		return availableLanguageIds.toArray(new String[availableLanguageIds.size()]);
+	}
+
+	@Override
+	public String getDefaultLanguageId() {
+		String xml = getName();
+
+		if (xml == null) {
+			return StringPool.BLANK;
+		}
+
+		return LocalizationUtil.getDefaultLanguageId(xml);
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport() throws LocaleException {
+		prepareLocalizedFieldsForImport(null);
+	}
+
+	@Override
 	@SuppressWarnings("unused")
 	public void prepareLocalizedFieldsForImport(Locale defaultImportLocale)
 		throws LocaleException {
-		setName(getName(defaultImportLocale), defaultImportLocale,
-			defaultImportLocale);
-		setDescription(getDescription(defaultImportLocale),
-			defaultImportLocale, defaultImportLocale);
+		Locale defaultLocale = LocaleUtil.getDefault();
+
+		String modelDefaultLanguageId = getDefaultLanguageId();
+
+		String name = getName(defaultLocale);
+
+		if (Validator.isNull(name)) {
+			setName(getName(modelDefaultLanguageId), defaultLocale);
+		}
+		else {
+			setName(getName(defaultLocale), defaultLocale, defaultLocale);
+		}
+
+		String description = getDescription(defaultLocale);
+
+		if (Validator.isNull(description)) {
+			setDescription(getDescription(modelDefaultLanguageId), defaultLocale);
+		}
+		else {
+			setDescription(getDescription(defaultLocale), defaultLocale,
+				defaultLocale);
+		}
 	}
 
 	@Override

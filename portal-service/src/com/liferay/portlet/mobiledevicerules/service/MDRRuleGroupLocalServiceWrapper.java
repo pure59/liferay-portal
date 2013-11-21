@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.mobiledevicerules.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see MDRRuleGroupLocalService
  * @generated
  */
+@ProviderType
 public class MDRRuleGroupLocalServiceWrapper implements MDRRuleGroupLocalService,
 	ServiceWrapper<MDRRuleGroupLocalService> {
 	public MDRRuleGroupLocalServiceWrapper(
@@ -381,23 +384,20 @@ public class MDRRuleGroupLocalServiceWrapper implements MDRRuleGroupLocalService
 
 	@Override
 	public void deleteRuleGroup(long ruleGroupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.SystemException {
 		_mdrRuleGroupLocalService.deleteRuleGroup(ruleGroupId);
 	}
 
 	@Override
 	public void deleteRuleGroup(
 		com.liferay.portlet.mobiledevicerules.model.MDRRuleGroup ruleGroup)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.SystemException {
 		_mdrRuleGroupLocalService.deleteRuleGroup(ruleGroup);
 	}
 
 	@Override
 	public void deleteRuleGroups(long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.SystemException {
 		_mdrRuleGroupLocalService.deleteRuleGroups(groupId);
 	}
 

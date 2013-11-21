@@ -79,6 +79,7 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 			{ "repositoryId", Types.BIGINT },
 			{ "folderId", Types.BIGINT },
 			{ "fileEntryId", Types.BIGINT },
+			{ "treePath", Types.VARCHAR },
 			{ "extension", Types.VARCHAR },
 			{ "mimeType", Types.VARCHAR },
 			{ "title", Types.VARCHAR },
@@ -94,7 +95,7 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 			{ "statusByUserName", Types.VARCHAR },
 			{ "statusDate", Types.TIMESTAMP }
 		};
-	public static final String TABLE_SQL_CREATE = "create table DLFileVersion (uuid_ VARCHAR(75) null,fileVersionId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,repositoryId LONG,folderId LONG,fileEntryId LONG,extension VARCHAR(75) null,mimeType VARCHAR(75) null,title VARCHAR(255) null,description STRING null,changeLog VARCHAR(75) null,extraSettings TEXT null,fileEntryTypeId LONG,version VARCHAR(75) null,size_ LONG,checksum VARCHAR(75) null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
+	public static final String TABLE_SQL_CREATE = "create table DLFileVersion (uuid_ VARCHAR(75) null,fileVersionId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,repositoryId LONG,folderId LONG,fileEntryId LONG,treePath STRING null,extension VARCHAR(75) null,mimeType VARCHAR(75) null,title VARCHAR(255) null,description STRING null,changeLog VARCHAR(75) null,extraSettings TEXT null,fileEntryTypeId LONG,version VARCHAR(75) null,size_ LONG,checksum VARCHAR(75) null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table DLFileVersion";
 	public static final String ORDER_BY_JPQL = " ORDER BY dlFileVersion.fileEntryId DESC, dlFileVersion.createDate DESC";
 	public static final String ORDER_BY_SQL = " ORDER BY DLFileVersion.fileEntryId DESC, DLFileVersion.createDate DESC";
@@ -145,6 +146,7 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		model.setRepositoryId(soapModel.getRepositoryId());
 		model.setFolderId(soapModel.getFolderId());
 		model.setFileEntryId(soapModel.getFileEntryId());
+		model.setTreePath(soapModel.getTreePath());
 		model.setExtension(soapModel.getExtension());
 		model.setMimeType(soapModel.getMimeType());
 		model.setTitle(soapModel.getTitle());
@@ -234,6 +236,7 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		attributes.put("repositoryId", getRepositoryId());
 		attributes.put("folderId", getFolderId());
 		attributes.put("fileEntryId", getFileEntryId());
+		attributes.put("treePath", getTreePath());
 		attributes.put("extension", getExtension());
 		attributes.put("mimeType", getMimeType());
 		attributes.put("title", getTitle());
@@ -318,6 +321,12 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 
 		if (fileEntryId != null) {
 			setFileEntryId(fileEntryId);
+		}
+
+		String treePath = (String)attributes.get("treePath");
+
+		if (treePath != null) {
+			setTreePath(treePath);
 		}
 
 		String extension = (String)attributes.get("extension");
@@ -405,8 +414,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -429,8 +438,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getFileVersionId() {
 		return _fileVersionId;
 	}
@@ -440,8 +449,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_fileVersionId = fileVersionId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -463,8 +472,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -486,8 +495,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -507,8 +516,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -523,8 +532,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -536,8 +545,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -547,8 +556,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_modifiedDate = modifiedDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getRepositoryId() {
 		return _repositoryId;
 	}
@@ -558,8 +567,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_repositoryId = repositoryId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getFolderId() {
 		return _folderId;
 	}
@@ -581,8 +590,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		return _originalFolderId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getFileEntryId() {
 		return _fileEntryId;
 	}
@@ -604,8 +613,24 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		return _originalFileEntryId;
 	}
 
-	@Override
 	@JSON
+	@Override
+	public String getTreePath() {
+		if (_treePath == null) {
+			return StringPool.BLANK;
+		}
+		else {
+			return _treePath;
+		}
+	}
+
+	@Override
+	public void setTreePath(String treePath) {
+		_treePath = treePath;
+	}
+
+	@JSON
+	@Override
 	public String getExtension() {
 		if (_extension == null) {
 			return StringPool.BLANK;
@@ -620,8 +645,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_extension = extension;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getMimeType() {
 		if (_mimeType == null) {
 			return StringPool.BLANK;
@@ -646,8 +671,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		return GetterUtil.getString(_originalMimeType);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getTitle() {
 		if (_title == null) {
 			return StringPool.BLANK;
@@ -672,8 +697,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		return GetterUtil.getString(_originalTitle);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -688,8 +713,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_description = description;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getChangeLog() {
 		if (_changeLog == null) {
 			return StringPool.BLANK;
@@ -704,8 +729,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_changeLog = changeLog;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getExtraSettings() {
 		if (_extraSettings == null) {
 			return StringPool.BLANK;
@@ -720,8 +745,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_extraSettings = extraSettings;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getFileEntryTypeId() {
 		return _fileEntryTypeId;
 	}
@@ -731,8 +756,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_fileEntryTypeId = fileEntryTypeId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getVersion() {
 		if (_version == null) {
 			return StringPool.BLANK;
@@ -757,8 +782,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		return GetterUtil.getString(_originalVersion);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getSize() {
 		return _size;
 	}
@@ -768,8 +793,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_size = size;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getChecksum() {
 		if (_checksum == null) {
 			return StringPool.BLANK;
@@ -784,8 +809,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_checksum = checksum;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getStatus() {
 		return _status;
 	}
@@ -807,8 +832,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		return _originalStatus;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getStatusByUserId() {
 		return _statusByUserId;
 	}
@@ -829,8 +854,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_statusByUserUuid = statusByUserUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getStatusByUserName() {
 		if (_statusByUserName == null) {
 			return StringPool.BLANK;
@@ -845,8 +870,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		_statusByUserName = statusByUserName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getStatusDate() {
 		return _statusDate;
 	}
@@ -931,16 +956,6 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 	}
 
 	@Override
-	public boolean isInTrash() {
-		if (getStatus() == WorkflowConstants.STATUS_IN_TRASH) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	@Override
 	public boolean isPending() {
 		if (getStatus() == WorkflowConstants.STATUS_PENDING) {
 			return true;
@@ -1002,6 +1017,7 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		dlFileVersionImpl.setRepositoryId(getRepositoryId());
 		dlFileVersionImpl.setFolderId(getFolderId());
 		dlFileVersionImpl.setFileEntryId(getFileEntryId());
+		dlFileVersionImpl.setTreePath(getTreePath());
 		dlFileVersionImpl.setExtension(getExtension());
 		dlFileVersionImpl.setMimeType(getMimeType());
 		dlFileVersionImpl.setTitle(getTitle());
@@ -1168,6 +1184,14 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 
 		dlFileVersionCacheModel.fileEntryId = getFileEntryId();
 
+		dlFileVersionCacheModel.treePath = getTreePath();
+
+		String treePath = dlFileVersionCacheModel.treePath;
+
+		if ((treePath != null) && (treePath.length() == 0)) {
+			dlFileVersionCacheModel.treePath = null;
+		}
+
 		dlFileVersionCacheModel.extension = getExtension();
 
 		String extension = dlFileVersionCacheModel.extension;
@@ -1262,7 +1286,7 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(51);
+		StringBundler sb = new StringBundler(53);
 
 		sb.append("{uuid=");
 		sb.append(getUuid());
@@ -1286,6 +1310,8 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		sb.append(getFolderId());
 		sb.append(", fileEntryId=");
 		sb.append(getFileEntryId());
+		sb.append(", treePath=");
+		sb.append(getTreePath());
 		sb.append(", extension=");
 		sb.append(getExtension());
 		sb.append(", mimeType=");
@@ -1321,7 +1347,7 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(79);
+		StringBundler sb = new StringBundler(82);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portlet.documentlibrary.model.DLFileVersion");
@@ -1370,6 +1396,10 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 		sb.append(
 			"<column><column-name>fileEntryId</column-name><column-value><![CDATA[");
 		sb.append(getFileEntryId());
+		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>treePath</column-name><column-value><![CDATA[");
+		sb.append(getTreePath());
 		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>extension</column-name><column-value><![CDATA[");
@@ -1458,6 +1488,7 @@ public class DLFileVersionModelImpl extends BaseModelImpl<DLFileVersion>
 	private long _fileEntryId;
 	private long _originalFileEntryId;
 	private boolean _setOriginalFileEntryId;
+	private String _treePath;
 	private String _extension;
 	private String _mimeType;
 	private String _originalMimeType;

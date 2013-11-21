@@ -347,6 +347,10 @@ public class SocialActivityLimitPersistenceImpl extends BasePersistenceImpl<Soci
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByGroupId(groupId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<SocialActivityLimit> list = findByGroupId(groupId, count - 1,
 				count, orderByComparator);
 
@@ -834,6 +838,10 @@ public class SocialActivityLimitPersistenceImpl extends BasePersistenceImpl<Soci
 	public SocialActivityLimit fetchByUserId_Last(long userId,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUserId(userId);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<SocialActivityLimit> list = findByUserId(userId, count - 1, count,
 				orderByComparator);
@@ -1346,6 +1354,10 @@ public class SocialActivityLimitPersistenceImpl extends BasePersistenceImpl<Soci
 	public SocialActivityLimit fetchByC_C_Last(long classNameId, long classPK,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByC_C(classNameId, classPK);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<SocialActivityLimit> list = findByC_C(classNameId, classPK,
 				count - 1, count, orderByComparator);
@@ -1960,6 +1972,10 @@ public class SocialActivityLimitPersistenceImpl extends BasePersistenceImpl<Soci
 	private static final String _FINDER_COLUMN_G_U_C_C_A_A_ACTIVITYCOUNTERNAME_3 =
 		"(socialActivityLimit.activityCounterName IS NULL OR socialActivityLimit.activityCounterName = '')";
 
+	public SocialActivityLimitPersistenceImpl() {
+		setModelClass(SocialActivityLimit.class);
+	}
+
 	/**
 	 * Caches the social activity limit in the entity cache if it is enabled.
 	 *
@@ -2331,6 +2347,8 @@ public class SocialActivityLimitPersistenceImpl extends BasePersistenceImpl<Soci
 
 		clearUniqueFindersCache(socialActivityLimit);
 		cacheUniqueFindersCache(socialActivityLimit);
+
+		socialActivityLimit.resetOriginalValues();
 
 		return socialActivityLimit;
 	}

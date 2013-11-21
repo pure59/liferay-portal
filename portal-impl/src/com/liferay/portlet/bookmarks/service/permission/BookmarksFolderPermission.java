@@ -16,9 +16,11 @@ package com.liferay.portlet.bookmarks.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.staging.permission.StagingPermissionUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.bookmarks.NoSuchFolderException;
 import com.liferay.portlet.bookmarks.model.BookmarksFolder;
@@ -60,6 +62,15 @@ public class BookmarksFolderPermission {
 			actionId = ActionKeys.ADD_SUBFOLDER;
 		}
 
+		Boolean hasPermission = StagingPermissionUtil.hasPermission(
+			permissionChecker, folder.getGroupId(),
+			BookmarksFolder.class.getName(), folder.getFolderId(),
+			PortletKeys.BOOKMARKS, actionId);
+
+		if (hasPermission != null) {
+			return hasPermission.booleanValue();
+		}
+
 		if (actionId.equals(ActionKeys.VIEW) &&
 			PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
 
@@ -85,7 +96,8 @@ public class BookmarksFolderPermission {
 				}
 			}
 
-			return true;
+			return BookmarksPermission.contains(
+				permissionChecker, folder.getGroupId(), actionId);
 		}
 
 		return _hasPermission(permissionChecker, folder, actionId);

@@ -155,7 +155,7 @@ public class ImagePersistenceImpl extends BasePersistenceImpl<Image>
 
 		if ((list != null) && !list.isEmpty()) {
 			for (Image image : list) {
-				if ((size != image.getSize())) {
+				if ((size <= image.getSize())) {
 					list = null;
 
 					break;
@@ -323,6 +323,10 @@ public class ImagePersistenceImpl extends BasePersistenceImpl<Image>
 	public Image fetchByLtSize_Last(int size,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByLtSize(size);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<Image> list = findByLtSize(size, count - 1, count,
 				orderByComparator);
@@ -548,6 +552,10 @@ public class ImagePersistenceImpl extends BasePersistenceImpl<Image>
 
 	private static final String _FINDER_COLUMN_LTSIZE_SIZE_2 = "image.size < ?";
 
+	public ImagePersistenceImpl() {
+		setModelClass(Image.class);
+	}
+
 	/**
 	 * Caches the image in the entity cache if it is enabled.
 	 *
@@ -764,6 +772,8 @@ public class ImagePersistenceImpl extends BasePersistenceImpl<Image>
 
 		EntityCacheUtil.putResult(ImageModelImpl.ENTITY_CACHE_ENABLED,
 			ImageImpl.class, image.getPrimaryKey(), image);
+
+		image.resetOriginalValues();
 
 		return image;
 	}

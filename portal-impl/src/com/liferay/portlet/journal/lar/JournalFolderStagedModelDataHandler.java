@@ -14,10 +14,13 @@
 
 package com.liferay.portlet.journal.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.service.ServiceContext;
@@ -34,6 +37,20 @@ public class JournalFolderStagedModelDataHandler
 	extends BaseStagedModelDataHandler<JournalFolder> {
 
 	public static final String[] CLASS_NAMES = {JournalFolder.class.getName()};
+
+	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		JournalFolder folder =
+			JournalFolderLocalServiceUtil.fetchJournalFolderByUuidAndGroupId(
+				uuid, groupId);
+
+		if (folder != null) {
+			JournalFolderLocalServiceUtil.deleteFolder(folder);
+		}
+	}
 
 	@Override
 	public String[] getClassNames() {
@@ -53,15 +70,15 @@ public class JournalFolderStagedModelDataHandler
 		if (folder.getParentFolderId() !=
 				JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, folder.getParentFolder());
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, folder, folder.getParentFolder(),
+				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
 
 		Element folderElement = portletDataContext.getExportDataElement(folder);
 
 		portletDataContext.addClassedModel(
-			folderElement, ExportImportPathUtil.getModelPath(folder), folder,
-			JournalPortletDataHandler.NAMESPACE);
+			folderElement, ExportImportPathUtil.getModelPath(folder), folder);
 	}
 
 	@Override
@@ -71,29 +88,23 @@ public class JournalFolderStagedModelDataHandler
 
 		long userId = portletDataContext.getUserId(folder.getUserUuid());
 
-		Map<Long, Long> folderIds =
-			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
-				JournalFolder.class);
-
 		if (folder.getParentFolderId() !=
 				JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			String path = ExportImportPathUtil.getModelPath(
-				portletDataContext, JournalFolder.class.getName(),
+			StagedModelDataHandlerUtil.importReferenceStagedModel(
+				portletDataContext, folder, JournalFolder.class,
 				folder.getParentFolderId());
-
-			JournalFolder parentFolder =
-				(JournalFolder)portletDataContext.getZipEntryAsObject(path);
-
-			StagedModelDataHandlerUtil.importStagedModel(
-				portletDataContext, parentFolder);
 		}
+
+		Map<Long, Long> folderIds =
+			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+				JournalFolder.class);
 
 		long parentFolderId = MapUtil.getLong(
 			folderIds, folder.getParentFolderId(), folder.getParentFolderId());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			folder, JournalPortletDataHandler.NAMESPACE);
+			folder);
 
 		JournalFolder importedFolder = null;
 
@@ -125,8 +136,30 @@ public class JournalFolderStagedModelDataHandler
 				folder.getDescription(), serviceContext);
 		}
 
-		portletDataContext.importClassedModel(
-			folder, importedFolder, JournalPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(folder, importedFolder);
+	}
+
+	@Override
+	protected void doRestoreStagedModel(
+			PortletDataContext portletDataContext, JournalFolder folder)
+		throws Exception {
+
+		long userId = portletDataContext.getUserId(folder.getUserUuid());
+
+		JournalFolder existingFolder =
+			JournalFolderLocalServiceUtil.fetchJournalFolderByUuidAndGroupId(
+				folder.getUuid(), portletDataContext.getScopeGroupId());
+
+		if ((existingFolder == null) || !existingFolder.isInTrash()) {
+			return;
+		}
+
+		TrashHandler trashHandler = existingFolder.getTrashHandler();
+
+		if (trashHandler.isRestorable(existingFolder.getFolderId())) {
+			trashHandler.restoreTrashEntry(
+				userId, existingFolder.getFolderId());
+		}
 	}
 
 }

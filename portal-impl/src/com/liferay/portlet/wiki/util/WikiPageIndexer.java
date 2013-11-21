@@ -32,17 +32,15 @@ import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchEngineUtil;
 import com.liferay.portal.kernel.search.Summary;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.messageboards.model.MBMessage;
-import com.liferay.portlet.wiki.asset.WikiPageAssetRendererFactory;
 import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.model.WikiPage;
 import com.liferay.portlet.wiki.service.WikiNodeServiceUtil;
@@ -51,8 +49,6 @@ import com.liferay.portlet.wiki.service.permission.WikiPagePermission;
 import com.liferay.portlet.wiki.service.persistence.WikiNodeActionableDynamicQuery;
 import com.liferay.portlet.wiki.service.persistence.WikiPageActionableDynamicQuery;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Locale;
 
 import javax.portlet.PortletURL;
@@ -78,27 +74,22 @@ public class WikiPageIndexer extends BaseIndexer {
 	public void addRelatedEntryFields(Document document, Object obj)
 		throws Exception {
 
-		WikiPage page = null;
+		long classPK = 0;
 
 		if (obj instanceof DLFileEntry) {
 			DLFileEntry dlFileEntry = (DLFileEntry)obj;
 
-			page = WikiPageAttachmentsUtil.getPage(
-				dlFileEntry.getFileEntryId());
-
-			document.addKeyword(
-				Field.CLASS_NAME_ID,
-				PortalUtil.getClassNameId(WikiPage.class.getName()));
-			document.addKeyword(Field.CLASS_PK, page.getResourcePrimKey());
+			classPK = dlFileEntry.getClassPK();
 		}
 		else if (obj instanceof MBMessage) {
 			MBMessage message = (MBMessage)obj;
 
-			page = WikiPageLocalServiceUtil.getPage(message.getClassPK());
+			classPK = message.getClassPK();
 		}
 
+		WikiPage page = WikiPageLocalServiceUtil.getPage(classPK);
+
 		document.addKeyword(Field.NODE_ID, page.getNodeId());
-		document.addKeyword(Field.RELATED_ENTRY, true);
 	}
 
 	@Override
@@ -128,17 +119,11 @@ public class WikiPageIndexer extends BaseIndexer {
 			BooleanQuery contextQuery, SearchContext searchContext)
 		throws Exception {
 
-		int status = GetterUtil.getInteger(
-			searchContext.getAttribute(Field.STATUS),
-			WorkflowConstants.STATUS_APPROVED);
-
-		if (status != WorkflowConstants.STATUS_ANY) {
-			contextQuery.addRequiredTerm(Field.STATUS, status);
-		}
+		addStatus(contextQuery, searchContext);
 
 		long[] nodeIds = searchContext.getNodeIds();
 
-		if ((nodeIds != null) && (nodeIds.length > 0)) {
+		if (ArrayUtil.isNotEmpty(nodeIds)) {
 			BooleanQuery nodeIdsQuery = BooleanQueryFactoryUtil.create(
 				searchContext);
 
@@ -176,7 +161,6 @@ public class WikiPageIndexer extends BaseIndexer {
 
 			SearchEngineUtil.deleteDocument(
 				getSearchEngineId(), companyId, document.get(Field.UID));
-
 		}
 		else if (obj instanceof WikiNode) {
 			WikiNode node = (WikiNode)obj;
@@ -229,18 +213,6 @@ public class WikiPageIndexer extends BaseIndexer {
 		document.addKeyword(Field.NODE_ID, page.getNodeId());
 		document.addText(Field.TITLE, page.getTitle());
 
-		if (!page.isInTrash() && page.isInTrashContainer()) {
-			addTrashFields(
-				document, WikiNode.class.getName(), page.getNodeId(), null,
-				null, WikiPageAssetRendererFactory.TYPE);
-
-			document.addKeyword(
-				Field.ROOT_ENTRY_CLASS_NAME, WikiNode.class.getName());
-			document.addKeyword(Field.ROOT_ENTRY_CLASS_PK, page.getNodeId());
-			document.addKeyword(
-				Field.STATUS, WorkflowConstants.STATUS_IN_TRASH);
-		}
-
 		return document;
 	}
 
@@ -267,6 +239,10 @@ public class WikiPageIndexer extends BaseIndexer {
 	@Override
 	protected void doReindex(Object obj) throws Exception {
 		WikiPage page = (WikiPage)obj;
+
+		if (!page.isApproved() && !page.isInTrash()) {
+			return;
+		}
 
 		if (Validator.isNotNull(page.getRedirectTitle())) {
 			return;
@@ -322,8 +298,6 @@ public class WikiPageIndexer extends BaseIndexer {
 	protected void reindexPages(long companyId, long groupId, final long nodeId)
 		throws PortalException, SystemException {
 
-		final Collection<Document> documents = new ArrayList<Document>();
-
 		ActionableDynamicQuery actionableDynamicQuery =
 			new WikiPageActionableDynamicQuery() {
 
@@ -344,17 +318,16 @@ public class WikiPageIndexer extends BaseIndexer {
 
 				Document document = getDocument(page);
 
-				documents.add(document);
+				addDocument(document);
 			}
 
 		};
 
+		actionableDynamicQuery.setCompanyId(companyId);
 		actionableDynamicQuery.setGroupId(groupId);
+		actionableDynamicQuery.setSearchEngineId(getSearchEngineId());
 
 		actionableDynamicQuery.performActions();
-
-		SearchEngineUtil.updateDocuments(
-			getSearchEngineId(), companyId, documents);
 	}
 
 }

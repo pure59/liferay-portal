@@ -16,6 +16,8 @@ package com.liferay.portlet.messageboards.service.base;
 
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.IdentifiableBean;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
@@ -29,12 +31,15 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.model.PersistedModel;
 import com.liferay.portal.service.BaseLocalServiceImpl;
 import com.liferay.portal.service.PersistedModelLocalServiceRegistry;
+import com.liferay.portal.service.persistence.GroupFinder;
+import com.liferay.portal.service.persistence.GroupPersistence;
 import com.liferay.portal.service.persistence.LockFinder;
 import com.liferay.portal.service.persistence.LockPersistence;
 import com.liferay.portal.service.persistence.SubscriptionPersistence;
 import com.liferay.portal.service.persistence.UserFinder;
 import com.liferay.portal.service.persistence.UserPersistence;
 import com.liferay.portal.service.persistence.WorkflowInstanceLinkPersistence;
+import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.asset.service.persistence.AssetEntryFinder;
 import com.liferay.portlet.asset.service.persistence.AssetEntryPersistence;
@@ -53,11 +58,10 @@ import com.liferay.portlet.messageboards.service.persistence.MBThreadFlagPersist
 import com.liferay.portlet.messageboards.service.persistence.MBThreadPersistence;
 import com.liferay.portlet.ratings.service.persistence.RatingsStatsFinder;
 import com.liferay.portlet.ratings.service.persistence.RatingsStatsPersistence;
-import com.liferay.portlet.social.service.persistence.SocialActivityCounterFinder;
-import com.liferay.portlet.social.service.persistence.SocialActivityCounterPersistence;
 import com.liferay.portlet.social.service.persistence.SocialActivityFinder;
 import com.liferay.portlet.social.service.persistence.SocialActivityPersistence;
 import com.liferay.portlet.trash.service.persistence.TrashEntryPersistence;
+import com.liferay.portlet.trash.service.persistence.TrashVersionPersistence;
 
 import java.io.Serializable;
 
@@ -808,6 +812,80 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	}
 
 	/**
+	 * Returns the group local service.
+	 *
+	 * @return the group local service
+	 */
+	public com.liferay.portal.service.GroupLocalService getGroupLocalService() {
+		return groupLocalService;
+	}
+
+	/**
+	 * Sets the group local service.
+	 *
+	 * @param groupLocalService the group local service
+	 */
+	public void setGroupLocalService(
+		com.liferay.portal.service.GroupLocalService groupLocalService) {
+		this.groupLocalService = groupLocalService;
+	}
+
+	/**
+	 * Returns the group remote service.
+	 *
+	 * @return the group remote service
+	 */
+	public com.liferay.portal.service.GroupService getGroupService() {
+		return groupService;
+	}
+
+	/**
+	 * Sets the group remote service.
+	 *
+	 * @param groupService the group remote service
+	 */
+	public void setGroupService(
+		com.liferay.portal.service.GroupService groupService) {
+		this.groupService = groupService;
+	}
+
+	/**
+	 * Returns the group persistence.
+	 *
+	 * @return the group persistence
+	 */
+	public GroupPersistence getGroupPersistence() {
+		return groupPersistence;
+	}
+
+	/**
+	 * Sets the group persistence.
+	 *
+	 * @param groupPersistence the group persistence
+	 */
+	public void setGroupPersistence(GroupPersistence groupPersistence) {
+		this.groupPersistence = groupPersistence;
+	}
+
+	/**
+	 * Returns the group finder.
+	 *
+	 * @return the group finder
+	 */
+	public GroupFinder getGroupFinder() {
+		return groupFinder;
+	}
+
+	/**
+	 * Sets the group finder.
+	 *
+	 * @param groupFinder the group finder
+	 */
+	public void setGroupFinder(GroupFinder groupFinder) {
+		this.groupFinder = groupFinder;
+	}
+
+	/**
 	 * Returns the lock local service.
 	 *
 	 * @return the lock local service
@@ -1182,6 +1260,25 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	}
 
 	/**
+	 * Returns the social activity remote service.
+	 *
+	 * @return the social activity remote service
+	 */
+	public com.liferay.portlet.social.service.SocialActivityService getSocialActivityService() {
+		return socialActivityService;
+	}
+
+	/**
+	 * Sets the social activity remote service.
+	 *
+	 * @param socialActivityService the social activity remote service
+	 */
+	public void setSocialActivityService(
+		com.liferay.portlet.social.service.SocialActivityService socialActivityService) {
+		this.socialActivityService = socialActivityService;
+	}
+
+	/**
 	 * Returns the social activity persistence.
 	 *
 	 * @return the social activity persistence
@@ -1217,63 +1314,6 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	public void setSocialActivityFinder(
 		SocialActivityFinder socialActivityFinder) {
 		this.socialActivityFinder = socialActivityFinder;
-	}
-
-	/**
-	 * Returns the social activity counter local service.
-	 *
-	 * @return the social activity counter local service
-	 */
-	public com.liferay.portlet.social.service.SocialActivityCounterLocalService getSocialActivityCounterLocalService() {
-		return socialActivityCounterLocalService;
-	}
-
-	/**
-	 * Sets the social activity counter local service.
-	 *
-	 * @param socialActivityCounterLocalService the social activity counter local service
-	 */
-	public void setSocialActivityCounterLocalService(
-		com.liferay.portlet.social.service.SocialActivityCounterLocalService socialActivityCounterLocalService) {
-		this.socialActivityCounterLocalService = socialActivityCounterLocalService;
-	}
-
-	/**
-	 * Returns the social activity counter persistence.
-	 *
-	 * @return the social activity counter persistence
-	 */
-	public SocialActivityCounterPersistence getSocialActivityCounterPersistence() {
-		return socialActivityCounterPersistence;
-	}
-
-	/**
-	 * Sets the social activity counter persistence.
-	 *
-	 * @param socialActivityCounterPersistence the social activity counter persistence
-	 */
-	public void setSocialActivityCounterPersistence(
-		SocialActivityCounterPersistence socialActivityCounterPersistence) {
-		this.socialActivityCounterPersistence = socialActivityCounterPersistence;
-	}
-
-	/**
-	 * Returns the social activity counter finder.
-	 *
-	 * @return the social activity counter finder
-	 */
-	public SocialActivityCounterFinder getSocialActivityCounterFinder() {
-		return socialActivityCounterFinder;
-	}
-
-	/**
-	 * Sets the social activity counter finder.
-	 *
-	 * @param socialActivityCounterFinder the social activity counter finder
-	 */
-	public void setSocialActivityCounterFinder(
-		SocialActivityCounterFinder socialActivityCounterFinder) {
-		this.socialActivityCounterFinder = socialActivityCounterFinder;
 	}
 
 	/**
@@ -1333,6 +1373,44 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 		this.trashEntryPersistence = trashEntryPersistence;
 	}
 
+	/**
+	 * Returns the trash version local service.
+	 *
+	 * @return the trash version local service
+	 */
+	public com.liferay.portlet.trash.service.TrashVersionLocalService getTrashVersionLocalService() {
+		return trashVersionLocalService;
+	}
+
+	/**
+	 * Sets the trash version local service.
+	 *
+	 * @param trashVersionLocalService the trash version local service
+	 */
+	public void setTrashVersionLocalService(
+		com.liferay.portlet.trash.service.TrashVersionLocalService trashVersionLocalService) {
+		this.trashVersionLocalService = trashVersionLocalService;
+	}
+
+	/**
+	 * Returns the trash version persistence.
+	 *
+	 * @return the trash version persistence
+	 */
+	public TrashVersionPersistence getTrashVersionPersistence() {
+		return trashVersionPersistence;
+	}
+
+	/**
+	 * Sets the trash version persistence.
+	 *
+	 * @param trashVersionPersistence the trash version persistence
+	 */
+	public void setTrashVersionPersistence(
+		TrashVersionPersistence trashVersionPersistence) {
+		this.trashVersionPersistence = trashVersionPersistence;
+	}
+
 	public void afterPropertiesSet() {
 		persistedModelLocalServiceRegistry.register("com.liferay.portlet.messageboards.model.MBThread",
 			mbThreadLocalService);
@@ -1372,13 +1450,18 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	}
 
 	/**
-	 * Performs an SQL query.
+	 * Performs a SQL query.
 	 *
 	 * @param sql the sql query
 	 */
 	protected void runSQL(String sql) throws SystemException {
 		try {
 			DataSource dataSource = mbThreadPersistence.getDataSource();
+
+			DB db = DBFactoryUtil.getDB();
+
+			sql = db.buildSQL(sql);
+			sql = PortalUtil.transformSQL(sql);
 
 			SqlUpdate sqlUpdate = SqlUpdateFactoryUtil.getSqlUpdate(dataSource,
 					sql, new int[0]);
@@ -1438,6 +1521,14 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	protected MBThreadFlagPersistence mbThreadFlagPersistence;
 	@BeanReference(type = com.liferay.counter.service.CounterLocalService.class)
 	protected com.liferay.counter.service.CounterLocalService counterLocalService;
+	@BeanReference(type = com.liferay.portal.service.GroupLocalService.class)
+	protected com.liferay.portal.service.GroupLocalService groupLocalService;
+	@BeanReference(type = com.liferay.portal.service.GroupService.class)
+	protected com.liferay.portal.service.GroupService groupService;
+	@BeanReference(type = GroupPersistence.class)
+	protected GroupPersistence groupPersistence;
+	@BeanReference(type = GroupFinder.class)
+	protected GroupFinder groupFinder;
 	@BeanReference(type = com.liferay.portal.service.LockLocalService.class)
 	protected com.liferay.portal.service.LockLocalService lockLocalService;
 	@BeanReference(type = LockPersistence.class)
@@ -1478,22 +1569,22 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	protected RatingsStatsFinder ratingsStatsFinder;
 	@BeanReference(type = com.liferay.portlet.social.service.SocialActivityLocalService.class)
 	protected com.liferay.portlet.social.service.SocialActivityLocalService socialActivityLocalService;
+	@BeanReference(type = com.liferay.portlet.social.service.SocialActivityService.class)
+	protected com.liferay.portlet.social.service.SocialActivityService socialActivityService;
 	@BeanReference(type = SocialActivityPersistence.class)
 	protected SocialActivityPersistence socialActivityPersistence;
 	@BeanReference(type = SocialActivityFinder.class)
 	protected SocialActivityFinder socialActivityFinder;
-	@BeanReference(type = com.liferay.portlet.social.service.SocialActivityCounterLocalService.class)
-	protected com.liferay.portlet.social.service.SocialActivityCounterLocalService socialActivityCounterLocalService;
-	@BeanReference(type = SocialActivityCounterPersistence.class)
-	protected SocialActivityCounterPersistence socialActivityCounterPersistence;
-	@BeanReference(type = SocialActivityCounterFinder.class)
-	protected SocialActivityCounterFinder socialActivityCounterFinder;
 	@BeanReference(type = com.liferay.portlet.trash.service.TrashEntryLocalService.class)
 	protected com.liferay.portlet.trash.service.TrashEntryLocalService trashEntryLocalService;
 	@BeanReference(type = com.liferay.portlet.trash.service.TrashEntryService.class)
 	protected com.liferay.portlet.trash.service.TrashEntryService trashEntryService;
 	@BeanReference(type = TrashEntryPersistence.class)
 	protected TrashEntryPersistence trashEntryPersistence;
+	@BeanReference(type = com.liferay.portlet.trash.service.TrashVersionLocalService.class)
+	protected com.liferay.portlet.trash.service.TrashVersionLocalService trashVersionLocalService;
+	@BeanReference(type = TrashVersionPersistence.class)
+	protected TrashVersionPersistence trashVersionPersistence;
 	@BeanReference(type = PersistedModelLocalServiceRegistry.class)
 	protected PersistedModelLocalServiceRegistry persistedModelLocalServiceRegistry;
 	private String _beanIdentifier;

@@ -340,6 +340,10 @@ public class SubscriptionPersistenceImpl extends BasePersistenceImpl<Subscriptio
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUserId(userId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<Subscription> list = findByUserId(userId, count - 1, count,
 				orderByComparator);
 
@@ -849,6 +853,10 @@ public class SubscriptionPersistenceImpl extends BasePersistenceImpl<Subscriptio
 	public Subscription fetchByU_C_Last(long userId, long classNameId,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByU_C(userId, classNameId);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<Subscription> list = findByU_C(userId, classNameId, count - 1,
 				count, orderByComparator);
@@ -1398,6 +1406,10 @@ public class SubscriptionPersistenceImpl extends BasePersistenceImpl<Subscriptio
 		long classPK, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByC_C_C(companyId, classNameId, classPK);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<Subscription> list = findByC_C_C(companyId, classNameId, classPK,
 				count - 1, count, orderByComparator);
@@ -2315,6 +2327,10 @@ public class SubscriptionPersistenceImpl extends BasePersistenceImpl<Subscriptio
 	private static final String _FINDER_COLUMN_C_U_C_C_CLASSPK_5 = "(" +
 		removeConjunction(_FINDER_COLUMN_C_U_C_C_CLASSPK_2) + ")";
 
+	public SubscriptionPersistenceImpl() {
+		setModelClass(Subscription.class);
+	}
+
 	/**
 	 * Caches the subscription in the entity cache if it is enabled.
 	 *
@@ -2693,6 +2709,8 @@ public class SubscriptionPersistenceImpl extends BasePersistenceImpl<Subscriptio
 
 		clearUniqueFindersCache(subscription);
 		cacheUniqueFindersCache(subscription);
+
+		subscription.resetOriginalValues();
 
 		return subscription;
 	}

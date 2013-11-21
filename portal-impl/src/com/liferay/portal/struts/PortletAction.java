@@ -18,7 +18,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.servlet.BrowserSnifferUtil;
 import com.liferay.portal.kernel.servlet.ServletResponseUtil;
@@ -40,6 +39,8 @@ import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
+import com.liferay.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portlet.StrictPortletPreferencesImpl;
 
 import java.io.IOException;
 
@@ -50,6 +51,7 @@ import javax.portlet.EventResponse;
 import javax.portlet.MimeResponse;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
+import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletRequestDispatcher;
 import javax.portlet.PortletResponse;
@@ -253,15 +255,51 @@ public class PortletAction extends Action {
 		return getResources();
 	}
 
+	protected PortletPreferences getStrictPortletSetup(
+			Layout layout, String portletId)
+		throws PortalException, SystemException {
+
+		if (Validator.isNull(portletId)) {
+			return null;
+		}
+
+		PortletPreferences portletPreferences =
+			PortletPreferencesFactoryUtil.getStrictPortletSetup(
+				layout, portletId);
+
+		if (portletPreferences instanceof StrictPortletPreferencesImpl) {
+			throw new PrincipalException();
+		}
+
+		return portletPreferences;
+	}
+
+	protected PortletPreferences getStrictPortletSetup(
+			PortletRequest portletRequest)
+		throws PortalException, SystemException {
+
+		String portletResource = ParamUtil.getString(
+			portletRequest, "portletResource");
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		return getStrictPortletSetup(themeDisplay.getLayout(), portletResource);
+	}
+
+	/**
+	 * @deprecated As of 6.2.0 {@link #hideDefaultSuccessMessage(PortletRequest)
+	 */
 	protected void hideDefaultSuccessMessage(
 		PortletConfig portletConfig, PortletRequest portletRequest) {
 
-		LiferayPortletConfig liferayPortletConfig =
-			(LiferayPortletConfig)portletConfig;
+		hideDefaultSuccessMessage(portletRequest);
+	}
 
+	protected void hideDefaultSuccessMessage(PortletRequest portletRequest) {
 		SessionMessages.add(
 			portletRequest,
-			liferayPortletConfig.getPortletId() +
+			PortalUtil.getPortletId(portletRequest) +
 				SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_SUCCESS_MESSAGE);
 	}
 
@@ -373,12 +411,9 @@ public class PortletAction extends Action {
 			redirect = HttpUtil.setParameter(
 				redirect, "closeRedirect", closeRedirect);
 
-			LiferayPortletConfig liferayPortletConfig =
-				(LiferayPortletConfig)portletConfig;
-
 			SessionMessages.add(
 				actionRequest,
-				liferayPortletConfig.getPortletId() +
+				PortalUtil.getPortletId(actionRequest) +
 					SessionMessages.KEY_SUFFIX_CLOSE_REDIRECT,
 				closeRedirect);
 		}

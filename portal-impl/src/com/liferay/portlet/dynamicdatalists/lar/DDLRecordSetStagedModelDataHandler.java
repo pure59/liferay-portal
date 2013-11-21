@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatalists.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -38,6 +40,20 @@ public class DDLRecordSetStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {DDLRecordSet.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		DDLRecordSet ddlRecordSet =
+			DDLRecordSetLocalServiceUtil.fetchDDLRecordSetByUuidAndGroupId(
+				uuid, groupId);
+
+		if (ddlRecordSet != null) {
+			DDLRecordSetLocalServiceUtil.deleteRecordSet(ddlRecordSet);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -54,8 +70,9 @@ public class DDLRecordSetStagedModelDataHandler
 
 		DDMStructure ddmStructure = recordSet.getDDMStructure();
 
-		StagedModelDataHandlerUtil.exportStagedModel(
-			portletDataContext, ddmStructure);
+		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			portletDataContext, recordSet, ddmStructure,
+			PortletDataContext.REFERENCE_TYPE_STRONG);
 
 		List<DDMTemplate> ddmTemplates = ddmStructure.getTemplates();
 
@@ -63,17 +80,31 @@ public class DDLRecordSetStagedModelDataHandler
 			recordSet);
 
 		for (DDMTemplate ddmTemplate : ddmTemplates) {
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, ddmTemplate);
-
-			portletDataContext.addReferenceElement(
-				recordSet, recordSetElement, ddmTemplate,
-				PortletDataContext.REFERENCE_TYPE_STRONG, false);
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, recordSet, ddmTemplate,
+				PortletDataContext.REFERENCE_TYPE_STRONG);
 		}
 
 		portletDataContext.addClassedModel(
 			recordSetElement, ExportImportPathUtil.getModelPath(recordSet),
-			recordSet, DDLPortletDataHandler.NAMESPACE);
+			recordSet);
+	}
+
+	@Override
+	protected void doImportCompanyStagedModel(
+			PortletDataContext portletDataContext, String uuid,
+			long recordSetId)
+		throws Exception {
+
+		DDLRecordSet existingRecordSet =
+			DDLRecordSetLocalServiceUtil.fetchDDLRecordSetByUuidAndGroupId(
+				uuid, portletDataContext.getCompanyGroupId());
+
+		Map<Long, Long> recordSetIds =
+			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+				DDLRecordSet.class);
+
+		recordSetIds.put(recordSetId, existingRecordSet.getRecordSetId());
 	}
 
 	@Override
@@ -83,15 +114,9 @@ public class DDLRecordSetStagedModelDataHandler
 
 		long userId = portletDataContext.getUserId(recordSet.getUserUuid());
 
-		String structurePath = ExportImportPathUtil.getModelPath(
-			portletDataContext, DDMStructure.class.getName(),
+		StagedModelDataHandlerUtil.importReferenceStagedModel(
+			portletDataContext, recordSet, DDMStructure.class,
 			recordSet.getDDMStructureId());
-
-		DDMStructure ddmStructure =
-			(DDMStructure)portletDataContext.getZipEntryAsObject(structurePath);
-
-		StagedModelDataHandlerUtil.importStagedModel(
-			portletDataContext, ddmStructure);
 
 		Map<Long, Long> ddmStructureIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -101,17 +126,11 @@ public class DDLRecordSetStagedModelDataHandler
 			ddmStructureIds, recordSet.getDDMStructureId(),
 			recordSet.getDDMStructureId());
 
-		List<Element> ddmTemplateElements =
-			portletDataContext.getReferenceDataElements(
-				recordSet, DDMTemplate.class);
-
-		for (Element ddmTemplateElement : ddmTemplateElements) {
-			StagedModelDataHandlerUtil.importStagedModel(
-				portletDataContext, ddmTemplateElement);
-		}
+		StagedModelDataHandlerUtil.importReferenceStagedModels(
+			portletDataContext, recordSet, DDMTemplate.class);
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			recordSet, DDLPortletDataHandler.NAMESPACE);
+			recordSet);
 
 		DDLRecordSet importedRecordSet = null;
 
@@ -146,8 +165,7 @@ public class DDLRecordSetStagedModelDataHandler
 				recordSet.getScope(), serviceContext);
 		}
 
-		portletDataContext.importClassedModel(
-			recordSet, importedRecordSet, DDLPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(recordSet, importedRecordSet);
 	}
 
 }

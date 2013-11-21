@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.transaction.Isolation;
@@ -34,6 +36,7 @@ import com.liferay.portal.service.PersistedModelLocalService;
  * @see com.liferay.portlet.documentlibrary.service.impl.DLFileVersionLocalServiceImpl
  * @generated
  */
+@ProviderType
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface DLFileVersionLocalService extends BaseLocalService,
@@ -336,4 +339,7 @@ public interface DLFileVersionLocalService extends BaseLocalService,
 		long userId, long fileEntryId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
+
+	public void rebuildTree(long companyId)
+		throws com.liferay.portal.kernel.exception.SystemException;
 }

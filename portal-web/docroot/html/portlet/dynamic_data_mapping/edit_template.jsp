@@ -18,6 +18,8 @@
 
 <%
 String redirect = ParamUtil.getString(request, "redirect");
+String closeRedirect = ParamUtil.getString(request, "closeRedirect");
+boolean showBackURL = ParamUtil.getBoolean(request, "showBackURL", true);
 
 String portletResource = ParamUtil.getString(request, "portletResource");
 
@@ -48,7 +50,9 @@ if (Validator.isNull(script)) {
 	TemplateHandler templateHandler = TemplateHandlerRegistryUtil.getTemplateHandler(classNameId);
 
 	if (templateHandler != null) {
-		script = ContentUtil.get(templateHandler.getTemplatesHelpPath(language));
+		Class<?> templateHandlerClass = templateHandler.getClass();
+
+		script = ContentUtil.get(templateHandlerClass.getClassLoader(), templateHandler.getTemplatesHelpPath(language));
 	}
 	else if ((structure != null) && Validator.equals(structure.getClassName(), JournalArticle.class.getName())) {
 		script = ContentUtil.get(PropsUtil.get(PropsKeys.JOURNAL_TEMPLATE_LANGUAGE_CONTENT, new Filter(language)));
@@ -78,6 +82,7 @@ if (Validator.isNotNull(structureAvailableFields)) {
 <aui:form action="<%= editTemplateURL %>" enctype="multipart/form-data" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveTemplate();" %>'>
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= (template != null) ? Constants.UPDATE : Constants.ADD %>" />
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
+	<aui:input name="closeRedirect" type="hidden" value="<%= closeRedirect %>" />
 	<aui:input name="portletResource" type="hidden" value="<%= portletResource %>" />
 	<aui:input name="templateId" type="hidden" value="<%= templateId %>" />
 	<aui:input name="groupId" type="hidden" value="<%= groupId %>" />
@@ -122,7 +127,8 @@ if (Validator.isNotNull(structureAvailableFields)) {
 	<liferay-ui:header
 		backURL="<%= ddmDisplay.getEditTemplateBackURL(liferayPortletRequest, liferayPortletResponse, classNameId, classPK, portletResource) %>"
 		localizeTitle="<%= false %>"
-		title="<%= HtmlUtil.escape(title) %>"
+		showBackURL="<%= showBackURL %>"
+		title="<%= title %>"
 	/>
 
 	<aui:model-context bean="<%= template %>" model="<%= DDMTemplate.class %>" />
@@ -134,13 +140,13 @@ if (Validator.isNotNull(structureAvailableFields)) {
 			<liferay-ui:panel collapsible="<%= true %>" defaultState="closed" extended="<%= false %>" id="templateDetailsSectionPanel" persistState="<%= true %>" title="details">
 				<c:if test="<%= ddmDisplay.isShowStructureSelector() %>">
 					<aui:field-wrapper helpMessage="structure-help" label="structure">
-						<c:if test="<%= structure != null %>">
-							<%= structure.getName(locale) %>
-						</c:if>
+						<liferay-ui:input-resource url="<%= (structure != null) ? structure.getName(locale) : StringPool.BLANK %>" />
+
 						<c:if test="<%= ((template == null) || (template.getClassPK() == 0)) %>">
 							<liferay-ui:icon
-								image="add"
+								iconCssClass="icon-search"
 								label="<%= true %>"
+								linkCssClass="btn"
 								message="select"
 								url='<%= "javascript:" + renderResponse.getNamespace() + "openDDMStructureSelector();" %>'
 							/>
@@ -148,33 +154,35 @@ if (Validator.isNotNull(structureAvailableFields)) {
 					</aui:field-wrapper>
 				</c:if>
 
-				<aui:select helpMessage='<%= (template == null) ? StringPool.BLANK : "changing-the-language-will-not-automatically-translate-the-existing-template-script" %>' label="language" name="language">
+				<c:if test="<%= type.equals(DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY) %>">
+					<aui:select changesContext="<%= true %>" helpMessage='<%= (template == null) ? StringPool.BLANK : "changing-the-language-will-not-automatically-translate-the-existing-template-script" %>' label="language" name="language">
 
-					<%
-					for (String curLangType : ddmDisplay.getTemplateLanguageTypes()) {
-						StringBundler sb = new StringBundler(6);
+						<%
+						for (String curLangType : ddmDisplay.getTemplateLanguageTypes()) {
+							StringBundler sb = new StringBundler(6);
 
-						sb.append(LanguageUtil.get(pageContext, curLangType + "[stands-for]"));
-						sb.append(StringPool.SPACE);
-						sb.append(StringPool.OPEN_PARENTHESIS);
-						sb.append(StringPool.PERIOD);
-						sb.append(curLangType);
-						sb.append(StringPool.CLOSE_PARENTHESIS);
-					%>
+							sb.append(LanguageUtil.get(pageContext, curLangType + "[stands-for]"));
+							sb.append(StringPool.SPACE);
+							sb.append(StringPool.OPEN_PARENTHESIS);
+							sb.append(StringPool.PERIOD);
+							sb.append(curLangType);
+							sb.append(StringPool.CLOSE_PARENTHESIS);
+						%>
 
-						<aui:option label="<%= sb.toString() %>" selected="<%= language.equals(curLangType) %>" value="<%= curLangType %>" />
+							<aui:option label="<%= sb.toString() %>" selected="<%= language.equals(curLangType) %>" value="<%= curLangType %>" />
 
-					<%
-					}
-					%>
+						<%
+						}
+						%>
 
-				</aui:select>
+					</aui:select>
+				</c:if>
 
 				<aui:input name="description" />
 
 				<c:if test="<%= template != null %>">
 					<aui:field-wrapper helpMessage="template-key-help" label="template-key">
-						<%= template.getTemplateKey() %>
+						<liferay-ui:input-resource url="<%= template.getTemplateKey() %>" />
 					</aui:field-wrapper>
 
 					<aui:field-wrapper label="url">
@@ -306,6 +314,12 @@ if (Validator.isNotNull(structureAvailableFields)) {
 					window.<portlet:namespace />formBuilder.get('fields').each(A.rbind('<portlet:namespace />setFieldsHiddenAttributes', window, mode));
 
 					A.Array.each(window.<portlet:namespace />formBuilder.get('availableFields'), A.rbind('<portlet:namespace />setFieldsHiddenAttributes', window, mode));
+
+					var editingField = window.<portlet:namespace />formBuilder.editingField;
+
+					if (editingField) {
+						window.<portlet:namespace />formBuilder.propertyList.set('data', window.<portlet:namespace />formBuilder.getFieldProperties(editingField));
+					}
 				},
 				['aui-base']
 			);

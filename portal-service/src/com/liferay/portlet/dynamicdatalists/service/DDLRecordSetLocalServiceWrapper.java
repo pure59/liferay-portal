@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatalists.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see DDLRecordSetLocalService
  * @generated
  */
+@ProviderType
 public class DDLRecordSetLocalServiceWrapper implements DDLRecordSetLocalService,
 	ServiceWrapper<DDLRecordSetLocalService> {
 	public DDLRecordSetLocalServiceWrapper(
@@ -409,6 +412,13 @@ public class DDLRecordSetLocalServiceWrapper implements DDLRecordSetLocalService
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		_ddlRecordSetLocalService.deleteRecordSets(groupId);
+	}
+
+	@Override
+	public com.liferay.portlet.dynamicdatalists.model.DDLRecordSet fetchRecordSet(
+		long recordSetId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _ddlRecordSetLocalService.fetchRecordSet(recordSetId);
 	}
 
 	@Override

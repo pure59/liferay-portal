@@ -58,6 +58,7 @@ AUI.add(
 		 *
 		 * Optional
 		 * maxEntries {Number}: The maximum number of entries that will be loaded. The default value is -1, which will load all categories.
+		 * moreResultsLabel {String}: The localized label for link "Load more results".
 		 * portalModelResource {boolean}: Whether the asset model is on the portal level.
 		 */
 
@@ -98,11 +99,16 @@ AUI.add(
 						validator: Lang.isNumber,
 						value: -1
 					},
+					moreResultsLabel: {
+						validator: '_isValidString',
+						value: Liferay.Language.get('load-more-results')
+					},
 					singleSelect: {
 						validator: Lang.isBoolean,
 						value: false
 					},
 					title: {
+						validator: '_isValidString',
 						value: Liferay.Language.get('select-categories')
 					},
 					vocabularyIds: {
@@ -364,7 +370,7 @@ AUI.add(
 								processSearchResults
 							);
 
-							var input = popup.searchField.get('node');
+							var input = popup.searchField;
 
 							input.on('keyup', searchCategoriesTask);
 
@@ -378,6 +384,12 @@ AUI.add(
 						popup.entriesNode.append(searchResults);
 
 						instance._searchBuffer = [];
+					},
+
+					_isValidString: function(value) {
+						var instance = this;
+
+						return Lang.isString(value) && value.length;
 					},
 
 					_onBoundingBoxClick: EMPTY_FN,
@@ -408,6 +420,8 @@ AUI.add(
 						};
 
 						entry[matchKey] = entryMatchKey;
+
+						entry.value = A.Lang.String.unescapeHTML(entry.value);
 
 						instance.entries.add(entry);
 					},
@@ -566,13 +580,11 @@ AUI.add(
 					_showSelectPopup: function(event) {
 						var instance = this;
 
-						event.domEvent.preventDefault();
-
 						instance._showPopup(event);
 
 						var popup = instance._popup;
 
-						popup.set('headerContent', '<h3>' + Liferay.Language.get('categories') + '</h3>');
+						popup.titleNode.html(Liferay.Language.get('categories'));
 
 						popup.entriesNode.addClass(CSS_TAGS_LIST);
 
@@ -598,9 +610,7 @@ AUI.add(
 							instance._bindSearchHandle.detach();
 						}
 
-						var searchField = popup.searchField.get(BOUNDING_BOX);
-
-						instance._bindSearchHandle = searchField.once('focus', instance._initSearch, instance);
+						instance._bindSearchHandle = popup.searchField.once('focus', instance._initSearch, instance);
 					},
 
 					_vocabulariesIterator: function(item, index, collection) {
@@ -624,7 +634,7 @@ AUI.add(
 
 						if (maxEntries > 0) {
 							paginatorConfig.limit = maxEntries;
-							paginatorConfig.moreResultsLabel = Liferay.Language.get('load-more-results');
+							paginatorConfig.moreResultsLabel = instance.get('moreResultsLabel');
 							paginatorConfig.total = item.categoriesCount;
 						}
 						else {

@@ -77,22 +77,17 @@ request.setAttribute("view.jsp-repositoryId", String.valueOf(repositoryId));
 
 <liferay-util:buffer var="uploadURL"><liferay-portlet:actionURL><portlet:param name="struts_action" value="/document_library/view_file_entry" /><portlet:param name="<%= Constants.CMD %>" value="<%= Constants.ADD_DYNAMIC %>" /><portlet:param name="folderId" value="{folderId}" /><portlet:param name="repositoryId" value="<%= String.valueOf(repositoryId) %>" /></liferay-portlet:actionURL><liferay-ui:input-permissions-params modelName="<%= DLFileEntryConstants.getClassName() %>" /></liferay-util:buffer>
 
-<portlet:actionURL var="undoTrashURL">
-	<portlet:param name="struts_action" value="/document_library/edit_entry" />
-	<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.RESTORE %>" />
-</portlet:actionURL>
-
-<liferay-ui:trash-undo portletURL="<%= undoTrashURL %>" />
+<liferay-ui:trash-undo />
 
 <div id="<portlet:namespace />documentLibraryContainer">
 	<aui:row cssClass="lfr-app-column-view">
-		<aui:col cssClass="navigation-pane" width="<%= 20 %>">
+		<aui:col cssClass="navigation-pane" width="<%= 25 %>">
 			<liferay-util:include page="/html/portlet/document_library/view_folders.jsp" />
 
 			<div class="folder-pagination"></div>
 		</aui:col>
 
-		<aui:col cssClass="context-pane" width="<%= showFolderMenu ? 80 : 100 %>">
+		<aui:col cssClass="context-pane" width="<%= showFolderMenu ? 75 : 100 %>">
 			<liferay-ui:app-view-toolbar
 				includeDisplayStyle="<%= true %>"
 				includeSelectAll="<%= true %>"
@@ -146,10 +141,10 @@ request.setAttribute("view.jsp-repositoryId", String.valueOf(repositoryId));
 						</c:when>
 						<c:otherwise>
 							<liferay-util:include page="/html/portlet/document_library/view_entries.jsp" />
-
-							<%@ include file="/html/portlet/document_library/file_entries_template.jspf" %>
 						</c:otherwise>
 					</c:choose>
+
+					<%@ include file="/html/portlet/document_library/file_entries_template.jspf" %>
 				</div>
 
 				<div class="document-entries-pagination"></div>
@@ -204,7 +199,7 @@ if (!defaultFolderView && (folder != null) && portletName.equals(PortletKeys.DOC
 			displayStyle: '<%= HtmlUtil.escapeJS(displayStyle) %>',
 			folders: {
 				defaultParams: {
-					p_p_id: <%= portletId %>,
+					p_p_id: <%= HtmlUtil.escapeJS(portletId) %>,
 					p_p_lifecycle: 0
 				},
 				defaultParentFolderId: '<%= DLFolderConstants.DEFAULT_PARENT_FOLDER_ID %>',
@@ -243,7 +238,7 @@ if (!defaultFolderView && (folder != null) && portletName.equals(PortletKeys.DOC
 				foldersTotal: <%= foldersTotal %>
 			},
 			namespace: '<portlet:namespace />',
-			portletId: '<%= portletId %>',
+			portletId: '<%= HtmlUtil.escapeJS(portletId) %>',
 			redirect: encodeURIComponent('<%= currentURL %>'),
 			repositories: [
 				{

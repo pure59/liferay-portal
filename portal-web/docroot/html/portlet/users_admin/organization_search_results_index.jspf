@@ -14,19 +14,17 @@
  */
 --%>
 
-<%@ page import="com.liferay.portal.kernel.search.Hits" %>
-<%@ page import="com.liferay.portal.kernel.search.Sort" %>
-<%@ page import="com.liferay.portal.kernel.search.SortFactoryUtil" %>
-<%@ page import="com.liferay.portlet.usersadmin.util.UsersAdminUtil" %>
-
 <%
 organizationParams.put("expandoAttributes", searchTerms.getKeywords());
 
 Sort sort = SortFactoryUtil.getSort(Organization.class, organizationSearchContainer.getOrderByCol(), organizationSearchContainer.getOrderByType());
 
-while (true) {
-	Hits hits = null;
+boolean corruptIndex = false;
 
+Hits hits = null;
+Tuple tuple = null;
+
+do {
 	if (searchTerms.isAdvancedSearch()) {
 		hits = OrganizationLocalServiceUtil.search(company.getCompanyId(), parentOrganizationId, searchTerms.getName(), searchTerms.getType(), searchTerms.getStreet(), searchTerms.getCity(), searchTerms.getZip(), searchTerms.getRegionName(), searchTerms.getCountryName(), organizationParams, searchTerms.isAndOperator(), organizationSearchContainer.getStart(), organizationSearchContainer.getEnd(), sort);
 	}
@@ -34,18 +32,14 @@ while (true) {
 		hits = OrganizationLocalServiceUtil.search(company.getCompanyId(), parentOrganizationId, searchTerms.getKeywords(), organizationParams, organizationSearchContainer.getStart(), organizationSearchContainer.getEnd(), sort);
 	}
 
-	Tuple tuple = UsersAdminUtil.getOrganizations(hits);
+	tuple = UsersAdminUtil.getOrganizations(hits);
 
-	boolean corruptIndex = (Boolean)tuple.getObject(1);
-
-	if (!corruptIndex) {
-		results = (List<Organization>)tuple.getObject(0);
-		total = hits.getLength();
-
-		break;
-	}
+	corruptIndex = (Boolean)tuple.getObject(1);
 }
+while (corruptIndex);
 
-pageContext.setAttribute("results", results);
-pageContext.setAttribute("total", total);
+results = (List<Organization>)tuple.getObject(0);
+
+organizationSearchContainer.setResults(results);
+organizationSearchContainer.setTotal(hits.getLength());
 %>

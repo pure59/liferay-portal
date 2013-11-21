@@ -25,13 +25,11 @@ if (relative) {
 
 iframeSrc += (String)request.getAttribute(WebKeys.IFRAME_SRC);
 
-if (Validator.isNotNull(iframeVariables)) {
-	if (iframeSrc.contains(StringPool.QUESTION)) {
-		iframeSrc = iframeSrc.concat(StringPool.AMPERSAND).concat(StringUtil.merge(iframeVariables, StringPool.AMPERSAND));
-	}
-	else {
-		iframeSrc = iframeSrc.concat(StringPool.QUESTION).concat(StringUtil.merge(iframeVariables, StringPool.AMPERSAND));
-	}
+if (iframeSrc.contains(StringPool.QUESTION)) {
+	iframeSrc = iframeSrc.concat(StringPool.AMPERSAND).concat(StringUtil.merge(iframeVariables, StringPool.AMPERSAND));
+}
+else {
+	iframeSrc = iframeSrc.concat(StringPool.QUESTION).concat(StringUtil.merge(iframeVariables, StringPool.AMPERSAND));
 }
 
 String baseSrc = iframeSrc;
@@ -102,6 +100,12 @@ if (windowState.equals(WindowState.MAXIMIZED)) {
 
 			var hash = document.location.hash.replace('#', '');
 
+			// LPS-33951
+
+			if (!A.UA.gecko) {
+				hash = A.QueryString.unescape(hash);
+			}
+
 			var hashObj = A.QueryString.parse(hash);
 
 			hash = hashObj['<portlet:namespace />'];
@@ -159,7 +163,9 @@ if (windowState.equals(WindowState.MAXIMIZED)) {
 				restore.attr('href', href + '#' + hash);
 			}
 
-			location.hash = hash;
+			// LPS-33951
+
+			location.hash = A.QueryString.escape(hash);
 		},
 		['aui-base', 'querystring']
 	);

@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.wiki.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see WikiNodeService
  * @generated
  */
+@ProviderType
 public class WikiNodeServiceWrapper implements WikiNodeService,
 	ServiceWrapper<WikiNodeService> {
 	public WikiNodeServiceWrapper(WikiNodeService wikiNodeService) {
@@ -78,6 +81,48 @@ public class WikiNodeServiceWrapper implements WikiNodeService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _wikiNodeService.getNode(groupId, name);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.wiki.model.WikiNode> getNodes(
+		long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _wikiNodeService.getNodes(groupId);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.wiki.model.WikiNode> getNodes(
+		long groupId, int status)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _wikiNodeService.getNodes(groupId, status);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.wiki.model.WikiNode> getNodes(
+		long groupId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _wikiNodeService.getNodes(groupId, start, end);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.wiki.model.WikiNode> getNodes(
+		long groupId, int status, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _wikiNodeService.getNodes(groupId, status, start, end);
+	}
+
+	@Override
+	public int getNodesCount(long groupId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _wikiNodeService.getNodesCount(groupId);
+	}
+
+	@Override
+	public int getNodesCount(long groupId, int status)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _wikiNodeService.getNodesCount(groupId, status);
 	}
 
 	@Override

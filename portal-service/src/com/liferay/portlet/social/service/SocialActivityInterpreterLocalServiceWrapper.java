@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.social.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see SocialActivityInterpreterLocalService
  * @generated
  */
+@ProviderType
 public class SocialActivityInterpreterLocalServiceWrapper
 	implements SocialActivityInterpreterLocalService,
 		ServiceWrapper<SocialActivityInterpreterLocalService> {
@@ -76,6 +79,12 @@ public class SocialActivityInterpreterLocalServiceWrapper
 	@Override
 	public java.util.Map<java.lang.String, java.util.List<com.liferay.portlet.social.model.SocialActivityInterpreter>> getActivityInterpreters() {
 		return _socialActivityInterpreterLocalService.getActivityInterpreters();
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.social.model.SocialActivityInterpreter> getActivityInterpreters(
+		java.lang.String selector) {
+		return _socialActivityInterpreterLocalService.getActivityInterpreters(selector);
 	}
 
 	/**

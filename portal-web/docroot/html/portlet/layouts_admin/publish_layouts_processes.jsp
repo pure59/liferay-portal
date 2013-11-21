@@ -18,14 +18,18 @@
 
 <%
 String closeRedirect = ParamUtil.getString(request, "closeRedirect");
+
 long groupId = ParamUtil.getLong(request, "groupId");
+long liveGroupId = ParamUtil.getLong(request, "liveGroupId");
+boolean localPublishing = ParamUtil.getBoolean(request, "localPublishing");
 
 PortletURL renderURL = liferayPortletResponse.createRenderURL();
 
 renderURL.setParameter("struts_action", "/layouts_admin/publish_layouts");
-renderURL.setParameter("tabs2", "all-publication-processes");
+renderURL.setParameter("tabs2", "current-and-previous");
 renderURL.setParameter("closeRedirect", closeRedirect);
 renderURL.setParameter("groupId", String.valueOf(groupId));
+renderURL.setParameter("localPublishing", String.valueOf(localPublishing));
 
 String orderByCol = ParamUtil.getString(request, "orderByCol");
 String orderByType = ParamUtil.getString(request, "orderByType");
@@ -39,7 +43,9 @@ else {
 	orderByType = portalPreferences.getValue(PortletKeys.BACKGROUND_TASK, "entries-order-by-type", "desc");
 }
 
-OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderByComparator(orderByCol, orderByType);
+OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBackgroundTaskOrderByComparator(orderByCol, orderByType);
+
+String taskExecutorClassName = localPublishing ? LayoutStagingBackgroundTaskExecutor.class.getName() : LayoutRemoteStagingBackgroundTaskExecutor.class.getName();
 %>
 
 <liferay-ui:search-container
@@ -48,11 +54,26 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 	orderByCol="<%= orderByCol %>"
 	orderByComparator="<%= orderByComparator %>"
 	orderByType="<%= orderByType %>"
-	total="<%= BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(groupId, LayoutStagingBackgroundTaskExecutor.class.getName()) %>"
 >
-	<liferay-ui:search-container-results
-		results="<%= BackgroundTaskLocalServiceUtil.getBackgroundTasks(groupId, LayoutStagingBackgroundTaskExecutor.class.getName(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
-	/>
+	<liferay-ui:search-container-results>
+
+		<%
+		List<BackgroundTask> backgroundTasks = BackgroundTaskLocalServiceUtil.getBackgroundTasks(groupId, taskExecutorClassName, QueryUtil.ALL_POS, QueryUtil.ALL_POS, orderByComparator);
+
+		results.addAll(backgroundTasks);
+
+		if (localPublishing) {
+			results.addAll(BackgroundTaskLocalServiceUtil.getBackgroundTasks(liveGroupId, taskExecutorClassName, QueryUtil.ALL_POS, QueryUtil.ALL_POS, orderByComparator));
+		}
+
+		searchContainer.setTotal(results.size());
+
+		results = ListUtil.subList(results, searchContainer.getStart(), searchContainer.getEnd());
+
+		searchContainer.setResults(results);
+		%>
+
+	</liferay-ui:search-container-results>
 
 	<liferay-ui:search-container-row
 		className="com.liferay.portal.model.BackgroundTask"
@@ -61,7 +82,7 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 	>
 		<liferay-ui:search-container-column-text
 			name="user-name"
-			value="<%= backgroundTask.getUserName() %>"
+			value="<%= HtmlUtil.escape(backgroundTask.getUserName()) %>"
 		/>
 
 		<liferay-ui:search-container-column-jsp
@@ -69,6 +90,27 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 			name="status"
 			path="/html/portlet/layouts_admin/publish_process_message.jsp"
 		/>
+
+		<c:if test="<%= localPublishing %>">
+			<liferay-ui:search-container-column-text name="type">
+				<c:if test="<%= backgroundTask.getGroupId() == liveGroupId %>">
+					<strong class="label label-info">
+						<liferay-ui:message key="initial-publication" />
+					</strong>
+				</c:if>
+
+				<strong class="label label-default">
+					<c:choose>
+						<c:when test='<%= MapUtil.getBoolean(backgroundTask.getTaskContextMap(), "privateLayout") %>'>
+							<liferay-ui:message key="private-pages" />
+						</c:when>
+						<c:otherwise>
+							<liferay-ui:message key="public-pages" />
+						</c:otherwise>
+					</c:choose>
+				</strong>
+			</liferay-ui:search-container-column-text>
+		</c:if>
 
 		<liferay-ui:search-container-column-date
 			name="create-date"
@@ -105,3 +147,17 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 
 	<liferay-ui:search-iterator />
 </liferay-ui:search-container>
+
+<%
+int incompleteBackgroundTaskCount = BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(groupId, taskExecutorClassName, false);
+
+if (localPublishing) {
+	incompleteBackgroundTaskCount += BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(liveGroupId, taskExecutorClassName, false);
+}
+%>
+
+<div class="hide incomplete-process-message">
+	<liferay-util:include page="/html/portlet/layouts_admin/incomplete_processes_message.jsp">
+		<liferay-util:param name="incompleteBackgroundTaskCount" value="<%= String.valueOf(incompleteBackgroundTaskCount) %>" />
+	</liferay-util:include>
+</div>

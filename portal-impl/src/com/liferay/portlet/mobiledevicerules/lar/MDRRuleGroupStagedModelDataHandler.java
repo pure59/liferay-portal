@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.mobiledevicerules.lar;
 
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -29,6 +30,20 @@ public class MDRRuleGroupStagedModelDataHandler
 	extends BaseStagedModelDataHandler<MDRRuleGroup> {
 
 	public static final String[] CLASS_NAMES = {MDRRuleGroup.class.getName()};
+
+	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws SystemException {
+
+		MDRRuleGroup ruleGroup =
+			MDRRuleGroupLocalServiceUtil.fetchMDRRuleGroupByUuidAndGroupId(
+				uuid, groupId);
+
+		if (ruleGroup != null) {
+			MDRRuleGroupLocalServiceUtil.deleteRuleGroup(ruleGroup);
+		}
+	}
 
 	@Override
 	public String[] getClassNames() {
@@ -50,7 +65,7 @@ public class MDRRuleGroupStagedModelDataHandler
 
 		portletDataContext.addClassedModel(
 			ruleGroupElement, ExportImportPathUtil.getModelPath(ruleGroup),
-			ruleGroup, MDRPortletDataHandler.NAMESPACE);
+			ruleGroup);
 	}
 
 	@Override
@@ -61,7 +76,7 @@ public class MDRRuleGroupStagedModelDataHandler
 		long userId = portletDataContext.getUserId(ruleGroup.getUserUuid());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			ruleGroup, MDRPortletDataHandler.NAMESPACE);
+			ruleGroup);
 
 		serviceContext.setUserId(userId);
 
@@ -94,8 +109,7 @@ public class MDRRuleGroupStagedModelDataHandler
 				ruleGroup.getDescriptionMap(), serviceContext);
 		}
 
-		portletDataContext.importClassedModel(
-			ruleGroup, importedRuleGroup, MDRPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(ruleGroup, importedRuleGroup);
 	}
 
 }

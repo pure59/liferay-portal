@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatamapping.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.transaction.Isolation;
@@ -34,6 +36,7 @@ import com.liferay.portal.service.PersistedModelLocalService;
  * @see com.liferay.portlet.dynamicdatamapping.service.impl.DDMTemplateLocalServiceImpl
  * @generated
  */
+@ProviderType
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface DDMTemplateLocalService extends BaseLocalService,
@@ -785,6 +788,21 @@ public interface DDMTemplateLocalService extends BaseLocalService,
 	*/
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getTemplatesCount(long groupId, long classNameId)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	/**
+	* Returns the number of templates matching the group, class name ID, and
+	* class PK.
+	*
+	* @param groupId the primary key of the group
+	* @param classNameId the primary key of the class name for the template's
+	related model
+	* @param classPK the primary key of the template's related entity
+	* @return the number of matching templates
+	* @throws SystemException if a system exception occurred
+	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getTemplatesCount(long groupId, long classNameId, long classPK)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
 	/**

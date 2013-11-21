@@ -47,12 +47,16 @@ AUI.add(
 			instance._closeText = options.closeText;
 			instance._node = options.node;
 			instance._noticeType = options.type || 'notice';
-			instance._noticeClass = 'alert-block popup-alert-notice';
+			instance._noticeClass = 'alert-block';
 			instance._onClose = options.onClose;
 			instance._useCloseButton = true;
 
-			if (options.useAnimation && !Lang.isNumber(options.timeout)) {
-				options.timeout = 5000;
+			if (options.useAnimation) {
+				instance._noticeClass += ' popup-alert-notice';
+
+				if (!Lang.isNumber(options.timeout)) {
+					options.timeout = 5000;
+				}
 			}
 
 			instance._animationConfig = options.animationConfig || {
@@ -164,8 +168,18 @@ AUI.add(
 					);
 				}
 				else {
-					instance._hideHandle = A.later(instance._timeout, notice, STR_HIDE);
+					if (instance._timeout > -1) {
+						instance._hideHandle = A.later(instance._timeout, notice, STR_HIDE);
+					}
 				}
+
+				Liferay.fire(
+					'noticeShow',
+					{
+						notice: instance,
+						useAnimation: instance._useAnimation
+					}
+				);
 			},
 
 			_beforeNoticeHide: function(event) {
@@ -181,12 +195,31 @@ AUI.add(
 						}
 					);
 
-					instance._notice.transition(animationConfig);
+					instance._notice.transition(
+						animationConfig,
+						function() {
+							instance._notice.toggle(false);
+						}
+					);
 
 					returnVal = new Do.Halt(null);
 				}
 
+				Liferay.fire(
+					'noticeHide',
+					{
+						notice: instance,
+						useAnimation: instance._useAnimation
+					}
+				);
+
 				return returnVal;
+			},
+
+			_beforeNoticeShow: function(event) {
+				var instance = this;
+
+				instance._notice.toggle(true);
 			},
 
 			_createHTML: function() {
@@ -201,7 +234,12 @@ AUI.add(
 					notice.html(content);
 				}
 
-				notice.addClass(instance._noticeClass);
+				A.Array.each(
+					instance._noticeClass.split(' '),
+					function(item, index, collection) {
+						notice.addClass(item);
+					}
+				)
 
 				instance._addCloseButton(notice);
 				instance._addToggleButton(notice);
@@ -212,11 +250,11 @@ AUI.add(
 
 				instance._body.addClass(CSS_ALERTS);
 
-				if (instance._timeout > 0) {
-					Do.before(instance._beforeNoticeHide, notice, STR_HIDE, instance);
+				Do.before(instance._beforeNoticeHide, notice, STR_HIDE, instance);
 
-					Do.after(instance._afterNoticeShow, notice, STR_SHOW, instance);
-				}
+				Do.before(instance._beforeNoticeShow, notice, STR_SHOW, instance);
+
+				Do.after(instance._afterNoticeShow, notice, STR_SHOW, instance);
 
 				instance._notice = notice;
 			},

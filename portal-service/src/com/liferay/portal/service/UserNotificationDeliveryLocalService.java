@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.transaction.Isolation;
@@ -32,6 +34,7 @@ import com.liferay.portal.kernel.transaction.Transactional;
  * @see com.liferay.portal.service.impl.UserNotificationDeliveryLocalServiceImpl
  * @generated
  */
+@ProviderType
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface UserNotificationDeliveryLocalService extends BaseLocalService,
@@ -267,4 +270,8 @@ public interface UserNotificationDeliveryLocalService extends BaseLocalService,
 		int notificationType, int deliveryType, boolean deliver)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
+
+	public com.liferay.portal.model.UserNotificationDelivery updateUserNotificationDelivery(
+		long userNotificationDeliveryId, boolean deliver)
+		throws com.liferay.portal.kernel.exception.SystemException;
 }

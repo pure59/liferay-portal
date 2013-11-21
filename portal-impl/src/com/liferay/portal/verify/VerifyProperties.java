@@ -284,9 +284,10 @@ public class VerifyProperties extends VerifyProcess {
 		"lucene.store.jdbc.dialect.microsoft",
 		"lucene.store.jdbc.dialect.mysql", "lucene.store.jdbc.dialect.oracle",
 		"lucene.store.jdbc.dialect.postgresql",
+		"memory.cluster.scheduler.lock.cache.enabled",
 		"message.boards.thread.locking.enabled", "portal.ctx",
 		"portal.security.manager.enable", "permissions.user.check.algorithm",
-		"scheduler.classes", "shard.available.names",
+		"scheduler.classes", "schema.run.minimal", "shard.available.names",
 		"velocity.engine.resource.manager",
 		"velocity.engine.resource.manager.cache.enabled",
 		"webdav.storage.class", "webdav.storage.show.edit.url",
@@ -419,6 +420,14 @@ public class VerifyProperties extends VerifyProcess {
 				"configuration.jsp"
 		},
 		new String[] {
+			"field.editable.com.liferay.portal.model.User.emailAddress",
+			"field.editable.user.types"
+		},
+		new String[] {
+			"field.editable.com.liferay.portal.model.User.screenName",
+			"field.editable.user.types"
+		},
+		new String[] {
 			"journal.error.template.freemarker", "journal.error.template[ftl]"
 		},
 		new String[] {
@@ -426,6 +435,14 @@ public class VerifyProperties extends VerifyProcess {
 		},
 		new String[] {
 			"journal.error.template.xsl", "journal.error.template[xsl]"
+		},
+		new String[] {
+			"journal.template.freemarker.restricted.variables",
+			"freemarker.engine.restricted.variables"
+		},
+		new String[] {
+			"journal.template.velocity.restricted.variables",
+			"velocity.engine.restricted.variables"
 		},
 		new String[] {
 			"referer.url.domains.allowed", "redirect.url.domains.allowed"

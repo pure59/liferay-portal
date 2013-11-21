@@ -16,6 +16,8 @@ package com.liferay.portlet.announcements.service.base;
 
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.IdentifiableBean;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
@@ -36,10 +38,13 @@ import com.liferay.portal.service.persistence.OrganizationFinder;
 import com.liferay.portal.service.persistence.OrganizationPersistence;
 import com.liferay.portal.service.persistence.RoleFinder;
 import com.liferay.portal.service.persistence.RolePersistence;
+import com.liferay.portal.service.persistence.TeamFinder;
+import com.liferay.portal.service.persistence.TeamPersistence;
 import com.liferay.portal.service.persistence.UserFinder;
 import com.liferay.portal.service.persistence.UserGroupFinder;
 import com.liferay.portal.service.persistence.UserGroupPersistence;
 import com.liferay.portal.service.persistence.UserPersistence;
+import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.announcements.model.AnnouncementsEntry;
 import com.liferay.portlet.announcements.service.AnnouncementsEntryLocalService;
@@ -850,6 +855,80 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	}
 
 	/**
+	 * Returns the team local service.
+	 *
+	 * @return the team local service
+	 */
+	public com.liferay.portal.service.TeamLocalService getTeamLocalService() {
+		return teamLocalService;
+	}
+
+	/**
+	 * Sets the team local service.
+	 *
+	 * @param teamLocalService the team local service
+	 */
+	public void setTeamLocalService(
+		com.liferay.portal.service.TeamLocalService teamLocalService) {
+		this.teamLocalService = teamLocalService;
+	}
+
+	/**
+	 * Returns the team remote service.
+	 *
+	 * @return the team remote service
+	 */
+	public com.liferay.portal.service.TeamService getTeamService() {
+		return teamService;
+	}
+
+	/**
+	 * Sets the team remote service.
+	 *
+	 * @param teamService the team remote service
+	 */
+	public void setTeamService(
+		com.liferay.portal.service.TeamService teamService) {
+		this.teamService = teamService;
+	}
+
+	/**
+	 * Returns the team persistence.
+	 *
+	 * @return the team persistence
+	 */
+	public TeamPersistence getTeamPersistence() {
+		return teamPersistence;
+	}
+
+	/**
+	 * Sets the team persistence.
+	 *
+	 * @param teamPersistence the team persistence
+	 */
+	public void setTeamPersistence(TeamPersistence teamPersistence) {
+		this.teamPersistence = teamPersistence;
+	}
+
+	/**
+	 * Returns the team finder.
+	 *
+	 * @return the team finder
+	 */
+	public TeamFinder getTeamFinder() {
+		return teamFinder;
+	}
+
+	/**
+	 * Sets the team finder.
+	 *
+	 * @param teamFinder the team finder
+	 */
+	public void setTeamFinder(TeamFinder teamFinder) {
+		this.teamFinder = teamFinder;
+	}
+
+	/**
 	 * Returns the user local service.
 	 *
 	 * @return the user local service
@@ -1037,13 +1116,18 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	}
 
 	/**
-	 * Performs an SQL query.
+	 * Performs a SQL query.
 	 *
 	 * @param sql the sql query
 	 */
 	protected void runSQL(String sql) throws SystemException {
 		try {
 			DataSource dataSource = announcementsEntryPersistence.getDataSource();
+
+			DB db = DBFactoryUtil.getDB();
+
+			sql = db.buildSQL(sql);
+			sql = PortalUtil.transformSQL(sql);
 
 			SqlUpdate sqlUpdate = SqlUpdateFactoryUtil.getSqlUpdate(dataSource,
 					sql, new int[0]);
@@ -1111,6 +1195,14 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	protected RolePersistence rolePersistence;
 	@BeanReference(type = RoleFinder.class)
 	protected RoleFinder roleFinder;
+	@BeanReference(type = com.liferay.portal.service.TeamLocalService.class)
+	protected com.liferay.portal.service.TeamLocalService teamLocalService;
+	@BeanReference(type = com.liferay.portal.service.TeamService.class)
+	protected com.liferay.portal.service.TeamService teamService;
+	@BeanReference(type = TeamPersistence.class)
+	protected TeamPersistence teamPersistence;
+	@BeanReference(type = TeamFinder.class)
+	protected TeamFinder teamFinder;
 	@BeanReference(type = com.liferay.portal.service.UserLocalService.class)
 	protected com.liferay.portal.service.UserLocalService userLocalService;
 	@BeanReference(type = com.liferay.portal.service.UserService.class)

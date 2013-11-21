@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.trash.service.http;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -61,6 +63,7 @@ import java.rmi.RemoteException;
  * @see com.liferay.portlet.trash.service.TrashEntryServiceUtil
  * @generated
  */
+@ProviderType
 public class TrashEntryServiceSoap {
 	/**
 	* Deletes the trash entries with the matching group ID considering
@@ -317,6 +320,37 @@ public class TrashEntryServiceSoap {
 		try {
 			com.liferay.portlet.trash.model.TrashEntry returnValue = TrashEntryServiceUtil.restoreEntry(entryId,
 					overrideClassPK, name);
+
+			return com.liferay.portlet.trash.model.TrashEntrySoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.trash.model.TrashEntrySoap restoreEntry(
+		java.lang.String className, long classPK) throws RemoteException {
+		try {
+			com.liferay.portlet.trash.model.TrashEntry returnValue = TrashEntryServiceUtil.restoreEntry(className,
+					classPK);
+
+			return com.liferay.portlet.trash.model.TrashEntrySoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.trash.model.TrashEntrySoap restoreEntry(
+		java.lang.String className, long classPK, long overrideClassPK,
+		java.lang.String name) throws RemoteException {
+		try {
+			com.liferay.portlet.trash.model.TrashEntry returnValue = TrashEntryServiceUtil.restoreEntry(className,
+					classPK, overrideClassPK, name);
 
 			return com.liferay.portlet.trash.model.TrashEntrySoap.toSoapModel(returnValue);
 		}

@@ -8,9 +8,9 @@ AUI.add(
 
 		var STATUS_CODE = Liferay.STATUS_CODE;
 
-		var STR_LAYOUT_ID = 'layoutId';
-
 		var STR_EMPTY = '';
+
+		var STR_LAYOUT_ID = 'layoutId';
 
 		var TPL_EDITOR = '<div class="add-page-editor"><div class="input-append"></div></div>';
 
@@ -105,7 +105,11 @@ AUI.add(
 						if (navBlock) {
 							instance._updateURL = themeDisplay.getPathMain() + '/layouts_admin/update_page?p_auth=' + Liferay.authToken;
 
-							var navItemSelector = Liferay.Data.NAV_ITEM_SELECTOR || '> ul > li';
+							var navListSelector = Liferay.Data.NAV_LIST_SELECTOR || '> ul';
+
+							var navItemSelector = Liferay.Data.NAV_ITEM_SELECTOR || navListSelector + '> li';
+
+							var navList = navBlock.one(navListSelector);
 
 							var items = navBlock.all(navItemSelector);
 
@@ -142,6 +146,9 @@ AUI.add(
 							);
 
 							instance._navItemSelector = navItemSelector;
+							instance._navListSelector = navListSelector;
+
+							instance._navList = navList;
 
 							instance._makeDeletable();
 							instance._makeSortable();
@@ -288,7 +295,7 @@ AUI.add(
 								navItemSelector
 							);
 
-							navBlock.delegate(['mouseenter', 'mouseleave'], instance._hoverNavItem, 'li', instance);
+							navBlock.delegate(['mouseenter', 'mouseleave'], instance._hoverNavItem, '.lfr-nav-deletable', instance);
 
 							instance._deleteButton(navItems);
 						}
@@ -635,7 +642,7 @@ AUI.add(
 
 					var sortable = new A.Sortable(
 						{
-							container: navBlock,
+							container: instance._navList,
 							moveType: 'move',
 							nodes: '.lfr-nav-sortable',
 							opacity: '.5',
@@ -831,27 +838,30 @@ AUI.add(
 			function(node) {
 				var instance = this;
 
-				var navItems = instance.get('navBlock').all('li');
+				var nextLayoutId = -1;
 
-				var priority = -1;
+				var nextNode = node.next();
 
-				navItems.some(
-					function(item, index, collection) {
-						if (!item.ancestor().hasClass('child-menu')) {
-							priority++;
-						}
+				if (nextNode) {
+					nextLayoutId = nextNode.getData(STR_LAYOUT_ID);
+				}
 
-						return item == node;
-					}
-				);
+				var previousLayoutId = -1;
+
+				var previousNode = node.previous();
+
+				if (previousNode) {
+					previousLayoutId = previousNode.getData(STR_LAYOUT_ID);
+				}
 
 				var data = {
 					cmd: 'priority',
 					doAsUserId: themeDisplay.getDoAsUserIdEncoded(),
 					groupId: themeDisplay.getSiteGroupId(),
 					layoutId: node.getData(STR_LAYOUT_ID),
+					nextLayoutId: nextLayoutId,
 					p_auth: Liferay.authToken,
-					priority: priority,
+					previousLayoutId: previousLayoutId,
 					privateLayout: themeDisplay.isPrivateLayout()
 				};
 

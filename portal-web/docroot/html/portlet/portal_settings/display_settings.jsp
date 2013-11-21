@@ -21,7 +21,16 @@
 <h3><liferay-ui:message key="language-and-time-zone" /></h3>
 
 <aui:fieldset>
-	<liferay-ui:error exception="<%= LocaleException.class %>" message="please-enter-a-valid-locale" />
+	<liferay-ui:error exception="<%= LocaleException.class %>">
+
+		<%
+		LocaleException le = (LocaleException)errorException;
+		%>
+
+		<c:if test="<%= le.getType() == LocaleException.TYPE_DISPLAY_SETTINGS %>">
+			<liferay-ui:message key="please-enter-a-valid-locale" />
+		</c:if>
+	</liferay-ui:error>
 
 	<aui:select label="default-language" name="languageId">
 
@@ -124,7 +133,7 @@
 
 		boolean deployed = false;
 
-		List<Theme> themes = ThemeLocalServiceUtil.getThemes(company.getCompanyId(), 0, user.getUserId(), false);
+		List<Theme> themes = ThemeLocalServiceUtil.getPageThemes(company.getCompanyId(), 0, user.getUserId(), false);
 
 		for (Theme curTheme: themes) {
 			if (Validator.equals(defaultRegularThemeId, curTheme.getThemeId())) {
@@ -151,7 +160,7 @@
 
 			boolean deployed = false;
 
-			List<Theme> themes = ThemeLocalServiceUtil.getThemes(company.getCompanyId(), 0, user.getUserId(), true);
+			List<Theme> themes = ThemeLocalServiceUtil.getPageThemes(company.getCompanyId(), 0, user.getUserId(), true);
 
 			for (Theme curTheme: themes) {
 				if (Validator.equals(defaultWapThemeId, curTheme.getThemeId())) {
@@ -178,13 +187,7 @@
 
 		boolean deployed = false;
 
-		List<Theme> themes = ThemeLocalServiceUtil.getThemes(company.getCompanyId(), 0, user.getUserId(), false);
-
-		Theme controlPanelTheme = ThemeLocalServiceUtil.getTheme(company.getCompanyId(), "controlpanel", false);
-
-		if (controlPanelTheme != null) {
-			themes.add(controlPanelTheme);
-		}
+		List<Theme> themes = ThemeLocalServiceUtil.getControlPanelThemes(company.getCompanyId(), user.getUserId(), false);
 
 		for (Theme curTheme: themes) {
 			if (Validator.equals(defaultControlPanelThemeId, curTheme.getThemeId())) {

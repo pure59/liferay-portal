@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.SystemEventLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class SystemEventLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -293,6 +296,11 @@ public class SystemEventLocalServiceUtil {
 	public static void deleteSystemEvents(long groupId)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		getService().deleteSystemEvents(groupId);
+	}
+
+	public static void deleteSystemEvents(long groupId, long systemEventSetKey)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		getService().deleteSystemEvents(groupId, systemEventSetKey);
 	}
 
 	public static com.liferay.portal.model.SystemEvent fetchSystemEvent(

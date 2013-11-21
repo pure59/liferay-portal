@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.polls.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see PollsChoice
  * @generated
  */
+@ProviderType
 public class PollsChoiceWrapper implements PollsChoice,
 	ModelWrapper<PollsChoice> {
 	public PollsChoiceWrapper(PollsChoice pollsChoice) {
@@ -575,6 +578,22 @@ public class PollsChoiceWrapper implements PollsChoice,
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_pollsChoice.setExpandoBridgeAttributes(serviceContext);
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _pollsChoice.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _pollsChoice.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_pollsChoice.prepareLocalizedFieldsForImport();
 	}
 
 	@Override

@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.mobiledevicerules.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see MDRRuleGroup
  * @generated
  */
+@ProviderType
 public class MDRRuleGroupWrapper implements MDRRuleGroup,
 	ModelWrapper<MDRRuleGroup> {
 	public MDRRuleGroupWrapper(MDRRuleGroup mdrRuleGroup) {
@@ -668,6 +671,22 @@ public class MDRRuleGroupWrapper implements MDRRuleGroup,
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_mdrRuleGroup.setExpandoBridgeAttributes(serviceContext);
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _mdrRuleGroup.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _mdrRuleGroup.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_mdrRuleGroup.prepareLocalizedFieldsForImport();
 	}
 
 	@Override

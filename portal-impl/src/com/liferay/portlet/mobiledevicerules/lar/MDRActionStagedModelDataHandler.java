@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.mobiledevicerules.lar;
 
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -46,6 +47,20 @@ public class MDRActionStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {MDRAction.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws SystemException {
+
+		MDRAction action =
+			MDRActionLocalServiceUtil.fetchMDRActionByUuidAndGroupId(
+				uuid, groupId);
+
+		if (action != null) {
+			MDRActionLocalServiceUtil.deleteAction(action);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -64,8 +79,9 @@ public class MDRActionStagedModelDataHandler
 			MDRRuleGroupInstanceLocalServiceUtil.getRuleGroupInstance(
 				action.getRuleGroupInstanceId());
 
-		StagedModelDataHandlerUtil.exportStagedModel(
-			portletDataContext, ruleGroupInstance);
+		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			portletDataContext, action, ruleGroupInstance,
+			PortletDataContext.REFERENCE_TYPE_PARENT);
 
 		Element actionElement = portletDataContext.getExportDataElement(action);
 
@@ -94,8 +110,7 @@ public class MDRActionStagedModelDataHandler
 		}
 
 		portletDataContext.addClassedModel(
-			actionElement, ExportImportPathUtil.getModelPath(action), action,
-			MDRPortletDataHandler.NAMESPACE);
+			actionElement, ExportImportPathUtil.getModelPath(action), action);
 	}
 
 	@Override
@@ -103,16 +118,9 @@ public class MDRActionStagedModelDataHandler
 			PortletDataContext portletDataContext, MDRAction action)
 		throws Exception {
 
-		String ruleGroupInstancePath = ExportImportPathUtil.getModelPath(
-			portletDataContext, MDRRuleGroupInstance.class.getName(),
+		StagedModelDataHandlerUtil.importReferenceStagedModel(
+			portletDataContext, action, MDRRuleGroupInstance.class,
 			action.getRuleGroupInstanceId());
-
-		MDRRuleGroupInstance ruleGroupInstance =
-			(MDRRuleGroupInstance)portletDataContext.getZipEntryAsObject(
-				ruleGroupInstancePath);
-
-		StagedModelDataHandlerUtil.importStagedModel(
-			portletDataContext, ruleGroupInstance);
 
 		Map<Long, Long> ruleGroupInstanceIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -123,7 +131,7 @@ public class MDRActionStagedModelDataHandler
 			action.getRuleGroupInstanceId());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			action, MDRPortletDataHandler.NAMESPACE);
+			action);
 
 		serviceContext.setUserId(
 			portletDataContext.getUserId(action.getUserUuid()));
@@ -162,8 +170,7 @@ public class MDRActionStagedModelDataHandler
 				action.getTypeSettingsProperties(), serviceContext);
 		}
 
-		portletDataContext.importClassedModel(
-			action, importedAction, MDRPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(action, importedAction);
 	}
 
 	protected void validateLayout(Element actionElement, MDRAction action) {

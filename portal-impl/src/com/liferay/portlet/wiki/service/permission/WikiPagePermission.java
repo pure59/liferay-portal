@@ -16,10 +16,12 @@ package com.liferay.portlet.wiki.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.staging.permission.StagingPermissionUtil;
 import com.liferay.portal.kernel.workflow.permission.WorkflowPermissionUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.wiki.NoSuchPageException;
 import com.liferay.portlet.wiki.NoSuchPageResourceException;
@@ -124,6 +126,44 @@ public class WikiPagePermission {
 	public static boolean contains(
 		PermissionChecker permissionChecker, WikiPage page, String actionId) {
 
+		Boolean hasPermission = StagingPermissionUtil.hasPermission(
+			permissionChecker, page.getGroupId(), WikiPage.class.getName(),
+			page.getPageId(), PortletKeys.WIKI, actionId);
+
+		if (hasPermission != null) {
+			return hasPermission.booleanValue();
+		}
+
+		if (page.isDraft()) {
+			if (actionId.equals(ActionKeys.VIEW) &&
+				!contains(permissionChecker, page, ActionKeys.UPDATE)) {
+
+				return false;
+			}
+
+			if (actionId.equals(ActionKeys.DELETE) &&
+				(page.getStatusByUserId() == permissionChecker.getUserId())) {
+
+				return true;
+			}
+		}
+		else if (page.isPending()) {
+			hasPermission = WorkflowPermissionUtil.hasPermission(
+				permissionChecker, page.getGroupId(), WikiPage.class.getName(),
+				page.getResourcePrimKey(), actionId);
+
+			if ((hasPermission != null) && hasPermission.booleanValue()) {
+				return true;
+			}
+		}
+		else if (page.isScheduled()) {
+			if (actionId.equals(ActionKeys.VIEW) &&
+				!contains(permissionChecker, page, ActionKeys.UPDATE)) {
+
+				return false;
+			}
+		}
+
 		if (actionId.equals(ActionKeys.VIEW)) {
 			WikiPage redirectPage = page.getRedirectPage();
 
@@ -150,22 +190,6 @@ public class WikiPagePermission {
 
 				return true;
 			}
-		}
-
-		if (page.isPending()) {
-			Boolean hasPermission = WorkflowPermissionUtil.hasPermission(
-				permissionChecker, page.getGroupId(), WikiPage.class.getName(),
-				page.getResourcePrimKey(), actionId);
-
-			if ((hasPermission != null) && hasPermission.booleanValue()) {
-				return true;
-			}
-		}
-
-		if (page.isDraft() && actionId.equals(ActionKeys.DELETE) &&
-			(page.getStatusByUserId() == permissionChecker.getUserId())) {
-
-			return true;
 		}
 
 		return _hasPermission(permissionChecker, page, actionId);

@@ -31,13 +31,13 @@ boolean expired = true;
 
 <c:choose>
 	<c:when test="<%= article == null %>">
+
+		<%
+		renderRequest.setAttribute(WebKeys.PORTLET_CONFIGURATOR_VISIBILITY, Boolean.TRUE);
+		%>
+
 		<c:choose>
 			<c:when test="<%= Validator.isNull(articleId) %>">
-
-				<%
-				renderRequest.setAttribute(WebKeys.PORTLET_CONFIGURATOR_VISIBILITY, Boolean.TRUE);
-				%>
-
 				<div class="alert alert-info">
 					<liferay-ui:message key="select-existing-web-content-or-add-some-web-content-to-be-displayed-in-this-portlet" />
 				</div>
@@ -125,6 +125,7 @@ boolean expired = true;
 											printPageURL.setParameter("struts_action", "/journal_content/view");
 											printPageURL.setParameter("groupId", String.valueOf(articleDisplay.getGroupId()));
 											printPageURL.setParameter("articleId", articleDisplay.getArticleId());
+											printPageURL.setParameter("page", String.valueOf(articleDisplay.getCurrentPage()));
 											printPageURL.setParameter("viewMode", Constants.PRINT);
 											printPageURL.setWindowState(LiferayWindowState.POP_UP);
 											%>
@@ -169,7 +170,7 @@ boolean expired = true;
 												<liferay-ui:icon
 													image='<%= "../file_system/small/" + extension %>'
 													label="<%= true %>"
-													message='<%= LanguageUtil.format(pageContext, "x-convert-x-to-x", new Object[] {"hide-accessible", articleDisplay.getTitle(), extension.toUpperCase()}) %>'
+													message='<%= LanguageUtil.format(pageContext, "x-convert-x-to-x", new Object[] {"hide-accessible", articleDisplay.getTitle(), StringUtil.toUpperCase(extension)}) %>'
 													method="get"
 													url="<%= exportArticleURL.toString() %>"
 												/>
@@ -194,7 +195,7 @@ boolean expired = true;
 										</c:if>
 
 										<div class="locale-actions">
-											<liferay-ui:language displayStyle="<%= 0 %>" languageIds="<%= availableLocales %>" />
+											<liferay-ui:language displayStyle="<%= 0 %>" formAction="<%= currentURL %>" languageId="<%= LanguageUtil.getLanguageId(request) %>" languageIds="<%= availableLocales %>" />
 										</div>
 									</c:if>
 								</c:if>
@@ -299,7 +300,7 @@ if ((articleDisplay != null) && Validator.isNotNull(articleDisplay.getDDMTemplat
 }
 
 boolean showEditArticleIcon = (latestArticle != null) && JournalArticlePermission.contains(permissionChecker, latestArticle.getGroupId(), latestArticle.getArticleId(), ActionKeys.UPDATE);
-boolean showEditTemplateIcon = (ddmTemplate != null) && DDMTemplatePermission.contains(permissionChecker, ddmTemplate, ActionKeys.UPDATE);
+boolean showEditTemplateIcon = (ddmTemplate != null) && DDMTemplatePermission.contains(permissionChecker, ddmTemplate, PortletKeys.JOURNAL, ActionKeys.UPDATE);
 boolean showSelectArticleIcon = PortletPermissionUtil.contains(permissionChecker, layout, portletDisplay.getId(), ActionKeys.CONFIGURATION);
 boolean showAddArticleIcon = showSelectArticleIcon && JournalPermission.contains(permissionChecker, scopeGroupId, ActionKeys.ADD_ARTICLE);
 boolean showIconsActions = themeDisplay.isSignedIn() && !layout.isLayoutPrototypeLinkActive() && (showEditArticleIcon || showEditTemplateIcon || showSelectArticleIcon || showAddArticleIcon);
@@ -330,7 +331,7 @@ boolean showIconsActions = themeDisplay.isSignedIn() && !layout.isLayoutPrototyp
 				<liferay-portlet:renderURL portletName="<%= PortletKeys.DYNAMIC_DATA_MAPPING %>" var="editTemplateURL" windowState="<%= WindowState.MAXIMIZED.toString() %>">
 					<portlet:param name="struts_action" value="/dynamic_data_mapping/edit_template" />
 					<portlet:param name="redirect" value="<%= currentURL %>" />
-					<portlet:param name="refererPortletName" value="<%= PortletKeys.JOURNAL %>" />
+					<portlet:param name="refererPortletName" value="<%= PortletKeys.JOURNAL_CONTENT %>" />
 					<portlet:param name="groupId" value="<%= String.valueOf(ddmTemplate.getGroupId()) %>" />
 					<portlet:param name="templateId" value="<%= String.valueOf(ddmTemplate.getTemplateId()) %>" />
 				</liferay-portlet:renderURL>
@@ -418,7 +419,6 @@ boolean showIconsActions = themeDisplay.isSignedIn() && !layout.isLayoutPrototyp
 			hideControls="<%= print %>"
 			ratingsEnabled="<%= enableCommentRatings && !print %>"
 			redirect="<%= currentURL %>"
-			subject="<%= articleDisplay.getTitle() %>"
 			userId="<%= articleDisplay.getUserId() %>"
 		/>
 	</c:if>

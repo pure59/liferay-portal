@@ -92,8 +92,6 @@ AUI.add(
 
 		var SELECTOR_CATEGORY_MESSAGES_EDIT = '#categoryMessagesEdit';
 
-		var SELECTOR_CATEGORY_NAME_INPUT = '.category-name input';
-
 		var SELECTOR_FLOATING_TRIGGER = '.lfr-floating-trigger';
 
 		var SELECTOR_UPDATE_CATEGORY_FORM = 'form.update-category-form';
@@ -106,7 +104,7 @@ AUI.add(
 
 		var SELECTOR_VOCABULARY_CATEGORY_MESSAGES = '#vocabularyCategoryMessages';
 
-		var SELECTOR_VOCABULARY_NAME_INPUT = '.vocabulary-name input';
+		var SELECTOR_VOCABULARY_NAME_INPUT = '.vocabulary-name';
 
 		var SELECTOR_VOCABULARY_SELECT_LIST = '.vocabulary-select-list';
 
@@ -628,6 +626,10 @@ AUI.add(
 							}
 						);
 
+						if (Liferay.Form.Placeholders) {
+							liveSearch.sendRequest('');
+						}
+
 						liveSearch.after(STR_QUERY, instance._processSearch, instance);
 
 						instance._searchInput.on('keydown', instance._onSearchInputKeyDown, instance);
@@ -716,8 +718,7 @@ AUI.add(
 								{
 									dialog: {
 										align: instance._dialogAlignConfig,
-										cssClass: 'portlet-asset-categories-admin-dialog permissions-change',
-										width: 600
+										cssClass: 'portlet-asset-categories-admin-dialog permissions-change'
 									},
 									title: Liferay.Language.get('edit-permissions'),
 									uri: 'about:blank'
@@ -1059,14 +1060,6 @@ AUI.add(
 						return filteredCategories;
 					},
 
-					_focusCategoryPanelAdd: function() {
-						var instance = this;
-
-						var inputCategoryAddNameNode = instance._inputCategoryNameNode || instance._categoryFormAdd.one(SELECTOR_CATEGORY_NAME_INPUT);
-
-						Util.focusFormField(inputCategoryAddNameNode);
-					},
-
 					_focusVocabularyPanelAdd: function() {
 						var instance = this;
 
@@ -1118,8 +1111,22 @@ AUI.add(
 								};
 
 								return {
+									after: {
+										childrenChange: function(event) {
+											var target = event.target;
+
+											target.set('alwaysShowHitArea', (event.newVal.length > 0));
+										}
+									},
 									alwaysShowHitArea: item.hasChildren,
 									id: STR_CATEGORY_NODE + item.categoryId,
+									io: {
+										cfg: {
+											data: A.bind('_formatRequestData', instance)
+										},
+										formatter: A.bind('_formatJSONResult', instance),
+										url: themeDisplay.getPathMain() + '/asset/get_categories'
+									},
 									label: Liferay.Util.escapeHTML(item.titleCurrentValue),
 									paginator: paginatorConfig,
 									type: 'check',
@@ -1643,8 +1650,6 @@ AUI.add(
 						instance._categoryFormAdd = categoryFormAdd;
 
 						instance._loadVocabularySelect(instance._vocabularies, instance._selectedVocabularyId);
-
-						instance._focusCategoryPanelAdd();
 					},
 
 					_initializeCategoryPanelEdit: function() {
@@ -1678,10 +1683,6 @@ AUI.add(
 						if (buttonChangeCategoryPermissions) {
 							buttonChangeCategoryPermissions.on(EVENT_CLICK, instance._onChangePermissions, instance);
 						}
-
-						var inputCategoryNameNode = categoryFormEdit.one(SELECTOR_CATEGORY_NAME_INPUT);
-
-						Util.focusFormField(inputCategoryNameNode);
 					},
 
 					_initializeVocabularyPanelAdd: function(callback) {
@@ -1742,10 +1743,6 @@ AUI.add(
 						if (buttonChangeVocabularyPermissions) {
 							buttonChangeVocabularyPermissions.on(EVENT_CLICK, instance._onChangePermissions, instance);
 						}
-
-						var inputVocabularyEditNameNode = vocabularyFormEdit.one(SELECTOR_VOCABULARY_NAME_INPUT);
-
-						Util.focusFormField(inputVocabularyEditNameNode);
 					},
 
 					_loadData: function() {
@@ -1861,7 +1858,7 @@ AUI.add(
 								vocabulary.categoriesCount++;
 							}
 
-							instance._sendMessage(MESSAGE_TYPE_SUCCESS, Liferay.Language.get('your-request-processed-successfully'), SELECTOR_CATEGORY_MESSAGES_EDIT);
+							instance._sendMessage(MESSAGE_TYPE_SUCCESS, Liferay.Language.get('your-request-processed-successfully'));
 
 							instance._selectVocabulary(instance._selectedVocabularyId);
 
@@ -1871,6 +1868,10 @@ AUI.add(
 									instance._hideSection(instance._categoryViewContainer);
 								}
 							);
+
+							if (action === ACTION_EDIT) {
+								instance._showCategoryViewContainer(response.categoryId);
+							}
 
 							instance._hidePanels();
 						}
@@ -2177,7 +2178,7 @@ AUI.add(
 						var exception = response.exception;
 
 						if (!response.exception) {
-							instance._sendMessage(MESSAGE_TYPE_SUCCESS, Liferay.Language.get('your-request-processed-successfully'), SELECTOR_VOCABULARY_MESSAGES_EDIT);
+							instance._sendMessage(MESSAGE_TYPE_SUCCESS, Liferay.Language.get('your-request-processed-successfully'));
 
 							instance._displayList(
 								function() {
@@ -2587,7 +2588,7 @@ AUI.add(
 							instance._currentPanelEditIOHandle.detach();
 						}
 
-						categoryPanelEdit.set(STR_TITLE, Liferay.Language.get('edit-category'));
+						categoryPanelEdit.titleNode.html(Liferay.Language.get('edit-category'));
 
 						var categoryEditURL = instance._createURL(CATEGORY, ACTION_EDIT, LIFECYCLE_RENDER);
 
@@ -2691,13 +2692,7 @@ AUI.add(
 
 							vocabularyPanelAdd._syncUIPosAlign();
 
-							var afterSuccess = A.bind(
-								'_initializeVocabularyPanelAdd',
-								instance,
-								function() {
-									instance._focusVocabularyPanelAdd();
-								}
-							);
+							var afterSuccess = A.bind('_initializeVocabularyPanelAdd', instance, null);
 
 							vocabularyPanelAdd.plug(
 								A.Plugin.IO,
@@ -2733,7 +2728,7 @@ AUI.add(
 							instance._currentPanelEditIOHandle.detach();
 						}
 
-						vocabularyPanelEdit.set(STR_TITLE, Liferay.Language.get('edit-vocabulary'));
+						vocabularyPanelEdit.titleNode.html(Liferay.Language.get('edit-vocabulary'));
 
 						var vocabularyEditURL = instance._createURL(TYPE_VOCABULARY, ACTION_EDIT, LIFECYCLE_RENDER);
 
@@ -2888,7 +2883,7 @@ AUI.add(
 							}
 						}
 						else {
-							dropNode.append(dragNode);
+							dropNode.appendChild(dragNode);
 						}
 					},
 
@@ -2993,6 +2988,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-dialog-iframe-deprecated', 'aui-io-plugin-deprecated', 'aui-live-search-deprecated', 'aui-modal', 'aui-pagination', 'autocomplete-base', 'aui-tree-view', 'dd', 'escape', 'json', 'liferay-history-manager', 'liferay-portlet-url', 'liferay-util-window']
+		requires: ['aui-dialog-iframe-deprecated', 'aui-io-plugin-deprecated', 'aui-live-search-deprecated', 'aui-modal', 'aui-pagination', 'autocomplete-base', 'aui-tree-view', 'dd', 'escape', 'json', 'liferay-form', 'liferay-history-manager', 'liferay-portlet-url', 'liferay-util-window']
 	}
 );

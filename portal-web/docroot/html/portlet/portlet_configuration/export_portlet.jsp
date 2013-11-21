@@ -21,15 +21,26 @@ Layout exportableLayout = ExportImportHelperUtil.getExportableLayout(themeDispla
 
 PortletURL portletURL = currentURLObj;
 
-portletURL.setParameter("tabs3", "all-export-processes");
+portletURL.setParameter("tabs3", "current-and-previous");
 %>
 
 <liferay-ui:tabs
-	names="new-export-process,all-export-processes"
+	names="new-export-process,current-and-previous"
 	param="tabs3"
 	refresh="<%= false %>"
 >
 	<liferay-ui:section>
+
+		<%
+		int incompleteBackgroundTaskCount = BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(themeDisplay.getScopeGroupId(), selPortlet.getPortletId(), PortletExportBackgroundTaskExecutor.class.getName(), false);
+		%>
+
+		<div class="<%= (incompleteBackgroundTaskCount == 0) ? "hide" : "in-progress" %>" id="<portlet:namespace />incompleteProcessMessage">
+			<liferay-util:include page="/html/portlet/layouts_admin/incomplete_processes_message.jsp">
+				<liferay-util:param name="incompleteBackgroundTaskCount" value="<%= String.valueOf(incompleteBackgroundTaskCount) %>" />
+			</liferay-util:include>
+		</div>
+
 		<portlet:actionURL var="exportPortletURL">
 			<portlet:param name="struts_action" value="/portlet_configuration/export_import" />
 		</portlet:actionURL>
@@ -53,7 +64,7 @@ portletURL.setParameter("tabs3", "all-export-processes");
 				PortletDataHandlerControl[] configurationControls = portletDataHandler.getExportConfigurationControls(company.getCompanyId(), themeDisplay.getScopeGroupId(), selPortlet, exportableLayout.getPlid(), false);
 				%>
 
-				<c:if test="<%= (configurationControls != null) && (configurationControls.length > 0) %>">
+				<c:if test="<%= ArrayUtil.isNotEmpty(configurationControls) %>">
 					<aui:fieldset cssClass="options-group" label="application">
 						<ul class="lfr-tree select-options unstyled">
 							<li class="options">
@@ -64,18 +75,22 @@ portletURL.setParameter("tabs3", "all-export-processes");
 										<aui:input label="configuration" name="<%= PortletDataHandlerKeys.PORTLET_CONFIGURATION + StringPool.UNDERLINE + selPortlet.getRootPortletId() %>" type="checkbox" value="<%= true %>" />
 
 										<div class="hide" id="<portlet:namespace />configuration_<%= selPortlet.getRootPortletId() %>">
-											<aui:fieldset cssClass="portlet-type-data-section" label="configuration">
-												<ul class="lfr-tree unstyled">
+											<ul class="lfr-tree unstyled">
+												<li class="tree-item">
+													<aui:fieldset cssClass="portlet-type-data-section" label="configuration">
+														<ul class="lfr-tree unstyled">
 
-													<%
-													request.setAttribute("render_controls.jsp-action", Constants.EXPORT);
-													request.setAttribute("render_controls.jsp-controls", configurationControls);
-													request.setAttribute("render_controls.jsp-portletId", selPortlet.getRootPortletId());
-													%>
+															<%
+															request.setAttribute("render_controls.jsp-action", Constants.EXPORT);
+															request.setAttribute("render_controls.jsp-controls", configurationControls);
+															request.setAttribute("render_controls.jsp-portletId", selPortlet.getRootPortletId());
+															%>
 
-													<liferay-util:include page="/html/portlet/layouts_admin/render_controls.jsp" />
-												</ul>
-											</aui:fieldset>
+															<liferay-util:include page="/html/portlet/layouts_admin/render_controls.jsp" />
+														</ul>
+													</aui:fieldset>
+												</li>
+											</ul>
 										</div>
 
 										<ul class="hide" id="<portlet:namespace />showChangeConfiguration_<%= selPortlet.getRootPortletId() %>">
@@ -102,24 +117,13 @@ portletURL.setParameter("tabs3", "all-export-processes");
 					</aui:fieldset>
 				</c:if>
 
-				<c:if test="<%= portletDataHandler != null %>">
+				<c:if test="<%= !portletDataHandler.isDisplayPortlet() %>">
 
 					<%
-					Date startDate = null;
+					DateRange dateRange = ExportImportHelperUtil.getDateRange(renderRequest, themeDisplay.getScopeGroupId(), false, plid, selPortlet.getPortletId(), "all");
 
-					long startDateTime = ParamUtil.getLong(request, "startDate");
-
-					if (startDateTime > 0) {
-						startDate = new Date(startDateTime);
-					}
-
-					Date endDate = null;
-
-					long endDateTime = ParamUtil.getLong(request, "endDate");
-
-					if (endDateTime > 0) {
-						endDate = new Date(endDateTime);
-					}
+					Date startDate = dateRange.getStartDate();
+					Date endDate = dateRange.getEndDate();
 
 					PortletDataContext portletDataContext = PortletDataContextFactoryUtil.createPreparePortletDataContext(themeDisplay, startDate, endDate);
 
@@ -128,9 +132,11 @@ portletURL.setParameter("tabs3", "all-export-processes");
 					ManifestSummary manifestSummary = portletDataContext.getManifestSummary();
 
 					long exportModelCount = portletDataHandler.getExportModelCount(manifestSummary);
+
+					long modelDeletionCount = manifestSummary.getModelDeletionCount(portletDataHandler.getDeletionSystemEventStagedModelTypes());
 					%>
 
-					<c:if test="<%= (exportModelCount != 0) || (startDate != null) || (endDate != null) %>">
+					<c:if test="<%= (exportModelCount != 0) || (modelDeletionCount != 0) || (startDate != null) || (endDate != null) %>">
 						<aui:fieldset cssClass="options-group" label="content">
 							<ul class="lfr-tree select-options unstyled">
 								<li class="tree-item">
@@ -141,11 +147,20 @@ portletURL.setParameter("tabs3", "all-export-processes");
 											<aui:input data-name='<%= LanguageUtil.get(pageContext, "date-range") %>' helpMessage="export-date-range-help" id="rangeDateRange" label="date-range" name="range" type="radio" value="dateRange" />
 
 											<%
-											Calendar today = CalendarFactoryUtil.getCalendar(timeZone, locale);
+											Calendar endCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 
-											Calendar yesterday = CalendarFactoryUtil.getCalendar(timeZone, locale);
+											if (endDate != null) {
+												endCalendar.setTime(endDate);
+											}
 
-											yesterday.add(Calendar.DATE, -1);
+											Calendar startCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
+
+											if (startDate != null) {
+												startCalendar.setTime(startDate);
+											}
+											else {
+												startCalendar.add(Calendar.DATE, -1);
+											}
 											%>
 
 											<ul class="date-range-options hide unstyled" id="<portlet:namespace />startEndDate">
@@ -153,28 +168,29 @@ portletURL.setParameter("tabs3", "all-export-processes");
 													<aui:fieldset label="start-date">
 														<liferay-ui:input-date
 															dayParam="startDateDay"
-															dayValue="<%= yesterday.get(Calendar.DATE) %>"
+															dayValue="<%= startCalendar.get(Calendar.DATE) %>"
 															disabled="<%= false %>"
-															firstDayOfWeek="<%= yesterday.getFirstDayOfWeek() - 1 %>"
+															firstDayOfWeek="<%= startCalendar.getFirstDayOfWeek() - 1 %>"
 															monthParam="startDateMonth"
-															monthValue="<%= yesterday.get(Calendar.MONTH) %>"
+															monthValue="<%= startCalendar.get(Calendar.MONTH) %>"
+															name="startDate"
 															yearParam="startDateYear"
-															yearRangeEnd="<%= yesterday.get(Calendar.YEAR) %>"
-															yearRangeStart="<%= yesterday.get(Calendar.YEAR) - 100 %>"
-															yearValue="<%= yesterday.get(Calendar.YEAR) %>"
+															yearValue="<%= startCalendar.get(Calendar.YEAR) %>"
 														/>
 
 														&nbsp;
 
 														<liferay-ui:input-time
 															amPmParam='<%= "startDateAmPm" %>'
-															amPmValue="<%= yesterday.get(Calendar.AM_PM) %>"
+															amPmValue="<%= startCalendar.get(Calendar.AM_PM) %>"
+															dateParam="startDateTime"
+															dateValue="<%= startCalendar.getTime() %>"
 															disabled="<%= false %>"
 															hourParam='<%= "startDateHour" %>'
-															hourValue="<%= yesterday.get(Calendar.HOUR) %>"
-															minuteInterval="<%= 1 %>"
+															hourValue="<%= startCalendar.get(Calendar.HOUR) %>"
 															minuteParam='<%= "startDateMinute" %>'
-															minuteValue="<%= yesterday.get(Calendar.MINUTE) %>"
+															minuteValue="<%= startCalendar.get(Calendar.MINUTE) %>"
+															name="startTime"
 														/>
 													</aui:fieldset>
 												</li>
@@ -183,40 +199,46 @@ portletURL.setParameter("tabs3", "all-export-processes");
 													<aui:fieldset label="end-date">
 														<liferay-ui:input-date
 															dayParam="endDateDay"
-															dayValue="<%= today.get(Calendar.DATE) %>"
+															dayValue="<%= endCalendar.get(Calendar.DATE) %>"
 															disabled="<%= false %>"
-															firstDayOfWeek="<%= today.getFirstDayOfWeek() - 1 %>"
+															firstDayOfWeek="<%= endCalendar.getFirstDayOfWeek() - 1 %>"
 															monthParam="endDateMonth"
-															monthValue="<%= today.get(Calendar.MONTH) %>"
+															monthValue="<%= endCalendar.get(Calendar.MONTH) %>"
+															name="endDate"
 															yearParam="endDateYear"
-															yearRangeEnd="<%= today.get(Calendar.YEAR) %>"
-															yearRangeStart="<%= today.get(Calendar.YEAR) - 100 %>"
-															yearValue="<%= today.get(Calendar.YEAR) %>"
+															yearValue="<%= endCalendar.get(Calendar.YEAR) %>"
 														/>
 
 														&nbsp;
 
 														<liferay-ui:input-time
 															amPmParam='<%= "endDateAmPm" %>'
-															amPmValue="<%= today.get(Calendar.AM_PM) %>"
+															amPmValue="<%= endCalendar.get(Calendar.AM_PM) %>"
+															dateParam="startDateTime"
+															dateValue="<%= endCalendar.getTime() %>"
 															disabled="<%= false %>"
 															hourParam='<%= "endDateHour" %>'
-															hourValue="<%= today.get(Calendar.HOUR) %>"
+															hourValue="<%= endCalendar.get(Calendar.HOUR) %>"
 															minuteParam='<%= "endDateMinute" %>'
-															minuteValue="<%= today.get(Calendar.MINUTE) %>"
+															minuteValue="<%= endCalendar.get(Calendar.MINUTE) %>"
+															name="endTime"
 														/>
 													</aui:fieldset>
 												</li>
 											</ul>
 
-											<aui:input id="rangeLast" inlineField="<%= true %>" label="last" name="range" type="radio" value="last" />
+											<aui:input id="rangeLast" label='<%= LanguageUtil.get(pageContext, "last") + StringPool.TRIPLE_PERIOD %>' name="range" type="radio" value="last" />
 
-											<aui:select inlineField="<%= true %>" label="" name="last">
-												<aui:option label='<%= LanguageUtil.format(pageContext, "x-hours", "12") %>' value="12" />
-												<aui:option label='<%= LanguageUtil.format(pageContext, "x-hours", "24") %>' value="24" />
-												<aui:option label='<%= LanguageUtil.format(pageContext, "x-hours", "48") %>' value="48" />
-												<aui:option label='<%= LanguageUtil.format(pageContext, "x-days", "7") %>' value="168" />
-											</aui:select>
+											<ul class="hide unstyled" id="<portlet:namespace />rangeLastInputs">
+												<li>
+													<aui:select cssClass="relative-range" label="" name="last">
+														<aui:option label='<%= LanguageUtil.format(pageContext, "x-hours", "12") %>' value="12" />
+														<aui:option label='<%= LanguageUtil.format(pageContext, "x-hours", "24") %>' value="24" />
+														<aui:option label='<%= LanguageUtil.format(pageContext, "x-hours", "48") %>' value="48" />
+														<aui:option label='<%= LanguageUtil.format(pageContext, "x-days", "7") %>' value="168" />
+													</aui:select>
+												</li>
+											</ul>
 										</aui:fieldset>
 									</div>
 
@@ -233,7 +255,7 @@ portletURL.setParameter("tabs3", "all-export-processes");
 									/>
 								</li>
 
-								<c:if test="<%= exportModelCount != 0 %>">
+								<c:if test="<%= (exportModelCount != 0) || (modelDeletionCount != 0) %>">
 									<li class="options">
 										<ul class="portlet-list">
 											<li class="tree-item">
@@ -241,15 +263,16 @@ portletURL.setParameter("tabs3", "all-export-processes");
 
 												<liferay-util:buffer var="badgeHTML">
 													<span class="badge badge-info"><%= exportModelCount > 0 ? exportModelCount : StringPool.BLANK %></span>
+													<span class="badge badge-warning deletions"><%= modelDeletionCount > 0 ? (modelDeletionCount + StringPool.SPACE + LanguageUtil.get(pageContext, "deletions")) : StringPool.BLANK %></span>
 												</liferay-util:buffer>
 
-												<aui:input label='<%= LanguageUtil.get(pageContext, "content") + badgeHTML %>' name='<%= PortletDataHandlerKeys.PORTLET_DATA + "_" + selPortlet.getRootPortletId() %>' type="checkbox" value="<%= true %>" />
+												<aui:input label='<%= LanguageUtil.get(pageContext, "content") + badgeHTML %>' name="<%= PortletDataHandlerKeys.PORTLET_DATA + StringPool.UNDERLINE + selPortlet.getRootPortletId() %>" type="checkbox" value="<%= true %>" />
 
 												<%
 												PortletDataHandlerControl[] exportControls = portletDataHandler.getExportControls();
 												PortletDataHandlerControl[] metadataControls = portletDataHandler.getExportMetadataControls();
 
-												if (Validator.isNotNull(exportControls) || Validator.isNotNull(metadataControls)) {
+												if (ArrayUtil.isNotEmpty(exportControls) || ArrayUtil.isNotEmpty(metadataControls)) {
 												%>
 
 													<div class="hide" id="<portlet:namespace />content_<%= selPortlet.getRootPortletId() %>">
@@ -265,7 +288,7 @@ portletURL.setParameter("tabs3", "all-export-processes");
 																		request.setAttribute("render_controls.jsp-portletDisabled", !portletDataHandler.isPublishToLiveByDefault());
 																		%>
 
-																		<aui:field-wrapper label='<%= Validator.isNotNull(metadataControls) ? "content" : StringPool.BLANK %>'>
+																		<aui:field-wrapper label='<%= ArrayUtil.isNotEmpty(metadataControls) ? "content" : StringPool.BLANK %>'>
 																			<ul class="lfr-tree unstyled">
 																				<liferay-util:include page="/html/portlet/layouts_admin/render_controls.jsp" />
 																			</ul>
@@ -280,7 +303,7 @@ portletURL.setParameter("tabs3", "all-export-processes");
 
 																			PortletDataHandlerControl[] childrenControls = control.getChildren();
 
-																			if ((childrenControls != null) && (childrenControls.length > 0)) {
+																			if (ArrayUtil.isNotEmpty(childrenControls)) {
 																				request.setAttribute("render_controls.jsp-controls", childrenControls);
 																			%>
 
@@ -301,7 +324,7 @@ portletURL.setParameter("tabs3", "all-export-processes");
 														</ul>
 													</div>
 
-													<ul id="<portlet:namespace />showChangeContent">
+													<ul id="<portlet:namespace />showChangeContent_<%= selPortlet.getRootPortletId() %>">
 														<li>
 															<span class="selected-labels" id="<portlet:namespace />selectedContent_<%= selPortlet.getRootPortletId() %>"></span>
 
@@ -316,7 +339,7 @@ portletURL.setParameter("tabs3", "all-export-processes");
 													</ul>
 
 													<aui:script>
-														Liferay.Util.toggleBoxes('<portlet:namespace /><%= PortletDataHandlerKeys.PORTLET_DATA + StringPool.UNDERLINE + selPortlet.getRootPortletId() %>Checkbox', '<portlet:namespace />showChangeContent');
+														Liferay.Util.toggleBoxes('<portlet:namespace /><%= PortletDataHandlerKeys.PORTLET_DATA + StringPool.UNDERLINE + selPortlet.getRootPortletId() %>Checkbox', '<portlet:namespace />showChangeContent<%= StringPool.UNDERLINE + selPortlet.getRootPortletId() %>');
 													</aui:script>
 
 												<%
@@ -327,17 +350,26 @@ portletURL.setParameter("tabs3", "all-export-processes");
 										</ul>
 
 										<ul>
-											<aui:fieldset cssClass="comments-and-ratings" label="for-each-of-the-selected-content-types,-export-their">
-												<span class="selected-labels" id="<portlet:namespace />selectedCommentsAndRatings"></span>
+											<aui:fieldset cssClass="content-options" label="for-each-of-the-selected-content-types,-export-their">
+												<span class="selected-labels" id="<portlet:namespace />selectedContentOptions"></span>
 
-												<aui:a cssClass="modify-link" href="javascript:;" id="commentsAndRatingsLink" label="change" method="get" />
+												<aui:a cssClass="modify-link" href="javascript:;" id="contentOptionsLink" label="change" method="get" />
 
-												<div class="hide" id="<portlet:namespace />commentsAndRatings">
+												<div class="hide" id="<portlet:namespace />contentOptions">
 													<ul class="lfr-tree unstyled">
 														<li class="tree-item">
 															<aui:input label="comments" name="<%= PortletDataHandlerKeys.COMMENTS %>" type="checkbox" value="<%= true %>" />
 
 															<aui:input label="ratings" name="<%= PortletDataHandlerKeys.RATINGS %>" type="checkbox" value="<%= true %>" />
+
+															<c:if test="<%= modelDeletionCount != 0 %>">
+
+																<%
+																String deletionsLabel = LanguageUtil.get(pageContext, "deletions") + (modelDeletionCount > 0 ? " (" + modelDeletionCount + ")" : StringPool.BLANK);
+																%>
+
+																<aui:input data-name="<%= deletionsLabel %>" helpMessage="deletions-help" label="<%= deletionsLabel %>" name="<%= PortletDataHandlerKeys.DELETIONS %>" type="checkbox" />
+															</c:if>
 														</li>
 													</ul>
 												</div>
@@ -374,7 +406,7 @@ portletURL.setParameter("tabs3", "all-export-processes");
 	</liferay-ui:section>
 
 	<liferay-ui:section>
-		<div id="<portlet:namespace />exportProcesses">
+		<div class="process-list" id="<portlet:namespace />exportProcesses">
 			<liferay-util:include page="/html/portlet/portlet_configuration/export_portlet_processes.jsp" />
 		</div>
 	</liferay-ui:section>
@@ -386,13 +418,16 @@ portletURL.setParameter("tabs3", "all-export-processes");
 		<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.EXPORT %>" />
 		<portlet:param name="<%= SearchContainer.DEFAULT_CUR_PARAM %>" value="<%= ParamUtil.getString(request, SearchContainer.DEFAULT_CUR_PARAM) %>" />
 		<portlet:param name="<%= SearchContainer.DEFAULT_DELTA_PARAM %>" value="<%= ParamUtil.getString(request, SearchContainer.DEFAULT_DELTA_PARAM) %>" />
+		<portlet:param name="groupId" value="<%= String.valueOf(themeDisplay.getScopeGroupId()) %>" />
 		<portlet:param name="portletResource" value="<%= portletResource %>" />
 	</liferay-portlet:resourceURL>
 
 	new Liferay.ExportImport(
 		{
 			commentsNode: '#<%= PortletDataHandlerKeys.COMMENTS %>Checkbox',
+			deletionsNode: '#<%= PortletDataHandlerKeys.DELETIONS %>Checkbox',
 			form: document.<portlet:namespace />fm1,
+			incompleteProcessMessageNode: '#<portlet:namespace />incompleteProcessMessage',
 			namespace: '<portlet:namespace />',
 			processesNode: '#exportProcesses',
 			processesResourceURL: '<%= exportProcessesURL.toString() %>',
@@ -418,7 +453,7 @@ portletURL.setParameter("tabs3", "all-export-processes");
 <aui:script>
 	Liferay.Util.toggleBoxes('<portlet:namespace /><%= PortletDataHandlerKeys.PERMISSIONS %>Checkbox', '<portlet:namespace />permissionsUl');
 
-	Liferay.Util.toggleRadio('<portlet:namespace />rangeDateRange', '<portlet:namespace />startEndDate');
-	Liferay.Util.toggleRadio('<portlet:namespace />rangeAll', '', ['<portlet:namespace />startEndDate']);
-	Liferay.Util.toggleRadio('<portlet:namespace />rangeLast', '', ['<portlet:namespace />startEndDate']);
+	Liferay.Util.toggleRadio('<portlet:namespace />rangeAll', '', ['<portlet:namespace />startEndDate', '<portlet:namespace />rangeLastInputs']);
+	Liferay.Util.toggleRadio('<portlet:namespace />rangeDateRange', '<portlet:namespace />startEndDate', '<portlet:namespace />rangeLastInputs');
+	Liferay.Util.toggleRadio('<portlet:namespace />rangeLast', '<portlet:namespace />rangeLastInputs', ['<portlet:namespace />startEndDate']);
 </aui:script>

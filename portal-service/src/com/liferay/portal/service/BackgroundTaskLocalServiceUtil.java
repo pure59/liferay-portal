@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.BackgroundTaskLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class BackgroundTaskLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -324,6 +327,11 @@ public class BackgroundTaskLocalServiceUtil {
 			status, statusMessage, serviceContext);
 	}
 
+	public static void cleanUpBackgroundTask(
+		com.liferay.portal.model.BackgroundTask backgroundTask, int status) {
+		getService().cleanUpBackgroundTask(backgroundTask, status);
+	}
+
 	public static void cleanUpBackgroundTasks()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		getService().cleanUpBackgroundTasks();
@@ -339,6 +347,16 @@ public class BackgroundTaskLocalServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		getService().deleteGroupBackgroundTasks(groupId);
+	}
+
+	public static com.liferay.portal.model.BackgroundTask fetchFirstBackgroundTask(
+		long groupId, java.lang.String taskExecutorClassName,
+		boolean completed,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .fetchFirstBackgroundTask(groupId, taskExecutorClassName,
+			completed, orderByComparator);
 	}
 
 	public static com.liferay.portal.model.BackgroundTask fetchFirstBackgroundTask(
@@ -397,6 +415,29 @@ public class BackgroundTaskLocalServiceUtil {
 	}
 
 	public static java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
+		long groupId, java.lang.String[] taskExecutorClassNames)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getBackgroundTasks(groupId, taskExecutorClassNames);
+	}
+
+	public static java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
+		long groupId, java.lang.String[] taskExecutorClassNames, int status)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getBackgroundTasks(groupId, taskExecutorClassNames, status);
+	}
+
+	public static java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
+		long groupId, java.lang.String[] taskExecutorClassNames, int start,
+		int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getBackgroundTasks(groupId, taskExecutorClassNames, start,
+			end, orderByComparator);
+	}
+
+	public static java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
 		java.lang.String taskExecutorClassName, int status)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService().getBackgroundTasks(taskExecutorClassName, status);
@@ -411,6 +452,22 @@ public class BackgroundTaskLocalServiceUtil {
 			end, orderByComparator);
 	}
 
+	public static java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
+		java.lang.String[] taskExecutorClassNames, int status)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getBackgroundTasks(taskExecutorClassNames, status);
+	}
+
+	public static java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
+		java.lang.String[] taskExecutorClassNames, int status, int start,
+		int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getBackgroundTasks(taskExecutorClassNames, status, start,
+			end, orderByComparator);
+	}
+
 	public static int getBackgroundTasksCount(long groupId,
 		java.lang.String taskExecutorClassName)
 		throws com.liferay.portal.kernel.exception.SystemException {
@@ -419,10 +476,42 @@ public class BackgroundTaskLocalServiceUtil {
 	}
 
 	public static int getBackgroundTasksCount(long groupId,
+		java.lang.String taskExecutorClassName, boolean completed)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getBackgroundTasksCount(groupId, taskExecutorClassName,
+			completed);
+	}
+
+	public static int getBackgroundTasksCount(long groupId,
 		java.lang.String name, java.lang.String taskExecutorClassName)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService()
 				   .getBackgroundTasksCount(groupId, name, taskExecutorClassName);
+	}
+
+	public static int getBackgroundTasksCount(long groupId,
+		java.lang.String name, java.lang.String taskExecutorClassName,
+		boolean completed)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getBackgroundTasksCount(groupId, name,
+			taskExecutorClassName, completed);
+	}
+
+	public static int getBackgroundTasksCount(long groupId,
+		java.lang.String[] taskExecutorClassNames)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getBackgroundTasksCount(groupId, taskExecutorClassNames);
+	}
+
+	public static int getBackgroundTasksCount(long groupId,
+		java.lang.String[] taskExecutorClassNames, boolean completed)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getBackgroundTasksCount(groupId, taskExecutorClassNames,
+			completed);
 	}
 
 	public static java.lang.String getBackgroundTaskStatusJSON(
@@ -433,6 +522,10 @@ public class BackgroundTaskLocalServiceUtil {
 	public static void resumeBackgroundTask(long backgroundTaskId)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		getService().resumeBackgroundTask(backgroundTaskId);
+	}
+
+	public static void triggerBackgroundTask(long backgroundTaskId) {
+		getService().triggerBackgroundTask(backgroundTaskId);
 	}
 
 	public static BackgroundTaskLocalService getService() {

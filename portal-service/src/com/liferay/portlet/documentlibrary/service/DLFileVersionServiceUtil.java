@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.documentlibrary.service.impl.DLFileVersionServiceImpl
  * @generated
  */
+@ProviderType
 public class DLFileVersionServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -61,6 +64,19 @@ public class DLFileVersionServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return getService().getFileVersion(fileVersionId);
+	}
+
+	public static java.util.List<com.liferay.portlet.documentlibrary.model.DLFileVersion> getFileVersions(
+		long fileEntryId, int status)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService().getFileVersions(fileEntryId, status);
+	}
+
+	public static int getFileVersionsCount(long fileEntryId, int status)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService().getFileVersionsCount(fileEntryId, status);
 	}
 
 	public static com.liferay.portlet.documentlibrary.model.DLFileVersion getLatestFileVersion(

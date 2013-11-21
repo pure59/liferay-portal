@@ -20,15 +20,16 @@ import com.liferay.portal.kernel.trash.TrashActionKeys;
 import com.liferay.portal.kernel.trash.TrashRenderer;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ContainerModel;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.journal.NoSuchFolderException;
 import com.liferay.portlet.journal.asset.JournalArticleAssetRenderer;
 import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.journal.model.JournalArticleResource;
 import com.liferay.portlet.journal.service.JournalArticleLocalServiceUtil;
 import com.liferay.portlet.journal.service.JournalArticleResourceLocalServiceUtil;
+import com.liferay.portlet.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.portlet.journal.service.permission.JournalArticlePermission;
 import com.liferay.portlet.journal.service.permission.JournalFolderPermission;
 import com.liferay.portlet.journal.util.JournalUtil;
@@ -101,7 +102,17 @@ public class JournalArticleTrashHandler extends JournalBaseTrashHandler {
 	}
 
 	@Override
-	public String getRestoreLink(PortletRequest portletRequest, long classPK)
+	public ContainerModel getParentContainerModel(TrashedModel trashedModel)
+		throws PortalException, SystemException {
+
+		JournalArticle article = (JournalArticle)trashedModel;
+
+		return getContainerModel(article.getFolderId());
+	}
+
+	@Override
+	public String getRestoreContainerModelLink(
+			PortletRequest portletRequest, long classPK)
 		throws PortalException, SystemException {
 
 		JournalArticle article =
@@ -123,13 +134,13 @@ public class JournalArticleTrashHandler extends JournalBaseTrashHandler {
 	}
 
 	@Override
-	public ContainerModel getTrashContainer(long classPK)
+	public TrashEntry getTrashEntry(long classPK)
 		throws PortalException, SystemException {
 
 		JournalArticle article =
 			JournalArticleLocalServiceUtil.getLatestArticle(classPK);
 
-		return article.getTrashContainer();
+		return article.getTrashEntry();
 	}
 
 	@Override
@@ -184,10 +195,10 @@ public class JournalArticleTrashHandler extends JournalBaseTrashHandler {
 		JournalArticle article =
 			JournalArticleLocalServiceUtil.getLatestArticle(classPK);
 
-		try {
-			article.getFolder();
-		}
-		catch (NoSuchFolderException nsfe) {
+		if ((article.getFolderId() > 0) &&
+			(JournalFolderLocalServiceUtil.fetchFolder(
+				article.getFolderId()) == null)) {
+
 			return false;
 		}
 
@@ -259,20 +270,26 @@ public class JournalArticleTrashHandler extends JournalBaseTrashHandler {
 		JournalArticle article =
 			JournalArticleLocalServiceUtil.getLatestArticle(classPK);
 
+		JournalArticleResource journalArticleResource =
+			article.getArticleResource();
+
 		if (Validator.isNotNull(newName)) {
 			originalTitle = newName;
 		}
 
-		JournalArticleResource articleResource =
+		JournalArticleResource originalArticleResource =
 			JournalArticleResourceLocalServiceUtil.fetchArticleResource(
 				article.getGroupId(), originalTitle);
 
-		if (articleResource != null) {
+		if ((originalArticleResource != null) &&
+			(journalArticleResource.getPrimaryKey() !=
+				originalArticleResource.getPrimaryKey())) {
+
 			DuplicateEntryException dee = new DuplicateEntryException();
 
 			JournalArticle duplicateArticle =
 				JournalArticleLocalServiceUtil.getArticle(
-					articleResource.getGroupId(), originalTitle);
+					originalArticleResource.getGroupId(), originalTitle);
 
 			dee.setDuplicateEntryId(duplicateArticle.getResourcePrimKey());
 			dee.setOldName(duplicateArticle.getArticleId());

@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.util.Accessor;
 
 /**
@@ -25,6 +27,7 @@ import com.liferay.portal.kernel.util.Accessor;
  * @see com.liferay.portal.model.impl.PortletModelImpl
  * @generated
  */
+@ProviderType
 public interface Portlet extends PortletModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -182,6 +185,13 @@ public interface Portlet extends PortletModel, PersistedModel {
 	* @return the configuration action instance of the portlet
 	*/
 	public com.liferay.portal.kernel.portlet.ConfigurationAction getConfigurationActionInstance();
+
+	/**
+	* Returns the servlet context name of the portlet.
+	*
+	* @return the servlet context name of the portlet
+	*/
+	public java.lang.String getContextName();
 
 	/**
 	* Returns the servlet context path of the portlet.

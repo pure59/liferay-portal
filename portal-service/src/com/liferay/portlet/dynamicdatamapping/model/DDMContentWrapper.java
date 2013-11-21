@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatamapping.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DDMContent
  * @generated
  */
+@ProviderType
 public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	public DDMContentWrapper(DDMContent ddmContent) {
 		_ddmContent = ddmContent;
@@ -572,6 +575,22 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_ddmContent.setExpandoBridgeAttributes(serviceContext);
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _ddmContent.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _ddmContent.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_ddmContent.prepareLocalizedFieldsForImport();
 	}
 
 	@Override

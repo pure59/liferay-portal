@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.bean.AutoEscape;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -40,6 +42,7 @@ import java.util.Map;
  * @see com.liferay.portal.model.impl.RoleModelImpl
  * @generated
  */
+@ProviderType
 public interface RoleModel extends AttachedModel, BaseModel<Role>,
 	StagedAuditedModel {
 	/*
@@ -509,6 +512,12 @@ public interface RoleModel extends AttachedModel, BaseModel<Role>,
 
 	@Override
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext);
+
+	public String[] getAvailableLanguageIds();
+
+	public String getDefaultLanguageId();
+
+	public void prepareLocalizedFieldsForImport() throws LocaleException;
 
 	public void prepareLocalizedFieldsForImport(Locale defaultImportLocale)
 		throws LocaleException;

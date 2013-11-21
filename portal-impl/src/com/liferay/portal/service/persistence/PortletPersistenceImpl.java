@@ -343,6 +343,10 @@ public class PortletPersistenceImpl extends BasePersistenceImpl<Portlet>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByCompanyId(companyId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<Portlet> list = findByCompanyId(companyId, count - 1, count,
 				orderByComparator);
 
@@ -831,6 +835,10 @@ public class PortletPersistenceImpl extends BasePersistenceImpl<Portlet>
 	private static final String _FINDER_COLUMN_C_P_PORTLETID_2 = "portlet.portletId = ?";
 	private static final String _FINDER_COLUMN_C_P_PORTLETID_3 = "(portlet.portletId IS NULL OR portlet.portletId = '')";
 
+	public PortletPersistenceImpl() {
+		setModelClass(Portlet.class);
+	}
+
 	/**
 	 * Caches the portlet in the entity cache if it is enabled.
 	 *
@@ -1131,6 +1139,8 @@ public class PortletPersistenceImpl extends BasePersistenceImpl<Portlet>
 
 		clearUniqueFindersCache(portlet);
 		cacheUniqueFindersCache(portlet);
+
+		portlet.resetOriginalValues();
 
 		return portlet;
 	}

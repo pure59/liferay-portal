@@ -95,10 +95,12 @@ public class IconMenuTag extends BaseBodyTagSupport implements BodyTag {
 				_localizeMessage = true;
 				_maxDisplayItems = _DEFAULT_MAX_DISPLAY_ITEMS;
 				_message = "actions";
+				_select = false;
 				_showArrow = true;
 				_showExpanded = false;
 				_showWhenSingleIcon = false;
 				_startPage = null;
+				_triggerCssClass = null;
 			}
 		}
 	}
@@ -201,6 +203,10 @@ public class IconMenuTag extends BaseBodyTagSupport implements BodyTag {
 		}
 	}
 
+	public void setSelect(boolean select) {
+		_select = select;
+	}
+
 	public void setShowArrow(boolean showArrow) {
 		_showArrow = showArrow;
 	}
@@ -215,6 +221,14 @@ public class IconMenuTag extends BaseBodyTagSupport implements BodyTag {
 
 	public void setStartPage(String startPage) {
 		_startPage = startPage;
+	}
+
+	public void setTriggerCssClass(String triggerCssClass) {
+		_triggerCssClass = triggerCssClass;
+	}
+
+	public void setUseIconCaret(boolean useIconCaret) {
+		_useIconCaret = useIconCaret;
 	}
 
 	protected String getEndPage() {
@@ -272,7 +286,7 @@ public class IconMenuTag extends BaseBodyTagSupport implements BodyTag {
 					jspWriter.write("\">");
 				}
 				else {
-					jspWriter.write("<div class=\"btn-group");
+					jspWriter.write("<div class=\"btn-group lfr-icon-menu");
 
 					if (Validator.isNotNull(_cssClass)) {
 						jspWriter.write(StringPool.SPACE);
@@ -296,6 +310,14 @@ public class IconMenuTag extends BaseBodyTagSupport implements BodyTag {
 						jspWriter.write(" btn");
 					}
 
+					if (_select) {
+						jspWriter.write(" select");
+					}
+
+					if (Validator.isNotNull(_triggerCssClass)) {
+						jspWriter.write(StringPool.SPACE + _triggerCssClass);
+					}
+
 					String message = _message;
 
 					if (_localizeMessage) {
@@ -309,19 +331,51 @@ public class IconMenuTag extends BaseBodyTagSupport implements BodyTag {
 					jspWriter.write("\">");
 
 					if (_showArrow && _direction.equals("left")) {
-						jspWriter.write("<i class=\"caret\"></i>&nbsp;");
+						String caret = "caret";
+
+						if (_useIconCaret) {
+							caret = "icon-caret-left";
+						}
+
+						jspWriter.write("<i class=\"");
+						jspWriter.write(caret);
+						jspWriter.write("\"></i> ");
 					}
+
+					boolean auiImage = false;
 
 					if (Validator.isNotNull(_icon)) {
-						jspWriter.write("<img alt=\"\" src=\"");
-						jspWriter.write(_icon);
-						jspWriter.write("\" />&nbsp;");
+						auiImage = _icon.startsWith(_AUI_PATH);
+
+						if (auiImage) {
+							jspWriter.write(" <i class=\"icon-");
+							jspWriter.write(
+								_icon.substring(_AUI_PATH.length()));
+							jspWriter.write("\"></i> ");
+						}
+						else {
+							jspWriter.write("<img alt=\"\" src=\"");
+							jspWriter.write(_icon);
+							jspWriter.write("\" /> ");
+						}
 					}
 
-					jspWriter.write(message);
+					if (Validator.isNotNull(message)) {
+						jspWriter.write("<span class=\"lfr-icon-menu-text\">");
+						jspWriter.write(message);
+						jspWriter.write("</span>");
+					}
 
 					if (_showArrow && !_direction.equals("left")) {
-						jspWriter.write("&nbsp;<i class=\"caret\"></i>");
+						String caret = "caret";
+
+						if (_useIconCaret) {
+							caret = "icon-caret-" + _direction;
+						}
+
+						jspWriter.write(" <i class=\"");
+						jspWriter.write(caret);
+						jspWriter.write("\"></i> ");
 					}
 
 					jspWriter.write("</a>");
@@ -372,6 +426,8 @@ public class IconMenuTag extends BaseBodyTagSupport implements BodyTag {
 		return EVAL_PAGE;
 	}
 
+	private static final String _AUI_PATH = "../aui/";
+
 	private static final int _DEFAULT_MAX_DISPLAY_ITEMS = GetterUtil.getInteger(
 		PropsUtil.get(PropsKeys.ICON_MENU_MAX_DISPLAY_ITEMS));
 
@@ -390,9 +446,12 @@ public class IconMenuTag extends BaseBodyTagSupport implements BodyTag {
 	private boolean _localizeMessage = true;
 	private int _maxDisplayItems = _DEFAULT_MAX_DISPLAY_ITEMS;
 	private String _message = "actions";
+	private boolean _select;
 	private boolean _showArrow = true;
 	private boolean _showExpanded;
 	private boolean _showWhenSingleIcon;
 	private String _startPage;
+	private String _triggerCssClass;
+	private boolean _useIconCaret;
 
 }

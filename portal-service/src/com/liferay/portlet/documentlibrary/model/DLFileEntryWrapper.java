@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DLFileEntry
  * @generated
  */
+@ProviderType
 public class DLFileEntryWrapper implements DLFileEntry,
 	ModelWrapper<DLFileEntry> {
 	public DLFileEntryWrapper(DLFileEntry dlFileEntry) {
@@ -63,6 +66,7 @@ public class DLFileEntryWrapper implements DLFileEntry,
 		attributes.put("classPK", getClassPK());
 		attributes.put("repositoryId", getRepositoryId());
 		attributes.put("folderId", getFolderId());
+		attributes.put("treePath", getTreePath());
 		attributes.put("name", getName());
 		attributes.put("extension", getExtension());
 		attributes.put("mimeType", getMimeType());
@@ -154,6 +158,12 @@ public class DLFileEntryWrapper implements DLFileEntry,
 
 		if (folderId != null) {
 			setFolderId(folderId);
+		}
+
+		String treePath = (String)attributes.get("treePath");
+
+		if (treePath != null) {
+			setTreePath(treePath);
 		}
 
 		String name = (String)attributes.get("name");
@@ -546,6 +556,26 @@ public class DLFileEntryWrapper implements DLFileEntry,
 	}
 
 	/**
+	* Returns the tree path of this document library file entry.
+	*
+	* @return the tree path of this document library file entry
+	*/
+	@Override
+	public java.lang.String getTreePath() {
+		return _dlFileEntry.getTreePath();
+	}
+
+	/**
+	* Sets the tree path of this document library file entry.
+	*
+	* @param treePath the tree path of this document library file entry
+	*/
+	@Override
+	public void setTreePath(java.lang.String treePath) {
+		_dlFileEntry.setTreePath(treePath);
+	}
+
+	/**
 	* Returns the name of this document library file entry.
 	*
 	* @return the name of this document library file entry
@@ -855,6 +885,76 @@ public class DLFileEntryWrapper implements DLFileEntry,
 		_dlFileEntry.setManualCheckInRequired(manualCheckInRequired);
 	}
 
+	/**
+	* Returns the status of this document library file entry.
+	*
+	* @return the status of this document library file entry
+	*/
+	@Override
+	public int getStatus() {
+		return _dlFileEntry.getStatus();
+	}
+
+	/**
+	* Returns the trash entry created when this document library file entry was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this document library file entry.
+	*
+	* @return the trash entry created when this document library file entry was moved to the Recycle Bin
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry getTrashEntry()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _dlFileEntry.getTrashEntry();
+	}
+
+	/**
+	* Returns the class primary key of the trash entry for this document library file entry.
+	*
+	* @return the class primary key of the trash entry for this document library file entry
+	*/
+	@Override
+	public long getTrashEntryClassPK() {
+		return _dlFileEntry.getTrashEntryClassPK();
+	}
+
+	/**
+	* Returns the trash handler for this document library file entry.
+	*
+	* @return the trash handler for this document library file entry
+	*/
+	@Override
+	public com.liferay.portal.kernel.trash.TrashHandler getTrashHandler() {
+		return _dlFileEntry.getTrashHandler();
+	}
+
+	/**
+	* Returns <code>true</code> if this document library file entry is in the Recycle Bin.
+	*
+	* @return <code>true</code> if this document library file entry is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrash() {
+		return _dlFileEntry.isInTrash();
+	}
+
+	/**
+	* Returns <code>true</code> if the parent of this document library file entry is in the Recycle Bin.
+	*
+	* @return <code>true</code> if the parent of this document library file entry is in the Recycle Bin; <code>false</code> otherwise
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public boolean isInTrashContainer() {
+		return _dlFileEntry.isInTrashContainer();
+	}
+
+	@Override
+	public boolean isInTrashExplicitly()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _dlFileEntry.isInTrashExplicitly();
+	}
+
 	@Override
 	public boolean isNew() {
 		return _dlFileEntry.isNew();
@@ -961,6 +1061,19 @@ public class DLFileEntryWrapper implements DLFileEntry,
 	}
 
 	@Override
+	public void updateTreePath(java.lang.String treePath)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_dlFileEntry.updateTreePath(treePath);
+	}
+
+	@Override
+	public java.lang.String buildTreePath()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _dlFileEntry.buildTreePath();
+	}
+
+	@Override
 	public java.io.InputStream getContentStream()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
@@ -1049,13 +1162,6 @@ public class DLFileEntryWrapper implements DLFileEntry,
 		return _dlFileEntry.getLuceneProperties();
 	}
 
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _dlFileEntry.getTrashContainer();
-	}
-
 	/**
 	* @deprecated As of 6.2.0, replaced by {@link DLFileVersion#getUserId()}
 	*/
@@ -1076,8 +1182,7 @@ public class DLFileEntryWrapper implements DLFileEntry,
 	* @deprecated As of 6.2.0, replaced by {@link DLFileVersion#getUserUuid()}
 	*/
 	@Override
-	public java.lang.String getVersionUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getVersionUserUuid() {
 		return _dlFileEntry.getVersionUserUuid();
 	}
 
@@ -1094,13 +1199,6 @@ public class DLFileEntryWrapper implements DLFileEntry,
 	@Override
 	public boolean isInHiddenFolder() {
 		return _dlFileEntry.isInHiddenFolder();
-	}
-
-	@Override
-	public boolean isInTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _dlFileEntry.isInTrashContainer();
 	}
 
 	@Override

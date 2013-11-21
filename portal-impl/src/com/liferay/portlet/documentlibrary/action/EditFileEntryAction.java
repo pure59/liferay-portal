@@ -21,23 +21,23 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.servlet.ServletResponseConstants;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.KeyValuePair;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StreamUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TempFileUtil;
@@ -53,7 +53,6 @@ import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portal.util.WebKeys;
-import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.PortletURLImpl;
 import com.liferay.portlet.asset.AssetCategoryException;
 import com.liferay.portlet.asset.AssetTagException;
@@ -72,18 +71,18 @@ import com.liferay.portlet.documentlibrary.NoSuchFileVersionException;
 import com.liferay.portlet.documentlibrary.NoSuchFolderException;
 import com.liferay.portlet.documentlibrary.SourceFileNameException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
+import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
 import com.liferay.portlet.documentlibrary.util.DLUtil;
 import com.liferay.portlet.dynamicdatamapping.StorageFieldRequiredException;
+import com.liferay.portlet.trash.util.TrashUtil;
 
 import java.io.InputStream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.portlet.ActionRequest;
@@ -116,6 +115,8 @@ import org.apache.struts.action.ActionMapping;
  * @author Kenneth Chang
  */
 public class EditFileEntryAction extends PortletAction {
+
+	public static final String TEMP_RANDOM_SUFFIX = "--tempRandomSuffix--";
 
 	@Override
 	public void processAction(
@@ -155,11 +156,10 @@ public class EditFileEntryAction extends PortletAction {
 					portletConfig, actionRequest, actionResponse);
 			}
 			else if (cmd.equals(Constants.ADD_TEMP)) {
-				addTempFileEntry(actionRequest);
+				addTempFileEntry(actionRequest, actionResponse);
 			}
 			else if (cmd.equals(Constants.DELETE)) {
-				deleteFileEntry(
-					(LiferayPortletConfig)portletConfig, actionRequest, false);
+				deleteFileEntry(actionRequest, false);
 			}
 			else if (cmd.equals(Constants.DELETE_TEMP)) {
 				deleteTempFileEntry(actionRequest, actionResponse);
@@ -180,8 +180,7 @@ public class EditFileEntryAction extends PortletAction {
 				moveFileEntries(actionRequest, true);
 			}
 			else if (cmd.equals(Constants.MOVE_TO_TRASH)) {
-				deleteFileEntry(
-					(LiferayPortletConfig)portletConfig, actionRequest, true);
+				deleteFileEntry(actionRequest, true);
 			}
 			else if (cmd.equals(Constants.REVERT)) {
 				revertFileEntry(actionRequest);
@@ -228,11 +227,17 @@ public class EditFileEntryAction extends PortletAction {
 							if (cmd.equals(Constants.ADD) &&
 								(fileEntry != null)) {
 
+								String portletId = HttpUtil.getParameter(
+									redirect, "p_p_id", false);
+
+								String namespace =
+									PortalUtil.getPortletNamespace(portletId);
+
 								redirect = HttpUtil.addParameter(
-									redirect, "className",
+									redirect, namespace + "className",
 									DLFileEntry.class.getName());
 								redirect = HttpUtil.addParameter(
-									redirect, "classPK",
+									redirect, namespace + "classPK",
 									fileEntry.getFileEntryId());
 							}
 
@@ -301,7 +306,7 @@ public class EditFileEntryAction extends PortletAction {
 			ActionResponse actionResponse)
 		throws Exception {
 
-		List<String> validFileNames = new ArrayList<String>();
+		List<KeyValuePair> validFileNameKVPs = new ArrayList<KeyValuePair>();
 		List<KeyValuePair> invalidFileNameKVPs = new ArrayList<KeyValuePair>();
 
 		String[] selectedFileNames = ParamUtil.getParameterValues(
@@ -310,16 +315,20 @@ public class EditFileEntryAction extends PortletAction {
 		for (String selectedFileName : selectedFileNames) {
 			addMultipleFileEntries(
 				portletConfig, actionRequest, actionResponse, selectedFileName,
-				validFileNames, invalidFileNameKVPs);
+				validFileNameKVPs, invalidFileNameKVPs);
 		}
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
-		for (String validFileName : validFileNames) {
+		for (KeyValuePair validFileNameKVP : validFileNameKVPs) {
+			String fileName = validFileNameKVP.getKey();
+			String originalFileName = validFileNameKVP.getValue();
+
 			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
 			jsonObject.put("added", Boolean.TRUE);
-			jsonObject.put("fileName", validFileName);
+			jsonObject.put("fileName", fileName);
+			jsonObject.put("originalFileName", originalFileName);
 
 			jsonArray.put(jsonObject);
 		}
@@ -333,6 +342,7 @@ public class EditFileEntryAction extends PortletAction {
 			jsonObject.put("added", Boolean.FALSE);
 			jsonObject.put("errorMessage", errorMessage);
 			jsonObject.put("fileName", fileName);
+			jsonObject.put("originalFileName", fileName);
 
 			jsonArray.put(jsonObject);
 		}
@@ -343,8 +353,11 @@ public class EditFileEntryAction extends PortletAction {
 	protected void addMultipleFileEntries(
 			PortletConfig portletConfig, ActionRequest actionRequest,
 			ActionResponse actionResponse, String selectedFileName,
-			List<String> validFileNames, List<KeyValuePair> invalidFileNameKVPs)
+			List<KeyValuePair> validFileNameKVPs,
+			List<KeyValuePair> invalidFileNameKVPs)
 		throws Exception {
+
+		String originalSelectedFileName = selectedFileName;
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -368,6 +381,33 @@ public class EditFileEntryAction extends PortletAction {
 			ServiceContext serviceContext = ServiceContextFactory.getInstance(
 				DLFileEntry.class.getName(), actionRequest);
 
+			int pos = selectedFileName.indexOf(TEMP_RANDOM_SUFFIX);
+
+			if (pos != -1) {
+				selectedFileName = selectedFileName.substring(0, pos);
+			}
+
+			while (true) {
+				try {
+					DLAppLocalServiceUtil.getFileEntry(
+						themeDisplay.getScopeGroupId(), folderId,
+						selectedFileName);
+
+					StringBundler sb = new StringBundler(5);
+
+					sb.append(FileUtil.stripExtension(selectedFileName));
+					sb.append(StringPool.DASH);
+					sb.append(StringUtil.randomString());
+					sb.append(StringPool.PERIOD);
+					sb.append(FileUtil.getExtension(selectedFileName));
+
+					selectedFileName = sb.toString();
+				}
+				catch (Exception e) {
+					break;
+				}
+			}
+
 			FileEntry fileEntry = DLAppServiceUtil.addFileEntry(
 				repositoryId, folderId, selectedFileName, mimeType,
 				selectedFileName, description, changeLog, inputStream, size,
@@ -380,7 +420,8 @@ public class EditFileEntryAction extends PortletAction {
 			AssetPublisherUtil.addRecentFolderId(
 				actionRequest, DLFileEntry.class.getName(), folderId);
 
-			validFileNames.add(selectedFileName);
+			validFileNameKVPs.add(
+				new KeyValuePair(selectedFileName, originalSelectedFileName));
 
 			return;
 		}
@@ -389,7 +430,7 @@ public class EditFileEntryAction extends PortletAction {
 				portletConfig, actionRequest, actionResponse, e);
 
 			invalidFileNameKVPs.add(
-				new KeyValuePair(selectedFileName, errorMessage));
+				new KeyValuePair(originalSelectedFileName, errorMessage));
 		}
 		finally {
 			if (tempFileEntry != null) {
@@ -398,7 +439,8 @@ public class EditFileEntryAction extends PortletAction {
 		}
 	}
 
-	protected void addTempFileEntry(ActionRequest actionRequest)
+	protected void addTempFileEntry(
+			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
 		UploadPortletRequest uploadPortletRequest =
@@ -410,6 +452,11 @@ public class EditFileEntryAction extends PortletAction {
 		long folderId = ParamUtil.getLong(uploadPortletRequest, "folderId");
 		String sourceFileName = uploadPortletRequest.getFileName("file");
 
+		String title = sourceFileName;
+
+		sourceFileName = sourceFileName.concat(
+			TEMP_RANDOM_SUFFIX).concat(StringUtil.randomString());
+
 		InputStream inputStream = null;
 
 		try {
@@ -420,6 +467,13 @@ public class EditFileEntryAction extends PortletAction {
 			DLAppServiceUtil.addTempFileEntry(
 				themeDisplay.getScopeGroupId(), folderId, sourceFileName,
 				_TEMP_FOLDER_NAME, inputStream, contentType);
+
+			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+			jsonObject.put("name", sourceFileName);
+			jsonObject.put("title", title);
+
+			writeJSON(actionRequest, actionResponse, jsonObject);
 		}
 		catch (Exception e) {
 			UploadException uploadException =
@@ -510,7 +564,6 @@ public class EditFileEntryAction extends PortletAction {
 	}
 
 	protected void deleteFileEntry(
-			LiferayPortletConfig liferayPortletConfig,
 			ActionRequest actionRequest, boolean moveToTrash)
 		throws Exception {
 
@@ -534,20 +587,15 @@ public class EditFileEntryAction extends PortletAction {
 			return;
 		}
 
-		DLAppServiceUtil.moveFileEntryToTrash(fileEntryId);
+		FileEntry fileEntry = DLAppServiceUtil.moveFileEntryToTrash(
+			fileEntryId);
 
-		Map<String, String[]> data = new HashMap<String, String[]>();
+		if (fileEntry.getModel() instanceof DLFileEntry) {
+			TrashUtil.addTrashSessionMessages(
+				actionRequest, (DLFileEntry)fileEntry.getModel());
+		}
 
-		data.put(
-			"restoreFileEntryIds", new String[] {String.valueOf(fileEntryId)});
-
-		SessionMessages.add(
-			actionRequest,
-			liferayPortletConfig.getPortletId() +
-				SessionMessages.KEY_SUFFIX_DELETE_SUCCESS_DATA,
-			data);
-
-		hideDefaultSuccessMessage(liferayPortletConfig, actionRequest);
+		hideDefaultSuccessMessage(actionRequest);
 	}
 
 	protected void deleteTempFileEntry(
@@ -662,16 +710,11 @@ public class EditFileEntryAction extends PortletAction {
 				PropsKeys.DL_FILE_EXTENSIONS, StringPool.COMMA);
 		}
 		else {
-			PortletPreferences portletPreferences =
-				portletRequest.getPreferences();
+			PortletPreferences portletPreferences = getStrictPortletSetup(
+				portletRequest);
 
-			String portletResource = ParamUtil.getString(
-				portletRequest, "portletResource");
-
-			if (Validator.isNotNull(portletResource)) {
-				portletPreferences =
-					PortletPreferencesFactoryUtil.getPortletSetup(
-						portletRequest, portletResource);
+			if (portletPreferences == null) {
+				portletPreferences = portletRequest.getPreferences();
 			}
 
 			Set<String> extensions = new HashSet<String>();
@@ -940,16 +983,10 @@ public class EditFileEntryAction extends PortletAction {
 				String portletName = portletConfig.getPortletName();
 
 				if (portletName.equals(PortletKeys.MEDIA_GALLERY_DISPLAY)) {
-					String portletResource = ParamUtil.getString(
-						actionRequest, "portletResource");
+					PortletPreferences portletPreferences =
+						getStrictPortletSetup(actionRequest);
 
-					PortletPreferences portletPreferences = null;
-
-					if (Validator.isNotNull(portletResource)) {
-						PortletPreferencesFactoryUtil.getPortletSetup(
-							actionRequest, portletResource);
-					}
-					else {
+					if (portletPreferences == null) {
 						portletPreferences = actionRequest.getPreferences();
 					}
 

@@ -21,9 +21,7 @@ ServiceContext#deriveDefaultPermissions(long, String).
 
 --%>
 
-<%@ include file="/html/taglib/init.jsp" %>
-
-<%@ page import="com.liferay.taglib.ui.InputPermissionsParamsTag" %>
+<%@ include file="/html/taglib/ui/input_permissions/init.jsp" %>
 
 <%
 String uniqueNamespace = namespace + PortalUtil.getUniqueElementId(request, namespace, StringPool.BLANK);
@@ -46,9 +44,16 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 		Group siteGroup = GroupLocalServiceUtil.getGroup(themeDisplay.getSiteGroupId());
 
 		Role defaultGroupRole = RoleLocalServiceUtil.getDefaultGroupRole(siteGroup.getGroupId());
+
+		boolean hasViewDefaultGroupRolePermission = RolePermissionUtil.contains(themeDisplay.getPermissionChecker(), siteGroup.getGroupId(), defaultGroupRole.getRoleId(), ActionKeys.VIEW);
+
 		Role guestRole = RoleLocalServiceUtil.getRole(themeDisplay.getCompanyId(), RoleConstants.GUEST);
 
-		String[] roleNames = new String[] {RoleConstants.GUEST, defaultGroupRole.getName()};
+		String[] roleNames = new String[] {RoleConstants.GUEST};
+
+		if (hasViewDefaultGroupRolePermission) {
+			roleNames = ArrayUtil.append(roleNames, defaultGroupRole.getName());
+		}
 
 		String guestPermissionsName = "guestPermissions";
 		String groupPermissionsName = "groupPermissions";
@@ -91,22 +96,26 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 				%>
 
 				<option <%= (inputPermissionsViewRole.equals(RoleConstants.GUEST)) ? "selected=\"selected\"" : "" %> value="<%= RoleConstants.GUEST %>"><%= guestRoleLabel %></option>
-				<option <%= (inputPermissionsViewRole.equals(defaultGroupRole.getName())) ? "selected=\"selected\"" : "" %> value="<%= defaultGroupRole.getName() %>">
-					<c:choose>
-						<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.ORGANIZATION_USER) %>">
-							<liferay-ui:message key="organization-members" />
-						</c:when>
-						<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.POWER_USER) %>">
-							<liferay-ui:message key="power-users" />
-						</c:when>
-						<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.SITE_MEMBER) %>">
-							<liferay-ui:message key="site-members" />
-						</c:when>
-						<c:otherwise>
-							<liferay-ui:message key="user" />
-						</c:otherwise>
-					</c:choose>
-				</option>
+
+				<c:if test="<%= hasViewDefaultGroupRolePermission %>">
+					<option <%= (inputPermissionsViewRole.equals(defaultGroupRole.getName())) ? "selected=\"selected\"" : "" %> value="<%= defaultGroupRole.getName() %>">
+						<c:choose>
+							<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.ORGANIZATION_USER) %>">
+								<liferay-ui:message key="organization-members" />
+							</c:when>
+							<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.POWER_USER) %>">
+								<liferay-ui:message key="power-users" />
+							</c:when>
+							<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.SITE_MEMBER) %>">
+								<liferay-ui:message key="site-members" />
+							</c:when>
+							<c:otherwise>
+								<liferay-ui:message key="user" />
+							</c:otherwise>
+						</c:choose>
+					</option>
+				</c:if>
+
 				<option <%= (inputPermissionsViewRole.equals(RoleConstants.OWNER)) ? "selected=\"selected\"" : "" %> value="<%= RoleConstants.OWNER %>"><liferay-ui:message key="owner" /></option>
 			</select>
 
@@ -290,7 +299,7 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 					document.<%= formName %>.<%= namespace %>addUserPermissionsBox.checked = false;
 				}
 				else if (!document.<%= formName %>.<%= namespace %>addGroupPermissionsBox.checked &&
-						 !document.<%= formName %>.<%= namespace %>addGuestPermissionsBox.checked) {
+						!document.<%= formName %>.<%= namespace %>addGuestPermissionsBox.checked) {
 
 					document.<%= formName %>.<%= namespace %>addUserPermissionsBox.checked = true;
 				}

@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.messageboards.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see MBThreadService
  * @generated
  */
+@ProviderType
 public class MBThreadServiceWrapper implements MBThreadService,
 	ServiceWrapper<MBThreadService> {
 	public MBThreadServiceWrapper(MBThreadService mbThreadService) {
@@ -175,6 +178,25 @@ public class MBThreadServiceWrapper implements MBThreadService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		_mbThreadService.restoreThreadFromTrash(threadId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.search.Hits search(long groupId,
+		long creatorUserId, int status, int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _mbThreadService.search(groupId, creatorUserId, status, start,
+			end);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.search.Hits search(long groupId,
+		long creatorUserId, long startDate, long endDate, int status,
+		int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _mbThreadService.search(groupId, creatorUserId, startDate,
+			endDate, status, start, end);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.2.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_2_0.dtd">
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 7.0.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_7_0_0.dtd">
 
 <service-builder package-path="com.liferay.portal">
 	<namespace>Portal</namespace>
@@ -143,14 +143,14 @@
 		</finder>
 		<finder name="G_T" return-type="Collection">
 			<finder-column name="groupId" />
-			<finder-column name="taskExecutorClassName" />
+			<finder-column name="taskExecutorClassName" arrayable-operator="OR" />
 		</finder>
 		<finder name="G_S" return-type="Collection">
 			<finder-column name="groupId" />
 			<finder-column name="status" />
 		</finder>
 		<finder name="T_S" return-type="Collection">
-			<finder-column name="taskExecutorClassName" />
+			<finder-column name="taskExecutorClassName" arrayable-operator="OR" />
 			<finder-column name="status" />
 		</finder>
 		<finder name="G_N_T" return-type="Collection">
@@ -158,10 +158,21 @@
 			<finder-column name="name" />
 			<finder-column name="taskExecutorClassName" />
 		</finder>
+		<finder name="G_T_C" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="taskExecutorClassName" arrayable-operator="OR" />
+			<finder-column name="completed" />
+		</finder>
 		<finder name="G_T_S" return-type="Collection">
 			<finder-column name="groupId" />
-			<finder-column name="taskExecutorClassName" />
+			<finder-column name="taskExecutorClassName" arrayable-operator="OR" />
 			<finder-column name="status" />
+		</finder>
+		<finder name="G_N_T_C" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="name" />
+			<finder-column name="taskExecutorClassName" />
+			<finder-column name="completed" />
 		</finder>
 	</entity>
 	<entity name="BrowserTracker" local-service="true" remote-service="false">
@@ -442,6 +453,10 @@
 		<finder name="LiveGroupId" return-type="Group">
 			<finder-column name="liveGroupId" />
 		</finder>
+		<finder name="C_C" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="classNameId" />
+		</finder>
 		<finder name="C_P" return-type="Collection">
 			<finder-column name="companyId" />
 			<finder-column name="parentGroupId" />
@@ -461,6 +476,11 @@
 		<finder name="T_A" return-type="Collection">
 			<finder-column name="type" />
 			<finder-column name="active" />
+		</finder>
+		<finder name="G_C_P" return-type="Collection" db-index="false">
+			<finder-column name="groupId" comparator="&gt;" />
+			<finder-column name="companyId" />
+			<finder-column name="parentGroupId" />
 		</finder>
 		<finder name="C_C_C" return-type="Group" unique="true">
 			<finder-column name="companyId" />
@@ -515,6 +535,7 @@
 		<reference package-path="com.liferay.portlet.shopping" entity="ShoppingOrder" />
 		<reference package-path="com.liferay.portlet.social" entity="SocialActivity" />
 		<reference package-path="com.liferay.portlet.social" entity="SocialActivitySetting" />
+		<reference package-path="com.liferay.portlet.social" entity="SocialRequest" />
 		<reference package-path="com.liferay.portlet.softwarecatalog" entity="SCFrameworkVersion" />
 		<reference package-path="com.liferay.portlet.softwarecatalog" entity="SCProductEntry" />
 		<reference package-path="com.liferay.portlet.wiki" entity="WikiNode" />
@@ -1182,9 +1203,18 @@
 			<finder-column name="companyId" />
 			<finder-column name="parentOrganizationId" />
 		</finder>
+		<finder name="C_T" return-type="Collection" db-index="false">
+			<finder-column name="companyId" />
+			<finder-column name="treePath" comparator="LIKE" />
+		</finder>
 		<finder name="C_N" return-type="Organization" unique="true">
 			<finder-column name="companyId" />
 			<finder-column name="name" />
+		</finder>
+		<finder name="O_C_P" return-type="Collection" db-index="false">
+			<finder-column name="organizationId" comparator="&gt;" />
+			<finder-column name="companyId" />
+			<finder-column name="parentOrganizationId" />
 		</finder>
 
 		<!-- References -->
@@ -1948,6 +1978,10 @@
 			<finder-column name="companyId" />
 			<finder-column name="name" case-sensitive="false" />
 		</finder>
+		<finder name="C_T" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="type" arrayable-operator="OR" />
+		</finder>
 		<finder name="T_S" return-type="Collection">
 			<finder-column name="type" />
 			<finder-column name="subtype" />
@@ -2100,6 +2134,10 @@
 
 		<finder name="GroupId" return-type="Collection">
 			<finder-column name="groupId" />
+		</finder>
+		<finder name="G_S" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="systemEventSetKey" />
 		</finder>
 		<finder name="G_C_C" return-type="Collection">
 			<finder-column name="groupId" />
@@ -2808,6 +2846,7 @@
 		<exception>LARType</exception>
 		<exception>LayoutBranchName</exception>
 		<exception>LayoutFriendlyURL</exception>
+		<exception>LayoutFriendlyURLs</exception>
 		<exception>LayoutHidden</exception>
 		<exception>LayoutImport</exception>
 		<exception>LayoutName</exception>
@@ -2863,6 +2902,7 @@
 		<exception>TeamName</exception>
 		<exception>UserActive</exception>
 		<exception>UserEmailAddress</exception>
+		<exception>UserField</exception>
 		<exception>UserGroupName</exception>
 		<exception>UserId</exception>
 		<exception>UserLockout</exception>

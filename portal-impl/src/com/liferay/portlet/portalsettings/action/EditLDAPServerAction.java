@@ -143,7 +143,7 @@ public class EditLDAPServerAction extends PortletAction {
 		}
 
 		PortletPreferences portletPreferences = PrefsPropsUtil.getPreferences(
-			companyId);
+			companyId, true);
 
 		String ldapServerIds = portletPreferences.getValue(
 			"ldap.server.ids", StringPool.BLANK);
@@ -179,14 +179,14 @@ public class EditLDAPServerAction extends PortletAction {
 		// Update portletPreferences
 
 		PortletPreferences portletPreferences = PrefsPropsUtil.getPreferences(
-			themeDisplay.getCompanyId());
+			themeDisplay.getCompanyId(), true);
 
 		UnicodeProperties properties = new UnicodeProperties();
 
 		String ldapServerIds = portletPreferences.getValue(
 			"ldap.server.ids", StringPool.BLANK);
 
-		ldapServerIds = StringUtil.remove(
+		ldapServerIds = StringUtil.removeFromList(
 			ldapServerIds, String.valueOf(ldapServerId));
 
 		properties.put("ldap.server.ids", ldapServerIds);

@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link StagingService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see StagingService
  * @generated
  */
+@ProviderType
 public class StagingServiceWrapper implements StagingService,
 	ServiceWrapper<StagingService> {
 	public StagingServiceWrapper(StagingService stagingService) {
@@ -77,6 +80,16 @@ public class StagingServiceWrapper implements StagingService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		_stagingService.updateStagingRequest(stagingRequestId, fileName, bytes);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.lar.MissingReferences validateStagingRequest(
+		long stagingRequestId, boolean privateLayout,
+		java.util.Map<java.lang.String, java.lang.String[]> parameterMap)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _stagingService.validateStagingRequest(stagingRequestId,
+			privateLayout, parameterMap);
 	}
 
 	/**

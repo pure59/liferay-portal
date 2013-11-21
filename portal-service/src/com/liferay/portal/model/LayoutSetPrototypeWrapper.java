@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see LayoutSetPrototype
  * @generated
  */
+@ProviderType
 public class LayoutSetPrototypeWrapper implements LayoutSetPrototype,
 	ModelWrapper<LayoutSetPrototype> {
 	public LayoutSetPrototypeWrapper(LayoutSetPrototype layoutSetPrototype) {
@@ -582,6 +585,22 @@ public class LayoutSetPrototypeWrapper implements LayoutSetPrototype,
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_layoutSetPrototype.setExpandoBridgeAttributes(serviceContext);
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _layoutSetPrototype.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _layoutSetPrototype.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_layoutSetPrototype.prepareLocalizedFieldsForImport();
 	}
 
 	@Override

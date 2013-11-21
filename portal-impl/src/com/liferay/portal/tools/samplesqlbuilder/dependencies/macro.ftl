@@ -56,11 +56,11 @@
 	_groupId
 	_parentDLFolderId
 >
-	<#if (_dlFolderDepth <= maxDLFolderDepth)>
-		<#list 1..maxDLFolderCount as dlFolderCount>
-			<#local dlFolderModel = dataFactory.newDLFolderModel(_groupId, _parentDLFolderId, dlFolderCount)>
+	<#if (_dlFolderDepth <= dataFactory.maxDLFolderDepth)>
+		<#local dlFolderModels = dataFactory.newDLFolderModels(_groupId, _parentDLFolderId)>
 
-			insert into DLFolder values ('${dlFolderModel.uuid}', ${dlFolderModel.folderId}, ${dlFolderModel.groupId}, ${dlFolderModel.companyId}, ${dlFolderModel.userId}, '${dlFolderModel.userName}', '${dataFactory.getDateString(dlFolderModel.createDate)}', '${dataFactory.getDateString(dlFolderModel.modifiedDate)}', ${dlFolderModel.repositoryId}, ${dlFolderModel.mountPoint?string}, ${dlFolderModel.parentFolderId}, '${dlFolderModel.name}', '${dlFolderModel.description}', '${dataFactory.getDateString(dlFolderModel.lastPostDate)}', ${dlFolderModel.defaultFileEntryTypeId}, ${dlFolderModel.hidden?string}, ${dlFolderModel.overrideFileEntryTypes?string}, ${dlFolderModel.status}, ${dlFolderModel.statusByUserId}, '${dlFolderModel.statusByUserName}', '${dataFactory.getDateString(dlFolderModel.statusDate)}');
+		<#list dlFolderModels as dlFolderModel>
+			insert into DLFolder values ('${dlFolderModel.uuid}', ${dlFolderModel.folderId}, ${dlFolderModel.groupId}, ${dlFolderModel.companyId}, ${dlFolderModel.userId}, '${dlFolderModel.userName}', '${dataFactory.getDateString(dlFolderModel.createDate)}', '${dataFactory.getDateString(dlFolderModel.modifiedDate)}', ${dlFolderModel.repositoryId}, ${dlFolderModel.mountPoint?string}, ${dlFolderModel.parentFolderId}, '', '${dlFolderModel.name}', '${dlFolderModel.description}', '${dataFactory.getDateString(dlFolderModel.lastPostDate)}', ${dlFolderModel.defaultFileEntryTypeId}, ${dlFolderModel.hidden?string}, ${dlFolderModel.overrideFileEntryTypes?string}, ${dlFolderModel.status}, ${dlFolderModel.statusByUserId}, '${dlFolderModel.statusByUserName}', '${dataFactory.getDateString(dlFolderModel.statusDate)}');
 
 			<@insertResourcePermissions
 				_entry = dlFolderModel
@@ -70,56 +70,54 @@
 				_entry = dlFolderModel
 			/>
 
-			<#if (maxDLFileEntryCount > 0)>
-				<#list 1..maxDLFileEntryCount as dlFileEntryCount>
-					<#local dlFileEntryModel = dataFactory.newDlFileEntryModel(dlFolderModel, dlFileEntryCount)>
+			<#local dlFileEntryModels = dataFactory.newDlFileEntryModels(dlFolderModel)>
 
-					insert into DLFileEntry values ('${dlFileEntryModel.uuid}', ${dlFileEntryModel.fileEntryId}, ${dlFileEntryModel.groupId}, ${dlFileEntryModel.companyId}, ${dlFileEntryModel.userId}, '${dlFileEntryModel.userName}', ${dlFileEntryModel.versionUserId}, '${dlFileEntryModel.versionUserName}', '${dataFactory.getDateString(dlFileEntryModel.createDate)}', '${dataFactory.getDateString(dlFileEntryModel.modifiedDate)}', ${dlFileEntryModel.classNameId}, ${dlFileEntryModel.classPK}, ${dlFileEntryModel.repositoryId}, ${dlFileEntryModel.folderId}, '${dlFileEntryModel.name}', '${dlFileEntryModel.extension}', '${dlFileEntryModel.mimeType}', '${dlFileEntryModel.title}','${dlFileEntryModel.description}', '${dlFileEntryModel.extraSettings}', ${dlFileEntryModel.fileEntryTypeId}, '${dlFileEntryModel.version}', ${dlFileEntryModel.size}, ${dlFileEntryModel.readCount}, ${dlFileEntryModel.smallImageId}, ${dlFileEntryModel.largeImageId}, ${dlFileEntryModel.custom1ImageId}, ${dlFileEntryModel.custom2ImageId}, ${dlFileEntryModel.manualCheckInRequired?string});
+			<#list dlFileEntryModels as dlFileEntryModel>
+				insert into DLFileEntry values ('${dlFileEntryModel.uuid}', ${dlFileEntryModel.fileEntryId}, ${dlFileEntryModel.groupId}, ${dlFileEntryModel.companyId}, ${dlFileEntryModel.userId}, '${dlFileEntryModel.userName}', '${dataFactory.getDateString(dlFileEntryModel.createDate)}', '${dataFactory.getDateString(dlFileEntryModel.modifiedDate)}', ${dlFileEntryModel.classNameId}, ${dlFileEntryModel.classPK}, ${dlFileEntryModel.repositoryId}, ${dlFileEntryModel.folderId}, '', '${dlFileEntryModel.name}', '${dlFileEntryModel.extension}', '${dlFileEntryModel.mimeType}', '${dlFileEntryModel.title}','${dlFileEntryModel.description}', '${dlFileEntryModel.extraSettings}', ${dlFileEntryModel.fileEntryTypeId}, '${dlFileEntryModel.version}', ${dlFileEntryModel.size}, ${dlFileEntryModel.readCount}, ${dlFileEntryModel.smallImageId}, ${dlFileEntryModel.largeImageId}, ${dlFileEntryModel.custom1ImageId}, ${dlFileEntryModel.custom2ImageId}, ${dlFileEntryModel.manualCheckInRequired?string});
 
-					<#local dlFileVersionModel = dataFactory.newDLFileVersionModel(dlFileEntryModel)>
+				<#local dlFileVersionModel = dataFactory.newDLFileVersionModel(dlFileEntryModel)>
 
-					insert into DLFileVersion values ('${dlFileVersionModel.uuid}', ${dlFileVersionModel.fileVersionId}, ${dlFileVersionModel.groupId}, ${dlFileVersionModel.companyId}, ${dlFileVersionModel.userId}, '${dlFileVersionModel.userName}', '${dataFactory.getDateString(dlFileVersionModel.createDate)}', '${dataFactory.getDateString(dlFileVersionModel.modifiedDate)}', ${dlFileVersionModel.repositoryId}, ${dlFileVersionModel.folderId}, ${dlFileVersionModel.fileEntryId}, '${dlFileVersionModel.extension}', '${dlFileVersionModel.mimeType}', '${dlFileVersionModel.title}','${dlFileVersionModel.description}', '${dlFileVersionModel.changeLog}', '${dlFileVersionModel.extraSettings}', ${dlFileVersionModel.fileEntryTypeId}, '${dlFileVersionModel.version}', ${dlFileVersionModel.size}, '${dlFileVersionModel.checksum}', ${dlFileVersionModel.status}, ${dlFileVersionModel.statusByUserId}, '${dlFileVersionModel.statusByUserName}', ${dlFileVersionModel.statusDate!'null'});
+				insert into DLFileVersion values ('${dlFileVersionModel.uuid}', ${dlFileVersionModel.fileVersionId}, ${dlFileVersionModel.groupId}, ${dlFileVersionModel.companyId}, ${dlFileVersionModel.userId}, '${dlFileVersionModel.userName}', '${dataFactory.getDateString(dlFileVersionModel.createDate)}', '${dataFactory.getDateString(dlFileVersionModel.modifiedDate)}', ${dlFileVersionModel.repositoryId}, ${dlFileVersionModel.folderId}, ${dlFileVersionModel.fileEntryId}, '', '${dlFileVersionModel.extension}', '${dlFileVersionModel.mimeType}', '${dlFileVersionModel.title}','${dlFileVersionModel.description}', '${dlFileVersionModel.changeLog}', '${dlFileVersionModel.extraSettings}', ${dlFileVersionModel.fileEntryTypeId}, '${dlFileVersionModel.version}', ${dlFileVersionModel.size}, '${dlFileVersionModel.checksum}', ${dlFileVersionModel.status}, ${dlFileVersionModel.statusByUserId}, '${dlFileVersionModel.statusByUserName}', ${dlFileVersionModel.statusDate!'null'});
 
-					<@insertResourcePermissions
-						_entry = dlFileEntryModel
-					/>
+				<@insertResourcePermissions
+					_entry = dlFileEntryModel
+				/>
 
-					<@insertAssetEntry
-						_entry = dlFileEntryModel
-					/>
+				<@insertAssetEntry
+					_entry = dlFileEntryModel
+				/>
 
-					<#local ddmStorageLinkId = counter.get()>
+				<#local ddmStorageLinkId = dataFactory.getCounterNext()>
 
-					<@insertDDMContent
-						_ddmStorageLinkId = ddmStorageLinkId
-						_ddmStructureId = _ddmStructureId
-						_entry = dlFileEntryModel
-					/>
+				<@insertDDMContent
+					_ddmStorageLinkId = ddmStorageLinkId
+					_ddmStructureId = _ddmStructureId
+					_entry = dlFileEntryModel
+				/>
 
-					<@insertMBDiscussion
-						_classNameId = dataFactory.DLFileEntryClassNameId
-						_classPK = dlFileEntryModel.fileEntryId
-						_groupId = dlFileEntryModel.groupId
-						_maxCommentCount = 0
-						_mbRootMessageId = counter.get()
-						_mbThreadId = counter.get()
-					/>
+				<@insertMBDiscussion
+					_classNameId = dataFactory.DLFileEntryClassNameId
+					_classPK = dlFileEntryModel.fileEntryId
+					_groupId = dlFileEntryModel.groupId
+					_maxCommentCount = 0
+					_mbRootMessageId = dataFactory.getCounterNext()
+					_mbThreadId = dataFactory.getCounterNext()
+				/>
 
-					<@insertSocialActivity
-						_entry = dlFileEntryModel
-					/>
+				<@insertSocialActivity
+					_entry = dlFileEntryModel
+				/>
 
-					<#local dlFileEntryMetadataModel = dataFactory.newDLFileEntryMetadataModel(ddmStorageLinkId, _ddmStructureId, dlFileVersionModel)>
+				<#local dlFileEntryMetadataModel = dataFactory.newDLFileEntryMetadataModel(ddmStorageLinkId, _ddmStructureId, dlFileVersionModel)>
 
-					insert into DLFileEntryMetadata values ('${dlFileEntryMetadataModel.uuid}', ${dlFileEntryMetadataModel.fileEntryMetadataId}, ${dlFileEntryMetadataModel.DDMStorageId}, ${dlFileEntryMetadataModel.DDMStructureId}, ${dlFileEntryMetadataModel.fileEntryTypeId}, ${dlFileEntryMetadataModel.fileEntryId}, ${dlFileEntryMetadataModel.fileVersionId});
+				insert into DLFileEntryMetadata values ('${dlFileEntryMetadataModel.uuid}', ${dlFileEntryMetadataModel.fileEntryMetadataId}, ${dlFileEntryMetadataModel.DDMStorageId}, ${dlFileEntryMetadataModel.DDMStructureId}, ${dlFileEntryMetadataModel.fileEntryTypeId}, ${dlFileEntryMetadataModel.fileEntryId}, ${dlFileEntryMetadataModel.fileVersionId});
 
-					<@insertDDMStructureLink
-						_entry = dlFileEntryMetadataModel
-					/>
+				<@insertDDMStructureLink
+					_entry = dlFileEntryMetadataModel
+				/>
 
-					${documentLibraryCSVWriter.write(dlFolderModel.folderId + "," + dlFileEntryModel.name + "," + dlFileEntryModel.fileEntryId + "," + dataFactory.getDateLong(dlFileEntryModel.createDate) + "," + dataFactory.getDateLong(dlFolderModel.createDate) + "\n")}
-				</#list>
-			</#if>
+				${documentLibraryCSVWriter.write(dlFolderModel.folderId + "," + dlFileEntryModel.name + "," + dlFileEntryModel.fileEntryId + "," + dataFactory.getDateLong(dlFileEntryModel.createDate) + "," + dataFactory.getDateLong(dlFolderModel.createDate) + "\n")}
+			</#list>
 
 			<@insertDLFolder
 				_ddmStructureId = _ddmStructureId
@@ -176,19 +174,17 @@
 		_mbMessageModel = mbRootMessageModel
 	/>
 
-	<#if (_maxCommentCount > 0)>
-		<#list 1.._maxCommentCount as commentCount>
-			<#local mbMessageModel = dataFactory.newMBMessageModel(mbThreadModel, _classNameId, _classPK, commentCount)>
+	<#local mbMessageModels = dataFactory.newMBMessageModels(mbThreadModel, _classNameId, _classPK, _maxCommentCount)>
 
-			<@insertMBMessage
-				_mbMessageModel = mbMessageModel
-			/>
+	<#list mbMessageModels as mbMessageModel>
+		<@insertMBMessage
+			_mbMessageModel = mbMessageModel
+		/>
 
-			<@insertSocialActivity
-				_entry = mbMessageModel
-			/>
-		</#list>
-	</#if>
+		<@insertSocialActivity
+			_entry = mbMessageModel
+		/>
+	</#list>
 
 	<#local mbDiscussionModel = dataFactory.newMBDiscussionModel(_groupId, _classNameId, _classPK, _mbThreadId)>
 

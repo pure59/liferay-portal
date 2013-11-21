@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see Role
  * @generated
  */
+@ProviderType
 public class RoleWrapper implements Role, ModelWrapper<Role> {
 	public RoleWrapper(Role role) {
 		_role = role;
@@ -789,6 +792,22 @@ public class RoleWrapper implements Role, ModelWrapper<Role> {
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_role.setExpandoBridgeAttributes(serviceContext);
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _role.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _role.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_role.prepareLocalizedFieldsForImport();
 	}
 
 	@Override

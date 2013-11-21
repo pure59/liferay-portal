@@ -17,29 +17,20 @@
 <%@ include file="/html/portlet/init.jsp" %>
 
 <%@ page import="com.liferay.portal.DuplicateRoleException" %><%@
-page import="com.liferay.portal.NoSuchRoleException" %><%@
 page import="com.liferay.portal.RequiredRoleException" %><%@
 page import="com.liferay.portal.RoleAssignmentException" %><%@
 page import="com.liferay.portal.RoleNameException" %><%@
 page import="com.liferay.portal.RolePermissionsException" %><%@
-page import="com.liferay.portal.kernel.portletdisplaytemplate.BasePortletDisplayTemplateHandler" %><%@
-page import="com.liferay.portal.kernel.template.TemplateHandler" %><%@
-page import="com.liferay.portal.kernel.template.TemplateHandlerRegistryUtil" %><%@
+page import="com.liferay.portal.kernel.template.comparator.TemplateHandlerComparator" %><%@
 page import="com.liferay.portal.security.membershippolicy.OrganizationMembershipPolicyUtil" %><%@
 page import="com.liferay.portal.security.membershippolicy.RoleMembershipPolicyUtil" %><%@
 page import="com.liferay.portal.security.membershippolicy.SiteMembershipPolicyUtil" %><%@
 page import="com.liferay.portal.security.permission.PermissionConverterUtil" %><%@
 page import="com.liferay.portal.security.permission.comparator.ActionComparator" %><%@
 page import="com.liferay.portal.security.permission.comparator.ModelResourceWeightComparator" %><%@
-page import="com.liferay.portal.service.permission.RolePermissionUtil" %><%@
 page import="com.liferay.portlet.rolesadmin.search.ResourceActionRowChecker" %><%@
-page import="com.liferay.portlet.rolesadmin.search.RoleDisplayTerms" %><%@
 page import="com.liferay.portlet.rolesadmin.search.RoleSearch" %><%@
-page import="com.liferay.portlet.rolesadmin.search.RoleSearchTerms" %><%@
-page import="com.liferay.portlet.rolesadmin.util.RolesAdminUtil" %><%@
-page import="com.liferay.portlet.usersadmin.search.GroupSearch" %><%@
-page import="com.liferay.portlet.usersadmin.search.OrganizationSearch" %><%@
-page import="com.liferay.portlet.usersadmin.util.UsersAdminUtil" %>
+page import="com.liferay.portlet.rolesadmin.search.RoleSearchTerms" %>
 
 <%
 boolean filterManageableGroups = true;
@@ -59,10 +50,16 @@ private String _getActionLabel(PageContext pageContext, ThemeDisplay themeDispla
 	String actionLabel = null;
 
 	if (actionId.equals(ActionKeys.ACCESS_IN_CONTROL_PANEL)) {
-		if (PortalUtil.isControlPanelPortlet(resourceName, PortletCategoryKeys.SITE_ADMINISTRATION, themeDisplay)) {
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(themeDisplay.getCompanyId(), resourceName);
+
+		String controlPanelCategory = portlet.getControlPanelEntryCategory();
+
+		if (Validator.isNull(controlPanelCategory)) {
+		}
+		else if (controlPanelCategory.startsWith(PortletCategoryKeys.SITE_ADMINISTRATION)) {
 			actionLabel = LanguageUtil.get(pageContext, "access-in-site-administration");
 		}
-		else if (PortalUtil.isControlPanelPortlet(resourceName, PortletCategoryKeys.MY, themeDisplay)) {
+		else if (controlPanelCategory.equals(PortletCategoryKeys.MY)) {
 			actionLabel = LanguageUtil.get(pageContext, "access-in-my-account");
 		}
 	}

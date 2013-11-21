@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.polls.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -25,14 +27,30 @@ import com.liferay.portlet.polls.service.PollsQuestionLocalServiceUtil;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Shinn Lok
+ * @author Mate Thurzo
  */
 public class PollsQuestionStagedModelDataHandler
 	extends BaseStagedModelDataHandler<PollsQuestion> {
 
 	public static final String[] CLASS_NAMES = {PollsQuestion.class.getName()};
+
+	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		PollsQuestion question =
+			PollsQuestionLocalServiceUtil.fetchPollsQuestionByUuidAndGroupId(
+				uuid, groupId);
+
+		if (question != null) {
+			PollsQuestionLocalServiceUtil.deleteQuestion(question);
+		}
+	}
 
 	@Override
 	public String[] getClassNames() {
@@ -54,7 +72,23 @@ public class PollsQuestionStagedModelDataHandler
 
 		portletDataContext.addClassedModel(
 			questionElement, ExportImportPathUtil.getModelPath(question),
-			question, PollsPortletDataHandler.NAMESPACE);
+			question);
+	}
+
+	@Override
+	protected void doImportCompanyStagedModel(
+			PortletDataContext portletDataContext, String uuid, long questionId)
+		throws Exception {
+
+		PollsQuestion existingQuestion =
+			PollsQuestionLocalServiceUtil.fetchPollsQuestionByUuidAndGroupId(
+				uuid, portletDataContext.getCompanyGroupId());
+
+		Map<Long, Long> questionIds =
+			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+				PollsQuestion.class);
+
+		questionIds.put(questionId, existingQuestion.getQuestionId());
 	}
 
 	@Override
@@ -91,7 +125,7 @@ public class PollsQuestionStagedModelDataHandler
 		}
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			question, PollsPortletDataHandler.NAMESPACE);
+			question);
 
 		PollsQuestion importedQuestion = null;
 
@@ -127,8 +161,23 @@ public class PollsQuestionStagedModelDataHandler
 				expirationMinute, neverExpire, null, serviceContext);
 		}
 
-		portletDataContext.importClassedModel(
-			question, importedQuestion, PollsPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(question, importedQuestion);
+	}
+
+	@Override
+	protected boolean validateMissingReference(
+			String uuid, long companyId, long groupId)
+		throws Exception {
+
+		PollsQuestion question =
+			PollsQuestionLocalServiceUtil.fetchPollsQuestionByUuidAndGroupId(
+				uuid, groupId);
+
+		if (question == null) {
+			return false;
+		}
+
+		return true;
 	}
 
 }

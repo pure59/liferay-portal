@@ -25,7 +25,11 @@ import com.liferay.portalweb.portal.util.TestPropsValues;
 
 import java.io.File;
 
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
+
+import net.jsourcerer.webdriver.jserrorcollector.JavaScriptError;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
@@ -52,7 +56,7 @@ public abstract class BaseWebDriverImpl
 
 		WebDriver.Window window = options.window();
 
-		window.setSize(new Dimension(1000, 1250));
+		window.setSize(new Dimension(1050, 1250));
 
 		webDriver.get(browserURL);
 	}
@@ -80,6 +84,69 @@ public abstract class BaseWebDriverImpl
 	@Override
 	public void assertElementPresent(String locator) throws Exception {
 		LiferaySeleniumHelper.assertElementPresent(this, locator);
+	}
+
+	@Override
+	public void assertEmailBody(String index, String body) throws Exception {
+		LiferaySeleniumHelper.assertEmailBody(this, index, body);
+	}
+
+	@Override
+	public void assertEmailSubject(String index, String subject)
+		throws Exception {
+
+		LiferaySeleniumHelper.assertEmailSubject(this, index, subject);
+	}
+
+	@Override
+	public void assertJavaScriptErrors() throws Exception {
+		if (!TestPropsValues.TEST_ASSSERT_JAVASCRIPT_ERRORS) {
+			return;
+		}
+
+		String pageSource = getPageSource();
+
+		if (pageSource.contains(
+				"html id=\"feedHandler\" xmlns=" +
+					"\"http://www.w3.org/1999/xhtml\"")) {
+
+			return;
+		}
+
+		WebElement webElement = getWebElement("//body");
+
+		WrapsDriver wrapsDriver = (WrapsDriver)webElement;
+
+		WebDriver webDriver = wrapsDriver.getWrappedDriver();
+
+		List<JavaScriptError> javaScriptErrors = JavaScriptError.readErrors(
+			webDriver);
+
+		if (!javaScriptErrors.isEmpty()) {
+			for (JavaScriptError javaScriptError : javaScriptErrors) {
+				String javaScriptErrorValue = javaScriptError.toString();
+
+				System.out.println("JS_ERROR: " + javaScriptErrorValue);
+
+				// LPS-41634
+
+				if (javaScriptErrorValue.contains(
+						"TypeError: d.config.doc.defaultView is null")) {
+
+					continue;
+				}
+
+				// LPS-41634
+
+				if (javaScriptErrorValue.contains(
+						"NS_ERROR_NOT_INITIALIZED:")) {
+
+					continue;
+				}
+
+				throw new Exception(javaScriptErrorValue);
+			}
+		}
 	}
 
 	@Override
@@ -186,6 +253,14 @@ public abstract class BaseWebDriverImpl
 	}
 
 	@Override
+	public void connectToEmailAccount(String emailAddress, String emailPassword)
+		throws Exception {
+
+		LiferaySeleniumHelper.connectToEmailAccount(
+			emailAddress, emailPassword);
+	}
+
+	@Override
 	public void copyText(String locator) {
 		_clipBoard = super.getText(locator);
 	}
@@ -193,6 +268,11 @@ public abstract class BaseWebDriverImpl
 	@Override
 	public void copyValue(String locator) {
 		_clipBoard = super.getValue(locator);
+	}
+
+	@Override
+	public void deleteAllEmails() throws Exception {
+		LiferaySeleniumHelper.deleteAllEmails();
 	}
 
 	@Override
@@ -224,6 +304,16 @@ public abstract class BaseWebDriverImpl
 		Calendar calendar = Calendar.getInstance();
 
 		return StringUtil.valueOf(calendar.get(Calendar.YEAR));
+	}
+
+	@Override
+	public String getEmailBody(String index) throws Exception {
+		return LiferaySeleniumHelper.getEmailBody(index);
+	}
+
+	@Override
+	public String getEmailSubject(String index) throws Exception {
+		return LiferaySeleniumHelper.getEmailSubject(index);
 	}
 
 	@Override
@@ -318,7 +408,11 @@ public abstract class BaseWebDriverImpl
 			return false;
 		}
 
-		return !pattern.equals(getSelectedLabel(selectLocator, "1"));
+		String[] selectedLabels = getSelectedLabels(selectLocator);
+
+		List<String> selectedLabelsList = Arrays.asList(selectedLabels);
+
+		return !selectedLabelsList.contains(pattern);
 	}
 
 	@Override
@@ -429,6 +523,11 @@ public abstract class BaseWebDriverImpl
 	}
 
 	@Override
+	public void replyToEmail(String to, String body) throws Exception {
+		LiferaySeleniumHelper.replyToEmail(this, to, body);
+	}
+
+	@Override
 	public void saveScreenshot(String fileName) throws Exception {
 		if (!TestPropsValues.SAVE_SCREENSHOT) {
 			return;
@@ -469,6 +568,18 @@ public abstract class BaseWebDriverImpl
 	public void selectAndWait(String selectLocator, String optionLocator) {
 		super.select(selectLocator, optionLocator);
 		super.waitForPageToLoad("30000");
+	}
+
+	@Override
+	public boolean sendActionLogger(String command, String[] params) {
+		return true;
+	}
+
+	@Override
+	public void sendEmail(String to, String subject, String body)
+		throws Exception {
+
+		LiferaySeleniumHelper.sendEmail(this, to, subject, body);
 	}
 
 	@Override
@@ -526,7 +637,13 @@ public abstract class BaseWebDriverImpl
 
 	@Override
 	public void uploadTempFile(String location, String value) {
-		uploadFile(location, TestPropsValues.OUTPUT_DIR + value);
+		String slash = "/";
+
+		if (OSDetector.isWindows()) {
+			slash = "\\";
+		}
+
+		uploadFile(location, TestPropsValues.OUTPUT_DIR + slash + value);
 	}
 
 	@Override

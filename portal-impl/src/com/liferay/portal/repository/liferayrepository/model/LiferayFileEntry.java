@@ -235,7 +235,15 @@ public class LiferayFileEntry extends LiferayModel implements FileEntry {
 	public FileVersion getLatestFileVersion()
 		throws PortalException, SystemException {
 
-		return new LiferayFileVersion(_dlFileEntry.getLatestFileVersion(false));
+		return getLatestFileVersion(false);
+	}
+
+	@Override
+	public FileVersion getLatestFileVersion(boolean trusted)
+		throws PortalException, SystemException {
+
+		return new LiferayFileVersion(
+			_dlFileEntry.getLatestFileVersion(trusted));
 	}
 
 	@Override
@@ -428,6 +436,21 @@ public class LiferayFileEntry extends LiferayModel implements FileEntry {
 	@Override
 	public boolean isEscapedModel() {
 		return _escapedModel;
+	}
+
+	@Override
+	public boolean isInTrash() {
+		return _dlFileEntry.isInTrash();
+	}
+
+	@Override
+	public boolean isInTrashContainer() {
+		try {
+			return _dlFileEntry.isInTrashContainer();
+		}
+		catch (Exception e) {
+			return false;
+		}
 	}
 
 	@Override

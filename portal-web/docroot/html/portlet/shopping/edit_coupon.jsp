@@ -33,8 +33,6 @@ if (coupon != null) {
 	}
 }
 
-String limitCategories = BeanParamUtil.getString(coupon, request, "limitCategories");
-String limitSkus = BeanParamUtil.getString(coupon, request, "limitSkus");
 double minOrder = BeanParamUtil.getDouble(coupon, request, "minOrder");
 double discount = BeanParamUtil.getDouble(coupon, request, "discount");
 String discountType = BeanParamUtil.getString(coupon, request, "discountType");
@@ -75,12 +73,12 @@ String discountType = BeanParamUtil.getString(coupon, request, "discountType");
 			</c:when>
 			<c:otherwise>
 				<aui:field-wrapper label="code">
-					<%= HtmlUtil.escape(code) %>
+					<liferay-ui:input-resource url="<%= code %>" />
 				</aui:field-wrapper>
 			</c:otherwise>
 		</c:choose>
 
-		<aui:input autoFocus="<%= (windowState.equals(WindowState.MAXIMIZED) && Validator.isNotNull(coupon)) %>" name="name" />
+		<aui:input autoFocus="<%= (windowState.equals(WindowState.MAXIMIZED) && (coupon != null)) %>" name="name" />
 
 		<aui:input name="description" />
 

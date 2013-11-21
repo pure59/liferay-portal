@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatalists.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
 
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see DDLRecordVersion
  * @generated
  */
+@ProviderType
 public class DDLRecordVersionWrapper implements DDLRecordVersion,
 	ModelWrapper<DDLRecordVersion> {
 	public DDLRecordVersionWrapper(DDLRecordVersion ddlRecordVersion) {
@@ -592,16 +595,6 @@ public class DDLRecordVersionWrapper implements DDLRecordVersion,
 	@Override
 	public boolean isIncomplete() {
 		return _ddlRecordVersion.isIncomplete();
-	}
-
-	/**
-	* Returns <code>true</code> if this d d l record version is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this d d l record version is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _ddlRecordVersion.isInTrash();
 	}
 
 	/**

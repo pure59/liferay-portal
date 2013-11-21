@@ -16,14 +16,7 @@
 
 <%@ include file="/html/portlet/init.jsp" %>
 
-<%@ page import="com.liferay.portal.kernel.template.TemplateHandler" %><%@
-page import="com.liferay.portal.kernel.template.TemplateHandlerRegistryUtil" %><%@
-page import="com.liferay.portlet.asset.NoSuchVocabularyException" %><%@
-page import="com.liferay.portlet.asset.model.AssetCategory" %><%@
-page import="com.liferay.portlet.asset.model.AssetVocabulary" %><%@
-page import="com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil" %><%@
-page import="com.liferay.portlet.asset.service.AssetVocabularyServiceUtil" %><%@
-page import="com.liferay.portlet.portletdisplaytemplate.util.PortletDisplayTemplateUtil" %>
+<%@ page import="com.liferay.portlet.asset.NoSuchVocabularyException" %>
 
 <%
 List<AssetVocabulary> assetVocabularies = AssetVocabularyServiceUtil.getGroupsVocabularies(new long[] {scopeGroupId, themeDisplay.getCompanyGroupId()});
@@ -44,7 +37,8 @@ if (!allAssetVocabularies && (portletPreferences.getValues("assetVocabularyIds",
 	assetVocabularyIds = StringUtil.split(portletPreferences.getValue("assetVocabularyIds", null), 0L);
 }
 
-String displayTemplate = portletPreferences.getValue("displayTemplate", StringPool.BLANK);
+String displayStyle = portletPreferences.getValue("displayStyle", StringPool.BLANK);
+long displayStyleGroupId = GetterUtil.getLong(portletPreferences.getValue("displayStyleGroupId", null), themeDisplay.getScopeGroupId());
 %>
 
 <%@ include file="/html/portlet/asset_categories_navigation/init-ext.jsp" %>

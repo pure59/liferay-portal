@@ -16,12 +16,15 @@ package com.liferay.portlet.asset.service.base;
 
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.IdentifiableBean;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.service.BaseServiceImpl;
 import com.liferay.portal.service.persistence.UserFinder;
 import com.liferay.portal.service.persistence.UserPersistence;
+import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.asset.model.AssetTagProperty;
 import com.liferay.portlet.asset.service.AssetTagPropertyService;
@@ -31,7 +34,6 @@ import com.liferay.portlet.asset.service.persistence.AssetCategoryPropertyFinder
 import com.liferay.portlet.asset.service.persistence.AssetCategoryPropertyPersistence;
 import com.liferay.portlet.asset.service.persistence.AssetEntryFinder;
 import com.liferay.portlet.asset.service.persistence.AssetEntryPersistence;
-import com.liferay.portlet.asset.service.persistence.AssetLinkFinder;
 import com.liferay.portlet.asset.service.persistence.AssetLinkPersistence;
 import com.liferay.portlet.asset.service.persistence.AssetTagFinder;
 import com.liferay.portlet.asset.service.persistence.AssetTagPersistence;
@@ -326,24 +328,6 @@ public abstract class AssetTagPropertyServiceBaseImpl extends BaseServiceImpl
 	public void setAssetLinkPersistence(
 		AssetLinkPersistence assetLinkPersistence) {
 		this.assetLinkPersistence = assetLinkPersistence;
-	}
-
-	/**
-	 * Returns the asset link finder.
-	 *
-	 * @return the asset link finder
-	 */
-	public AssetLinkFinder getAssetLinkFinder() {
-		return assetLinkFinder;
-	}
-
-	/**
-	 * Sets the asset link finder.
-	 *
-	 * @param assetLinkFinder the asset link finder
-	 */
-	public void setAssetLinkFinder(AssetLinkFinder assetLinkFinder) {
-		this.assetLinkFinder = assetLinkFinder;
 	}
 
 	/**
@@ -776,13 +760,18 @@ public abstract class AssetTagPropertyServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
-	 * Performs an SQL query.
+	 * Performs a SQL query.
 	 *
 	 * @param sql the sql query
 	 */
 	protected void runSQL(String sql) throws SystemException {
 		try {
 			DataSource dataSource = assetTagPropertyPersistence.getDataSource();
+
+			DB db = DBFactoryUtil.getDB();
+
+			sql = db.buildSQL(sql);
+			sql = PortalUtil.transformSQL(sql);
 
 			SqlUpdate sqlUpdate = SqlUpdateFactoryUtil.getSqlUpdate(dataSource,
 					sql, new int[0]);
@@ -822,8 +811,6 @@ public abstract class AssetTagPropertyServiceBaseImpl extends BaseServiceImpl
 	protected com.liferay.portlet.asset.service.AssetLinkLocalService assetLinkLocalService;
 	@BeanReference(type = AssetLinkPersistence.class)
 	protected AssetLinkPersistence assetLinkPersistence;
-	@BeanReference(type = AssetLinkFinder.class)
-	protected AssetLinkFinder assetLinkFinder;
 	@BeanReference(type = com.liferay.portlet.asset.service.AssetTagLocalService.class)
 	protected com.liferay.portlet.asset.service.AssetTagLocalService assetTagLocalService;
 	@BeanReference(type = com.liferay.portlet.asset.service.AssetTagService.class)

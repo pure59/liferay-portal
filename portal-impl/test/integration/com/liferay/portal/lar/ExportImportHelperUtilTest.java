@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -41,6 +42,8 @@ import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
+import com.liferay.portal.test.Sync;
+import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
 import com.liferay.portal.test.TransactionalExecutionTestListener;
 import com.liferay.portal.util.GroupTestUtil;
 import com.liferay.portal.util.LayoutTestUtil;
@@ -79,13 +82,16 @@ import org.powermock.api.mockito.PowerMockito;
 
 /**
  * @author Zsolt Berentey
+ * @author Peter Borkuti
  */
 @ExecutionTestListeners(
 	listeners = {
 		MainServletExecutionTestListener.class,
+		SynchronousDestinationExecutionTestListener.class,
 		TransactionalExecutionTestListener.class
 	})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
+@Sync
 @Transactional
 public class ExportImportHelperUtilTest extends PowerMockito {
 
@@ -123,6 +129,13 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 
 		_portletDataContextExport.setExportDataRootElement(rootElement);
 
+		_stagingPrivateLayout = LayoutTestUtil.addLayout(
+			_stagingGroup.getGroupId(), ServiceTestUtil.randomString(), true);
+		_stagingPublicLayout = LayoutTestUtil.addLayout(
+			_stagingGroup.getGroupId(), ServiceTestUtil.randomString(), false);
+
+		_portletDataContextExport.setPlid(_stagingPublicLayout.getPlid());
+
 		_portletDataContextImport =
 			PortletDataContextFactoryUtil.createImportPortletDataContext(
 				_stagingGroup.getCompanyId(), _stagingGroup.getGroupId(),
@@ -131,6 +144,12 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 				testReaderWriter);
 
 		_portletDataContextImport.setImportDataRootElement(rootElement);
+
+		_livePublicLayout = LayoutTestUtil.addLayout(
+			_liveGroup.getGroupId(), ServiceTestUtil.randomString(), false);
+
+		_portletDataContextImport.setPlid(_livePublicLayout.getPlid());
+
 		_portletDataContextImport.setSourceGroupId(_stagingGroup.getGroupId());
 
 		rootElement.addElement("entry");
@@ -144,6 +163,42 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 	public void tearDown() throws Exception {
 		GroupLocalServiceUtil.deleteGroup(_liveGroup);
 		GroupLocalServiceUtil.deleteGroup(_stagingGroup);
+	}
+
+	@Test
+	public void testDeleteTimestampFromDLReferenceURLs() throws Exception {
+		Element rootElement =
+			_portletDataContextExport.getExportDataRootElement();
+
+		String content = replaceParameters(
+			getContent("dl_references.txt"), _fileEntry);
+
+		List<String> urls = getURLs(content);
+
+		String urlContent = StringUtil.merge(urls, StringPool.NEW_LINE);
+
+		content = ExportImportHelperUtil.replaceExportContentReferences(
+			_portletDataContextExport, _referrerStagedModel,
+			rootElement.element("entry"), urlContent, true);
+
+		String[] exportedURLs = content.split(StringPool.NEW_LINE);
+
+		Assert.assertEquals(urls.size(), exportedURLs.length);
+
+		for (int i = 0; i < urls.size(); i++) {
+			String exportedUrl = exportedURLs[i];
+			String url = urls.get(i);
+
+			Assert.assertFalse(exportedUrl.matches("[?&]t="));
+
+			if (url.contains("/documents/") && url.contains("?")) {
+				Assert.assertTrue(exportedUrl.contains("width=100&height=100"));
+			}
+
+			if (url.contains("/documents/") && url.contains("mustkeep")) {
+				Assert.assertTrue(exportedUrl.contains("mustkeep"));
+			}
+		}
 	}
 
 	@Test
@@ -187,7 +242,9 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 
 		when(
 			portalImpl.getPathContext()
-		).thenReturn("/de");
+		).thenReturn(
+			"/de"
+		);
 
 		PortalUtil portalUtil = new PortalUtil();
 
@@ -287,11 +344,6 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 
 	@Test
 	public void testExportLinksToLayouts() throws Exception {
-		Layout publicLayout = LayoutTestUtil.addLayout(
-			_stagingGroup.getGroupId(), ServiceTestUtil.randomString(), false);
-		Layout privateLayout = LayoutTestUtil.addLayout(
-			_stagingGroup.getGroupId(), ServiceTestUtil.randomString(), true);
-
 		Element rootElement =
 			_portletDataContextExport.getExportDataRootElement();
 
@@ -305,9 +357,9 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 		StringBundler sb = new StringBundler(5);
 
 		sb.append("[1@private-group@");
-		sb.append(privateLayout.getUuid());
+		sb.append(_stagingPrivateLayout.getUuid());
 		sb.append(StringPool.AT);
-		sb.append(privateLayout.getFriendlyURL());
+		sb.append(_stagingPrivateLayout.getFriendlyURL());
 		sb.append(StringPool.CLOSE_BRACKET);
 
 		Assert.assertTrue(content.contains(sb.toString()));
@@ -315,9 +367,9 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 		sb.setIndex(0);
 
 		sb.append("[1@public@");
-		sb.append(publicLayout.getUuid());
+		sb.append(_stagingPublicLayout.getUuid());
 		sb.append(StringPool.AT);
-		sb.append(publicLayout.getFriendlyURL());
+		sb.append(_stagingPublicLayout.getFriendlyURL());
 		sb.append(StringPool.CLOSE_BRACKET);
 
 		Assert.assertTrue(content.contains(sb.toString()));
@@ -371,11 +423,6 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 
 	@Test
 	public void testImportLinksToLayouts() throws Exception {
-		LayoutTestUtil.addLayout(
-			_stagingGroup.getGroupId(), ServiceTestUtil.randomString(), false);
-		LayoutTestUtil.addLayout(
-			_stagingGroup.getGroupId(), ServiceTestUtil.randomString(), true);
-
 		Element rootElement =
 			_portletDataContextExport.getExportDataRootElement();
 
@@ -436,24 +483,27 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 	}
 
 	protected List<String> getURLs(String content) {
-		Pattern pattern = Pattern.compile(
-			"(?:href=|\\{|\\[)(.*?)(?:>|\\}|\\]|Link\\]\\])");
+		Pattern pattern = Pattern.compile("href=|\\{|\\[");
 
-		Matcher matcher = pattern.matcher(content);
+		Matcher matcher = pattern.matcher(StringPool.BLANK);
+
+		String[] lines = StringUtil.split(content, StringPool.NEW_LINE);
 
 		List<String> urls = new ArrayList<String>();
 
-		while (matcher.find()) {
-			String url = matcher.group(1);
+		for (String line : lines) {
+			matcher.reset(line);
 
-			urls.add(url);
+			if (matcher.find()) {
+				urls.add(line);
+			}
 		}
 
 		return urls;
 	}
 
 	protected String replaceParameters(String content, FileEntry fileEntry) {
-		return StringUtil.replace(
+		content = StringUtil.replace(
 			content,
 			new String[] {
 				"[$GROUP_FRIENDLY_URL$]", "[$GROUP_ID$]", "[$IMAGE_ID$]",
@@ -471,6 +521,52 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 				PropsValues.LAYOUT_FRIENDLY_URL_PUBLIC_SERVLET_MAPPING,
 				fileEntry.getTitle(), fileEntry.getUuid()
 			});
+
+		if (!content.contains("[$TIMESTAMP")) {
+			return content;
+		}
+
+		return replaceTimestampParameters(content);
+	}
+
+	protected String replaceTimestampParameters(String content) {
+		List<String> urls = ListUtil.toList(StringUtil.splitLines(content));
+
+		String timestampParameter = "t=123456789";
+
+		String parameters1 = timestampParameter + "&width=100&height=100";
+		String parameters2 = "width=100&" + timestampParameter + "&height=100";
+		String parameters3 = "width=100&height=100&" + timestampParameter;
+		String parameters4 =
+			timestampParameter + "?" + timestampParameter +
+				"&width=100&height=100";
+
+		List<String> outURLs = new ArrayList<String>();
+
+		for (String url : urls) {
+			if (!url.contains("[$TIMESTAMP")) {
+				continue;
+			}
+
+			outURLs.add(
+				StringUtil.replace(
+					url, new String[] {"[$TIMESTAMP$]", "[$TIMESTAMP_ONLY$]"},
+					new String[] {"&" + parameters1, "?" + parameters1}));
+			outURLs.add(
+				StringUtil.replace(
+					url, new String[] {"[$TIMESTAMP$]", "[$TIMESTAMP_ONLY$]"},
+					new String[] {"&" + parameters2, "?" + parameters2}));
+			outURLs.add(
+				StringUtil.replace(
+					url, new String[] {"[$TIMESTAMP$]", "[$TIMESTAMP_ONLY$]"},
+					new String[] {"&" + parameters3, "?" + parameters3}));
+			outURLs.add(
+				StringUtil.replace(
+					url, new String[] {"[$TIMESTAMP$]", "[$TIMESTAMP_ONLY$]"},
+					new String[] {StringPool.BLANK, "?" + parameters4}));
+		}
+
+		return StringUtil.merge(outURLs, StringPool.NEW_LINE);
 	}
 
 	protected void setFinalStaticField(Field field, Object newValue)
@@ -490,10 +586,13 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 
 	private FileEntry _fileEntry;
 	private Group _liveGroup;
+	private Layout _livePublicLayout;
 	private PortletDataContext _portletDataContextExport;
 	private PortletDataContext _portletDataContextImport;
 	private StagedModel _referrerStagedModel;
 	private Group _stagingGroup;
+	private Layout _stagingPrivateLayout;
+	private Layout _stagingPublicLayout;
 
 	private class TestReaderWriter implements ZipReader, ZipWriter {
 

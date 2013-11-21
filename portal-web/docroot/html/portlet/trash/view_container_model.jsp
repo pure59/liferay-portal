@@ -77,15 +77,11 @@ TrashUtil.addContainerModelBreadcrumbEntries(request, trashHandler.getContainerM
 
 	<liferay-ui:search-container
 		searchContainer="<%= new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, containerURL, null, null) %>"
+		total="<%= trashHandler.getContainerModelsCount(classPK, containerModelId) %>"
 	>
-		<liferay-ui:search-container-results>
-
-			<%
-			pageContext.setAttribute("results", trashHandler.getContainerModels(classPK, containerModelId, searchContainer.getStart(), searchContainer.getEnd()));
-			pageContext.setAttribute("total", trashHandler.getContainerModelsCount(classPK, containerModelId));
-			%>
-
-		</liferay-ui:search-container-results>
+		<liferay-ui:search-container-results
+			results="<%= trashHandler.getContainerModels(classPK, containerModelId, searchContainer.getStart(), searchContainer.getEnd()) %>"
+		/>
 
 		<liferay-ui:search-container-row
 			className="com.liferay.portal.model.ContainerModel"
@@ -109,7 +105,12 @@ TrashUtil.addContainerModelBreadcrumbEntries(request, trashHandler.getContainerM
 						TrashRenderer containerTrashRenderer = containerTrashHandler.getTrashRenderer(curContainerModel.getContainerModelId());
 						%>
 
-						<liferay-ui:icon label="<%= true %>" message="<%= curContainerModel.getContainerModelName() %>" src="<%= containerTrashRenderer.getIconPath(renderRequest) %>" url="<%= containerURL.toString() %>" />
+						<liferay-ui:icon
+							label="<%= true %>"
+							message="<%= curContainerModel.getContainerModelName() %>"
+							method="get" src="<%= containerTrashRenderer.getIconPath(renderRequest) %>"
+							url="<%= containerURL.toString() %>"
+						/>
 					</c:when>
 					<c:otherwise>
 						<%= curContainerModel.getContainerModelName() %>

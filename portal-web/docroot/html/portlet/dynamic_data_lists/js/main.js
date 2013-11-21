@@ -41,12 +41,22 @@ AUI.add(
 
 						instance.toolbar.add(
 							{
+								label: Liferay.Language.get('choose'),
 								on: {
 									click: A.bind('_onClickChoose', instance)
-								},
-								label: Liferay.Language.get('choose')
+								}
 							},
 							1
+						);
+
+						instance.toolbar.add(
+							{
+								label: Liferay.Language.get('clear'),
+								on: {
+									click: A.bind('_onClickClear', instance)
+								}
+							},
+							2
 						);
 					},
 
@@ -69,6 +79,12 @@ AUI.add(
 								uri: portletURL.toString()
 							}
 						);
+					},
+
+					_onClickClear: function() {
+						var instance = this;
+
+						instance.set('value', STR_EMPTY);
 					},
 
 					_selectFileEntry: function(url, uuid, groupId, title, version) {
@@ -300,7 +316,8 @@ AUI.add(
 									data: data,
 									record: record,
 									recordsetId: recordsetId,
-									structure: structure
+									structure: structure,
+									zIndex: Liferay.zIndex.OVERLAY
 								}
 							);
 						}
@@ -331,7 +348,13 @@ AUI.add(
 									fieldsMap,
 									function(json) {
 										if (json.recordId > 0) {
-											record.set('recordId', json.recordId);
+											record.set(
+												'recordId',
+												json.recordId,
+												{
+													silent: true
+												}
+											);
 										}
 									}
 								);
@@ -449,16 +472,26 @@ AUI.add(
 								};
 							}
 							else if (type === 'ddm-date') {
-								config.inputFormatter = function(value) {
-									var date = A.DataType.Date.parse(value);
+								config.inputFormatter = function(val) {
+									return AArray.map(
+										val,
+										function(item, index, collection) {
+											return item.getTime();
+										}
+									);
+								};
 
-									var dateValue = STR_EMPTY;
+								config.outputFormatter = function(val) {
+									return AArray.map(
+										val,
+										function(item, index, collection) {
+											var date = new Date(Lang.toInt(item));
 
-									if (date) {
-										dateValue = date.getTime();
-									}
+											date = DateMath.add(date, DateMath.MINUTES, date.getTimezoneOffset());
 
-									return dateValue;
+											return date;
+										}
+									);
 								};
 
 								item.formatter = function(obj) {
@@ -472,6 +505,31 @@ AUI.add(
 										date = DateMath.add(date, DateMath.MINUTES, date.getTimezoneOffset());
 
 										value = A.DataType.Date.format(date);
+									}
+
+									return value;
+								};
+							}
+							else if ((type === 'ddm-decimal') || (type === 'ddm-integer') || (type === 'ddm-number')) {
+								config.outputFormatter = function(value) {
+									var number = A.DataType.Number.parse(value);
+
+									var numberValue = STR_EMPTY;
+
+									if (Lang.isNumber(number)) {
+										numberValue = number;
+									}
+
+									return numberValue;
+								};
+
+								item.formatter = function(obj) {
+									var data = obj.data;
+
+									var value = A.DataType.Number.parse(data[name]);
+
+									if (!Lang.isNumber(value)) {
+										value = STR_EMPTY;
 									}
 
 									return value;
@@ -701,8 +759,6 @@ AUI.add(
 
 					previewDialog.set('bodyContent', content);
 				}
-
-				return previewDialog;
 			}
 		};
 

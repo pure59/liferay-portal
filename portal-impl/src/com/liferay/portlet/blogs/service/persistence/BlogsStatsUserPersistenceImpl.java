@@ -350,6 +350,10 @@ public class BlogsStatsUserPersistenceImpl extends BasePersistenceImpl<BlogsStat
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByGroupId(groupId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<BlogsStatsUser> list = findByGroupId(groupId, count - 1, count,
 				orderByComparator);
 
@@ -837,6 +841,10 @@ public class BlogsStatsUserPersistenceImpl extends BasePersistenceImpl<BlogsStat
 	public BlogsStatsUser fetchByUserId_Last(long userId,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUserId(userId);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsStatsUser> list = findByUserId(userId, count - 1, count,
 				orderByComparator);
@@ -1379,7 +1387,7 @@ public class BlogsStatsUserPersistenceImpl extends BasePersistenceImpl<BlogsStat
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsStatsUser blogsStatsUser : list) {
 				if ((groupId != blogsStatsUser.getGroupId()) ||
-						(entryCount != blogsStatsUser.getEntryCount())) {
+						(entryCount == blogsStatsUser.getEntryCount())) {
 					list = null;
 
 					break;
@@ -1565,6 +1573,10 @@ public class BlogsStatsUserPersistenceImpl extends BasePersistenceImpl<BlogsStat
 	public BlogsStatsUser fetchByG_NotE_Last(long groupId, int entryCount,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByG_NotE(groupId, entryCount);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsStatsUser> list = findByG_NotE(groupId, entryCount,
 				count - 1, count, orderByComparator);
@@ -1890,7 +1902,7 @@ public class BlogsStatsUserPersistenceImpl extends BasePersistenceImpl<BlogsStat
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsStatsUser blogsStatsUser : list) {
 				if ((companyId != blogsStatsUser.getCompanyId()) ||
-						(entryCount != blogsStatsUser.getEntryCount())) {
+						(entryCount == blogsStatsUser.getEntryCount())) {
 					list = null;
 
 					break;
@@ -2076,6 +2088,10 @@ public class BlogsStatsUserPersistenceImpl extends BasePersistenceImpl<BlogsStat
 	public BlogsStatsUser fetchByC_NotE_Last(long companyId, int entryCount,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByC_NotE(companyId, entryCount);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsStatsUser> list = findByC_NotE(companyId, entryCount,
 				count - 1, count, orderByComparator);
@@ -2616,6 +2632,10 @@ public class BlogsStatsUserPersistenceImpl extends BasePersistenceImpl<BlogsStat
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByU_L(userId, lastPostDate);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<BlogsStatsUser> list = findByU_L(userId, lastPostDate, count - 1,
 				count, orderByComparator);
 
@@ -2877,6 +2897,10 @@ public class BlogsStatsUserPersistenceImpl extends BasePersistenceImpl<BlogsStat
 	private static final String _FINDER_COLUMN_U_L_USERID_2 = "blogsStatsUser.userId = ? AND ";
 	private static final String _FINDER_COLUMN_U_L_LASTPOSTDATE_1 = "blogsStatsUser.lastPostDate IS NULL";
 	private static final String _FINDER_COLUMN_U_L_LASTPOSTDATE_2 = "blogsStatsUser.lastPostDate = ?";
+
+	public BlogsStatsUserPersistenceImpl() {
+		setModelClass(BlogsStatsUser.class);
+	}
 
 	/**
 	 * Caches the blogs stats user in the entity cache if it is enabled.
@@ -3220,6 +3244,8 @@ public class BlogsStatsUserPersistenceImpl extends BasePersistenceImpl<BlogsStat
 
 		clearUniqueFindersCache(blogsStatsUser);
 		cacheUniqueFindersCache(blogsStatsUser);
+
+		blogsStatsUser.resetOriginalValues();
 
 		return blogsStatsUser;
 	}

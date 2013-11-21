@@ -14,6 +14,7 @@
 
 package com.liferay.portal.lar;
 
+import com.liferay.portal.kernel.lar.ManifestSummary;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.PortletDataContextFactory;
 import com.liferay.portal.kernel.lar.PortletDataException;
@@ -24,6 +25,7 @@ import com.liferay.portal.kernel.zip.ZipReader;
 import com.liferay.portal.kernel.zip.ZipWriter;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.security.auth.CompanyThreadLocal;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 
@@ -51,6 +53,13 @@ public class PortletDataContextFactoryImpl
 			portletDataContext.getDataStrategy());
 		clonePortletDataContext.setEndDate(portletDataContext.getEndDate());
 		clonePortletDataContext.setGroupId(portletDataContext.getGroupId());
+
+		ManifestSummary manifestSummary =
+			portletDataContext.getManifestSummary();
+
+		clonePortletDataContext.setManifestSummary(
+			(ManifestSummary)manifestSummary.clone());
+
 		clonePortletDataContext.setNewLayouts(
 			portletDataContext.getNewLayouts());
 		clonePortletDataContext.setParameterMap(
@@ -135,7 +144,9 @@ public class PortletDataContextFactoryImpl
 			portletDataContext.setCompanyGroupId(companyGroup.getGroupId());
 		}
 		catch (Exception e) {
-			throw new IllegalStateException(e);
+			if (!CompanyThreadLocal.isDeleteInProcess()) {
+				throw new IllegalStateException(e);
+			}
 		}
 
 		portletDataContext.setCompanyId(companyId);
@@ -150,7 +161,9 @@ public class PortletDataContextFactoryImpl
 				userPersonalSiteGroup.getGroupId());
 		}
 		catch (Exception e) {
-			throw new IllegalStateException(e);
+			if (!CompanyThreadLocal.isDeleteInProcess()) {
+				throw new IllegalStateException(e);
+			}
 		}
 
 		return portletDataContext;

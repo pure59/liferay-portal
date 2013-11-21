@@ -31,9 +31,9 @@ import javax.naming.NamingException;
  */
 public interface DB {
 
-	public static final int MINIMAL = 1;
+	public static final int BARE = 0;
 
-	public static final int POPULATED = 0;
+	public static final int DEFAULT = 1;
 
 	public static final int SHARDED = 2;
 

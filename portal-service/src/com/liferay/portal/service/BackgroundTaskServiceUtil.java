@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.BackgroundTaskServiceImpl
  * @generated
  */
+@ProviderType
 public class BackgroundTaskServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -54,6 +57,14 @@ public class BackgroundTaskServiceUtil {
 	*/
 	public static void setBeanIdentifier(java.lang.String beanIdentifier) {
 		getService().setBeanIdentifier(beanIdentifier);
+	}
+
+	public static int getBackgroundTasksCount(long groupId,
+		java.lang.String taskExecutorClassName, java.lang.String completed)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getBackgroundTasksCount(groupId, taskExecutorClassName,
+			completed);
 	}
 
 	public static java.lang.String getBackgroundTaskStatusJSON(

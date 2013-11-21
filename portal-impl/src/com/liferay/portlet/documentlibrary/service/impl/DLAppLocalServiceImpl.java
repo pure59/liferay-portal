@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.repository.LocalRepository;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
@@ -126,7 +127,7 @@ public class DLAppLocalServiceImpl extends DLAppLocalServiceBaseImpl {
 		File file = null;
 
 		try {
-			if ((bytes != null) && (bytes.length > 0)) {
+			if (ArrayUtil.isNotEmpty(bytes)) {
 				file = FileUtil.createTempFile(bytes);
 			}
 
@@ -205,8 +206,8 @@ public class DLAppLocalServiceImpl extends DLAppLocalServiceBaseImpl {
 	}
 
 	/**
-	 * Adds a file entry and associated metadata based on an {@link
-	 * java.io.InputStream} object.
+	 * Adds a file entry and associated metadata based on an {@link InputStream}
+	 * object.
 	 *
 	 * <p>
 	 * This method takes two file names, the <code>sourceFileName</code> and the
@@ -981,7 +982,7 @@ public class DLAppLocalServiceImpl extends DLAppLocalServiceBaseImpl {
 		File file = null;
 
 		try {
-			if ((bytes != null) && (bytes.length > 0)) {
+			if (ArrayUtil.isNotEmpty(bytes)) {
 				file = FileUtil.createTempFile(bytes);
 			}
 
@@ -1023,7 +1024,7 @@ public class DLAppLocalServiceImpl extends DLAppLocalServiceBaseImpl {
 	 * @param  changeLog the file's version change log (optionally
 	 *         <code>null</code>)
 	 * @param  majorVersion whether the new file version is a major version
-	 * @param  file EntryId the primary key of the file entry
+	 * @param  file the file's data (optionally <code>null</code>)
 	 * @param  serviceContext the service context to be applied. Can set the
 	 *         asset category IDs, asset tag names, and expando bridge
 	 *         attributes for the file entry. In a Liferay repository, it may
@@ -1056,7 +1057,7 @@ public class DLAppLocalServiceImpl extends DLAppLocalServiceBaseImpl {
 			userId, fileEntryId, sourceFileName, mimeType, title, description,
 			changeLog, majorVersion, file, serviceContext);
 
-		DLProcessorRegistryUtil.cleanUp(fileEntry.getLatestFileVersion());
+		DLProcessorRegistryUtil.cleanUp(fileEntry.getLatestFileVersion(true));
 
 		dlAppHelperLocalService.updateFileEntry(
 			userId, fileEntry, null, fileEntry.getFileVersion(),
@@ -1066,7 +1067,7 @@ public class DLAppLocalServiceImpl extends DLAppLocalServiceBaseImpl {
 	}
 
 	/**
-	 * Updates a file entry and associated metadata based on an {@link java.io.
+	 * Updates a file entry and associated metadata based on an {@link
 	 * InputStream} object. If the file data is <code>null</code>, then only the
 	 * associated metadata (i.e., <code>title</code>, <code>description</code>,
 	 * and parameters in the <code>serviceContext</code>) will be updated.
@@ -1151,7 +1152,8 @@ public class DLAppLocalServiceImpl extends DLAppLocalServiceBaseImpl {
 			changeLog, majorVersion, is, size, serviceContext);
 
 		if (is != null) {
-			DLProcessorRegistryUtil.cleanUp(fileEntry.getLatestFileVersion());
+			DLProcessorRegistryUtil.cleanUp(
+				fileEntry.getLatestFileVersion(true));
 
 			oldFileVersion = null;
 		}
@@ -1485,7 +1487,6 @@ public class DLAppLocalServiceImpl extends DLAppLocalServiceBaseImpl {
 						userId, folder.getFolderId(),
 						destinationFolder.getFolderId(), sourceLocalRepository,
 						destinationLocalRepository, serviceContext);
-
 				}
 				else if (folderAndFileEntryAndFileShortcut
 							instanceof DLFileShortcut) {

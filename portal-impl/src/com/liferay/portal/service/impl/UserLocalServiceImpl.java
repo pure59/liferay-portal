@@ -51,6 +51,9 @@ import com.liferay.portal.kernel.image.ImageToolUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.messaging.DestinationNames;
+import com.liferay.portal.kernel.messaging.Message;
+import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
@@ -280,7 +283,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 			Account account = company.getAccount();
 
-			if (defaultGroupName.equalsIgnoreCase(account.getName())) {
+			if (StringUtil.equalsIgnoreCase(
+					defaultGroupName, account.getName())) {
+
 				defaultGroupName = GroupConstants.GUEST;
 			}
 
@@ -728,7 +733,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			emailAddress = StringPool.BLANK;
 		}
 		else {
-			emailAddress = emailAddress.trim().toLowerCase();
+			emailAddress = StringUtil.toLowerCase(emailAddress.trim());
 		}
 
 		if (!PrefsPropsUtil.getBoolean(
@@ -900,7 +905,22 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		// Groups
 
 		if (groupIds != null) {
-			groupLocalService.addUserGroups(userId, groupIds);
+			List<Group> groups = new ArrayList<Group>();
+
+			for (long groupId : groupIds) {
+				Group group = groupLocalService.fetchGroup(groupId);
+
+				if (group != null) {
+					groups.add(group);
+				}
+				else {
+					if (_log.isWarnEnabled()) {
+						_log.warn("Group " + groupId + " does not exist");
+					}
+				}
+			}
+
+			groupLocalService.addUserGroups(userId, groups);
 		}
 
 		addDefaultGroups(userId);
@@ -965,8 +985,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		workflowServiceContext.setAttribute("autoPassword", autoPassword);
 		workflowServiceContext.setAttribute("sendEmail", sendEmail);
 
-		startWorkflowInstance(
-			companyId, workflowUserId, userId, user, workflowServiceContext);
+		WorkflowHandlerRegistryUtil.startWorkflowInstance(
+			companyId, workflowUserId, User.class.getName(), userId, user,
+			workflowServiceContext);
 
 		if (serviceContext != null) {
 			String passwordUnencrypted = (String)serviceContext.getAttribute(
@@ -2174,6 +2195,24 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		return searchCount(group.getCompanyId(), null, status, params);
 	}
 
+	@Override
+	public List<User> getInheritedRoleUsers(
+			long roleId, int start, int end, OrderByComparator obc)
+		throws PortalException, SystemException {
+
+		Role role = rolePersistence.findByPrimaryKey(roleId);
+
+		LinkedHashMap<String, Object> params =
+			new LinkedHashMap<String, Object>();
+
+		params.put("inherit", Boolean.TRUE);
+		params.put("usersRoles", roleId);
+
+		return search(
+			role.getCompanyId(), null, WorkflowConstants.STATUS_APPROVED,
+			params, start, end, obc);
+	}
+
 	/**
 	 * Returns all the users who have not had any announcements of the type
 	 * delivered, excluding the default user.
@@ -2791,7 +2830,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	public long getUserIdByEmailAddress(long companyId, String emailAddress)
 		throws PortalException, SystemException {
 
-		emailAddress = emailAddress.trim().toLowerCase();
+		emailAddress = StringUtil.toLowerCase(emailAddress.trim());
 
 		User user = userPersistence.findByC_EA(companyId, emailAddress);
 
@@ -3260,7 +3299,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		if (user.isEmailAddressVerified() &&
-			emailAddress.equalsIgnoreCase(user.getEmailAddress())) {
+			StringUtil.equalsIgnoreCase(emailAddress, user.getEmailAddress())) {
 
 			return;
 		}
@@ -3308,7 +3347,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			user.getUserId(), "[$USER_SCREENNAME$]", user.getScreenName());
 		subscriptionSender.setFrom(fromAddress, fromName);
 		subscriptionSender.setHtmlFormat(true);
-		subscriptionSender.setMailId("user", user.getUserId());
+		subscriptionSender.setMailId(
+			"user", user.getUserId(), System.currentTimeMillis(),
+			PwdGenerator.getPassword());
 		subscriptionSender.setServiceContext(serviceContext);
 		subscriptionSender.setSubject(subject);
 		subscriptionSender.setUserId(user.getUserId());
@@ -3350,7 +3391,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			return;
 		}
 
-		emailAddress = emailAddress.trim().toLowerCase();
+		emailAddress = StringUtil.toLowerCase(emailAddress.trim());
 
 		if (Validator.isNull(emailAddress)) {
 			throw new UserEmailAddressException();
@@ -3483,7 +3524,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			user.getScreenName());
 		subscriptionSender.setFrom(fromAddress, fromName);
 		subscriptionSender.setHtmlFormat(true);
-		subscriptionSender.setMailId("user", user.getUserId());
+		subscriptionSender.setMailId(
+			"user", user.getUserId(), System.currentTimeMillis(),
+			PwdGenerator.getPassword());
 		subscriptionSender.setServiceContext(serviceContext);
 		subscriptionSender.setSubject(subject);
 		subscriptionSender.setUserId(user.getUserId());
@@ -3575,13 +3618,14 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 */
 	@Override
 	public void unsetGroupUsers(
-			long groupId, long[] userIds, ServiceContext serviceContext)
+			final long groupId, final long[] userIds,
+			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
 		userGroupRoleLocalService.deleteUserGroupRoles(
 			userIds, groupId, RoleConstants.TYPE_SITE);
 
-		userLocalService.unsetGroupTeamsUsers(groupId, userIds);
+		unsetGroupTeamsUsers(groupId, userIds);
 
 		groupPersistence.removeUsers(groupId, userIds);
 
@@ -3590,6 +3634,25 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		indexer.reindex(userIds);
 
 		PermissionCacheUtil.clearCache();
+
+		Callable<Void> callable = new Callable<Void>() {
+
+			@Override
+			public Void call() throws Exception {
+				Message message = new Message();
+
+				message.put("groupId", groupId);
+				message.put("userIds", userIds);
+
+				MessageBusUtil.sendMessage(
+					DestinationNames.SUBSCRIPTION_CLEAN_UP, message);
+
+				return null;
+			}
+
+		};
+
+		TransactionCommitCallbackRegistryUtil.registerCallback(callable);
 	}
 
 	/**
@@ -3601,13 +3664,14 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public void unsetOrganizationUsers(long organizationId, long[] userIds)
+	public void unsetOrganizationUsers(
+			long organizationId, final long[] userIds)
 		throws PortalException, SystemException {
 
 		Organization organization = organizationPersistence.findByPrimaryKey(
 			organizationId);
 
-		Group group = organization.getGroup();
+		final Group group = organization.getGroup();
 
 		userGroupRoleLocalService.deleteUserGroupRoles(
 			userIds, group.getGroupId(), RoleConstants.TYPE_ORGANIZATION);
@@ -3619,6 +3683,25 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		indexer.reindex(userIds);
 
 		PermissionCacheUtil.clearCache();
+
+		Callable<Void> callable = new Callable<Void>() {
+
+			@Override
+			public Void call() throws Exception {
+				Message message = new Message();
+
+				message.put("groupId", group.getGroupId());
+				message.put("userIds", userIds);
+
+				MessageBusUtil.sendMessage(
+					DestinationNames.SUBSCRIPTION_CLEAN_UP, message);
+
+				return null;
+			}
+
+		};
+
+		TransactionCommitCallbackRegistryUtil.registerCallback(callable);
 	}
 
 	/**
@@ -3837,8 +3920,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			String emailAddress2)
 		throws PortalException, SystemException {
 
-		emailAddress1 = emailAddress1.trim().toLowerCase();
-		emailAddress2 = emailAddress2.trim().toLowerCase();
+		emailAddress1 = StringUtil.toLowerCase(emailAddress1.trim());
+		emailAddress2 = StringUtil.toLowerCase(emailAddress2.trim());
 
 		User user = userPersistence.findByPrimaryKey(userId);
 
@@ -3879,8 +3962,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			String emailAddress2, ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		emailAddress1 = emailAddress1.trim().toLowerCase();
-		emailAddress2 = emailAddress2.trim().toLowerCase();
+		emailAddress1 = StringUtil.toLowerCase(emailAddress1.trim());
+		emailAddress2 = StringUtil.toLowerCase(emailAddress2.trim());
 
 		User user = userPersistence.findByPrimaryKey(userId);
 
@@ -4669,7 +4752,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		validateScreenName(user.getCompanyId(), userId, screenName);
 
-		if (!user.getScreenName().equalsIgnoreCase(screenName)) {
+		if (!StringUtil.equalsIgnoreCase(user.getScreenName(), screenName)) {
 			user.setDigest(StringPool.BLANK);
 		}
 
@@ -4801,18 +4884,18 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			user.getCompanyId());
 		String password = oldPassword;
 		screenName = getLogin(screenName);
-		emailAddress = emailAddress.trim().toLowerCase();
+		emailAddress = StringUtil.toLowerCase(emailAddress.trim());
 		openId = openId.trim();
 		String oldFullName = user.getFullName();
-		aimSn = aimSn.trim().toLowerCase();
-		facebookSn = facebookSn.trim().toLowerCase();
-		icqSn = icqSn.trim().toLowerCase();
-		jabberSn = jabberSn.trim().toLowerCase();
-		msnSn = msnSn.trim().toLowerCase();
-		mySpaceSn = mySpaceSn.trim().toLowerCase();
-		skypeSn = skypeSn.trim().toLowerCase();
-		twitterSn = twitterSn.trim().toLowerCase();
-		ymSn = ymSn.trim().toLowerCase();
+		aimSn = StringUtil.toLowerCase(aimSn.trim());
+		facebookSn = StringUtil.toLowerCase(facebookSn.trim());
+		icqSn = StringUtil.toLowerCase(icqSn.trim());
+		jabberSn = StringUtil.toLowerCase(jabberSn.trim());
+		msnSn = StringUtil.toLowerCase(msnSn.trim());
+		mySpaceSn = StringUtil.toLowerCase(mySpaceSn.trim());
+		skypeSn = StringUtil.toLowerCase(skypeSn.trim());
+		twitterSn = StringUtil.toLowerCase(twitterSn.trim());
+		ymSn = StringUtil.toLowerCase(ymSn.trim());
 		Date now = new Date();
 
 		EmailAddressGenerator emailAddressGenerator =
@@ -4859,7 +4942,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			user.setReminderQueryAnswer(reminderQueryAnswer);
 		}
 
-		if (!user.getScreenName().equalsIgnoreCase(screenName)) {
+		if (!StringUtil.equalsIgnoreCase(user.getScreenName(), screenName)) {
 			user.setScreenName(screenName);
 
 			user.setDigest(StringPool.BLANK);
@@ -5062,7 +5145,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		String emailAddress = ticket.getExtraInfo();
 
-		emailAddress = emailAddress.toLowerCase().trim();
+		emailAddress = StringUtil.toLowerCase(emailAddress).trim();
 
 		if (!emailAddress.equals(user.getEmailAddress())) {
 			if (userPersistence.fetchByC_EA(
@@ -5222,7 +5305,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			return Authenticator.FAILURE;
 		}
 
-		login = login.trim().toLowerCase();
+		login = StringUtil.toLowerCase(login.trim());
 
 		long userId = GetterUtil.getLong(login);
 
@@ -5557,7 +5640,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			searchContext.setQueryConfig(queryConfig);
 
 			if (sort != null) {
-				searchContext.setSorts(new Sort[] {sort});
+				searchContext.setSorts(sort);
 			}
 
 			searchContext.setStart(start);
@@ -5615,7 +5698,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			"[$USER_SCREENNAME$]", user.getScreenName());
 		subscriptionSender.setFrom(fromAddress, fromName);
 		subscriptionSender.setHtmlFormat(true);
-		subscriptionSender.setMailId("user", user.getUserId());
+		subscriptionSender.setMailId(
+			"user", user.getUserId(), System.currentTimeMillis(),
+			PwdGenerator.getPassword());
 		subscriptionSender.setServiceContext(serviceContext);
 		subscriptionSender.setSubject(subject);
 		subscriptionSender.setUserId(user.getUserId());
@@ -5630,7 +5715,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			String lastName, String emailAddress)
 		throws PortalException, SystemException {
 
-		if (emailAddress.equalsIgnoreCase(user.getEmailAddress())) {
+		if (StringUtil.equalsIgnoreCase(emailAddress, user.getEmailAddress())) {
 			return;
 		}
 
@@ -5661,26 +5746,6 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		user.setEmailAddress(emailAddress);
 		user.setDigest(StringPool.BLANK);
-	}
-
-	protected void startWorkflowInstance(
-		final long companyId, final long workflowUserId, final long userId,
-		final User user, final ServiceContext workflowServiceContext) {
-
-		Callable<Void> callable = new ShardCallable<Void>(companyId) {
-
-			@Override
-			protected Void doCall() throws Exception {
-				WorkflowHandlerRegistryUtil.startWorkflowInstance(
-					companyId, workflowUserId, User.class.getName(), userId,
-					user, workflowServiceContext);
-
-				return null;
-			}
-
-		};
-
-		TransactionCommitCallbackRegistryUtil.registerCallback(callable);
 	}
 
 	protected void updateGroups(
@@ -5803,9 +5868,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			Organization organization =
 				organizationPersistence.findByPrimaryKey(organizationId);
 
-			Group organizationGroup = organization.getGroup();
-
-			organizationGroupIds[i] = organizationGroup.getGroupId();
+			organizationGroupIds[i] = organization.getGroupId();
 		}
 
 		validGroupIds = ArrayUtil.append(validGroupIds, organizationGroupIds);
@@ -5875,7 +5938,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		User user = userPersistence.findByPrimaryKey(userId);
 
-		if (!user.getScreenName().equalsIgnoreCase(screenName)) {
+		if (!StringUtil.equalsIgnoreCase(user.getScreenName(), screenName)) {
 			validateScreenName(user.getCompanyId(), userId, screenName);
 		}
 
@@ -5885,7 +5948,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		if (!user.isDefaultUser()) {
 			if (Validator.isNotNull(emailAddress) &&
-				!user.getEmailAddress().equalsIgnoreCase(emailAddress)) {
+				!StringUtil.equalsIgnoreCase(
+					user.getEmailAddress(), emailAddress)) {
 
 				if (userPersistence.fetchByC_EA(
 						user.getCompanyId(), emailAddress) != null) {
@@ -5940,7 +6004,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			PropsKeys.MAIL_SESSION_MAIL_POP3_USER,
 			PropsValues.MAIL_SESSION_MAIL_POP3_USER);
 
-		if (emailAddress.equalsIgnoreCase(pop3User)) {
+		if (StringUtil.equalsIgnoreCase(emailAddress, pop3User)) {
 			throw new ReservedUserEmailAddressException();
 		}
 
@@ -5949,7 +6013,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			StringPool.NEW_LINE, PropsValues.ADMIN_RESERVED_EMAIL_ADDRESSES);
 
 		for (String reservedEmailAddress : reservedEmailAddresses) {
-			if (emailAddress.equalsIgnoreCase(reservedEmailAddress)) {
+			if (StringUtil.equalsIgnoreCase(
+					emailAddress, reservedEmailAddress)) {
+
 				throw new ReservedUserEmailAddressException();
 			}
 		}
@@ -5966,7 +6032,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		validateEmailAddress(user.getCompanyId(), emailAddress1);
 		validateEmailAddress(user.getCompanyId(), emailAddress2);
 
-		if (!emailAddress1.equalsIgnoreCase(user.getEmailAddress())) {
+		if (!StringUtil.equalsIgnoreCase(
+				emailAddress1, user.getEmailAddress())) {
+
 			if (userPersistence.fetchByC_EA(
 					user.getCompanyId(), emailAddress1) != null) {
 
@@ -6044,11 +6112,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		}
 
 		if (Validator.isNull(question)) {
-			throw new UserReminderQueryException("Question cannot be null");
+			throw new UserReminderQueryException("Question is null");
 		}
 
 		if (Validator.isNull(answer)) {
-			throw new UserReminderQueryException("Answer cannot be null");
+			throw new UserReminderQueryException("Answer is null");
 		}
 	}
 
@@ -6094,7 +6162,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		String[] anonymousNames = BaseServiceImpl.ANONYMOUS_NAMES;
 
 		for (String anonymousName : anonymousNames) {
-			if (screenName.equalsIgnoreCase(anonymousName)) {
+			if (StringUtil.equalsIgnoreCase(screenName, anonymousName)) {
 				throw new UserScreenNameException();
 			}
 		}
@@ -6126,7 +6194,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			StringPool.NEW_LINE, PropsValues.ADMIN_RESERVED_SCREEN_NAMES);
 
 		for (String reservedScreenName : reservedScreenNames) {
-			if (screenName.equalsIgnoreCase(reservedScreenName)) {
+			if (StringUtil.equalsIgnoreCase(screenName, reservedScreenName)) {
 				throw new ReservedUserScreenNameException();
 			}
 		}

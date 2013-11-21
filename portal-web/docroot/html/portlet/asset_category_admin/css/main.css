@@ -79,7 +79,7 @@
 		width: 16px;
 	}
 
-	.vocabulary-item-check {
+	input.vocabulary-item-check {
 		float: left;
 		margin-right: 5px;
 		margin-top: 0;
@@ -249,7 +249,7 @@
 
 		.tree-node-selected {
 			background: #08C;
-			
+
 			.tree-label {
 				color: #FFF;
 				cursor: move;
@@ -322,18 +322,6 @@
 			.button-holder {
 				margin-top: 10px;
 			}
-		}
-	}
-
-	.yui3-widget-bd .field.vocabulary-checkbox {
-		margin-top: 1.8em;
-
-		input {
-			width: auto;
-		}
-
-		label {
-			display:inline-block;
 		}
 	}
 }

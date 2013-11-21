@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link BackgroundTaskService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see BackgroundTaskService
  * @generated
  */
+@ProviderType
 public class BackgroundTaskServiceWrapper implements BackgroundTaskService,
 	ServiceWrapper<BackgroundTaskService> {
 	public BackgroundTaskServiceWrapper(
@@ -46,6 +49,14 @@ public class BackgroundTaskServiceWrapper implements BackgroundTaskService,
 	@Override
 	public void setBeanIdentifier(java.lang.String beanIdentifier) {
 		_backgroundTaskService.setBeanIdentifier(beanIdentifier);
+	}
+
+	@Override
+	public int getBackgroundTasksCount(long groupId,
+		java.lang.String taskExecutorClassName, java.lang.String completed)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _backgroundTaskService.getBackgroundTasksCount(groupId,
+			taskExecutorClassName, completed);
 	}
 
 	@Override

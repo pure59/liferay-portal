@@ -87,6 +87,9 @@ public class SynchronousDestinationExecutionTestListener
 
 			replaceDestination(DestinationNames.ASYNC_SERVICE);
 			replaceDestination(DestinationNames.BACKGROUND_TASK);
+			replaceDestination(
+				DestinationNames.DOCUMENT_LIBRARY_RAW_METADATA_PROCESSOR);
+			replaceDestination(DestinationNames.SUBSCRIPTION_SENDER);
 		}
 
 		protected void replaceDestination(String destinationName) {

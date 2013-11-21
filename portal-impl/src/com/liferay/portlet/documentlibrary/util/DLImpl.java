@@ -58,6 +58,7 @@ import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.PortletURLFactoryUtil;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
+import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryType;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryTypeConstants;
 import com.liferay.portlet.documentlibrary.model.DLFileShortcut;
@@ -342,26 +343,26 @@ public class DLImpl implements DL {
 			return themeDisplay.translate("home");
 		}
 
-		DLFolder dlFolder = DLFolderLocalServiceUtil.getFolder(folderId);
+		Folder folder = DLAppLocalServiceUtil.getFolder(folderId);
 
-		List<DLFolder> dlFolders = dlFolder.getAncestors();
+		List<Folder> folders = folder.getAncestors();
 
-		Collections.reverse(dlFolders);
+		Collections.reverse(folders);
 
-		StringBundler sb = new StringBundler((dlFolders.size() * 3) + 5);
+		StringBundler sb = new StringBundler((folders.size() * 3) + 5);
 
 		sb.append(themeDisplay.translate("home"));
 		sb.append(StringPool.SPACE);
 
-		for (DLFolder curDLFolder : dlFolders) {
+		for (Folder curFolder : folders) {
 			sb.append(StringPool.RAQUO);
 			sb.append(StringPool.SPACE);
-			sb.append(curDLFolder.getName());
+			sb.append(curFolder.getName());
 		}
 
 		sb.append(StringPool.RAQUO);
 		sb.append(StringPool.SPACE);
-		sb.append(dlFolder.getName());
+		sb.append(folder.getName());
 
 		return sb.toString();
 	}
@@ -378,7 +379,8 @@ public class DLImpl implements DL {
 
 	@Override
 	public String getDDMStructureKey(String fileEntryTypeUuid) {
-		return _STRUCTURE_KEY_PREFIX + fileEntryTypeUuid.toUpperCase();
+		return _STRUCTURE_KEY_PREFIX +
+			StringUtil.toUpperCase(fileEntryTypeUuid);
 	}
 
 	@Override
@@ -414,7 +416,27 @@ public class DLImpl implements DL {
 	}
 
 	@Override
-	public String getDLControlPanelLink(
+	public String getDLFileEntryControlPanelLink(
+			PortletRequest portletRequest, long fileEntryId)
+		throws PortalException, SystemException {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		PortletURL portletURL = PortletURLFactoryUtil.create(
+			portletRequest, PortletKeys.DOCUMENT_LIBRARY,
+			PortalUtil.getControlPanelPlid(themeDisplay.getCompanyId()),
+			PortletRequest.RENDER_PHASE);
+
+		portletURL.setParameter(
+			"struts_action", "/document_library/view_file_entry");
+		portletURL.setParameter("fileEntryId", String.valueOf(fileEntryId));
+
+		return portletURL.toString();
+	}
+
+	@Override
+	public String getDLFolderControlPanelLink(
 			PortletRequest portletRequest, long folderId)
 		throws PortalException, SystemException {
 
@@ -439,7 +461,7 @@ public class DLImpl implements DL {
 		Map<Locale, String> map = LocalizationUtil.getLocalizationMap(
 			preferences, "emailFileEntryAddedBody");
 
-		Locale defaultLocale = LocaleUtil.getDefault();
+		Locale defaultLocale = LocaleUtil.getSiteDefault();
 
 		String defaultValue = map.get(defaultLocale);
 
@@ -477,7 +499,7 @@ public class DLImpl implements DL {
 		Map<Locale, String> map = LocalizationUtil.getLocalizationMap(
 			preferences, "emailFileEntryAddedSubject");
 
-		Locale defaultLocale = LocaleUtil.getDefault();
+		Locale defaultLocale = LocaleUtil.getSiteDefault();
 
 		String defaultValue = map.get(defaultLocale);
 
@@ -500,7 +522,7 @@ public class DLImpl implements DL {
 		Map<Locale, String> map = LocalizationUtil.getLocalizationMap(
 			preferences, "emailFileEntryUpdatedBody");
 
-		Locale defaultLocale = LocaleUtil.getDefault();
+		Locale defaultLocale = LocaleUtil.getSiteDefault();
 
 		String defaultValue = map.get(defaultLocale);
 
@@ -538,7 +560,7 @@ public class DLImpl implements DL {
 		Map<Locale, String> map = LocalizationUtil.getLocalizationMap(
 			preferences, "emailFileEntryUpdatedSubject");
 
-		Locale defaultLocale = LocaleUtil.getDefault();
+		Locale defaultLocale = LocaleUtil.getSiteDefault();
 
 		String defaultValue = map.get(defaultLocale);
 
@@ -756,7 +778,7 @@ public class DLImpl implements DL {
 
 		String title = fileEntry.getTitle();
 
-		if (fileVersion.isInTrash()) {
+		if (fileEntry.isInTrash()) {
 			title = TrashUtil.getOriginalTitle(fileEntry.getTitle());
 		}
 
@@ -945,7 +967,7 @@ public class DLImpl implements DL {
 	@Override
 	public String getTitleWithExtension(String title, String extension) {
 		if (Validator.isNotNull(extension)) {
-			String periodAndExtension = StringPool.PERIOD + extension;
+			String periodAndExtension = StringPool.PERIOD.concat(extension);
 
 			if (!title.endsWith(periodAndExtension)) {
 				title += periodAndExtension;
@@ -1101,13 +1123,13 @@ public class DLImpl implements DL {
 
 	@Override
 	public boolean isOfficeExtension(String extension) {
-		if (extension.equalsIgnoreCase("doc") ||
-			extension.equalsIgnoreCase("docx") ||
-			extension.equalsIgnoreCase("dot") ||
-			extension.equalsIgnoreCase("ppt") ||
-			extension.equalsIgnoreCase("pptx") ||
-			extension.equalsIgnoreCase("xls") ||
-			extension.equalsIgnoreCase("xlsx")) {
+		if (StringUtil.equalsIgnoreCase(extension, "doc") ||
+			StringUtil.equalsIgnoreCase(extension, "docx") ||
+			StringUtil.equalsIgnoreCase(extension, "dot") ||
+			StringUtil.equalsIgnoreCase(extension, "ppt") ||
+			StringUtil.equalsIgnoreCase(extension, "pptx") ||
+			StringUtil.equalsIgnoreCase(extension, "xls") ||
+			StringUtil.equalsIgnoreCase(extension, "xlsx")) {
 
 			return true;
 		}
@@ -1166,6 +1188,27 @@ public class DLImpl implements DL {
 
 		return SubscriptionLocalServiceUtil.isSubscribed(
 			companyId, userId, Folder.class.getName(), folderIdsArray);
+	}
+
+	@Override
+	public boolean isValidVersion(String version) {
+		if (version.equals(DLFileEntryConstants.PRIVATE_WORKING_COPY_VERSION)) {
+			return true;
+		}
+
+		String[] versionParts = StringUtil.split(version, StringPool.PERIOD);
+
+		if (versionParts.length != 2) {
+			return false;
+		}
+
+		if (Validator.isNumber(versionParts[0]) &&
+			Validator.isNumber(versionParts[1])) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	protected long getDefaultFolderId(HttpServletRequest request)

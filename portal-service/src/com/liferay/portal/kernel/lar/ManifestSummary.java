@@ -14,6 +14,7 @@
 
 package com.liferay.portal.kernel.lar;
 
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LongWrapper;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -51,12 +52,15 @@ public class ManifestSummary implements Serializable {
 		return modelName.concat(StringPool.POUND).concat(referrerModelName);
 	}
 
-	public void addConfigurationPortlet(Portlet portlet, String[] options) {
+	public void addConfigurationPortlet(
+		Portlet portlet, String[] configurationPortletOptions) {
+
 		String rootPortletId = portlet.getRootPortletId();
 
 		if (!_configurationPortletOptions.containsKey(rootPortletId)) {
 			_configurationPortlets.add(portlet);
-			_configurationPortletOptions.put(rootPortletId, options);
+			_configurationPortletOptions.put(
+				rootPortletId, configurationPortletOptions);
 		}
 	}
 
@@ -105,6 +109,33 @@ public class ManifestSummary implements Serializable {
 		modelDeletionCounter.setValue(count);
 
 		_manifestSummaryKeys.add(manifestSummaryKey);
+	}
+
+	@Override
+	public Object clone() {
+		ManifestSummary manifestSummary = new ManifestSummary();
+
+		manifestSummary._configurationPortletOptions =
+			new HashMap<String, String[]> (
+				manifestSummary._configurationPortletOptions);
+		manifestSummary._configurationPortlets = new ArrayList<Portlet>(
+			_configurationPortlets);
+		manifestSummary._dataPortlets = new ArrayList<Portlet>(_dataPortlets);
+		manifestSummary._dataRootPortletIds = new HashSet<String>(
+			_dataRootPortletIds);
+
+		if (_exportDate != null) {
+			manifestSummary.setExportDate(new Date(_exportDate.getTime()));
+		}
+
+		manifestSummary._manifestSummaryKeys = new HashSet<String>(
+			_manifestSummaryKeys);
+		manifestSummary._modelAdditionCounters =
+			new HashMap<String, LongWrapper>(_modelAdditionCounters);
+		manifestSummary._modelDeletionCounters =
+			new HashMap<String, LongWrapper>(_modelDeletionCounters);
+
+		return manifestSummary;
 	}
 
 	public String[] getConfigurationPortletOptions(String rootPortletId) {
@@ -162,8 +193,56 @@ public class ManifestSummary implements Serializable {
 		return _modelAdditionCounters;
 	}
 
+	public long getModelDeletionCount() {
+		long modelDeletionCount = -1;
+
+		for (String manifestSummaryKey : _manifestSummaryKeys) {
+			long manifestSummaryKeyModelDeletionCount = getModelDeletionCount(
+				manifestSummaryKey);
+
+			if (manifestSummaryKeyModelDeletionCount == -1) {
+				continue;
+			}
+
+			if (modelDeletionCount == -1) {
+				modelDeletionCount = manifestSummaryKeyModelDeletionCount;
+			}
+			else {
+				modelDeletionCount += manifestSummaryKeyModelDeletionCount;
+			}
+		}
+
+		return modelDeletionCount;
+	}
+
 	public long getModelDeletionCount(Class<? extends ClassedModel> clazz) {
 		return getModelDeletionCount(clazz.getName());
+	}
+
+	public long getModelDeletionCount(StagedModelType[] stagedModelTypes) {
+		if (ArrayUtil.isEmpty(stagedModelTypes)) {
+			return 0;
+		}
+
+		long modelDeletionCount = -1;
+
+		for (StagedModelType stagedModelType : stagedModelTypes) {
+			long stagedModelTypeModelDeletionCount = getModelDeletionCount(
+				stagedModelType.toString());
+
+			if (stagedModelTypeModelDeletionCount == -1) {
+				continue;
+			}
+
+			if (modelDeletionCount == -1) {
+				modelDeletionCount = stagedModelTypeModelDeletionCount;
+			}
+			else {
+				modelDeletionCount += stagedModelTypeModelDeletionCount;
+			}
+		}
+
+		return modelDeletionCount;
 	}
 
 	public long getModelDeletionCount(String modelName) {

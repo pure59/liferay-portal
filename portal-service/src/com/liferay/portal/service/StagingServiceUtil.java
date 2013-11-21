@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.StagingServiceImpl
  * @generated
  */
+@ProviderType
 public class StagingServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -83,6 +86,16 @@ public class StagingServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		getService().updateStagingRequest(stagingRequestId, fileName, bytes);
+	}
+
+	public static com.liferay.portal.kernel.lar.MissingReferences validateStagingRequest(
+		long stagingRequestId, boolean privateLayout,
+		java.util.Map<java.lang.String, java.lang.String[]> parameterMap)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .validateStagingRequest(stagingRequestId, privateLayout,
+			parameterMap);
 	}
 
 	public static StagingService getService() {

@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.AutoEscape;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
@@ -36,6 +38,7 @@ import java.io.Serializable;
  * @see com.liferay.portlet.documentlibrary.model.impl.DLSyncEventModelImpl
  * @generated
  */
+@ProviderType
 public interface DLSyncEventModel extends BaseModel<DLSyncEvent> {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -72,18 +75,18 @@ public interface DLSyncEventModel extends BaseModel<DLSyncEvent> {
 	public void setSyncEventId(long syncEventId);
 
 	/**
-	 * Returns the modified date of this d l sync event.
+	 * Returns the modified time of this d l sync event.
 	 *
-	 * @return the modified date of this d l sync event
+	 * @return the modified time of this d l sync event
 	 */
-	public long getModifiedDate();
+	public long getModifiedTime();
 
 	/**
-	 * Sets the modified date of this d l sync event.
+	 * Sets the modified time of this d l sync event.
 	 *
-	 * @param modifiedDate the modified date of this d l sync event
+	 * @param modifiedTime the modified time of this d l sync event
 	 */
-	public void setModifiedDate(long modifiedDate);
+	public void setModifiedTime(long modifiedTime);
 
 	/**
 	 * Returns the event of this d l sync event.

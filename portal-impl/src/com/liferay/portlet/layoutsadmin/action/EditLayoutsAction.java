@@ -16,6 +16,7 @@ package com.liferay.portlet.layoutsadmin.action;
 
 import com.liferay.portal.ImageTypeException;
 import com.liferay.portal.LayoutFriendlyURLException;
+import com.liferay.portal.LayoutFriendlyURLsException;
 import com.liferay.portal.LayoutNameException;
 import com.liferay.portal.LayoutParentLayoutIdException;
 import com.liferay.portal.LayoutSetVirtualHostException;
@@ -31,7 +32,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.staging.StagingUtil;
@@ -170,12 +170,10 @@ public class EditLayoutsAction extends PortletAction {
 				closeRedirect = updateCloseRedirect(
 					themeDisplay, closeRedirect, null, layout, oldFriendlyURL);
 
-				LiferayPortletConfig liferayPortletConfig =
-					(LiferayPortletConfig)portletConfig;
-
 				SessionMessages.add(
 					actionRequest,
-					liferayPortletConfig.getPortletId() + "pageAdded", layout);
+					PortalUtil.getPortletId(actionRequest) + "pageAdded",
+					layout);
 			}
 			else if (cmd.equals(Constants.DELETE)) {
 				long plid = ParamUtil.getLong(actionRequest, "plid");
@@ -208,10 +206,16 @@ public class EditLayoutsAction extends PortletAction {
 				if (plid == refererPlid) {
 					redirect = HttpUtil.setParameter(
 						redirect, "refererPlid", newRefererPlid);
+					redirect = HttpUtil.setParameter(
+						redirect, actionResponse.getNamespace() + "selPlid", 0);
 				}
 
 				closeRedirect = updateCloseRedirect(
 					themeDisplay, closeRedirect, group, null, oldFriendlyURL);
+
+				redirect = HttpUtil.addParameter(
+					redirect, actionResponse.getNamespace() + "closeRedirect",
+					closeRedirect);
 			}
 			else if (cmd.equals("display_order")) {
 				updateDisplayOrder(actionRequest);
@@ -263,6 +267,7 @@ public class EditLayoutsAction extends PortletAction {
 			}
 			else if (e instanceof ImageTypeException ||
 					 e instanceof LayoutFriendlyURLException ||
+					 e instanceof LayoutFriendlyURLsException ||
 					 e instanceof LayoutNameException ||
 					 e instanceof LayoutParentLayoutIdException ||
 					 e instanceof LayoutSetVirtualHostException ||
@@ -273,14 +278,7 @@ public class EditLayoutsAction extends PortletAction {
 					 e instanceof SitemapPagePriorityException ||
 					 e instanceof UploadException) {
 
-				if (e instanceof LayoutFriendlyURLException) {
-					SessionErrors.add(
-						actionRequest,
-						LayoutFriendlyURLException.class.getName(), e);
-				}
-				else {
-					SessionErrors.add(actionRequest, e.getClass(), e);
-				}
+				SessionErrors.add(actionRequest, e.getClass(), e);
 			}
 			else if (e instanceof SystemException) {
 				SessionErrors.add(actionRequest, e.getClass(), e);
@@ -408,8 +406,7 @@ public class EditLayoutsAction extends PortletAction {
 
 			if (parentPlid == LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
 				if (!GroupPermissionUtil.contains(
-						permissionChecker, group.getGroupId(),
-						ActionKeys.ADD_LAYOUT)) {
+						permissionChecker, group, ActionKeys.ADD_LAYOUT)) {
 
 					throw new PrincipalException();
 				}
@@ -472,8 +469,7 @@ public class EditLayoutsAction extends PortletAction {
 
 			if (group.isCompany() || group.isSite()) {
 				boolean publishToLive = GroupPermissionUtil.contains(
-					permissionChecker, group.getGroupId(),
-					ActionKeys.PUBLISH_STAGING);
+					permissionChecker, group, ActionKeys.PUBLISH_STAGING);
 
 				if (!hasUpdateLayoutPermission && !publishToLive) {
 					throw new PrincipalException();
@@ -919,7 +915,7 @@ public class EditLayoutsAction extends PortletAction {
 					LayoutPrototypeServiceUtil.getLayoutPrototype(
 						layoutPrototypeId);
 
-				String layoutPrototypeLinkEnabled= ParamUtil.getString(
+				String layoutPrototypeLinkEnabled = ParamUtil.getString(
 					uploadPortletRequest, "layoutPrototypeLinkEnabled");
 
 				if (Validator.isNotNull(layoutPrototypeLinkEnabled)) {

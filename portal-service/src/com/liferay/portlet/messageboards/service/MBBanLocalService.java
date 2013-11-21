@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.messageboards.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.transaction.Isolation;
@@ -34,6 +36,7 @@ import com.liferay.portal.service.PersistedModelLocalService;
  * @see com.liferay.portlet.messageboards.service.impl.MBBanLocalServiceImpl
  * @generated
  */
+@ProviderType
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface MBBanLocalService extends BaseLocalService,
@@ -310,20 +313,16 @@ public interface MBBanLocalService extends BaseLocalService,
 
 	public void deleteBan(long banUserId,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.SystemException;
 
 	public void deleteBan(com.liferay.portlet.messageboards.model.MBBan ban)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.SystemException;
 
 	public void deleteBansByBanUserId(long banUserId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.SystemException;
 
 	public void deleteBansByGroupId(long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.SystemException;
 
 	public void expireBans()
 		throws com.liferay.portal.kernel.exception.SystemException;

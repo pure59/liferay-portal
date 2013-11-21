@@ -16,6 +16,7 @@ package com.liferay.portal.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.staging.permission.StagingPermissionUtil;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutConstants;
@@ -33,6 +34,7 @@ import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.service.ResourceLocalServiceUtil;
 import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.sites.util.SitesUtil;
 
@@ -85,6 +87,18 @@ public class LayoutPermissionImpl implements LayoutPermission {
 			boolean checkViewableGroup, String actionId)
 		throws PortalException, SystemException {
 
+		if (isAttemptToModifyLockedLayout(layout, actionId)) {
+			return false;
+		}
+
+		Boolean hasPermission = StagingPermissionUtil.hasPermission(
+			permissionChecker, layout.getGroup(), Layout.class.getName(),
+			layout.getGroupId(), null, actionId);
+
+		if (hasPermission != null) {
+			return hasPermission.booleanValue();
+		}
+
 		return containsWithViewableGroup(
 			permissionChecker, layout, checkViewableGroup, actionId);
 	}
@@ -133,10 +147,6 @@ public class LayoutPermissionImpl implements LayoutPermission {
 
 		Layout layout = LayoutLocalServiceUtil.getLayout(
 			groupId, privateLayout, layoutId);
-
-		if (isAttemptToModifyLockedLayout(layout, actionId)) {
-			return false;
-		}
 
 		return contains(permissionChecker, layout, actionId);
 	}
@@ -234,16 +244,22 @@ public class LayoutPermissionImpl implements LayoutPermission {
 			}
 		}
 
-		if (GroupPermissionUtil.contains(
-				permissionChecker, layout.getGroupId(),
-				ActionKeys.MANAGE_LAYOUTS)) {
+		if (actionId.equals(ActionKeys.ADD_LAYOUT)) {
+			if (!PortalUtil.isLayoutParentable(layout.getType()) ||
+				!SitesUtil.isLayoutSortable(layout)) {
 
-			return true;
+				return false;
+			}
+
+			if (GroupPermissionUtil.contains(
+					permissionChecker, group, ActionKeys.ADD_LAYOUT)) {
+
+				return true;
+			}
 		}
-		else if (actionId.equals(ActionKeys.ADD_LAYOUT) &&
-				 GroupPermissionUtil.contains(
-					 permissionChecker, layout.getGroupId(),
-					 ActionKeys.ADD_LAYOUT)) {
+
+		if (GroupPermissionUtil.contains(
+				permissionChecker, group, ActionKeys.MANAGE_LAYOUTS)) {
 
 			return true;
 		}
@@ -399,8 +415,7 @@ public class LayoutPermissionImpl implements LayoutPermission {
 
 			if (layout.isPrivateLayout()) {
 				if (GroupPermissionUtil.contains(
-						permissionChecker, groupUser.getGroupId(),
-						ActionKeys.MANAGE_LAYOUTS) ||
+						permissionChecker, group, ActionKeys.MANAGE_LAYOUTS) ||
 					UserPermissionUtil.contains(
 						permissionChecker, groupUserId,
 						groupUser.getOrganizationIds(), ActionKeys.UPDATE)) {
@@ -417,8 +432,7 @@ public class LayoutPermissionImpl implements LayoutPermission {
 
 		if (group.isStagingGroup()) {
 			if (GroupPermissionUtil.contains(
-					permissionChecker, group.getGroupId(),
-					ActionKeys.VIEW_STAGING)) {
+					permissionChecker, group, ActionKeys.VIEW_STAGING)) {
 
 				return true;
 			}
@@ -431,10 +445,9 @@ public class LayoutPermissionImpl implements LayoutPermission {
 
 		if (group.isSite()) {
 			if (GroupPermissionUtil.contains(
-					permissionChecker, group.getGroupId(),
-					ActionKeys.MANAGE_LAYOUTS) ||
+					permissionChecker, group, ActionKeys.MANAGE_LAYOUTS) ||
 				GroupPermissionUtil.contains(
-					permissionChecker, group.getGroupId(), ActionKeys.UPDATE)) {
+					permissionChecker, group, ActionKeys.UPDATE)) {
 
 				return true;
 			}

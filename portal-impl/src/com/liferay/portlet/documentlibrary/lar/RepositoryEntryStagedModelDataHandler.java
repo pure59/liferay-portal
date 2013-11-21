@@ -36,6 +36,13 @@ public class RepositoryEntryStagedModelDataHandler
 		{RepositoryEntry.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+		String uuid, long groupId, String className, String extraData) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -51,8 +58,8 @@ public class RepositoryEntryStagedModelDataHandler
 
 		portletDataContext.addClassedModel(
 			repositoryEntryElement,
-			ExportImportPathUtil.getModelPath(repositoryEntry), repositoryEntry,
-			DLPortletDataHandler.NAMESPACE);
+			ExportImportPathUtil.getModelPath(repositoryEntry),
+			repositoryEntry);
 	}
 
 	@Override
@@ -73,7 +80,7 @@ public class RepositoryEntryStagedModelDataHandler
 			repositoryEntry.getRepositoryId());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			repositoryEntry, DLPortletDataHandler.NAMESPACE);
+			repositoryEntry);
 
 		RepositoryEntry importedRepositoryEntry = null;
 
@@ -108,8 +115,7 @@ public class RepositoryEntryStagedModelDataHandler
 		}
 
 		portletDataContext.importClassedModel(
-			repositoryEntry, importedRepositoryEntry,
-			DLPortletDataHandler.NAMESPACE);
+			repositoryEntry, importedRepositoryEntry);
 	}
 
 }

@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import java.util.Map;
  * @see Company
  * @generated
  */
+@ProviderType
 public class CompanyWrapper implements Company, ModelWrapper<Company> {
 	public CompanyWrapper(Company company) {
 		_company = company;
@@ -508,6 +511,13 @@ public class CompanyWrapper implements Company, ModelWrapper<Company> {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _company.getGroup();
+	}
+
+	@Override
+	public long getGroupId()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _company.getGroupId();
 	}
 
 	@Override

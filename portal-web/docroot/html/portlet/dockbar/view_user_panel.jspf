@@ -14,10 +14,20 @@
  */
 --%>
 
-<aui:nav cssClass="nav-account-controls">
-	<%@ include file="/html/portlet/dockbar/view_admin_links.jspf" %>
+<aui:nav collapsible="<%= true %>" cssClass='<%= portalMessageUseAnimation ? "nav-account-controls" : "nav-account-controls nav-account-controls-notice" %>' icon="user" id="navAccountControls">
+	<c:if test="<%= userSetupComplete %>">
+		<%@ include file="/html/portlet/dockbar/view_page_customization_bar.jspf" %>
 
-	<%@ include file="/html/portlet/dockbar/view_my_sites.jspf" %>
+		<c:if test="<%= themeDisplay.isShowStagingIcon() %>">
+			<aui:nav-item cssClass="staging-controls">
+				<liferay-portlet:runtime portletName="<%= PortletKeys.STAGING_BAR %>" />
+			</aui:nav-item>
+		</c:if>
+
+		<%@ include file="/html/portlet/dockbar/view_admin_links.jspf" %>
+
+		<%@ include file="/html/portlet/dockbar/view_my_sites.jspf" %>
+	</c:if>
 
 	<%@ include file="/html/portlet/dockbar/view_user_account.jspf" %>
 </aui:nav>

@@ -16,6 +16,8 @@ package com.liferay.portlet.bookmarks.service.base;
 
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.IdentifiableBean;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -25,10 +27,10 @@ import com.liferay.portal.service.persistence.GroupPersistence;
 import com.liferay.portal.service.persistence.SubscriptionPersistence;
 import com.liferay.portal.service.persistence.UserFinder;
 import com.liferay.portal.service.persistence.UserPersistence;
+import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.asset.service.persistence.AssetEntryFinder;
 import com.liferay.portlet.asset.service.persistence.AssetEntryPersistence;
-import com.liferay.portlet.asset.service.persistence.AssetLinkFinder;
 import com.liferay.portlet.asset.service.persistence.AssetLinkPersistence;
 import com.liferay.portlet.bookmarks.model.BookmarksFolder;
 import com.liferay.portlet.bookmarks.service.BookmarksFolderService;
@@ -37,11 +39,10 @@ import com.liferay.portlet.bookmarks.service.persistence.BookmarksEntryPersisten
 import com.liferay.portlet.bookmarks.service.persistence.BookmarksFolderFinder;
 import com.liferay.portlet.bookmarks.service.persistence.BookmarksFolderPersistence;
 import com.liferay.portlet.expando.service.persistence.ExpandoRowPersistence;
-import com.liferay.portlet.social.service.persistence.SocialActivityCounterFinder;
-import com.liferay.portlet.social.service.persistence.SocialActivityCounterPersistence;
 import com.liferay.portlet.social.service.persistence.SocialActivityFinder;
 import com.liferay.portlet.social.service.persistence.SocialActivityPersistence;
 import com.liferay.portlet.trash.service.persistence.TrashEntryPersistence;
+import com.liferay.portlet.trash.service.persistence.TrashVersionPersistence;
 
 import javax.sql.DataSource;
 
@@ -555,24 +556,6 @@ public abstract class BookmarksFolderServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
-	 * Returns the asset link finder.
-	 *
-	 * @return the asset link finder
-	 */
-	public AssetLinkFinder getAssetLinkFinder() {
-		return assetLinkFinder;
-	}
-
-	/**
-	 * Sets the asset link finder.
-	 *
-	 * @param assetLinkFinder the asset link finder
-	 */
-	public void setAssetLinkFinder(AssetLinkFinder assetLinkFinder) {
-		this.assetLinkFinder = assetLinkFinder;
-	}
-
-	/**
 	 * Returns the expando row local service.
 	 *
 	 * @return the expando row local service
@@ -630,6 +613,25 @@ public abstract class BookmarksFolderServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
+	 * Returns the social activity remote service.
+	 *
+	 * @return the social activity remote service
+	 */
+	public com.liferay.portlet.social.service.SocialActivityService getSocialActivityService() {
+		return socialActivityService;
+	}
+
+	/**
+	 * Sets the social activity remote service.
+	 *
+	 * @param socialActivityService the social activity remote service
+	 */
+	public void setSocialActivityService(
+		com.liferay.portlet.social.service.SocialActivityService socialActivityService) {
+		this.socialActivityService = socialActivityService;
+	}
+
+	/**
 	 * Returns the social activity persistence.
 	 *
 	 * @return the social activity persistence
@@ -665,63 +667,6 @@ public abstract class BookmarksFolderServiceBaseImpl extends BaseServiceImpl
 	public void setSocialActivityFinder(
 		SocialActivityFinder socialActivityFinder) {
 		this.socialActivityFinder = socialActivityFinder;
-	}
-
-	/**
-	 * Returns the social activity counter local service.
-	 *
-	 * @return the social activity counter local service
-	 */
-	public com.liferay.portlet.social.service.SocialActivityCounterLocalService getSocialActivityCounterLocalService() {
-		return socialActivityCounterLocalService;
-	}
-
-	/**
-	 * Sets the social activity counter local service.
-	 *
-	 * @param socialActivityCounterLocalService the social activity counter local service
-	 */
-	public void setSocialActivityCounterLocalService(
-		com.liferay.portlet.social.service.SocialActivityCounterLocalService socialActivityCounterLocalService) {
-		this.socialActivityCounterLocalService = socialActivityCounterLocalService;
-	}
-
-	/**
-	 * Returns the social activity counter persistence.
-	 *
-	 * @return the social activity counter persistence
-	 */
-	public SocialActivityCounterPersistence getSocialActivityCounterPersistence() {
-		return socialActivityCounterPersistence;
-	}
-
-	/**
-	 * Sets the social activity counter persistence.
-	 *
-	 * @param socialActivityCounterPersistence the social activity counter persistence
-	 */
-	public void setSocialActivityCounterPersistence(
-		SocialActivityCounterPersistence socialActivityCounterPersistence) {
-		this.socialActivityCounterPersistence = socialActivityCounterPersistence;
-	}
-
-	/**
-	 * Returns the social activity counter finder.
-	 *
-	 * @return the social activity counter finder
-	 */
-	public SocialActivityCounterFinder getSocialActivityCounterFinder() {
-		return socialActivityCounterFinder;
-	}
-
-	/**
-	 * Sets the social activity counter finder.
-	 *
-	 * @param socialActivityCounterFinder the social activity counter finder
-	 */
-	public void setSocialActivityCounterFinder(
-		SocialActivityCounterFinder socialActivityCounterFinder) {
-		this.socialActivityCounterFinder = socialActivityCounterFinder;
 	}
 
 	/**
@@ -781,6 +726,44 @@ public abstract class BookmarksFolderServiceBaseImpl extends BaseServiceImpl
 		this.trashEntryPersistence = trashEntryPersistence;
 	}
 
+	/**
+	 * Returns the trash version local service.
+	 *
+	 * @return the trash version local service
+	 */
+	public com.liferay.portlet.trash.service.TrashVersionLocalService getTrashVersionLocalService() {
+		return trashVersionLocalService;
+	}
+
+	/**
+	 * Sets the trash version local service.
+	 *
+	 * @param trashVersionLocalService the trash version local service
+	 */
+	public void setTrashVersionLocalService(
+		com.liferay.portlet.trash.service.TrashVersionLocalService trashVersionLocalService) {
+		this.trashVersionLocalService = trashVersionLocalService;
+	}
+
+	/**
+	 * Returns the trash version persistence.
+	 *
+	 * @return the trash version persistence
+	 */
+	public TrashVersionPersistence getTrashVersionPersistence() {
+		return trashVersionPersistence;
+	}
+
+	/**
+	 * Sets the trash version persistence.
+	 *
+	 * @param trashVersionPersistence the trash version persistence
+	 */
+	public void setTrashVersionPersistence(
+		TrashVersionPersistence trashVersionPersistence) {
+		this.trashVersionPersistence = trashVersionPersistence;
+	}
+
 	public void afterPropertiesSet() {
 	}
 
@@ -816,13 +799,18 @@ public abstract class BookmarksFolderServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
-	 * Performs an SQL query.
+	 * Performs a SQL query.
 	 *
 	 * @param sql the sql query
 	 */
 	protected void runSQL(String sql) throws SystemException {
 		try {
 			DataSource dataSource = bookmarksFolderPersistence.getDataSource();
+
+			DB db = DBFactoryUtil.getDB();
+
+			sql = db.buildSQL(sql);
+			sql = PortalUtil.transformSQL(sql);
 
 			SqlUpdate sqlUpdate = SqlUpdateFactoryUtil.getSqlUpdate(dataSource,
 					sql, new int[0]);
@@ -886,29 +874,27 @@ public abstract class BookmarksFolderServiceBaseImpl extends BaseServiceImpl
 	protected com.liferay.portlet.asset.service.AssetLinkLocalService assetLinkLocalService;
 	@BeanReference(type = AssetLinkPersistence.class)
 	protected AssetLinkPersistence assetLinkPersistence;
-	@BeanReference(type = AssetLinkFinder.class)
-	protected AssetLinkFinder assetLinkFinder;
 	@BeanReference(type = com.liferay.portlet.expando.service.ExpandoRowLocalService.class)
 	protected com.liferay.portlet.expando.service.ExpandoRowLocalService expandoRowLocalService;
 	@BeanReference(type = ExpandoRowPersistence.class)
 	protected ExpandoRowPersistence expandoRowPersistence;
 	@BeanReference(type = com.liferay.portlet.social.service.SocialActivityLocalService.class)
 	protected com.liferay.portlet.social.service.SocialActivityLocalService socialActivityLocalService;
+	@BeanReference(type = com.liferay.portlet.social.service.SocialActivityService.class)
+	protected com.liferay.portlet.social.service.SocialActivityService socialActivityService;
 	@BeanReference(type = SocialActivityPersistence.class)
 	protected SocialActivityPersistence socialActivityPersistence;
 	@BeanReference(type = SocialActivityFinder.class)
 	protected SocialActivityFinder socialActivityFinder;
-	@BeanReference(type = com.liferay.portlet.social.service.SocialActivityCounterLocalService.class)
-	protected com.liferay.portlet.social.service.SocialActivityCounterLocalService socialActivityCounterLocalService;
-	@BeanReference(type = SocialActivityCounterPersistence.class)
-	protected SocialActivityCounterPersistence socialActivityCounterPersistence;
-	@BeanReference(type = SocialActivityCounterFinder.class)
-	protected SocialActivityCounterFinder socialActivityCounterFinder;
 	@BeanReference(type = com.liferay.portlet.trash.service.TrashEntryLocalService.class)
 	protected com.liferay.portlet.trash.service.TrashEntryLocalService trashEntryLocalService;
 	@BeanReference(type = com.liferay.portlet.trash.service.TrashEntryService.class)
 	protected com.liferay.portlet.trash.service.TrashEntryService trashEntryService;
 	@BeanReference(type = TrashEntryPersistence.class)
 	protected TrashEntryPersistence trashEntryPersistence;
+	@BeanReference(type = com.liferay.portlet.trash.service.TrashVersionLocalService.class)
+	protected com.liferay.portlet.trash.service.TrashVersionLocalService trashVersionLocalService;
+	@BeanReference(type = TrashVersionPersistence.class)
+	protected TrashVersionPersistence trashVersionPersistence;
 	private String _beanIdentifier;
 }

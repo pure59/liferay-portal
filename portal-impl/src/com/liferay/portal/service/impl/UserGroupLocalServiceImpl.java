@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.QueryConfig;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.Sort;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Validator;
@@ -35,6 +36,7 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.ResourceConstants;
+import com.liferay.portal.model.SystemEventConstants;
 import com.liferay.portal.model.Team;
 import com.liferay.portal.model.User;
 import com.liferay.portal.model.UserGroup;
@@ -338,7 +340,7 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 		UserGroup userGroup = userGroupPersistence.findByPrimaryKey(
 			userGroupId);
 
-		return deleteUserGroup(userGroup);
+		return userGroupLocalService.deleteUserGroup(userGroup);
 	}
 
 	/**
@@ -351,6 +353,9 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
+	@SystemEvent(
+		action = SystemEventConstants.ACTION_SKIP,
+		type = SystemEventConstants.TYPE_DELETE)
 	public UserGroup deleteUserGroup(UserGroup userGroup)
 		throws PortalException, SystemException {
 
@@ -405,7 +410,7 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 			companyId);
 
 		for (UserGroup userGroup : userGroups) {
-			deleteUserGroup(userGroup);
+			userGroupLocalService.deleteUserGroup(userGroup);
 		}
 	}
 
@@ -638,7 +643,7 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 			searchContext.setQueryConfig(queryConfig);
 
 			if (sort != null) {
-				searchContext.setSorts(new Sort[] {sort});
+				searchContext.setSorts(sort);
 			}
 
 			searchContext.setStart(start);
@@ -881,9 +886,6 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 			new String[] {PortletDataHandlerKeys.
 				PORTLETS_MERGE_MODE_ADD_TO_BOTTOM});
 		parameterMap.put(
-			PortletDataHandlerKeys.THEME,
-			new String[] {Boolean.FALSE.toString()});
-		parameterMap.put(
 			PortletDataHandlerKeys.THEME_REFERENCE,
 			new String[] {Boolean.TRUE.toString()});
 		parameterMap.put(
@@ -903,7 +905,7 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 
 		User user = userPersistence.findByPrimaryKey(userId);
 
-		long groupId = user.getGroup().getGroupId();
+		long groupId = user.getGroupId();
 
 		if (privateLayoutsFile != null) {
 			layoutLocalService.importLayouts(

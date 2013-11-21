@@ -6,7 +6,9 @@
 			<name>Liferay Portal</name>
 		</general-data>
 		<general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
+
 			<!-- Do not use Project Properties customizer when editing this file manually. -->
+
 			<name>Liferay Portal</name>
 			<properties/>
 			<folders>
@@ -206,14 +208,14 @@
 					</source-file>
 				</items>
 				<context-menu>
-					<ide-action name="All"/>
-					<ide-action name="Build"/>
-					<ide-action name="Clean"/>
-					<ide-action name="Compile"/>
-					<ide-action name="Deploy"/>
-					<ide-action name="Javadoc"/>
-					<ide-action name="Rebuild"/>
-					<ide-action name="Test"/>
+					<ide-action name="All" />
+					<ide-action name="Build" />
+					<ide-action name="Clean" />
+					<ide-action name="Compile" />
+					<ide-action name="Deploy" />
+					<ide-action name="Javadoc" />
+					<ide-action name="Rebuild" />
+					<ide-action name="Test" />
 				</context-menu>
 			</view>
 			<subprojects/>
@@ -242,13 +244,13 @@
 				<classpath mode="compile">lib/development/ant-installer.jar</classpath>
 				<classpath mode="compile">lib/development/antelope.jar</classpath>
 				<classpath mode="compile">lib/development/catalina.jar</classpath>
-				<classpath mode="compile">lib/development/ckbuilder.jar</classpath>
 				<classpath mode="compile">lib/development/cobertura.jar</classpath>
 				<classpath mode="compile">lib/development/deployment.jar</classpath>
 				<classpath mode="compile">lib/development/derby.jar</classpath>
 				<classpath mode="compile">lib/development/derbytools.jar</classpath>
 				<classpath mode="compile">lib/development/dtddoc.jar</classpath>
 				<classpath mode="compile">lib/development/dtdparser.jar</classpath>
+				<classpath mode="compile">lib/development/dumbster.jar</classpath>
 				<classpath mode="compile">lib/development/ecj.jar</classpath>
 				<classpath mode="compile">lib/development/firebird.jar</classpath>
 				<classpath mode="compile">lib/development/hamcrest-core.jar</classpath>
@@ -269,6 +271,7 @@
 				<classpath mode="compile">lib/development/jms.jar</classpath>
 				<classpath mode="compile">lib/development/jndi.jar</classpath>
 				<classpath mode="compile">lib/development/jnet.jar</classpath>
+				<classpath mode="compile">lib/development/jserrorcollector.jar</classpath>
 				<classpath mode="compile">lib/development/jsp-api.jar</classpath>
 				<classpath mode="compile">lib/development/jta.jar</classpath>
 				<classpath mode="compile">lib/development/jtds.jar</classpath>
@@ -276,6 +279,7 @@
 				<classpath mode="compile">lib/development/jutf7.jar</classpath>
 				<classpath mode="compile">lib/development/jymsg.jar</classpath>
 				<classpath mode="compile">lib/development/mail.jar</classpath>
+				<classpath mode="compile">lib/development/maven-ant-tasks.jar</classpath>
 				<classpath mode="compile">lib/development/mockito.jar</classpath>
 				<classpath mode="compile">lib/development/mysql.jar</classpath>
 				<classpath mode="compile">lib/development/objenesis.jar</classpath>
@@ -376,13 +380,12 @@
 				<classpath mode="compile">lib/portal/freshcookies-security.jar</classpath>
 				<classpath mode="compile">lib/portal/gif89.jar</classpath>
 				<classpath mode="compile">lib/portal/groovy.jar</classpath>
-				<classpath mode="compile">lib/portal/gt-coverage.jar</classpath>
-				<classpath mode="compile">lib/portal/gt-metadata.jar</classpath>
 				<classpath mode="compile">lib/portal/hessian.jar</classpath>
 				<classpath mode="compile">lib/portal/hibernate3.jar</classpath>
 				<classpath mode="compile">lib/portal/htmlparser.jar</classpath>
 				<classpath mode="compile">lib/portal/httpclient.jar</classpath>
 				<classpath mode="compile">lib/portal/httpcore.jar</classpath>
+				<classpath mode="compile">lib/portal/httpmime.jar</classpath>
 				<classpath mode="compile">lib/portal/ical4j.jar</classpath>
 				<classpath mode="compile">lib/portal/icq.jar</classpath>
 				<classpath mode="compile">lib/portal/im4java.jar</classpath>
@@ -446,6 +449,7 @@
 				<classpath mode="compile">lib/portal/lucene-queries.jar</classpath>
 				<classpath mode="compile">lib/portal/lucene-queryparser.jar</classpath>
 				<classpath mode="compile">lib/portal/lucene-spellchecker.jar</classpath>
+				<classpath mode="compile">lib/portal/mchange-commons-java.jar</classpath>
 				<classpath mode="compile">lib/portal/memcached.jar</classpath>
 				<classpath mode="compile">lib/portal/metadata-extractor.jar</classpath>
 				<classpath mode="compile">lib/portal/mime4j-core.jar</classpath>

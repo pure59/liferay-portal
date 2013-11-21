@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchContextFactory;
 import com.liferay.portal.kernel.search.Sort;
+import com.liferay.portal.kernel.search.SortFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
@@ -37,14 +38,20 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.model.LayoutTypePortletConstants;
 import com.liferay.portal.model.Portlet;
+import com.liferay.portal.security.permission.ActionKeys;
+import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.comparator.ModelResourceComparator;
 import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.theme.PortletDisplay;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.util.PortletKeys;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.NoSuchTagException;
@@ -59,6 +66,8 @@ import com.liferay.portlet.asset.service.AssetCategoryPropertyLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetTagPropertyLocalServiceUtil;
+import com.liferay.portlet.asset.service.permission.AssetCategoryPermission;
+import com.liferay.portlet.asset.service.permission.AssetTagPermission;
 import com.liferay.portlet.asset.service.persistence.AssetEntryQuery;
 import com.liferay.portlet.assetpublisher.util.AssetSearcher;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
@@ -81,6 +90,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import javax.portlet.PortletMode;
+import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
 
@@ -143,6 +153,74 @@ public class AssetUtil {
 		PortalUtil.addPortletBreadcrumbEntry(
 			request, assetCategory.getTitleCurrentValue(),
 			portletURL.toString());
+	}
+
+	public static long[] filterCategoryIds(
+			PermissionChecker permissionChecker, long[] categoryIds)
+		throws PortalException, SystemException {
+
+		List<Long> viewableCategoryIds = new ArrayList<Long>();
+
+		for (long categoryId : categoryIds) {
+			AssetCategory category =
+				AssetCategoryLocalServiceUtil.fetchCategory(categoryId);
+
+			if ((category != null) &&
+				AssetCategoryPermission.contains(
+					permissionChecker, categoryId, ActionKeys.VIEW)) {
+
+				viewableCategoryIds.add(categoryId);
+			}
+		}
+
+		return ArrayUtil.toArray(
+			viewableCategoryIds.toArray(new Long[viewableCategoryIds.size()]));
+	}
+
+	public static long[] filterTagIds(
+			PermissionChecker permissionChecker, long[] tagIds)
+		throws PortalException, SystemException {
+
+		List<Long> viewableTagIds = new ArrayList<Long>();
+
+		for (long tagId : tagIds) {
+			if (AssetTagPermission.contains(
+					permissionChecker, tagId, ActionKeys.VIEW)) {
+
+				viewableTagIds.add(tagId);
+			}
+		}
+
+		return ArrayUtil.toArray(
+			viewableTagIds.toArray(new Long[viewableTagIds.size()]));
+	}
+
+	public static long[][] filterTagIdsArray(
+			PermissionChecker permissionChecker, long[][] tagIdsArray)
+		throws PortalException, SystemException {
+
+		List<long[]> viewableTagIdsArray = new ArrayList<long[]>();
+
+		for (int i = 0; i< tagIdsArray.length; i++) {
+			long[] tagIds = tagIdsArray[i];
+
+			List<Long> viewableTagIds = new ArrayList<Long>();
+
+			for (long tagId : tagIds) {
+				if (AssetTagPermission.contains(
+						permissionChecker, tagId, ActionKeys.VIEW)) {
+
+					viewableTagIds.add(tagId);
+				}
+			}
+
+			viewableTagIdsArray.add(
+				ArrayUtil.toArray(
+					viewableTagIds.toArray(new Long[viewableTagIds.size()])));
+		}
+
+		return viewableTagIdsArray.toArray(
+			new long[viewableTagIdsArray.size()][]);
 	}
 
 	public static PortletURL getAddPortletURL(
@@ -295,6 +373,7 @@ public class AssetUtil {
 
 			redirectURL.setParameter(
 				"struts_action", "/asset_publisher/add_asset_redirect");
+			redirectURL.setParameter("redirect", themeDisplay.getURLCurrent());
 			redirectURL.setWindowState(LiferayWindowState.POP_UP);
 
 			redirect = redirectURL.toString();
@@ -427,24 +506,64 @@ public class AssetUtil {
 		return false;
 	}
 
+	public static boolean isDefaultAssetPublisher(
+		Layout layout, String portletId, String portletResource) {
+
+		UnicodeProperties typeSettingsProperties =
+			layout.getTypeSettingsProperties();
+
+		String defaultAssetPublisherPortletId =
+			typeSettingsProperties.getProperty(
+				LayoutTypePortletConstants.DEFAULT_ASSET_PUBLISHER_PORTLET_ID,
+				StringPool.BLANK);
+
+		if (Validator.isNull(defaultAssetPublisherPortletId)) {
+			return false;
+		}
+
+		if (defaultAssetPublisherPortletId.equals(portletId) ||
+			defaultAssetPublisherPortletId.equals(portletResource)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public static boolean isEnablePermissions(
+		PortletPreferences portletPreferences, String portletName) {
+
+		if (!PropsValues.ASSET_PUBLISHER_SEARCH_WITH_INDEX) {
+			return false;
+		}
+
+		if (portletName.equals(PortletKeys.HIGHEST_RATED_ASSETS) ||
+			portletName.equals(PortletKeys.MOST_VIEWED_ASSETS)) {
+
+			return false;
+		}
+
+		return GetterUtil.getBoolean(
+			portletPreferences.getValue("enablePermissions", null));
+	}
+
 	public static boolean isValidWord(String word) {
 		if (Validator.isNull(word)) {
 			return false;
 		}
-		else {
-			char[] wordCharArray = word.toCharArray();
 
-			for (char c : wordCharArray) {
-				for (char invalidChar : INVALID_CHARACTERS) {
-					if (c == invalidChar) {
-						if (_log.isDebugEnabled()) {
-							_log.debug(
-								"Word " + word + " is not valid because " + c +
-									" is not allowed");
-						}
+		char[] wordCharArray = word.toCharArray();
 
-						return false;
+		for (char c : wordCharArray) {
+			for (char invalidChar : INVALID_CHARACTERS) {
+				if (c == invalidChar) {
+					if (_log.isDebugEnabled()) {
+						_log.debug(
+							"Word " + word + " is not valid because " + c +
+								" is not allowed");
 					}
+
+					return false;
 				}
 			}
 		}
@@ -519,7 +638,7 @@ public class AssetUtil {
 
 	public static String substituteCategoryPropertyVariables(
 			long groupId, long categoryId, String s)
-		throws PortalException, SystemException {
+		throws SystemException {
 
 		String result = s;
 
@@ -579,23 +698,22 @@ public class AssetUtil {
 		if (Validator.isNull(text)) {
 			return text;
 		}
-		else {
-			char[] textCharArray = text.toCharArray();
 
-			for (int i = 0; i < textCharArray.length; i++) {
-				char c = textCharArray[i];
+		char[] textCharArray = text.toCharArray();
 
-				for (char invalidChar : INVALID_CHARACTERS) {
-					if (c == invalidChar) {
-						textCharArray[i] = CharPool.SPACE;
+		for (int i = 0; i < textCharArray.length; i++) {
+			char c = textCharArray[i];
 
-						break;
-					}
+			for (char invalidChar : INVALID_CHARACTERS) {
+				if (c == invalidChar) {
+					textCharArray[i] = CharPool.SPACE;
+
+					break;
 				}
 			}
-
-			return new String(textCharArray);
 		}
+
+		return new String(textCharArray);
 	}
 
 	protected static Sort getSort(
@@ -635,8 +753,8 @@ public class AssetUtil {
 				LocaleUtil.toLanguageId(locale));
 		}
 
-		return new Sort(
-			sortField, sortType, !orderByType.equalsIgnoreCase("asc"));
+		return SortFactoryUtil.getSort(
+			AssetEntry.class, sortType, sortField, orderByType);
 	}
 
 	protected static Sort[] getSorts(

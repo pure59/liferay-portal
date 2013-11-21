@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.blogs.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see BlogsEntry
  * @generated
  */
+@ProviderType
 public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	public BlogsEntryWrapper(BlogsEntry blogsEntry) {
 		_blogsEntry = blogsEntry;
@@ -773,6 +776,66 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	}
 
 	/**
+	* Returns the trash entry created when this blogs entry was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this blogs entry.
+	*
+	* @return the trash entry created when this blogs entry was moved to the Recycle Bin
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry getTrashEntry()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _blogsEntry.getTrashEntry();
+	}
+
+	/**
+	* Returns the class primary key of the trash entry for this blogs entry.
+	*
+	* @return the class primary key of the trash entry for this blogs entry
+	*/
+	@Override
+	public long getTrashEntryClassPK() {
+		return _blogsEntry.getTrashEntryClassPK();
+	}
+
+	/**
+	* Returns the trash handler for this blogs entry.
+	*
+	* @return the trash handler for this blogs entry
+	*/
+	@Override
+	public com.liferay.portal.kernel.trash.TrashHandler getTrashHandler() {
+		return _blogsEntry.getTrashHandler();
+	}
+
+	/**
+	* Returns <code>true</code> if this blogs entry is in the Recycle Bin.
+	*
+	* @return <code>true</code> if this blogs entry is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrash() {
+		return _blogsEntry.isInTrash();
+	}
+
+	/**
+	* Returns <code>true</code> if the parent of this blogs entry is in the Recycle Bin.
+	*
+	* @return <code>true</code> if the parent of this blogs entry is in the Recycle Bin; <code>false</code> otherwise
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public boolean isInTrashContainer() {
+		return _blogsEntry.isInTrashContainer();
+	}
+
+	@Override
+	public boolean isInTrashExplicitly()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _blogsEntry.isInTrashExplicitly();
+	}
+
+	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
 	@Override
@@ -838,16 +901,6 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	@Override
 	public boolean isIncomplete() {
 		return _blogsEntry.isIncomplete();
-	}
-
-	/**
-	* Returns <code>true</code> if this blogs entry is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this blogs entry is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _blogsEntry.isInTrash();
 	}
 
 	/**

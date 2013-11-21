@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatamapping.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DDMTemplate
  * @generated
  */
+@ProviderType
 public class DDMTemplateWrapper implements DDMTemplate,
 	ModelWrapper<DDMTemplate> {
 	public DDMTemplateWrapper(DDMTemplate ddmTemplate) {
@@ -1003,6 +1006,22 @@ public class DDMTemplateWrapper implements DDMTemplate,
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _ddmTemplate.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _ddmTemplate.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_ddmTemplate.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -1054,11 +1073,6 @@ public class DDMTemplateWrapper implements DDMTemplate,
 	public void persist()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		_ddmTemplate.persist();
-	}
-
-	@Override
-	public java.lang.String getDefaultLanguageId() {
-		return _ddmTemplate.getDefaultLanguageId();
 	}
 
 	@Override

@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DLFileEntryType
  * @generated
  */
+@ProviderType
 public class DLFileEntryTypeWrapper implements DLFileEntryType,
 	ModelWrapper<DLFileEntryType> {
 	public DLFileEntryTypeWrapper(DLFileEntryType dlFileEntryType) {
@@ -695,6 +698,22 @@ public class DLFileEntryTypeWrapper implements DLFileEntryType,
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_dlFileEntryType.setExpandoBridgeAttributes(serviceContext);
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _dlFileEntryType.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _dlFileEntryType.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_dlFileEntryType.prepareLocalizedFieldsForImport();
 	}
 
 	@Override

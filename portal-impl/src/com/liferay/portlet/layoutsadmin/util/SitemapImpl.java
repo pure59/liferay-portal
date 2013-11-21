@@ -167,7 +167,8 @@ public class SitemapImpl implements Sitemap {
 				Locale locale = entry.getKey();
 				String href = entry.getValue();
 
-				Element alternateURLElement = urlElement.addElement("link");
+				Element alternateURLElement = urlElement.addElement(
+					"xhtml:link", "http://www.w3.org/1999/xhtml");
 
 				alternateURLElement.addAttribute("href", href);
 				alternateURLElement.addAttribute(
@@ -175,7 +176,8 @@ public class SitemapImpl implements Sitemap {
 				alternateURLElement.addAttribute("rel", "alternate");
 			}
 
-			Element alternateURLElement = urlElement.addElement("link");
+			Element alternateURLElement = urlElement.addElement(
+				"xhtml:link", "http://www.w3.org/1999/xhtml");
 
 			alternateURLElement.addAttribute("rel", "alternate");
 			alternateURLElement.addAttribute("hreflang", "x-default");
@@ -184,11 +186,15 @@ public class SitemapImpl implements Sitemap {
 	}
 
 	protected Map<Locale, String> getAlternateURLs(
-		String canonicalURL, ThemeDisplay themeDisplay, Layout layout) {
+			String canonicalURL, ThemeDisplay themeDisplay, Layout layout)
+		throws PortalException, SystemException {
 
 		Map<Locale, String> alternateURLs = new HashMap<Locale, String>();
 
-		for (Locale availableLocale : LanguageUtil.getAvailableLocales()) {
+		Locale[] availableLocales = LanguageUtil.getAvailableLocales(
+			layout.getGroupId());
+
+		for (Locale availableLocale : availableLocales) {
 			String alternateURL = PortalUtil.getAlternateURL(
 				canonicalURL, themeDisplay, availableLocale, layout);
 
@@ -244,10 +250,11 @@ public class SitemapImpl implements Sitemap {
 				element, articleURL, null, journalArticle.getModifiedDate(),
 				articleURL, getAlternateURLs(articleURL, themeDisplay, layout));
 
-			Locale[] availableLocales = LanguageUtil.getAvailableLocales();
+			Locale[] availableLocales = LanguageUtil.getAvailableLocales(
+				layout.getGroupId());
 
 			if (availableLocales.length > 1) {
-				Locale defaultLocale = LocaleUtil.getDefault();
+				Locale defaultLocale = LocaleUtil.getSiteDefault();
 
 				for (Locale availableLocale : availableLocales) {
 					if (!availableLocale.equals(defaultLocale)) {
@@ -273,7 +280,7 @@ public class SitemapImpl implements Sitemap {
 		UnicodeProperties typeSettingsProperties =
 			layout.getTypeSettingsProperties();
 
-		if (layout.isHidden() || !PortalUtil.isLayoutSitemapable(layout) ||
+		if (!PortalUtil.isLayoutSitemapable(layout) ||
 			!GetterUtil.getBoolean(
 				typeSettingsProperties.getProperty("sitemap-include"), true)) {
 
@@ -291,10 +298,11 @@ public class SitemapImpl implements Sitemap {
 			layout.getModifiedDate(), layoutFullURL,
 			getAlternateURLs(layoutFullURL, themeDisplay, layout));
 
-		Locale[] availableLocales = LanguageUtil.getAvailableLocales();
+		Locale[] availableLocales = LanguageUtil.getAvailableLocales(
+			layout.getGroupId());
 
 		if (availableLocales.length > 1) {
-			Locale defaultLocale = LocaleUtil.getDefault();
+			Locale defaultLocale = LocaleUtil.getSiteDefault();
 
 			for (Locale availableLocale : availableLocales) {
 				if (availableLocale.equals(defaultLocale)) {
@@ -310,9 +318,6 @@ public class SitemapImpl implements Sitemap {
 					getAlternateURLs(layoutFullURL, themeDisplay, layout));
 			}
 		}
-
-		visitArticles(element, layout, themeDisplay);
-		visitLayouts(element, layout.getChildren(), themeDisplay);
 	}
 
 	protected void visitLayouts(
@@ -321,6 +326,10 @@ public class SitemapImpl implements Sitemap {
 
 		for (Layout layout : layouts) {
 			visitLayout(element, layout, themeDisplay);
+
+			visitArticles(element, layout, themeDisplay);
+
+			visitLayouts(element, layout.getChildren(), themeDisplay);
 		}
 	}
 

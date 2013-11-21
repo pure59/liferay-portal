@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.messageboards.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.messageboards.service.impl.MBThreadServiceImpl
  * @generated
  */
+@ProviderType
 public class MBThreadServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -168,6 +171,23 @@ public class MBThreadServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		getService().restoreThreadFromTrash(threadId);
+	}
+
+	public static com.liferay.portal.kernel.search.Hits search(long groupId,
+		long creatorUserId, int status, int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService().search(groupId, creatorUserId, status, start, end);
+	}
+
+	public static com.liferay.portal.kernel.search.Hits search(long groupId,
+		long creatorUserId, long startDate, long endDate, int status,
+		int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .search(groupId, creatorUserId, startDate, endDate, status,
+			start, end);
 	}
 
 	public static com.liferay.portlet.messageboards.model.MBThread splitThread(

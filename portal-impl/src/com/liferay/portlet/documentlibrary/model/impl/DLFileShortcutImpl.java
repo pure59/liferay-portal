@@ -23,7 +23,6 @@ import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.model.Repository;
 import com.liferay.portal.repository.liferayrepository.model.LiferayFolder;
 import com.liferay.portal.service.RepositoryLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.NoSuchFolderException;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFolderLocalServiceUtil;
@@ -34,6 +33,20 @@ import com.liferay.portlet.documentlibrary.service.DLFolderLocalServiceUtil;
 public class DLFileShortcutImpl extends DLFileShortcutBaseImpl {
 
 	public DLFileShortcutImpl() {
+	}
+
+	@Override
+	public String buildTreePath() throws PortalException, SystemException {
+		DLFolder dlFolder = getDLFolder();
+
+		return dlFolder.buildTreePath();
+	}
+
+	@Override
+	public DLFolder getDLFolder() throws PortalException, SystemException {
+		Folder folder = getFolder();
+
+		return (DLFolder)folder.getModel();
 	}
 
 	@Override
@@ -63,28 +76,6 @@ public class DLFileShortcutImpl extends DLFileShortcutBaseImpl {
 	}
 
 	@Override
-	public DLFolder getTrashContainer()
-		throws PortalException, SystemException {
-
-		Folder folder = null;
-
-		try {
-			folder = getFolder();
-		}
-		catch (NoSuchFolderException nsfe) {
-			return null;
-		}
-
-		DLFolder dlFolder = (DLFolder)folder.getModel();
-
-		if (dlFolder.isInTrash()) {
-			return dlFolder;
-		}
-
-		return dlFolder.getTrashContainer();
-	}
-
-	@Override
 	public boolean isInHiddenFolder() {
 		try {
 			long repositoryId = getRepositoryId();
@@ -102,18 +93,6 @@ public class DLFileShortcutImpl extends DLFileShortcutBaseImpl {
 		}
 
 		return false;
-	}
-
-	@Override
-	public boolean isInTrashContainer()
-		throws PortalException, SystemException {
-
-		if (getTrashContainer() != null) {
-			return true;
-		}
-		else {
-			return false;
-		}
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(DLFileShortcutImpl.class);

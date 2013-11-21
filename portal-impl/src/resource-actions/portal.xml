@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE resource-action-mapping PUBLIC "-//Liferay//DTD Resource Action Mapping 6.2.0//EN" "http://www.liferay.com/dtd/liferay-resource-action-mapping_6_2_0.dtd">
+<!DOCTYPE resource-action-mapping PUBLIC "-//Liferay//DTD Resource Action Mapping 7.0.0//EN" "http://www.liferay.com/dtd/liferay-resource-action-mapping_7_0_0.dtd">
 
 <resource-action-mapping>
 	<portlet-resource>
@@ -39,6 +39,7 @@
 		<permissions>
 			<supports>
 				<action-key>ADD_COMMUNITY</action-key>
+				<action-key>ADD_GENERAL_ANNOUNCEMENTS</action-key>
 				<action-key>ADD_LAYOUT_PROTOTYPE</action-key>
 				<action-key>ADD_LAYOUT_SET_PROTOTYPE</action-key>
 				<action-key>ADD_LICENSE</action-key>

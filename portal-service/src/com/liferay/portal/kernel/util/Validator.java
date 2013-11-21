@@ -160,7 +160,7 @@ public class Validator {
 	 *         instance, or both <code>null</code>; <code>false</code> otherwise
 	 */
 	public static boolean equals(Object obj1, Object obj2) {
-		if ((obj1 == null) && (obj2 == null)) {
+		if (obj1 == obj2) {
 			return true;
 		}
 		else if ((obj1 == null) || (obj2 == null)) {
@@ -601,7 +601,7 @@ public class Validator {
 					return false;
 				}
 
-				if (!isChar(c) && !isDigit(c) && (c != CharPool.DASH)) {
+				if (!Character.isLetterOrDigit(c) && (c != CharPool.DASH)) {
 					return false;
 				}
 			}
@@ -982,8 +982,21 @@ public class Validator {
 	}
 
 	/**
+	 * Returns <code>true</code> if the int number object is not
+	 * <code>null</code>, meaning it is not a <code>null</code> reference or
+	 * zero.
+	 *
+	 * @param  i the int number object to check
+	 * @return <code>true</code> if the int number object is not
+	 *         <code>null</code>; <code>false</code> otherwise
+	 */
+	public static boolean isNotNull(Integer i) {
+		return !isNull(i);
+	}
+
+	/**
 	 * Returns <code>true</code> if the long number object is not
-	 * <code>null</code>, meaning it is neither a <code>null</code> reference or
+	 * <code>null</code>, meaning it is not a <code>null</code> reference or
 	 * zero.
 	 *
 	 * @param  l the long number object to check
@@ -1008,15 +1021,11 @@ public class Validator {
 	}
 
 	/**
-	 * Returns <code>true</code> if the array is not <code>null</code>, meaning
-	 * it is neither a <code>null</code> reference or empty.
-	 *
-	 * @param  array the array to check
-	 * @return <code>true</code> if the array is not <code>null</code>;
-	 *         <code>false</code> otherwise
+	 * @deprecated As of 6.2.0, replaced by {@link ArrayUtil#isNotEmpty(
+	 *             Object[])}
 	 */
 	public static boolean isNotNull(Object[] array) {
-		return !isNull(array);
+		return ArrayUtil.isNotEmpty(array);
 	}
 
 	/**
@@ -1030,6 +1039,23 @@ public class Validator {
 	 */
 	public static boolean isNotNull(String s) {
 		return !isNull(s);
+	}
+
+	/**
+	 * Returns <code>true</code> if the int number object is <code>null</code>,
+	 * meaning it is either a <code>null</code> reference or zero.
+	 *
+	 * @param  i the int number object to check
+	 * @return <code>true</code> if the int number object is <code>null</code>;
+	 *         <code>false</code> otherwise
+	 */
+	public static boolean isNull(Integer i) {
+		if ((i == null) || (i.intValue()== 0)) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	/**
@@ -1059,7 +1085,10 @@ public class Validator {
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean isNull(Object obj) {
-		if (obj instanceof Long) {
+		if (obj instanceof Integer) {
+			return isNull((Integer)obj);
+		}
+		else if (obj instanceof Long) {
 			return isNull((Long)obj);
 		}
 		else if (obj instanceof String) {
@@ -1074,20 +1103,10 @@ public class Validator {
 	}
 
 	/**
-	 * Returns <code>true</code> if the array is <code>null</code>, meaning it
-	 * is either a <code>null</code> reference or empty.
-	 *
-	 * @param  array the array to check
-	 * @return <code>true</code> if the array is <code>null</code>;
-	 *         <code>false</code> otherwise
+	 * @deprecated As of 6.2.0, replaced by {@link ArrayUtil#isEmpty(Object[])}
 	 */
 	public static boolean isNull(Object[] array) {
-		if ((array == null) || (array.length == 0)) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		return ArrayUtil.isEmpty(array);
 	}
 
 	/**
@@ -1350,7 +1369,7 @@ public class Validator {
 
 	private static Pattern _emailAddressPattern = Pattern.compile(
 		"[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@" +
-		"(?:[\\w](?:[\\w-]*[\\w])?\\.)+[\\w](?:[\\w-]*[\\w])?");
+		"(?:[a-zA-Z0-9](?:-*[a-zA-Z0-9])?\\.*)+");
 	private static Pattern _ipv4AddressPattern = Pattern.compile(
 		"^" +
 		"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +

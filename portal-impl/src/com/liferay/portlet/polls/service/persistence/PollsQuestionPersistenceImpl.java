@@ -362,6 +362,10 @@ public class PollsQuestionPersistenceImpl extends BasePersistenceImpl<PollsQuest
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUuid(uuid);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<PollsQuestion> list = findByUuid(uuid, count - 1, count,
 				orderByComparator);
 
@@ -1183,6 +1187,10 @@ public class PollsQuestionPersistenceImpl extends BasePersistenceImpl<PollsQuest
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUuid_C(uuid, companyId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<PollsQuestion> list = findByUuid_C(uuid, companyId, count - 1,
 				count, orderByComparator);
 
@@ -1714,6 +1722,10 @@ public class PollsQuestionPersistenceImpl extends BasePersistenceImpl<PollsQuest
 	public PollsQuestion fetchByGroupId_Last(long groupId,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByGroupId(groupId);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<PollsQuestion> list = findByGroupId(groupId, count - 1, count,
 				orderByComparator);
@@ -2304,6 +2316,10 @@ public class PollsQuestionPersistenceImpl extends BasePersistenceImpl<PollsQuest
 
 	private static final String _FINDER_COLUMN_GROUPID_GROUPID_2 = "pollsQuestion.groupId = ?";
 
+	public PollsQuestionPersistenceImpl() {
+		setModelClass(PollsQuestion.class);
+	}
+
 	/**
 	 * Caches the polls question in the entity cache if it is enabled.
 	 *
@@ -2656,6 +2672,8 @@ public class PollsQuestionPersistenceImpl extends BasePersistenceImpl<PollsQuest
 
 		clearUniqueFindersCache(pollsQuestion);
 		cacheUniqueFindersCache(pollsQuestion);
+
+		pollsQuestion.resetOriginalValues();
 
 		return pollsQuestion;
 	}

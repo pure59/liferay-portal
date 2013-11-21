@@ -352,6 +352,10 @@ public class ExpandoColumnPersistenceImpl extends BasePersistenceImpl<ExpandoCol
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByTableId(tableId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<ExpandoColumn> list = findByTableId(tableId, count - 1, count,
 				orderByComparator);
 
@@ -1697,6 +1701,10 @@ public class ExpandoColumnPersistenceImpl extends BasePersistenceImpl<ExpandoCol
 	private static final String _FINDER_COLUMN_T_N_NAME_6 = "(" +
 		removeConjunction(_FINDER_COLUMN_T_N_NAME_3) + ")";
 
+	public ExpandoColumnPersistenceImpl() {
+		setModelClass(ExpandoColumn.class);
+	}
+
 	/**
 	 * Caches the expando column in the entity cache if it is enabled.
 	 *
@@ -2022,6 +2030,8 @@ public class ExpandoColumnPersistenceImpl extends BasePersistenceImpl<ExpandoCol
 
 		clearUniqueFindersCache(expandoColumn);
 		cacheUniqueFindersCache(expandoColumn);
+
+		expandoColumn.resetOriginalValues();
 
 		return expandoColumn;
 	}

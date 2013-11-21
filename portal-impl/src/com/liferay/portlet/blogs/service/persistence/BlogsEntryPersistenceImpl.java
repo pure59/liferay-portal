@@ -366,6 +366,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUuid(uuid);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<BlogsEntry> list = findByUuid(uuid, count - 1, count,
 				orderByComparator);
 
@@ -1186,6 +1190,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUuid_C(uuid, companyId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<BlogsEntry> list = findByUuid_C(uuid, companyId, count - 1, count,
 				orderByComparator);
 
@@ -1714,6 +1722,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 	public BlogsEntry fetchByGroupId_Last(long groupId,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByGroupId(groupId);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByGroupId(groupId, count - 1, count,
 				orderByComparator);
@@ -2567,6 +2579,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByCompanyId(companyId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<BlogsEntry> list = findByCompanyId(companyId, count - 1, count,
 				orderByComparator);
 
@@ -3078,6 +3094,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByC_U(companyId, userId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<BlogsEntry> list = findByC_U(companyId, userId, count - 1, count,
 				orderByComparator);
 
@@ -3401,8 +3421,8 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsEntry blogsEntry : list) {
 				if ((companyId != blogsEntry.getCompanyId()) ||
-						!Validator.equals(displayDate,
-							blogsEntry.getDisplayDate())) {
+						(displayDate.getTime() <= blogsEntry.getDisplayDate()
+																.getTime())) {
 					list = null;
 
 					break;
@@ -3599,6 +3619,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 	public BlogsEntry fetchByC_LtD_Last(long companyId, Date displayDate,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByC_LtD(companyId, displayDate);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByC_LtD(companyId, displayDate, count - 1,
 				count, orderByComparator);
@@ -3945,7 +3969,7 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsEntry blogsEntry : list) {
 				if ((companyId != blogsEntry.getCompanyId()) ||
-						(status != blogsEntry.getStatus())) {
+						(status == blogsEntry.getStatus())) {
 					list = null;
 
 					break;
@@ -4131,6 +4155,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 	public BlogsEntry fetchByC_NotS_Last(long companyId, int status,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByC_NotS(companyId, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByC_NotS(companyId, status, count - 1,
 				count, orderByComparator);
@@ -4656,6 +4684,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 	public BlogsEntry fetchByC_S_Last(long companyId, int status,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByC_S(companyId, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByC_S(companyId, status, count - 1, count,
 				orderByComparator);
@@ -5242,8 +5274,8 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsEntry blogsEntry : list) {
 				if ((groupId != blogsEntry.getGroupId()) ||
-						!Validator.equals(displayDate,
-							blogsEntry.getDisplayDate())) {
+						(displayDate.getTime() <= blogsEntry.getDisplayDate()
+																.getTime())) {
 					list = null;
 
 					break;
@@ -5440,6 +5472,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 	public BlogsEntry fetchByG_LtD_Last(long groupId, Date displayDate,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByG_LtD(groupId, displayDate);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByG_LtD(groupId, displayDate, count - 1,
 				count, orderByComparator);
@@ -6198,7 +6234,7 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsEntry blogsEntry : list) {
 				if ((groupId != blogsEntry.getGroupId()) ||
-						(status != blogsEntry.getStatus())) {
+						(status == blogsEntry.getStatus())) {
 					list = null;
 
 					break;
@@ -6384,6 +6420,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 	public BlogsEntry fetchByG_NotS_Last(long groupId, int status,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByG_NotS(groupId, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByG_NotS(groupId, status, count - 1, count,
 				orderByComparator);
@@ -7292,6 +7332,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByG_S(groupId, status);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<BlogsEntry> list = findByG_S(groupId, status, count - 1, count,
 				orderByComparator);
 
@@ -7994,7 +8038,8 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsEntry blogsEntry : list) {
-				if (!Validator.equals(displayDate, blogsEntry.getDisplayDate()) ||
+				if ((displayDate.getTime() <= blogsEntry.getDisplayDate()
+															.getTime()) ||
 						(status != blogsEntry.getStatus())) {
 					list = null;
 
@@ -8192,6 +8237,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 	public BlogsEntry fetchByLtD_S_Last(Date displayDate, int status,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByLtD_S(displayDate, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByLtD_S(displayDate, status, count - 1,
 				count, orderByComparator);
@@ -8548,7 +8597,7 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 			for (BlogsEntry blogsEntry : list) {
 				if ((companyId != blogsEntry.getCompanyId()) ||
 						(userId != blogsEntry.getUserId()) ||
-						(status != blogsEntry.getStatus())) {
+						(status == blogsEntry.getStatus())) {
 					list = null;
 
 					break;
@@ -8750,6 +8799,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		int status, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByC_U_NotS(companyId, userId, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByC_U_NotS(companyId, userId, status,
 				count - 1, count, orderByComparator);
@@ -9318,6 +9371,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		throws SystemException {
 		int count = countByC_U_S(companyId, userId, status);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<BlogsEntry> list = findByC_U_S(companyId, userId, status,
 				count - 1, count, orderByComparator);
 
@@ -9662,9 +9719,9 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsEntry blogsEntry : list) {
 				if ((companyId != blogsEntry.getCompanyId()) ||
-						!Validator.equals(displayDate,
-							blogsEntry.getDisplayDate()) ||
-						(status != blogsEntry.getStatus())) {
+						(displayDate.getTime() <= blogsEntry.getDisplayDate()
+																.getTime()) ||
+						(status == blogsEntry.getStatus())) {
 					list = null;
 
 					break;
@@ -9877,6 +9934,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		int status, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByC_LtD_NotS(companyId, displayDate, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByC_LtD_NotS(companyId, displayDate,
 				status, count - 1, count, orderByComparator);
@@ -10244,8 +10305,8 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsEntry blogsEntry : list) {
 				if ((companyId != blogsEntry.getCompanyId()) ||
-						!Validator.equals(displayDate,
-							blogsEntry.getDisplayDate()) ||
+						(displayDate.getTime() <= blogsEntry.getDisplayDate()
+																.getTime()) ||
 						(status != blogsEntry.getStatus())) {
 					list = null;
 
@@ -10459,6 +10520,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		int status, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByC_LtD_S(companyId, displayDate, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByC_LtD_S(companyId, displayDate, status,
 				count - 1, count, orderByComparator);
@@ -10824,8 +10889,8 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 			for (BlogsEntry blogsEntry : list) {
 				if ((groupId != blogsEntry.getGroupId()) ||
 						(userId != blogsEntry.getUserId()) ||
-						!Validator.equals(displayDate,
-							blogsEntry.getDisplayDate())) {
+						(displayDate.getTime() <= blogsEntry.getDisplayDate()
+																.getTime())) {
 					list = null;
 
 					break;
@@ -11038,6 +11103,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		Date displayDate, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByG_U_LtD(groupId, userId, displayDate);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByG_U_LtD(groupId, userId, displayDate,
 				count - 1, count, orderByComparator);
@@ -11841,7 +11910,7 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 			for (BlogsEntry blogsEntry : list) {
 				if ((groupId != blogsEntry.getGroupId()) ||
 						(userId != blogsEntry.getUserId()) ||
-						(status != blogsEntry.getStatus())) {
+						(status == blogsEntry.getStatus())) {
 					list = null;
 
 					break;
@@ -12043,6 +12112,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		int status, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByG_U_NotS(groupId, userId, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByG_U_NotS(groupId, userId, status,
 				count - 1, count, orderByComparator);
@@ -13009,6 +13082,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByG_U_S(groupId, userId, status);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<BlogsEntry> list = findByG_U_S(groupId, userId, status, count - 1,
 				count, orderByComparator);
 
@@ -13754,9 +13831,9 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsEntry blogsEntry : list) {
 				if ((groupId != blogsEntry.getGroupId()) ||
-						!Validator.equals(displayDate,
-							blogsEntry.getDisplayDate()) ||
-						(status != blogsEntry.getStatus())) {
+						(displayDate.getTime() <= blogsEntry.getDisplayDate()
+																.getTime()) ||
+						(status == blogsEntry.getStatus())) {
 					list = null;
 
 					break;
@@ -13969,6 +14046,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		int status, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByG_LtD_NotS(groupId, displayDate, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByG_LtD_NotS(groupId, displayDate, status,
 				count - 1, count, orderByComparator);
@@ -14772,8 +14853,8 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		if ((list != null) && !list.isEmpty()) {
 			for (BlogsEntry blogsEntry : list) {
 				if ((groupId != blogsEntry.getGroupId()) ||
-						!Validator.equals(displayDate,
-							blogsEntry.getDisplayDate()) ||
+						(displayDate.getTime() <= blogsEntry.getDisplayDate()
+																.getTime()) ||
 						(status != blogsEntry.getStatus())) {
 					list = null;
 
@@ -14987,6 +15068,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		int status, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByG_LtD_S(groupId, displayDate, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByG_LtD_S(groupId, displayDate, status,
 				count - 1, count, orderByComparator);
@@ -15796,9 +15881,9 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 			for (BlogsEntry blogsEntry : list) {
 				if ((groupId != blogsEntry.getGroupId()) ||
 						(userId != blogsEntry.getUserId()) ||
-						!Validator.equals(displayDate,
-							blogsEntry.getDisplayDate()) ||
-						(status != blogsEntry.getStatus())) {
+						(displayDate.getTime() <= blogsEntry.getDisplayDate()
+																.getTime()) ||
+						(status == blogsEntry.getStatus())) {
 					list = null;
 
 					break;
@@ -16025,6 +16110,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		Date displayDate, int status, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByG_U_LtD_NotS(groupId, userId, displayDate, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByG_U_LtD_NotS(groupId, userId,
 				displayDate, status, count - 1, count, orderByComparator);
@@ -16869,8 +16958,8 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 			for (BlogsEntry blogsEntry : list) {
 				if ((groupId != blogsEntry.getGroupId()) ||
 						(userId != blogsEntry.getUserId()) ||
-						!Validator.equals(displayDate,
-							blogsEntry.getDisplayDate()) ||
+						(displayDate.getTime() <= blogsEntry.getDisplayDate()
+																.getTime()) ||
 						(status != blogsEntry.getStatus())) {
 					list = null;
 
@@ -17098,6 +17187,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 		Date displayDate, int status, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByG_U_LtD_S(groupId, userId, displayDate, status);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<BlogsEntry> list = findByG_U_LtD_S(groupId, userId, displayDate,
 				status, count - 1, count, orderByComparator);
@@ -17841,6 +17934,10 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 	private static final String _FINDER_COLUMN_G_U_LTD_S_DISPLAYDATE_2 = "blogsEntry.displayDate < ? AND ";
 	private static final String _FINDER_COLUMN_G_U_LTD_S_STATUS_2 = "blogsEntry.status = ?";
 
+	public BlogsEntryPersistenceImpl() {
+		setModelClass(BlogsEntry.class);
+	}
+
 	/**
 	 * Caches the blogs entry in the entity cache if it is enabled.
 	 *
@@ -18391,6 +18488,8 @@ public class BlogsEntryPersistenceImpl extends BasePersistenceImpl<BlogsEntry>
 
 		clearUniqueFindersCache(blogsEntry);
 		cacheUniqueFindersCache(blogsEntry);
+
+		blogsEntry.resetOriginalValues();
 
 		return blogsEntry;
 	}

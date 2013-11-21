@@ -47,13 +47,15 @@ if (layout != null) {
 	controlPanel = group.isControlPanel();
 }
 
-String title = ddmDisplay.getViewTemplatesTitle(structure, controlPanel, locale);
+TemplateSearch templateSearch = new TemplateSearch(renderRequest, PortletURLUtil.clone(portletURL, renderResponse));
+
+TemplateSearchTerms templateSearchTerms = (TemplateSearchTerms)templateSearch.getSearchTerms();
+
+String title = ddmDisplay.getViewTemplatesTitle(structure, controlPanel, templateSearchTerms.isSearch(), locale);
 %>
 
 <liferay-ui:error exception="<%= RequiredTemplateException.class %>">
-	<liferay-ui:message key="required-templates-could-not-be-deleted" />
-
-	<liferay-ui:message key="they-are-referenced-by-web-contents" />
+	<liferay-ui:message key="required-templates-could-not-be-deleted.-they-are-referenced-by-web-content" />
 </liferay-ui:error>
 
 <c:if test="<%= showHeader %>">
@@ -89,7 +91,7 @@ String title = ddmDisplay.getViewTemplatesTitle(structure, controlPanel, locale)
 		orderByComparator="<%= orderByComparator %>"
 		orderByType="<%= orderByType %>"
 		rowChecker="<%= new RowChecker(renderResponse) %>"
-		searchContainer="<%= new TemplateSearch(renderRequest, portletURL) %>"
+		searchContainer="<%= templateSearch %>"
 	>
 		<liferay-util:include page="/html/portlet/dynamic_data_mapping/template_toolbar.jsp">
 			<liferay-util:param name="redirect" value="<%= currentURL %>" />

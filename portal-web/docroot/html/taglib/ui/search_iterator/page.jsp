@@ -198,9 +198,8 @@ int sortColumnIndex = -1;
 							</c:choose>
 
 						<c:if test="<%= orderKey != null %>">
+									<span class="table-sort-indicator"></span>
 								</a>
-
-								<span class="table-sort-indicator"></span>
 							</div>
 						</c:if>
 					</th>
@@ -262,7 +261,7 @@ int sortColumnIndex = -1;
 			Map<String, Object> data = row.getData();
 		%>
 
-			<tr class="<%= rowIsChecked ? "info" : StringPool.BLANK %>" <%= AUIUtil.buildData(data) %>>
+			<tr class="<%= GetterUtil.getString(row.getClassName()) %> <%= rowIsChecked ? "info" : StringPool.BLANK %>" <%= AUIUtil.buildData(data) %>>
 
 			<%
 			for (int j = 0; j < entries.size(); j++) {

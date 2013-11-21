@@ -20,7 +20,7 @@
 </tr>
 <tr>
 	<td>SELECT_STRUCTURE</td>
-	<td>//fieldset[@class='fieldset article-structure-toolbar']/div/div/span/a/span</td>
+	<td>//fieldset[contains(@class,'fieldset') and contains(@class,'article-structure-toolbar')]/div/div/span/a/span</td>
 	<td></td>
 </tr>
 <tr>
@@ -56,6 +56,11 @@
 <tr>
 	<td>SUBMIT_FOR_PUBLICATION_BUTTON</td>
 	<td>//button[@id='_15_publishButton' and contains(.,'Submit for Publication')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>NEW_WEB_CONTENT_ARTICLE_IFRAME</td>
+	<td>//iframe[@id='_145_editAsset_iframe_']</td>
 	<td></td>
 </tr>
 <tr>

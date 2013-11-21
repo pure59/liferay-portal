@@ -24,8 +24,7 @@ import com.liferay.portal.NoSuchLayoutException;
 import com.liferay.portal.NoSuchLayoutPrototypeException;
 import com.liferay.portal.NoSuchLayoutSetPrototypeException;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
-import com.liferay.portal.kernel.cluster.ClusterExecutorUtil;
-import com.liferay.portal.kernel.cluster.ClusterRequest;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
 import com.liferay.portal.kernel.lar.ExportImportThreadLocal;
@@ -43,34 +42,30 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.ColorSchemeFactoryUtil;
+import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.MethodHandler;
-import com.liferay.portal.kernel.util.MethodKey;
 import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Tuple;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.xml.Attribute;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.kernel.zip.ZipReader;
 import com.liferay.portal.kernel.zip.ZipReaderFactoryUtil;
 import com.liferay.portal.model.Group;
+import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutConstants;
 import com.liferay.portal.model.LayoutPrototype;
 import com.liferay.portal.model.LayoutSet;
 import com.liferay.portal.model.LayoutSetPrototype;
 import com.liferay.portal.model.Portlet;
-import com.liferay.portal.model.PortletConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.security.permission.PermissionCacheUtil;
 import com.liferay.portal.service.GroupLocalServiceUtil;
@@ -84,24 +79,16 @@ import com.liferay.portal.service.ServiceContextThreadLocal;
 import com.liferay.portal.service.persistence.LayoutUtil;
 import com.liferay.portal.service.persistence.UserUtil;
 import com.liferay.portal.servlet.filters.cache.CacheUtil;
-import com.liferay.portal.theme.ThemeLoader;
-import com.liferay.portal.theme.ThemeLoaderFactory;
-import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.journalcontent.util.JournalContentUtil;
 import com.liferay.portlet.sites.util.Sites;
 
 import java.io.File;
-import java.io.InputStream;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.time.StopWatch;
 
@@ -144,72 +131,53 @@ public class LayoutImporter {
 			Map<String, String[]> parameterMap, File file)
 		throws Exception {
 
-		LayoutSet layoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
-			groupId, privateLayout);
+		try {
+			ExportImportThreadLocal.setLayoutValidationInProcess(true);
 
-		ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(file);
+			LayoutSet layoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
+				groupId, privateLayout);
 
-		PortletDataContext portletDataContext =
-			PortletDataContextFactoryUtil.createImportPortletDataContext(
-				layoutSet.getCompanyId(), groupId, parameterMap, null,
-				zipReader);
+			ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(file);
 
-		validateFile(portletDataContext);
+			PortletDataContext portletDataContext =
+				PortletDataContextFactoryUtil.createImportPortletDataContext(
+					layoutSet.getCompanyId(), groupId, parameterMap, null,
+					zipReader);
 
-		MissingReferences missingReferences =
-			ExportImportHelperUtil.validateMissingReferences(
-				userId, groupId, parameterMap, file);
+			validateFile(portletDataContext);
 
-		Map<String, MissingReference> dependencyMissingReferences =
-			missingReferences.getDependencyMissingReferences();
+			MissingReferences missingReferences =
+				ExportImportHelperUtil.validateMissingReferences(
+					userId, groupId, parameterMap, file);
 
-		if (!dependencyMissingReferences.isEmpty()) {
-			throw new MissingReferenceException(missingReferences);
+			Map<String, MissingReference> dependencyMissingReferences =
+				missingReferences.getDependencyMissingReferences();
+
+			if (!dependencyMissingReferences.isEmpty()) {
+				throw new MissingReferenceException(missingReferences);
+			}
+
+			return missingReferences;
 		}
-
-		return missingReferences;
+		finally {
+			ExportImportThreadLocal.setLayoutValidationInProcess(false);
+		}
 	}
 
 	protected void deleteMissingLayouts(
-			long groupId, boolean privateLayout, List<Layout> newLayouts,
-			List<Layout> previousLayouts, ServiceContext serviceContext)
+			List<String> sourceLayoutUuids, List<Layout> previousLayouts,
+			ServiceContext serviceContext)
 		throws Exception {
 
-		// Layouts
-
-		Set<String> existingLayoutUuids = new HashSet<String>();
-
-		Group group = GroupLocalServiceUtil.getGroup(groupId);
-
-		if (group.hasStagingGroup()) {
-			Group stagingGroup = group.getStagingGroup();
-
-			if (stagingGroup.hasPrivateLayouts() ||
-				stagingGroup.hasPublicLayouts()) {
-
-				List<Layout> layouts = LayoutLocalServiceUtil.getLayouts(
-					stagingGroup.getGroupId(), privateLayout);
-
-				for (Layout layout : layouts) {
-					existingLayoutUuids.add(layout.getUuid());
-				}
-			}
-		}
-		else {
-			for (Layout layout : newLayouts) {
-				existingLayoutUuids.add(layout.getUuid());
-			}
-		}
-
-		if (_log.isDebugEnabled() && !existingLayoutUuids.isEmpty()) {
+		if (_log.isDebugEnabled() && !sourceLayoutUuids.isEmpty()) {
 			_log.debug("Delete missing layouts");
 		}
 
 		for (Layout layout : previousLayouts) {
-			if (!existingLayoutUuids.contains(layout.getUuid())) {
+			if (!sourceLayoutUuids.contains(layout.getUuid())) {
 				try {
 					LayoutLocalServiceUtil.deleteLayout(
-						layout, privateLayout, serviceContext);
+						layout, false, serviceContext);
 				}
 				catch (NoSuchLayoutException nsle) {
 				}
@@ -231,10 +199,6 @@ public class LayoutImporter {
 			parameterMap, PortletDataHandlerKeys.CATEGORIES);
 		boolean importPermissions = MapUtil.getBoolean(
 			parameterMap, PortletDataHandlerKeys.PERMISSIONS);
-		boolean importTheme = MapUtil.getBoolean(
-			parameterMap, PortletDataHandlerKeys.THEME);
-		boolean importThemeSettings = MapUtil.getBoolean(
-			parameterMap, PortletDataHandlerKeys.THEME_REFERENCE);
 		boolean importLogo = MapUtil.getBoolean(
 			parameterMap, PortletDataHandlerKeys.LOGO);
 		boolean importLayoutSetSettings = MapUtil.getBoolean(
@@ -260,7 +224,6 @@ public class LayoutImporter {
 			_log.debug("Delete portlet data " + deletePortletData);
 			_log.debug("Import categories " + importCategories);
 			_log.debug("Import permissions " + importPermissions);
-			_log.debug("Import theme " + importTheme);
 		}
 
 		StopWatch stopWatch = null;
@@ -279,6 +242,19 @@ public class LayoutImporter {
 		long companyId = layoutSet.getCompanyId();
 
 		User user = UserUtil.findByPrimaryKey(userId);
+
+		ServiceContext serviceContext =
+			ServiceContextThreadLocal.getServiceContext();
+
+		if (serviceContext == null) {
+			serviceContext = new ServiceContext();
+
+			serviceContext.setCompanyId(companyId);
+			serviceContext.setSignedIn(false);
+			serviceContext.setUserId(userId);
+
+			ServiceContextThreadLocal.pushServiceContext(serviceContext);
+		}
 
 		UserIdStrategy strategy = _portletImporter.getUserIdStrategy(
 			user, userIdStrategy);
@@ -304,8 +280,6 @@ public class LayoutImporter {
 		portletDataContext.setPrivateLayout(privateLayout);
 
 		// Zip
-
-		InputStream themeZip = null;
 
 		validateFile(portletDataContext);
 
@@ -420,9 +394,6 @@ public class LayoutImporter {
 				_headerElement.attributeValue("type-uuid"));
 		}
 
-		ServiceContext serviceContext =
-			ServiceContextThreadLocal.getServiceContext();
-
 		if (Validator.isNotNull(layoutSetPrototypeUuid)) {
 			layoutSet.setLayoutSetPrototypeUuid(layoutSetPrototypeUuid);
 			layoutSet.setLayoutSetPrototypeLinkEnabled(
@@ -433,37 +404,13 @@ public class LayoutImporter {
 
 		// Look and feel
 
-		if (importTheme) {
-			themeZip = portletDataContext.getZipEntryAsInputStream("theme.zip");
-		}
-
-		// Look and feel
-
-		String themeId = layoutSet.getThemeId();
-		String colorSchemeId = layoutSet.getColorSchemeId();
-
-		if (importThemeSettings) {
-			Attribute themeIdAttribute = _headerElement.attribute("theme-id");
-
-			if (themeIdAttribute != null) {
-				themeId = themeIdAttribute.getValue();
-			}
-
-			Attribute colorSchemeIdAttribute = _headerElement.attribute(
-				"color-scheme-id");
-
-			if (colorSchemeIdAttribute != null) {
-				colorSchemeId = colorSchemeIdAttribute.getValue();
-			}
-		}
-
 		if (importLogo) {
 			String logoPath = _headerElement.attributeValue("logo-path");
 
 			byte[] iconBytes = portletDataContext.getZipEntryAsByteArray(
 				logoPath);
 
-			if ((iconBytes != null) && (iconBytes.length > 0)) {
+			if (ArrayUtil.isNotEmpty(iconBytes)) {
 				File logo = null;
 
 				try {
@@ -482,6 +429,8 @@ public class LayoutImporter {
 			}
 		}
 
+		_themeImporter.importTheme(portletDataContext, layoutSet);
+
 		if (importLayoutSetSettings) {
 			String settings = GetterUtil.getString(
 				_headerElement.elementText("settings"));
@@ -490,33 +439,26 @@ public class LayoutImporter {
 				groupId, privateLayout, settings);
 		}
 
-		String css = GetterUtil.getString(_headerElement.elementText("css"));
-
-		if (themeZip != null) {
-			String importThemeId = importTheme(layoutSet, themeZip);
-
-			if (importThemeId != null) {
-				themeId = importThemeId;
-				colorSchemeId =
-					ColorSchemeFactoryUtil.getDefaultRegularColorSchemeId();
-			}
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(
-					"Importing theme takes " + stopWatch.getTime() + " ms");
-			}
-		}
-
-		boolean wapTheme = false;
-
-		LayoutSetLocalServiceUtil.updateLookAndFeel(
-			groupId, privateLayout, themeId, colorSchemeId, css, wapTheme);
-
 		// Read asset categories, asset tags, comments, locks, permissions, and
 		// ratings entries to make them available to the data handlers through
 		// the context
 
+		Element portletsElement = _rootElement.element("portlets");
+
+		List<Element> portletElements = portletsElement.elements("portlet");
+
 		if (importPermissions) {
+			for (Element portletElement : portletElements) {
+				String portletPath = portletElement.attributeValue("path");
+
+				Document portletDocument = SAXReaderUtil.read(
+					portletDataContext.getZipEntryAsString(portletPath));
+
+				_permissionImporter.checkRoles(
+					layoutCache, companyId, groupId, userId,
+					portletDocument.getRootElement());
+			}
+
 			_permissionImporter.readPortletDataPermissions(portletDataContext);
 		}
 
@@ -561,6 +503,7 @@ public class LayoutImporter {
 			}
 		}
 
+		List<String> sourceLayoutsUuids = new ArrayList<String>();
 		List<Layout> newLayouts = new ArrayList<Layout>();
 
 		if (_log.isDebugEnabled()) {
@@ -570,12 +513,10 @@ public class LayoutImporter {
 		}
 
 		for (Element layoutElement : _layoutElements) {
-			importLayout(portletDataContext, newLayouts, layoutElement);
+			importLayout(
+				portletDataContext, sourceLayoutsUuids, newLayouts,
+				layoutElement);
 		}
-
-		Element portletsElement = _rootElement.element("portlets");
-
-		List<Element> portletElements = portletsElement.elements("portlet");
 
 		// Delete portlet data
 
@@ -637,12 +578,6 @@ public class LayoutImporter {
 				plid = layout.getPlid();
 			}
 
-			layout = LayoutUtil.fetchByPrimaryKey(plid);
-
-			if ((layout == null) && !group.isCompany()) {
-				continue;
-			}
-
 			portletDataContext.setPlid(plid);
 			portletDataContext.setOldPlid(oldPlid);
 
@@ -656,8 +591,7 @@ public class LayoutImporter {
 			// portlet permissions. The import of the portlet data assumes that
 			// portlet preferences already exist.
 
-			_portletImporter.setPortletScope(
-				portletDataContext, portletElement);
+			setPortletScope(portletDataContext, portletElement);
 
 			long portletPreferencesGroupId = groupId;
 
@@ -667,7 +601,7 @@ public class LayoutImporter {
 				companyId, portletId, parameterMap, portletDataElement);
 
 			try {
-				if ((layout != null) && !group.isCompany()) {
+				if (layout != null) {
 					portletPreferencesGroupId = layout.getGroupId();
 				}
 
@@ -726,18 +660,13 @@ public class LayoutImporter {
 
 		if (deleteMissingLayouts) {
 			deleteMissingLayouts(
-				groupId, privateLayout, newLayouts, previousLayouts,
-				serviceContext);
+				sourceLayoutsUuids, previousLayouts, serviceContext);
 		}
 
 		// Page count
 
 		layoutSet = LayoutSetLocalServiceUtil.updatePageCount(
 			groupId, privateLayout);
-
-		if (_log.isInfoEnabled()) {
-			_log.info("Importing layouts takes " + stopWatch.getTime() + " ms");
-		}
 
 		// Site
 
@@ -807,6 +736,15 @@ public class LayoutImporter {
 
 				LayoutSetLocalServiceUtil.updateLayoutSet(layoutSet);
 			}
+		}
+
+		// Deletion system events
+
+		_deletionSystemEventImporter.importDeletionSystemEvents(
+			portletDataContext);
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Importing layouts takes " + stopWatch.getTime() + " ms");
 		}
 
 		zipReader.close();
@@ -905,106 +843,28 @@ public class LayoutImporter {
 	}
 
 	protected void importLayout(
-			PortletDataContext portletDataContext, List<Layout> newLayouts,
+			PortletDataContext portletDataContext,
+			List<String> sourceLayoutsUuids, List<Layout> newLayouts,
 			Element layoutElement)
 		throws Exception {
 
-		String path = layoutElement.attributeValue("path");
+		String action = layoutElement.attributeValue("action");
 
-		Layout layout = (Layout)portletDataContext.getZipEntryAsObject(path);
+		if (!action.equals(Constants.SKIP)) {
+			StagedModelDataHandlerUtil.importStagedModel(
+				portletDataContext, layoutElement);
 
-		StagedModelDataHandlerUtil.importStagedModel(
-			portletDataContext, layout);
+			List<Layout> portletDataContextNewLayouts =
+				portletDataContext.getNewLayouts();
 
-		List<Layout> portletDataContextNewLayouts =
-			portletDataContext.getNewLayouts();
+			newLayouts.addAll(portletDataContextNewLayouts);
 
-		newLayouts.addAll(portletDataContextNewLayouts);
-
-		portletDataContextNewLayouts.clear();
-	}
-
-	protected String importTheme(LayoutSet layoutSet, InputStream themeZip)
-		throws Exception {
-
-		ThemeLoader themeLoader = ThemeLoaderFactory.getDefaultThemeLoader();
-
-		if (themeLoader == null) {
-			_log.error("No theme loaders are deployed");
-
-			return null;
+			portletDataContextNewLayouts.clear();
 		}
 
-		ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(themeZip);
-
-		String lookAndFeelXML = zipReader.getEntryAsString(
-			"liferay-look-and-feel.xml");
-
-		String themeId = String.valueOf(layoutSet.getGroupId());
-
-		if (layoutSet.isPrivateLayout()) {
-			themeId += "-private";
+		if (!action.equals(Constants.DELETE)) {
+			sourceLayoutsUuids.add(layoutElement.attributeValue("uuid"));
 		}
-		else {
-			themeId += "-public";
-		}
-
-		if (PropsValues.THEME_LOADER_NEW_THEME_ID_ON_IMPORT) {
-			Date now = new Date();
-
-			themeId += "-" + Time.getShortTimestamp(now);
-		}
-
-		String themeName = themeId;
-
-		lookAndFeelXML = StringUtil.replace(
-			lookAndFeelXML,
-			new String[] {
-				"[$GROUP_ID$]", "[$THEME_ID$]", "[$THEME_NAME$]"
-			},
-			new String[] {
-				String.valueOf(layoutSet.getGroupId()), themeId, themeName
-			}
-		);
-
-		FileUtil.deltree(
-			themeLoader.getFileStorage() + StringPool.SLASH + themeId);
-
-		List<String> zipEntries = zipReader.getEntries();
-
-		for (String zipEntry : zipEntries) {
-			String key = zipEntry;
-
-			if (key.equals("liferay-look-and-feel.xml")) {
-				FileUtil.write(
-					themeLoader.getFileStorage() + StringPool.SLASH + themeId +
-						StringPool.SLASH + key,
-					lookAndFeelXML.getBytes());
-			}
-			else {
-				InputStream is = zipReader.getEntryAsInputStream(zipEntry);
-
-				FileUtil.write(
-					themeLoader.getFileStorage() + StringPool.SLASH + themeId +
-						StringPool.SLASH + key,
-					is);
-			}
-		}
-
-		themeLoader.loadThemes();
-
-		ClusterRequest clusterRequest = ClusterRequest.createMulticastRequest(
-			_loadThemesMethodHandler, true);
-
-		clusterRequest.setFireAndForget(true);
-
-		ClusterExecutorUtil.execute(clusterRequest);
-
-		themeId +=
-			PortletConstants.WAR_SEPARATOR +
-				themeLoader.getServletContextName();
-
-		return PortalUtil.getJsSafePortletId(themeId);
 	}
 
 	protected void readXML(PortletDataContext portletDataContext)
@@ -1039,6 +899,87 @@ public class LayoutImporter {
 			Layout.class);
 
 		_layoutElements = _layoutsElement.elements();
+	}
+
+	protected void setPortletScope(
+		PortletDataContext portletDataContext, Element portletElement) {
+
+		// Portlet data scope
+
+		String scopeLayoutUuid = GetterUtil.getString(
+			portletElement.attributeValue("scope-layout-uuid"));
+		String scopeLayoutType = GetterUtil.getString(
+			portletElement.attributeValue("scope-layout-type"));
+
+		portletDataContext.setScopeLayoutUuid(scopeLayoutUuid);
+		portletDataContext.setScopeType(scopeLayoutType);
+
+		// Layout scope
+
+		try {
+			Group scopeGroup = null;
+
+			if (scopeLayoutType.equals("company")) {
+				scopeGroup = GroupLocalServiceUtil.getCompanyGroup(
+					portletDataContext.getCompanyId());
+			}
+			else if (Validator.isNotNull(scopeLayoutUuid)) {
+				boolean privateLayout = GetterUtil.getBoolean(
+					portletElement.attributeValue("private-layout"));
+
+				Layout scopeLayout =
+					LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(
+						scopeLayoutUuid, portletDataContext.getGroupId(),
+						privateLayout);
+
+				if (scopeLayout.hasScopeGroup()) {
+					scopeGroup = scopeLayout.getScopeGroup();
+				}
+				else {
+					String name = String.valueOf(scopeLayout.getPlid());
+
+					scopeGroup = GroupLocalServiceUtil.addGroup(
+						portletDataContext.getUserId(null),
+						GroupConstants.DEFAULT_PARENT_GROUP_ID,
+						Layout.class.getName(), scopeLayout.getPlid(),
+						GroupConstants.DEFAULT_LIVE_GROUP_ID, name, null, 0,
+						true, GroupConstants.DEFAULT_MEMBERSHIP_RESTRICTION,
+						null, false, true, null);
+				}
+
+				Group group = scopeLayout.getGroup();
+
+				if (group.isStaged() && !group.isStagedRemotely()) {
+					try {
+						Layout oldLayout =
+							LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(
+								scopeLayoutUuid,
+								portletDataContext.getSourceGroupId(),
+								privateLayout);
+
+						Group oldScopeGroup = oldLayout.getScopeGroup();
+
+						oldScopeGroup.setLiveGroupId(scopeGroup.getGroupId());
+
+						GroupLocalServiceUtil.updateGroup(oldScopeGroup);
+					}
+					catch (NoSuchLayoutException nsle) {
+						if (_log.isWarnEnabled()) {
+							_log.warn(nsle);
+						}
+					}
+				}
+			}
+
+			if (scopeGroup != null) {
+				portletDataContext.setScopeGroupId(scopeGroup.getGroupId());
+			}
+		}
+		catch (PortalException pe) {
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+		}
 	}
 
 	protected void validateFile(PortletDataContext portletDataContext)
@@ -1076,13 +1017,15 @@ public class LayoutImporter {
 			StringUtil.split(
 				_headerElement.attributeValue("available-locales")));
 
-		Locale[] targetAvailableLocales = LanguageUtil.getAvailableLocales();
+		Locale[] targetAvailableLocales = LanguageUtil.getAvailableLocales(
+			portletDataContext.getScopeGroupId());
 
 		for (Locale sourceAvailableLocale : sourceAvailableLocales) {
 			if (!ArrayUtil.contains(
 					targetAvailableLocales, sourceAvailableLocale)) {
 
-				LocaleException le = new LocaleException();
+				LocaleException le = new LocaleException(
+					LocaleException.TYPE_EXPORT_IMPORT);
 
 				le.setSourceAvailableLocales(sourceAvailableLocales);
 				le.setTargetAvailableLocales(targetAvailableLocales);
@@ -1126,6 +1069,12 @@ public class LayoutImporter {
 		}
 
 		for (Element layoutElement : layoutElements) {
+			String action = layoutElement.attributeValue("action");
+
+			if (action.equals(Constants.SKIP)) {
+				continue;
+			}
+
 			String layoutPrototypeUuid = GetterUtil.getString(
 				layoutElement.attributeValue("layout-prototype-uuid"));
 
@@ -1154,14 +1103,14 @@ public class LayoutImporter {
 
 	private static Log _log = LogFactoryUtil.getLog(LayoutImporter.class);
 
-	private static MethodHandler _loadThemesMethodHandler = new MethodHandler(
-		new MethodKey(ThemeLoaderFactory.class, "loadThemes"));
-
+	private DeletionSystemEventImporter _deletionSystemEventImporter =
+		new DeletionSystemEventImporter();
 	private Element _headerElement;
 	private List<Element> _layoutElements;
 	private Element _layoutsElement;
 	private PermissionImporter _permissionImporter = new PermissionImporter();
 	private PortletImporter _portletImporter = new PortletImporter();
 	private Element _rootElement;
+	private ThemeImporter _themeImporter = new ThemeImporter();
 
 }

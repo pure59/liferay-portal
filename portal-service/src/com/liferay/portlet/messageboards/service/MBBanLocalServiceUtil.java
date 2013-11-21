@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.messageboards.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.messageboards.service.impl.MBBanLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class MBBanLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -349,27 +352,23 @@ public class MBBanLocalServiceUtil {
 
 	public static void deleteBan(long banUserId,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.SystemException {
 		getService().deleteBan(banUserId, serviceContext);
 	}
 
 	public static void deleteBan(
 		com.liferay.portlet.messageboards.model.MBBan ban)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.SystemException {
 		getService().deleteBan(ban);
 	}
 
 	public static void deleteBansByBanUserId(long banUserId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.SystemException {
 		getService().deleteBansByBanUserId(banUserId);
 	}
 
 	public static void deleteBansByGroupId(long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.SystemException {
 		getService().deleteBansByGroupId(groupId);
 	}
 

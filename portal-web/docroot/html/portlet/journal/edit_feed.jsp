@@ -34,7 +34,7 @@ String ddmStructureName = StringPool.BLANK;
 
 if (Validator.isNotNull(structureId)) {
 	try {
-		ddmStructure = DDMStructureLocalServiceUtil.getStructure(groupId, PortalUtil.getClassNameId(JournalArticle.class), structureId, true);
+		ddmStructure = DDMStructureLocalServiceUtil.getStructure(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(JournalArticle.class), structureId, true);
 
 		ddmStructureName = ddmStructure.getName(locale);
 	}
@@ -46,7 +46,7 @@ List<DDMTemplate> ddmTemplates = new ArrayList<DDMTemplate>();
 
 if (ddmStructure != null) {
 	ddmTemplates.addAll(DDMTemplateLocalServiceUtil.getTemplates(themeDisplay.getCompanyGroupId(), PortalUtil.getClassNameId(DDMStructure.class), ddmStructure.getStructureId()));
-	ddmTemplates.addAll(DDMTemplateLocalServiceUtil.getTemplates(groupId, PortalUtil.getClassNameId(DDMStructure.class), ddmStructure.getStructureId()));
+	ddmTemplates.addAll(DDMTemplateLocalServiceUtil.getTemplates(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(DDMStructure.class), ddmStructure.getStructureId()));
 }
 
 String templateId = BeanParamUtil.getString(feed, request, "templateId");
@@ -55,7 +55,7 @@ if ((ddmStructure == null) && Validator.isNotNull(templateId)) {
 	DDMTemplate ddmTemplate = null;
 
 	try {
-		ddmTemplate = DDMTemplateLocalServiceUtil.getTemplate(groupId, PortalUtil.getClassNameId(DDMStructure.class), templateId, true);
+		ddmTemplate = DDMTemplateLocalServiceUtil.getTemplate(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(DDMStructure.class), templateId, true);
 	}
 	catch (NoSuchTemplateException nste) {
 	}
@@ -67,7 +67,7 @@ if ((ddmStructure == null) && Validator.isNotNull(templateId)) {
 			structureId = ddmStructure.getStructureKey();
 			ddmStructureName = ddmStructure.getName(locale);
 
-			ddmTemplates = DDMTemplateLocalServiceUtil.getTemplates(groupId, PortalUtil.getClassNameId(DDMStructure.class), ddmTemplate.getClassPK());
+			ddmTemplates = DDMTemplateLocalServiceUtil.getTemplates(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(DDMStructure.class), ddmTemplate.getClassPK());
 		}
 		catch (NoSuchStructureException nsse) {
 		}
@@ -146,7 +146,7 @@ if (feed != null) {
 			</c:when>
 			<c:otherwise>
 				<aui:field-wrapper label="id">
-					<%= HtmlUtil.escape(feedId) %>
+					<liferay-ui:input-resource url="<%= feedId %>" />
 				</aui:field-wrapper>
 			</c:otherwise>
 		</c:choose>
@@ -193,11 +193,13 @@ if (feed != null) {
 				<aui:field-wrapper label="structure">
 					<aui:input name="structureId" type="hidden" value="<%= structureId %>" />
 
-					<%= HtmlUtil.escape(ddmStructureName) %>
+					<div class="input-append">
+						<liferay-ui:input-resource url="<%= ddmStructureName %>" />
 
-					<aui:button name="selectStructureButton" onClick='<%= renderResponse.getNamespace() + "openStructureSelector();" %>' value="select" />
+						<aui:button name="selectStructureButton" onClick='<%= renderResponse.getNamespace() + "openStructureSelector();" %>' value="select" />
 
-					<aui:button disabled="<%= Validator.isNull(structureId) %>" name="removeStructureButton" onClick='<%= renderResponse.getNamespace() + "removeStructure();" %>' value="remove" />
+						<aui:button disabled="<%= Validator.isNull(structureId) %>" name="removeStructureButton" onClick='<%= renderResponse.getNamespace() + "removeStructure();" %>' value="remove" />
+					</div>
 				</aui:field-wrapper>
 
 				<aui:field-wrapper label="template">
@@ -357,7 +359,7 @@ if (feed != null) {
 					destroyOnHide: true
 				},
 				eventName: '<portlet:namespace />selectStructure',
-				groupId: <%= groupId %>,
+				groupId: <%= themeDisplay.getSiteGroupId() %>,
 
 				<%
 				Portlet portlet = PortletLocalServiceUtil.getPortletById(portletDisplay.getId());

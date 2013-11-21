@@ -50,11 +50,14 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_role_assignments.
 	if (tabs3.equals("current")) {
 		groupParams.put("groupsRoles", new Long(role.getRoleId()));
 	}
+
+	total = GroupLocalServiceUtil.searchCount(company.getCompanyId(), searchTerms.getName(), searchTerms.getDescription(), groupParams, searchTerms.isAndOperator());
+
+	searchContainer.setTotal(total);
 	%>
 
 	<liferay-ui:search-container-results
 		results="<%= GroupLocalServiceUtil.search(company.getCompanyId(), searchTerms.getName(), searchTerms.getDescription(), groupParams, searchTerms.isAndOperator(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
-		total="<%= GroupLocalServiceUtil.searchCount(company.getCompanyId(), searchTerms.getName(), searchTerms.getDescription(), groupParams, searchTerms.isAndOperator()) %>"
 	/>
 
 	<liferay-ui:search-form
@@ -69,8 +72,6 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_role_assignments.
 	%>
 
 	<aui:button onClick="<%= taglibOnClick %>" value="update-associations" />
-
-	<br /><br />
 
 	<liferay-ui:search-container-row
 		className="com.liferay.portal.model.Group"

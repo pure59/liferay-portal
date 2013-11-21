@@ -20,6 +20,7 @@
 page import="com.liferay.portal.LayoutSetBranchNameException" %><%@
 page import="com.liferay.portal.kernel.staging.StagingUtil" %><%@
 page import="com.liferay.portal.kernel.workflow.WorkflowTask" %><%@
+page import="com.liferay.portal.lar.backgroundtask.LayoutStagingBackgroundTaskExecutor" %><%@
 page import="com.liferay.portal.service.LayoutSetBranchLocalServiceUtil" %><%@
 page import="com.liferay.portal.service.permission.LayoutBranchPermissionUtil" %><%@
 page import="com.liferay.portal.service.permission.LayoutSetBranchPermissionUtil" %><%@
@@ -58,6 +59,7 @@ if (group != null) {
 	}
 	else if (group.isStaged()) {
 		if (group.isStagedRemotely()) {
+			liveGroup = group;
 			stagingGroup = group;
 		}
 		else {

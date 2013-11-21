@@ -16,6 +16,7 @@ package com.liferay.portal.model.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.staging.StagingConstants;
@@ -31,6 +32,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
+import com.liferay.portal.model.GroupWrapper;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutConstants;
 import com.liferay.portal.model.LayoutPrototype;
@@ -95,12 +97,8 @@ public class GroupImpl extends GroupBaseImpl {
 	}
 
 	@Override
-	public String buildTreePath() throws PortalException, SystemException {
-		StringBundler sb = new StringBundler();
-
-		buildTreePath(sb, this);
-
-		return sb.toString();
+	public void clearStagingGroup() {
+		_stagingGroup = null;
 	}
 
 	@Override
@@ -193,6 +191,33 @@ public class GroupImpl extends GroupBaseImpl {
 	}
 
 	@Override
+	public String getLayoutRootNodeName(boolean privateLayout, Locale locale) {
+		String pagesName = null;
+
+		if (isLayoutPrototype() || isLayoutSetPrototype() || isUserGroup()) {
+			pagesName = "pages";
+		}
+		else if (privateLayout) {
+			if (isUser()) {
+				pagesName = "my-dashboard";
+			}
+			else {
+				pagesName = "private-pages";
+			}
+		}
+		else {
+			if (isUser()) {
+				pagesName = "my-profile";
+			}
+			else {
+				pagesName = "public-pages";
+			}
+		}
+
+		return LanguageUtil.get(locale, pagesName);
+	}
+
+	@Override
 	public Group getLiveGroup() {
 		if (!isStagingGroup()) {
 			return null;
@@ -201,6 +226,22 @@ public class GroupImpl extends GroupBaseImpl {
 		try {
 			if (_liveGroup == null) {
 				_liveGroup = GroupLocalServiceUtil.getGroup(getLiveGroupId());
+
+				if (_liveGroup instanceof GroupImpl) {
+					GroupImpl groupImpl = (GroupImpl)_liveGroup;
+
+					groupImpl._stagingGroup = this;
+				}
+				else {
+					_liveGroup = new GroupWrapper(_liveGroup) {
+
+						@Override
+						public Group getStagingGroup() {
+							return GroupImpl.this;
+						}
+
+					};
+				}
 			}
 
 			return _liveGroup;
@@ -414,6 +455,22 @@ public class GroupImpl extends GroupBaseImpl {
 			if (_stagingGroup == null) {
 				_stagingGroup = GroupLocalServiceUtil.getStagingGroup(
 					getGroupId());
+
+				if (_stagingGroup instanceof GroupImpl) {
+					GroupImpl groupImpl = (GroupImpl)_stagingGroup;
+
+					groupImpl._liveGroup = this;
+				}
+				else {
+					_stagingGroup = new GroupWrapper(_stagingGroup) {
+
+						@Override
+						public Group getLiveGroup() {
+							return GroupImpl.this;
+						}
+
+					};
+				}
 			}
 
 			return _stagingGroup;
@@ -533,6 +590,14 @@ public class GroupImpl extends GroupBaseImpl {
 	}
 
 	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #hasAncestor}
+	 */
+	@Override
+	public boolean isChild(long groupId) {
+		return hasAncestor(groupId);
+	}
+
+	/**
 	 * @deprecated As of 6.1.0, renamed to {@link #isRegularSite}
 	 */
 	@Override
@@ -542,7 +607,18 @@ public class GroupImpl extends GroupBaseImpl {
 
 	@Override
 	public boolean isCompany() {
-		return hasClassName(Company.class);
+		return hasClassName(Company.class) || isCompanyStagingGroup();
+	}
+
+	@Override
+	public boolean isCompanyStagingGroup() {
+		Group liveGroup = getLiveGroup();
+
+		if (liveGroup == null) {
+			return false;
+		}
+
+		return liveGroup.isCompany();
 	}
 
 	@Override
@@ -642,7 +718,7 @@ public class GroupImpl extends GroupBaseImpl {
 		Layout defaultLayout = null;
 
 		int siteLayoutsCount = LayoutLocalServiceUtil.getLayoutsCount(
-			this, true);
+			this, privateSite);
 
 		if (siteLayoutsCount == 0) {
 			boolean hasPowerUserRole = RoleLocalServiceUtil.hasUserRole(
@@ -736,10 +812,6 @@ public class GroupImpl extends GroupBaseImpl {
 			String portletDataHandlerClass =
 				portlet.getPortletDataHandlerClass();
 
-			if (Validator.isNull(portletDataHandlerClass)) {
-				return true;
-			}
-
 			for (Map.Entry<String, String> entry :
 					typeSettingsProperties.entrySet()) {
 
@@ -813,20 +885,6 @@ public class GroupImpl extends GroupBaseImpl {
 		_typeSettingsProperties = typeSettingsProperties;
 
 		super.setTypeSettings(_typeSettingsProperties.toString());
-	}
-
-	protected void buildTreePath(StringBundler sb, Group group)
-		throws PortalException, SystemException {
-
-		if (group == null) {
-			sb.append(StringPool.SLASH);
-		}
-		else {
-			buildTreePath(sb, group.getParentGroup());
-
-			sb.append(group.getGroupId());
-			sb.append(StringPool.SLASH);
-		}
 	}
 
 	protected long getDefaultPlid(boolean privateLayout) {

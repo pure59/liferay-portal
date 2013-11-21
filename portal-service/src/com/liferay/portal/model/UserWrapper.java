@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see User
  * @generated
  */
+@ProviderType
 public class UserWrapper implements User, ModelWrapper<User> {
 	public UserWrapper(User user) {
 		_user = user;
@@ -1348,6 +1351,12 @@ public class UserWrapper implements User, ModelWrapper<User> {
 	}
 
 	@Override
+	public void addRemotePreference(
+		com.liferay.portal.kernel.util.RemotePreference remotePreference) {
+		_user.addRemotePreference(remotePreference);
+	}
+
+	@Override
 	public java.util.List<com.liferay.portal.model.Address> getAddresses()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _user.getAddresses();
@@ -1657,6 +1666,17 @@ public class UserWrapper implements User, ModelWrapper<User> {
 	}
 
 	@Override
+	public com.liferay.portal.kernel.util.RemotePreference getRemotePreference(
+		java.lang.String name) {
+		return _user.getRemotePreference(name);
+	}
+
+	@Override
+	public java.lang.Iterable<com.liferay.portal.kernel.util.RemotePreference> getRemotePreferences() {
+		return _user.getRemotePreferences();
+	}
+
+	@Override
 	public long[] getRoleIds()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _user.getRoleIds();
@@ -1771,6 +1791,16 @@ public class UserWrapper implements User, ModelWrapper<User> {
 	}
 
 	@Override
+	public boolean isEmailAddressComplete() {
+		return _user.isEmailAddressComplete();
+	}
+
+	@Override
+	public boolean isEmailAddressVerificationComplete() {
+		return _user.isEmailAddressVerificationComplete();
+	}
+
+	@Override
 	public boolean isFemale()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
@@ -1787,6 +1817,21 @@ public class UserWrapper implements User, ModelWrapper<User> {
 	@Override
 	public boolean isPasswordModified() {
 		return _user.isPasswordModified();
+	}
+
+	@Override
+	public boolean isReminderQueryComplete() {
+		return _user.isReminderQueryComplete();
+	}
+
+	@Override
+	public boolean isSetupComplete() {
+		return _user.isSetupComplete();
+	}
+
+	@Override
+	public boolean isTermsOfUseComplete() {
+		return _user.isTermsOfUseComplete();
 	}
 
 	@Override

@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.blogs.service.http;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -61,6 +63,7 @@ import java.rmi.RemoteException;
  * @see com.liferay.portlet.blogs.service.BlogsEntryServiceUtil
  * @generated
  */
+@ProviderType
 public class BlogsEntryServiceSoap {
 	public static void deleteEntry(long entryId) throws RemoteException {
 		try {
@@ -248,9 +251,12 @@ public class BlogsEntryServiceSoap {
 		}
 	}
 
-	public static void moveEntryToTrash(long entryId) throws RemoteException {
+	public static com.liferay.portlet.blogs.model.BlogsEntrySoap moveEntryToTrash(
+		long entryId) throws RemoteException {
 		try {
-			BlogsEntryServiceUtil.moveEntryToTrash(entryId);
+			com.liferay.portlet.blogs.model.BlogsEntry returnValue = BlogsEntryServiceUtil.moveEntryToTrash(entryId);
+
+			return com.liferay.portlet.blogs.model.BlogsEntrySoap.toSoapModel(returnValue);
 		}
 		catch (Exception e) {
 			_log.error(e, e);

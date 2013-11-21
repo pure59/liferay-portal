@@ -54,8 +54,6 @@ AUI.add(
 
 		var TPL_DEVICE_SIZE_STATUS = '<div class="lfr-device-size-status"><span class="lfr-device-size-status-content"></span></div>';
 
-		var TPL_DEVICE_SKIN = '<div class="lfr-device-skin smartphone"></div>';
-
 		var WIN = A.config.win;
 
 		var DevicePreview = A.Component.create(
@@ -86,12 +84,9 @@ AUI.add(
 
 						instance._dialogId = A.guid();
 
-						var devicePreviewContainer = instance.byId('devicePreviewContainer');
-
-						instance._closePanelButton = devicePreviewContainer.one('#closePanel');
+						instance._closePanelButton = instance.byId('closePanelPreview');
 
 						instance._devicePreviewNode = A.Node.create(Lang.sub(TPL_DEVICE_PREVIEW));
-						instance._deviceSkin = A.Node.create(TPL_DEVICE_SKIN);
 
 						BODY.append(instance._devicePreviewNode);
 
@@ -110,6 +105,8 @@ AUI.add(
 							}
 						);
 
+						var devicePreviewContainer = instance.byId('devicePreviewContainer');
+
 						instance._deviceItems = devicePreviewContainer.all(SELECTOR_DEVICE_ITEM);
 
 						instance._devicePreviewContainer = devicePreviewContainer;
@@ -121,6 +118,8 @@ AUI.add(
 						var instance = this;
 
 						(new A.EventHandle(instance._eventHandles)).detach();
+
+						instance._devicePreviewNode.remove();
 					},
 
 					_bindUI: function() {
@@ -235,6 +234,7 @@ AUI.add(
 									dialog: A.merge(DIALOG_DEFAULTS, dialogConfig),
 									dialogIframe: DIALOG_IFRAME_DEFAULTS,
 									id: instance._dialogId,
+									iframeId: 'devicePreviewIframe',
 									uri: WIN.location.href
 								},
 								function(dialogWindow) {

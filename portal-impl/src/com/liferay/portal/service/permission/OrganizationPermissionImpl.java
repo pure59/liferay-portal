@@ -16,7 +16,7 @@ package com.liferay.portal.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.model.Group;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.model.Organization;
 import com.liferay.portal.model.OrganizationConstants;
 import com.liferay.portal.security.auth.PrincipalException;
@@ -76,7 +76,7 @@ public class OrganizationPermissionImpl implements OrganizationPermission {
 			String actionId)
 		throws PortalException, SystemException {
 
-		if ((organizationIds == null) || (organizationIds.length == 0)) {
+		if (ArrayUtil.isEmpty(organizationIds)) {
 			return true;
 		}
 
@@ -93,9 +93,7 @@ public class OrganizationPermissionImpl implements OrganizationPermission {
 			String actionId)
 		throws PortalException, SystemException {
 
-		Group group = organization.getGroup();
-
-		long groupId = group.getGroupId();
+		long groupId = organization.getGroupId();
 
 		if (contains(permissionChecker, groupId, organization, actionId)) {
 			return true;
@@ -105,9 +103,7 @@ public class OrganizationPermissionImpl implements OrganizationPermission {
 			Organization parentOrganization =
 				organization.getParentOrganization();
 
-			Group parentGroup = parentOrganization.getGroup();
-
-			groupId = parentGroup.getGroupId();
+			groupId = parentOrganization.getGroupId();
 
 			if (contains(
 					permissionChecker, groupId, parentOrganization,

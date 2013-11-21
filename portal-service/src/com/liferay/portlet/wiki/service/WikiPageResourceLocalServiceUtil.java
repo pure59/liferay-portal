@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.wiki.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.wiki.service.impl.WikiPageResourceLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class WikiPageResourceLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -284,6 +287,12 @@ public class WikiPageResourceLocalServiceUtil {
 		long nodeId, java.lang.String title)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService().fetchPageResource(nodeId, title);
+	}
+
+	public static com.liferay.portlet.wiki.model.WikiPageResource fetchPageResource(
+		java.lang.String uuid)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().fetchPageResource(uuid);
 	}
 
 	public static com.liferay.portlet.wiki.model.WikiPageResource getPageResource(

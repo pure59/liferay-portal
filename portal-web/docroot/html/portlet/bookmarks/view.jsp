@@ -65,12 +65,7 @@ if (folder != null) {
 }
 %>
 
-<portlet:actionURL var="undoTrashURL">
-	<portlet:param name="struts_action" value="/bookmarks/edit_entry" />
-	<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.RESTORE %>" />
-</portlet:actionURL>
-
-<liferay-ui:trash-undo portletURL="<%= undoTrashURL %>" />
+<liferay-ui:trash-undo />
 
 <liferay-util:include page="/html/portlet/bookmarks/top_links.jsp" />
 
@@ -87,32 +82,14 @@ if (folder != null) {
 	<c:when test='<%= topLink.equals("home") %>'>
 		<aui:row>
 			<c:if test="<%= folder != null %>">
-
-				<%
-				long parentFolderId = folder.getParentFolderId();
-				String parentFolderName = LanguageUtil.get(pageContext, "home");
-
-				if (!folder.isRoot()) {
-					BookmarksFolder parentFolder = BookmarksFolderLocalServiceUtil.getBookmarksFolder(parentFolderId);
-
-					parentFolderId = parentFolder.getFolderId();
-					parentFolderName = parentFolder.getName();
-				}
-				%>
-
-				<portlet:renderURL var="backURL">
-					<portlet:param name="struts_action" value="/bookmarks/view" />
-					<portlet:param name="folderId" value="<%= String.valueOf(parentFolderId) %>" />
-				</portlet:renderURL>
-
 				<liferay-ui:header
-					backLabel="<%= parentFolderName %>"
-					backURL="<%= backURL.toString() %>"
 					localizeTitle="<%= false %>"
 					title="<%= folder.getName() %>"
 				/>
 			</c:if>
+		</aui:row>
 
+		<aui:row>
 			<aui:col cssClass="lfr-asset-column lfr-asset-column-details" width="<%= 75 %>">
 				<liferay-ui:panel-container extended="<%= false %>" id="bookmarksInfoPanelContainer" persistState="<%= true %>">
 					<c:if test="<%= folder != null %>">
@@ -152,10 +129,10 @@ if (folder != null) {
 								deltaConfigurable="<%= false %>"
 								headerNames="<%= StringUtil.merge(folderColumns) %>"
 								iteratorURL="<%= portletURL %>"
+								total="<%= BookmarksFolderServiceUtil.getFoldersCount(scopeGroupId, folderId) %>"
 							>
 								<liferay-ui:search-container-results
 									results="<%= BookmarksFolderServiceUtil.getFolders(scopeGroupId, folderId, searchContainer.getStart(), searchContainer.getEnd()) %>"
-									total="<%= BookmarksFolderServiceUtil.getFoldersCount(scopeGroupId, folderId) %>"
 								/>
 
 								<liferay-ui:search-container-row
@@ -219,24 +196,23 @@ if (folder != null) {
 				title="<%= topLink %>"
 			/>
 
+			<%
+			long groupEntriesUserId = 0;
+
+			if (topLink.equals("mine") && themeDisplay.isSignedIn()) {
+				groupEntriesUserId = user.getUserId();
+			}
+			%>
+
 			<liferay-ui:search-container
 				delta="<%= entriesPerPage %>"
 				deltaConfigurable="<%= false %>"
 				emptyResultsMessage="there-are-no-entries"
 				iteratorURL="<%= portletURL %>"
+				total="<%= BookmarksEntryServiceUtil.getGroupEntriesCount(scopeGroupId, groupEntriesUserId) %>"
 			>
-
-				<%
-				long groupEntriesUserId = 0;
-
-				if (topLink.equals("mine") && themeDisplay.isSignedIn()) {
-					groupEntriesUserId = user.getUserId();
-				}
-				%>
-
 				<liferay-ui:search-container-results
 					results="<%= BookmarksEntryServiceUtil.getGroupEntries(scopeGroupId, groupEntriesUserId, searchContainer.getStart(), searchContainer.getEnd()) %>"
-					total="<%= BookmarksEntryServiceUtil.getGroupEntriesCount(scopeGroupId, groupEntriesUserId) %>"
 				/>
 
 				<liferay-ui:search-container-row

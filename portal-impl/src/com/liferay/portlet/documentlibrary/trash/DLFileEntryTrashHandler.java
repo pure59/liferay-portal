@@ -24,12 +24,12 @@ import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ContainerModel;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.repository.liferayrepository.LiferayRepository;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.RepositoryServiceUtil;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.documentlibrary.NoSuchFolderException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFileVersion;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
@@ -37,6 +37,7 @@ import com.liferay.portlet.documentlibrary.service.DLAppHelperLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileVersionLocalServiceUtil;
+import com.liferay.portlet.documentlibrary.service.DLFolderLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.permission.DLFileEntryPermission;
 import com.liferay.portlet.documentlibrary.service.permission.DLFolderPermission;
 import com.liferay.portlet.documentlibrary.util.DLUtil;
@@ -104,12 +105,33 @@ public class DLFileEntryTrashHandler extends DLBaseTrashHandler {
 	}
 
 	@Override
-	public String getRestoreLink(PortletRequest portletRequest, long classPK)
+	public ContainerModel getParentContainerModel(TrashedModel trashedModel)
+		throws PortalException, SystemException {
+
+		DLFileEntry dlFileEntry = (DLFileEntry)trashedModel;
+
+		return getContainerModel(dlFileEntry.getFolderId());
+	}
+
+	@Override
+	public String getRestoreContainedModelLink(
+			PortletRequest portletRequest, long classPK)
 		throws PortalException, SystemException {
 
 		DLFileEntry dlFileEntry = getDLFileEntry(classPK);
 
-		return DLUtil.getDLControlPanelLink(
+		return DLUtil.getDLFileEntryControlPanelLink(
+			portletRequest, dlFileEntry.getFileEntryId());
+	}
+
+	@Override
+	public String getRestoreContainerModelLink(
+			PortletRequest portletRequest, long classPK)
+		throws PortalException, SystemException {
+
+		DLFileEntry dlFileEntry = getDLFileEntry(classPK);
+
+		return DLUtil.getDLFolderControlPanelLink(
 			portletRequest, dlFileEntry.getFolderId());
 	}
 
@@ -125,17 +147,17 @@ public class DLFileEntryTrashHandler extends DLBaseTrashHandler {
 	}
 
 	@Override
-	public ContainerModel getTrashContainer(long classPK)
+	public String getSystemEventClassName() {
+		return FileEntry.class.getName();
+	}
+
+	@Override
+	public TrashEntry getTrashEntry(long classPK)
 		throws PortalException, SystemException {
 
-		try {
-			DLFileEntry dlFileEntry = getDLFileEntry(classPK);
+		DLFileEntry dlFileEntry = getDLFileEntry(classPK);
 
-			return dlFileEntry.getTrashContainer();
-		}
-		catch (InvalidRepositoryException ire) {
-			return null;
-		}
+		return dlFileEntry.getTrashEntry();
 	}
 
 	@Override
@@ -160,9 +182,7 @@ public class DLFileEntryTrashHandler extends DLBaseTrashHandler {
 		try {
 			DLFileEntry dlFileEntry = getDLFileEntry(classPK);
 
-			DLFileVersion dlFileVersion = dlFileEntry.getFileVersion();
-
-			return dlFileVersion.isInTrash();
+			return dlFileEntry.isInTrash();
 		}
 		catch (InvalidRepositoryException ire) {
 			return false;
@@ -187,21 +207,17 @@ public class DLFileEntryTrashHandler extends DLBaseTrashHandler {
 	public boolean isRestorable(long classPK)
 		throws PortalException, SystemException {
 
-		try {
-			DLFileEntry dlFileEntry = getDLFileEntry(classPK);
+		DLFileEntry dlFileEntry = fetchDLFileEntry(classPK);
 
-			try {
-				dlFileEntry.getFolder();
-			}
-			catch (NoSuchFolderException nsfe) {
-				return false;
-			}
+		if ((dlFileEntry == null) ||
+			((dlFileEntry.getFolderId() > 0) &&
+			 (DLFolderLocalServiceUtil.fetchFolder(
+				dlFileEntry.getFolderId()) == null))) {
 
-			return !dlFileEntry.isInTrashContainer();
-		}
-		catch (InvalidRepositoryException ire) {
 			return false;
 		}
+
+		return !dlFileEntry.isInTrashContainer();
 	}
 
 	@Override
@@ -293,6 +309,21 @@ public class DLFileEntryTrashHandler extends DLBaseTrashHandler {
 
 			throw dee;
 		}
+	}
+
+	protected DLFileEntry fetchDLFileEntry(long classPK)
+		throws PortalException, SystemException {
+
+		Repository repository = RepositoryServiceUtil.getRepositoryImpl(
+			0, classPK, 0);
+
+		if (!(repository instanceof LiferayRepository)) {
+			return null;
+		}
+
+		FileEntry fileEntry = repository.getFileEntry(classPK);
+
+		return (DLFileEntry)fileEntry.getModel();
 	}
 
 	protected DLFileEntry getDLFileEntry(long classPK)

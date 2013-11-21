@@ -35,7 +35,7 @@
 </tr>
 <tr>
 	<td>INFO_MESSAGE_THREAD</td>
-	<td>//div[@id='messageBoardsThreadsPanelContent']/div/div[@class='alert alert-info']</td>
+	<td>//div[@id='messageBoardsThreadsPanelContent']/div/div[contains(@class,'alert') and contains(@class,'alert-info')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -164,27 +164,27 @@
 <!--THREAD_TABLE-->
 <tr>
 	<td>THREAD_TABLE_THREAD</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${threadSubject}')]/td[1]/a</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[1]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>THREAD_TABLE_STARTED_BY</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${threadSubject}')]/td[3]/a</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[3]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>THREAD_TABLE_POSTS</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${threadSubject}')]/td[4]/a</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[4]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>THREAD_TABLE_LAST_POST</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${threadSubject}')]/td[6]/a</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[6]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>THREAD_TABLE_ACTIONS</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${threadSubject}')]//a[@title='Actions']</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]//a[@title='Actions']</td>
 	<td></td>
 </tr>
 <tr>

@@ -568,6 +568,10 @@ public class ShardPersistenceImpl extends BasePersistenceImpl<Shard>
 	private static final String _FINDER_COLUMN_C_C_CLASSNAMEID_2 = "shard.classNameId = ? AND ";
 	private static final String _FINDER_COLUMN_C_C_CLASSPK_2 = "shard.classPK = ?";
 
+	public ShardPersistenceImpl() {
+		setModelClass(Shard.class);
+	}
+
 	/**
 	 * Caches the shard in the entity cache if it is enabled.
 	 *
@@ -869,6 +873,8 @@ public class ShardPersistenceImpl extends BasePersistenceImpl<Shard>
 
 		clearUniqueFindersCache(shard);
 		cacheUniqueFindersCache(shard);
+
+		shard.resetOriginalValues();
 
 		return shard;
 	}

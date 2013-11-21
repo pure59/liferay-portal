@@ -23,8 +23,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.ehcache.config.CacheConfiguration.CacheEventListenerFactoryConfiguration;
 import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.config.CacheConfiguration.CacheEventListenerFactoryConfiguration;
 import net.sf.ehcache.config.Configuration;
 import net.sf.ehcache.config.ConfigurationFactory;
 
@@ -70,7 +70,7 @@ public class EhcacheConfigurationUtil {
 	public static Configuration getConfiguration(
 		URL configurationURL, boolean clusterAware, boolean usingDefault) {
 
-		if (Validator.isNull(configurationURL)) {
+		if (configurationURL == null) {
 			return null;
 		}
 

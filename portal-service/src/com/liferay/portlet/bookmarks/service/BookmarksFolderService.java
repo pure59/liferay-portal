@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.bookmarks.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
@@ -34,6 +36,7 @@ import com.liferay.portal.service.BaseService;
  * @see com.liferay.portlet.bookmarks.service.impl.BookmarksFolderServiceImpl
  * @generated
  */
+@ProviderType
 @AccessControlled
 @JSONWebService
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
@@ -157,7 +160,8 @@ public interface BookmarksFolderService extends BaseService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
-	public void moveFolderToTrash(long folderId)
+	public com.liferay.portlet.bookmarks.model.BookmarksFolder moveFolderToTrash(
+		long folderId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 

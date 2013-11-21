@@ -342,7 +342,7 @@ public class PortletContainerImpl implements PortletContainer {
 				request, portlet.getPortletId());
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesLocalServiceUtil.getPreferences(
+			PortletPreferencesLocalServiceUtil.getStrictPreferences(
 				portletPreferencesIds);
 
 		ServletContext servletContext = (ServletContext)request.getAttribute(
@@ -597,6 +597,9 @@ public class PortletContainerImpl implements PortletContainer {
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		PortletPreferencesFactoryUtil.checkControlPanelPortletPreferences(
+			themeDisplay, portlet);
+
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
 		PortletDisplay portletDisplayClone = PortletDisplayFactory.create();
@@ -725,7 +728,7 @@ public class PortletContainerImpl implements PortletContainer {
 				request, portlet.getPortletId());
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesLocalServiceUtil.getPreferences(
+			PortletPreferencesLocalServiceUtil.getStrictPreferences(
 				portletPreferencesIds);
 
 		ServletContext servletContext = (ServletContext)request.getAttribute(

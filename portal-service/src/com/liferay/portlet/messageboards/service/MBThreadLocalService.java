@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.messageboards.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.transaction.Isolation;
@@ -34,6 +36,7 @@ import com.liferay.portal.service.PersistedModelLocalService;
  * @see com.liferay.portlet.messageboards.service.impl.MBThreadLocalServiceImpl
  * @generated
  */
+@ProviderType
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface MBThreadLocalService extends BaseLocalService,
@@ -491,6 +494,11 @@ public interface MBThreadLocalService extends BaseLocalService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	public void moveDependentsToTrash(long groupId, long threadId,
+		long trashEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
 	public com.liferay.portlet.messageboards.model.MBThread moveThread(
 		long groupId, long categoryId, long threadId)
 		throws com.liferay.portal.kernel.exception.PortalException,
@@ -506,7 +514,7 @@ public interface MBThreadLocalService extends BaseLocalService,
 			com.liferay.portal.kernel.exception.SystemException;
 
 	public com.liferay.portlet.messageboards.model.MBThread moveThreadToTrash(
-		long userId, long entryId)
+		long userId, long threadId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
@@ -515,7 +523,25 @@ public interface MBThreadLocalService extends BaseLocalService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	public void restoreDependentsFromTrash(long groupId, long threadId,
+		long trashEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
 	public void restoreThreadFromTrash(long userId, long threadId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public com.liferay.portal.kernel.search.Hits search(long groupId,
+		long userId, long creatorUserId, int status, int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public com.liferay.portal.kernel.search.Hits search(long groupId,
+		long userId, long creatorUserId, long startDate, long endDate,
+		int status, int start, int end)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
@@ -530,7 +556,7 @@ public interface MBThreadLocalService extends BaseLocalService,
 			com.liferay.portal.kernel.exception.SystemException;
 
 	public com.liferay.portlet.messageboards.model.MBThread updateStatus(
-		long userId, long threadId, int status, int categoryStatus)
+		long userId, long threadId, int status)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 

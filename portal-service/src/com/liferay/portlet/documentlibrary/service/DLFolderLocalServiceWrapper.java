@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see DLFolderLocalService
  * @generated
  */
+@ProviderType
 public class DLFolderLocalServiceWrapper implements DLFolderLocalService,
 	ServiceWrapper<DLFolderLocalService> {
 	public DLFolderLocalServiceWrapper(
@@ -596,6 +599,13 @@ public class DLFolderLocalServiceWrapper implements DLFolderLocalService,
 
 	@Override
 	public com.liferay.portlet.documentlibrary.model.DLFolder fetchFolder(
+		long folderId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _dlFolderLocalService.fetchFolder(folderId);
+	}
+
+	@Override
+	public com.liferay.portlet.documentlibrary.model.DLFolder fetchFolder(
 		long groupId, long parentFolderId, java.lang.String name)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _dlFolderLocalService.fetchFolder(groupId, parentFolderId, name);
@@ -801,6 +811,14 @@ public class DLFolderLocalServiceWrapper implements DLFolderLocalService,
 	}
 
 	@Override
+	public int getFoldersCount(long groupId, long parentFolderId, int status,
+		boolean includeMountfolders)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _dlFolderLocalService.getFoldersCount(groupId, parentFolderId,
+			status, includeMountfolders);
+	}
+
+	@Override
 	public com.liferay.portlet.documentlibrary.model.DLFolder getMountFolder(
 		long repositoryId)
 		throws com.liferay.portal.kernel.exception.PortalException,
@@ -867,6 +885,12 @@ public class DLFolderLocalServiceWrapper implements DLFolderLocalService,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _dlFolderLocalService.moveFolder(userId, folderId,
 			parentFolderId, serviceContext);
+	}
+
+	@Override
+	public void rebuildTree(long companyId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_dlFolderLocalService.rebuildTree(companyId);
 	}
 
 	@Override

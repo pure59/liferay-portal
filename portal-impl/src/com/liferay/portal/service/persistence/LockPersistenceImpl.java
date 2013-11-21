@@ -355,6 +355,10 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUuid(uuid);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<Lock> list = findByUuid(uuid, count - 1, count, orderByComparator);
 
 		if (!list.isEmpty()) {
@@ -904,6 +908,10 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUuid_C(uuid, companyId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<Lock> list = findByUuid_C(uuid, companyId, count - 1, count,
 				orderByComparator);
 
@@ -1250,7 +1258,8 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 
 		if ((list != null) && !list.isEmpty()) {
 			for (Lock lock : list) {
-				if (!Validator.equals(expirationDate, lock.getExpirationDate())) {
+				if ((expirationDate.getTime() <= lock.getExpirationDate()
+														 .getTime())) {
 					list = null;
 
 					break;
@@ -1433,6 +1442,10 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 	public Lock fetchByLtExpirationDate_Last(Date expirationDate,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByLtExpirationDate(expirationDate);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<Lock> list = findByLtExpirationDate(expirationDate, count - 1,
 				count, orderByComparator);
@@ -1980,6 +1993,10 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 	private static final String _FINDER_COLUMN_C_K_KEY_2 = "lock.key = ?";
 	private static final String _FINDER_COLUMN_C_K_KEY_3 = "(lock.key IS NULL OR lock.key = '')";
 
+	public LockPersistenceImpl() {
+		setModelClass(Lock.class);
+	}
+
 	/**
 	 * Caches the lock in the entity cache if it is enabled.
 	 *
@@ -2295,6 +2312,8 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 
 		clearUniqueFindersCache(lock);
 		cacheUniqueFindersCache(lock);
+
+		lock.resetOriginalValues();
 
 		return lock;
 	}

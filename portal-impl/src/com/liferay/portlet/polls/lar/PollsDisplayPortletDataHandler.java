@@ -15,18 +15,15 @@
 package com.liferay.portlet.polls.lar;
 
 import com.liferay.portal.kernel.lar.DataLevel;
-import com.liferay.portal.kernel.lar.ManifestSummary;
 import com.liferay.portal.kernel.lar.PortletDataContext;
-import com.liferay.portal.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.portal.kernel.lar.PortletDataHandlerControl;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
-import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.xml.Element;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.polls.NoSuchQuestionException;
 import com.liferay.portlet.polls.model.PollsChoice;
 import com.liferay.portlet.polls.model.PollsQuestion;
@@ -34,7 +31,6 @@ import com.liferay.portlet.polls.model.PollsVote;
 import com.liferay.portlet.polls.service.permission.PollsPermission;
 import com.liferay.portlet.polls.service.persistence.PollsQuestionUtil;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.portlet.PortletPreferences;
@@ -47,16 +43,8 @@ public class PollsDisplayPortletDataHandler extends PollsPortletDataHandler {
 	public PollsDisplayPortletDataHandler() {
 		setDataLevel(DataLevel.PORTLET_INSTANCE);
 		setDataPortletPreferences("questionId");
-		setExportControls(
-			new PortletDataHandlerBoolean(
-				NAMESPACE, "selected-question", true, true,
-				new PortletDataHandlerControl[] {
-					new PortletDataHandlerBoolean(
-						NAMESPACE, "votes", true, false, null,
-						PollsVote.class.getName())
-				},
-				PollsQuestion.class.getName()));
-		setPublishToLiveByDefault(true);
+		setExportControls(new PortletDataHandlerControl[0]);
+		setPublishToLiveByDefault(PropsValues.POLLS_PUBLISH_TO_LIVE_BY_DEFAULT);
 	}
 
 	@Override
@@ -75,7 +63,7 @@ public class PollsDisplayPortletDataHandler extends PollsPortletDataHandler {
 	}
 
 	@Override
-	protected String doExportData(
+	protected PortletPreferences doProcessExportPortletPreferences(
 			PortletDataContext portletDataContext, String portletId,
 			PortletPreferences portletPreferences)
 		throws Exception {
@@ -90,7 +78,7 @@ public class PollsDisplayPortletDataHandler extends PollsPortletDataHandler {
 						portletId);
 			}
 
-			return StringPool.BLANK;
+			return portletPreferences;
 		}
 
 		PollsQuestion question = null;
@@ -103,82 +91,48 @@ public class PollsDisplayPortletDataHandler extends PollsPortletDataHandler {
 				_log.warn(nsqe, nsqe);
 			}
 
-			return StringPool.BLANK;
+			return portletPreferences;
 		}
 
-		portletDataContext.addPermissions(
-			PollsPermission.RESOURCE_NAME,
-			portletDataContext.getScopeGroupId());
+		portletDataContext.addPortletPermissions(PollsPermission.RESOURCE_NAME);
 
-		Element rootElement = addExportDataRootElement(portletDataContext);
-
-		rootElement.addAttribute(
-			"group-id", String.valueOf(portletDataContext.getScopeGroupId()));
-
-		StagedModelDataHandlerUtil.exportStagedModel(
-			portletDataContext, question);
+		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			portletDataContext, portletId, question);
 
 		for (PollsChoice choice : question.getChoices()) {
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, choice);
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, portletId, choice);
 		}
 
 		if (portletDataContext.getBooleanParameter(
 				PollsPortletDataHandler.NAMESPACE, "votes")) {
 
 			for (PollsVote vote : question.getVotes()) {
-				StagedModelDataHandlerUtil.exportStagedModel(
-					portletDataContext, vote);
+				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+					portletDataContext, portletId, vote);
 			}
 		}
 
-		return getExportDataRootElementString(rootElement);
+		return portletPreferences;
 	}
 
 	@Override
-	protected PortletPreferences doImportData(
+	protected PortletPreferences doProcessImportPortletPreferences(
 			PortletDataContext portletDataContext, String portletId,
-			PortletPreferences portletPreferences, String data)
+			PortletPreferences portletPreferences)
 		throws Exception {
 
-		portletDataContext.importPermissions(
-			PollsPermission.RESOURCE_NAME,
-			portletDataContext.getSourceGroupId(),
-			portletDataContext.getScopeGroupId());
+		portletDataContext.importPortletPermissions(
+			PollsPermission.RESOURCE_NAME);
 
-		Element questionsElement = portletDataContext.getImportDataGroupElement(
-			PollsQuestion.class);
+		StagedModelDataHandlerUtil.importReferenceStagedModels(
+			portletDataContext, PollsQuestion.class);
 
-		List<Element> questionElements = questionsElement.elements();
+		StagedModelDataHandlerUtil.importReferenceStagedModels(
+			portletDataContext, PollsChoice.class);
 
-		for (Element questionElement : questionElements) {
-			StagedModelDataHandlerUtil.importStagedModel(
-				portletDataContext, questionElement);
-		}
-
-		Element choicesElement = portletDataContext.getImportDataGroupElement(
-			PollsChoice.class);
-
-		List<Element> choiceElements = choicesElement.elements();
-
-		for (Element choiceElement : choiceElements) {
-			StagedModelDataHandlerUtil.importStagedModel(
-				portletDataContext, choiceElement);
-		}
-
-		if (portletDataContext.getBooleanParameter(
-				PollsPortletDataHandler.NAMESPACE, "votes")) {
-
-			Element votesElement = portletDataContext.getImportDataGroupElement(
-				PollsVote.class);
-
-			List<Element> voteElements = votesElement.elements();
-
-			for (Element voteElement : voteElements) {
-				StagedModelDataHandlerUtil.importStagedModel(
-					portletDataContext, voteElement);
-			}
-		}
+		StagedModelDataHandlerUtil.importReferenceStagedModels(
+			portletDataContext, PollsVote.class);
 
 		long questionId = GetterUtil.getLong(
 			portletPreferences.getValue("questionId", StringPool.BLANK));
@@ -195,29 +149,6 @@ public class PollsDisplayPortletDataHandler extends PollsPortletDataHandler {
 		}
 
 		return portletPreferences;
-	}
-
-	@Override
-	protected void doPrepareManifestSummary(
-			PortletDataContext portletDataContext,
-			PortletPreferences portletPreferences) throws Exception {
-
-		ManifestSummary manifestSummary =
-			portletDataContext.getManifestSummary();
-
-		if ((portletPreferences == null) ||
-			(manifestSummary.getModelAdditionCount(PollsQuestion.class) > -1)) {
-
-			return;
-		}
-
-		long questionId = GetterUtil.getLong(
-			portletPreferences.getValue("questionId", StringPool.BLANK));
-
-		if (questionId > 0) {
-			manifestSummary.addModelAdditionCount(
-				new StagedModelType(PollsQuestion.class), 1);
-		}
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(

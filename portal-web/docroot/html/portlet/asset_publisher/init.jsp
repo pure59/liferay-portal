@@ -17,41 +17,21 @@
 <%@ include file="/html/portlet/init.jsp" %>
 
 <%@ page import="com.liferay.portal.NoSuchModelException" %><%@
-page import="com.liferay.portal.kernel.search.Hits" %><%@
-page import="com.liferay.portal.kernel.template.TemplateHandler" %><%@
-page import="com.liferay.portal.kernel.template.TemplateHandlerRegistryUtil" %><%@
 page import="com.liferay.portal.kernel.util.DateFormatFactoryUtil" %><%@
-page import="com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil" %><%@
+page import="com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil" %><%@
 page import="com.liferay.portlet.asset.DuplicateQueryRuleException" %><%@
 page import="com.liferay.portlet.asset.NoSuchTagException" %><%@
 page import="com.liferay.portlet.asset.NoSuchTagPropertyException" %><%@
-page import="com.liferay.portlet.asset.model.AssetCategory" %><%@
-page import="com.liferay.portlet.asset.model.AssetEntry" %><%@
-page import="com.liferay.portlet.asset.model.AssetRenderer" %><%@
-page import="com.liferay.portlet.asset.model.AssetRendererFactory" %><%@
-page import="com.liferay.portlet.asset.model.AssetTag" %><%@
 page import="com.liferay.portlet.asset.model.AssetTagProperty" %><%@
-page import="com.liferay.portlet.asset.model.AssetVocabulary" %><%@
-page import="com.liferay.portlet.asset.service.AssetCategoryLocalServiceUtil" %><%@
-page import="com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil" %><%@
-page import="com.liferay.portlet.asset.service.AssetEntryServiceUtil" %><%@
-page import="com.liferay.portlet.asset.service.AssetTagLocalServiceUtil" %><%@
 page import="com.liferay.portlet.asset.service.AssetTagPropertyLocalServiceUtil" %><%@
-page import="com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil" %><%@
-page import="com.liferay.portlet.asset.service.persistence.AssetEntryQuery" %><%@
-page import="com.liferay.portlet.asset.util.AssetUtil" %><%@
 page import="com.liferay.portlet.assetpublisher.search.AssetDisplayTerms" %><%@
 page import="com.liferay.portlet.assetpublisher.search.AssetSearch" %><%@
 page import="com.liferay.portlet.assetpublisher.util.AssetPublisherHelperUtil" %><%@
 page import="com.liferay.portlet.assetpublisher.util.AssetPublisherUtil" %><%@
-page import="com.liferay.portlet.documentlibrary.util.DocumentConversionUtil" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.model.DDMStructure" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.util.DDMImpl" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.util.DDMIndexerUtil" %><%@
 page import="com.liferay.portlet.messageboards.model.MBDiscussion" %><%@
-page import="com.liferay.portlet.messageboards.model.MBMessage" %><%@
 page import="com.liferay.portlet.portletdisplaytemplate.util.PortletDisplayTemplateConstants" %><%@
-page import="com.liferay.portlet.portletdisplaytemplate.util.PortletDisplayTemplateUtil" %><%@
 page import="com.liferay.util.RSSUtil" %>
 
 <%
@@ -61,23 +41,13 @@ String selectionStyle = GetterUtil.getString(portletPreferences.getValue("select
 
 long[] groupIds = AssetPublisherUtil.getGroupIds(portletPreferences, scopeGroupId, layout);
 
-long[] availableClassNameIds = AssetRendererFactoryRegistryUtil.getClassNameIds(company.getCompanyId());
-
-for (long classNameId : availableClassNameIds) {
-	AssetRendererFactory assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(PortalUtil.getClassName(classNameId));
-
-	if (!assetRendererFactory.isSelectable()) {
-		availableClassNameIds = ArrayUtil.remove(availableClassNameIds, classNameId);
-	}
-}
+long[] availableClassNameIds = AssetRendererFactoryRegistryUtil.getClassNameIds(company.getCompanyId(), true);
 
 boolean anyAssetType = GetterUtil.getBoolean(portletPreferences.getValue("anyAssetType", null), true);
 
 long[] classNameIds = AssetPublisherUtil.getClassNameIds(portletPreferences, availableClassNameIds);
 
 long[] classTypeIds = GetterUtil.getLongValues(portletPreferences.getValues("classTypeIds", null));
-
-String customUserAttributes = GetterUtil.getString(portletPreferences.getValue("customUserAttributes", StringPool.BLANK));
 
 AssetEntryQuery assetEntryQuery = new AssetEntryQuery();
 
@@ -132,36 +102,28 @@ if (selectionStyle.equals("dynamic")) {
 		}
 	}
 
-	AssetPublisherUtil.addUserAttributes(user, StringUtil.split(customUserAttributes), assetEntryQuery);
+	AssetPublisherUtil.processAssetEntryQuery(user, portletPreferences, assetEntryQuery);
 }
-
-long assetVocabularyId = GetterUtil.getLong(portletPreferences.getValue("assetVocabularyId", StringPool.BLANK));
 
 long assetCategoryId = ParamUtil.getLong(request, "categoryId");
 
-String assetCategoryTitle = null;
-String assetVocabularyTitle = null;
-
 if (assetCategoryId > 0) {
-	allAssetCategoryIds = assetEntryQuery.getAllCategoryIds();
+	if (selectionStyle.equals("dynamic")) {
+		allAssetCategoryIds = assetEntryQuery.getAllCategoryIds();
 
-	if (!ArrayUtil.contains(allAssetCategoryIds, assetCategoryId)) {
-		assetEntryQuery.setAllCategoryIds(ArrayUtil.append(allAssetCategoryIds, assetCategoryId));
+		if (!ArrayUtil.contains(allAssetCategoryIds, assetCategoryId)) {
+			assetEntryQuery.setAllCategoryIds(ArrayUtil.append(allAssetCategoryIds, assetCategoryId));
+		}
+	}
+	else if (selectionStyle.equals("manual")) {
+		allAssetCategoryIds = ArrayUtil.append(allAssetCategoryIds, assetCategoryId);
 	}
 
 	AssetCategory assetCategory = AssetCategoryLocalServiceUtil.getCategory(assetCategoryId);
 
 	assetCategory = assetCategory.toEscapedModel();
 
-	assetCategoryTitle = assetCategory.getTitle(locale);
-
-	AssetVocabulary assetVocabulary = AssetVocabularyLocalServiceUtil.getAssetVocabulary(assetCategory.getVocabularyId());
-
-	assetVocabulary = assetVocabulary.toEscapedModel();
-
-	assetVocabularyTitle = assetVocabulary.getTitle(locale);
-
-	PortalUtil.setPageKeywords(assetCategoryTitle, request);
+	PortalUtil.setPageKeywords(assetCategory.getTitle(locale), request);
 }
 
 String assetTagName = ParamUtil.getString(request, "tag");
@@ -194,6 +156,7 @@ boolean mergeUrlTags = GetterUtil.getBoolean(portletPreferences.getValue("mergeU
 boolean mergeLayoutTags = GetterUtil.getBoolean(portletPreferences.getValue("mergeLayoutTags", null), false);
 
 String displayStyle = GetterUtil.getString(portletPreferences.getValue("displayStyle", PropsValues.ASSET_PUBLISHER_DISPLAY_STYLE_DEFAULT));
+long displayStyleGroupId = GetterUtil.getLong(portletPreferences.getValue("displayStyleGroupId", null), themeDisplay.getScopeGroupId());
 
 boolean showAddContentButton = GetterUtil.getBoolean(portletPreferences.getValue("showAddContentButton", null), true);
 boolean showAssetTitle = GetterUtil.getBoolean(portletPreferences.getValue("showAssetTitle", null), true);
@@ -219,19 +182,7 @@ assetEntryQuery.setPaginationType(paginationType);
 boolean showAvailableLocales = GetterUtil.getBoolean(portletPreferences.getValue("showAvailableLocales", null));
 boolean showMetadataDescriptions = GetterUtil.getBoolean(portletPreferences.getValue("showMetadataDescriptions", null), true);
 
-boolean defaultAssetPublisher = false;
-
-UnicodeProperties typeSettingsProperties = layout.getTypeSettingsProperties();
-
-String defaultAssetPublisherPortletId = typeSettingsProperties.getProperty(LayoutTypePortletConstants.DEFAULT_ASSET_PUBLISHER_PORTLET_ID, StringPool.BLANK);
-
-if (defaultAssetPublisherPortletId.equals(portletDisplay.getId()) || (Validator.isNotNull(defaultAssetPublisherPortletId) && defaultAssetPublisherPortletId.equals(portletResource))) {
-	defaultAssetPublisher = true;
-}
-
-boolean enablePermissions = PropsValues.ASSET_PUBLISHER_SEARCH_WITH_INDEX ? true : GetterUtil.getBoolean(portletPreferences.getValue("enablePermissions", null));
-
-assetEntryQuery.setEnablePermissions(enablePermissions);
+assetEntryQuery.setEnablePermissions(AssetUtil.isEnablePermissions(portletPreferences, portletName));
 
 boolean enableRelatedAssets = GetterUtil.getBoolean(portletPreferences.getValue("enableRelatedAssets", null), true);
 boolean enableRatings = GetterUtil.getBoolean(portletPreferences.getValue("enableRatings", null));
@@ -245,27 +196,16 @@ boolean openOfficeServerEnabled = PrefsPropsUtil.getBoolean(PropsKeys.OPENOFFICE
 boolean enableConversions = openOfficeServerEnabled && (extensions != null) && (extensions.length > 0);
 boolean enablePrint = GetterUtil.getBoolean(portletPreferences.getValue("enablePrint", null));
 boolean enableFlags = GetterUtil.getBoolean(portletPreferences.getValue("enableFlags", null));
-boolean enableSocialBookmarks = GetterUtil.getBoolean(portletPreferences.getValue("enableSocialBookmarks", null), true);
-String socialBookmarksDisplayStyle = portletPreferences.getValue("socialBookmarksDisplayStyle", "horizontal");
-String socialBookmarksDisplayPosition = portletPreferences.getValue("socialBookmarksDisplayPosition", "bottom");
 
-String defaultMetadataFields = StringPool.BLANK;
 String allMetadataFields = "create-date,modified-date,publish-date,expiration-date,priority,author,view-count,categories,tags";
 
-String[] metadataFields = StringUtil.split(portletPreferences.getValue("metadataFields", defaultMetadataFields));
-
-boolean enableRSS = !PortalUtil.isRSSFeedsEnabled() ? false : GetterUtil.getBoolean(portletPreferences.getValue("enableRss", null));
-int rssDelta = GetterUtil.getInteger(portletPreferences.getValue("rssDelta", StringPool.BLANK), SearchContainer.DEFAULT_DELTA);
-String rssDisplayStyle = portletPreferences.getValue("rssDisplayStyle", RSSUtil.DISPLAY_STYLE_ABSTRACT);
-String rssFeedType = portletPreferences.getValue("rssFeedType", RSSUtil.FEED_TYPE_DEFAULT);
-String rssName = portletPreferences.getValue("rssName", portletDisplay.getTitle());
+String[] metadataFields = StringUtil.split(portletPreferences.getValue("metadataFields", StringPool.BLANK));
 
 String[] assetEntryXmls = portletPreferences.getValues("assetEntryXml", new String[0]);
 
 boolean viewInContext = assetLinkBehavior.equals("viewInPortlet");
 
 boolean showPortletWithNoResults = false;
-boolean groupByClass = (assetVocabularyId == -1);
 
 Map<String, PortletURL> addPortletURLs = null;
 
@@ -277,6 +217,8 @@ Format dateFormatDate = FastDateFormatFactoryUtil.getDate(locale, timeZone);
 <%!
 private String _checkViewURL(AssetEntry assetEntry, boolean viewInContext, String viewURL, String currentURL, ThemeDisplay themeDisplay) {
 	if (Validator.isNotNull(viewURL)) {
+		viewURL = HttpUtil.setParameter(viewURL, "inheritRedirect", viewInContext);
+
 		Layout layout = themeDisplay.getLayout();
 
 		String assetEntryLayoutUuid = assetEntry.getLayoutUuid();

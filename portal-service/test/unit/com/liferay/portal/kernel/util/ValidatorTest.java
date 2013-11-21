@@ -33,6 +33,19 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class ValidatorTest extends PowerMockito {
 
 	@Test
+	public void testIsDomain() throws Exception {
+
+		// 来锐.com, живот.рс
+
+		String[] validDomains = new String[] {
+			"localhost", "liferay.com", "\u6765\u9510.com",
+			"\u0436\u0438\u0432\u043E\u0442.\u0440\u0441"
+		};
+
+		testIsValidByMethodName("isDomain", validDomains, true);
+	}
+
+	@Test
 	public void testIsFileExtension() throws Exception {
 		String[] validFileExtensions = {
 			"abc", ".abc", "."
@@ -79,7 +92,7 @@ public class ValidatorTest extends PowerMockito {
 			"test", "liferay.com", "@liferay.com", "test(@liferay.com",
 			"test)@liferay.com", "test,@liferay.com", ".test@liferay.com",
 			"test.@liferay.com", "te..st@liferay.com", "test user@liferay.com",
-			"test@-liferay.com", "test@liferay"
+			"test@-liferay.com", "test@_liferay.com"
 		};
 
 		testValidEmailAddreses(invalidEmailAddresses, false);
@@ -371,7 +384,8 @@ public class ValidatorTest extends PowerMockito {
 			"test-@liferay.com", "test/@liferay.com", "test=@liferay.com",
 			"test?@liferay.com", "test^@liferay.com", "test_@liferay.com",
 			"test`@liferay.com", "test{@liferay.com", "test|@liferay.com",
-			"test{@liferay.com", "test~@liferay.com"
+			"test{@liferay.com", "test~@liferay.com", "test@liferay.com.",
+			"test@liferay"
 		};
 
 		testValidEmailAddreses(validEmailAddresses, true);

@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * The extended model interface for the User service. Represents a row in the &quot;User_&quot; database table, with each column mapped to a property of this class.
  *
@@ -23,12 +25,16 @@ package com.liferay.portal.model;
  * @see com.liferay.portal.model.impl.UserModelImpl
  * @generated
  */
+@ProviderType
 public interface User extends UserModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
 	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.UserImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+	public void addRemotePreference(
+		com.liferay.portal.kernel.util.RemotePreference remotePreference);
+
 	public java.util.List<com.liferay.portal.model.Address> getAddresses()
 		throws com.liferay.portal.kernel.exception.SystemException;
 
@@ -213,6 +219,11 @@ public interface User extends UserModel, PersistedModel {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	public com.liferay.portal.kernel.util.RemotePreference getRemotePreference(
+		java.lang.String name);
+
+	public java.lang.Iterable<com.liferay.portal.kernel.util.RemotePreference> getRemotePreferences();
+
 	public long[] getRoleIds()
 		throws com.liferay.portal.kernel.exception.SystemException;
 
@@ -273,6 +284,10 @@ public interface User extends UserModel, PersistedModel {
 
 	public boolean isActive();
 
+	public boolean isEmailAddressComplete();
+
+	public boolean isEmailAddressVerificationComplete();
+
 	public boolean isFemale()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
@@ -282,6 +297,12 @@ public interface User extends UserModel, PersistedModel {
 			com.liferay.portal.kernel.exception.SystemException;
 
 	public boolean isPasswordModified();
+
+	public boolean isReminderQueryComplete();
+
+	public boolean isSetupComplete();
+
+	public boolean isTermsOfUseComplete();
 
 	public void setPasswordModified(boolean passwordModified);
 

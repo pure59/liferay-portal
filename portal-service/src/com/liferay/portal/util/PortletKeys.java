@@ -91,6 +91,8 @@ public class PortletKeys {
 
 	public static final String GROUP_STATISTICS = "181";
 
+	public static final String HIGHEST_RATED_ASSETS = "194";
+
 	public static final String IFRAME = "48";
 
 	public static final String INVITATION = "100";
@@ -102,9 +104,6 @@ public class PortletKeys {
 	public static final String JOURNAL_CONTENT_LIST = "62";
 
 	public static final String JOURNAL_CONTENT_SEARCH = "77";
-
-	public static final String KNOWLEDGE_BASE_ADMIN =
-		"1_WAR_knowledgebaseportlet";
 
 	public static final String LANGUAGE = "82";
 
@@ -135,6 +134,8 @@ public class PortletKeys {
 
 	public static final String MONITORING = "131";
 
+	public static final String MOST_VIEWED_ASSETS = "193";
+
 	public static final String MY_ACCOUNT = "2";
 
 	public static final String MY_PAGES = "140";
@@ -146,6 +147,8 @@ public class PortletKeys {
 	public static final String MY_WORKFLOW_INSTANCES = "158";
 
 	public static final String MY_WORKFLOW_TASKS = "153";
+
+	public static final String NAVIGATION = "71";
 
 	public static final String NESTED_PORTLETS = "118";
 
@@ -218,6 +221,8 @@ public class PortletKeys {
 	public static final String SITE_REDIRECTOR = "49";
 
 	public static final String SITE_SETTINGS = "165";
+
+	public static final String SITE_TEMPLATE_SETTINGS = "192";
 
 	public static final String SITES_ADMIN = "134";
 

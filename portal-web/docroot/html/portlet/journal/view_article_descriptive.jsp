@@ -31,7 +31,7 @@ if (article.getVersion() > JournalArticleConstants.VERSION_DEFAULT) {
 	createDate = firstArticleVersion.getCreateDate();
 
 	if (article.getStatus() > WorkflowConstants.STATUS_APPROVED) {
-		latestApprovedArticleVersion = JournalArticleLocalServiceUtil.getLatestArticle(article.getGroupId(), article.getArticleId(), WorkflowConstants.STATUS_APPROVED);
+		latestApprovedArticleVersion = JournalArticleLocalServiceUtil.fetchLatestArticle(article.getGroupId(), article.getArticleId(), WorkflowConstants.STATUS_APPROVED);
 	}
 }
 
@@ -50,13 +50,14 @@ String articleImageURL = article.getArticleImageURL(themeDisplay);
 	displayDate="<%= article.getDisplayDate() %>"
 	displayStyle="descriptive"
 	expirationDate="<%= article.getExpirationDate() %>"
+	groupId="<%= article.getGroupId() %>"
 	latestApprovedVersion="<%= (latestApprovedArticleVersion != null) ? String.valueOf(latestApprovedArticleVersion.getVersion()) : null %>"
 	latestApprovedVersionAuthor="<%= (latestApprovedArticleVersion != null) ? String.valueOf(latestApprovedArticleVersion.getUserName()) : null %>"
 	modifiedDate="<%= article.getModifiedDate() %>"
 	reviewDate="<%= article.getReviewDate() %>"
 	rowCheckerId="<%= String.valueOf(article.getArticleId()) %>"
 	rowCheckerName="<%= JournalArticle.class.getSimpleName() %>"
-	showCheckbox="<%= JournalArticlePermission.contains(permissionChecker, article, ActionKeys.DELETE) || JournalArticlePermission.contains(permissionChecker, article, ActionKeys.UPDATE) %>"
+	showCheckbox="<%= JournalArticlePermission.contains(permissionChecker, article, ActionKeys.DELETE) || JournalArticlePermission.contains(permissionChecker, article, ActionKeys.EXPIRE) || JournalArticlePermission.contains(permissionChecker, article, ActionKeys.UPDATE) %>"
 	status="<%= article.getStatus() %>"
 	thumbnailDivStyle="height: 136px; width: 136px;"
 	thumbnailSrc='<%= Validator.isNotNull(articleImageURL) ? articleImageURL : themeDisplay.getPathThemeImages() + "/file_system/large/article.png" %>'

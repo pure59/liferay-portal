@@ -300,6 +300,13 @@ public class CMISFileEntry extends CMISModel implements FileEntry {
 	}
 
 	@Override
+	public FileVersion getLatestFileVersion(boolean trusted)
+		throws PortalException, SystemException {
+
+		return getLatestFileVersion();
+	}
+
+	@Override
 	public Lock getLock() {
 		if (!isCheckedOut()) {
 			return null;
@@ -566,6 +573,16 @@ public class CMISFileEntry extends CMISModel implements FileEntry {
 
 	@Override
 	public boolean isEscapedModel() {
+		return false;
+	}
+
+	@Override
+	public boolean isInTrash() {
+		return false;
+	}
+
+	@Override
+	public boolean isInTrashContainer() {
 		return false;
 	}
 

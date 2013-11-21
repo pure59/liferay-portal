@@ -70,7 +70,7 @@ public class CMISFileVersion extends CMISModel implements FileVersion {
 			_cmisRepository, _uuid, _fileVersionId, _document);
 
 		cmisFileVersion.setCompanyId(getCompanyId());
-		setFileVersionId(getFileVersionId());
+		cmisFileVersion.setFileVersionId(getFileVersionId());
 		cmisFileVersion.setGroupId(getGroupId());
 
 		try {
@@ -335,16 +335,6 @@ public class CMISFileVersion extends CMISModel implements FileVersion {
 
 	@Override
 	public boolean isExpired() {
-		return false;
-	}
-
-	@Override
-	public boolean isInTrash() {
-		return false;
-	}
-
-	@Override
-	public boolean isInTrashContainer() {
 		return false;
 	}
 

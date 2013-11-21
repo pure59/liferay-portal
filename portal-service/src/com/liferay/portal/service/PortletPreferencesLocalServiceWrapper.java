@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link PortletPreferencesLocalService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see PortletPreferencesLocalService
  * @generated
  */
+@ProviderType
 public class PortletPreferencesLocalServiceWrapper
 	implements PortletPreferencesLocalService,
 		ServiceWrapper<PortletPreferencesLocalService> {
@@ -313,6 +316,21 @@ public class PortletPreferencesLocalServiceWrapper
 	}
 
 	@Override
+	public javax.portlet.PortletPreferences fetchPreferences(long companyId,
+		long ownerId, int ownerType, long plid, java.lang.String portletId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _portletPreferencesLocalService.fetchPreferences(companyId,
+			ownerId, ownerType, plid, portletId);
+	}
+
+	@Override
+	public javax.portlet.PortletPreferences fetchPreferences(
+		com.liferay.portal.model.PortletPreferencesIds portletPreferencesIds)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _portletPreferencesLocalService.fetchPreferences(portletPreferencesIds);
+	}
+
+	@Override
 	public javax.portlet.PortletPreferences getDefaultPreferences(
 		long companyId, java.lang.String portletId)
 		throws com.liferay.portal.kernel.exception.SystemException {
@@ -392,21 +410,19 @@ public class PortletPreferencesLocalServiceWrapper
 
 	@Override
 	public long getPortletPreferencesCount(long ownerId, int ownerType,
+		long plid, com.liferay.portal.model.Portlet portlet,
+		boolean excludeDefaultPreferences)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _portletPreferencesLocalService.getPortletPreferencesCount(ownerId,
+			ownerType, plid, portlet, excludeDefaultPreferences);
+	}
+
+	@Override
+	public long getPortletPreferencesCount(long ownerId, int ownerType,
 		java.lang.String portletId, boolean excludeDefaultPreferences)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _portletPreferencesLocalService.getPortletPreferencesCount(ownerId,
 			ownerType, portletId, excludeDefaultPreferences);
-	}
-
-	@Override
-	public long getPortletPreferencesCount(long companyId, long groupId,
-		long ownerId, int ownerType, long plid,
-		com.liferay.portal.model.Portlet portlet, boolean privateLayout,
-		boolean excludeDefaultPreferences)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		return _portletPreferencesLocalService.getPortletPreferencesCount(companyId,
-			groupId, ownerId, ownerType, plid, portlet, privateLayout,
-			excludeDefaultPreferences);
 	}
 
 	@Override

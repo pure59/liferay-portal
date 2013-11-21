@@ -30,6 +30,10 @@ int index = 0;
 if (fieldParamSelection.equals("0")) {
 	modifiedLabel = LanguageUtil.get(pageContext, "any-time");
 }
+
+Calendar localeCal = CalendarFactoryUtil.getCalendar(timeZone, locale);
+
+int firstDayOfWeek = localeCal.getFirstDayOfWeek() - 1;
 %>
 
 <div class="<%= cssClass %>" data-facetFieldName="<%= facet.getFieldId() %>" id="<%= randomNamespace %>facet">
@@ -37,10 +41,10 @@ if (fieldParamSelection.equals("0")) {
 	<aui:input name='<%= facet.getFieldId() + "selection" %>' type="hidden" value="<%= fieldParamSelection %>" />
 
 	<aui:field-wrapper cssClass='<%= randomNamespace + "calendar calendar_" %>' label="" name="<%= facet.getFieldId() %>">
-		<ul class="modified unstyled">
-			<li class="facet-value default<%= (fieldParamSelection.equals("0") ? " current-term" : StringPool.BLANK) %>">
+		<ul class="modified nav nav-pills nav-stacked">
+			<li class="facet-value default<%= (fieldParamSelection.equals("0") ? " active" : StringPool.BLANK) %>">
 				<aui:a href="javascript:;" onClick='<%= renderResponse.getNamespace() + facet.getFieldId() + "clearFacet(0);" %>'>
-					<img alt="" src='<%= themeDisplay.getPathThemeImages() + "/common/time.png" %>' /><liferay-ui:message key="any-time" />
+					<aui:icon image="time" /> <liferay-ui:message key="any-time" />
 				</aui:a>
 			</li>
 
@@ -58,7 +62,7 @@ if (fieldParamSelection.equals("0")) {
 				}
 			%>
 
-				<li class="facet-value<%= fieldParamSelection.equals(String.valueOf(index)) ? " current-term" : StringPool.BLANK %>">
+				<li class="facet-value<%= fieldParamSelection.equals(String.valueOf(index)) ? " active" : StringPool.BLANK %>">
 
 					<%
 					String taglibSetRange = renderResponse.getNamespace() + facet.getFieldId() + "setRange(" + index + ", '" + range + "');";
@@ -66,22 +70,22 @@ if (fieldParamSelection.equals("0")) {
 
 					<aui:a href="javascript:;" onClick="<%= taglibSetRange %>">
 						<liferay-ui:message key="<%= label %>" />
+
+						<%
+						TermCollector termCollector = facetCollector.getTermCollector(range);
+						%>
+
+						<c:if test="<%= termCollector != null %>">
+							<span class="badge badge-info frequency"><%= termCollector.getFrequency() %></span>
+						</c:if>
 					</aui:a>
-
-					<%
-					TermCollector termCollector = facetCollector.getTermCollector(range);
-					%>
-
-					<c:if test="<%= termCollector != null %>">
-						<span class="frequency">(<%= termCollector.getFrequency() %>)</span>
-					</c:if>
 				</li>
 
 			<%
 			}
 			%>
 
-			<li class="facet-value<%= fieldParamSelection.equals(String.valueOf(index + 1)) ? " current-term" : StringPool.BLANK %>">
+			<li class="facet-value<%= fieldParamSelection.equals(String.valueOf(index + 1)) ? " active" : StringPool.BLANK %>">
 
 				<%
 				TermCollector termCollector = null;
@@ -95,11 +99,11 @@ if (fieldParamSelection.equals("0")) {
 
 				<aui:a cssClass='<%= randomNamespace + "custom-range-toggle" %>' href="javascript:;">
 					<liferay-ui:message key="custom-range" />&hellip;
-				</aui:a>
 
-				<c:if test="<%= termCollector != null %>">
-					<span class="frequency">(<%= termCollector.getFrequency() %>)</span>
-				</c:if>
+					<c:if test="<%= termCollector != null %>">
+						<span class="badge badge-info frequency"><%= termCollector.getFrequency() %></span>
+					</c:if>
+				</aui:a>
 			</li>
 
 			<div class="<%= !fieldParamSelection.equals(String.valueOf(index + 1)) ? "hide" : StringPool.BLANK %> modified-custom-range" id="<%= randomNamespace %>custom-range">
@@ -294,6 +298,8 @@ if (fieldParamSelection.equals("0")) {
 			},
 			calendar: {
 				dateFormat: '%Y-%m-%d',
+				firstDayOfWeek: <%= firstDayOfWeek %>,
+				locale: '<%= locale %>',
 
 				<c:if test='<%= fieldParamSelection.equals("6") && Validator.isNotNull(fieldParamFrom) %>'>
 					selectedDates: [
@@ -328,6 +334,8 @@ if (fieldParamSelection.equals("0")) {
 			},
 			calendar: {
 				dateFormat: '%Y-%m-%d',
+				firstDayOfWeek: <%= firstDayOfWeek %>,
+				locale: '<%= locale %>',
 
 				<c:if test='<%= fieldParamSelection.equals("6") && Validator.isNotNull(fieldParamTo) %>'>
 					selectedDates: [

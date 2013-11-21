@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.blogs.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see BlogsEntryService
  * @generated
  */
+@ProviderType
 public class BlogsEntryServiceWrapper implements BlogsEntryService,
 	ServiceWrapper<BlogsEntryService> {
 	public BlogsEntryServiceWrapper(BlogsEntryService blogsEntryService) {
@@ -201,10 +204,11 @@ public class BlogsEntryServiceWrapper implements BlogsEntryService,
 	}
 
 	@Override
-	public void moveEntryToTrash(long entryId)
+	public com.liferay.portlet.blogs.model.BlogsEntry moveEntryToTrash(
+		long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		_blogsEntryService.moveEntryToTrash(entryId);
+		return _blogsEntryService.moveEntryToTrash(entryId);
 	}
 
 	@Override

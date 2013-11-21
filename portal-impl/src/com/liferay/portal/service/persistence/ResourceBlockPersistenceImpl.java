@@ -384,6 +384,10 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByC_N(companyId, name);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<ResourceBlock> list = findByC_N(companyId, name, count - 1, count,
 				orderByComparator);
 
@@ -981,6 +985,10 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 		String name, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByC_G_N(companyId, groupId, name);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<ResourceBlock> list = findByC_G_N(companyId, groupId, name,
 				count - 1, count, orderByComparator);
@@ -1616,6 +1624,10 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 	private static final String _FINDER_COLUMN_C_G_N_P_PERMISSIONSHASH_2 = "resourceBlock.permissionsHash = ?";
 	private static final String _FINDER_COLUMN_C_G_N_P_PERMISSIONSHASH_3 = "(resourceBlock.permissionsHash IS NULL OR resourceBlock.permissionsHash = '')";
 
+	public ResourceBlockPersistenceImpl() {
+		setModelClass(ResourceBlock.class);
+	}
+
 	/**
 	 * Caches the resource block in the entity cache if it is enabled.
 	 *
@@ -1955,6 +1967,8 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 
 		clearUniqueFindersCache(resourceBlock);
 		cacheUniqueFindersCache(resourceBlock);
+
+		resourceBlock.resetOriginalValues();
 
 		return resourceBlock;
 	}

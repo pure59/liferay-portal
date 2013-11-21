@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.transaction.Isolation;
@@ -32,6 +34,7 @@ import com.liferay.portal.kernel.transaction.Transactional;
  * @see com.liferay.portal.service.impl.LockLocalServiceImpl
  * @generated
  */
+@ProviderType
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface LockLocalService extends BaseLocalService,
@@ -309,9 +312,26 @@ public interface LockLocalService extends BaseLocalService,
 			com.liferay.portal.kernel.exception.SystemException;
 
 	public com.liferay.portal.model.Lock lock(java.lang.String className,
+		java.lang.String key, java.lang.String owner)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #lock(String, String,
+	String)}
+	*/
+	public com.liferay.portal.model.Lock lock(java.lang.String className,
 		java.lang.String key, java.lang.String owner, boolean retrieveFromCache)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
+	public com.liferay.portal.model.Lock lock(java.lang.String className,
+		java.lang.String key, java.lang.String expectedOwner,
+		java.lang.String updatedOwner)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #lock(String, String, String,
+	String)}
+	*/
 	public com.liferay.portal.model.Lock lock(java.lang.String className,
 		java.lang.String key, java.lang.String expectedOwner,
 		java.lang.String updatedOwner, boolean retrieveFromCache)
@@ -328,6 +348,14 @@ public interface LockLocalService extends BaseLocalService,
 	public void unlock(java.lang.String className, java.lang.String key)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
+	public void unlock(java.lang.String className, java.lang.String key,
+		java.lang.String owner)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #unlock(String, String,
+	String)}
+	*/
 	public void unlock(java.lang.String className, java.lang.String key,
 		java.lang.String owner, boolean retrieveFromCache)
 		throws com.liferay.portal.kernel.exception.SystemException;

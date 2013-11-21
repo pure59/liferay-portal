@@ -120,6 +120,8 @@ public interface Http {
 
 	public boolean isProxyHost(String host);
 
+	public boolean isSecure(String url);
+
 	public Map<String, String[]> parameterMapFromString(String queryString);
 
 	public String parameterMapToString(Map<String, String[]> parameterMap);
@@ -133,6 +135,8 @@ public interface Http {
 
 	public String protocolize(String url, HttpServletRequest request);
 
+	public String protocolize(String url, int port, boolean secure);
+
 	public String protocolize(String url, RenderRequest renderRequest);
 
 	public String removeDomain(String url);
@@ -140,6 +144,8 @@ public interface Http {
 	public String removeParameter(String url, String name);
 
 	public String removeProtocol(String url);
+
+	public String sanitizeHeader(String header);
 
 	public String setParameter(String url, String name, boolean value);
 
@@ -552,7 +558,7 @@ public interface Http {
 				_headers = new HashMap<String, String>();
 			}
 
-			_headers.put(name.toLowerCase(), value);
+			_headers.put(StringUtil.toLowerCase(name), value);
 		}
 
 		public int getContentLength() {
@@ -568,7 +574,7 @@ public interface Http {
 				return null;
 			}
 			else {
-				return _headers.get(name.toLowerCase());
+				return _headers.get(StringUtil.toLowerCase(name));
 			}
 		}
 

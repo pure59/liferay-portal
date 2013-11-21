@@ -189,6 +189,15 @@ public class FileEntryProxyBean
 	}
 
 	@Override
+	public FileVersion getLatestFileVersion(boolean trusted)
+		throws PortalException, SystemException {
+
+		FileVersion fileVersion = _fileEntry.getLatestFileVersion(trusted);
+
+		return newFileVersionProxyBean(fileVersion);
+	}
+
+	@Override
 	public Lock getLock() {
 		Lock lock = _fileEntry.getLock();
 
@@ -286,7 +295,8 @@ public class FileEntryProxyBean
 	}
 
 	/**
-	 * @deprecated As of 6.2.0, replaced by {@link FileVersionProxyBean#getUserId()}
+	 * @deprecated As of 6.2.0, replaced by {@link
+	 *             FileVersionProxyBean#getUserId()}
 	 */
 	@Override
 	public long getVersionUserId() {
@@ -305,7 +315,8 @@ public class FileEntryProxyBean
 	}
 
 	/**
-	 * @deprecated As of 6.2.0, replaced by {@link FileVersionProxyBean#getUserName()}
+	 * @deprecated As of 6.2.0, replaced by {@link
+	 *             FileVersionProxyBean#getUserName()}
 	 */
 	@Override
 	public String getVersionUserName() {
@@ -324,7 +335,8 @@ public class FileEntryProxyBean
 	}
 
 	/**
-	 * @deprecated As of 6.2.0, replaced by {@link FileVersionProxyBean#getUserUuid()}
+	 * @deprecated As of 6.2.0, replaced by {@link
+	 *             FileVersionProxyBean#getUserUuid()}
 	 */
 	@Override
 	public String getVersionUserUuid() {
@@ -360,6 +372,16 @@ public class FileEntryProxyBean
 	@Override
 	public boolean isEscapedModel() {
 		return _fileEntry.isEscapedModel();
+	}
+
+	@Override
+	public boolean isInTrash() {
+		return _fileEntry.isInTrash();
+	}
+
+	@Override
+	public boolean isInTrashContainer() {
+		return _fileEntry.isInTrashContainer();
 	}
 
 	@Override

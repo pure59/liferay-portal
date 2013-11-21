@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portlet.asset.NoSuchCategoryException;
 import com.liferay.portlet.asset.model.AssetCategory;
+import com.liferay.portlet.asset.model.AssetCategoryConstants;
 import com.liferay.portlet.asset.model.impl.AssetCategoryImpl;
 import com.liferay.portlet.asset.model.impl.AssetCategoryModelImpl;
 import com.liferay.util.dao.orm.CustomSQLUtil;
@@ -214,7 +215,7 @@ public class AssetCategoryFinderImpl
 	public AssetCategory findByG_N(long groupId, String name)
 		throws NoSuchCategoryException, SystemException {
 
-		name = name.trim().toLowerCase();
+		name = StringUtil.toLowerCase(name.trim());
 
 		Session session = null;
 
@@ -310,31 +311,35 @@ public class AssetCategoryFinderImpl
 		if (categoryProperties.length == 0) {
 			return StringPool.BLANK;
 		}
-		else {
-			StringBundler sb = new StringBundler(
-				categoryProperties.length * 3 + 2);
 
-			sb.append(" INNER JOIN AssetCategoryProperty ON ");
-			sb.append(" (AssetCategoryProperty.categoryId = ");
-			sb.append(" AssetCategory.categoryId) AND ");
+		StringBundler sb = new StringBundler(categoryProperties.length * 3 + 2);
 
-			for (int i = 0; i < categoryProperties.length; i++) {
-				sb.append("(AssetCategoryProperty.key_ = ? AND ");
-				sb.append("AssetCategoryProperty.value = ?) ");
+		sb.append(" INNER JOIN AssetCategoryProperty ON ");
+		sb.append(" (AssetCategoryProperty.categoryId = ");
+		sb.append(" AssetCategory.categoryId) AND ");
 
-				if ((i + 1) < categoryProperties.length) {
-					sb.append(" AND ");
-				}
+		for (int i = 0; i < categoryProperties.length; i++) {
+			sb.append("(AssetCategoryProperty.key_ = ? AND ");
+			sb.append("AssetCategoryProperty.value = ?) ");
+
+			if ((i + 1) < categoryProperties.length) {
+				sb.append(" AND ");
 			}
-
-			return sb.toString();
 		}
+
+		return sb.toString();
 	}
 
 	protected void setJoin(QueryPos qPos, String[] categoryProperties) {
 		for (int i = 0; i < categoryProperties.length; i++) {
 			String[] categoryProperty = StringUtil.split(
-				categoryProperties[i], CharPool.COLON);
+				categoryProperties[i],
+				AssetCategoryConstants.PROPERTY_KEY_VALUE_SEPARATOR);
+
+			if (categoryProperty.length <= 1) {
+				categoryProperty = StringUtil.split(
+					categoryProperties[i], CharPool.COLON);
+			}
 
 			String key = StringPool.BLANK;
 

@@ -65,6 +65,10 @@ public class EvaluateLogTest extends BaseTestCase {
 				continue;
 			}
 
+			if (line.contains("INFO:")) {
+				continue;
+			}
+
 			if (line.matches(
 					".*The web application \\[.*\\] appears to have started " +
 						"a thread.*")) {
@@ -100,7 +104,7 @@ public class EvaluateLogTest extends BaseTestCase {
 
 			// LPS-17639
 
-			if (line.contains("Table 'lportal.lock_' doesn't exist")) {
+			if (line.contains("Table 'lportal.Lock_' doesn't exist")) {
 				continue;
 			}
 
@@ -134,9 +138,57 @@ public class EvaluateLogTest extends BaseTestCase {
 				continue;
 			}
 
+			// LPS-28954
+
+			if (line.matches(
+					".*The web application \\[/wsrp-portlet\\] created a " +
+						"ThreadLocal with key of type.*")) {
+
+				if (line.contains(
+						"[org.apache.axis.utils.XMLUtils." +
+							"ThreadLocalDocumentBuilder]")) {
+
+					continue;
+				}
+
+				if (line.contains(
+						"[org.apache.xml.security.utils." +
+							"UnsyncByteArrayOutputStream$1]")) {
+
+					continue;
+				}
+			}
+
 			// LPS-37574
 
 			if (line.contains("java.util.zip.ZipException: ZipFile closed")) {
+				continue;
+			}
+
+			// LPS-39742
+
+			if (line.contains("java.lang.IllegalStateException")) {
+				continue;
+			}
+
+			// LPS-41257
+
+			if (line.matches(
+					".*The web application \\[\\] created a ThreadLocal with " +
+						"key of type.*")) {
+
+				if (line.contains("[de.schlichtherle")) {
+					continue;
+				}
+			}
+
+			// LPS-41863
+
+			if (line.contains("Disabling contextual LOB") &&
+				line.contains("MSC service thread") &&
+				line.contains(
+					"[org.hibernate.engine.jdbc.JdbcSupportLoader]")) {
+
 				continue;
 			}
 

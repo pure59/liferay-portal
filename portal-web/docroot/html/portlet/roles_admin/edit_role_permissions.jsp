@@ -39,7 +39,7 @@ portletURL.setParameter("backURL", backURL);
 portletURL.setParameter("roleId", String.valueOf(role.getRoleId()));
 %>
 
-<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" varImpl="editPermissionsURL">
+<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" varImpl="editPermissionsResourceURL">
 	<portlet:param name="struts_action" value="/roles_admin/edit_role_permissions" />
 	<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.EDIT %>" />
 	<portlet:param name="tabs1" value="roles" />
@@ -47,12 +47,17 @@ portletURL.setParameter("roleId", String.valueOf(role.getRoleId()));
 	<portlet:param name="roleId" value="<%= String.valueOf(role.getRoleId()) %>" />
 </liferay-portlet:resourceURL>
 
+<liferay-portlet:renderURL copyCurrentRenderParameters="<%= false %>" varImpl="editPermissionsURL">
+	<portlet:param name="struts_action" value="/roles_admin/edit_role_permissions" />
+	<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.EDIT %>" />
+	<portlet:param name="tabs1" value="roles" />
+	<portlet:param name="redirect" value="<%= backURL %>" />
+	<portlet:param name="backURL" value="<%= backURL %>" />
+	<portlet:param name="roleId" value="<%= String.valueOf(role.getRoleId()) %>" />
+</liferay-portlet:renderURL>
+
 <c:choose>
 	<c:when test="<%= !portletName.equals(PortletKeys.ADMIN_SERVER) %>">
-		<liferay-util:include page="/html/portlet/roles_admin/toolbar.jsp">
-			<liferay-util:param name="toolbarItem" value='<%= (role == null) ? "add" : "view-all" %>' />
-		</liferay-util:include>
-
 		<liferay-ui:header
 			backURL="<%= backURL %>"
 			localizeTitle="<%= false %>"
@@ -136,7 +141,7 @@ portletURL.setParameter("roleId", String.valueOf(role.getRoleId()));
 		}
 
 		if (groupsHTML == '') {
-			groupsHTML = '<%= UnicodeLanguageUtil.get(pageContext, "all-sites") %>';
+			groupsHTML = '<liferay-ui:message key="all-sites" />';
 		}
 
 		nameEl.innerHTML = groupsHTML;
@@ -196,7 +201,7 @@ portletURL.setParameter("roleId", String.valueOf(role.getRoleId()));
 
 		var getNoResultsNode = function() {
 			if (!noResultsNode) {
-				noResultsNode = A.Node.create('<div class="alert"><%= LanguageUtil.get(pageContext, "there-are-no-results") %></div>');
+				noResultsNode = A.Node.create('<div class="alert"><liferay-ui:message key="there-are-no-results" /></div>');
 			}
 
 			return noResultsNode;
@@ -282,14 +287,14 @@ portletURL.setParameter("roleId", String.valueOf(role.getRoleId()));
 			notification = new Liferay.Notice(
 				{
 					closeText: false,
-					content: '<%= UnicodeLanguageUtil.get(pageContext, "sorry,-we-were-not-able-to-access-the-server") %>' + '<button type="button" class="close">&times;</button>',
+					content: '<liferay-ui:message key="sorry,-we-were-not-able-to-access-the-server" />' + '<button type="button" class="close">&times;</button>',
 					noticeClass: 'hide',
 					timeout: 10000,
 					toggleText: false,
 					type: 'warning',
 					useAnimation: true
 				}
-			)
+			);
 		}
 
 		return notification;
@@ -312,7 +317,7 @@ portletURL.setParameter("roleId", String.valueOf(role.getRoleId()));
 				permissionContentContainerNode.unplug(AParseContent);
 
 				A.io.request(
-					event.currentTarget.attr('href'),
+					event.currentTarget.attr('data-resource-href'),
 					{
 						on: {
 							failure: function() {
@@ -363,7 +368,7 @@ portletURL.setParameter("roleId", String.valueOf(role.getRoleId()));
 
 			if (AUI().Array.indexOf(selectedGroupIds, event.groupid) == -1) {
 				selectedGroupIds.push(event.groupid);
-				selectedGroupNames.push(event.groupname);
+				selectedGroupNames.push(event.groupdescriptivename);
 			}
 
 			<portlet:namespace />updateGroups(selectedGroupIds, selectedGroupNames, event.grouptarget);

@@ -2,7 +2,7 @@
 	<command name="addPG">
 		<execute macro="Page#openURL" />
 
-		<execute action="Dockbar#assertClick" locator-key1="ADD" value1="Add" />
+		<execute action="Dockbar#click" locator-key1="ADD" value1="Add" />
 		<execute action="Dockbar#assertClick" locator-key1="ADD_PAGE_LINK" value1="Page" />
 		<execute action="Dockbar#type" locator-key1="ADD_PAGE_NAME_FIELD" value1="${pageName}" />
 		<execute action="Dockbar#assertClick" locator-key1="ADD_PAGE_BUTTON" value1="Add Page" />
@@ -12,22 +12,118 @@
 		<execute action="Home#assertClick" locator-key1="PAGE" value1="${pageName}" />
 	</command>
 
-	<command name="gotoContentCP">
+	<command name="addWithWorkflowPG">
 		<execute macro="Page#openURL" />
 
-		<execute action="Dockbar#click" locator-key1="ADMIN" />
-		<execute action="Dockbar#click" locator-key1="ADMIN_SITE_ADMINISTRATION" />
+		<execute action="Dockbar#click" locator-key1="ADD" value1="Add" />
+		<execute action="Dockbar#assertClick" locator-key1="ADD_PAGE_LINK" value1="Page" />
+		<execute action="Dockbar#type" locator-key1="ADD_PAGE_NAME_FIELD" value1="${pageName}" />
+		<execute action="Dockbar#assertClick" locator-key1="ADD_PAGE_BUTTON" value1="Add Page" />
 
-		<execute action="Home#click" locator1="//ul[@class='category-portlets']/li[contains(.,'${portletName}')]/a" />
+		<var name="key_pageName" value="${pageName}" />
+
+		<execute action="Home#assertClick" locator-key1="PAGE" value1="${pageName}" />
+
+		<if>
+			<condition action="PGStaging#isElementNotPresent" locator-key1="STAGING_MENU_SUBMIT_FOR_PUBLICATION" />
+			<then>
+				<execute action="PGStaging#click" locator-key1="STAGING_DROP_DOWN_BUTTON" />
+				<execute action="PGStaging#assertElementPresent" locator-key1="STAGING_MENU_SUBMIT_FOR_PUBLICATION" />
+			</then>
+		</if>
+
+		<execute action="PGStaging#assertClick" locator-key1="STAGING_MENU_SUBMIT_FOR_PUBLICATION" value1="Submit for Publication" />
+		<execute action="PGStaging#assertElementPresent" locator-key1="STAGING_MENU_SUBMIT_FOR_PUBLICATION_DISABLED" />
+
+		<if>
+			<condition action="PGStaging#isTextEqual" locator-key1="STAGING_MENU_STATUS" value1="Pending (Created)" />
+			<then>
+				<execute action="PGStaging#assertTextEquals" locator-key1="STAGING_MENU_STATUS" value1="Pending (Created)" />
+			</then>
+			<else>
+				<execute action="PGStaging#assertTextEquals" locator-key1="STAGING_MENU_STATUS" value1="${workflowStatus}" />
+			</else>
+		</if>
+	</command>
+
+	<command name="gotoCmdCP">
+		<execute macro="Page#openURL" />
+
+		<execute action="Dockbar#assertClick" locator-key1="ADMIN" value1="Admin" />
+		<execute action="Dockbar#assertClick" locator-key1="${portletCategoryKey}" value1="${portletCategoryName}" />
+
+		<if>
+			<isset var="siteScopeName" />
+			<then>
+				<execute action="Home#click" locator-key1="SCOPE_SELECTOR" />
+
+				<var name="key_siteScopeName" value="${siteScopeName}" />
+
+				<execute action="Home#click" locator-key1="SCOPE_SELECTOR_MENULIST_ITEM" />
+			</then>
+		</if>
+
+		<var name="key_portletCategoryName" value="${portletCategoryName}" />
+
+		<if>
+			<condition action="Home#isElementPresent" locator-key1="SITE_ADMINISTRATION_CATEGORY_COLLAPSED" value1="${portletCategoryName}" />
+			<then>
+				<execute action="Home#assertClick" locator-key1="SITE_ADMINISTRATION_CATEGORY_COLLAPSED" value1="${portletCategoryName}" />
+
+				<execute action="Home#assertTextEquals" locator-key1="SITE_ADMINISTRATION_CATEGORY_EXPANDED" value1="${portletCategoryName}" />
+			</then>
+		</if>
+
+
+		<if>
+			<not>
+				<contains string="${portletName}" substring="{portletName}" />
+			</not>
+			<then>
+				<var name="key_portletName" value="${portletName}" />
+
+				<execute action="Home#assertClick" locator-key1="SITE_ADMINISTRATION_NAVIGATION" value1="${portletName}" />
+			</then>
+		</if>
+	</command>
+
+	<command name="gotoConfigurationCP">
+		<execute macro="Page#gotoCmdCP">
+			<var name="portletCategoryKey" value="ADMIN_SITE_ADMINISTRATION_CONFIGURATION" />
+			<var name="portletCategoryName" value="Configuration" />
+			<var name="portletName" value="${portletName}" />
+		</execute>
+	</command>
+
+	<command name="gotoContentCP">
+		<execute macro="Page#gotoCmdCP">
+			<var name="portletCategoryKey" value="ADMIN_SITE_ADMINISTRATION_CONTENT" />
+			<var name="portletCategoryName" value="Content" />
+			<var name="portletName" value="${portletName}" />
+		</execute>
 	</command>
 
 	<command name="gotoCP">
 		<execute macro="Page#openURL" />
 
-		<execute action="Dockbar#click" locator-key1="ADMIN" />
-		<execute action="Dockbar#click" locator-key1="ADMIN_CONTROL_PANEL" />
+		<execute action="Dockbar#assertClick" locator-key1="ADMIN" value1="Admin" />
+		<execute action="Dockbar#assertClick" locator-key1="ADMIN_CONTROL_PANEL" value1="Control Panel" />
 
-		<execute action="Home#click" locator1="//ul[@class='unstyled']/li/span/a[contains(.,'${portletName}')]" />
+		<if>
+			<isset var="portletName" />
+			<then>
+				<var name="key_portletName" value="${portletName}" />
+
+				<execute action="Home#click" locator-key1="CONTROL_PANEL_NAVIGATION" />
+			</then>
+		</if>
+	</command>
+
+	<command name="gotoMyDashboard">
+		<execute macro="Page#openURL" />
+
+		<execute action="Dockbar#click" locator-key1="USER_NAME" />
+		<execute action="Dockbar#assertClick" locator-key1="USER_MY_DASHBOARD" value1="My Dashboard" />
 	</command>
 
 	<command name="gotoMyAccount">
@@ -40,10 +136,26 @@
 		<execute action="Myaccount#assertClick" locator1="//ul[@class='nav control-panel-bar-secondary nav-pills']//a[contains(.,'${portletName}')]" value1="${portletName}" />
 	</command>
 
+	<command name="gotoPagesCP">
+		<execute macro="Page#gotoCmdCP">
+			<var name="portletCategoryKey" value="ADMIN_SITE_ADMINISTRATION_PAGES" />
+			<var name="portletCategoryName" value="Pages" />
+			<var name="portletName" value="${portletName}" />
+		</execute>
+     </command>
+
 	<command name="gotoPG">
 		<execute macro="Page#openURL" />
 
 		<execute action="Home#click" locator1="link=${pageName}" />
+	</command>
+
+	<command name="gotoUsersCP">
+		<execute macro="Page#gotoCmdCP">
+			<var name="portletCategoryKey" value="ADMIN_SITE_ADMINISTRATION_USERS" />
+			<var name="portletCategoryName" value="Users" />
+			<var name="portletName" value="${portletName}" />
+		</execute>
 	</command>
 
 	<command name="isPresent">
@@ -64,18 +176,16 @@
 		</if>
 
 		<if>
-			<equals arg1="${pageType}" arg2="Site" />
+			<and>
+				<isset var="siteName" />
+				<equals arg1="${siteURL}" arg2="true" />
+			</and>
 			<then>
-				<var name="pageTypeURL" value="/site-name" />
+				<var name="siteNameURL" value="${siteName?replace(' ', '-')}" />
+				<var name="siteNameURL" value="/${siteNameURL?lowercase()}" />
 			</then>
-			<elseif>
-				<equals arg1="${pageType}" arg2="Organization" />
-				<then>
-					<var name="pageTypeURL" value="/organization-name" />
-				</then>
-			</elseif>
 			<else>
-				<var name="pageTypeURL" value="/guest" />
+				<var name="siteNameURL" value="/guest" />
 			</else>
 		</if>
 
@@ -89,7 +199,7 @@
 			</else>
 		</if>
 
-		<execute action="Home#open" locator1="${pageAccessURL}${pageTypeURL}${pageStagingURL}" />
+		<execute action="Home#open" locator1="${pageAccessURL}${siteNameURL}${pageStagingURL}" />
 	</command>
 
 	<command name="tearDownPG">
@@ -104,5 +214,20 @@
 				<execute action="Home#assertElementNotPresent" locator-key1="PAGE_DELETE" />
 			</then>
 		</while>
+	</command>
+
+	<command name="viewPG">
+		<execute action="Home#assertTextEquals" locator-key1="BREADCRUMB_2" value1="${pageName}" />
+	</command>
+
+	<command name="viewWithWorkflowPG">
+		<execute action="Home#assertTextEquals" locator-key1="BREADCRUMB_2" value1="${pageName}" />
+
+		<execute action="PGStaging#assertTextEquals" locator-key1="STAGING_MENU_STATUS" value1="${workflowStatus}" />
+		<execute action="PGStaging#assertClick" locator-key1="LIVE_BUTTON" value1="Live" />
+
+		<var name="key_pageName" value="${pageName}" />
+
+		<execute action="Home#assertElementNotPresent" locator-key1="PAGE" />
 	</command>
 </definition>

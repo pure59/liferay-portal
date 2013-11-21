@@ -358,6 +358,10 @@ public class ResourceActionPersistenceImpl extends BasePersistenceImpl<ResourceA
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByName(name);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<ResourceAction> list = findByName(name, count - 1, count,
 				orderByComparator);
 
@@ -907,6 +911,10 @@ public class ResourceActionPersistenceImpl extends BasePersistenceImpl<ResourceA
 	private static final String _FINDER_COLUMN_N_A_ACTIONID_2 = "resourceAction.actionId = ?";
 	private static final String _FINDER_COLUMN_N_A_ACTIONID_3 = "(resourceAction.actionId IS NULL OR resourceAction.actionId = '')";
 
+	public ResourceActionPersistenceImpl() {
+		setModelClass(ResourceAction.class);
+	}
+
 	/**
 	 * Caches the resource action in the entity cache if it is enabled.
 	 *
@@ -1211,6 +1219,8 @@ public class ResourceActionPersistenceImpl extends BasePersistenceImpl<ResourceA
 
 		clearUniqueFindersCache(resourceAction);
 		cacheUniqueFindersCache(resourceAction);
+
+		resourceAction.resetOriginalValues();
 
 		return resourceAction;
 	}

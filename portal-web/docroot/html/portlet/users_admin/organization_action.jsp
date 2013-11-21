@@ -40,7 +40,7 @@ long organizationId = organization.getOrganizationId();
 
 Group organizationGroup = organization.getGroup();
 
-long organizationGroupId = organizationGroup.getGroupId();
+long organizationGroupId = organization.getGroupId();
 
 String cssClass = StringPool.BLANK;
 
@@ -78,11 +78,14 @@ if (row == null) {
 			modelResourceDescription="<%= HtmlUtil.escape(organization.getName()) %>"
 			resourcePrimKey="<%= String.valueOf(organization.getOrganizationId()) %>"
 			var="editOrganizationPermissionsURL"
+			windowState="<%= LiferayWindowState.POP_UP.toString() %>"
 		/>
 
 		<liferay-ui:icon
 			image="permissions"
+			method="get"
 			url="<%= editOrganizationPermissionsURL %>"
+			useDialog="<%= true %>"
 		/>
 	</c:if>--%>
 

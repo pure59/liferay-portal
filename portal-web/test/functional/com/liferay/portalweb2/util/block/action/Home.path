@@ -90,7 +90,39 @@
 </tr>
 <tr>
 	<td>SITE_NAME</td>
-	<td>//h1[@class='site-title']/span</td>
+	<td>//h1[@class='site-title']/a/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCOPE_SELECTOR</td>
+	<td>//a[@id='_145_controlPanelSiteSelector']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CONTENT_SCOPE_SELECTOR</td>
+	<td>//div[contains(@class,'lfr-title-scope-selector')]/div/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--SCOPE_SELECTOR_MENULIST-->
+<tr>
+	<td>SCOPE_SELECTOR_MENULIST_ITEM</td>
+	<td>//ul[@aria-labelledby='_145_controlPanelSiteSelector']/li/a[contains(.,'${key_siteScopeName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--CONTENT_SCOPE_SELECTOR_MENULIST-->
+<tr>
+	<td>CONTENT_SCOPE_SELECTOR_MENULIST_ITEM</td>
+	<td>//ul[contains(@class,'lfr-menu-list')]/li/a[contains(.,'${key_contentScopeName}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -127,6 +159,11 @@
 <tr>
 	<td>PAGE_2</td>
 	<td>xpath=(//li[contains(@class,'lfr-nav-deletable')])[2]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PAGE_2_GUEST_VIEW</td>
+	<td>xpath=(//li[contains(@class,'lfr-nav-item')])[2]/a</td>
 	<td></td>
 </tr>
 <tr>
@@ -198,6 +235,16 @@
 </tr>
 <!--PORTLET-->
 <tr>
+	<td>PORTLET_LOADING_ANIMATION</td>
+	<td>//div[contains(@class,'loading-animation') and contains(@class,'portlet-boundary')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PORTLET</td>
+	<td>//section[header/h1[contains(.,'${key_portletName}')]]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PORTLET_1</td>
 	<td>xpath=(//section)[1]</td>
 	<td></td>
@@ -210,6 +257,43 @@
 <tr>
 	<td>PORTLET_3</td>
 	<td>xpath=(//section)[3]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--CONTROL_PANEL-->
+<tr>
+	<td>CONTROL_PANEL_INFO_MESSAGE</td>
+	<td>//div[contains(@class,'alert') and contains(@class,'alert-info')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CONTROL_PANEL_NAVIGATION</td>
+	<td>//a[contains(.,'${key_portletName}') and contains(@id,'_190_controlPanelPortletLink')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--SITE_ADMINISTRATION-->
+<tr>
+	<td>SITE_ADMINISTRATION_CATEGORY_COLLAPSED</td>
+	<td>//div[contains(@class,'toggler-header-collapsed')]/div[contains(.,'${key_portletCategoryName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SITE_ADMINISTRATION_CATEGORY_EXPANDED</td>
+	<td>//div[contains(@class,'toggler-header-expanded')]/div[contains(.,'${key_portletCategoryName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SITE_ADMINISTRATION_NAVIGATION</td>
+	<td>//ul[@class='category-portlets']/li[contains(.,'${key_portletName}')]/a</td>
 	<td></td>
 </tr>
 </tbody>

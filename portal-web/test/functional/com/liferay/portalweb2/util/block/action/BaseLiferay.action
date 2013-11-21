@@ -1,4 +1,10 @@
 <definition>
+	<command name="addSelection">
+		<default>
+			<execute function="AddSelection#addSelection" />
+		</default>
+	</command>
+
 	<command name="assertChecked">
 		<default>
 			<execute function="AssertChecked#assertChecked" />
@@ -182,6 +188,18 @@
 	<command name="paste">
 		<default>
 			<execute function="Paste#paste" />
+		</default>
+	</command>
+
+	<command name="pause">
+		<default>
+			<execute function="Pause#pause" />
+		</default>
+	</command>
+
+	<command name="refresh">
+		<default>
+			<execute function="Refresh#refresh" />
 		</default>
 	</command>
 

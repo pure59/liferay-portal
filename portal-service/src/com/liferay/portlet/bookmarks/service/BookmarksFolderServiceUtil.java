@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.bookmarks.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.bookmarks.service.impl.BookmarksFolderServiceImpl
  * @generated
  */
+@ProviderType
 public class BookmarksFolderServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -182,10 +185,11 @@ public class BookmarksFolderServiceUtil {
 		return getService().moveFolderFromTrash(folderId, parentFolderId);
 	}
 
-	public static void moveFolderToTrash(long folderId)
+	public static com.liferay.portlet.bookmarks.model.BookmarksFolder moveFolderToTrash(
+		long folderId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		getService().moveFolderToTrash(folderId);
+		return getService().moveFolderToTrash(folderId);
 	}
 
 	public static void restoreFolderFromTrash(long folderId)

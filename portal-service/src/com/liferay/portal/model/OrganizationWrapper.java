@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see Organization
  * @generated
  */
+@ProviderType
 public class OrganizationWrapper implements Organization,
 	ModelWrapper<Organization> {
 	public OrganizationWrapper(Organization organization) {
@@ -650,6 +653,12 @@ public class OrganizationWrapper implements Organization,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _organization.buildTreePath();
+	}
+
+	@Override
+	public void updateTreePath(java.lang.String treePath)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_organization.updateTreePath(treePath);
 	}
 
 	@Override

@@ -41,8 +41,6 @@ import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.PortletURLImpl;
 import com.liferay.portlet.login.util.LoginUtil;
 
-import java.io.IOException;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletConfig;
@@ -51,6 +49,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.WindowState;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -90,12 +89,7 @@ public class LoginAction extends PortletAction {
 		}*/
 
 		try {
-			PortletPreferences portletPreferences =
-				PortletPreferencesFactoryUtil.getPortletSetup(actionRequest);
-
-			login(
-				themeDisplay, actionRequest, actionResponse,
-				portletPreferences);
+			login(themeDisplay, actionRequest, actionResponse);
 
 			boolean doActionAfterLogin = ParamUtil.getBoolean(
 				actionRequest, "doActionAfterLogin");
@@ -186,8 +180,7 @@ public class LoginAction extends PortletAction {
 
 	protected void login(
 			ThemeDisplay themeDisplay, ActionRequest actionRequest,
-			ActionResponse actionResponse,
-			PortletPreferences portletPreferences)
+			ActionResponse actionResponse)
 		throws Exception {
 
 		HttpServletRequest request = PortalUtil.getHttpServletRequest(
@@ -199,27 +192,41 @@ public class LoginAction extends PortletAction {
 		String password = actionRequest.getParameter("password");
 		boolean rememberMe = ParamUtil.getBoolean(actionRequest, "rememberMe");
 
-		String authType = portletPreferences.getValue("authType", null);
-
 		if (!themeDisplay.isSignedIn()) {
+			PortletPreferences portletPreferences =
+				PortletPreferencesFactoryUtil.getPortletSetup(actionRequest);
+
+			String authType = portletPreferences.getValue("authType", null);
+
 			LoginUtil.login(
 				request, response, login, password, rememberMe, authType);
 		}
 
+		String redirect = ParamUtil.getString(actionRequest, "redirect");
+
+		if (Validator.isNotNull(redirect)) {
+			redirect = PortalUtil.escapeRedirect(redirect);
+
+			if (!redirect.startsWith(Http.HTTP)) {
+				redirect = getCompleteRedirectURL(request, redirect);
+			}
+		}
+
+		String mainPath = themeDisplay.getPathMain();
+
 		if (PropsValues.PORTAL_JAAS_ENABLE) {
-			actionResponse.sendRedirect(
-				themeDisplay.getPathMain() + "/portal/protected");
+			if (Validator.isNotNull(redirect)) {
+				redirect = mainPath.concat(
+					"/portal/protected?redirect=").concat(redirect);
+			}
+			else {
+				redirect = mainPath.concat("/portal/protected");
+			}
+
+			actionResponse.sendRedirect(redirect);
 		}
 		else {
-			String redirect = ParamUtil.getString(actionRequest, "redirect");
-
 			if (Validator.isNotNull(redirect)) {
-				redirect = PortalUtil.escapeRedirect(redirect);
-
-				if (!redirect.startsWith(Http.HTTP)) {
-					redirect = getCompleteRedirectURL(request, redirect);
-				}
-
 				actionResponse.sendRedirect(redirect);
 			}
 			else {
@@ -230,7 +237,7 @@ public class LoginAction extends PortletAction {
 					return;
 				}
 				else {
-					actionResponse.sendRedirect(themeDisplay.getPathMain());
+					actionResponse.sendRedirect(mainPath);
 				}
 			}
 		}
@@ -238,13 +245,17 @@ public class LoginAction extends PortletAction {
 
 	protected void postProcessAuthFailure(
 			ActionRequest actionRequest, ActionResponse actionResponse)
-		throws IOException {
+		throws Exception {
 
 		Layout layout = (Layout)actionRequest.getAttribute(WebKeys.LAYOUT);
 
 		PortletURL portletURL = new PortletURLImpl(
 			actionRequest, PortletKeys.LOGIN, layout.getPlid(),
 			PortletRequest.RENDER_PHASE);
+
+		portletURL.setParameter("saveLastPath", Boolean.FALSE.toString());
+
+		portletURL.setWindowState(WindowState.MAXIMIZED);
 
 		actionResponse.sendRedirect(portletURL.toString());
 	}

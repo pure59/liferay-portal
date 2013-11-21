@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 
-<project name="portal-impl" basedir="." default="compile" xmlns:antelope="antlib:ise.antelope.tasks">
+<project name="portal-impl" basedir="." default="compile"
+	xmlns:antelope="antlib:ise.antelope.tasks"
+	xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+>
 	<property name="test.properties" value="portal-test.properties" />
 
 	<import file="../build-common-java.xml" />
@@ -29,7 +32,7 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 		<ant dir="${alloy.taglibs.dir}" target="clean" inheritAll="false" />
 		<ant dir="${alloy.taglibs.dir}" target="start" inheritAll="false" />
 
-		<copy todir="${project.dir}/lib/portal">
+		<copy todir="${project.dir}/lib/portal" preservelastmodified="true">
 			<fileset file="${alloy.taglibs.dir}/alloy-taglib/alloy-taglib.jar" />
 		</copy>
 	</target>
@@ -131,6 +134,42 @@ svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
 			<arg value="javax/naming/directory/DirContext.java" />
 		</java>
 	</target>-->
+
+	<target name="build-bobo-browse-jar">
+		<get dest="release-3.2.0.zip" src="https://codeload.github.com/senseidb/bobo/zip/release-3.2.0" />
+
+		<tstamp>
+			<format property="tstamp.value" pattern="yyyyMMddkkmmssSSS" />
+		</tstamp>
+
+		<unzip
+			dest="${tstamp.value}"
+			src="release-3.2.0.zip"
+		/>
+
+		<delete file="release-3.2.0.zip" />
+
+		<patch patchfile="${project.dir}/lib/portal/bobo-browse/LPS-28980.patch"
+			dir="${tstamp.value}/bobo-release-3.2.0"
+			strip="1"
+		/>
+
+		<patch patchfile="${project.dir}/lib/portal/bobo-browse/LPS-38192.patch"
+			dir="${tstamp.value}/bobo-release-3.2.0"
+			strip="1"
+		/>
+
+		<artifact:mvn pom="${tstamp.value}/bobo-release-3.2.0/bobo-browse/pom.xml">
+			<arg value="package" />
+		</artifact:mvn>
+
+		<move
+			file="${tstamp.value}/bobo-release-3.2.0/bobo-browse/target/bobo-browse-3.2.0.jar"
+			tofile="${project.dir}/lib/portal/bobo-browse.jar.new"
+		/>
+
+		<delete dir="${tstamp.value}" />
+	</target>
 
 	<target name="build-creole-parser">
 		<delete>
@@ -486,6 +525,16 @@ public class Creole10Parser]]></replacevalue>
 			<arg line="-S gem install -i ./${tstamp.value}/output ${tstamp.value}/compass/compass-0.12.2.gem --no-rdoc --no-ri" />
 		</java>
 
+		<if>
+			<os family="windows" />
+			<then>
+				<replace dir="${tstamp.value}/output/bin/">
+					<replacetoken><![CDATA[#! jruby]]></replacetoken>
+					<replacevalue><![CDATA[#!/usr/bin/env jruby]]></replacevalue>
+				</replace>
+			</then>
+		</if>
+
 		<jar
 			basedir="${tstamp.value}/output"
 			jarfile="${project.dir}/lib/portal/ruby-gems.jar"
@@ -496,8 +545,8 @@ public class Creole10Parser]]></replacevalue>
 
 	<target name="build-selenium-java-jar">
 		<get
-			dest="selenium-firefox-driver-2.33.0-sources.jar"
-			src="http://search.maven.org/remotecontent?filepath=org/seleniumhq/selenium/selenium-firefox-driver/2.33.0/selenium-firefox-driver-2.33.0-sources.jar"
+			dest="selenium-firefox-driver-2.37.0-sources.jar"
+			src="http://search.maven.org/remotecontent?filepath=org/seleniumhq/selenium/selenium-firefox-driver/2.37.0/selenium-firefox-driver-2.37.0-sources.jar"
 		/>
 
 		<tstamp>
@@ -506,14 +555,14 @@ public class Creole10Parser]]></replacevalue>
 
 		<unzip
 			dest="${tstamp.value}"
-			src="selenium-firefox-driver-2.33.0-sources.jar"
+			src="selenium-firefox-driver-2.37.0-sources.jar"
 		>
 			<patternset>
 				<include name="**/FirefoxDriver.java" />
 			</patternset>
 		</unzip>
 
-		<delete file="selenium-firefox-driver-2.33.0-sources.jar" />
+		<delete file="selenium-firefox-driver-2.37.0-sources.jar" />
 
 		<replace file="${tstamp.value}/org/openqa/selenium/firefox/FirefoxDriver.java">
 			<replacefilter token="localhost" value="127.0.0.1" />
@@ -642,6 +691,13 @@ public class Creole10Parser]]></replacevalue>
 			<fileset
 				dir="${tstamp.value}"
 				includes="org/hamcrest/**"
+			/>
+
+			<!-- http*.jar -->
+
+			<fileset
+				dir="${tstamp.value}"
+				includes="org/apache/http/**"
 			/>
 
 			<!-- junit.jar -->
@@ -1268,11 +1324,11 @@ public class Creole10Parser]]></replacevalue>
 	</target>
 
 	<target name="compile-dependencies">
-		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/definitions">
+		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/definitions" preservelastmodified="true">
 			<fileset dir="${project.dir}/definitions" />
 		</copy>
 
-		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies">
+		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies" preservelastmodified="true">
 			<fileset
 				dir="${project.dir}/classes"
 				includes="*.properties"
@@ -1283,15 +1339,15 @@ public class Creole10Parser]]></replacevalue>
 			/>
 		</copy>
 
-		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/tools/sql/dependencies">
+		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/tools/sql/dependencies" preservelastmodified="true">
 			<fileset
 				dir="${project.dir}/sql"
-				includes="portal-data-common.sql,portal-data-counter.sql,portal-data-release.sql,portal-data-sample.vm,portal-tables.sql,indexes.properties,indexes.sql,quartz-tables.sql,sequences.sql,update-*.sql"
+				includes="portal-data-common.sql,portal-data-counter.sql,portal-data-release.sql,portal-tables.sql,indexes.properties,indexes.sql,quartz-tables.sql,sequences.sql,update-*.sql"
 			/>
 		</copy>
 
-		<copy file="${project.dir}/classes/log4j.properties" todir="${portal-impl.classes.dir}" />
-		<copy file="${project.dir}/classes/logging.properties" todir="${portal-impl.classes.dir}" />
+		<copy file="${project.dir}/classes/log4j.properties" todir="${portal-impl.classes.dir}" preservelastmodified="true" />
+		<copy file="${project.dir}/classes/logging.properties" todir="${portal-impl.classes.dir}" preservelastmodified="true" />
 
 		<if>
 			<not>
@@ -1331,7 +1387,7 @@ public class Creole10Parser]]></replacevalue>
 			</then>
 		</if>
 
-		<copy todir="${portal-impl.classes.dir}">
+		<copy todir="${portal-impl.classes.dir}" preservelastmodified="true">
 			<fileset dir="src" excludes="**/*.java,**/META-INF/javadocs-all*.xml" />
 		</copy>
 	</target>
@@ -1393,11 +1449,11 @@ public class Creole10Parser]]></replacevalue>
 			<then>
 				<delete file="${app.server.lib.portal.dir}/portal-impl.jar" />
 
-				<copy todir="${app.server.classes.portal.dir}/com/liferay/portal/definitions">
+				<copy todir="${app.server.classes.portal.dir}/com/liferay/portal/definitions" preservelastmodified="true">
 					<fileset dir="${project.dir}/definitions" />
 				</copy>
 
-				<copy todir="${app.server.classes.portal.dir}">
+				<copy todir="${app.server.classes.portal.dir}" preservelastmodified="true">
 					<fileset dir="src" includes="**/dependencies/**,**/service.xml" />
 				</copy>
 
@@ -1406,8 +1462,8 @@ public class Creole10Parser]]></replacevalue>
 			<else>
 				<antcall target="build-common-java.deploy" />
 
-				<copy file="classes/log4j.properties" todir="${app.server.classes.portal.dir}" />
-				<copy file="classes/logging.properties" todir="${app.server.classes.portal.dir}" />
+				<copy file="classes/log4j.properties" todir="${app.server.classes.portal.dir}" preservelastmodified="true" />
+				<copy file="classes/logging.properties" todir="${app.server.classes.portal.dir}" preservelastmodified="true" />
 			</else>
 		</if>
 	</target>
@@ -1417,7 +1473,7 @@ public class Creole10Parser]]></replacevalue>
 	</target>
 
 	<target name="format-source">
-		<copy todir="classes" overwrite="true">
+		<copy todir="classes" overwrite="true" preservelastmodified="true">
 			<fileset dir="src" includes="com/liferay/portal/tools/dependencies/*.properties" />
 		</copy>
 
@@ -1456,7 +1512,7 @@ public class Creole10Parser]]></replacevalue>
 		<ant dir="../util-java" target="jar" inheritAll="false" />
 		<ant dir="../util-taglib" target="jar" inheritAll="false" />
 
-		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/osgi/core">
+		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/osgi/core" preservelastmodified="true">
 			<fileset dir="${project.dir}/osgi/lib/${module.framework.implementation}/core" includes="*.jar" />
 		</copy>
 
@@ -1470,7 +1526,7 @@ public class Creole10Parser]]></replacevalue>
 
 		<echo file="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/osgi/core/jars.txt">${osgi.core.jars.list}</echo>
 
-		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/osgi/portal">
+		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/osgi/portal" preservelastmodified="true">
 			<fileset dir="${project.dir}/osgi/lib/common/portal" includes="*.jar" />
 			<fileset dir="${project.dir}/osgi/lib/${module.framework.implementation}/portal" includes="*.jar" />
 		</copy>
@@ -1485,6 +1541,25 @@ public class Creole10Parser]]></replacevalue>
 
 		<echo file="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/osgi/portal/jars.txt">${osgi.portal.jars.list}</echo>
 
+		<for list="1,2,3,4,5,6,7,8,9" param="index">
+			<sequential>
+				<if>
+					<available file="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/plugins@{index}" />
+					<then>
+						<fileset dir="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/plugins@{index}" id="plugins@{index}.wars">
+							<include name="*.war" />
+						</fileset>
+
+						<pathconvert property="plugins@{index}.wars.list" pathsep="," refid="plugins@{index}.wars">
+							<flattenmapper />
+						</pathconvert>
+
+						<echo file="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/plugins@{index}/wars.txt">${plugins@{index}.wars.list}</echo>
+					</then>
+				</if>
+			</sequential>
+		</for>
+
 		<if>
 			<not>
 				<and>
@@ -1493,14 +1568,7 @@ public class Creole10Parser]]></replacevalue>
 				</and>
 			</not>
 			<then>
-				<antcall target="manifest" />
-
-				<jar
-					basedir="classes"
-					excludes="log4j.properties,logging.properties,portal-*.properties,system-*.properties"
-					jarfile="${jar.file}.jar"
-					manifest="classes/META-INF/MANIFEST.MF"
-				/>
+				<antcall target="build-common-java.jar" />
 			</then>
 		</if>
 	</target>

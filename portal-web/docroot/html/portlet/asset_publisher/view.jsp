@@ -34,7 +34,7 @@ if (mergeUrlTags || mergeLayoutTags) {
 
 	String titleEntry = null;
 
-	if ((compilerTagNames != null) && (compilerTagNames.length > 0)) {
+	if (ArrayUtil.isNotEmpty(compilerTagNames)) {
 		String[] newAssetTagNames = ArrayUtil.append(allAssetTagNames, compilerTagNames);
 
 		allAssetTagNames = ArrayUtil.distinct(newAssetTagNames, new StringComparator());
@@ -81,9 +81,11 @@ if (enableTagBasedNavigation && selectionStyle.equals("manual") && ((assetEntryQ
 Group scopeGroup = themeDisplay.getScopeGroup();
 %>
 
-<c:if test="<%= showAddContentButton && (scopeGroup != null) && (!scopeGroup.hasStagingGroup() || scopeGroup.isStagingGroup()) && !portletName.equals(PortletKeys.RELATED_ASSETS) %>">
+<c:if test="<%= showAddContentButton && (scopeGroup != null) && (!scopeGroup.hasStagingGroup() || scopeGroup.isStagingGroup()) && !portletName.equals(PortletKeys.HIGHEST_RATED_ASSETS) && !portletName.equals(PortletKeys.MOST_VIEWED_ASSETS) && !portletName.equals(PortletKeys.RELATED_ASSETS) %>">
 
 	<%
+	boolean defaultAssetPublisher = AssetUtil.isDefaultAssetPublisher(layout, portletDisplay.getId(), portletResource);
+
 	addPortletURLs = AssetUtil.getAddPortletURLs(liferayPortletRequest, liferayPortletResponse, classNameIds, classTypeIds, allAssetCategoryIds, allAssetTagNames, null);
 
 	for (long groupId : groupIds) {
@@ -100,7 +102,7 @@ Group scopeGroup = themeDisplay.getScopeGroup();
 </c:if>
 
 <div class="subscribe-action">
-	<c:if test="<%= !portletName.equals(PortletKeys.RECENT_CONTENT) && !portletName.equals(PortletKeys.RELATED_ASSETS) && PortletPermissionUtil.contains(permissionChecker, plid, portletDisplay.getId(), ActionKeys.SUBSCRIBE) && AssetPublisherUtil.getEmailAssetEntryAddedEnabled(portletPreferences) %>">
+	<c:if test="<%= !portletName.equals(PortletKeys.HIGHEST_RATED_ASSETS) && !portletName.equals(PortletKeys.MOST_VIEWED_ASSETS) && !portletName.equals(PortletKeys.RECENT_CONTENT) && !portletName.equals(PortletKeys.RELATED_ASSETS) && PortletPermissionUtil.contains(permissionChecker, plid, portletDisplay.getId(), ActionKeys.SUBSCRIBE) && AssetPublisherUtil.getEmailAssetEntryAddedEnabled(portletPreferences) %>">
 		<c:choose>
 			<c:when test="<%= AssetPublisherUtil.isSubscribed(themeDisplay.getCompanyId(), user.getUserId(), themeDisplay.getPlid(), portletDisplay.getId()) %>">
 				<portlet:actionURL var="unsubscribeURL">
@@ -131,6 +133,10 @@ Group scopeGroup = themeDisplay.getScopeGroup();
 		</c:choose>
 	</c:if>
 
+	<%
+	boolean enableRSS = !PortalUtil.isRSSFeedsEnabled() ? false : GetterUtil.getBoolean(portletPreferences.getValue("enableRss", null));
+	%>
+
 	<c:if test="<%= enableRSS %>">
 		<liferay-portlet:resourceURL varImpl="rssURL">
 			<portlet:param name="struts_action" value="/asset_publisher/rss" />
@@ -159,7 +165,7 @@ if (!paginationType.equals("none")) {
 </c:if>
 
 <%
-long portletDisplayDDMTemplateId = PortletDisplayTemplateUtil.getPortletDisplayTemplateDDMTemplateId(themeDisplay.getScopeGroupId(), displayStyle);
+long portletDisplayDDMTemplateId = PortletDisplayTemplateUtil.getPortletDisplayTemplateDDMTemplateId(displayStyleGroupId, displayStyle);
 
 Map<String, Object> contextObjects = new HashMap<String, Object>();
 

@@ -30,6 +30,8 @@ import com.liferay.portal.service.CompanyLocalServiceUtil;
 import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
+import com.liferay.portal.test.Sync;
+import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
 import com.liferay.portal.test.TransactionalCallbackAwareExecutionTestListener;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
@@ -58,9 +60,11 @@ import org.junit.runner.RunWith;
 @ExecutionTestListeners(
 	listeners = {
 		MainServletExecutionTestListener.class,
+		SynchronousDestinationExecutionTestListener.class,
 		TransactionalCallbackAwareExecutionTestListener.class
 	})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
+@Sync
 @Transactional
 public class JournalExportImportTest extends BasePortletExportImportTestCase {
 
@@ -96,6 +100,12 @@ public class JournalExportImportTest extends BasePortletExportImportTestCase {
 		return JournalTestUtil.addArticle(
 			groupId, ServiceTestUtil.randomString(),
 			ServiceTestUtil.randomString());
+	}
+
+	@Override
+	protected void deleteStagedModel(StagedModel stagedModel) throws Exception {
+		JournalArticleLocalServiceUtil.deleteArticle(
+			(JournalArticle)stagedModel);
 	}
 
 	protected void exportImportJournalArticle(
@@ -138,7 +148,7 @@ public class JournalExportImportTest extends BasePortletExportImportTestCase {
 
 		String exportedResourceUuid = article.getArticleResourceUuid();
 
-		doExportImportPortlet(PortletKeys.JOURNAL);
+		exportImportPortlet(PortletKeys.JOURNAL);
 
 		int articlesCount = JournalArticleLocalServiceUtil.getArticlesCount(
 			importedGroup.getGroupId());
@@ -278,6 +288,11 @@ public class JournalExportImportTest extends BasePortletExportImportTestCase {
 		JournalArticle article = (JournalArticle)stagedModel;
 
 		return article.getArticleResourceUuid();
+	}
+
+	@Override
+	protected void testExportImportDisplayStyle(long groupId, String scopeType)
+		throws Exception {
 	}
 
 }

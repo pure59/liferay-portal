@@ -1,10 +1,13 @@
 package ${seleniumBuilderContext.getTestCasePackageName(testCaseName)};
 
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portalweb.portal.BaseTestCase;
 import com.liferay.portalweb.portal.util.RuntimeVariables;
 import com.liferay.portalweb.portal.util.SeleniumUtil;
+import com.liferay.portalweb.portal.util.TestPropsValues;
 import com.liferay.portalweb.portal.util.liferayselenium.LiferaySelenium;
+import com.liferay.portalweb.portal.util.liferayselenium.SeleniumException;
 
 <#assign rootElement = seleniumBuilderContext.getTestCaseRootElement(testCaseName)>
 
@@ -20,15 +23,29 @@ import com.liferay.portalweb.portal.util.liferayselenium.LiferaySelenium;
 	import ${seleniumBuilderContext.getMacroClassName(childElementAttributeValue)};
 </#list>
 
+<#if rootElement.attributeValue("extends")??>
+	<#assign extendedTestCase = rootElement.attributeValue("extends")>
+
+	import ${seleniumBuilderContext.getTestCaseClassName(extendedTestCase)};
+</#if>
+
 import java.util.HashMap;
 import java.util.Map;
 
-public class ${seleniumBuilderContext.getTestCaseSimpleClassName(testCaseName)} extends BaseTestCase {
+public class ${seleniumBuilderContext.getTestCaseSimpleClassName(testCaseName)}
+	<#if extendedTestCase??>
+		extends ${extendedTestCase}TestCase {
+	<#else>
+		extends BaseTestCase {
+	</#if>
 
-	<#if rootElement.element("var")??>
-		public ${seleniumBuilderContext.getTestCaseSimpleClassName(testCaseName)}() {
-			super();
+	public ${seleniumBuilderContext.getTestCaseSimpleClassName(testCaseName)}() {
+		super();
 
+		currentTestCaseName = "${testCaseName?uncap_first}TestCase";
+		testCaseName = "${testCaseName?uncap_first}TestCase";
+
+		<#if rootElement.element("var")??>
 			<#assign varElements = rootElement.elements("var")>
 
 			<#assign context = "definitionScopeVariables">
@@ -36,8 +53,8 @@ public class ${seleniumBuilderContext.getTestCaseSimpleClassName(testCaseName)} 
 			<#list varElements as varElement>
 				<#include "var_element.ftl">
 			</#list>
-		}
-	</#if>
+		</#if>
+	}
 
 	@Override
 	public void setUp() throws Exception {
@@ -50,117 +67,117 @@ public class ${seleniumBuilderContext.getTestCaseSimpleClassName(testCaseName)} 
 		selenium.startLogger();
 	}
 
+	<#assign methodNames = ["command", "set-up", "tear-down"]>
+
+	<#list methodNames as methodName>
+		<#assign methodElements = rootElement.elements("${methodName}")>
+
+		<#list methodElements as methodElement>
+			<#if methodName == "set-up">
+				public void methodSetUp
+			<#elseif methodName == "tear-down">
+				public void methodTearDown
+			<#else>
+				public void method${methodElement.attributeValue("name")}
+			</#if>
+
+			(String commandName, boolean nested) throws Exception {
+				commandScopeVariables = new HashMap<String, String>();
+
+				commandScopeVariables.putAll(definitionScopeVariables);
+
+				<#assign childElementAttributeValues = seleniumBuilderFileUtil.getChildElementAttributeValues(methodElement, "action")>
+
+				<#list childElementAttributeValues as childElementAttributeValue>
+					${childElementAttributeValue}Action ${seleniumBuilderFileUtil.getVariableName(childElementAttributeValue)}Action = new ${childElementAttributeValue}Action(selenium);
+				</#list>
+
+				<#assign childElementAttributeValues = seleniumBuilderFileUtil.getChildElementAttributeValues(methodElement, "macro")>
+
+				<#list childElementAttributeValues as childElementAttributeValue>
+					${childElementAttributeValue}Macro ${seleniumBuilderFileUtil.getVariableName(childElementAttributeValue)}Macro = new ${childElementAttributeValue}Macro(selenium);
+				</#list>
+
+				if (!nested) {
+					selenium.sendLogger(currentTestCaseName + commandName, "start");
+
+					selenium.sendLogger(currentTestCaseName + commandName, "pending");
+
+					<#assign lineNumber = methodElement.attributeValue("line-number")>
+
+					selenium.sendLogger(testCaseName + "${lineNumber}", "pending");
+				}
+
+				<#assign blockElement = methodElement>
+
+				<#include "test_case_block_element.ftl">
+
+				if (!nested) {
+					<#assign lineNumber = methodElement.attributeValue("line-number")>
+
+					selenium.sendLogger(currentTestCaseName + "${lineNumber}", "pass");
+				}
+			}
+		</#list>
+	</#list>
+
 	<#assign commandElements = rootElement.elements("command")>
 
 	<#list commandElements as commandElement>
 		<#assign commandName = commandElement.attributeValue("name")>
 
 		public void test${commandName}() throws Exception {
-			commandScopeVariables = new HashMap<String, String>();
-
-			commandScopeVariables.putAll(definitionScopeVariables);
-
-			<#assign childElementAttributeValues = seleniumBuilderFileUtil.getChildElementAttributeValues(rootElement, "action")>
-
-			<#list childElementAttributeValues as childElementAttributeValue>
-				${childElementAttributeValue}Action ${seleniumBuilderFileUtil.getVariableName(childElementAttributeValue)}Action = new ${childElementAttributeValue}Action(selenium);
-			</#list>
-
-			<#assign childElementAttributeValues = seleniumBuilderFileUtil.getChildElementAttributeValues(rootElement, "macro")>
-
-			<#list childElementAttributeValues as childElementAttributeValue>
-				${childElementAttributeValue}Macro ${seleniumBuilderFileUtil.getVariableName(childElementAttributeValue)}Macro = new ${childElementAttributeValue}Macro(selenium);
-			</#list>
-
 			boolean testPassed = false;
+			boolean testSkipped = false;
 
 			try {
 				definitionScopeVariables.put("testCaseName", "${testCaseName}TestCase${commandName}");
 
 				<#if rootElement.element("set-up")??>
-					commandScopeVariables = new HashMap<String, String>();
-
-					commandScopeVariables.putAll(definitionScopeVariables);
-
-					selenium.sendLogger("${testCaseName?uncap_first}TestCase${commandName}", "start");
-
-					selenium.sendLogger("${testCaseName?uncap_first}TestCase${commandName}", "pending");
-
-					<#assign setUpElement = rootElement.element("set-up")>
-
-					<#assign lineNumber = setUpElement.attributeValue("line-number")>
-
-					selenium.sendLogger("${testCaseName?uncap_first}TestCase${lineNumber}", "pending");
-
-					<#assign blockElement = setUpElement>
-
-					<#include "test_case_block_element.ftl">
-
-					<#assign lineNumber = setUpElement.attributeValue("line-number")>
-
-					selenium.sendLogger("${testCaseName?uncap_first}TestCase${lineNumber}", "pass");
+					methodSetUp("${commandName}", false);
 				</#if>
 
-				commandScopeVariables = new HashMap<String, String>();
+				<#if commandElement.attributeValue("depends")??>
+					<#assign depends = commandElement.attributeValue("depends")>
 
-				commandScopeVariables.putAll(definitionScopeVariables);
+					if (!ArrayUtil.contains(TestPropsValues.FIXED_ISSUES, "${depends}")) {
+						throw new SeleniumException();
+					}
+				</#if>
 
-				selenium.sendLogger("${testCaseName?uncap_first}TestCase${commandName}", "start");
-
-				selenium.sendLogger("${testCaseName?uncap_first}TestCase${commandName}", "pending");
-
-				<#assign lineNumber = commandElement.attributeValue("line-number")>
-
-				selenium.sendLogger("${testCaseName?uncap_first}TestCase${lineNumber}", "pending");
-
-				<#assign blockElement = commandElement>
-
-				<#include "test_case_block_element.ftl">
-
-				<#assign lineNumber = commandElement.attributeValue("line-number")>
-
-				selenium.sendLogger("${testCaseName?uncap_first}TestCase${lineNumber}", "pass");
+				method${commandName}("${commandName}", false);
 
 				testPassed = true;
 			}
+			catch (SeleniumException se) {
+				testSkipped = true;
+			}
 			finally {
 				<#if rootElement.element("tear-down")??>
-					commandScopeVariables = new HashMap<String, String>();
-
-					commandScopeVariables.putAll(definitionScopeVariables);
-
-					<#assign tearDownElement = rootElement.element("tear-down")>
-
-					selenium.sendLogger("${testCaseName?uncap_first}TestCase${commandName}", "start");
-
-					selenium.sendLogger("${testCaseName?uncap_first}TestCase${commandName}", "pending");
-
-					<#assign lineNumber = tearDownElement.attributeValue("line-number")>
-
-					selenium.sendLogger("${testCaseName?uncap_first}TestCase${lineNumber}", "pending");
-
-					<#assign blockElement = tearDownElement>
-
-					<#include "test_case_block_element.ftl">
-
-					<#assign lineNumber = tearDownElement.attributeValue("line-number")>
-
-					selenium.sendLogger("${testCaseName?uncap_first}TestCase${lineNumber}", "pass");
+					if (!TestPropsValues.TEST_SKIP_TEAR_DOWN) {
+							methodTearDown("${commandName}", false);
+					}
 				</#if>
 
-				if (testPassed) {
-					selenium.sendLogger("${testCaseName?uncap_first}TestCase${commandName}", "pass");
+				if (testSkipped) {
+					selenium.sendLogger(testCaseName + "${commandName}", "skip");
+				}
+				else if (testPassed) {
+					selenium.sendLogger(testCaseName + "${commandName}", "pass");
 				}
 				else {
-					selenium.sendLogger("${testCaseName?uncap_first}TestCase${commandName}", "fail");
+					selenium.sendLogger(testCaseName + "${commandName}", "fail");
 				}
 			}
 		}
 	</#list>
 
 	static {
-		<#assign commandElements = rootElement.elements("command")>
+		<#assign testCaseCommandNames = seleniumBuilderContext.getTestCaseCommandNames(testCaseName)>
 
-		testCaseCount = ${commandElements?size};
+		testCaseCount = ${testCaseCommandNames?size};
 	}
+
+	private static String testCaseName;
+
 }

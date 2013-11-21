@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.asset.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see AssetVocabulary
  * @generated
  */
+@ProviderType
 public class AssetVocabularyWrapper implements AssetVocabulary,
 	ModelWrapper<AssetVocabulary> {
 	public AssetVocabularyWrapper(AssetVocabulary assetVocabulary) {
@@ -722,6 +725,22 @@ public class AssetVocabularyWrapper implements AssetVocabulary,
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_assetVocabulary.setExpandoBridgeAttributes(serviceContext);
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _assetVocabulary.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _assetVocabulary.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_assetVocabulary.prepareLocalizedFieldsForImport();
 	}
 
 	@Override

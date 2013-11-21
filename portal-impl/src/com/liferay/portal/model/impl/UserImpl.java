@@ -19,11 +19,14 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.shard.ShardUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.Digester;
 import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.RemotePreference;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -66,12 +69,17 @@ import com.liferay.portal.service.WebsiteLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.Portal;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -84,6 +92,11 @@ import java.util.TreeSet;
 public class UserImpl extends UserBaseImpl {
 
 	public UserImpl() {
+	}
+
+	@Override
+	public void addRemotePreference(RemotePreference remotePreference) {
+		_remotePreferences.put(remotePreference.getName(), remotePreference);
 	}
 
 	@Override
@@ -131,10 +144,10 @@ public class UserImpl extends UserBaseImpl {
 	@Override
 	public String getDigest(String password) {
 		if (Validator.isNull(getScreenName())) {
-			throw new IllegalStateException("Screen name cannot be null");
+			throw new IllegalStateException("Screen name is null");
 		}
 		else if (Validator.isNull(getEmailAddress())) {
-			throw new IllegalStateException("Email address cannot be null");
+			throw new IllegalStateException("Email address is null");
 		}
 
 		StringBundler sb = new StringBundler(5);
@@ -349,7 +362,7 @@ public class UserImpl extends UserBaseImpl {
 			String[] classNames, boolean includeControlPanel, int max)
 		throws PortalException, SystemException {
 
-		return GroupServiceUtil.getUserPlacesGroups(
+		return GroupServiceUtil.getUserSitesGroups(
 			getUserId(), classNames, includeControlPanel, max);
 	}
 
@@ -544,6 +557,18 @@ public class UserImpl extends UserBaseImpl {
 	}
 
 	@Override
+	public RemotePreference getRemotePreference(String name) {
+		return _remotePreferences.get(name);
+	}
+
+	@Override
+	public Iterable<RemotePreference> getRemotePreferences() {
+		Collection<RemotePreference> values = _remotePreferences.values();
+
+		return Collections.unmodifiableCollection(values);
+	}
+
+	@Override
 	public long[] getRoleIds() throws SystemException {
 		List<Role> roles = getRoles();
 
@@ -707,6 +732,39 @@ public class UserImpl extends UserBaseImpl {
 	}
 
 	@Override
+	public boolean isEmailAddressComplete() {
+		if (Validator.isNull(getEmailAddress()) ||
+			(PropsValues.USERS_EMAIL_ADDRESS_REQUIRED &&
+			 Validator.isNull(getDisplayEmailAddress()))) {
+
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean isEmailAddressVerificationComplete() {
+		boolean emailAddressVerificationRequired = false;
+
+		try {
+			Company company = CompanyLocalServiceUtil.getCompany(
+				getCompanyId());
+
+			emailAddressVerificationRequired = company.isStrangersVerify();
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+		}
+
+		if (emailAddressVerificationRequired) {
+			return super.isEmailAddressVerified();
+		}
+
+		return true;
+	}
+
+	@Override
 	public boolean isFemale() throws PortalException, SystemException {
 		return getFemale();
 	}
@@ -719,6 +777,50 @@ public class UserImpl extends UserBaseImpl {
 	@Override
 	public boolean isPasswordModified() {
 		return _passwordModified;
+	}
+
+	@Override
+	public boolean isReminderQueryComplete() {
+		if (PropsValues.USERS_REMINDER_QUERIES_ENABLED) {
+			if (Validator.isNull(getReminderQueryQuestion()) ||
+				Validator.isNull(getReminderQueryAnswer())) {
+
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean isSetupComplete() {
+		if (isEmailAddressComplete() && isEmailAddressVerificationComplete() &&
+			!isPasswordReset() && isReminderQueryComplete() &&
+			isTermsOfUseComplete()) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean isTermsOfUseComplete() {
+		boolean termsOfUseRequired = false;
+
+		try {
+			termsOfUseRequired = PrefsPropsUtil.getBoolean(
+				getCompanyId(), PropsKeys.TERMS_OF_USE_REQUIRED);
+		}
+		catch (SystemException se) {
+			termsOfUseRequired = PropsValues.TERMS_OF_USE_REQUIRED;
+		}
+
+		if (termsOfUseRequired) {
+			return super.isAgreedToTermsOfUse();
+		}
+
+		return true;
 	}
 
 	@Override
@@ -762,10 +864,14 @@ public class UserImpl extends UserBaseImpl {
 			});
 	}
 
+	private static Log _log = LogFactoryUtil.getLog(UserImpl.class);
+
 	private Locale _locale;
 	private boolean _passwordModified;
 	private PasswordPolicy _passwordPolicy;
 	private String _passwordUnencrypted;
+	private transient Map<String, RemotePreference> _remotePreferences =
+		new HashMap<String, RemotePreference>();
 	private TimeZone _timeZone;
 
 }

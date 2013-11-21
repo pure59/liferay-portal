@@ -354,6 +354,10 @@ public class ListTypePersistenceImpl extends BasePersistenceImpl<ListType>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByType(type);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<ListType> list = findByType(type, count - 1, count,
 				orderByComparator);
 
@@ -609,6 +613,10 @@ public class ListTypePersistenceImpl extends BasePersistenceImpl<ListType>
 	private static final String _FINDER_COLUMN_TYPE_TYPE_2 = "listType.type = ?";
 	private static final String _FINDER_COLUMN_TYPE_TYPE_3 = "(listType.type IS NULL OR listType.type = '')";
 
+	public ListTypePersistenceImpl() {
+		setModelClass(ListType.class);
+	}
+
 	/**
 	 * Caches the list type in the entity cache if it is enabled.
 	 *
@@ -846,6 +854,8 @@ public class ListTypePersistenceImpl extends BasePersistenceImpl<ListType>
 
 		EntityCacheUtil.putResult(ListTypeModelImpl.ENTITY_CACHE_ENABLED,
 			ListTypeImpl.class, listType.getPrimaryKey(), listType);
+
+		listType.resetOriginalValues();
 
 		return listType;
 	}

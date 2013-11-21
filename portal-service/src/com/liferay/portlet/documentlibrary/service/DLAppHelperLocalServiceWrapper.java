@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see DLAppHelperLocalService
  * @generated
  */
+@ProviderType
 public class DLAppHelperLocalServiceWrapper implements DLAppHelperLocalService,
 	ServiceWrapper<DLAppHelperLocalService> {
 	public DLAppHelperLocalServiceWrapper(
@@ -163,6 +166,16 @@ public class DLAppHelperLocalServiceWrapper implements DLAppHelperLocalService,
 	}
 
 	@Override
+	public void moveDependentsToTrash(
+		java.util.List<java.lang.Object> dlFileEntriesAndDLFolders,
+		long trashEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		_dlAppHelperLocalService.moveDependentsToTrash(dlFileEntriesAndDLFolders,
+			trashEntryId);
+	}
+
+	@Override
 	public void moveFileEntry(
 		com.liferay.portal.kernel.repository.model.FileEntry fileEntry)
 		throws com.liferay.portal.kernel.exception.PortalException,
@@ -267,6 +280,31 @@ public class DLAppHelperLocalServiceWrapper implements DLAppHelperLocalService,
 	}
 
 	@Override
+	public void registerDLSyncEventCallback(java.lang.String event,
+		com.liferay.portal.kernel.repository.model.FileEntry fileEntry)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		_dlAppHelperLocalService.registerDLSyncEventCallback(event, fileEntry);
+	}
+
+	@Override
+	public void registerDLSyncEventCallback(java.lang.String event,
+		com.liferay.portal.kernel.repository.model.Folder folder)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_dlAppHelperLocalService.registerDLSyncEventCallback(event, folder);
+	}
+
+	@Override
+	public void restoreDependentsFromTrash(
+		java.util.List<java.lang.Object> dlFileEntriesAndDLFolders,
+		long trashEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		_dlAppHelperLocalService.restoreDependentsFromTrash(dlFileEntriesAndDLFolders,
+			trashEntryId);
+	}
+
+	@Override
 	public void restoreFileEntryFromTrash(long userId,
 		com.liferay.portal.kernel.repository.model.FileEntry fileEntry)
 		throws com.liferay.portal.kernel.exception.PortalException,
@@ -323,15 +361,6 @@ public class DLAppHelperLocalServiceWrapper implements DLAppHelperLocalService,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _dlAppHelperLocalService.updateAsset(userId, folder,
 			assetCategoryIds, assetTagNames, assetLinkEntryIds);
-	}
-
-	@Override
-	public void updateDependentStatus(com.liferay.portal.model.User user,
-		java.util.List<java.lang.Object> dlFileEntriesAndDLFolders, int status)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		_dlAppHelperLocalService.updateDependentStatus(user,
-			dlFileEntriesAndDLFolders, status);
 	}
 
 	@Override

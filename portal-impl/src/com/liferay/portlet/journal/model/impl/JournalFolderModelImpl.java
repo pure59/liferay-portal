@@ -14,16 +14,23 @@
 
 package com.liferay.portlet.journal.model.impl;
 
+import com.liferay.portal.NoSuchModelException;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
+import com.liferay.portal.kernel.trash.TrashHandler;
+import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.ContainerModel;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -33,6 +40,8 @@ import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.journal.model.JournalFolderModel;
 import com.liferay.portlet.journal.model.JournalFolderSoap;
+import com.liferay.portlet.trash.model.TrashEntry;
+import com.liferay.portlet.trash.service.TrashEntryLocalServiceUtil;
 
 import java.io.Serializable;
 
@@ -76,6 +85,7 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 			{ "createDate", Types.TIMESTAMP },
 			{ "modifiedDate", Types.TIMESTAMP },
 			{ "parentFolderId", Types.BIGINT },
+			{ "treePath", Types.VARCHAR },
 			{ "name", Types.VARCHAR },
 			{ "description", Types.VARCHAR },
 			{ "status", Types.INTEGER },
@@ -83,7 +93,7 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 			{ "statusByUserName", Types.VARCHAR },
 			{ "statusDate", Types.TIMESTAMP }
 		};
-	public static final String TABLE_SQL_CREATE = "create table JournalFolder (uuid_ VARCHAR(75) null,folderId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,parentFolderId LONG,name VARCHAR(100) null,description STRING null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
+	public static final String TABLE_SQL_CREATE = "create table JournalFolder (uuid_ VARCHAR(75) null,folderId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,parentFolderId LONG,treePath STRING null,name VARCHAR(100) null,description STRING null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table JournalFolder";
 	public static final String ORDER_BY_JPQL = " ORDER BY journalFolder.parentFolderId ASC, journalFolder.name ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY JournalFolder.parentFolderId ASC, JournalFolder.name ASC";
@@ -100,11 +110,12 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 				"value.object.column.bitmask.enabled.com.liferay.portlet.journal.model.JournalFolder"),
 			true);
 	public static long COMPANYID_COLUMN_BITMASK = 1L;
-	public static long GROUPID_COLUMN_BITMASK = 2L;
-	public static long NAME_COLUMN_BITMASK = 4L;
-	public static long PARENTFOLDERID_COLUMN_BITMASK = 8L;
-	public static long STATUS_COLUMN_BITMASK = 16L;
-	public static long UUID_COLUMN_BITMASK = 32L;
+	public static long FOLDERID_COLUMN_BITMASK = 2L;
+	public static long GROUPID_COLUMN_BITMASK = 4L;
+	public static long NAME_COLUMN_BITMASK = 8L;
+	public static long PARENTFOLDERID_COLUMN_BITMASK = 16L;
+	public static long STATUS_COLUMN_BITMASK = 32L;
+	public static long UUID_COLUMN_BITMASK = 64L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -128,6 +139,7 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		model.setCreateDate(soapModel.getCreateDate());
 		model.setModifiedDate(soapModel.getModifiedDate());
 		model.setParentFolderId(soapModel.getParentFolderId());
+		model.setTreePath(soapModel.getTreePath());
 		model.setName(soapModel.getName());
 		model.setDescription(soapModel.getDescription());
 		model.setStatus(soapModel.getStatus());
@@ -207,6 +219,7 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("parentFolderId", getParentFolderId());
+		attributes.put("treePath", getTreePath());
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
 		attributes.put("status", getStatus());
@@ -273,6 +286,12 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 			setParentFolderId(parentFolderId);
 		}
 
+		String treePath = (String)attributes.get("treePath");
+
+		if (treePath != null) {
+			setTreePath(treePath);
+		}
+
 		String name = (String)attributes.get("name");
 
 		if (name != null) {
@@ -310,8 +329,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -334,19 +353,31 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getFolderId() {
 		return _folderId;
 	}
 
 	@Override
 	public void setFolderId(long folderId) {
+		_columnBitmask |= FOLDERID_COLUMN_BITMASK;
+
+		if (!_setOriginalFolderId) {
+			_setOriginalFolderId = true;
+
+			_originalFolderId = _folderId;
+		}
+
 		_folderId = folderId;
 	}
 
-	@Override
+	public long getOriginalFolderId() {
+		return _originalFolderId;
+	}
+
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -368,8 +399,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -391,8 +422,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -412,8 +443,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -428,8 +459,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -439,8 +470,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -450,8 +481,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		_modifiedDate = modifiedDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getParentFolderId() {
 		return _parentFolderId;
 	}
@@ -473,8 +504,24 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		return _originalParentFolderId;
 	}
 
-	@Override
 	@JSON
+	@Override
+	public String getTreePath() {
+		if (_treePath == null) {
+			return StringPool.BLANK;
+		}
+		else {
+			return _treePath;
+		}
+	}
+
+	@Override
+	public void setTreePath(String treePath) {
+		_treePath = treePath;
+	}
+
+	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -499,8 +546,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		return GetterUtil.getString(_originalName);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -515,8 +562,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		_description = description;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getStatus() {
 		return _status;
 	}
@@ -538,8 +585,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		return _originalStatus;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getStatusByUserId() {
 		return _statusByUserId;
 	}
@@ -560,8 +607,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		_statusByUserUuid = statusByUserUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getStatusByUserName() {
 		if (_statusByUserName == null) {
 			return StringPool.BLANK;
@@ -576,8 +623,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		_statusByUserName = statusByUserName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getStatusDate() {
 		return _statusDate;
 	}
@@ -598,23 +645,131 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 	}
 
 	@Override
-	public String getContainerModelName() {
-		return String.valueOf(getName());
-	}
-
-	@Override
 	public long getParentContainerModelId() {
-		return 0;
+		return getParentFolderId();
 	}
 
 	@Override
 	public void setParentContainerModelId(long parentContainerModelId) {
+		_parentFolderId = parentContainerModelId;
+	}
+
+	@Override
+	public String getContainerModelName() {
+		return String.valueOf(getName());
 	}
 
 	@Override
 	public StagedModelType getStagedModelType() {
 		return new StagedModelType(PortalUtil.getClassNameId(
 				JournalFolder.class.getName()));
+	}
+
+	@Override
+	public TrashEntry getTrashEntry() throws PortalException, SystemException {
+		if (!isInTrash()) {
+			return null;
+		}
+
+		TrashEntry trashEntry = TrashEntryLocalServiceUtil.fetchEntry(getModelClassName(),
+				getTrashEntryClassPK());
+
+		if (trashEntry != null) {
+			return trashEntry;
+		}
+
+		TrashHandler trashHandler = getTrashHandler();
+
+		if (!Validator.isNull(trashHandler.getContainerModelClassName())) {
+			ContainerModel containerModel = null;
+
+			try {
+				containerModel = trashHandler.getParentContainerModel(this);
+			}
+			catch (NoSuchModelException nsme) {
+				return null;
+			}
+
+			while (containerModel != null) {
+				if (containerModel instanceof TrashedModel) {
+					TrashedModel trashedModel = (TrashedModel)containerModel;
+
+					return trashedModel.getTrashEntry();
+				}
+
+				trashHandler = TrashHandlerRegistryUtil.getTrashHandler(trashHandler.getContainerModelClassName());
+
+				if (trashHandler == null) {
+					return null;
+				}
+
+				containerModel = trashHandler.getContainerModel(containerModel.getParentContainerModelId());
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public long getTrashEntryClassPK() {
+		return getPrimaryKey();
+	}
+
+	@Override
+	public TrashHandler getTrashHandler() {
+		return TrashHandlerRegistryUtil.getTrashHandler(getModelClassName());
+	}
+
+	@Override
+	public boolean isInTrash() {
+		if (getStatus() == WorkflowConstants.STATUS_IN_TRASH) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isInTrashContainer() {
+		TrashHandler trashHandler = getTrashHandler();
+
+		if ((trashHandler == null) ||
+				Validator.isNull(trashHandler.getContainerModelClassName())) {
+			return false;
+		}
+
+		try {
+			ContainerModel containerModel = trashHandler.getParentContainerModel(this);
+
+			if (containerModel == null) {
+				return false;
+			}
+
+			if (containerModel instanceof TrashedModel) {
+				return ((TrashedModel)containerModel).isInTrash();
+			}
+		}
+		catch (Exception e) {
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean isInTrashExplicitly() throws SystemException {
+		if (!isInTrash()) {
+			return false;
+		}
+
+		TrashEntry trashEntry = TrashEntryLocalServiceUtil.fetchEntry(getModelClassName(),
+				getTrashEntryClassPK());
+
+		if (trashEntry != null) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -686,16 +841,6 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 	}
 
 	@Override
-	public boolean isInTrash() {
-		if (getStatus() == WorkflowConstants.STATUS_IN_TRASH) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	@Override
 	public boolean isPending() {
 		if (getStatus() == WorkflowConstants.STATUS_PENDING) {
 			return true;
@@ -755,6 +900,7 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		journalFolderImpl.setCreateDate(getCreateDate());
 		journalFolderImpl.setModifiedDate(getModifiedDate());
 		journalFolderImpl.setParentFolderId(getParentFolderId());
+		journalFolderImpl.setTreePath(getTreePath());
 		journalFolderImpl.setName(getName());
 		journalFolderImpl.setDescription(getDescription());
 		journalFolderImpl.setStatus(getStatus());
@@ -827,6 +973,10 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 
 		journalFolderModelImpl._originalUuid = journalFolderModelImpl._uuid;
 
+		journalFolderModelImpl._originalFolderId = journalFolderModelImpl._folderId;
+
+		journalFolderModelImpl._setOriginalFolderId = false;
+
 		journalFolderModelImpl._originalGroupId = journalFolderModelImpl._groupId;
 
 		journalFolderModelImpl._setOriginalGroupId = false;
@@ -896,6 +1046,14 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 
 		journalFolderCacheModel.parentFolderId = getParentFolderId();
 
+		journalFolderCacheModel.treePath = getTreePath();
+
+		String treePath = journalFolderCacheModel.treePath;
+
+		if ((treePath != null) && (treePath.length() == 0)) {
+			journalFolderCacheModel.treePath = null;
+		}
+
 		journalFolderCacheModel.name = getName();
 
 		String name = journalFolderCacheModel.name;
@@ -938,7 +1096,7 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(31);
+		StringBundler sb = new StringBundler(33);
 
 		sb.append("{uuid=");
 		sb.append(getUuid());
@@ -958,6 +1116,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		sb.append(getModifiedDate());
 		sb.append(", parentFolderId=");
 		sb.append(getParentFolderId());
+		sb.append(", treePath=");
+		sb.append(getTreePath());
 		sb.append(", name=");
 		sb.append(getName());
 		sb.append(", description=");
@@ -977,7 +1137,7 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(49);
+		StringBundler sb = new StringBundler(52);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portlet.journal.model.JournalFolder");
@@ -1020,6 +1180,10 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 		sb.append(getParentFolderId());
 		sb.append("]]></column-value></column>");
 		sb.append(
+			"<column><column-name>treePath</column-name><column-value><![CDATA[");
+		sb.append(getTreePath());
+		sb.append("]]></column-value></column>");
+		sb.append(
 			"<column><column-name>name</column-name><column-value><![CDATA[");
 		sb.append(getName());
 		sb.append("]]></column-value></column>");
@@ -1056,6 +1220,8 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 	private String _uuid;
 	private String _originalUuid;
 	private long _folderId;
+	private long _originalFolderId;
+	private boolean _setOriginalFolderId;
 	private long _groupId;
 	private long _originalGroupId;
 	private boolean _setOriginalGroupId;
@@ -1070,6 +1236,7 @@ public class JournalFolderModelImpl extends BaseModelImpl<JournalFolder>
 	private long _parentFolderId;
 	private long _originalParentFolderId;
 	private boolean _setOriginalParentFolderId;
+	private String _treePath;
 	private String _name;
 	private String _originalName;
 	private String _description;

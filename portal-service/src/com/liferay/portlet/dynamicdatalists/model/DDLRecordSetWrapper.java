@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatalists.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DDLRecordSet
  * @generated
  */
+@ProviderType
 public class DDLRecordSetWrapper implements DDLRecordSet,
 	ModelWrapper<DDLRecordSet> {
 	public DDLRecordSetWrapper(DDLRecordSet ddlRecordSet) {
@@ -776,6 +779,22 @@ public class DDLRecordSetWrapper implements DDLRecordSet,
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.service.ServiceContext serviceContext) {
 		_ddlRecordSet.setExpandoBridgeAttributes(serviceContext);
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _ddlRecordSet.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _ddlRecordSet.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_ddlRecordSet.prepareLocalizedFieldsForImport();
 	}
 
 	@Override

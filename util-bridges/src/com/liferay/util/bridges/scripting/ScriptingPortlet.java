@@ -110,7 +110,7 @@ public class ScriptingPortlet extends GenericPortlet {
 		filePath = getInitParameter("file-path");
 
 		if (Validator.isNull(filePath)) {
-			filePath = StringPool.SLASH;
+			throw new PortletException("file-path parameter is not set");
 		}
 		else if (filePath.contains(StringPool.BACK_SLASH) ||
 				 filePath.contains(StringPool.DOUBLE_SLASH) ||
@@ -207,7 +207,8 @@ public class ScriptingPortlet extends GenericPortlet {
 			ScriptingHelperUtil.getPortletObjects(
 				portletConfig, portletContext, portletRequest, portletResponse);
 
-		ScriptingUtil.exec(null, portletObjects, language, script);
+		ScriptingUtil.exec(
+			null, portletObjects, language, script, StringPool.EMPTY_ARRAY);
 	}
 
 	protected void doRender(
@@ -253,17 +254,19 @@ public class ScriptingPortlet extends GenericPortlet {
 		StringBundler sb = new StringBundler();
 
 		for (String globalFile : globalFiles) {
-			InputStream is = getPortletContext().getResourceAsStream(
+			PortletContext portletContext = getPortletContext();
+
+			InputStream inputStream = portletContext.getResourceAsStream(
 				globalFile);
 
-			if (is == null) {
+			if (inputStream == null) {
 				if (_log.isWarnEnabled()) {
 					_log.warn("Global file " + globalFile + " does not exist");
 				}
 			}
 
-			if (is != null) {
-				String script = new String(FileUtil.getBytes(is));
+			if (inputStream != null) {
+				String script = new String(FileUtil.getBytes(inputStream));
 
 				sb.append(script);
 				sb.append(StringPool.NEW_LINE);
@@ -282,22 +285,24 @@ public class ScriptingPortlet extends GenericPortlet {
 
 		checkPath(path);
 
-		InputStream is = getPortletContext().getResourceAsStream(path);
+		PortletContext portletContext = getPortletContext();
 
-		if (is == null) {
+		InputStream inputStream = portletContext.getResourceAsStream(path);
+
+		if (inputStream == null) {
 			_log.error(path + " is not a valid " + language + " file");
 
 			return;
 		}
 
 		try {
-			declareBeans(is, portletRequest, portletResponse);
+			declareBeans(inputStream, portletRequest, portletResponse);
 		}
 		catch (ScriptingException se) {
 			SessionErrors.add(portletRequest, _ERROR, se);
 		}
 		finally {
-			is.close();
+			inputStream.close();
 		}
 	}
 

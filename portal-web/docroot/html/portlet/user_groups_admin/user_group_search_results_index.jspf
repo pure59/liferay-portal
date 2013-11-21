@@ -14,31 +14,32 @@
  */
 --%>
 
-<%@ page import="com.liferay.portal.kernel.search.Hits" %>
-<%@ page import="com.liferay.portal.kernel.search.Sort" %>
-<%@ page import="com.liferay.portal.kernel.search.SortFactoryUtil" %>
-<%@ page import="com.liferay.portlet.usersadmin.util.UsersAdminUtil" %>
-
 <%
 userGroupParams.put("expandoAttributes", searchTerms.getKeywords());
 
 Sort sort = SortFactoryUtil.getSort(UserGroup.class, searchContainer.getOrderByCol(), searchContainer.getOrderByType());
 
-while (true) {
-	Hits hits = UserGroupLocalServiceUtil.search(company.getCompanyId(), searchTerms.getKeywords(), userGroupParams, searchContainer.getStart(), searchContainer.getEnd(), sort);
+boolean corruptIndex = false;
 
-	Tuple tuple = UsersAdminUtil.getUserGroups(hits);
+Hits hits = null;
+Tuple tuple = null;
 
-	boolean corruptIndex = (Boolean)tuple.getObject(1);
-
-	if (!corruptIndex) {
-		results = (List<UserGroup>)tuple.getObject(0);
-		total = hits.getLength();
-
-		break;
+do {
+	if (searchTerms.isAdvancedSearch()) {
+		hits = UserGroupLocalServiceUtil.search(company.getCompanyId(), searchTerms.getName(), searchTerms.getDescription(), userGroupParams, searchTerms.isAndOperator(), searchContainer.getStart(), searchContainer.getEnd(), sort);
 	}
-}
+	else {
+		hits = UserGroupLocalServiceUtil.search(company.getCompanyId(), searchTerms.getKeywords(), userGroupParams, searchContainer.getStart(), searchContainer.getEnd(), sort);
+	}
 
-pageContext.setAttribute("results", results);
-pageContext.setAttribute("total", total);
+	tuple = UsersAdminUtil.getUserGroups(hits);
+
+	corruptIndex = (Boolean)tuple.getObject(1);
+}
+while (corruptIndex);
+
+results = (List<UserGroup>)tuple.getObject(0);
+
+searchContainer.setResults(results);
+searchContainer.setTotal(hits.getLength());
 %>

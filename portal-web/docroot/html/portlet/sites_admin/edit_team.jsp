@@ -34,14 +34,12 @@ if (group.isOrganization()) {
 }
 %>
 
-<c:if test="<%= !layout.isTypeControlPanel() %>">
-	<liferay-ui:header
-		backURL="<%= redirect %>"
-		escapeXml="<%= false %>"
-		localizeTitle="<%= false %>"
-		title='<%= HtmlUtil.escape(group.getDescriptiveName(locale)) + ": " + ((team == null) ? LanguageUtil.get(pageContext, "new-team") : HtmlUtil.escape(team.getName())) %>'
-	/>
-</c:if>
+<liferay-ui:header
+	backURL="<%= redirect %>"
+	escapeXml="<%= false %>"
+	localizeTitle="<%= false %>"
+	title='<%= ((team == null) ? LanguageUtil.get(pageContext, "new-team") : HtmlUtil.escape(team.getName())) %>'
+/>
 
 <portlet:actionURL var="editTeamURL">
 	<portlet:param name="struts_action" value="/sites_admin/edit_team" />
@@ -61,7 +59,7 @@ if (group.isOrganization()) {
 	<aui:fieldset>
 		<c:if test="<%= team != null %>">
 			<aui:field-wrapper label="team-id">
-				<%= team.getTeamId() %>
+				<liferay-ui:input-resource url="<%= String.valueOf(team.getTeamId()) %>" />
 			</aui:field-wrapper>
 		</c:if>
 

@@ -84,9 +84,10 @@ userGroupRoles.addAll(siteRoles);
 <c:if test="<%= !portletName.equals(PortletKeys.MY_ACCOUNT) %>">
 	<liferay-ui:icon
 		cssClass="modify-link"
+		iconCssClass="icon-search"
 		id="selectRegularRoleLink"
-		image="add"
 		label="<%= true %>"
+		linkCssClass="btn"
 		message="select"
 		method="get"
 		url="javascript:;"
@@ -104,19 +105,17 @@ userGroupRoles.addAll(siteRoles);
 							width: 600
 						},
 						id: '<portlet:namespace />selectRegularRole',
-						title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "regular-role") %>',
+						title: '<liferay-ui:message arguments="regular-role" key="select-x" />',
 						uri: '<portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="struts_action" value="/users_admin/select_regular_role" /><portlet:param name="p_u_i_d" value='<%= (selUser == null) ? "0" : String.valueOf(selUser.getUserId()) %>' /></portlet:renderURL>'
 					},
 					function(event) {
-						<portlet:namespace />selectRole(event.roleid, event.roletitle, event.searchcontainername, event.groupname, event.groupid);
+						<portlet:namespace />selectRole(event.roleid, event.roletitle, event.searchcontainername, event.groupdescriptivename, event.groupid);
 					}
 				);
 			}
 		);
 	</aui:script>
 </c:if>
-
-<br /><br />
 
 <h3><liferay-ui:message key="inherited-roles" /></h3>
 
@@ -167,8 +166,6 @@ userGroupRoles.addAll(siteRoles);
 
 	<liferay-ui:search-iterator paginate="<%= false %>" />
 </liferay-ui:search-container>
-
-<br /><br />
 
 <h3><liferay-ui:message key="organization-roles" /></h3>
 
@@ -253,9 +250,10 @@ userGroupRoles.addAll(siteRoles);
 <c:if test="<%= !organizations.isEmpty() && !portletName.equals(PortletKeys.MY_ACCOUNT) %>">
 	<liferay-ui:icon
 		cssClass="modify-link"
+		iconCssClass="icon-search"
 		id="selectOrganizationRoleLink"
-		image="add"
 		label="<%= true %>"
+		linkCssClass="btn"
 		message="select"
 		method="get"
 		url="javascript:;"
@@ -271,19 +269,17 @@ userGroupRoles.addAll(siteRoles);
 							modal: true
 						},
 						id: '<portlet:namespace />selectOrganizationRole',
-						title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "organization-role") %>',
+						title: '<liferay-ui:message arguments="organization-role" key="select-x" />',
 						uri: '<portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="struts_action" value="/users_admin/select_organization_role" /><portlet:param name="step" value="1" /><portlet:param name="organizationIds" value="<%= StringUtil.merge(organizationIds) %>" /><portlet:param name="p_u_i_d" value='<%= (selUser == null) ? "0" : String.valueOf(selUser.getUserId()) %>' /></portlet:renderURL>'
 					},
 					function(event) {
-						<portlet:namespace />selectRole(event.roleid, event.roletitle, event.searchcontainername, event.groupname, event.groupid);
+						<portlet:namespace />selectRole(event.roleid, event.roletitle, event.searchcontainername, event.groupdescriptivename, event.groupid);
 					}
 				);
 			}
 		);
 	</aui:script>
 </c:if>
-
-<br /><br />
 
 <h3><liferay-ui:message key="site-roles" /></h3>
 
@@ -347,9 +343,10 @@ userGroupRoles.addAll(siteRoles);
 		<c:if test="<%= !portletName.equals(PortletKeys.MY_ACCOUNT) %>">
 			<liferay-ui:icon
 				cssClass="modify-link"
+				iconCssClass="icon-search"
 				id="selectSiteRoleLink"
-				image="add"
 				label="<%= true %>"
+				linkCssClass="btn"
 				message="select"
 				method="get"
 				url="javascript:;"
@@ -385,11 +382,11 @@ userGroupRoles.addAll(siteRoles);
 									width: 600
 								},
 								id: '<portlet:namespace />selectSiteRole',
-								title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "site-role") %>',
+								title: '<liferay-ui:message arguments="site-role" key="select-x" />',
 								uri: '<portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="struts_action" value="/users_admin/select_site_role" /><portlet:param name="step" value="1" /><portlet:param name="p_u_i_d" value='<%= (selUser == null) ? "0" : String.valueOf(selUser.getUserId()) %>' /></portlet:renderURL>'
 							},
 							function(event) {
-								<portlet:namespace />selectRole(event.roleid, event.roletitle, event.searchcontainername, event.groupname, event.groupid);
+								<portlet:namespace />selectRole(event.roleid, event.roletitle, event.searchcontainername, event.groupdescriptivename, event.groupid);
 							}
 						);
 					}
@@ -406,8 +403,8 @@ userGroupRoles.addAll(siteRoles);
 	function <portlet:namespace />deleteGroupRole(roleId, groupId) {
 		for (var i = 0; i < <portlet:namespace />groupRolesRoleIds.length; i++) {
 			if ((<portlet:namespace />groupRolesRoleIds[i] == roleId) && (<portlet:namespace />groupRolesGroupIds[i] == groupId)) {
-				 <portlet:namespace />groupRolesGroupIds.splice(i, 1);
-				 <portlet:namespace />groupRolesRoleIds.splice(i, 1);
+				<portlet:namespace />groupRolesGroupIds.splice(i, 1);
+				<portlet:namespace />groupRolesRoleIds.splice(i, 1);
 
 				break;
 			}

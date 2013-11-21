@@ -22,7 +22,6 @@ import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.util.ContentTypes;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringPool;
@@ -45,6 +44,7 @@ import com.liferay.portlet.dynamicdatamapping.storage.Field;
 import com.liferay.portlet.dynamicdatamapping.storage.Fields;
 import com.liferay.portlet.dynamicdatamapping.storage.StorageEngineUtil;
 import com.liferay.portlet.dynamicdatamapping.util.DDMUtil;
+import com.liferay.portlet.expando.model.ExpandoBridge;
 
 import java.io.Serializable;
 
@@ -519,6 +519,16 @@ public class DDLRecordLocalServiceImpl extends DDLRecordLocalServiceBaseImpl {
 				recordVersion.getStatus(), serviceContext);
 		}
 
+		if (!majorVersion &&
+			isKeepRecordVersionLabel(
+				record.getRecordVersion(), recordVersion,
+				serviceContext.getWorkflowAction())) {
+
+			ddlRecordVersionPersistence.remove(recordVersion);
+
+			return record;
+		}
+
 		// Workflow
 
 		WorkflowHandlerRegistryUtil.startWorkflowInstance(
@@ -647,20 +657,8 @@ public class DDLRecordLocalServiceImpl extends DDLRecordLocalServiceBaseImpl {
 
 		recordVersion.setGroupId(record.getGroupId());
 		recordVersion.setCompanyId(record.getCompanyId());
-
-		long versionUserId = record.getVersionUserId();
-
-		if (versionUserId <= 0) {
-			versionUserId = record.getUserId();
-		}
-
-		recordVersion.setUserId(versionUserId);
-
-		String versionUserName = GetterUtil.getString(
-			record.getVersionUserName(), record.getUserName());
-
-		recordVersion.setUserName(versionUserName);
-
+		recordVersion.setUserId(user.getUserId());
+		recordVersion.setUserName(user.getFullName());
 		recordVersion.setCreateDate(record.getModifiedDate());
 		recordVersion.setDDMStorageId(ddmStorageId);
 		recordVersion.setRecordSetId(record.getRecordSetId());
@@ -697,6 +695,44 @@ public class DDLRecordLocalServiceImpl extends DDLRecordLocalServiceBaseImpl {
 		return versionParts[0] + StringPool.PERIOD + versionParts[1];
 	}
 
+	/**
+	 * @see com.liferay.portlet.documentlibrary.service.impl.DLFileEntryLocalServiceImpl#isKeepFileVersionLabel(
+	 *      DLFileEntry, DLFileVersion, DLFileVersion, int)
+	 */
+	protected boolean isKeepRecordVersionLabel(
+			DDLRecordVersion lastRecordVersion,
+			DDLRecordVersion latestRecordVersion, int workflowContext)
+		throws PortalException {
+
+		if (workflowContext == WorkflowConstants.ACTION_SAVE_DRAFT) {
+			return false;
+		}
+
+		Fields lastFields = StorageEngineUtil.getFields(
+			lastRecordVersion.getDDMStorageId());
+		Fields latestFields = StorageEngineUtil.getFields(
+			latestRecordVersion.getDDMStorageId());
+
+		if (!lastFields.equals(latestFields, false)) {
+			return false;
+		}
+
+		ExpandoBridge lastExpandoBridge = lastRecordVersion.getExpandoBridge();
+		ExpandoBridge latestExpandoBridge =
+			latestRecordVersion.getExpandoBridge();
+
+		Map<String, Serializable> lastAttributes =
+			lastExpandoBridge.getAttributes();
+		Map<String, Serializable> latestAttributes =
+			latestExpandoBridge.getAttributes();
+
+		if (!lastAttributes.equals(latestAttributes)) {
+			return false;
+		}
+
+		return true;
+	}
+
 	protected Fields toFields(
 		long ddmStructureId, Map<String, Serializable> fieldsMap) {
 
@@ -718,6 +754,8 @@ public class DDLRecordLocalServiceImpl extends DDLRecordLocalServiceBaseImpl {
 			int displayIndex, int status, ServiceContext serviceContext)
 		throws SystemException {
 
+		recordVersion.setUserId(user.getUserId());
+		recordVersion.setUserName(user.getFullName());
 		recordVersion.setVersion(version);
 		recordVersion.setDisplayIndex(displayIndex);
 		recordVersion.setStatus(status);

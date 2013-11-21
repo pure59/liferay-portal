@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see DLSyncEventLocalService
  * @generated
  */
+@ProviderType
 public class DLSyncEventLocalServiceWrapper implements DLSyncEventLocalService,
 	ServiceWrapper<DLSyncEventLocalService> {
 	public DLSyncEventLocalServiceWrapper(
@@ -294,9 +297,15 @@ public class DLSyncEventLocalServiceWrapper implements DLSyncEventLocalService,
 
 	@Override
 	public java.util.List<com.liferay.portlet.documentlibrary.model.DLSyncEvent> getDLSyncEvents(
-		long modifiedDate)
+		long modifiedTime)
 		throws com.liferay.portal.kernel.exception.SystemException {
-		return _dlSyncEventLocalService.getDLSyncEvents(modifiedDate);
+		return _dlSyncEventLocalService.getDLSyncEvents(modifiedTime);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.documentlibrary.model.DLSyncEvent> getLatestDLSyncEvents()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _dlSyncEventLocalService.getLatestDLSyncEvents();
 	}
 
 	/**

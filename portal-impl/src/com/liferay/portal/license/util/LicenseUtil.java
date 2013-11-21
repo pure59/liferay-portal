@@ -27,6 +27,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
@@ -38,23 +39,19 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.util.ClassLoaderUtil;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.util.Encryptor;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
-import java.net.Proxy;
+import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 
 import java.security.Key;
 import java.security.KeyFactory;
@@ -80,6 +77,19 @@ import javax.crypto.KeyGenerator;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 
 /**
  * @author Amos Fong
@@ -139,32 +149,11 @@ public class LicenseUtil {
 		}
 	}
 
+	/**
+	 * @deprecated As of 6.2.0, replaced by {@link PortalUtil#getComputerName()}
+	 */
 	public static String getHostName() {
-		if (_hostName != null) {
-			return _hostName;
-		}
-
-		_hostName = StringPool.BLANK;
-
-		try {
-			Runtime runtime = Runtime.getRuntime();
-
-			Process process = runtime.exec("hostname");
-
-			BufferedReader bufferedReader = new BufferedReader(
-				new InputStreamReader(process.getInputStream()), 128);
-
-			_hostName = bufferedReader.readLine();
-
-			bufferedReader.close();
-		}
-		catch (Exception e) {
-			_log.error("Unable to read local server's host name");
-
-			_log.error(e, e);
-		}
-
-		return _hostName;
+		return PortalUtil.getComputerName();
 	}
 
 	public static Set<String> getIpAddresses() {
@@ -278,7 +267,7 @@ public class LicenseUtil {
 
 			String macAddress = matcher.group(1);
 
-			macAddress = macAddress.toLowerCase();
+			macAddress = StringUtil.toLowerCase(macAddress);
 			macAddress = macAddress.replace(CharPool.DASH, CharPool.COLON);
 			macAddress = macAddress.replace(CharPool.PERIOD, CharPool.COLON);
 
@@ -326,7 +315,7 @@ public class LicenseUtil {
 	public static Map<String, String> getServerInfo() {
 		Map<String, String> serverInfo = new HashMap<String, String>();
 
-		serverInfo.put("hostName", getHostName());
+		serverInfo.put("hostName", PortalUtil.getComputerName());
 		serverInfo.put("ipAddresses", StringUtil.merge(getIpAddresses()));
 		serverInfo.put("macAddresses", StringUtil.merge(getMacAddresses()));
 
@@ -439,10 +428,16 @@ public class LicenseUtil {
 	}
 
 	public static String sendRequest(String request) throws Exception {
-		InputStream inputStream = null;
-		OutputStream outputStream = null;
+		HttpClient httpClient = null;
+
+		HttpClientConnectionManager httpClientConnectionManager =
+			new BasicHttpClientConnectionManager();
 
 		try {
+			HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+
+			httpClientBuilder.setConnectionManager(httpClientConnectionManager);
+
 			String serverURL = LICENSE_SERVER_URL;
 
 			if (!serverURL.endsWith(StringPool.SLASH)) {
@@ -451,9 +446,14 @@ public class LicenseUtil {
 
 			serverURL += "osb-portlet/license";
 
-			URL url = new URL(serverURL);
+			URI uri = new URI(serverURL);
 
-			URLConnection connection = null;
+			HttpPost httpPost = new HttpPost(uri);
+
+			CredentialsProvider credentialsProvider =
+				new BasicCredentialsProvider();
+
+			HttpHost proxyHttpHost = null;
 
 			if (Validator.isNotNull(_PROXY_URL)) {
 				if (_log.isInfoEnabled()) {
@@ -462,34 +462,35 @@ public class LicenseUtil {
 							_PROXY_PORT);
 				}
 
-				Proxy proxy = new Proxy(
-					Proxy.Type.HTTP,
-					new InetSocketAddress(_PROXY_URL, _PROXY_PORT));
-
-				connection = url.openConnection(proxy);
+				proxyHttpHost = new HttpHost(_PROXY_URL, _PROXY_PORT);
 
 				if (Validator.isNotNull(_PROXY_USER_NAME)) {
-					String login =
-						_PROXY_USER_NAME + StringPool.COLON + _PROXY_PASSWORD;
-
-					String encodedLogin = Base64.encode(login.getBytes());
-
-					connection.setRequestProperty(
-						"Proxy-Authorization", "Basic " + encodedLogin);
+					credentialsProvider.setCredentials(
+						new AuthScope(_PROXY_URL, _PROXY_PORT),
+						new UsernamePasswordCredentials(
+							_PROXY_USER_NAME, _PROXY_PASSWORD));
 				}
 			}
-			else {
-				connection = url.openConnection();
-			}
 
-			connection.setDoOutput(true);
+			httpClientBuilder.setDefaultCredentialsProvider(
+				credentialsProvider);
+			httpClientBuilder.setProxy(proxyHttpHost);
 
-			outputStream = connection.getOutputStream();
+			httpClient = httpClientBuilder.build();
 
-			outputStream.write(_encryptRequest(serverURL, request));
+			ByteArrayEntity byteArrayEntity = new ByteArrayEntity(
+				_encryptRequest(serverURL, request));
+
+			byteArrayEntity.setContentType(ContentTypes.APPLICATION_JSON);
+
+			httpPost.setEntity(byteArrayEntity);
+
+			HttpResponse httpResponse = httpClient.execute(httpPost);
+
+			HttpEntity httpEntity = httpResponse.getEntity();
 
 			String response = _decryptResponse(
-				serverURL, connection.getInputStream());
+				serverURL, httpEntity.getContent());
 
 			if (_log.isDebugEnabled()) {
 				_log.debug("Server response: " + response);
@@ -502,20 +503,8 @@ public class LicenseUtil {
 			return response;
 		}
 		finally {
-			try {
-				if (inputStream != null) {
-					inputStream.close();
-				}
-			}
-			catch (Exception e) {
-			}
-
-			try {
-				if (outputStream != null) {
-					outputStream.close();
-				}
-			}
-			catch (Exception e) {
+			if (httpClient != null) {
+				httpClientConnectionManager.shutdown();
 			}
 		}
 	}
@@ -566,7 +555,7 @@ public class LicenseUtil {
 				jsonObject.put("productEntryName", productEntryName);
 			}
 
-			jsonObject.put("hostName", getHostName());
+			jsonObject.put("hostName", PortalUtil.getComputerName());
 			jsonObject.put("ipAddresses", StringUtil.merge(getIpAddresses()));
 			jsonObject.put("macAddresses", StringUtil.merge(getMacAddresses()));
 			jsonObject.put("serverId", Arrays.toString(getServerIdBytes()));
@@ -582,17 +571,16 @@ public class LicenseUtil {
 		if (serverURL.startsWith(Http.HTTPS)) {
 			return StringUtil.read(inputStream);
 		}
-		else {
-			byte[] bytes = IOUtils.toByteArray(inputStream);
 
-			if ((bytes == null) || (bytes.length <= 0)) {
-				return null;
-			}
+		byte[] bytes = IOUtils.toByteArray(inputStream);
 
-			bytes = Encryptor.decryptUnencodedAsBytes(_symmetricKey, bytes);
-
-			return new String(bytes, StringPool.UTF8);
+		if ((bytes == null) || (bytes.length <= 0)) {
+			return null;
 		}
+
+		bytes = Encryptor.decryptUnencodedAsBytes(_symmetricKey, bytes);
+
+		return new String(bytes, StringPool.UTF8);
 	}
 
 	private static byte[] _encryptRequest(String serverURL, String request)
@@ -603,16 +591,15 @@ public class LicenseUtil {
 		if (serverURL.startsWith(Http.HTTPS)) {
 			return bytes;
 		}
-		else {
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-			bytes = Encryptor.encryptUnencoded(_symmetricKey, bytes);
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-			jsonObject.put("content", Base64.objectToString(bytes));
-			jsonObject.put("key", _encryptedSymmetricKey);
+		bytes = Encryptor.encryptUnencoded(_symmetricKey, bytes);
 
-			return jsonObject.toString().getBytes(StringPool.UTF8);
-		}
+		jsonObject.put("content", Base64.objectToString(bytes));
+		jsonObject.put("key", _encryptedSymmetricKey);
+
+		return jsonObject.toString().getBytes(StringPool.UTF8);
 	}
 
 	private static Map<String, String> _getOrderProducts(
@@ -723,11 +710,10 @@ public class LicenseUtil {
 	private static String _encryptedSymmetricKey;
 	private static MethodHandler _getServerInfoMethodHandler =
 		new MethodHandler(new MethodKey(LicenseUtil.class, "getServerInfo"));
-	private static String _hostName;
 	private static Set<String> _ipAddresses;
 	private static Set<String> _macAddresses;
 	private static Pattern _macAddressPattern1 = Pattern.compile(
-		"\\s((\\p{XDigit}{2}(-|:)){5}(\\p{XDigit}{2}))(?:\\s|$)");
+		"\\s((\\p{XDigit}{1,2}(-|:)){5}(\\p{XDigit}{1,2}))(?:\\s|$)");
 	private static Pattern _macAddressPattern2 = Pattern.compile(
 		"\\s((\\p{XDigit}{1,2}(\\.)){5}(\\p{XDigit}{1,2}))(?:\\s|$)");
 	private static MethodKey _registerOrderMethodKey = new MethodKey(

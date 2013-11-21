@@ -14,12 +14,16 @@
 
 package com.liferay.portlet.messageboards.lar;
 
+import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.lar.BaseWorkflowedStagedModelDataHandlerTestCase;
 import com.liferay.portal.model.Group;
+import com.liferay.portal.model.Repository;
 import com.liferay.portal.model.StagedModel;
+import com.liferay.portal.service.persistence.RepositoryUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.test.TransactionalExecutionTestListener;
@@ -82,9 +86,35 @@ public class MBMessageStagedModelDataHandlerTest
 			MBTestUtil.getInputStreamOVPs(
 				"attachment.txt", getClass(), StringPool.BLANK);
 
-		return MBTestUtil.addMessageWithWorkflowAndAttachments(
+		MBMessage message = MBTestUtil.addMessageWithWorkflowAndAttachments(
 			group.getGroupId(), category.getCategoryId(), true,
 			objectValuePairs);
+
+		List<FileEntry> attachmentsFileEntries =
+			message.getAttachmentsFileEntries();
+
+		FileEntry fileEntry = attachmentsFileEntries.get(0);
+
+		Folder folder = fileEntry.getFolder();
+
+		while (folder != null) {
+			addDependentStagedModel(
+				dependentStagedModelsMap, Folder.class, folder);
+
+			folder = folder.getParentFolder();
+		}
+
+		addDependentStagedModel(
+			dependentStagedModelsMap, FileEntry.class,
+			attachmentsFileEntries.get(0));
+
+		Repository repository = RepositoryUtil.fetchByPrimaryKey(
+			fileEntry.getRepositoryId());
+
+		addDependentStagedModel(
+			dependentStagedModelsMap, Repository.class, repository);
+
+		return message;
 	}
 
 	@Override
@@ -137,12 +167,13 @@ public class MBMessageStagedModelDataHandlerTest
 
 	@Override
 	protected void validateImport(
-			StagedModel stagedModel,
+			StagedModel stagedModel, StagedModelAssets stagedModelAssets,
 			Map<String, List<StagedModel>> dependentStagedModelsMap,
 			Group group)
 		throws Exception {
 
-		super.validateImport(stagedModel, dependentStagedModelsMap, group);
+		super.validateImport(
+			stagedModel, stagedModelAssets, dependentStagedModelsMap, group);
 
 		MBMessage importedMessage = (MBMessage)getStagedModel(
 			stagedModel.getUuid(), group);

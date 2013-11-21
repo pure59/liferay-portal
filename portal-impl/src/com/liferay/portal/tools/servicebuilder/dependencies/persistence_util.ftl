@@ -1,5 +1,7 @@
 package ${packagePath}.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import ${packagePath}.model.${entity.name};
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
@@ -25,6 +27,11 @@ import java.util.List;
  * @see ${entity.name}PersistenceImpl
  * @generated
  */
+
+<#if pluginName == "">
+	@ProviderType
+</#if>
+
 public class ${entity.name}Util {
 
 	/*
@@ -50,7 +57,7 @@ public class ${entity.name}Util {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#countWithDynamicQuery(DynamicQuery)
 	 */
-	public long countWithDynamicQuery(DynamicQuery dynamicQuery) throws SystemException {
+	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) throws SystemException {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
 	}
 

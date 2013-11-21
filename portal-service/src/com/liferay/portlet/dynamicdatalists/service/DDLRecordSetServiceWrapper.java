@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatalists.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see DDLRecordSetService
  * @generated
  */
+@ProviderType
 public class DDLRecordSetServiceWrapper implements DDLRecordSetService,
 	ServiceWrapper<DDLRecordSetService> {
 	public DDLRecordSetServiceWrapper(DDLRecordSetService ddlRecordSetService) {
@@ -76,6 +79,43 @@ public class DDLRecordSetServiceWrapper implements DDLRecordSetService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _ddlRecordSetService.getRecordSet(recordSetId);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.dynamicdatalists.model.DDLRecordSet> search(
+		long companyId, long groupId, java.lang.String keywords, int scope,
+		int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _ddlRecordSetService.search(companyId, groupId, keywords, scope,
+			start, end, orderByComparator);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.dynamicdatalists.model.DDLRecordSet> search(
+		long companyId, long groupId, java.lang.String name,
+		java.lang.String description, int scope, boolean andOperator,
+		int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _ddlRecordSetService.search(companyId, groupId, name,
+			description, scope, andOperator, start, end, orderByComparator);
+	}
+
+	@Override
+	public int searchCount(long companyId, long groupId,
+		java.lang.String keywords, int scope)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _ddlRecordSetService.searchCount(companyId, groupId, keywords,
+			scope);
+	}
+
+	@Override
+	public int searchCount(long companyId, long groupId, java.lang.String name,
+		java.lang.String description, int scope, boolean andOperator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _ddlRecordSetService.searchCount(companyId, groupId, name,
+			description, scope, andOperator);
 	}
 
 	@Override

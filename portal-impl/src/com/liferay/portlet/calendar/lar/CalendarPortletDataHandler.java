@@ -31,6 +31,7 @@ import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortletKeys;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.calendar.model.CalEvent;
 import com.liferay.portlet.calendar.service.CalEventLocalServiceUtil;
 import com.liferay.portlet.calendar.service.permission.CalendarPermission;
@@ -59,7 +60,8 @@ public class CalendarPortletDataHandler extends BasePortletDataHandler {
 			new PortletDataHandlerBoolean(
 				NAMESPACE, "events", true, true, null,
 				CalEvent.class.getName()));
-		setPublishToLiveByDefault(true);
+		setPublishToLiveByDefault(
+			PropsValues.CALENDAR_PUBLISH_TO_LIVE_BY_DEFAULT);
 	}
 
 	@Override
@@ -151,8 +153,7 @@ public class CalendarPortletDataHandler extends BasePortletDataHandler {
 
 		Element eventElement = rootElement.addElement("event");
 
-		portletDataContext.addClassedModel(
-			eventElement, path, event, NAMESPACE);
+		portletDataContext.addClassedModel(eventElement, path, event);
 	}
 
 	protected String getEventPath(
@@ -196,7 +197,7 @@ public class CalendarPortletDataHandler extends BasePortletDataHandler {
 				timeZone = user.getTimeZone();
 			}
 			else {
-				locale = LocaleUtil.getDefault();
+				locale = LocaleUtil.getSiteDefault();
 				timeZone = TimeZoneUtil.getTimeZone(StringPool.UTC);
 			}
 
@@ -217,7 +218,7 @@ public class CalendarPortletDataHandler extends BasePortletDataHandler {
 		}
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			eventElement, event, NAMESPACE);
+			eventElement, event);
 
 		CalEvent importedEvent = null;
 
@@ -264,7 +265,7 @@ public class CalendarPortletDataHandler extends BasePortletDataHandler {
 				event.getSecondReminder(), serviceContext);
 		}
 
-		portletDataContext.importClassedModel(event, importedEvent, NAMESPACE);
+		portletDataContext.importClassedModel(event, importedEvent);
 	}
 
 }

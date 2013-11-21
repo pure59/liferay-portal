@@ -423,6 +423,10 @@ public class WorkflowInstanceLinkPersistenceImpl extends BasePersistenceImpl<Wor
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByG_C_C_C(groupId, companyId, classNameId, classPK);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<WorkflowInstanceLink> list = findByG_C_C_C(groupId, companyId,
 				classNameId, classPK, count - 1, count, orderByComparator);
 
@@ -693,6 +697,10 @@ public class WorkflowInstanceLinkPersistenceImpl extends BasePersistenceImpl<Wor
 	private static final String _FINDER_COLUMN_G_C_C_C_CLASSNAMEID_2 = "workflowInstanceLink.classNameId = ? AND ";
 	private static final String _FINDER_COLUMN_G_C_C_C_CLASSPK_2 = "workflowInstanceLink.classPK = ?";
 
+	public WorkflowInstanceLinkPersistenceImpl() {
+		setModelClass(WorkflowInstanceLink.class);
+	}
+
 	/**
 	 * Caches the workflow instance link in the entity cache if it is enabled.
 	 *
@@ -946,6 +954,8 @@ public class WorkflowInstanceLinkPersistenceImpl extends BasePersistenceImpl<Wor
 		EntityCacheUtil.putResult(WorkflowInstanceLinkModelImpl.ENTITY_CACHE_ENABLED,
 			WorkflowInstanceLinkImpl.class,
 			workflowInstanceLink.getPrimaryKey(), workflowInstanceLink);
+
+		workflowInstanceLink.resetOriginalValues();
 
 		return workflowInstanceLink;
 	}

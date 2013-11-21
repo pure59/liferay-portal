@@ -30,12 +30,12 @@ import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFolderLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.service.DLFolderServiceUtil;
 import com.liferay.portlet.documentlibrary.util.DLAppTestUtil;
 import com.liferay.portlet.trash.BaseTrashHandlerTestCase;
 import com.liferay.portlet.trash.util.TrashUtil;
 
-import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -51,39 +51,58 @@ import org.junit.runner.RunWith;
 @Sync
 public class DLFolderTrashHandlerTest extends BaseTrashHandlerTestCase {
 
+	@Ignore()
 	@Override
+	@Test
+	public void testDeleteTrashVersions() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
 	public void testTrashAndDeleteDraft() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashAndRestoreDraft() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashMyBaseModel() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashRecentBaseModel() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashVersionBaseModelAndDelete() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashVersionBaseModelAndRestore() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashVersionParentBaseModel() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
+	}
+
+	@Ignore()
+	@Override
+	@Test
+	public void testTrashVersionParentBaseModelAndRestore() throws Exception {
 	}
 
 	@Override
@@ -154,7 +173,7 @@ public class DLFolderTrashHandlerTest extends BaseTrashHandlerTestCase {
 
 		DLFolder parentDLFolder = (DLFolder)parentBaseModel;
 
-		return DLFolderServiceUtil.getFoldersCount(
+		return DLFolderLocalServiceUtil.getFoldersCount(
 			parentDLFolder.getGroupId(), parentDLFolder.getFolderId(),
 			WorkflowConstants.STATUS_APPROVED, false);
 	}

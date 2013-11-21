@@ -14,13 +14,12 @@
 
 package com.liferay.portlet.documentlibrary.action;
 
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
+import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.servlet.SessionMessages;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
@@ -36,9 +35,10 @@ import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
+import com.liferay.portlet.trash.util.TrashUtil;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -72,8 +72,7 @@ public class EditFolderAction extends PortletAction {
 				updateFolder(actionRequest);
 			}
 			else if (cmd.equals(Constants.DELETE)) {
-				deleteFolders(
-					(LiferayPortletConfig)portletConfig, actionRequest, false);
+				deleteFolders(actionRequest, false);
 			}
 			else if (cmd.equals(Constants.MOVE)) {
 				moveFolders(actionRequest, false);
@@ -82,8 +81,7 @@ public class EditFolderAction extends PortletAction {
 				moveFolders(actionRequest, true);
 			}
 			else if (cmd.equals(Constants.MOVE_TO_TRASH)) {
-				deleteFolders(
-					(LiferayPortletConfig)portletConfig, actionRequest, true);
+				deleteFolders(actionRequest, true);
 			}
 			else if (cmd.equals(Constants.SUBSCRIBE)) {
 				subscribeFolder(actionRequest);
@@ -146,7 +144,6 @@ public class EditFolderAction extends PortletAction {
 	}
 
 	protected void deleteFolders(
-			LiferayPortletConfig liferayPortletConfig,
 			ActionRequest actionRequest, boolean moveToTrash)
 		throws Exception {
 
@@ -162,9 +159,16 @@ public class EditFolderAction extends PortletAction {
 				ParamUtil.getString(actionRequest, "folderIds"), 0L);
 		}
 
+		List<TrashedModel> trashedModels = new ArrayList<TrashedModel>();
+
 		for (long deleteFolderId : deleteFolderIds) {
 			if (moveToTrash) {
-				DLAppServiceUtil.moveFolderToTrash(deleteFolderId);
+				Folder folder = DLAppServiceUtil.moveFolderToTrash(
+					deleteFolderId);
+
+				if (folder.getModel() instanceof DLFolder) {
+					trashedModels.add((DLFolder)folder.getModel());
+				}
 			}
 			else {
 				DLAppServiceUtil.deleteFolder(deleteFolderId);
@@ -175,17 +179,9 @@ public class EditFolderAction extends PortletAction {
 		}
 
 		if (moveToTrash && (deleteFolderIds.length > 0)) {
-			Map<String, String[]> data = new HashMap<String, String[]>();
+			TrashUtil.addTrashSessionMessages(actionRequest, trashedModels);
 
-			data.put(
-				"restoreFolderIds", ArrayUtil.toStringArray(deleteFolderIds));
-
-			SessionMessages.add(
-				actionRequest,
-				liferayPortletConfig.getPortletId() +
-					SessionMessages.KEY_SUFFIX_DELETE_SUCCESS_DATA, data);
-
-			hideDefaultSuccessMessage(liferayPortletConfig, actionRequest);
+			hideDefaultSuccessMessage(actionRequest);
 		}
 	}
 

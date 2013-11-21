@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatalists.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.dynamicdatalists.service.impl.DDLRecordSetLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class DDLRecordSetLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -385,6 +388,12 @@ public class DDLRecordSetLocalServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		getService().deleteRecordSets(groupId);
+	}
+
+	public static com.liferay.portlet.dynamicdatalists.model.DDLRecordSet fetchRecordSet(
+		long recordSetId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().fetchRecordSet(recordSetId);
 	}
 
 	public static com.liferay.portlet.dynamicdatalists.model.DDLRecordSet fetchRecordSet(

@@ -32,6 +32,8 @@ List<AssetEntry> results = new ArrayList<AssetEntry>();
 int total = 0;
 
 if (!portletName.equals(PortletKeys.RELATED_ASSETS) || (assetEntryQuery.getLinkedAssetEntryId() > 0)) {
+	long assetVocabularyId = GetterUtil.getLong(portletPreferences.getValue("assetVocabularyId", null));
+
 	if (assetVocabularyId > 0) {
 		AssetVocabulary assetVocabulary = AssetVocabularyLocalServiceUtil.getVocabulary(assetVocabularyId);
 
@@ -50,7 +52,7 @@ if (!portletName.equals(PortletKeys.RELATED_ASSETS) || (assetEntryQuery.getLinke
 
 			int groupTotal = 0;
 
-			if (PropsValues.ASSET_PUBLISHER_SEARCH_WITH_INDEX && (assetEntryQuery.getLinkedAssetEntryId() == 0)) {
+			if (PropsValues.ASSET_PUBLISHER_SEARCH_WITH_INDEX && (assetEntryQuery.getLinkedAssetEntryId() == 0) && !portletName.equals(PortletKeys.HIGHEST_RATED_ASSETS) && !portletName.equals(PortletKeys.MOST_VIEWED_ASSETS)) {
 				Hits hits = AssetUtil.search(request, assetEntryQuery, start, end);
 
 				groupTotal = hits.getLength();
@@ -113,10 +115,10 @@ if (!portletName.equals(PortletKeys.RELATED_ASSETS) || (assetEntryQuery.getLinke
 
 		searchContainer.setTotal(total);
 	}
-	else if (!groupByClass) {
+	else if (assetVocabularyId != -1) {
 		assetEntryQuery.setClassNameIds(classNameIds);
 
-		if (PropsValues.ASSET_PUBLISHER_SEARCH_WITH_INDEX && (assetEntryQuery.getLinkedAssetEntryId() == 0)) {
+		if (PropsValues.ASSET_PUBLISHER_SEARCH_WITH_INDEX && (assetEntryQuery.getLinkedAssetEntryId() == 0) && !portletName.equals(PortletKeys.HIGHEST_RATED_ASSETS) && !portletName.equals(PortletKeys.MOST_VIEWED_ASSETS)) {
 			Hits hits = AssetUtil.search(request, assetEntryQuery, start, end);
 
 			total = hits.getLength();
@@ -166,7 +168,7 @@ if (!portletName.equals(PortletKeys.RELATED_ASSETS) || (assetEntryQuery.getLinke
 
 			int groupTotal = 0;
 
-			if (PropsValues.ASSET_PUBLISHER_SEARCH_WITH_INDEX && (assetEntryQuery.getLinkedAssetEntryId() == 0)) {
+			if (PropsValues.ASSET_PUBLISHER_SEARCH_WITH_INDEX && (assetEntryQuery.getLinkedAssetEntryId() == 0) && !portletName.equals(PortletKeys.HIGHEST_RATED_ASSETS) && !portletName.equals(PortletKeys.MOST_VIEWED_ASSETS)) {
 				Hits hits = AssetUtil.search(request, assetEntryQuery, start, end);
 
 				groupTotal = hits.getLength();

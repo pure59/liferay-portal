@@ -78,6 +78,10 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 			ClusterGroupModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll", new String[0]);
 
+	public ClusterGroupPersistenceImpl() {
+		setModelClass(ClusterGroup.class);
+	}
+
 	/**
 	 * Caches the cluster group in the entity cache if it is enabled.
 	 *
@@ -298,6 +302,8 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 
 		EntityCacheUtil.putResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
 			ClusterGroupImpl.class, clusterGroup.getPrimaryKey(), clusterGroup);
+
+		clusterGroup.resetOriginalValues();
 
 		return clusterGroup;
 	}

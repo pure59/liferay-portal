@@ -31,9 +31,11 @@ import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.xml.Element;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutPrototype;
 import com.liferay.portal.model.LayoutSetPrototype;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.LayoutPrototypeLocalServiceUtil;
 import com.liferay.portal.service.LayoutSetPrototypeLocalServiceUtil;
@@ -56,6 +58,24 @@ public class LayoutSetPrototypeStagedModelDataHandler
 		{LayoutSetPrototype.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+		LayoutSetPrototype layoutSetPrototype =
+			LayoutSetPrototypeLocalServiceUtil.
+				fetchLayoutSetPrototypeByUuidAndCompanyId(
+					uuid, group.getCompanyId());
+
+		if (layoutSetPrototype != null) {
+			LayoutSetPrototypeLocalServiceUtil.deleteLayoutSetPrototype(
+				layoutSetPrototype);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -72,7 +92,7 @@ public class LayoutSetPrototypeStagedModelDataHandler
 		portletDataContext.addClassedModel(
 			layoutSetPrototypeElement,
 			ExportImportPathUtil.getModelPath(layoutSetPrototype),
-			layoutSetPrototype, LayoutSetPrototypePortletDataHandler.NAMESPACE);
+			layoutSetPrototype);
 
 		exportLayouts(layoutSetPrototype, portletDataContext);
 
@@ -96,7 +116,7 @@ public class LayoutSetPrototypeStagedModelDataHandler
 			settingsProperties.getProperty("layoutsUpdateable"), true);
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			layoutSetPrototype, LayoutSetPrototypePortletDataHandler.NAMESPACE);
+			layoutSetPrototype);
 
 		serviceContext.setAttribute("addDefaultLayout", false);
 
@@ -146,8 +166,7 @@ public class LayoutSetPrototypeStagedModelDataHandler
 			serviceContext);
 
 		portletDataContext.importClassedModel(
-			layoutSetPrototype, importedLayoutSetPrototype,
-			LayoutSetPrototypePortletDataHandler.NAMESPACE);
+			layoutSetPrototype, importedLayoutSetPrototype);
 	}
 
 	protected void exportLayoutPrototypes(

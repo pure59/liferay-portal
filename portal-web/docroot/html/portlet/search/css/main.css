@@ -46,37 +46,8 @@
 				margin: 0 0 1em;
 			}
 
-			.facet-value {
-				font-size: 1.1em;
-				padding: 3px;
-				padding-right: 0;
-
-				a {
-					text-decoration: none;
-
-					img {
-						margin-right: 8px;
-						vertical-align: middle;
-					}
-				}
-
-				&.current-term {
-					background: #5B677D;
-					font-weight: bold;
-					margin-bottom: 2px;
-
-					a {
-						color: #FFF;
-
-						img {
-							margin-right: 8px;
-						}
-					}
-
-					.frequency {
-						display: none;
-					}
-				}
+			.facet-value.active .frequency {
+				display: none;
 			}
 
 			.date .calendar {
@@ -232,6 +203,19 @@
 		padding: 5px 0;
 	}
 
+	.search-suggested-spelling {
+		margin: 0;
+
+		.suggested-keywords a {
+			font-size: 1.3em;
+		}
+
+		.changed-keyword {
+			font-weight: bold;
+			font-style: italic;
+		}
+	}
+
 	.section-title {
 		font-size: 1.3em;
 		font-weight: bold;
@@ -247,6 +231,10 @@
 .portlet-search.portlet-configuration {
 	.fieldset-content {
 		padding-top: 0.5em;
+	}
+
+	.options-container {
+		margin-left: 1.8em;
 	}
 
 	.search-configuration-text {

@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.UserNotificationDeliveryLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class UserNotificationDeliveryLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -315,6 +318,14 @@ public class UserNotificationDeliveryLocalServiceUtil {
 		return getService()
 				   .getUserNotificationDelivery(userId, portletId, classNameId,
 			notificationType, deliveryType, deliver);
+	}
+
+	public static com.liferay.portal.model.UserNotificationDelivery updateUserNotificationDelivery(
+		long userNotificationDeliveryId, boolean deliver)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .updateUserNotificationDelivery(userNotificationDeliveryId,
+			deliver);
 	}
 
 	public static UserNotificationDeliveryLocalService getService() {

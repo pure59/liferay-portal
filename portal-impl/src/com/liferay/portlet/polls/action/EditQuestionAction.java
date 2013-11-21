@@ -14,7 +14,6 @@
 
 package com.liferay.portlet.polls.action;
 
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
@@ -22,7 +21,6 @@ import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.security.auth.PrincipalException;
@@ -33,7 +31,6 @@ import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
-import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.bookmarks.model.BookmarksEntry;
 import com.liferay.portlet.polls.DuplicateVoteException;
 import com.liferay.portlet.polls.NoSuchChoiceException;
@@ -133,12 +130,9 @@ public class EditQuestionAction extends PortletAction {
 
 				SessionErrors.add(actionRequest, e.getClass());
 
-				LiferayPortletConfig liferayPortletConfig =
-					(LiferayPortletConfig)portletConfig;
-
 				SessionMessages.add(
 					actionRequest,
-					liferayPortletConfig.getPortletId() +
+					PortalUtil.getPortletId(actionRequest) +
 						SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
 			}
 			else if (e instanceof QuestionExpiredException) {
@@ -177,8 +171,7 @@ public class EditQuestionAction extends PortletAction {
 	}
 
 	protected void addAndStoreSelection(
-			PortletConfig portletConfig, PortletRequest portletRequest,
-			PollsQuestion question)
+			PortletRequest portletRequest, PollsQuestion question)
 		throws Exception {
 
 		String referringPortletResource = ParamUtil.getString(
@@ -194,21 +187,17 @@ public class EditQuestionAction extends PortletAction {
 		Layout layout = LayoutLocalServiceUtil.getLayout(
 			themeDisplay.getRefererPlid());
 
-		PortletPreferences portletPreferences =
-			PortletPreferencesFactoryUtil.getPortletSetup(
-				layout, referringPortletResource, StringPool.BLANK);
+		PortletPreferences portletPreferences = getStrictPortletSetup(
+			layout, referringPortletResource);
 
 		portletPreferences.setValue(
 			"questionId", String.valueOf(question.getQuestionId()));
 
 		portletPreferences.store();
 
-		LiferayPortletConfig liferayPortletConfig =
-			(LiferayPortletConfig)portletConfig;
-
 		SessionMessages.add(
 			portletRequest,
-			liferayPortletConfig.getPortletId() +
+			PortalUtil.getPortletId(portletRequest) +
 				SessionMessages.KEY_SUFFIX_REFRESH_PORTLET,
 			referringPortletResource);
 	}
@@ -306,7 +295,7 @@ public class EditQuestionAction extends PortletAction {
 
 			// Poll display
 
-			addAndStoreSelection(portletConfig, actionRequest, question);
+			addAndStoreSelection(actionRequest, question);
 		}
 		else {
 

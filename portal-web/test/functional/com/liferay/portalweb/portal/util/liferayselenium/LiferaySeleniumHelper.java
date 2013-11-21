@@ -17,6 +17,7 @@ package com.liferay.portalweb.portal.util.liferayselenium;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portalweb.portal.BaseTestCase;
+import com.liferay.portalweb.portal.util.EmailCommands;
 import com.liferay.portalweb.portal.util.RuntimeVariables;
 import com.liferay.portalweb.portal.util.TestPropsValues;
 
@@ -74,6 +75,21 @@ public class LiferaySeleniumHelper {
 			throw new Exception(
 				"Element is not present at \"" + locator + "\"");
 		}
+	}
+
+	public static void assertEmailBody(
+			LiferaySelenium liferaySelenium, String index, String body)
+		throws Exception {
+
+		BaseTestCase.assertEquals(body, liferaySelenium.getEmailBody(index));
+	}
+
+	public static void assertEmailSubject(
+			LiferaySelenium liferaySelenium, String index, String subject)
+		throws Exception {
+
+		BaseTestCase.assertEquals(
+			subject, liferaySelenium.getEmailSubject(index));
 	}
 
 	public static void assertLocation(
@@ -268,12 +284,31 @@ public class LiferaySeleniumHelper {
 		}
 	}
 
+	public static void connectToEmailAccount(
+			String emailAddress, String emailPassword)
+		throws Exception {
+
+		EmailCommands.connectToEmailAccount(emailAddress, emailPassword);
+	}
+
+	public static void deleteAllEmails() throws Exception {
+		EmailCommands.deleteAllEmails();
+	}
+
 	public static void echo(String message) {
 		System.out.println(message);
 	}
 
 	public static void fail(String message) {
 		BaseTestCase.fail(message);
+	}
+
+	public static String getEmailBody(String index) throws Exception {
+		return EmailCommands.getEmailBody(GetterUtil.getInteger(index));
+	}
+
+	public static String getEmailSubject(String index) throws Exception {
+		return EmailCommands.getEmailSubject(GetterUtil.getInteger(index));
 	}
 
 	public static String getNumberDecrement(String value) {
@@ -338,6 +373,25 @@ public class LiferaySeleniumHelper {
 		Thread.sleep(GetterUtil.getInteger(waitTime));
 	}
 
+	public static void replyToEmail(
+			LiferaySelenium liferaySelenium, String to, String body)
+		throws Exception {
+
+		EmailCommands.replyToEmail(to, body);
+
+		liferaySelenium.pause("3000");
+	}
+
+	public static void sendEmail(
+			LiferaySelenium liferaySelenium, String to, String subject,
+			String body)
+		throws Exception {
+
+		EmailCommands.sendEmail(to, subject, body);
+
+		liferaySelenium.pause("3000");
+	}
+
 	public static void typeFrame(
 		LiferaySelenium liferaySelenium, String locator, String value) {
 
@@ -348,7 +402,7 @@ public class LiferaySeleniumHelper {
 		liferaySelenium.runScript(
 			"document.body.innerHTML = \"" + value + "\"");
 
-		liferaySelenium.selectFrame("relative=top");
+		liferaySelenium.selectFrame("relative=parent");
 	}
 
 	public static void waitForElementNotPresent(

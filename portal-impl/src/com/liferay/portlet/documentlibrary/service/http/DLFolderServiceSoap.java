@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service.http;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -62,6 +64,7 @@ import java.rmi.RemoteException;
  * @see com.liferay.portlet.documentlibrary.service.DLFolderServiceUtil
  * @generated
  */
+@ProviderType
 public class DLFolderServiceSoap {
 	public static com.liferay.portlet.documentlibrary.model.DLFolderSoap addFolder(
 		long groupId, long repositoryId, boolean mountPoint,
@@ -223,22 +226,6 @@ public class DLFolderServiceSoap {
 					end, obc);
 
 			return com.liferay.portlet.documentlibrary.model.DLFolderSoap.toSoapModels(returnValue);
-		}
-		catch (Exception e) {
-			_log.error(e, e);
-
-			throw new RemoteException(e.getMessage());
-		}
-	}
-
-	public static int getFoldersAndFileEntriesAndFileShortcuts(long groupId,
-		long folderId, int status, java.lang.String[] mimeTypes,
-		boolean includeMountFolders) throws RemoteException {
-		try {
-			int returnValue = DLFolderServiceUtil.getFoldersAndFileEntriesAndFileShortcuts(groupId,
-					folderId, status, mimeTypes, includeMountFolders);
-
-			return returnValue;
 		}
 		catch (Exception e) {
 			_log.error(e, e);

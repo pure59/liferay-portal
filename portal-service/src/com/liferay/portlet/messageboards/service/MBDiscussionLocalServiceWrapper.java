@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.messageboards.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see MBDiscussionLocalService
  * @generated
  */
+@ProviderType
 public class MBDiscussionLocalServiceWrapper implements MBDiscussionLocalService,
 	ServiceWrapper<MBDiscussionLocalService> {
 	public MBDiscussionLocalServiceWrapper(
@@ -355,6 +358,20 @@ public class MBDiscussionLocalServiceWrapper implements MBDiscussionLocalService
 			com.liferay.portal.kernel.exception.SystemException {
 		return _mbDiscussionLocalService.addDiscussion(userId, classNameId,
 			classPK, threadId, serviceContext);
+	}
+
+	@Override
+	public com.liferay.portlet.messageboards.model.MBDiscussion fetchDiscussion(
+		long discussionId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _mbDiscussionLocalService.fetchDiscussion(discussionId);
+	}
+
+	@Override
+	public com.liferay.portlet.messageboards.model.MBDiscussion fetchDiscussion(
+		java.lang.String className, long classPK)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _mbDiscussionLocalService.fetchDiscussion(className, classPK);
 	}
 
 	@Override

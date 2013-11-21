@@ -68,6 +68,22 @@ public abstract class BaseSeleniumImpl
 	}
 
 	@Override
+	public void assertEmailBody(String index, String body) throws Exception {
+		LiferaySeleniumHelper.assertEmailBody(this, index, body);
+	}
+
+	@Override
+	public void assertEmailSubject(String index, String subject)
+		throws Exception {
+
+		LiferaySeleniumHelper.assertEmailSubject(this, index, subject);
+	}
+
+	@Override
+	public void assertJavaScriptErrors() throws Exception {
+	}
+
+	@Override
 	public void assertLocation(String pattern) {
 		LiferaySeleniumHelper.assertLocation(this, pattern);
 	}
@@ -171,6 +187,14 @@ public abstract class BaseSeleniumImpl
 	}
 
 	@Override
+	public void connectToEmailAccount(String emailAddress, String emailPassword)
+		throws Exception {
+
+		LiferaySeleniumHelper.connectToEmailAccount(
+			emailAddress, emailPassword);
+	}
+
+	@Override
 	public void copyText(String locator) {
 		_clipBoard = super.getText(locator);
 	}
@@ -178,6 +202,11 @@ public abstract class BaseSeleniumImpl
 	@Override
 	public void copyValue(String locator) {
 		_clipBoard = super.getValue(locator);
+	}
+
+	@Override
+	public void deleteAllEmails() throws Exception {
+		LiferaySeleniumHelper.deleteAllEmails();
 	}
 
 	@Override
@@ -203,6 +232,16 @@ public abstract class BaseSeleniumImpl
 	@Override
 	public String getCurrentYear() {
 		return _commandProcessor.getString("getCurrentYear", new String[0]);
+	}
+
+	@Override
+	public String getEmailBody(String index) throws Exception {
+		return LiferaySeleniumHelper.getEmailBody(index);
+	}
+
+	@Override
+	public String getEmailSubject(String index) throws Exception {
+		return LiferaySeleniumHelper.getEmailSubject(index);
 	}
 
 	@Override
@@ -368,6 +407,11 @@ public abstract class BaseSeleniumImpl
 	}
 
 	@Override
+	public void replyToEmail(String to, String body) throws Exception {
+		LiferaySeleniumHelper.replyToEmail(this, to, body);
+	}
+
+	@Override
 	public void saveScreenshot(String fileName) throws Exception {
 		if (!TestPropsValues.SAVE_SCREENSHOT) {
 			return;
@@ -419,6 +463,18 @@ public abstract class BaseSeleniumImpl
 	public void selectAndWait(String selectLocator, String optionLocator) {
 		super.select(selectLocator, optionLocator);
 		super.waitForPageToLoad("30000");
+	}
+
+	@Override
+	public boolean sendActionLogger(String command, String[] params) {
+		return true;
+	}
+
+	@Override
+	public void sendEmail(String to, String subject, String body)
+		throws Exception {
+
+		LiferaySeleniumHelper.sendEmail(this, to, subject, body);
 	}
 
 	@Override

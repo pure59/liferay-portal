@@ -60,8 +60,7 @@ refererURL.setParameter("updateLayout", "true");
 
 				<div class="lfr-add-content">
 					<liferay-ui:panel collapsible="<%= layout.isTypePortlet() %>" cssClass="lfr-content-category lfr-component panel-page-category" extended="<%= true %>" id="<%= panelId %>" persistState="<%= true %>" title='<%= LanguageUtil.get(pageContext, "highlighted") %>'>
-
-						<aui:nav cssClass="nav-list">
+						<aui:nav collapsible="<%= false %>" cssClass="nav-list">
 
 							<%
 							for (Portlet portlet : portlets) {
@@ -93,7 +92,7 @@ refererURL.setParameter("updateLayout", "true");
 
 							<aui:nav-item cssClass="lfr-content-item" href="">
 								<span <%= AUIUtil.buildData(data) %> class="<%= cssClass %>">
-									<icon class="<%= portletInstanceable ? "icon-th-large" : "icon-stop" %>"></icon>
+									<i class="<%= portletInstanceable ? "icon-th-large" : "icon-stop" %>"></i>
 
 									<liferay-ui:message key="<%= PortalUtil.getPortletTitle(portlet, application, locale) %>" />
 								</span>
@@ -112,7 +111,6 @@ refererURL.setParameter("updateLayout", "true");
 							%>
 
 						</aui:nav>
-
 					</liferay-ui:panel>
 				</div>
 
@@ -152,7 +150,16 @@ refererURL.setParameter("updateLayout", "true");
 		</liferay-ui:panel-container>
 
 		<c:if test="<%= layout.isTypePortlet() %>">
-			<div class="alert alert-info">
+			<ul class="lfr-add-apps-legend nav-list unstyled">
+				<li>
+					<aui:icon image="stop" label="can-be-added-once" />
+				</li>
+				<li>
+					<aui:icon image="th-large" label="can-be-added-several-times" />
+				</li>
+			</ul>
+
+			<div class="alert alert-info lfr-drag-portlet-message">
 				<liferay-ui:message key="to-add-a-portlet-to-the-page-just-drag-it" />
 			</div>
 		</c:if>
@@ -166,7 +173,7 @@ refererURL.setParameter("updateLayout", "true");
 			%>
 
 			<p class="lfr-install-more">
-				<aui:a href='<%= HttpUtil.removeParameter(marketplaceURL.toString(), "controlPanelCategory") %>' label="install-more-applications" />
+				<aui:a cssClass="btn btn-primary" href='<%= HttpUtil.removeParameter(marketplaceURL.toString(), "controlPanelCategory") %>' label="install-more-applications" />
 			</p>
 		</c:if>
 	</div>

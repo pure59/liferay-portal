@@ -22,6 +22,8 @@ Group liveGroup = (Group)request.getAttribute("site.liveGroup");
 
 <liferay-ui:error-marker key="errorSection" value="displaySettings" />
 
+<h3><liferay-ui:message key="display-settings" /></h3>
+
 <h3><liferay-ui:message key="language" /></h3>
 
 <%
@@ -35,11 +37,20 @@ else {
 }
 
 boolean inheritLocales = GetterUtil.getBoolean(typeSettingsProperties.getProperty("inheritLocales"), true);
+
+LayoutSet publicLayoutSet = liveGroup.getPublicLayoutSet();
+LayoutSet privateLayoutSet = liveGroup.getPrivateLayoutSet();
+
+boolean disabledLocaleInput = false;
+
+if (publicLayoutSet.isLayoutSetPrototypeLinkEnabled() || privateLayoutSet.isLayoutSetPrototypeLinkEnabled()) {
+	disabledLocaleInput = true;
+}
 %>
 
-<aui:input checked="<%= inheritLocales %>" id="inheritLocales" label="use-the-default-language-options" name="TypeSettingsProperties--inheritLocales--" type="radio" value="<%= true %>" />
+<aui:input checked="<%= inheritLocales %>" disabled="<%= disabledLocaleInput %>" id="inheritLocales" label="use-the-default-language-options" name="TypeSettingsProperties--inheritLocales--" type="radio" value="<%= true %>" />
 
-<aui:input checked="<%= !inheritLocales %>" id="customLocales" label="define-a-custom-default-language-and-additional-available-languages-for-this-site" name="TypeSettingsProperties--inheritLocales--" type="radio" value="<%= false %>" />
+<aui:input checked="<%= !inheritLocales %>" disabled="<%= disabledLocaleInput %>" id="customLocales" label="define-a-custom-default-language-and-additional-available-languages-for-this-site" name="TypeSettingsProperties--inheritLocales--" type="radio" value="<%= false %>" />
 
 <aui:fieldset id="customLocalesFieldset">
 	<aui:fieldset cssClass="default-language" label="default-language">
@@ -69,19 +80,33 @@ boolean inheritLocales = GetterUtil.getBoolean(typeSettingsProperties.getPropert
 </aui:fieldset>
 
 <aui:fieldset id="inheritLocalesFieldset">
-	<liferay-ui:error exception="<%= LocaleException.class %>" message="please-enter-a-valid-locale" />
+	<liferay-ui:error exception="<%= LocaleException.class %>">
+
+		<%
+		LocaleException le = (LocaleException)errorException;
+		%>
+
+		<c:choose>
+			<c:when test="<%= le.getType() == LocaleException.TYPE_DEFAULT %>">
+				<liferay-ui:message arguments="<%= StringUtil.merge(LocaleUtil.toDisplayNames(le.getTargetAvailableLocales(), locale), StringPool.COMMA_AND_SPACE) %>" key="please-select-a-default-language-among-the-available-languages-of-the-site-x" />
+			</c:when>
+			<c:when test="<%= le.getType() == LocaleException.TYPE_DISPLAY_SETTINGS %>">
+				<liferay-ui:message arguments="<%= StringUtil.merge(LocaleUtil.toDisplayNames(le.getSourceAvailableLocales(), locale), StringPool.COMMA_AND_SPACE) %>" key="please-select-the-available-languages-of-the-site-among-the-available-languages-of-the-portal-x" />
+			</c:when>
+		</c:choose>
+	</liferay-ui:error>
 
 	<%
-	Locale[] siteAavailableLocales = LanguageUtil.getAvailableLocales(liveGroup.getGroupId());
+	Locale[] siteAvailableLocales = LanguageUtil.getAvailableLocales(liveGroup.getGroupId());
 	%>
 
 	<aui:fieldset cssClass="default-language" label="default-language">
-		<aui:select label="" name="TypeSettingsProperties--languageId--">
+		<aui:select disabled="<%= disabledLocaleInput %>"  label="" name="TypeSettingsProperties--languageId--">
 
 			<%
 			Locale siteDefaultLocale = PortalUtil.getSiteDefaultLocale(liveGroup.getGroupId());
 
-			for (Locale siteAvailableLocale : siteAavailableLocales) {
+			for (Locale siteAvailableLocale : siteAvailableLocales) {
 			%>
 
 				<aui:option label="<%= siteAvailableLocale.getDisplayName(locale) %>" lang="<%= LocaleUtil.toW3cLanguageId(siteAvailableLocale) %>" selected="<%= (siteDefaultLocale.getLanguage().equals(siteAvailableLocale.getLanguage()) && siteDefaultLocale.getCountry().equals(siteAvailableLocale.getCountry())) %>" value="<%= LocaleUtil.toLanguageId(siteAvailableLocale) %>" />
@@ -94,7 +119,7 @@ boolean inheritLocales = GetterUtil.getBoolean(typeSettingsProperties.getPropert
 	</aui:fieldset>
 
 	<aui:fieldset cssClass="available-languages" label="available-languages">
-		<aui:input name='<%= "TypeSettingsProperties--" + PropsKeys.LOCALES + "--" %>' type="hidden" value="<%= StringUtil.merge(LocaleUtil.toLanguageIds(siteAavailableLocales)) %>" />
+		<aui:input name='<%= "TypeSettingsProperties--" + PropsKeys.LOCALES + "--" %>' type="hidden" value="<%= StringUtil.merge(LocaleUtil.toLanguageIds(siteAvailableLocales)) %>" />
 
 		<%
 
@@ -102,7 +127,7 @@ boolean inheritLocales = GetterUtil.getBoolean(typeSettingsProperties.getPropert
 
 		List leftList = new ArrayList();
 
-		for (Locale siteAvailableLocale : siteAavailableLocales) {
+		for (Locale siteAvailableLocale : siteAvailableLocales) {
 			leftList.add(new KeyValuePair(LocaleUtil.toLanguageId(siteAvailableLocale), siteAvailableLocale.getDisplayName(locale)));
 		}
 
@@ -111,7 +136,7 @@ boolean inheritLocales = GetterUtil.getBoolean(typeSettingsProperties.getPropert
 		List rightList = new ArrayList();
 
 		for (Locale availableLocale : LanguageUtil.getAvailableLocales()) {
-			if (!ArrayUtil.contains(siteAavailableLocales, availableLocale)) {
+			if (!ArrayUtil.contains(siteAvailableLocales, availableLocale)) {
 				rightList.add(new KeyValuePair(LocaleUtil.toLanguageId(availableLocale), availableLocale.getDisplayName(locale)));
 			}
 		}

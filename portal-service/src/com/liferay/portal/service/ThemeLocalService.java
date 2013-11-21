@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.transaction.Isolation;
@@ -32,6 +34,7 @@ import com.liferay.portal.kernel.transaction.Transactional;
  * @see com.liferay.portal.service.impl.ThemeLocalServiceImpl
  * @generated
  */
+@ProviderType
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface ThemeLocalService extends BaseLocalService {
@@ -70,6 +73,16 @@ public interface ThemeLocalService extends BaseLocalService {
 		throws com.liferay.portal.kernel.exception.SystemException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.portal.model.Theme> getControlPanelThemes(
+		long companyId, long userId, boolean wapTheme)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.portal.model.Theme> getPageThemes(
+		long companyId, long groupId, long userId, boolean wapTheme)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public com.liferay.portal.model.Theme getTheme(long companyId,
 		java.lang.String themeId, boolean wapTheme)
 		throws com.liferay.portal.kernel.exception.SystemException;
@@ -78,6 +91,9 @@ public interface ThemeLocalService extends BaseLocalService {
 	public java.util.List<com.liferay.portal.model.Theme> getThemes(
 		long companyId);
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #getPageThemes}
+	*/
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public java.util.List<com.liferay.portal.model.Theme> getThemes(
 		long companyId, long groupId, long userId, boolean wapTheme)

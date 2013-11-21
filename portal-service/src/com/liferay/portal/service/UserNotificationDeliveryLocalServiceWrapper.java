@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link UserNotificationDeliveryLocalService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see UserNotificationDeliveryLocalService
  * @generated
  */
+@ProviderType
 public class UserNotificationDeliveryLocalServiceWrapper
 	implements UserNotificationDeliveryLocalService,
 		ServiceWrapper<UserNotificationDeliveryLocalService> {
@@ -322,6 +325,14 @@ public class UserNotificationDeliveryLocalServiceWrapper
 			com.liferay.portal.kernel.exception.SystemException {
 		return _userNotificationDeliveryLocalService.getUserNotificationDelivery(userId,
 			portletId, classNameId, notificationType, deliveryType, deliver);
+	}
+
+	@Override
+	public com.liferay.portal.model.UserNotificationDelivery updateUserNotificationDelivery(
+		long userNotificationDeliveryId, boolean deliver)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _userNotificationDeliveryLocalService.updateUserNotificationDelivery(userNotificationDeliveryId,
+			deliver);
 	}
 
 	/**

@@ -17,9 +17,11 @@
 <%@ include file="/html/portlet/portlet_configuration/init.jsp" %>
 
 <%
+long groupId = ParamUtil.getLong(request, "groupId", themeDisplay.getScopeGroupId());
+
 PortletURL portletURL = currentURLObj;
 
-portletURL.setParameter("tabs3", "all-import-processes");
+portletURL.setParameter("tabs3", "current-and-previous");
 
 String orderByCol = ParamUtil.getString(request, "orderByCol");
 String orderByType = ParamUtil.getString(request, "orderByType");
@@ -33,7 +35,7 @@ else {
 	orderByType = portalPreferences.getValue(PortletKeys.BACKGROUND_TASK, "entries-order-by-type", "desc");
 }
 
-OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderByComparator(orderByCol, orderByType);
+OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBackgroundTaskOrderByComparator(orderByCol, orderByType);
 %>
 
 <liferay-ui:search-container
@@ -42,10 +44,10 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 	orderByCol="<%= orderByCol %>"
 	orderByComparator="<%= orderByComparator %>"
 	orderByType="<%= orderByType %>"
-	total="<%= BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(themeDisplay.getScopeGroupId(), selPortlet.getPortletId(), PortletImportBackgroundTaskExecutor.class.getName()) %>"
+	total="<%= BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(groupId, selPortlet.getPortletId(), PortletImportBackgroundTaskExecutor.class.getName()) %>"
 >
 	<liferay-ui:search-container-results
-		results="<%= BackgroundTaskLocalServiceUtil.getBackgroundTasks(themeDisplay.getScopeGroupId(), selPortlet.getPortletId(), PortletImportBackgroundTaskExecutor.class.getName(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
+		results="<%= BackgroundTaskLocalServiceUtil.getBackgroundTasks(groupId, selPortlet.getPortletId(), PortletImportBackgroundTaskExecutor.class.getName(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
 	/>
 
 	<liferay-ui:search-container-row
@@ -55,7 +57,7 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 	>
 		<liferay-ui:search-container-column-text
 			name="user-name"
-			value="<%= backgroundTask.getUserName() %>"
+			value="<%= HtmlUtil.escape(backgroundTask.getUserName()) %>"
 		/>
 
 		<liferay-ui:search-container-column-jsp
@@ -99,3 +101,13 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 
 	<liferay-ui:search-iterator />
 </liferay-ui:search-container>
+
+<%
+int incompleteBackgroundTaskCount = BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(groupId, selPortlet.getPortletId(), PortletImportBackgroundTaskExecutor.class.getName(), false);
+%>
+
+<div class="hide incomplete-process-message">
+	<liferay-util:include page="/html/portlet/layouts_admin/incomplete_processes_message.jsp">
+		<liferay-util:param name="incompleteBackgroundTaskCount" value="<%= String.valueOf(incompleteBackgroundTaskCount) %>" />
+	</liferay-util:include>
+</div>

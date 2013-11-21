@@ -15,6 +15,7 @@
 package com.liferay.portlet.portalsettings.action;
 
 import com.liferay.portal.ImageTypeException;
+import com.liferay.portal.NoSuchRepositoryException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.image.ImageBag;
@@ -45,8 +46,6 @@ import com.liferay.portlet.documentlibrary.FileSizeException;
 import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
 import com.liferay.portlet.documentlibrary.NoSuchFileException;
 
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 
 import java.io.InputStream;
@@ -190,21 +189,6 @@ public class EditCompanyLogoAction extends PortletAction {
 		}
 	}
 
-	protected RenderedImage getCroppedRenderedImage(
-		RenderedImage renderedImage, int height, int width, int x, int y) {
-
-		Rectangle rectangle = new Rectangle(width, height);
-
-		Rectangle croppedRectangle = rectangle.intersection(
-			new Rectangle(renderedImage.getWidth(), renderedImage.getHeight()));
-
-		BufferedImage bufferedImage = ImageToolUtil.getBufferedImage(
-			renderedImage);
-
-		return bufferedImage.getSubimage(
-			x, y, croppedRectangle.width, croppedRectangle.height);
-	}
-
 	protected FileEntry getTempImageFileEntry(PortletRequest portletRequest)
 		throws PortalException, SystemException {
 
@@ -257,7 +241,7 @@ public class EditCompanyLogoAction extends PortletAction {
 				int x = jsonObject.getInt("x");
 				int y = jsonObject.getInt("y");
 
-				renderedImage = getCroppedRenderedImage(
+				renderedImage = ImageToolUtil.crop(
 					renderedImage, height, width, x, y);
 			}
 
@@ -268,6 +252,9 @@ public class EditCompanyLogoAction extends PortletAction {
 		}
 		catch (NoSuchFileEntryException nsfee) {
 			throw new UploadException(nsfee);
+		}
+		catch (NoSuchRepositoryException nsre) {
+			throw new UploadException(nsre);
 		}
 		finally {
 			StreamUtil.cleanUp(tempImageStream);

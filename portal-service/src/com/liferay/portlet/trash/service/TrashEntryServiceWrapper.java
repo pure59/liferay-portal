@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.trash.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see TrashEntryService
  * @generated
  */
+@ProviderType
 public class TrashEntryServiceWrapper implements TrashEntryService,
 	ServiceWrapper<TrashEntryService> {
 	public TrashEntryServiceWrapper(TrashEntryService trashEntryService) {
@@ -261,6 +264,24 @@ public class TrashEntryServiceWrapper implements TrashEntryService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _trashEntryService.restoreEntry(entryId, overrideClassPK, name);
+	}
+
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry restoreEntry(
+		java.lang.String className, long classPK)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _trashEntryService.restoreEntry(className, classPK);
+	}
+
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry restoreEntry(
+		java.lang.String className, long classPK, long overrideClassPK,
+		java.lang.String name)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _trashEntryService.restoreEntry(className, classPK,
+			overrideClassPK, name);
 	}
 
 	/**

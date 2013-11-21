@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.social.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.social.service.impl.SocialActivityInterpreterLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class SocialActivityInterpreterLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -78,6 +81,11 @@ public class SocialActivityInterpreterLocalServiceUtil {
 
 	public static java.util.Map<java.lang.String, java.util.List<com.liferay.portlet.social.model.SocialActivityInterpreter>> getActivityInterpreters() {
 		return getService().getActivityInterpreters();
+	}
+
+	public static java.util.List<com.liferay.portlet.social.model.SocialActivityInterpreter> getActivityInterpreters(
+		java.lang.String selector) {
+		return getService().getActivityInterpreters(selector);
 	}
 
 	/**

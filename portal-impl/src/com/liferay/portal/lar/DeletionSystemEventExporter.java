@@ -26,7 +26,9 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.ManifestSummary;
 import com.liferay.portal.kernel.lar.PortletDataContext;
+import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.portal.kernel.lar.StagedModelType;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
@@ -43,7 +45,10 @@ import java.util.Set;
  */
 public class DeletionSystemEventExporter {
 
-	public void export(PortletDataContext portletDataContext) throws Exception {
+	public void exportDeletionSystemEvents(
+			PortletDataContext portletDataContext)
+		throws Exception {
+
 		Document document = SAXReaderUtil.createDocument();
 
 		Element rootElement = document.addElement("deletion-system-events");
@@ -51,8 +56,12 @@ public class DeletionSystemEventExporter {
 		Set<StagedModelType> deletionSystemEventStagedModelTypes =
 			portletDataContext.getDeletionSystemEventStagedModelTypes();
 
-		if (!deletionSystemEventStagedModelTypes.isEmpty()) {
-			doExport(
+		if (!deletionSystemEventStagedModelTypes.isEmpty() &&
+			MapUtil.getBoolean(
+				portletDataContext.getParameterMap(),
+				PortletDataHandlerKeys.DELETIONS)) {
+
+			doExportDeletionSystemEvents(
 				portletDataContext, rootElement,
 				deletionSystemEventStagedModelTypes);
 		}
@@ -63,7 +72,7 @@ public class DeletionSystemEventExporter {
 			document.formattedString());
 	}
 
-	protected void doExport(
+	protected void doExportDeletionSystemEvents(
 			final PortletDataContext portletDataContext,
 			final Element rootElement,
 			final Set<StagedModelType> deletionSystemEventStagedModelTypes)
@@ -105,9 +114,11 @@ public class DeletionSystemEventExporter {
 							classNameIdProperty.eq(
 								stagedModelType.getClassNameId()));
 
-						conjunction.add(
-							referrerClassNameIdProperty.eq(
-								stagedModelType.getReferrerClassNameId()));
+						if (stagedModelType.getReferrerClassNameId() >= 0) {
+							conjunction.add(
+								referrerClassNameIdProperty.eq(
+									stagedModelType.getReferrerClassNameId()));
+						}
 
 						referrerClassNameIdDisjunction.add(conjunction);
 					}
@@ -164,6 +175,8 @@ public class DeletionSystemEventExporter {
 		deletionSystemEventElement.addAttribute(
 			"class-name",
 			PortalUtil.getClassName(systemEvent.getClassNameId()));
+		deletionSystemEventElement.addAttribute(
+			"extra-data", systemEvent.getExtraData());
 		deletionSystemEventElement.addAttribute(
 			"group-id", String.valueOf(systemEvent.getGroupId()));
 

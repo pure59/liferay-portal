@@ -77,7 +77,12 @@ public class SearchContainerResultsTag<R> extends TagSupport {
 			}
 
 			if (_results == null) {
-				_results = (List<R>)pageContext.getAttribute(_resultsVar);
+				_results = searchContainer.getResults();
+
+				if (_results.isEmpty()) {
+					_results = (List<R>)pageContext.getAttribute(_resultsVar);
+				}
+
 				_deprecatedTotal = (Integer)pageContext.getAttribute(
 					_deprecatedTotalVar);
 			}
@@ -93,8 +98,6 @@ public class SearchContainerResultsTag<R> extends TagSupport {
 			if (total == 0) {
 				searchContainer.setTotal(_deprecatedTotal);
 			}
-
-			searchContainerTag.setHasResults(true);
 
 			pageContext.setAttribute(_resultsVar, _results);
 
@@ -166,7 +169,7 @@ public class SearchContainerResultsTag<R> extends TagSupport {
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link
-	 *             #SearchContainerTag.setTotal(int)}.
+	 *             SearchContainerTag#setTotal(int)}.
 	 */
 	public void setTotal(int deprecatedTotal) {
 		_deprecatedTotal = deprecatedTotal;

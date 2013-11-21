@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see UserGroup
  * @generated
  */
+@ProviderType
 public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	public UserGroupWrapper(UserGroup userGroup) {
 		_userGroup = userGroup;
@@ -514,6 +517,13 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _userGroup.getGroup();
+	}
+
+	@Override
+	public long getGroupId()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _userGroup.getGroupId();
 	}
 
 	@Override

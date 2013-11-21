@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DLFolder
  * @generated
  */
+@ProviderType
 public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 	public DLFolderWrapper(DLFolder dlFolder) {
 		_dlFolder = dlFolder;
@@ -61,6 +64,7 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 		attributes.put("repositoryId", getRepositoryId());
 		attributes.put("mountPoint", getMountPoint());
 		attributes.put("parentFolderId", getParentFolderId());
+		attributes.put("treePath", getTreePath());
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
 		attributes.put("lastPostDate", getLastPostDate());
@@ -141,6 +145,12 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 
 		if (parentFolderId != null) {
 			setParentFolderId(parentFolderId);
+		}
+
+		String treePath = (String)attributes.get("treePath");
+
+		if (treePath != null) {
+			setTreePath(treePath);
 		}
 
 		String name = (String)attributes.get("name");
@@ -479,6 +489,26 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 	}
 
 	/**
+	* Returns the tree path of this document library folder.
+	*
+	* @return the tree path of this document library folder
+	*/
+	@Override
+	public java.lang.String getTreePath() {
+		return _dlFolder.getTreePath();
+	}
+
+	/**
+	* Sets the tree path of this document library folder.
+	*
+	* @param treePath the tree path of this document library folder
+	*/
+	@Override
+	public void setTreePath(java.lang.String treePath) {
+		_dlFolder.setTreePath(treePath);
+	}
+
+	/**
 	* Returns the name of this document library folder.
 	*
 	* @return the name of this document library folder
@@ -721,6 +751,66 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 	}
 
 	/**
+	* Returns the trash entry created when this document library folder was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this document library folder.
+	*
+	* @return the trash entry created when this document library folder was moved to the Recycle Bin
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry getTrashEntry()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _dlFolder.getTrashEntry();
+	}
+
+	/**
+	* Returns the class primary key of the trash entry for this document library folder.
+	*
+	* @return the class primary key of the trash entry for this document library folder
+	*/
+	@Override
+	public long getTrashEntryClassPK() {
+		return _dlFolder.getTrashEntryClassPK();
+	}
+
+	/**
+	* Returns the trash handler for this document library folder.
+	*
+	* @return the trash handler for this document library folder
+	*/
+	@Override
+	public com.liferay.portal.kernel.trash.TrashHandler getTrashHandler() {
+		return _dlFolder.getTrashHandler();
+	}
+
+	/**
+	* Returns <code>true</code> if this document library folder is in the Recycle Bin.
+	*
+	* @return <code>true</code> if this document library folder is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrash() {
+		return _dlFolder.isInTrash();
+	}
+
+	/**
+	* Returns <code>true</code> if the parent of this document library folder is in the Recycle Bin.
+	*
+	* @return <code>true</code> if the parent of this document library folder is in the Recycle Bin; <code>false</code> otherwise
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public boolean isInTrashContainer() {
+		return _dlFolder.isInTrashContainer();
+	}
+
+	@Override
+	public boolean isInTrashExplicitly()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _dlFolder.isInTrashExplicitly();
+	}
+
+	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
 	@Override
@@ -789,16 +879,6 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 	}
 
 	/**
-	* Returns <code>true</code> if this document library folder is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this document library folder is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _dlFolder.isInTrash();
-	}
-
-	/**
 	* Returns <code>true</code> if this document library folder is pending.
 	*
 	* @return <code>true</code> if this document library folder is pending; <code>false</code> otherwise
@@ -831,7 +911,7 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 	/**
 	* Sets the container model ID of this document library folder.
 	*
-	* @param container model ID of this document library folder
+	* @param containerModelId the container model ID of this document library folder
 	*/
 	@Override
 	public void setContainerModelId(long containerModelId) {
@@ -861,7 +941,7 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 	/**
 	* Sets the parent container model ID of this document library folder.
 	*
-	* @param parent container model ID of this document library folder
+	* @param parentContainerModelId the parent container model ID of this document library folder
 	*/
 	@Override
 	public void setParentContainerModelId(long parentContainerModelId) {
@@ -974,6 +1054,19 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 	}
 
 	@Override
+	public java.lang.String buildTreePath()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _dlFolder.buildTreePath();
+	}
+
+	@Override
+	public void updateTreePath(java.lang.String treePath)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_dlFolder.updateTreePath(treePath);
+	}
+
+	@Override
 	public java.util.List<java.lang.Long> getAncestorFolderIds()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
@@ -1009,11 +1102,6 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 	}
 
 	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashContainer() {
-		return _dlFolder.getTrashContainer();
-	}
-
-	@Override
 	public boolean hasInheritableLock() {
 		return _dlFolder.hasInheritableLock();
 	}
@@ -1026,11 +1114,6 @@ public class DLFolderWrapper implements DLFolder, ModelWrapper<DLFolder> {
 	@Override
 	public boolean isInHiddenFolder() {
 		return _dlFolder.isInHiddenFolder();
-	}
-
-	@Override
-	public boolean isInTrashContainer() {
-		return _dlFolder.isInTrashContainer();
 	}
 
 	@Override

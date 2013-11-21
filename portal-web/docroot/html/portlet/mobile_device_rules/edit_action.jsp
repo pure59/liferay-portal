@@ -81,11 +81,11 @@ else {
 
 		<aui:input name="description" />
 
-		<aui:select changesContext="<%= true %>" name="type" onChange='<%= renderResponse.getNamespace() + "changeType();" %>' showEmptyOption="<%= true %>">
+		<aui:select changesContext="<%= true %>" name="type" onChange='<%= renderResponse.getNamespace() + "changeType();" %>' required="<%= true %>" showEmptyOption="<%= true %>">
 
 			<%
 			for (ActionHandler actionHandler : ActionHandlerManagerUtil.getActionHandlers()) {
-	   		%>
+			%>
 
 				<aui:option label="<%= actionHandler.getType() %>" selected="<%= type.equals(actionHandler.getType()) %>" />
 
@@ -124,8 +124,8 @@ else {
 				'<%= siteURLLayoutsURL.toString() %>',
 				{
 					data: {
-						actionGroupId: document.<portlet:namespace />fm.<portlet:namespace />groupId.value,
-						actionPlid: document.<portlet:namespace />fm.<portlet:namespace />actionPlid.value
+						<portlet:namespace />actionGroupId: document.<portlet:namespace />fm.<portlet:namespace />groupId.value,
+						<portlet:namespace />actionPlid: document.<portlet:namespace />fm.<portlet:namespace />actionPlid.value
 					},
 					on: {
 						success: function(id, obj) {
@@ -149,28 +149,31 @@ else {
 			var A = AUI();
 
 			A.io.request(
-				<portlet:resourceURL var="editorURL">
+				<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" var="editorURL">
 					<portlet:param name="struts_action" value="/mobile_device_rules/edit_action_editor" />
-				</portlet:resourceURL>
+					<portlet:param name="ajax" value="true" />
+				</liferay-portlet:resourceURL>
 
 				'<%= editorURL.toString() %>',
 				{
 					data: {
-						type: document.<portlet:namespace />fm.<portlet:namespace />type.value,
-						<%= "actionId" %>: <%= actionId %>
+						<portlet:namespace />type: document.<portlet:namespace />fm.<portlet:namespace />type.value,
+						<portlet:namespace /><%= "actionId" %>: <%= actionId %>
 					},
 					on: {
 						success: function(id, obj) {
 							var typeSettings = A.one('#<portlet:namespace />typeSettings');
 
 							if (typeSettings) {
-								typeSettings.html(this.get('responseData'));
+								typeSettings.plug(A.Plugin.ParseContent);
+
+								typeSettings.setContent(this.get('responseData'));
 							}
 						}
 					}
 				}
 			);
 		},
-		['aui-io']
+		['aui-io', 'aui-parse-content']
 	);
 </aui:script>

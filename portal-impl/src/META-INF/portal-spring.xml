@@ -213,7 +213,6 @@
 	<bean id="com.liferay.portlet.asset.service.persistence.AssetEntryFinder" class="com.liferay.portlet.asset.service.persistence.AssetEntryFinderImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.asset.service.AssetLinkLocalService" class="com.liferay.portlet.asset.service.impl.AssetLinkLocalServiceImpl" />
 	<bean id="com.liferay.portlet.asset.service.persistence.AssetLinkPersistence" class="com.liferay.portlet.asset.service.persistence.AssetLinkPersistenceImpl" parent="basePersistence" />
-	<bean id="com.liferay.portlet.asset.service.persistence.AssetLinkFinder" class="com.liferay.portlet.asset.service.persistence.AssetLinkFinderImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.asset.service.AssetTagLocalService" class="com.liferay.portlet.asset.service.impl.AssetTagLocalServiceImpl" />
 	<bean id="com.liferay.portlet.asset.service.AssetTagService" class="com.liferay.portlet.asset.service.impl.AssetTagServiceImpl" />
 	<bean id="com.liferay.portlet.asset.service.persistence.AssetTagPersistence" class="com.liferay.portlet.asset.service.persistence.AssetTagPersistenceImpl" parent="basePersistence" />
@@ -409,6 +408,7 @@
 	<bean id="com.liferay.portlet.shopping.service.ShoppingOrderItemLocalService" class="com.liferay.portlet.shopping.service.impl.ShoppingOrderItemLocalServiceImpl" />
 	<bean id="com.liferay.portlet.shopping.service.persistence.ShoppingOrderItemPersistence" class="com.liferay.portlet.shopping.service.persistence.ShoppingOrderItemPersistenceImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.social.service.SocialActivityLocalService" class="com.liferay.portlet.social.service.impl.SocialActivityLocalServiceImpl" />
+	<bean id="com.liferay.portlet.social.service.SocialActivityService" class="com.liferay.portlet.social.service.impl.SocialActivityServiceImpl" />
 	<bean id="com.liferay.portlet.social.service.persistence.SocialActivityPersistence" class="com.liferay.portlet.social.service.persistence.SocialActivityPersistenceImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.social.service.persistence.SocialActivityFinder" class="com.liferay.portlet.social.service.persistence.SocialActivityFinderImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.social.service.SocialActivityAchievementLocalService" class="com.liferay.portlet.social.service.impl.SocialActivityAchievementLocalServiceImpl" />
@@ -448,6 +448,7 @@
 	<bean id="com.liferay.portlet.trash.service.TrashEntryLocalService" class="com.liferay.portlet.trash.service.impl.TrashEntryLocalServiceImpl" />
 	<bean id="com.liferay.portlet.trash.service.TrashEntryService" class="com.liferay.portlet.trash.service.impl.TrashEntryServiceImpl" />
 	<bean id="com.liferay.portlet.trash.service.persistence.TrashEntryPersistence" class="com.liferay.portlet.trash.service.persistence.TrashEntryPersistenceImpl" parent="basePersistence" />
+	<bean id="com.liferay.portlet.trash.service.TrashVersionLocalService" class="com.liferay.portlet.trash.service.impl.TrashVersionLocalServiceImpl" />
 	<bean id="com.liferay.portlet.trash.service.persistence.TrashVersionPersistence" class="com.liferay.portlet.trash.service.persistence.TrashVersionPersistenceImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.wiki.service.WikiNodeLocalService" class="com.liferay.portlet.wiki.service.impl.WikiNodeLocalServiceImpl" />
 	<bean id="com.liferay.portlet.wiki.service.WikiNodeService" class="com.liferay.portlet.wiki.service.impl.WikiNodeServiceImpl" />

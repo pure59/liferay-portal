@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.model.Repository;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.theme.ThemeDisplay;
 
 import java.io.File;
 import java.io.InputStream;
@@ -61,6 +62,9 @@ public interface PortletFileRepository {
 			long groupId, String portletId, ServiceContext serviceContext)
 		throws PortalException, SystemException;
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #deletePortletFolder}
+	 */
 	public void deleteFolder(long folderId)
 		throws PortalException, SystemException;
 
@@ -76,6 +80,9 @@ public interface PortletFileRepository {
 
 	public void deletePortletFileEntry(
 			long groupId, long folderId, String fileName)
+		throws PortalException, SystemException;
+
+	public void deletePortletFolder(long folderId)
 		throws PortalException, SystemException;
 
 	public void deletePortletRepository(long groupId, String portletId)
@@ -110,6 +117,16 @@ public interface PortletFileRepository {
 			long groupId, long folderId, String fileName)
 		throws PortalException, SystemException;
 
+	public FileEntry getPortletFileEntry(String uuid, long groupId)
+		throws PortalException, SystemException;
+
+	public String getPortletFileEntryURL(
+		ThemeDisplay themeDisplay, FileEntry fileEntry, String queryString);
+
+	public String getPortletFileEntryURL(
+		ThemeDisplay themeDisplay, FileEntry fileEntry, String queryString,
+		boolean absoluteURL);
+
 	public Folder getPortletFolder(long folderId)
 		throws PortalException, SystemException;
 
@@ -120,10 +137,10 @@ public interface PortletFileRepository {
 	public Repository getPortletRepository(long groupId, String portletId)
 		throws PortalException, SystemException;
 
-	public void movePortletFileEntryToTrash(long userId, long fileEntryId)
+	public FileEntry movePortletFileEntryToTrash(long userId, long fileEntryId)
 		throws PortalException, SystemException;
 
-	public void movePortletFileEntryToTrash(
+	public FileEntry movePortletFileEntryToTrash(
 			long groupId, long userId, long folderId, String fileName)
 		throws PortalException, SystemException;
 

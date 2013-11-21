@@ -25,11 +25,13 @@ import com.liferay.portal.kernel.plugin.License;
 import com.liferay.portal.kernel.plugin.PluginPackage;
 import com.liferay.portal.kernel.servlet.PluginContextListener;
 import com.liferay.portal.kernel.servlet.PortalClassLoaderServlet;
+import com.liferay.portal.kernel.servlet.PortalDelegateServlet;
 import com.liferay.portal.kernel.servlet.PortletServlet;
 import com.liferay.portal.kernel.servlet.SecurePluginContextListener;
 import com.liferay.portal.kernel.servlet.SecureServlet;
 import com.liferay.portal.kernel.servlet.SerializableSessionAttributeListener;
 import com.liferay.portal.kernel.servlet.filters.invoker.InvokerFilter;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -50,6 +52,7 @@ import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.plugin.PluginPackageUtil;
+import com.liferay.portal.security.lang.SecurityManagerUtil;
 import com.liferay.portal.tools.WebXMLBuilder;
 import com.liferay.portal.util.ExtRegistry;
 import com.liferay.portal.util.InitUtil;
@@ -97,7 +100,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 		List<String> jars = new ArrayList<String>();
 
 		for (String arg : args) {
-			String fileName = arg.toLowerCase();
+			String fileName = StringUtil.toLowerCase(arg);
 
 			if (fileName.endsWith(".war")) {
 				wars.add(arg);
@@ -424,9 +427,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			String[] commonsLoggingJars = pluginLibDir.list(
 				new GlobFilenameFilter("commons-logging*.jar"));
 
-			if ((commonsLoggingJars == null) ||
-				(commonsLoggingJars.length == 0)) {
-
+			if (ArrayUtil.isEmpty(commonsLoggingJars)) {
 				String portalJarPath =
 					PortalUtil.getPortalLibDir() + "commons-logging.jar";
 
@@ -442,7 +443,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			String[] log4jJars = pluginLibDir.list(
 				new GlobFilenameFilter("log4j*.jar"));
 
-			if ((log4jJars == null) || (log4jJars.length == 0)) {
+			if (ArrayUtil.isEmpty(log4jJars)) {
 				String portalJarPath =
 					PortalUtil.getPortalLibDir() + "log4j.jar";
 
@@ -545,7 +546,9 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 	}
 
 	public void copyTomcatContextXml(File targetDir) throws Exception {
-		if (!appServerType.equals(ServerDetector.TOMCAT_ID)) {
+		if (!appServerType.equals(ServerDetector.TOMCAT_ID) ||
+			SecurityManagerUtil.ENABLED) {
+
 			return;
 		}
 
@@ -607,7 +610,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			files = FileUtil.sortFiles(files);
 
 			for (File srcFile : files) {
-				String fileName = srcFile.getName().toLowerCase();
+				String fileName = StringUtil.toLowerCase(srcFile.getName());
 
 				boolean deploy = false;
 
@@ -1510,8 +1513,8 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 		Map<String, String> filterMap = new HashMap<String, String>();
 
-		filterMap.put("author", pluginPackage.getAuthor());
-		filterMap.put("change_log", pluginPackage.getChangeLog());
+		filterMap.put("author", wrapCDATA(pluginPackage.getAuthor()));
+		filterMap.put("change_log", wrapCDATA(pluginPackage.getChangeLog()));
 		filterMap.put(
 			"licenses",
 			getPluginPackageLicensesXml(pluginPackage.getLicenses()));
@@ -1519,12 +1522,13 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			"liferay_versions",
 			getPluginPackageLiferayVersionsXml(
 				pluginPackage.getLiferayVersions()));
-		filterMap.put("long_description", pluginPackage.getLongDescription());
+		filterMap.put(
+			"long_description", wrapCDATA(pluginPackage.getLongDescription()));
 		filterMap.put("module_artifact_id", pluginPackage.getArtifactId());
 		filterMap.put("module_group_id", pluginPackage.getGroupId());
 		filterMap.put("module_version", pluginPackage.getVersion());
 		filterMap.put("page_url", pluginPackage.getPageURL());
-		filterMap.put("plugin_name", pluginPackage.getName());
+		filterMap.put("plugin_name", wrapCDATA(pluginPackage.getName()));
 		filterMap.put("plugin_type", pluginType);
 		filterMap.put(
 			"plugin_type_name",
@@ -1536,7 +1540,9 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			"required_deployment_contexts",
 			getPluginPackageRequiredDeploymentContextsXml(
 				pluginPackage.getRequiredDeploymentContexts()));
-		filterMap.put("short_description", pluginPackage.getShortDescription());
+		filterMap.put(
+			"short_description",
+			wrapCDATA(pluginPackage.getShortDescription()));
 		filterMap.put("tags", getPluginPackageTagsXml(pluginPackage.getTags()));
 
 		return filterMap;
@@ -1970,13 +1976,13 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 			// LEP-6415
 
-			if (shortFileName.equalsIgnoreCase("mule-config.xml")) {
+			if (StringUtil.equalsIgnoreCase(shortFileName, "mule-config.xml")) {
 				continue;
 			}
 
 			String ext = GetterUtil.getString(FileUtil.getExtension(fileName));
 
-			if (!ext.equalsIgnoreCase("xml")) {
+			if (!StringUtil.equalsIgnoreCase(ext, "xml")) {
 				continue;
 			}
 
@@ -2055,6 +2061,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 			if (servletClass.equals(
 					PortalClassLoaderServlet.class.getName()) ||
+				servletClass.equals(PortalDelegateServlet.class.getName()) ||
 				servletClass.equals(PortletServlet.class.getName())) {
 
 				continue;
@@ -2375,6 +2382,11 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 		if (_log.isInfoEnabled()) {
 			_log.info("Modifying Servlet " + webXmlVersion + " " + webXml);
 		}
+	}
+
+	@Override
+	public String wrapCDATA(String string) {
+		return StringPool.CDATA_OPEN + string + StringPool.CDATA_CLOSE;
 	}
 
 	protected String appServerType;

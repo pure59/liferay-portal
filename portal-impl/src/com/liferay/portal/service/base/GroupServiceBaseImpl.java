@@ -16,6 +16,8 @@ package com.liferay.portal.service.base;
 
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.IdentifiableBean;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -101,6 +103,7 @@ import com.liferay.portal.service.persistence.WebDAVPropsPersistence;
 import com.liferay.portal.service.persistence.WebsitePersistence;
 import com.liferay.portal.service.persistence.WorkflowDefinitionLinkPersistence;
 import com.liferay.portal.service.persistence.WorkflowInstanceLinkPersistence;
+import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.asset.service.persistence.AssetCategoryFinder;
 import com.liferay.portlet.asset.service.persistence.AssetCategoryPersistence;
@@ -137,6 +140,7 @@ import com.liferay.portlet.shopping.service.persistence.ShoppingOrderPersistence
 import com.liferay.portlet.social.service.persistence.SocialActivityFinder;
 import com.liferay.portlet.social.service.persistence.SocialActivityPersistence;
 import com.liferay.portlet.social.service.persistence.SocialActivitySettingPersistence;
+import com.liferay.portlet.social.service.persistence.SocialRequestPersistence;
 import com.liferay.portlet.softwarecatalog.service.persistence.SCFrameworkVersionPersistence;
 import com.liferay.portlet.softwarecatalog.service.persistence.SCProductEntryPersistence;
 import com.liferay.portlet.wiki.service.persistence.WikiNodePersistence;
@@ -5109,6 +5113,25 @@ public abstract class GroupServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
+	 * Returns the social activity remote service.
+	 *
+	 * @return the social activity remote service
+	 */
+	public com.liferay.portlet.social.service.SocialActivityService getSocialActivityService() {
+		return socialActivityService;
+	}
+
+	/**
+	 * Sets the social activity remote service.
+	 *
+	 * @param socialActivityService the social activity remote service
+	 */
+	public void setSocialActivityService(
+		com.liferay.portlet.social.service.SocialActivityService socialActivityService) {
+		this.socialActivityService = socialActivityService;
+	}
+
+	/**
 	 * Returns the social activity persistence.
 	 *
 	 * @return the social activity persistence
@@ -5201,6 +5224,63 @@ public abstract class GroupServiceBaseImpl extends BaseServiceImpl
 	public void setSocialActivitySettingPersistence(
 		SocialActivitySettingPersistence socialActivitySettingPersistence) {
 		this.socialActivitySettingPersistence = socialActivitySettingPersistence;
+	}
+
+	/**
+	 * Returns the social request local service.
+	 *
+	 * @return the social request local service
+	 */
+	public com.liferay.portlet.social.service.SocialRequestLocalService getSocialRequestLocalService() {
+		return socialRequestLocalService;
+	}
+
+	/**
+	 * Sets the social request local service.
+	 *
+	 * @param socialRequestLocalService the social request local service
+	 */
+	public void setSocialRequestLocalService(
+		com.liferay.portlet.social.service.SocialRequestLocalService socialRequestLocalService) {
+		this.socialRequestLocalService = socialRequestLocalService;
+	}
+
+	/**
+	 * Returns the social request remote service.
+	 *
+	 * @return the social request remote service
+	 */
+	public com.liferay.portlet.social.service.SocialRequestService getSocialRequestService() {
+		return socialRequestService;
+	}
+
+	/**
+	 * Sets the social request remote service.
+	 *
+	 * @param socialRequestService the social request remote service
+	 */
+	public void setSocialRequestService(
+		com.liferay.portlet.social.service.SocialRequestService socialRequestService) {
+		this.socialRequestService = socialRequestService;
+	}
+
+	/**
+	 * Returns the social request persistence.
+	 *
+	 * @return the social request persistence
+	 */
+	public SocialRequestPersistence getSocialRequestPersistence() {
+		return socialRequestPersistence;
+	}
+
+	/**
+	 * Sets the social request persistence.
+	 *
+	 * @param socialRequestPersistence the social request persistence
+	 */
+	public void setSocialRequestPersistence(
+		SocialRequestPersistence socialRequestPersistence) {
+		this.socialRequestPersistence = socialRequestPersistence;
 	}
 
 	/**
@@ -5408,13 +5488,18 @@ public abstract class GroupServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
-	 * Performs an SQL query.
+	 * Performs a SQL query.
 	 *
 	 * @param sql the sql query
 	 */
 	protected void runSQL(String sql) throws SystemException {
 		try {
 			DataSource dataSource = groupPersistence.getDataSource();
+
+			DB db = DBFactoryUtil.getDB();
+
+			sql = db.buildSQL(sql);
+			sql = PortalUtil.transformSQL(sql);
 
 			SqlUpdate sqlUpdate = SqlUpdateFactoryUtil.getSqlUpdate(dataSource,
 					sql, new int[0]);
@@ -5954,6 +6039,8 @@ public abstract class GroupServiceBaseImpl extends BaseServiceImpl
 	protected ShoppingOrderFinder shoppingOrderFinder;
 	@BeanReference(type = com.liferay.portlet.social.service.SocialActivityLocalService.class)
 	protected com.liferay.portlet.social.service.SocialActivityLocalService socialActivityLocalService;
+	@BeanReference(type = com.liferay.portlet.social.service.SocialActivityService.class)
+	protected com.liferay.portlet.social.service.SocialActivityService socialActivityService;
 	@BeanReference(type = SocialActivityPersistence.class)
 	protected SocialActivityPersistence socialActivityPersistence;
 	@BeanReference(type = SocialActivityFinder.class)
@@ -5964,6 +6051,12 @@ public abstract class GroupServiceBaseImpl extends BaseServiceImpl
 	protected com.liferay.portlet.social.service.SocialActivitySettingService socialActivitySettingService;
 	@BeanReference(type = SocialActivitySettingPersistence.class)
 	protected SocialActivitySettingPersistence socialActivitySettingPersistence;
+	@BeanReference(type = com.liferay.portlet.social.service.SocialRequestLocalService.class)
+	protected com.liferay.portlet.social.service.SocialRequestLocalService socialRequestLocalService;
+	@BeanReference(type = com.liferay.portlet.social.service.SocialRequestService.class)
+	protected com.liferay.portlet.social.service.SocialRequestService socialRequestService;
+	@BeanReference(type = SocialRequestPersistence.class)
+	protected SocialRequestPersistence socialRequestPersistence;
 	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCFrameworkVersionLocalService.class)
 	protected com.liferay.portlet.softwarecatalog.service.SCFrameworkVersionLocalService scFrameworkVersionLocalService;
 	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCFrameworkVersionService.class)

@@ -106,7 +106,8 @@ public class DLFolderPermission {
 				}
 			}
 
-			return true;
+			return DLPermission.contains(
+				permissionChecker, dlFolder.getGroupId(), actionId);
 		}
 
 		return _hasPermission(permissionChecker, dlFolder, actionId);
@@ -138,11 +139,10 @@ public class DLFolderPermission {
 
 			return DLPermission.contains(permissionChecker, groupId, actionId);
 		}
-		else {
-			Folder folder = DLAppLocalServiceUtil.getFolder(folderId);
 
-			return folder.containsPermission(permissionChecker, actionId);
-		}
+		Folder folder = DLAppLocalServiceUtil.getFolder(folderId);
+
+		return folder.containsPermission(permissionChecker, actionId);
 	}
 
 	private static boolean _hasPermission(

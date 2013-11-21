@@ -73,7 +73,7 @@
 						<portlet:param name="struts_action" value="/document_library_display/search" />
 					</liferay-portlet:renderURL>
 
-					<div class="navbar-search pull-right">
+					<aui:nav-bar-search cssClass="pull-right">
 						<div class="form-search">
 							<aui:form action="<%= searchURL %>" method="get" name="searchFm">
 								<liferay-portlet:renderURLParams varImpl="searchURL" />
@@ -83,14 +83,10 @@
 								<aui:input name="breadcrumbsFolderId" type="hidden" value="<%= folderId %>" />
 								<aui:input name="searchFolderIds" type="hidden" value="<%= folderId %>" />
 
-								<div class="input-append">
-									<input class="search-query span9" id="<portlet:namespace/>keywords1" name="<portlet:namespace/>keywords" placeholder="<liferay-ui:message key="keywords" />" type="text" />
-
-									<aui:button primary="<%= false %>" type="submit" value="search" />
-								</div>
+								<liferay-ui:input-search id="keywords1" />
 							</aui:form>
 						</div>
-					</div>
+					</aui:nav-bar-search>
 
 					<c:if test="<%= windowState.equals(WindowState.MAXIMIZED) %>">
 						<aui:script>

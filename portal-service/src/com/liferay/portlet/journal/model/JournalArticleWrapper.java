@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.journal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see JournalArticle
  * @generated
  */
+@ProviderType
 public class JournalArticleWrapper implements JournalArticle,
 	ModelWrapper<JournalArticle> {
 	public JournalArticleWrapper(JournalArticle journalArticle) {
@@ -63,6 +66,7 @@ public class JournalArticleWrapper implements JournalArticle,
 		attributes.put("folderId", getFolderId());
 		attributes.put("classNameId", getClassNameId());
 		attributes.put("classPK", getClassPK());
+		attributes.put("treePath", getTreePath());
 		attributes.put("articleId", getArticleId());
 		attributes.put("version", getVersion());
 		attributes.put("title", getTitle());
@@ -160,6 +164,12 @@ public class JournalArticleWrapper implements JournalArticle,
 
 		if (classPK != null) {
 			setClassPK(classPK);
+		}
+
+		String treePath = (String)attributes.get("treePath");
+
+		if (treePath != null) {
+			setTreePath(treePath);
 		}
 
 		String articleId = (String)attributes.get("articleId");
@@ -589,6 +599,26 @@ public class JournalArticleWrapper implements JournalArticle,
 	@Override
 	public void setClassPK(long classPK) {
 		_journalArticle.setClassPK(classPK);
+	}
+
+	/**
+	* Returns the tree path of this journal article.
+	*
+	* @return the tree path of this journal article
+	*/
+	@Override
+	public java.lang.String getTreePath() {
+		return _journalArticle.getTreePath();
+	}
+
+	/**
+	* Sets the tree path of this journal article.
+	*
+	* @param treePath the tree path of this journal article
+	*/
+	@Override
+	public void setTreePath(java.lang.String treePath) {
+		_journalArticle.setTreePath(treePath);
 	}
 
 	/**
@@ -1296,6 +1326,66 @@ public class JournalArticleWrapper implements JournalArticle,
 	}
 
 	/**
+	* Returns the trash entry created when this journal article was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this journal article.
+	*
+	* @return the trash entry created when this journal article was moved to the Recycle Bin
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry getTrashEntry()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _journalArticle.getTrashEntry();
+	}
+
+	/**
+	* Returns the class primary key of the trash entry for this journal article.
+	*
+	* @return the class primary key of the trash entry for this journal article
+	*/
+	@Override
+	public long getTrashEntryClassPK() {
+		return _journalArticle.getTrashEntryClassPK();
+	}
+
+	/**
+	* Returns the trash handler for this journal article.
+	*
+	* @return the trash handler for this journal article
+	*/
+	@Override
+	public com.liferay.portal.kernel.trash.TrashHandler getTrashHandler() {
+		return _journalArticle.getTrashHandler();
+	}
+
+	/**
+	* Returns <code>true</code> if this journal article is in the Recycle Bin.
+	*
+	* @return <code>true</code> if this journal article is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrash() {
+		return _journalArticle.isInTrash();
+	}
+
+	/**
+	* Returns <code>true</code> if the parent of this journal article is in the Recycle Bin.
+	*
+	* @return <code>true</code> if the parent of this journal article is in the Recycle Bin; <code>false</code> otherwise
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public boolean isInTrashContainer() {
+		return _journalArticle.isInTrashContainer();
+	}
+
+	@Override
+	public boolean isInTrashExplicitly()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _journalArticle.isInTrashExplicitly();
+	}
+
+	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
 	@Override
@@ -1361,16 +1451,6 @@ public class JournalArticleWrapper implements JournalArticle,
 	@Override
 	public boolean isIncomplete() {
 		return _journalArticle.isIncomplete();
-	}
-
-	/**
-	* Returns <code>true</code> if this journal article is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this journal article is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _journalArticle.isInTrash();
 	}
 
 	/**
@@ -1452,6 +1532,22 @@ public class JournalArticleWrapper implements JournalArticle,
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _journalArticle.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _journalArticle.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_journalArticle.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -1506,6 +1602,19 @@ public class JournalArticleWrapper implements JournalArticle,
 	}
 
 	@Override
+	public void updateTreePath(java.lang.String treePath)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_journalArticle.updateTreePath(treePath);
+	}
+
+	@Override
+	public java.lang.String buildTreePath()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _journalArticle.buildTreePath();
+	}
+
+	@Override
 	public java.lang.String getArticleImageURL(
 		com.liferay.portal.theme.ThemeDisplay themeDisplay) {
 		return _journalArticle.getArticleImageURL(themeDisplay);
@@ -1525,6 +1634,9 @@ public class JournalArticleWrapper implements JournalArticle,
 		return _journalArticle.getArticleResourceUuid();
 	}
 
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getAvailableLanguageIds}
+	*/
 	@Override
 	public java.lang.String[] getAvailableLocales() {
 		return _journalArticle.getAvailableLocales();
@@ -1535,6 +1647,9 @@ public class JournalArticleWrapper implements JournalArticle,
 		return _journalArticle.getContentByLocale(languageId);
 	}
 
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getDefaultLanguageId}
+	*/
 	@Override
 	public java.lang.String getDefaultLocale() {
 		return _journalArticle.getDefaultLocale();
@@ -1555,17 +1670,9 @@ public class JournalArticleWrapper implements JournalArticle,
 	}
 
 	@Override
-	public com.liferay.portlet.journal.model.JournalFolder getTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _journalArticle.getTrashContainer();
-	}
-
-	@Override
-	public boolean isInTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _journalArticle.isInTrashContainer();
+	public boolean hasApprovedVersion()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _journalArticle.hasApprovedVersion();
 	}
 
 	@Override

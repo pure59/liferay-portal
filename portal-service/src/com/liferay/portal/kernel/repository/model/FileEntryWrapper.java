@@ -169,6 +169,13 @@ public class FileEntryWrapper implements FileEntry, ModelWrapper<FileEntry> {
 	}
 
 	@Override
+	public FileVersion getLatestFileVersion(boolean trusted)
+		throws PortalException, SystemException {
+
+		return _fileEntry.getLatestFileVersion(trusted);
+	}
+
+	@Override
 	public Lock getLock() {
 		return _fileEntry.getLock();
 	}
@@ -306,6 +313,16 @@ public class FileEntryWrapper implements FileEntry, ModelWrapper<FileEntry> {
 	@Override
 	public boolean isEscapedModel() {
 		return _fileEntry.isEscapedModel();
+	}
+
+	@Override
+	public boolean isInTrash() {
+		return _fileEntry.isInTrash();
+	}
+
+	@Override
+	public boolean isInTrashContainer() {
+		return _fileEntry.isInTrashContainer();
 	}
 
 	@Override

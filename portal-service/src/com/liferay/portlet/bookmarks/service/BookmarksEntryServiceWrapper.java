@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.bookmarks.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see BookmarksEntryService
  * @generated
  */
+@ProviderType
 public class BookmarksEntryServiceWrapper implements BookmarksEntryService,
 	ServiceWrapper<BookmarksEntryService> {
 	public BookmarksEntryServiceWrapper(
@@ -176,10 +179,11 @@ public class BookmarksEntryServiceWrapper implements BookmarksEntryService,
 	}
 
 	@Override
-	public void moveEntryToTrash(long entryId)
+	public com.liferay.portlet.bookmarks.model.BookmarksEntry moveEntryToTrash(
+		long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		_bookmarksEntryService.moveEntryToTrash(entryId);
+		return _bookmarksEntryService.moveEntryToTrash(entryId);
 	}
 
 	@Override
@@ -203,6 +207,15 @@ public class BookmarksEntryServiceWrapper implements BookmarksEntryService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		_bookmarksEntryService.restoreEntryFromTrash(entryId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.search.Hits search(long groupId,
+		long creatorUserId, int status, int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _bookmarksEntryService.search(groupId, creatorUserId, status,
+			start, end);
 	}
 
 	@Override

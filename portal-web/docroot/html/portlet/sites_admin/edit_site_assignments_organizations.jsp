@@ -22,8 +22,6 @@ String tabs2 = (String)request.getAttribute("edit_site_assignments.jsp-tabs2");
 
 int cur = (Integer)request.getAttribute("edit_site_assignments.jsp-cur");
 
-String redirect = ParamUtil.getString(request, "redirect");
-
 Group group = (Group)request.getAttribute("edit_site_assignments.jsp-group");
 
 PortletURL portletURL = (PortletURL)request.getAttribute("edit_site_assignments.jsp-portletURL");
@@ -33,7 +31,7 @@ PortletURL viewOrganizationsURL = renderResponse.createRenderURL();
 viewOrganizationsURL.setParameter("struts_action", "/sites_admin/edit_site_assignments");
 viewOrganizationsURL.setParameter("tabs1", "organizations");
 viewOrganizationsURL.setParameter("tabs2", tabs2);
-viewOrganizationsURL.setParameter("redirect", redirect);
+viewOrganizationsURL.setParameter("redirect", currentURL);
 viewOrganizationsURL.setParameter("groupId", String.valueOf(group.getGroupId()));
 
 OrganizationGroupChecker organizationGroupChecker = null;
@@ -156,9 +154,12 @@ searchContainer.setEmptyResultsMessage(emptyResultsMessage);
 				viewOrganizationsURL.setParameter("tabs2", "available");
 				%>
 
-				<aui:button-row>
-					<aui:button href="<%= viewOrganizationsURL.toString() %>" value="assign-organizations" />
-				</aui:button-row>
+				<liferay-ui:icon
+					image="../aui/globe"
+					label="<%= true %>"
+					message="assign-organizations"
+					url="<%= viewOrganizationsURL.toString() %>"
+				/>
 
 				<%
 				viewOrganizationsURL.setParameter("tabs2", "current");
@@ -174,7 +175,7 @@ searchContainer.setEmptyResultsMessage(emptyResultsMessage);
 				%>
 
 				<aui:button-row>
-					<aui:button onClick="<%= taglibOnClick %>" value="save" />
+					<aui:button onClick="<%= taglibOnClick %>" primary="<%= true %>" value="save" />
 				</aui:button-row>
 			</c:otherwise>
 		</c:choose>
@@ -184,12 +185,8 @@ searchContainer.setEmptyResultsMessage(emptyResultsMessage);
 		<c:when test='<%= tabs1.equals("summary") && (total > 0) %>'>
 			<liferay-ui:panel collapsible="<%= true %>" extended="<%= false %>" persistState="<%= true %>" title='<%= LanguageUtil.format(pageContext, (total > 1) ? "x-organizations" : "x-organization", total) %>'>
 				<span class="form-search">
-					<aui:input inlineField="<%= true %>" label="" name='<%= DisplayTerms.KEYWORDS + "_organizations" %>' size="30" value="" />
-
-					<aui:button type="submit" value="search" />
+					<liferay-ui:input-search name='<%= DisplayTerms.KEYWORDS + "_organizations" %>' />
 				</span>
-
-				<br /><br />
 
 				<liferay-ui:search-iterator paginate="<%= false %>" />
 
@@ -197,8 +194,6 @@ searchContainer.setEmptyResultsMessage(emptyResultsMessage);
 					<a href="<%= viewOrganizationsURL %>"><liferay-ui:message key="view-more" /> &raquo;</a>
 				</c:if>
 			</liferay-ui:panel>
-
-			<div class="separator"><!-- --></div>
 		</c:when>
 		<c:when test='<%= !tabs1.equals("summary") %>'>
 			<c:if test="<%= total > searchContainer.getDelta() %>">

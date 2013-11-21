@@ -54,6 +54,8 @@ if (wikiPage == null) {
 
 boolean editable = false;
 
+boolean copyPageAttachments = ParamUtil.getBoolean(request, "copyPageAttachments", true);
+
 List<FileEntry> attachmentsFileEntries = null;
 
 if (wikiPage != null) {
@@ -196,6 +198,11 @@ if (Validator.isNull(redirect)) {
 		<aui:input name="version" type="hidden" value="<%= wikiPage.getVersion() %>" />
 	</c:if>
 
+	<c:if test="<%= templatePage != null %>">
+		<aui:input name="templateNodeId" type="hidden" value="<%= String.valueOf(templateNodeId) %>" />
+		<aui:input name="templateTitle" type="hidden" value="<%= templateTitle %>" />
+	</c:if>
+
 	<aui:input name="workflowAction" type="hidden" value="<%= WorkflowConstants.ACTION_SAVE_DRAFT %>" />
 	<aui:input name="preview" type="hidden" value="<%= preview %>" />
 
@@ -241,7 +248,7 @@ if (Validator.isNull(redirect)) {
 
 				<c:if test="<%= Validator.isNotNull(parentTitle) %>">
 					<aui:field-wrapper label="parent">
-						<%= HtmlUtil.escape(parentTitle) %>
+						<liferay-ui:input-resource url="<%= parentTitle %>" />
 					</aui:field-wrapper>
 				</c:if>
 
@@ -303,27 +310,31 @@ if (Validator.isNull(redirect)) {
 			</c:if>
 
 			<aui:fieldset>
-				<c:if test="<%= (attachmentsFileEntries != null) && !attachmentsFileEntries.isEmpty() %>">
+				<c:if test="<%= (attachmentsFileEntries != null) && !attachmentsFileEntries.isEmpty() || ((templatePage != null) && (templatePage.getAttachmentsFileEntriesCount() > 0)) %>">
 					<aui:field-wrapper label="attachments">
+						<c:if test="<%= (templatePage != null) && (templatePage.getAttachmentsFileEntriesCount() > 0) %>">
 
-						<%
-						for (int i = 0; i < attachmentsFileEntries.size(); i++) {
-							FileEntry attachmentsFileEntry = attachmentsFileEntries.get(i);
-						%>
+							<%
+							attachmentsFileEntries = templatePage.getAttachmentsFileEntries();
+							%>
 
-							<portlet:actionURL var="getPageAttachmentURL" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>">
-								<portlet:param name="struts_action" value="/wiki/get_page_attachment" />
-								<portlet:param name="nodeId" value="<%= String.valueOf(node.getNodeId()) %>" />
-								<portlet:param name="title" value="<%= wikiPage.getTitle() %>" />
-								<portlet:param name="fileName" value="<%= attachmentsFileEntry.getTitle() %>" />
-							</portlet:actionURL>
+							<aui:input name="copyPageAttachments" type="checkbox" value="<%= copyPageAttachments %>" />
+						</c:if>
 
-							<aui:a href="<%= getPageAttachmentURL %>"><%= attachmentsFileEntry.getTitle() %></aui:a> (<%= TextFormatter.formatStorageSize(attachmentsFileEntry.getSize(), locale) %>)<%= (i < (attachmentsFileEntries.size() - 1)) ? ", " : "" %>
+						<c:if test="<%= attachmentsFileEntries != null %>">
 
-						<%
-						}
-						%>
+							<%
+							for (int i = 0; i < attachmentsFileEntries.size(); i++) {
+								FileEntry attachmentsFileEntry = attachmentsFileEntries.get(i);
+							%>
 
+								<aui:a href="<%= (templatePage != null) && (templatePage.getAttachmentsFileEntriesCount() > 0) ? PortletFileRepositoryUtil.getPortletFileEntryURL(themeDisplay, attachmentsFileEntry, StringPool.BLANK) : null %>"><%= attachmentsFileEntry.getTitle() %></aui:a> (<%= TextFormatter.formatStorageSize(attachmentsFileEntry.getSize(), locale) %>)<%= (i < (attachmentsFileEntries.size() - 1)) ? ", " : "" %>
+
+							<%
+							}
+							%>
+
+						</c:if>
 					</aui:field-wrapper>
 				</c:if>
 
@@ -428,7 +439,7 @@ if (Validator.isNull(redirect)) {
 
 					<aui:button name="previewButton" onClick='<%= renderResponse.getNamespace() + "previewPage();" %>' value="preview" />
 
-					<aui:button disabled="<%= pending %>" name="publishButton" onClick='<%= renderResponse.getNamespace() + "publishPage();" %>' value="<%= publishButtonLabel %>" />
+					<aui:button disabled="<%= pending %>" name="publishButton" onClick='<%= renderResponse.getNamespace() + "publishPage();" %>' primary="<%= true %>" value="<%= publishButtonLabel %>" />
 
 					<c:if test="<%= !newPage && WikiPagePermission.contains(permissionChecker, wikiPage, ActionKeys.DELETE) %>">
 						<c:choose>
@@ -490,12 +501,7 @@ if (Validator.isNull(redirect)) {
 	}
 
 	function <portlet:namespace />getSuggestionsContent() {
-		var content = '';
-
-		content += document.<portlet:namespace />fm.<portlet:namespace />title.value + ' ';
-		content += window.<portlet:namespace />editor.getHTML();
-
-		return content;
+		return document.<portlet:namespace />fm.<portlet:namespace />title.value + ' ' + window.<portlet:namespace />editor.getHTML();
 	}
 
 	function <portlet:namespace />moveToTrashPage() {

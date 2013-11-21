@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.messageboards.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.messageboards.service.impl.MBCategoryLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class MBCategoryLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -607,14 +610,6 @@ public class MBCategoryLocalServiceUtil {
 			outEmailAddress, outCustom, outServerName, outServerPort,
 			outUseSSL, outUserName, outPassword, allowAnonymous,
 			mailingListActive, mergeWithParentCategory, serviceContext);
-	}
-
-	public static void updateDependentStatus(
-		com.liferay.portal.model.User user,
-		java.util.List<java.lang.Object> categoriesAndThreads, int status)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		getService().updateDependentStatus(user, categoriesAndThreads, status);
 	}
 
 	public static com.liferay.portlet.messageboards.model.MBCategory updateStatus(

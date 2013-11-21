@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link LockLocalService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see LockLocalService
  * @generated
  */
+@ProviderType
 public class LockLocalServiceWrapper implements LockLocalService,
 	ServiceWrapper<LockLocalService> {
 	public LockLocalServiceWrapper(LockLocalService lockLocalService) {
@@ -371,11 +374,35 @@ public class LockLocalServiceWrapper implements LockLocalService,
 
 	@Override
 	public com.liferay.portal.model.Lock lock(java.lang.String className,
+		java.lang.String key, java.lang.String owner)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _lockLocalService.lock(className, key, owner);
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #lock(String, String,
+	String)}
+	*/
+	@Override
+	public com.liferay.portal.model.Lock lock(java.lang.String className,
 		java.lang.String key, java.lang.String owner, boolean retrieveFromCache)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _lockLocalService.lock(className, key, owner, retrieveFromCache);
 	}
 
+	@Override
+	public com.liferay.portal.model.Lock lock(java.lang.String className,
+		java.lang.String key, java.lang.String expectedOwner,
+		java.lang.String updatedOwner)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _lockLocalService.lock(className, key, expectedOwner,
+			updatedOwner);
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #lock(String, String, String,
+	String)}
+	*/
 	@Override
 	public com.liferay.portal.model.Lock lock(java.lang.String className,
 		java.lang.String key, java.lang.String expectedOwner,
@@ -405,6 +432,17 @@ public class LockLocalServiceWrapper implements LockLocalService,
 		_lockLocalService.unlock(className, key);
 	}
 
+	@Override
+	public void unlock(java.lang.String className, java.lang.String key,
+		java.lang.String owner)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_lockLocalService.unlock(className, key, owner);
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #unlock(String, String,
+	String)}
+	*/
 	@Override
 	public void unlock(java.lang.String className, java.lang.String key,
 		java.lang.String owner, boolean retrieveFromCache)

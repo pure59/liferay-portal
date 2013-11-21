@@ -342,6 +342,10 @@ public class UserIdMapperPersistenceImpl extends BasePersistenceImpl<UserIdMappe
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUserId(userId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<UserIdMapper> list = findByUserId(userId, count - 1, count,
 				orderByComparator);
 
@@ -1125,6 +1129,10 @@ public class UserIdMapperPersistenceImpl extends BasePersistenceImpl<UserIdMappe
 	private static final String _FINDER_COLUMN_T_E_EXTERNALUSERID_2 = "userIdMapper.externalUserId = ?";
 	private static final String _FINDER_COLUMN_T_E_EXTERNALUSERID_3 = "(userIdMapper.externalUserId IS NULL OR userIdMapper.externalUserId = '')";
 
+	public UserIdMapperPersistenceImpl() {
+		setModelClass(UserIdMapper.class);
+	}
+
 	/**
 	 * Caches the user ID mapper in the entity cache if it is enabled.
 	 *
@@ -1471,6 +1479,8 @@ public class UserIdMapperPersistenceImpl extends BasePersistenceImpl<UserIdMappe
 
 		clearUniqueFindersCache(userIdMapper);
 		cacheUniqueFindersCache(userIdMapper);
+
+		userIdMapper.resetOriginalValues();
 
 		return userIdMapper;
 	}

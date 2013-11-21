@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link UserLocalService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see UserLocalService
  * @generated
  */
+@ProviderType
 public class UserLocalServiceWrapper implements UserLocalService,
 	ServiceWrapper<UserLocalService> {
 	public UserLocalServiceWrapper(UserLocalService userLocalService) {
@@ -1870,6 +1873,15 @@ public class UserLocalServiceWrapper implements UserLocalService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _userLocalService.getGroupUsersCount(groupId, status);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portal.model.User> getInheritedRoleUsers(
+		long roleId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator obc)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _userLocalService.getInheritedRoleUsers(roleId, start, end, obc);
 	}
 
 	/**

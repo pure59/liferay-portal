@@ -38,12 +38,10 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 
-import org.powermock.api.mockito.PowerMockito;
-
 /**
  * @author Eduardo Garcia
  */
-public class BaseExportImportTestCase extends PowerMockito {
+public class BaseExportImportTestCase {
 
 	@Before
 	public void setUp() throws Exception {
@@ -65,7 +63,9 @@ public class BaseExportImportTestCase extends PowerMockito {
 	@After
 	public void tearDown() throws Exception {
 		try {
-			GroupLocalServiceUtil.deleteGroup(group);
+			if (group != null) {
+				GroupLocalServiceUtil.deleteGroup(group);
+			}
 
 			if (importedGroup != null) {
 				GroupLocalServiceUtil.deleteGroup(importedGroup);
@@ -74,8 +74,13 @@ public class BaseExportImportTestCase extends PowerMockito {
 		catch (RequiredGroupException rge) {
 		}
 
-		LayoutLocalServiceUtil.deleteLayout(layout);
-		LayoutLocalServiceUtil.deleteLayout(importedLayout);
+		if (layout != null) {
+			LayoutLocalServiceUtil.deleteLayout(layout);
+		}
+
+		if (importedLayout != null) {
+			LayoutLocalServiceUtil.deleteLayout(importedLayout);
+		}
 
 		if ((larFile != null) && larFile.exists()) {
 			FileUtil.delete(larFile);
@@ -102,6 +107,10 @@ public class BaseExportImportTestCase extends PowerMockito {
 
 	protected StagedModel addStagedModel(long groupId) throws Exception {
 		return null;
+	}
+
+	protected void deleteStagedModel(StagedModel stagedModel) throws Exception {
+		return;
 	}
 
 	protected Map<String, String[]> getExportParameterMap() throws Exception {

@@ -26,7 +26,6 @@ import com.liferay.portlet.messageboards.model.MBBan;
 import com.liferay.portlet.messageboards.model.MBCategory;
 import com.liferay.portlet.messageboards.model.MBCategoryConstants;
 import com.liferay.portlet.messageboards.model.MBMessage;
-import com.liferay.portlet.messageboards.model.MBThread;
 import com.liferay.portlet.messageboards.model.MBThreadFlag;
 import com.liferay.portlet.messageboards.service.MBBanLocalServiceUtil;
 import com.liferay.portlet.messageboards.service.MBCategoryLocalServiceUtil;
@@ -56,7 +55,6 @@ public class MBPortletDataHandler extends BasePortletDataHandler {
 			new StagedModelType(MBBan.class),
 			new StagedModelType(MBCategory.class),
 			new StagedModelType(MBMessage.class),
-			new StagedModelType(MBThread.class),
 			new StagedModelType(MBThreadFlag.class));
 		setExportControls(
 			new PortletDataHandlerBoolean(
@@ -107,8 +105,7 @@ public class MBPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences)
 		throws Exception {
 
-		portletDataContext.addPermissions(
-			MBPermission.RESOURCE_NAME, portletDataContext.getScopeGroupId());
+		portletDataContext.addPortletPermissions(MBPermission.RESOURCE_NAME);
 
 		Element rootElement = addExportDataRootElement(portletDataContext);
 
@@ -151,9 +148,7 @@ public class MBPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences, String data)
 		throws Exception {
 
-		portletDataContext.importPermissions(
-			MBPermission.RESOURCE_NAME, portletDataContext.getSourceGroupId(),
-			portletDataContext.getScopeGroupId());
+		portletDataContext.importPortletPermissions(MBPermission.RESOURCE_NAME);
 
 		if (portletDataContext.getBooleanParameter(NAMESPACE, "messages")) {
 			Element categoriesElement =

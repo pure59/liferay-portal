@@ -7,10 +7,6 @@
 		margin-top: 15px;
 	}
 
-	.display-style-buttons-container {
-		margin-right: 10px;
-	}
-
 	.file-entry-list-description {
 		font-style: italic;
 		margin-left: 10px;
@@ -46,6 +42,7 @@
 		padding: 0.5em 0.75em;
 		padding-right: 30px;
 		position: relative;
+		word-wrap: break-word;
 
 		.keywords {
 			float: none;
@@ -117,10 +114,6 @@
 		}
 	}
 
-	.document-container {
-		overflow: auto;
-	}
-
 	.document-container, .document-entries-pagination {
 		clear: both;
 	}
@@ -136,12 +129,6 @@
 
 	.folder.error:hover {
 		background-color: #FDD;
-	}
-
-	.expand-folder-container {
-		position: absolute;
-		right: 0;
-		top: 0;
 	}
 
 	.folder-search {
@@ -264,14 +251,9 @@
 	}
 
 	.taglib-search-iterator-page-iterator-top, .taglib-search-iterator-page-iterator-bottom, .paginator-container {
-		background: #D9D9D9 url(@theme_image_path@/application/subheader_bg.png) 0 0 repeat-x;
 		clear: both;
 		padding: 5px;
 		position: relative;
-	}
-
-	.taglib-search-iterator-page-iterator-top, .taglib-search-iterator-page-iterator-bottom, .paginator-container {
-		text-align: center;
 	}
 
 	.taglib-search-iterator-page-iterator-top.page-iterator-bottom, .lfr-app-column-view .taglib-search-iterator-page-iterator-bottom {
@@ -413,7 +395,11 @@
 		}
 
 		.entry-title {
+			@include ellipsis;
+
+			overflow: hidden;
 			position: relative;
+			white-space: nowrap;
 		}
 
 		.entry-title-text {
@@ -473,6 +459,7 @@
 		.document-description {
 			margin: 8px 0;
 			display: block;
+			word-break: break-word;
 		}
 
 		.document-thumbnail {
@@ -520,6 +507,10 @@
 			.lfr-asset-ratings {
 				margin: 0 0 1em;
 			}
+		}
+
+		.lfr-asset-description {
+			word-break: break-word;
 		}
 	}
 

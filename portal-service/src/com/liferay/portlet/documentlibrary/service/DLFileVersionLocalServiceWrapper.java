@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see DLFileVersionLocalService
  * @generated
  */
+@ProviderType
 public class DLFileVersionLocalServiceWrapper
 	implements DLFileVersionLocalService,
 		ServiceWrapper<DLFileVersionLocalService> {
@@ -402,6 +405,12 @@ public class DLFileVersionLocalServiceWrapper
 			com.liferay.portal.kernel.exception.SystemException {
 		return _dlFileVersionLocalService.getLatestFileVersion(userId,
 			fileEntryId);
+	}
+
+	@Override
+	public void rebuildTree(long companyId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_dlFileVersionLocalService.rebuildTree(companyId);
 	}
 
 	/**

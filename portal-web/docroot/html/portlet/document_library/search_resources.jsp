@@ -50,9 +50,15 @@ if (searchFolderId > 0) {
 else {
 	long defaultFolderId = DLFolderConstants.getFolderId(scopeGroupId, DLFolderConstants.getDataRepositoryId(scopeGroupId, searchFolderIds));
 
-	List<Long> folderIds = DLAppServiceUtil.getSubfolderIds(scopeGroupId, searchFolderIds);
+	List<Folder> folders = DLAppServiceUtil.getFolders(scopeGroupId, searchFolderIds);
 
-	folderIds.add(0, defaultFolderId);
+	List<Long> folderIds = new ArrayList<Long>(folders.size() + 1);
+
+	folderIds.add(defaultFolderId);
+
+	for (Folder subFolder : folders) {
+		folderIds.add(subFolder.getFolderId());
+	}
 
 	folderIdsArray = StringUtil.split(StringUtil.merge(folderIds), 0L);
 }
@@ -68,14 +74,14 @@ int entryEnd = ParamUtil.getInteger(request, "entryEnd", entriesPerPage);
 
 int total = 0;
 
-boolean ajaxRequest = ParamUtil.getBoolean(request, "ajax");
+boolean ajax = ParamUtil.getBoolean(request, "ajax");
 
 boolean showRepositoryTabs = ParamUtil.getBoolean(request, "showRepositoryTabs");
 
 boolean showSearchInfo = ParamUtil.getBoolean(request, "showSearchInfo");
 
 if (searchType == DLSearchConstants.FRAGMENT) {
-	if (ajaxRequest) {
+	if (ajax) {
 		showRepositoryTabs = false;
 
 		showSearchInfo = false;
@@ -90,7 +96,7 @@ if (searchType == DLSearchConstants.FRAGMENT) {
 		}
 	}
 }
-else if ((searchType == DLSearchConstants.SINGLE) && !ajaxRequest) {
+else if ((searchType == DLSearchConstants.SINGLE) && !ajax) {
 	showSearchInfo = true;
 
 	if (folderId == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
@@ -189,6 +195,7 @@ else if ((searchType == DLSearchConstants.SINGLE) && !ajaxRequest) {
 				QueryConfig queryConfig = new QueryConfig();
 
 				queryConfig.setHighlightEnabled(true);
+				queryConfig.setSearchSubfolders(true);
 
 				searchContext.setQueryConfig(queryConfig);
 
@@ -214,7 +221,7 @@ else if ((searchType == DLSearchConstants.SINGLE) && !ajaxRequest) {
 
 					String className = searchResult.getClassName();
 
-					if (className.equals(DLFileEntry.class.getName())) {
+					if (className.equals(DLFileEntry.class.getName()) || FileEntry.class.isAssignableFrom(Class.forName(className))) {
 						fileEntry = DLAppLocalServiceUtil.getFileEntry(searchResult.getClassPK());
 					}
 					else if (className.equals(DLFolder.class.getName())) {
@@ -234,7 +241,7 @@ else if ((searchType == DLSearchConstants.SINGLE) && !ajaxRequest) {
 
 							FileVersion latestFileVersion = fileEntry.getFileVersion();
 
-							if ((user.getUserId() == fileEntry.getUserId()) || permissionChecker.isCompanyAdmin() || permissionChecker.isGroupAdmin(scopeGroupId) || DLFileEntryPermission.contains(permissionChecker, fileEntry, ActionKeys.UPDATE)) {
+							if ((user.getUserId() == fileEntry.getUserId()) || permissionChecker.isContentReviewer(user.getCompanyId(), scopeGroupId) || DLFileEntryPermission.contains(permissionChecker, fileEntry, ActionKeys.UPDATE)) {
 								latestFileVersion = fileEntry.getLatestFileVersion();
 							}
 
@@ -264,7 +271,7 @@ else if ((searchType == DLSearchConstants.SINGLE) && !ajaxRequest) {
 							<%
 							int status = WorkflowConstants.STATUS_APPROVED;
 
-							if (permissionChecker.isCompanyAdmin() || permissionChecker.isGroupAdmin(curFolder.getGroupId())) {
+							if (permissionChecker.isContentReviewer(user.getCompanyId(), curFolder.getGroupId())) {
 								status = WorkflowConstants.STATUS_ANY;
 							}
 

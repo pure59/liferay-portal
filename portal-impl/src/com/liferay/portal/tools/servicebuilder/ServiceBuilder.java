@@ -154,7 +154,7 @@ public class ServiceBuilder {
 
 				String name = element.attributeValue("name");
 
-				entityElements.put(name.toLowerCase(), element);
+				entityElements.put(StringUtil.toLowerCase(name), element);
 			}
 			else if (elementName.equals("exceptions")) {
 				element.detach();
@@ -201,12 +201,6 @@ public class ServiceBuilder {
 		String ormFileName = arguments.get("service.orm.file");
 		String modelHintsFileName = arguments.get("service.model.hints.file");
 		String springFileName = arguments.get("service.spring.file");
-		String springBaseFileName = arguments.get("service.spring.base.file");
-		String springClusterFileName = arguments.get("service.spring.cluster.file");
-		String springDynamicDataSourceFileName = arguments.get("service.spring.dynamic.data.source.file");
-		String springHibernateFileName = arguments.get("service.spring.hibernate.file");
-		String springInfrastructureFileName = arguments.get("service.spring.infrastructure.file");
-		String springShardDataSourceFileName = arguments.get("service.spring.shard.data.source.file");
 		String apiDir = arguments.get("service.api.dir");
 		String implDir = arguments.get("service.impl.dir");
 		String remotingFileName = arguments.get("service.remoting.file");
@@ -227,11 +221,8 @@ public class ServiceBuilder {
 		try {
 			new ServiceBuilder(
 				fileName, hbmFileName, ormFileName, modelHintsFileName,
-				springFileName, springBaseFileName, springClusterFileName,
-				springDynamicDataSourceFileName, springHibernateFileName,
-				springInfrastructureFileName, springShardDataSourceFileName,
-				apiDir, implDir, remotingFileName, sqlDir, sqlFileName,
-				sqlIndexesFileName, sqlIndexesPropertiesFileName,
+				springFileName, apiDir, implDir, remotingFileName, sqlDir,
+				sqlFileName, sqlIndexesFileName, sqlIndexesPropertiesFileName,
 				sqlSequencesFileName, autoNamespaceTables, beanLocatorUtil,
 				propsUtil, pluginName, targetEntityName, testDir, true,
 				buildNumber, buildNumberIncrement);
@@ -303,9 +294,6 @@ public class ServiceBuilder {
 				"\t-Dservice.tpl.service_soap=" + _TPL_ROOT + "service_soap.ftl\n"+
 				"\t-Dservice.tpl.service_util=" + _TPL_ROOT + "service_util.ftl\n"+
 				"\t-Dservice.tpl.service_wrapper=" + _TPL_ROOT + "service_wrapper.ftl\n"+
-				"\t-Dservice.tpl.spring_base_xml=" + _TPL_ROOT + "spring_base_xml.ftl\n"+
-				"\t-Dservice.tpl.spring_hibernate_xml=" + _TPL_ROOT + "spring_hibernate_xml.ftl\n"+
-				"\t-Dservice.tpl.spring_infrastructure_xml=" + _TPL_ROOT + "spring_infrastructure_xml.ftl\n"+
 				"\t-Dservice.tpl.spring_xml=" + _TPL_ROOT + "spring_xml.ftl\n"+
 				"\t-Dservice.tpl.spring_xml_session=" + _TPL_ROOT + "spring_xml_session.ftl");
 
@@ -493,41 +481,30 @@ public class ServiceBuilder {
 
 	public ServiceBuilder(
 		String fileName, String hbmFileName, String ormFileName,
-		String modelHintsFileName, String springFileName,
-		String springBaseFileName, String springClusterFileName,
-		String springDynamicDataSourceFileName, String springHibernateFileName,
-		String springInfrastructureFileName,
-		String springShardDataSourceFileName, String apiDir, String implDir,
-		String remotingFileName, String sqlDir, String sqlFileName,
-		String sqlIndexesFileName, String sqlIndexesPropertiesFileName,
-		String sqlSequencesFileName, boolean autoNamespaceTables,
-		String beanLocatorUtil, String propsUtil, String pluginName,
-		String targetEntityName, String testDir) {
+		String modelHintsFileName, String springFileName, String apiDir,
+		String implDir, String remotingFileName, String sqlDir,
+		String sqlFileName, String sqlIndexesFileName,
+		String sqlIndexesPropertiesFileName, String sqlSequencesFileName,
+		boolean autoNamespaceTables, String beanLocatorUtil, String propsUtil,
+		String pluginName, String targetEntityName, String testDir) {
 
 		this(
 			fileName, hbmFileName, ormFileName, modelHintsFileName,
-			springFileName, springBaseFileName, springClusterFileName,
-			springDynamicDataSourceFileName, springHibernateFileName,
-			springInfrastructureFileName, springShardDataSourceFileName, apiDir,
-			implDir, remotingFileName, sqlDir, sqlFileName, sqlIndexesFileName,
-			sqlIndexesPropertiesFileName, sqlSequencesFileName,
-			autoNamespaceTables, beanLocatorUtil, propsUtil, pluginName,
-			targetEntityName, testDir, true, 1, true);
+			springFileName, apiDir, implDir, remotingFileName, sqlDir,
+			sqlFileName, sqlIndexesFileName, sqlIndexesPropertiesFileName,
+			sqlSequencesFileName, autoNamespaceTables, beanLocatorUtil,
+			propsUtil, pluginName, targetEntityName, testDir, true, 1, true);
 	}
 
 	public ServiceBuilder(
 		String fileName, String hbmFileName, String ormFileName,
-		String modelHintsFileName, String springFileName,
-		String springBaseFileName, String springClusterFileName,
-		String springDynamicDataSourceFileName, String springHibernateFileName,
-		String springInfrastructureFileName,
-		String springShardDataSourceFileName, String apiDir, String implDir,
-		String remotingFileName, String sqlDir, String sqlFileName,
-		String sqlIndexesFileName, String sqlIndexesPropertiesFileName,
-		String sqlSequencesFileName, boolean autoNamespaceTables,
-		String beanLocatorUtil, String propsUtil, String pluginName,
-		String targetEntityName, String testDir, boolean build,
-		long buildNumber, boolean buildNumberIncrement) {
+		String modelHintsFileName, String springFileName, String apiDir,
+		String implDir, String remotingFileName, String sqlDir,
+		String sqlFileName, String sqlIndexesFileName,
+		String sqlIndexesPropertiesFileName, String sqlSequencesFileName,
+		boolean autoNamespaceTables, String beanLocatorUtil, String propsUtil,
+		String pluginName, String targetEntityName, String testDir,
+		boolean build, long buildNumber, boolean buildNumberIncrement) {
 
 		_tplBadAliasNames = _getTplProperty(
 			"bad_alias_names", _tplBadAliasNames);
@@ -581,16 +558,6 @@ public class ServiceBuilder {
 		_tplServiceUtil = _getTplProperty("service_util", _tplServiceUtil);
 		_tplServiceWrapper = _getTplProperty(
 			"service_wrapper", _tplServiceWrapper);
-		_tplSpringBaseXml = _getTplProperty(
-			"spring_base_xml", _tplSpringBaseXml);
-		_tplSpringClusterXml = _getTplProperty(
-			"spring_cluster_xml", _tplSpringClusterXml);
-		_tplSpringHibernateXml = _getTplProperty(
-			"spring_hibernate_xml", _tplSpringHibernateXml);
-		_tplSpringInfrastructureXml = _getTplProperty(
-			"spring_infrastructure_xml", _tplSpringInfrastructureXml);
-		_tplSpringShardDataSourceXml = _getTplProperty(
-			"spring_shard_data_source_xml", _tplSpringShardDataSourceXml);
 		_tplSpringXml = _getTplProperty("spring_xml", _tplSpringXml);
 
 		try {
@@ -601,12 +568,6 @@ public class ServiceBuilder {
 			_ormFileName = ormFileName;
 			_modelHintsFileName = modelHintsFileName;
 			_springFileName = springFileName;
-			_springBaseFileName = springBaseFileName;
-			_springClusterFileName = springClusterFileName;
-			_springDynamicDataSourceFileName = springDynamicDataSourceFileName;
-			_springHibernateFileName = springHibernateFileName;
-			_springInfrastructureFileName = springInfrastructureFileName;
-			_springShardDataSourceFileName = springShardDataSourceFileName;
 			_apiDir = apiDir;
 			_implDir = implDir;
 			_remotingFileName = remotingFileName;
@@ -843,12 +804,8 @@ public class ServiceBuilder {
 				_createSQLSequences();
 
 				_createProps();
-				_createSpringBaseXml();
-				_createSpringClusterXml();
-				_createSpringDynamicDataSourceXml();
-				_createSpringHibernateXml();
-				_createSpringInfrastructureXml();
-				_createSpringShardDataSourceXml();
+
+				_deleteSpringLegacyXml();
 			}
 		}
 		catch (FileNotFoundException fnfe) {
@@ -966,72 +923,68 @@ public class ServiceBuilder {
 
 			return entity;
 		}
-		else {
-			String refPackage = name.substring(0, pos);
-			String refEntity = name.substring(pos + 1);
 
-			if (refPackage.equals(_packagePath)) {
-				pos = _ejbList.indexOf(new Entity(refEntity));
+		String refPackage = name.substring(0, pos);
+		String refEntity = name.substring(pos + 1);
 
-				if (pos == -1) {
-					throw new RuntimeException(
-						"Cannot find " + refEntity + " in " +
-							ListUtil.toString(_ejbList, Entity.NAME_ACCESSOR));
-				}
+		if (refPackage.equals(_packagePath)) {
+			pos = _ejbList.indexOf(new Entity(refEntity));
 
-				entity = _ejbList.get(pos);
-
-				_entityPool.put(name, entity);
-
-				return entity;
+			if (pos == -1) {
+				throw new RuntimeException(
+					"Cannot find " + refEntity + " in " +
+						ListUtil.toString(_ejbList, Entity.NAME_ACCESSOR));
 			}
 
-			String refPackageDir = StringUtil.replace(refPackage, ".", "/");
-
-			String refFileName =
-				_implDir + "/" + refPackageDir + "/service.xml";
-
-			File refFile = new File(refFileName);
-
-			boolean useTempFile = false;
-
-			if (!refFile.exists()) {
-				refFileName = Time.getTimestamp();
-				refFile = new File(refFileName);
-
-				ClassLoader classLoader = getClass().getClassLoader();
-
-				FileUtil.write(
-					refFileName,
-					StringUtil.read(
-						classLoader, refPackageDir + "/service.xml"));
-
-				useTempFile = true;
-			}
-
-			ServiceBuilder serviceBuilder = new ServiceBuilder(
-				refFileName, _hbmFileName, _ormFileName, _modelHintsFileName,
-				_springFileName, _springBaseFileName, _springClusterFileName,
-				_springDynamicDataSourceFileName, _springHibernateFileName,
-				_springInfrastructureFileName, _springShardDataSourceFileName,
-				_apiDir, _implDir, _remotingFileName, _sqlDir, _sqlFileName,
-				_sqlIndexesFileName, _sqlIndexesPropertiesFileName,
-				_sqlSequencesFileName, _autoNamespaceTables, _beanLocatorUtil,
-				_propsUtil, _pluginName, _targetEntityName, _testDir, false,
-				_buildNumber, _buildNumberIncrement);
-
-			entity = serviceBuilder.getEntity(refEntity);
-
-			entity.setPortalReference(useTempFile);
+			entity = _ejbList.get(pos);
 
 			_entityPool.put(name, entity);
 
-			if (useTempFile) {
-				refFile.deleteOnExit();
-			}
-
 			return entity;
 		}
+
+		String refPackageDir = StringUtil.replace(refPackage, ".", "/");
+
+		String refFileName =
+			_implDir + "/" + refPackageDir + "/service.xml";
+
+		File refFile = new File(refFileName);
+
+		boolean useTempFile = false;
+
+		if (!refFile.exists()) {
+			refFileName = Time.getTimestamp();
+			refFile = new File(refFileName);
+
+			ClassLoader classLoader = getClass().getClassLoader();
+
+			FileUtil.write(
+				refFileName,
+				StringUtil.read(
+					classLoader, refPackageDir + "/service.xml"));
+
+			useTempFile = true;
+		}
+
+		ServiceBuilder serviceBuilder = new ServiceBuilder(
+			refFileName, _hbmFileName, _ormFileName, _modelHintsFileName,
+			_springFileName, _apiDir, _implDir, _remotingFileName, _sqlDir,
+			_sqlFileName, _sqlIndexesFileName, _sqlIndexesPropertiesFileName,
+			_sqlSequencesFileName, _autoNamespaceTables, _beanLocatorUtil,
+			_propsUtil, _pluginName, _targetEntityName, _testDir, false,
+			_buildNumber, _buildNumberIncrement);
+
+		entity = serviceBuilder.getEntity(refEntity);
+
+		entity.setPortalReference(useTempFile);
+
+		_entityPool.put(name, entity);
+
+		if (useTempFile) {
+			refFile.deleteOnExit();
+		}
+
+		return entity;
 	}
 
 	public Entity getEntityByGenericsName(String genericsName) {
@@ -3204,106 +3157,6 @@ public class ServiceBuilder {
 		writeFile(ejbFile, content, _author);
 	}
 
-	private void _createSpringBaseXml() throws Exception {
-		if (Validator.isNull(_springBaseFileName)) {
-			return;
-		}
-
-		// Content
-
-		String content = _processTemplate(_tplSpringBaseXml);
-
-		// Write file
-
-		File ejbFile = new File(_springBaseFileName);
-
-		FileUtil.write(ejbFile, content, true);
-
-		if (Validator.isNotNull(_pluginName)) {
-			FileUtil.delete(
-				"docroot/WEB-INF/src/META-INF/data-source-spring.xml");
-			FileUtil.delete("docroot/WEB-INF/src/META-INF/misc-spring.xml");
-		}
-	}
-
-	private void _createSpringClusterXml() throws Exception {
-		if (Validator.isNull(_springClusterFileName)) {
-			return;
-		}
-
-		// Content
-
-		String content = _processTemplate(_tplSpringClusterXml);
-
-		// Write file
-
-		File ejbFile = new File(_springClusterFileName);
-
-		FileUtil.write(ejbFile, content, true);
-	}
-
-	private void _createSpringDynamicDataSourceXml() throws Exception {
-		if (Validator.isNull(_springDynamicDataSourceFileName)) {
-			return;
-		}
-
-		File ejbFile = new File(_springDynamicDataSourceFileName);
-
-		if (ejbFile.exists()) {
-			System.out.println("Removing deprecated " + ejbFile);
-
-			ejbFile.delete();
-		}
-	}
-
-	private void _createSpringHibernateXml() throws Exception {
-		if (Validator.isNull(_springHibernateFileName)) {
-			return;
-		}
-
-		// Content
-
-		String content = _processTemplate(_tplSpringHibernateXml);
-
-		// Write file
-
-		File ejbFile = new File(_springHibernateFileName);
-
-		FileUtil.write(ejbFile, content, true);
-	}
-
-	private void _createSpringInfrastructureXml() throws Exception {
-		if (Validator.isNull(_springInfrastructureFileName)) {
-			return;
-		}
-
-		// Content
-
-		String content = _processTemplate(_tplSpringInfrastructureXml);
-
-		// Write file
-
-		File ejbFile = new File(_springInfrastructureFileName);
-
-		FileUtil.write(ejbFile, content, true);
-	}
-
-	private void _createSpringShardDataSourceXml() throws Exception {
-		if (Validator.isNull(_springShardDataSourceFileName)) {
-			return;
-		}
-
-		// Content
-
-		String content = _processTemplate(_tplSpringShardDataSourceXml);
-
-		// Write file
-
-		File ejbFile = new File(_springShardDataSourceFileName);
-
-		FileUtil.write(ejbFile, content, true);
-	}
-
 	private void _createSpringXml() throws Exception {
 		if (_packagePath.equals("com.liferay.counter")) {
 			return;
@@ -3552,7 +3405,9 @@ public class ServiceBuilder {
 				sb.append("\n");
 			}
 
-			sb.append(indexName + StringPool.EQUAL + finderName);
+			sb.append(indexName);
+			sb.append(StringPool.EQUAL);
+			sb.append(finderName);
 			sb.append("\n");
 
 			prevEntityName = entityName;
@@ -3608,7 +3463,8 @@ public class ServiceBuilder {
 					String tableName = line.substring(x, y);
 
 					if (tableName.compareTo(entityMapping.getTable()) > 0) {
-						sb.append(newCreateTableString + "\n\n");
+						sb.append(newCreateTableString);
+						sb.append("\n\n");
 
 						appendNewTable = false;
 					}
@@ -3619,7 +3475,8 @@ public class ServiceBuilder {
 			}
 
 			if (appendNewTable) {
-				sb.append("\n" + newCreateTableString);
+				sb.append("\n");
+				sb.append(newCreateTableString);
 			}
 
 			unsyncBufferedReader.close();
@@ -3683,7 +3540,9 @@ public class ServiceBuilder {
 						sequenceName = sequenceName.substring(0, 30);
 					}
 
-					sb.append("create sequence " + sequenceName + ";");
+					sb.append("create sequence ");
+					sb.append(sequenceName);
+					sb.append(";");
 
 					String sequenceSQL = sb.toString();
 
@@ -3801,7 +3660,8 @@ public class ServiceBuilder {
 					String tableName = line.substring(x, y);
 
 					if (tableName.compareTo(entity.getTable()) > 0) {
-						sb.append(newCreateTableString + "\n\n");
+						sb.append(newCreateTableString);
+						sb.append("\n\n");
 
 						appendNewTable = false;
 					}
@@ -3812,13 +3672,32 @@ public class ServiceBuilder {
 			}
 
 			if (appendNewTable) {
-				sb.append("\n" + newCreateTableString);
+				sb.append("\n");
+				sb.append(newCreateTableString);
 			}
 
 			unsyncBufferedReader.close();
 
 			FileUtil.write(sqlFile, sb.toString(), true);
 		}
+	}
+
+	private void _deleteSpringLegacyXml() throws Exception {
+		if (Validator.isNull(_pluginName)) {
+			return;
+		}
+
+		FileUtil.delete("docroot/WEB-INF/src/META-INF/base-spring.xml");
+		FileUtil.delete("docroot/WEB-INF/src/META-INF/cluster-spring.xml");
+		FileUtil.delete("docroot/WEB-INF/src/META-INF/data-source-spring.xml");
+		FileUtil.delete(
+			"docroot/WEB-INF/src/META-INF/dynamic-data-source-spring.xml");
+		FileUtil.delete("docroot/WEB-INF/src/META-INF/hibernate-spring.xml");
+		FileUtil.delete(
+			"docroot/WEB-INF/src/META-INF/infrastructure-spring.xml");
+		FileUtil.delete("docroot/WEB-INF/src/META-INF/misc-spring.xml");
+		FileUtil.delete(
+			"docroot/WEB-INF/src/META-INF/shard-data-source-spring.xml");
 	}
 
 	private String _fixHbmXml(String content) throws IOException {
@@ -3971,10 +3850,6 @@ public class ServiceBuilder {
 		context.put("ormFileName", _ormFileName);
 		context.put("modelHintsFileName", _modelHintsFileName);
 		context.put("springFileName", _springFileName);
-		context.put("springBaseFileName", _springBaseFileName);
-		context.put("springHibernateFileName", _springHibernateFileName);
-		context.put(
-			"springInfrastructureFileName", _springInfrastructureFileName);
 		context.put("apiDir", _apiDir);
 		context.put("implDir", _implDir);
 		context.put("sqlDir", _sqlDir);
@@ -4032,8 +3907,9 @@ public class ServiceBuilder {
 				String indexSpec =
 					entityMapping.getTable() + " (" + colDBName + ");";
 
-				String indexHash = StringUtil.toHexString(
-					indexSpec.hashCode()).toUpperCase();
+				String indexHash = StringUtil.toHexString(indexSpec.hashCode());
+
+				indexHash = StringUtil.toUpperCase(indexHash);
 
 				String indexName = "IX_" + indexHash;
 
@@ -4096,24 +3972,25 @@ public class ServiceBuilder {
 				String colName = col.getName();
 				String colType = col.getType();
 
-				sb.append("\t" + col.getDBName());
+				sb.append("\t");
+				sb.append(col.getDBName());
 				sb.append(" ");
 
-				if (colType.equalsIgnoreCase("boolean")) {
+				if (StringUtil.equalsIgnoreCase(colType, "boolean")) {
 					sb.append("BOOLEAN");
 				}
-				else if (colType.equalsIgnoreCase("double") ||
-						 colType.equalsIgnoreCase("float")) {
+				else if (StringUtil.equalsIgnoreCase(colType, "double") ||
+						 StringUtil.equalsIgnoreCase(colType, "float")) {
 
 					sb.append("DOUBLE");
 				}
 				else if (colType.equals("int") ||
 						 colType.equals("Integer") ||
-						 colType.equalsIgnoreCase("short")) {
+						 StringUtil.equalsIgnoreCase(colType, "short")) {
 
 					sb.append("INTEGER");
 				}
-				else if (colType.equalsIgnoreCase("long")) {
+				else if (StringUtil.equalsIgnoreCase(colType, "long")) {
 					sb.append("LONG");
 				}
 				else if (colType.equals("String")) {
@@ -4132,7 +4009,9 @@ public class ServiceBuilder {
 					}
 
 					if (maxLength < 4000) {
-						sb.append("VARCHAR(" + maxLength + ")");
+						sb.append("VARCHAR(");
+						sb.append(maxLength);
+						sb.append(")");
 					}
 					else if (maxLength == 4000) {
 						sb.append("STRING");
@@ -4206,24 +4085,25 @@ public class ServiceBuilder {
 			String colType = col.getType();
 			String colIdType = col.getIdType();
 
-			sb.append("\t" + col.getDBName());
+			sb.append("\t");
+			sb.append(col.getDBName());
 			sb.append(" ");
 
-			if (colType.equalsIgnoreCase("boolean")) {
+			if (StringUtil.equalsIgnoreCase(colType, "boolean")) {
 				sb.append("BOOLEAN");
 			}
-			else if (colType.equalsIgnoreCase("double") ||
-					 colType.equalsIgnoreCase("float")) {
+			else if (StringUtil.equalsIgnoreCase(colType, "double") ||
+					 StringUtil.equalsIgnoreCase(colType, "float")) {
 
 				sb.append("DOUBLE");
 			}
 			else if (colType.equals("int") ||
 					 colType.equals("Integer") ||
-					 colType.equalsIgnoreCase("short")) {
+					 StringUtil.equalsIgnoreCase(colType, "short")) {
 
 				sb.append("INTEGER");
 			}
-			else if (colType.equalsIgnoreCase("long")) {
+			else if (StringUtil.equalsIgnoreCase(colType, "long")) {
 				sb.append("LONG");
 			}
 			else if (colType.equals("Blob")) {
@@ -4248,7 +4128,9 @@ public class ServiceBuilder {
 				}
 
 				if (maxLength < 4000) {
-					sb.append("VARCHAR(" + maxLength + ")");
+					sb.append("VARCHAR(");
+					sb.append(maxLength);
+					sb.append(")");
 				}
 				else if (maxLength == 4000) {
 					sb.append("STRING");
@@ -4566,6 +4448,8 @@ public class ServiceBuilder {
 			entityElement.attributeValue("cache-enabled"), true);
 		boolean jsonEnabled = GetterUtil.getBoolean(
 			entityElement.attributeValue("json-enabled"), remoteService);
+		boolean trashEnabled = GetterUtil.getBoolean(
+			entityElement.attributeValue("trash-enabled"));
 		boolean deprecated = GetterUtil.getBoolean(
 			entityElement.attributeValue("deprecated"));
 
@@ -4821,7 +4705,7 @@ public class ServiceBuilder {
 
 		String alias = TextFormatter.format(ejbName, TextFormatter.I);
 
-		if (_badAliasNames.contains(alias.toLowerCase())) {
+		if (_badAliasNames.contains(StringUtil.toLowerCase(alias))) {
 			alias += StringPool.UNDERLINE;
 		}
 
@@ -4945,12 +4829,9 @@ public class ServiceBuilder {
 				humanName, table, alias, uuid, uuidAccessor, localService,
 				remoteService, persistenceClass, finderClass, dataSource,
 				sessionFactory, txManager, cacheEnabled, jsonEnabled,
-				deprecated, pkList, regularColList, blobList, collectionList,
-				columnList, order, finderList, referenceList, txRequiredList));
-	}
-
-	private String _processTemplate(String name) throws Exception {
-		return _processTemplate(name, _getContext());
+				trashEnabled, deprecated, pkList, regularColList, blobList,
+				collectionList, columnList, order, finderList, referenceList,
+				txRequiredList));
 	}
 
 	private String _processTemplate(String name, Map<String, Object> context)
@@ -5039,13 +4920,7 @@ public class ServiceBuilder {
 	private String _propsUtil;
 	private String _remotingFileName;
 	private String _serviceOutputPath;
-	private String _springBaseFileName;
-	private String _springClusterFileName;
-	private String _springDynamicDataSourceFileName;
 	private String _springFileName;
-	private String _springHibernateFileName;
-	private String _springInfrastructureFileName;
-	private String _springShardDataSourceFileName;
 	private String _sqlDir;
 	private String _sqlFileName;
 	private String _sqlIndexesFileName;
@@ -5102,14 +4977,6 @@ public class ServiceBuilder {
 	private String _tplServiceSoap = _TPL_ROOT + "service_soap.ftl";
 	private String _tplServiceUtil = _TPL_ROOT + "service_util.ftl";
 	private String _tplServiceWrapper = _TPL_ROOT + "service_wrapper.ftl";
-	private String _tplSpringBaseXml = _TPL_ROOT + "spring_base_xml.ftl";
-	private String _tplSpringClusterXml = _TPL_ROOT + "spring_cluster_xml.ftl";
-	private String _tplSpringHibernateXml =
-		_TPL_ROOT + "spring_hibernate_xml.ftl";
-	private String _tplSpringInfrastructureXml =
-		_TPL_ROOT + "spring_infrastructure_xml.ftl";
-	private String _tplSpringShardDataSourceXml =
-		_TPL_ROOT + "spring_shard_data_source_xml.ftl";
 	private String _tplSpringXml = _TPL_ROOT + "spring_xml.ftl";
 
 }

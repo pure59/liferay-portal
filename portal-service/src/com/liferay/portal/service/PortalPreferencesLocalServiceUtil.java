@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.PortalPreferencesLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class PortalPreferencesLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -269,6 +272,17 @@ public class PortalPreferencesLocalServiceUtil {
 	}
 
 	public static com.liferay.portal.model.PortalPreferences addPortalPreferences(
+		long ownerId, int ownerType, java.lang.String defaultPreferences)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .addPortalPreferences(ownerId, ownerType, defaultPreferences);
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #addPortalPreferences(long,
+	int, String)}
+	*/
+	public static com.liferay.portal.model.PortalPreferences addPortalPreferences(
 		long companyId, long ownerId, int ownerType,
 		java.lang.String defaultPreferences)
 		throws com.liferay.portal.kernel.exception.SystemException {
@@ -278,11 +292,31 @@ public class PortalPreferencesLocalServiceUtil {
 	}
 
 	public static javax.portlet.PortletPreferences getPreferences(
+		long ownerId, int ownerType)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getPreferences(ownerId, ownerType);
+	}
+
+	public static javax.portlet.PortletPreferences getPreferences(
+		long ownerId, int ownerType, java.lang.String defaultPreferences)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getPreferences(ownerId, ownerType, defaultPreferences);
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getPreferences(long, int)}
+	*/
+	public static javax.portlet.PortletPreferences getPreferences(
 		long companyId, long ownerId, int ownerType)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService().getPreferences(companyId, ownerId, ownerType);
 	}
 
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getPreferences(long, int,
+	String)}
+	*/
 	public static javax.portlet.PortletPreferences getPreferences(
 		long companyId, long ownerId, int ownerType,
 		java.lang.String defaultPreferences)

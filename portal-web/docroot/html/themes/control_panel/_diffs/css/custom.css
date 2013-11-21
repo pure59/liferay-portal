@@ -1,6 +1,8 @@
 @import "compass";
+@import "mixins";
 
 @import url(../../classic/css/custom_common.css);
+@import url(custom_responsive.css);
 
 $dockbarGradientEnd: #1273C7;
 $dockbarGradientStart: #118ADE;
@@ -26,15 +28,11 @@ $dockbarOpenGradientStart: #0EA6F9;
 	legend {
 		color: #8D8D8D;
 		font-size: 18px;
-		font-weight: lighter;
-	}
-
-	#banner {
-		display: none;
+		font-weight: 200;
 	}
 
 	#wrapper {
-		padding: 1.1em 0 0;
+		padding: 0;
 	}
 
 	.container-fluid.panel-manage-frontpage {
@@ -49,46 +47,48 @@ $dockbarOpenGradientStart: #0EA6F9;
 		}
 	}
 
-	.panel-manage-frontpage {
-		.control-panel-bar-secondary {
-			margin-bottom: 1px;
-			margin-left: 20px;
-		}
-	}
-
 	.control-panel-home-actions-category .btn {
 		margin-bottom: 0.5em;
 	}
 
-	/* ---------- Control Panel Secondary Nav ---------- */
+	.taglib-portal-message {
+		margin-bottom: 0;
+	}
 
-	.control-panel-bar-secondary.nav-pills {
-		li {
-			margin-right: 20px;
+	/* ---------- Control panel secondary nav ---------- */
 
-			a {
-				font-size: 15px;
-				font-weight: normal;
-				margin: 0;
-				padding: 10px 10px 11px;
+	.control-panel-bar-secondary {
+		margin-left: 10px;
+		padding-top: 1.1em;
 
-				&:hover {
-					background: #E5F5FC;
+		&.nav-pills {
+			li {
+				margin-right: 20px;
+
+				a {
+					font-size: 15px;
+					font-weight: normal;
+					margin: 0;
+					padding: 10px 10px 11px;
+
+					&:hover {
+						background: #E5F5FC;
+					}
 				}
 			}
-		}
 
-		> .active > a {
-			background: #009AE5;
-			color: #FFF;
-
-			&:hover {
+			> .active > a {
 				background: #009AE5;
+				color: #FFF;
+
+				&:hover {
+					background: #009AE5;
+				}
 			}
 		}
 	}
 
-	/* ---------- Control Panel Home ---------- */
+	/* ---------- Control panel home ---------- */
 
 	.control-panel-home-menu {
 		margin-top: 40px;
@@ -148,31 +148,32 @@ $dockbarOpenGradientStart: #0EA6F9;
 			}
 		}
 
-		/* ---------- Control Panel Home Category Header ---------- */
+		/* ---------- Control panel home category header ---------- */
 
-		.control-panel-home-category-header {
+		.control-panel-home-category-header a {
 			background: none no-repeat 0 50%;
 			border-bottom: 1px solid #D4D4D4;
 			color: #009AE5;
+			display: block;
 			font-size: 24px;
-			font-weight: 200;
+			font-weight: 100;
 			margin-bottom: 30px;
 			padding-left: 47px;
 		}
 
-		#control-panel-home-category-headerapps {
+		#control-panel-home-category-headerapps a {
 			background-image: url(../images/custom/home_apps.png);
 		}
 
-		#control-panel-home-category-headerconfiguration {
+		#control-panel-home-category-headerconfiguration a {
 			background-image: url(../images/custom/home_configuration.png);
 		}
 
-		#control-panel-home-category-headersites {
+		#control-panel-home-category-headersites a {
 			background-image: url(../images/custom/home_sites.png);
 		}
 
-		#control-panel-home-category-headerusers {
+		#control-panel-home-category-headerusers a {
 			background-image: url(../images/custom/home_users.png);
 		}
 	}
@@ -181,9 +182,6 @@ $dockbarOpenGradientStart: #0EA6F9;
 
 	.dockbar {
 		border-top: 1px solid #00AEFF;
-		font-size: 13px;
-		font-weight: lighter;
-		letter-spacing: 1px;
 		position: relative;
 
 		.nav > li > a {
@@ -198,10 +196,27 @@ $dockbarOpenGradientStart: #0EA6F9;
 			padding-right: 0;
 
 			.brand {
-				&, > a {
+				letter-spacing: 1px;
+
+				&, h1, a {
 					color: #FFF;
-					font-weight: lighter;
+					font-weight: 100;
 					text-shadow: none;
+				}
+
+				.control-panel-site-selector {
+					font-size: inherit;
+					margin-top: 0;
+					vertical-align: baseline;
+
+					a {
+						text-decoration: none;
+					}
+
+					.caret {
+						border-top-color: #FFF;
+						margin-top: -4px;
+					}
 				}
 
 				.control-panel-back-link {
@@ -222,7 +237,10 @@ $dockbarOpenGradientStart: #0EA6F9;
 					background-color: $dockbarOpenGradientEnd;
 				}
 			}
-			.nav-add-controls {
+
+			.nav-navigation {
+				letter-spacing: 1px;
+
 				> li {
 					&.active a {
 						border-radius: 4px;
@@ -242,7 +260,7 @@ $dockbarOpenGradientStart: #0EA6F9;
 					margin-right: 5px;
 
 
-					/* ---------- Menu Icons ---------- */
+					/* ---------- Menu icons ---------- */
 
 					&.control-panel-apps, &.control-panel-configuration, &.control-panel-sites, &.control-panel-users {
 						[class^="icon-"], [class*=" icon-"] {
@@ -313,7 +331,31 @@ $dockbarOpenGradientStart: #0EA6F9;
 		}
 	}
 
-	/* ---------- General Nav ---------- */
+	/* ---------- Form navigator ---------- */
+
+	.portlet-journal {
+		form {
+			margin-bottom: 0;
+		}
+
+		.article-form-add {
+			.taglib-header {
+				margin-bottom: 0;
+			}
+
+			.journal-article-header-edit {
+				border-top-width: 0;
+			}
+		}
+	}
+
+	/* ---------- General nav ---------- */
+
+	.portlet-topper-toolbar {
+		position: absolute;
+		right: 21px;
+		top: 23px;
+	}
 
 	.nav-list {
 		li > a {
@@ -337,93 +379,82 @@ $dockbarOpenGradientStart: #0EA6F9;
 
 	.portlet-title {
 		font-size: 25px;
-		font-weight: lighter;
+		font-weight: 100;
 
 		.taglib-icon-help {
 			margin-left: -7px;
 		}
 	}
 
-	/* ---------- Panel Page Menu (Site Pages Side Navigation) ---------- */
+	/* ---------- Side accordion navigations ---------- */
+
+	.lfr-title-scope-selector {
+		padding: 0 15px 5px;
+	}
 
 	.panel-page-menu {
+		position: relative;
+
+		.accordion-toggle [class^="icon-"] {
+			display: none;
+		}
+
+		.minimize-panels a {
+			background: url(../images/custom/panel_close.png) no-repeat;
+			display: none;
+			color: #FFF;
+			font-size: 20px;
+			height: 17px;
+			position: absolute;
+			right: -18px;
+			text-align: center;
+			text-decoration: none;
+			top: 7px;
+			width: 24px;
+
+			span {
+				color: transparent;
+				font-size: 0;
+			}
+		}
+
+		&:hover {
+			.minimize-panels a {
+				display: block;
+			}
+		}
+
 		.portlet-borderless-container {
 			background: #FCFCFC;
-			border-right: 1px solid #D1D1D1;
+			border-right: 1px solid #D3D3D3;
 			padding: 15px 0 0;
 
 			.accordion {
-				background: #FFF;
+				border-right-width: 0;
 				margin-bottom: 0;
 
-				.accordion-group {
-					background: #FFF;
-					border: solid #D1D1D1;
-					border-width: 1px 0 0;
-					margin-bottom: 0;
+				.accordion-group .category-portlets {
+					list-style: none;
+					margin: 0;
 
-					&:last-child {
-						.toggler-header-collapsed {
-							border-bottom: 1px solid #D1D1D1;
+					li {
+						a {
+							display: block;
+							font-size: 14px;
+							padding: 3px 15px;
+							text-decoration: none;
+
+							&:focus, &:hover {
+								background: #E5F5FC;
+								color: #009AE5;
+							}
 						}
-					}
 
-					.accordion-heading {
-						cursor: pointer;
-
-						.accordion-toggle {
-							font-size: 16px;
-							font-weight: 300;
-							padding: 0;
-							text-transform: capitalize;
-						}
-					}
-
-					.accordion-inner {
-						background: #FCFCFC;
-						border: solid #D1D1D1;
-						border-width: 1px 0 0;
-						padding: 6px 0 15px;
-					}
-
-					.category-portlets {
-						list-style: none;
-						margin: 0;
-
-						li {
+						&.selected-portlet {
 							a {
-								display: block;
-								font-size: 14px;
-								padding: 3px 15px;
-								text-decoration: none;
-
-								&:focus, &:hover {
-									background: #E5F5FC;
-									color: #009AE5;
-								}
+								background: #60BFEF;
+								color: #FFF;
 							}
-
-							&.selected-portlet {
-								a {
-									background: #60BFEF;
-									color: #FFF;
-								}
-							}
-						}
-					}
-
-					.toggler-header {
-						background: #F2F2F2;
-						padding: 6px 10px;
-
-						.accordion-toggle {
-							background: #F2F2F2 url(../images/custom/arrow_option.png) no-repeat 100% -20px;
-						}
-					}
-
-					.toggler-header-collapsed {
-						.accordion-toggle {
-							background-position: 100% 0;
 						}
 					}
 				}
@@ -431,7 +462,7 @@ $dockbarOpenGradientStart: #0EA6F9;
 		}
 
 		.search-panels {
-			padding: 0 10px 13px;
+			padding: 0 10px 14px;
 			position: relative;
 
 			.cancel-search {
@@ -448,7 +479,27 @@ $dockbarOpenGradientStart: #0EA6F9;
 				}
 			}
 
+			.icon-search {
+				display: none;
+			}
+
 			.search-panels-bar {
+				position: relative;
+
+				&:after {
+					background: url(../images/custom/search_panel_icon.png) no-repeat 0 50%;
+					color: #D4D4D4;
+					content: '';
+					display: block;
+					font-size: 0;
+					height: 18px;
+					margin-left: 8px;
+					margin-top: 6px;
+					position: absolute;
+					top: 0;
+					width: 27px;
+				}
+
 				.control-group {
 					margin: 0;
 
@@ -462,17 +513,6 @@ $dockbarOpenGradientStart: #0EA6F9;
 					}
 				}
 
-				.search-panel-icon {
-					background: url(../images/custom/search_panel_icon.png) no-repeat 0 50%;
-					color: #D4D4D4;
-					font-size: 0;
-					height: 18px;
-					margin-left: 8px;
-					margin-top: 6px;
-					position: absolute;
-					width: 27px;
-				}
-
 				input {
 					padding-left: 40px;
 				}
@@ -481,6 +521,132 @@ $dockbarOpenGradientStart: #0EA6F9;
 
 		.search-panel-active .search-panels .cancel-search {
 			display: inline-block;
+		}
+	}
+
+	.panels-minimized {
+		.panel-page-menu {
+			width: 50px;
+
+			.accordion-group {
+				&.open {
+					.toggler-content {
+						border: 1px solid #DDD;
+						left: 49px;
+
+						&:before {
+							content: '';
+							height: 44px;
+							margin-left: 0px;
+							position: absolute;
+							width: 50px;
+						}
+
+						.accordion-inner {
+							border-top-width: 0;
+						}
+					}
+
+					.toggler-header {
+						background-color: #DDD;
+					}
+				}
+			}
+
+			.accordion-toggle {
+				position: relative;
+				text-align: center;
+
+				[class^="icon-"] {
+					display: inline;
+				}
+
+				.title-text {
+					display: none;
+				}
+			}
+
+			.control-panel-tools {
+				cursor: pointer;
+				padding-top: 16px;
+
+				&:hover {
+					background-color: #DDD;
+				}
+			}
+
+			.minimize-panels a {
+				background-image: url(../images/custom/panel_open.png);
+			}
+
+			.portlet-borderless-container {
+				padding: 0;
+
+				.accordion {
+					.toggler-header .accordion-toggle {
+						background: none no-repeat right;
+					}
+
+					.accordion-group {
+						background: #FFF;
+						border: solid #D1D1D1;
+						border-width: 0;
+						margin-bottom: 0;
+						position: relative;
+
+						&:first-child {
+							border-top-width: 1px;
+						}
+
+						&:last-child {
+							.toggler-header-collapsed {
+								border-bottom-width: 1px;
+							}
+						}
+					}
+
+					.accordion-heading {
+						border-bottom: 1px solid #D1D1D1;
+						border-top-width: 0;
+
+						&:hover {
+							background-color: #DDD;
+						}
+					}
+
+					.toggler-header {
+						padding: 14px 10px 10px;
+					}
+				}
+			}
+
+			.search-panels {
+				text-align: center;
+
+				.icon-search {
+					display: block;
+				}
+			}
+
+			.search-panels-bar {
+				display: none;
+			}
+
+			.toggler-content {
+				left: -250px;
+				position: absolute;
+				top: -1px;
+				width: 225px;
+				z-index: 1;
+			}
+
+			.toggler-content-collapsed {
+				display: block;
+			}
+		}
+
+		.span9.panel-page-body {
+			width: 90%;
 		}
 	}
 
@@ -500,8 +666,8 @@ $dockbarOpenGradientStart: #0EA6F9;
 			.control-panel-back-link {
 				color: #30C8EE;
 				display: inline-block;
-				font-size: 20px;
-				line-height: 20px;
+				font-size: 21px;
+				line-height: 21px;
 				margin-right: 5px;
 				text-decoration: none;
 				vertical-align: middle;
@@ -511,35 +677,43 @@ $dockbarOpenGradientStart: #0EA6F9;
 				}
 			}
 
+			.control-panel-site-selector {
+				font-size: inherit;
+
+				a {
+					&:focus, &:hover {
+						.icon-caret-down {
+							color: #8CD3FC;
+						}
+					}
+				}
+
+				[class^="icon-"], [class*="icon-"] {
+					font-size: 21px;
+					padding: 0 10px 0 0;
+					vertical-align: top;
+				}
+
+				&.open {
+					.dropdown-toggle {
+						@include box-shadow(none);
+
+						[class^="icon-"], [class*="icon-"] {
+							color: #009AE5;
+						}
+					}
+				}
+			}
+
 			.site-title {
 				display: inline-block;
 				font-size: 25px;
 				font-weight: 300;
 				line-height: 20px;
 				margin: 0;
-				padding: 0 28px 0 5px;
+				padding: 0 28px 0 0;
 				text-transform: capitalize;
 				vertical-align: middle;
-
-				.control-panel-site-selector {
-					.dropdown-toggle {
-						i.caret {
-							background: url(../images/custom/arrow_option_down.png) no-repeat 0 0;
-							border-width: 0;
-							height: 20px;
-							margin: 0;
-							width: 20px;
-						}
-					}
-
-					&.open {
-						.dropdown-toggle {
-							i.caret {
-								background-position: 0 -20px;
-							}
-						}
-					}
-				}
 			}
 
 			.visit-links {
@@ -547,27 +721,12 @@ $dockbarOpenGradientStart: #0EA6F9;
 				font-size: 12px;
 				list-style: none;
 				margin: 0;
-				padding: 0 0 0 25px;
+				padding: 0 0 0 29px;
 
 				li {
 					display: inline-block;
 					margin-left: 0;
 					margin-right: 5px;
-				}
-
-				ul {
-					color: #8D8D8D;
-					list-style: none;
-					margin: 0;
-
-					li {
-						float: left;
-
-						&.divider:before {
-							content: '/';
-							margin: 0 5px;
-						}
-					}
 				}
 			}
 		}
@@ -576,17 +735,23 @@ $dockbarOpenGradientStart: #0EA6F9;
 			background: #FCFCFC;
 			border: 1px solid #D1D1D1;
 			border-width: 0 0 0 1px;
+			padding-top: 0;
 
 			.nav-header {
 				background: #F3F3F3;
 				font-size: 14px;
-				font-weight: lighter;
-				text-transform: capitalize;
+				font-weight: 200;
+				text-transform: none;
 			}
 		}
 	}
 
-	/* ---------- Control Panel General ---------- */
+	/* ---------- Control panel general ---------- */
+
+	li.publish-link-container a:before {
+		content: '';
+		padding-left: 19px;
+	}
 
 	.control-panel-site-selector .caret {
 		border-width: 6px;
@@ -595,6 +760,10 @@ $dockbarOpenGradientStart: #0EA6F9;
 	}
 
 	.lfr-ctrl-panel {
+		li.publish-link-container a:before {
+			padding-left: 0;
+		}
+
 		.lfr-meta-actions {
 			margin-right: 0;
 		}
@@ -616,7 +785,7 @@ $dockbarOpenGradientStart: #0EA6F9;
 		margin-left: 0;
 	}
 
-	/* ---------- My Account Popup ---------- */
+	/* ---------- My account popup ---------- */
 
 	button {
 		&.delete-logo, &.edit-logo {
@@ -655,12 +824,18 @@ $dockbarOpenGradientStart: #0EA6F9;
 		}
 	}
 
+	.btn-group.control-panel-site-selector.open a {
+		@include box-shadow(none);
+	}
+
 	.dropdown-menu {
 		@include box-shadow(none);
 	}
 
 	.panel-page-menu .portlet-borderless-container {
 		&:after {
+				background-color: #D1D1D1;
+
 				@include background-image(linear-gradient(#FFF, #D1D1D1));
 
 				content: '';
@@ -674,7 +849,7 @@ $dockbarOpenGradientStart: #0EA6F9;
 
 		.accordion .accordion-group {
 			@include border-radius(0);
-			@include box-shadow(-3px 0px 2px -2px #F5F5F5);
+			@include box-shadow(-3px 0 2px -2px #F5F5F5);
 
 			.accordion-heading {
 				&.toggler-header-collapsed, &.toggler-header-expanded {
@@ -696,22 +871,30 @@ $dockbarOpenGradientStart: #0EA6F9;
 		@include border-radius(4px);
 	}
 
-	/* ---------- Dockbar ---------- */
+	.alert {
+		margin: 20px 0;
+	}
+
+	/* ---------- Extras dockbar ---------- */
 
 	.dockbar {
 		.navbar-inner {
+			background-color: $dockbarGradientStart;
+
 			@include background-image(linear-gradient(top, $dockbarGradientStart, $dockbarGradientEnd));
 			@include filter-gradient($dockbarGradientStart, $dockbarGradientEnd, vertical);
 
 			ul.nav-account-controls {
 				li.open > .dropdown-toggle {
+					background-color: $dockbarGradientStart;
+
 					@include background-image(linear-gradient(top, $dockbarOpenGradientStart, $dockbarOpenGradientEnd));
 					@include box-shadow(none);
 					@include filter-gradient($dockbarOpenGradientStart, $dockbarOpenGradientEnd, vertical);
 				}
 			}
 
-			ul.nav-add-controls {
+			ul.nav-navigation {
 				> li a:hover {
 					@include border-radius(4px);
 				}
@@ -726,7 +909,7 @@ $dockbarOpenGradientStart: #0EA6F9;
 	}
 
 	.panel-page-menu .portlet-static.portlet-static-end {
-		@include box-shadow(3px 0px 2px -2px #F5F5F5);
+		@include box-shadow(3px 0 2px -2px #F5F5F5);
 	}
 
 	.panel-manage-frontpage {
@@ -736,7 +919,156 @@ $dockbarOpenGradientStart: #0EA6F9;
 
 		.form-navigator.well {
 			@include border-radius(0);
-			@include box-shadow(-3px 0px 2px -2px #F5F5F5);
+			@include box-shadow(-3px 0 2px -2px #F5F5F5);
+		}
+	}
+
+	/* ---------- Media queries ---------- */
+
+	@include respond-to(phone, tablet) {
+		ul.form-navigator.well {
+			.button-holder {
+				padding-bottom: 20px;
+				position: absolute;
+				top: 100%;
+			}
+		}
+
+		.portlet-journal {
+			.journal-article-header-edit {
+				border-top-width: 1px;
+			}
+		}
+
+		.nav-list .nav-header {
+			margin-left: 0;
+			margin-right: 0;
+		}
+
+		.tabbable-content.taglib-form-navigator {
+			position: relative;
+		}
+
+		.taglib-form-navigator .nav.form-navigator.well {
+			border-top-width: 0;
+			margin-top: 0;
+			padding: 0;
+		}
+	}
+
+	@include respond-to(phone) {
+
+		/* ---------- Panel page menu ---------- */
+
+		.panel-page-menu {
+			.minimize-panels a {
+				display: block;
+				opacity: 1;
+			}
+		}
+
+		.panels-minimized {
+			.panel-page-body.span9 {
+				width: 100%;
+
+				&:before {
+					content: ".";
+					clear: both;
+					display: block;
+					height: 0;
+					visibility: hidden;
+				}
+			}
+
+			.panel-page-menu {
+				float: left;
+				width: 100%;
+
+				.control-panel-tools {
+					float: left;
+					width: 20%;
+				}
+
+				.minimize-panels {
+					display: none;
+				}
+
+				.portlet-borderless-container {
+					background: transparent;
+					border: 1px solid #D3D3D3;
+					float: left;
+					margin-top: 20px;
+					width: 100%;
+					z-index: 400;
+
+					&:after {
+						background-image: none;
+					}
+
+					.accordion {
+						border-width: 0;
+						float: left;
+						width: 80%;
+
+						.toggler-header .accordion-toggle {
+							background-position: center;
+							right: auto;
+						}
+
+						.accordion-group {
+							@include box-shadow(none);
+
+							float: left;
+							position: static;
+							width: 25%;
+
+							&:first-child {
+								border-top-width: 0;
+							}
+
+							&:last-child {
+								.toggler-header {
+									border-bottom-width: 0;
+								}
+							}
+
+							&.open {
+								.toggler-content {
+									left: -1px;
+									margin-top: 0 !important;
+									position: absolute;
+									width: 100%;
+								}
+							}
+						}
+
+						.accordion-heading {
+							border-bottom-width: 0;
+						}
+					}
+				}
+
+				.search-panels {
+					background-position: center;
+					right: auto;
+				}
+
+				.toggler-content {
+					margin-top: 3px;
+					top: auto;
+				}
+
+				.toggler-header {
+					border-left: 1px solid #D3D3D3;
+				}
+			}
+		}
+
+		.span6 {
+			&.article-structure, &.article-template {
+				float: left;
+				width: 45%;
+			}
 		}
 	}
 }

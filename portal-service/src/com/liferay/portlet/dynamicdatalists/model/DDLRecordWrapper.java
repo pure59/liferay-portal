@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatalists.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DDLRecord
  * @generated
  */
+@ProviderType
 public class DDLRecordWrapper implements DDLRecord, ModelWrapper<DDLRecord> {
 	public DDLRecordWrapper(DDLRecord ddlRecord) {
 		_ddlRecord = ddlRecord;
@@ -634,6 +637,13 @@ public class DDLRecordWrapper implements DDLRecord, ModelWrapper<DDLRecord> {
 	public java.io.Serializable getFieldValue(java.lang.String fieldName)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecord.getFieldValue(fieldName);
+	}
+
+	@Override
+	public java.io.Serializable getFieldValue(java.lang.String fieldName,
+		java.util.Locale locale)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _ddlRecord.getFieldValue(fieldName, locale);
 	}
 
 	@Override

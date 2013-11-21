@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.servlet.ServletContextPool;
 import com.liferay.portal.kernel.servlet.URLEncoder;
 import com.liferay.portal.kernel.template.TemplateHandler;
 import com.liferay.portal.kernel.trash.TrashHandler;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ContextPathUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -644,6 +645,20 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
+	 * Returns the servlet context name of the portlet.
+	 *
+	 * @return the servlet context name of the portlet
+	 */
+	@Override
+	public String getContextName() {
+		if (!_portletApp.isWARFile()) {
+			return PortalUtil.getServletContextName();
+		}
+
+		return _portletApp.getServletContextName();
+	}
+
+	/**
 	 * Returns the servlet context path of the portlet.
 	 *
 	 * @return the servlet context path of the portlet
@@ -1012,7 +1027,7 @@ public class PortletImpl extends PortletBaseImpl {
 	@Override
 	public List<Indexer> getIndexerInstances() {
 		if (_indexerClasses.isEmpty() &&
-			!_portletClass.equals(AlloyPortlet.class.getName())) {
+			!_portletClass.contains(AlloyPortlet.class.getSimpleName())) {
 
 			return Collections.emptyList();
 		}
@@ -2220,12 +2235,12 @@ public class PortletImpl extends PortletBaseImpl {
 	 */
 	@Override
 	public boolean hasRoleWithName(String roleName) {
-		if ((_rolesArray == null) || (_rolesArray.length == 0)) {
+		if (ArrayUtil.isEmpty(_rolesArray)) {
 			return false;
 		}
 
 		for (int i = 0; i < _rolesArray.length; i++) {
-			if (_rolesArray[i].equalsIgnoreCase(roleName)) {
+			if (StringUtil.equalsIgnoreCase(_rolesArray[i], roleName)) {
 				return true;
 			}
 		}

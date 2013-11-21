@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE liferay-portlet-app PUBLIC "-//Liferay//DTD Portlet Application 6.2.0//EN" "http://www.liferay.com/dtd/liferay-portlet-app_6_2_0.dtd">
+<!DOCTYPE liferay-portlet-app PUBLIC "-//Liferay//DTD Portlet Application 7.0.0//EN" "http://www.liferay.com/dtd/liferay-portlet-app_7_0_0.dtd">
 
 <liferay-portlet-app>
 	<portlet>
@@ -159,6 +159,7 @@
 		<struts-path>message_boards</struts-path>
 		<configuration-action-class>com.liferay.portlet.messageboards.action.ConfigurationActionImpl</configuration-action-class>
 		<indexer-class>com.liferay.portlet.messageboards.util.MBMessageIndexer</indexer-class>
+		<indexer-class>com.liferay.portlet.messageboards.util.MBThreadIndexer</indexer-class>
 		<open-search-class>com.liferay.portlet.messageboards.util.MBOpenSearchImpl</open-search-class>
 		<scheduler-entry>
 			<scheduler-event-listener-class>com.liferay.portlet.messageboards.messaging.ExpireBanMessageListener</scheduler-event-listener-class>
@@ -282,6 +283,7 @@
 		<render-weight>50</render-weight>
 		<header-portlet-css>/html/portlet/polls/css/main.css</header-portlet-css>
 		<css-class-wrapper>portlet-polls</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
 	</portlet>
 	<portlet>
 		<portlet-name>26</portlet-name>
@@ -578,6 +580,7 @@
 		<social-activity-interpreter-class>com.liferay.portlet.journal.social.JournalArticleActivityInterpreter</social-activity-interpreter-class>
 		<social-activity-interpreter-class>com.liferay.portlet.journal.social.JournalFolderActivityInterpreter</social-activity-interpreter-class>
 		<custom-attributes-display>com.liferay.portlet.journal.JournalArticleCustomAttributesDisplay</custom-attributes-display>
+		<ddm-display>com.liferay.portlet.journal.ddm.JournalContentDDMDisplay</ddm-display>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
 		<layout-cacheable>true</layout-cacheable>
@@ -645,6 +648,7 @@
 		<render-weight>50</render-weight>
 		<header-portlet-css>/html/portlet/journal_articles/css/main.css</header-portlet-css>
 		<css-class-wrapper>portlet-journal-articles</css-class-wrapper>
+		<active>false</active>
 	</portlet>
 	<portlet>
 		<portlet-name>64</portlet-name>
@@ -664,6 +668,7 @@
 		<private-request-attributes>false</private-request-attributes>
 		<private-session-attributes>false</private-session-attributes>
 		<render-weight>50</render-weight>
+		<header-portlet-css>/html/portlet/recent_documents/css/main.css</header-portlet-css>
 		<css-class-wrapper>portlet-recent-documents</css-class-wrapper>
 	</portlet>
 	<portlet>
@@ -837,6 +842,7 @@
 		<portlet-url-class>com.liferay.portal.struts.StrutsActionPortletURL</portlet-url-class>
 		<staged-model-data-handler-class>com.liferay.portlet.layoutsadmin.lar.LayoutFriendlyURLStagedModelDataHandler</staged-model-data-handler-class>
 		<staged-model-data-handler-class>com.liferay.portlet.layoutsadmin.lar.LayoutStagedModelDataHandler</staged-model-data-handler-class>
+		<staged-model-data-handler-class>com.liferay.portlet.layoutsadmin.lar.StagedThemeStagedModelDataHandler</staged-model-data-handler-class>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
 		<private-request-attributes>false</private-request-attributes>
@@ -884,6 +890,7 @@
 		<private-session-attributes>false</private-session-attributes>
 		<render-weight>50</render-weight>
 		<css-class-wrapper>portlet-software-catalog</css-class-wrapper>
+		<active>false</active>
 	</portlet>
 	<portlet>
 		<portlet-name>99</portlet-name>
@@ -1021,6 +1028,7 @@
 		<header-portlet-css>/html/portlet/document_library/css/main.css</header-portlet-css>
 		<header-portlet-css>/html/portlet/document_library_display/css/main.css</header-portlet-css>
 		<css-class-wrapper>portlet-document-library-display</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
 	</portlet>
 	<portlet>
 		<portlet-name>113</portlet-name>
@@ -1074,6 +1082,7 @@
 		<private-request-attributes>false</private-request-attributes>
 		<private-session-attributes>false</private-session-attributes>
 		<render-weight>50</render-weight>
+		<header-portlet-css>/html/portlet/activities/css/main.css</header-portlet-css>
 		<css-class-wrapper>portlet-activities</css-class-wrapper>
 	</portlet>
 	<portlet>
@@ -1294,6 +1303,7 @@
 		<render-weight>50</render-weight>
 		<header-portlet-css>/html/portlet/layouts_admin/css/main.css</header-portlet-css>
 		<header-portlet-css>/html/portlet/users_admin/css/main.css</header-portlet-css>
+		<footer-portlet-javascript>/html/portlet/layouts_admin/js/main.js</footer-portlet-javascript>
 		<css-class-wrapper>portlet-users-admin</css-class-wrapper>
 		<add-default-resource>true</add-default-resource>
 	</portlet>
@@ -1405,21 +1415,10 @@
 		<css-class-wrapper>portlet-page-flags</css-class-wrapper>
 	</portlet>
 	<portlet>
-		<portlet-name>144</portlet-name>
-		<icon>/html/icons/ratings.png</icon>
-		<struts-path>ratings</struts-path>
-		<use-default-template>false</use-default-template>
-		<private-request-attributes>false</private-request-attributes>
-		<private-session-attributes>false</private-session-attributes>
-		<render-weight>50</render-weight>
-		<css-class-wrapper>portlet-ratings</css-class-wrapper>
-		<add-default-resource>true</add-default-resource>
-		<system>true</system>
-	</portlet>
-	<portlet>
 		<portlet-name>145</portlet-name>
 		<icon>/html/icons/default.png</icon>
 		<struts-path>dockbar</struts-path>
+		<portlet-url-class>com.liferay.portal.struts.StrutsActionPortletURL</portlet-url-class>
 		<use-default-template>false</use-default-template>
 		<show-portlet-access-denied>false</show-portlet-access-denied>
 		<show-portlet-inactive>false</show-portlet-inactive>
@@ -1557,7 +1556,6 @@
 		<friendly-url-mapper-class>com.liferay.portal.kernel.portlet.DefaultFriendlyURLMapper</friendly-url-mapper-class>
 		<friendly-url-mapping>my_workflow_tasks</friendly-url-mapping>
 		<friendly-url-routes>com/liferay/portlet/workflowtasks/workflow-tasks-friendly-url-routes.xml</friendly-url-routes>
-		<user-notification-definitions>com/liferay/portlet/workflowtasks/workflow-tasks-user-notification-definitions.xml</user-notification-definitions>
 		<user-notification-handler-class>com.liferay.portlet.workflowtasks.notifications.WorkflowTasksUserNotificationHandler</user-notification-handler-class>
 		<control-panel-entry-category>my</control-panel-entry-category>
 		<control-panel-entry-weight>3.0</control-panel-entry-weight>
@@ -1831,6 +1829,7 @@
 		<header-portlet-css>/html/portlet/asset_publisher/css/main.css</header-portlet-css>
 		<css-class-wrapper>portlet-asset-publisher</css-class-wrapper>
 		<add-default-resource>true</add-default-resource>
+		<active>false</active>
 	</portlet>
 	<portlet>
 		<portlet-name>174</portlet-name>
@@ -1839,7 +1838,7 @@
 		<parent-struts-path>sites_admin</parent-struts-path>
 		<portlet-url-class>com.liferay.portal.struts.StrutsActionPortletURL</portlet-url-class>
 		<control-panel-entry-category>site_administration.users</control-panel-entry-category>
-		<control-panel-entry-weight>3.0</control-panel-entry-weight>
+		<control-panel-entry-weight>1.0</control-panel-entry-weight>
 		<control-panel-entry-class>com.liferay.portlet.sitesadmin.SiteMembershipsControlPanelEntry</control-panel-entry-class>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
@@ -1900,6 +1899,7 @@
 		<render-weight>50</render-weight>
 		<header-portlet-css>/html/portlet/mobile_device_rules/css/main.css</header-portlet-css>
 		<css-class-wrapper>mobile-device-rules</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
 	</portlet>
 	<portlet>
 		<portlet-name>179</portlet-name>
@@ -1908,6 +1908,7 @@
 		<portlet-url-class>com.liferay.portal.struts.StrutsActionPortletURL</portlet-url-class>
 		<control-panel-entry-category>site_administration.configuration</control-panel-entry-category>
 		<control-panel-entry-weight>3.0</control-panel-entry-weight>
+		<control-panel-entry-class>com.liferay.portlet.socialactivity.SocialActivityControlPanelEntry</control-panel-entry-class>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
 		<private-request-attributes>false</private-request-attributes>
@@ -2061,6 +2062,96 @@
 		<render-weight>50</render-weight>
 		<add-default-resource>true</add-default-resource>
 		<system>true</system>
+	</portlet>
+	<portlet>
+		<portlet-name>191</portlet-name>
+		<icon>/html/icons/site_memberships_admin.png</icon>
+		<struts-path>site_teams_admin</struts-path>
+		<parent-struts-path>sites_admin</parent-struts-path>
+		<portlet-url-class>com.liferay.portal.struts.StrutsActionPortletURL</portlet-url-class>
+		<control-panel-entry-category>site_administration.users</control-panel-entry-category>
+		<control-panel-entry-weight>2.0</control-panel-entry-weight>
+		<control-panel-entry-class>com.liferay.portlet.sitesadmin.SiteTeamsControlPanelEntry</control-panel-entry-class>
+		<preferences-owned-by-group>true</preferences-owned-by-group>
+		<use-default-template>false</use-default-template>
+		<private-request-attributes>false</private-request-attributes>
+		<private-session-attributes>false</private-session-attributes>
+		<render-weight>50</render-weight>
+		<header-portlet-css>/html/portlet/layouts_admin/css/main.css</header-portlet-css>
+		<header-portlet-css>/html/portlet/sites_admin/css/main.css</header-portlet-css>
+		<css-class-wrapper>portlet-communities</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
+		<system>true</system>
+	</portlet>
+	<portlet>
+		<portlet-name>192</portlet-name>
+		<icon>/html/icons/site_settings.png</icon>
+		<struts-path>layout_set_prototype_settings</struts-path>
+		<parent-struts-path>layout_set_prototypes</parent-struts-path>
+		<portlet-url-class>com.liferay.portal.struts.StrutsActionPortletURL</portlet-url-class>
+		<portlet-data-handler-class>com.liferay.portlet.layoutsetprototypes.lar.LayoutSetPrototypePortletDataHandler</portlet-data-handler-class>
+		<control-panel-entry-category>site_administration.configuration</control-panel-entry-category>
+		<control-panel-entry-weight>1.0</control-panel-entry-weight>
+		<control-panel-entry-class>com.liferay.portlet.layoutsetprototypes.LayoutSetPrototypeSettingsControlPanelEntry</control-panel-entry-class>
+		<preferences-owned-by-group>true</preferences-owned-by-group>
+		<use-default-template>false</use-default-template>
+		<private-request-attributes>false</private-request-attributes>
+		<private-session-attributes>false</private-session-attributes>
+		<render-weight>50</render-weight>
+		<header-portlet-css>/html/portlet/layouts_admin/css/main.css</header-portlet-css>
+		<header-portlet-css>/html/portlet/users_admin/css/main.css</header-portlet-css>
+		<footer-portlet-javascript>/html/portlet/layouts_admin/js/main.js</footer-portlet-javascript>
+		<css-class-wrapper>portlet-users-admin</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
+		<system>true</system>
+	</portlet>
+	<portlet>
+		<portlet-name>193</portlet-name>
+		<icon>/html/icons/asset_publisher.png</icon>
+		<parent-struts-path>asset_publisher</parent-struts-path>
+		<configuration-action-class>com.liferay.portlet.assetpublisher.action.ConfigurationActionImpl</configuration-action-class>
+		<indexer-class>com.liferay.portlet.assetpublisher.util.AssetIndexer</indexer-class>
+		<friendly-url-mapper-class>com.liferay.portal.kernel.portlet.DefaultFriendlyURLMapper</friendly-url-mapper-class>
+		<friendly-url-mapping>asset_publisher</friendly-url-mapping>
+		<friendly-url-routes>com/liferay/portlet/assetpublisher/asset-publisher-friendly-url-routes.xml</friendly-url-routes>
+		<portlet-data-handler-class>com.liferay.portlet.assetpublisher.lar.AssetPublisherPortletDataHandler</portlet-data-handler-class>
+		<template-handler>com.liferay.portlet.assetpublisher.template.AssetPublisherPortletDisplayTemplateHandler</template-handler>
+		<portlet-layout-listener-class>com.liferay.portlet.assetpublisher.AssetPublisherPortletLayoutListener</portlet-layout-listener-class>
+		<preferences-owned-by-group>true</preferences-owned-by-group>
+		<use-default-template>false</use-default-template>
+		<layout-cacheable>true</layout-cacheable>
+		<instanceable>true</instanceable>
+		<scopeable>false</scopeable>
+		<private-request-attributes>false</private-request-attributes>
+		<private-session-attributes>false</private-session-attributes>
+		<render-weight>50</render-weight>
+		<header-portlet-css>/html/portlet/asset_publisher/css/main.css</header-portlet-css>
+		<css-class-wrapper>portlet-asset-publisher</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
+	</portlet>
+	<portlet>
+		<portlet-name>194</portlet-name>
+		<icon>/html/icons/asset_publisher.png</icon>
+		<parent-struts-path>asset_publisher</parent-struts-path>
+		<configuration-action-class>com.liferay.portlet.assetpublisher.action.ConfigurationActionImpl</configuration-action-class>
+		<indexer-class>com.liferay.portlet.assetpublisher.util.AssetIndexer</indexer-class>
+		<friendly-url-mapper-class>com.liferay.portal.kernel.portlet.DefaultFriendlyURLMapper</friendly-url-mapper-class>
+		<friendly-url-mapping>asset_publisher</friendly-url-mapping>
+		<friendly-url-routes>com/liferay/portlet/assetpublisher/asset-publisher-friendly-url-routes.xml</friendly-url-routes>
+		<portlet-data-handler-class>com.liferay.portlet.assetpublisher.lar.AssetPublisherPortletDataHandler</portlet-data-handler-class>
+		<template-handler>com.liferay.portlet.assetpublisher.template.AssetPublisherPortletDisplayTemplateHandler</template-handler>
+		<portlet-layout-listener-class>com.liferay.portlet.assetpublisher.AssetPublisherPortletLayoutListener</portlet-layout-listener-class>
+		<preferences-owned-by-group>true</preferences-owned-by-group>
+		<use-default-template>false</use-default-template>
+		<layout-cacheable>true</layout-cacheable>
+		<instanceable>true</instanceable>
+		<scopeable>false</scopeable>
+		<private-request-attributes>false</private-request-attributes>
+		<private-session-attributes>false</private-session-attributes>
+		<render-weight>50</render-weight>
+		<header-portlet-css>/html/portlet/asset_publisher/css/main.css</header-portlet-css>
+		<css-class-wrapper>portlet-asset-publisher</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
 	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>

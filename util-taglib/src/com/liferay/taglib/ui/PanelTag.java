@@ -16,9 +16,9 @@ package com.liferay.taglib.ui;
 
 import com.liferay.portal.kernel.servlet.taglib.BaseBodyTagSupport;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.taglib.util.IncludeTag;
-import com.liferay.util.PwdGenerator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
@@ -35,7 +35,7 @@ public class PanelTag extends IncludeTag {
 			(HttpServletRequest)pageContext.getRequest();
 
 		if (Validator.isNull(_id)) {
-			_id = PwdGenerator.getPassword(PwdGenerator.KEY3, 4);
+			_id = StringUtil.randomId();
 		}
 
 		if (Validator.isNull(_parentId)) {
@@ -52,6 +52,7 @@ public class PanelTag extends IncludeTag {
 		}
 
 		request.setAttribute("liferay-ui:panel:helpMessage", _helpMessage);
+		request.setAttribute("liferay-ui:panel:iconCssClass", _iconCssClass);
 		request.setAttribute("liferay-ui:panel:id", _id);
 		request.setAttribute("liferay-ui:panel:parentId", _parentId);
 		request.setAttribute("liferay-ui:panel:title", _title);
@@ -62,6 +63,7 @@ public class PanelTag extends IncludeTag {
 			"liferay-ui:panel:persistState", String.valueOf(_persistState));
 		request.setAttribute("liferay-ui:panel:extended", _extended);
 		request.setAttribute("liferay-ui:panel:cssClass", _cssClass);
+		request.setAttribute("liferay-ui:panel:state", _state);
 
 		super.doStartTag();
 
@@ -92,6 +94,10 @@ public class PanelTag extends IncludeTag {
 		_helpMessage = helpMessage;
 	}
 
+	public void setIconCssClass(String iconCssClass) {
+		_iconCssClass = iconCssClass;
+	}
+
 	public void setId(String id) {
 		_id = id;
 	}
@@ -108,6 +114,10 @@ public class PanelTag extends IncludeTag {
 		_startPage = startPage;
 	}
 
+	public void setState(String state) {
+		_state = state;
+	}
+
 	public void setTitle(String title) {
 		_title = title;
 	}
@@ -120,10 +130,12 @@ public class PanelTag extends IncludeTag {
 		_endPage = null;
 		_extended = null;
 		_helpMessage = null;
+		_iconCssClass = null;
 		_id = null;
 		_parentId = StringPool.BLANK;
 		_persistState = true;
 		_startPage = null;
+		_state = null;
 		_title = null;
 	}
 
@@ -157,10 +169,12 @@ public class PanelTag extends IncludeTag {
 	private String _endPage;
 	private Boolean _extended;
 	private String _helpMessage;
+	private String _iconCssClass;
 	private String _id;
 	private String _parentId = StringPool.BLANK;
 	private boolean _persistState = true;
 	private String _startPage;
+	private String _state;
 	private String _title;
 
 }

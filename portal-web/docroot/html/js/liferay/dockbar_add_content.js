@@ -6,6 +6,8 @@ AUI.add(
 
 		var DATA_STYLE = 'data-style';
 
+		var SELECTOR_ADD_CONTENT_ITEM = '.add-content-item';
+
 		var SELECTOR_BUTTON = '.btn';
 
 		var STR_ACTION = 'action';
@@ -49,6 +51,8 @@ AUI.add(
 						instance._numItems.on('change', instance._onChangeNumItems, instance);
 
 						instance._styleButtonsList.delegate(STR_CLICK, instance._onChangeDisplayStyle, SELECTOR_BUTTON, instance);
+
+						instance._entriesPanel.delegate(STR_CLICK, instance._addContent, SELECTOR_ADD_CONTENT_ITEM, instance);
 
 						Liferay.on(
 							'AddContent:addPortlet',
@@ -97,7 +101,7 @@ AUI.add(
 					_onPortletClose: function(event) {
 						var instance = this;
 
-						var item = instance._addPanelContainer.one('.drag-content-item[data-plid=' + event.plid + '][data-portlet-id=' + event.portletId + '][data-instanceable=false]');
+						var item = instance._entriesPanel.one('.drag-content-item[data-plid=' + event.plid + '][data-portlet-id=' + event.portletId + '][data-instanceable=false]');
 
 						if (item && item.hasClass(CSS_LFR_PORTLET_USED)) {
 							var portletId = item.attr(DATA_PORTLET_ID);

@@ -25,10 +25,13 @@ long maxFileSize = PrefsPropsUtil.getLong(PropsKeys.UPLOAD_SERVLET_REQUEST_IMPL_
 <c:choose>
 	<c:when test='<%= SessionMessages.contains(renderRequest, "requestProcessed") %>'>
 		<aui:script>
-			opener.<portlet:namespace />changeLogo('<%= selUser.getPortraitURL(themeDisplay) %>');
+			Liferay.Util.getOpener().<portlet:namespace />changeLogo('<%= selUser.getPortraitURL(themeDisplay) %>');
 
-			window.close();
+			Liferay.Util.getWindow().hide();
 		</aui:script>
+	</c:when>
+	<c:when test='<%= !UsersAdminUtil.hasUpdateFieldPermission(selUser, "portrait") %>'>
+		<img src="<%= selUser.getPortraitURL(themeDisplay) %>" />
 	</c:when>
 	<c:otherwise>
 		<portlet:actionURL var="editUserPortraitURL">
@@ -47,7 +50,7 @@ long maxFileSize = PrefsPropsUtil.getLong(PropsKeys.UPLOAD_SERVLET_REQUEST_IMPL_
 				<liferay-ui:message arguments="<%= PrefsPropsUtil.getLong(PropsKeys.USERS_IMAGE_MAX_SIZE) / 1024 %>" key="please-enter-a-file-with-a-valid-file-size-no-larger-than-x" />
 			</liferay-ui:error>
 
-			<aui:fieldset>
+			<aui:fieldset cssClass="lfr-portrait-editor">
 				<aui:input autoFocus="<= windowState.equals(WindowState.MAXIMIZED) %>" label='<%= LanguageUtil.format(pageContext, "upload-images-no-larger-than-x-k", maxFileSize, false) %>' name="fileName" size="50" type="file" />
 
 				<div class="lfr-change-logo lfr-portrait-preview" id="<portlet:namespace />portraitPreview">
@@ -63,7 +66,7 @@ long maxFileSize = PrefsPropsUtil.getLong(PropsKeys.UPLOAD_SERVLET_REQUEST_IMPL_
 		</aui:form>
 
 		<aui:script use="liferay-logo-editor">
-			new Liferay.LogoEditor(
+			var logoEditor = new Liferay.LogoEditor(
 				{
 					maxFileSize: '<%= maxFileSize %>',
 					namespace: '<portlet:namespace />',
@@ -71,6 +74,14 @@ long maxFileSize = PrefsPropsUtil.getLong(PropsKeys.UPLOAD_SERVLET_REQUEST_IMPL_
 					uploadURL: '<portlet:actionURL><portlet:param name="struts_action" value="/users_admin/edit_user_portrait" /><portlet:param name="<%= Constants.CMD %>" value="<%= Constants.ADD_TEMP %>" /><portlet:param name="p_u_i_d" value="<%= String.valueOf(selUser.getUserId()) %>" /></portlet:actionURL>'
 				}
 			);
+
+			if (Liferay.Util.getTop() !== A.config.win) {
+				var dialog = Liferay.Util.getWindow();
+
+				if (dialog) {
+					dialog.on(['resize:end', 'resize:resize', 'resize:start'], logoEditor.resize, logoEditor);
+				}
+			}
 		</aui:script>
 	</c:otherwise>
 </c:choose>

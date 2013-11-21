@@ -246,7 +246,7 @@ public class BaseRepositoryProxyBean
 
 	@Override
 	public int getFileEntriesAndFileShortcutsCount(long folderId, int status)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		return _baseRepository.getFileEntriesAndFileShortcutsCount(
 			folderId, status);
@@ -262,13 +262,15 @@ public class BaseRepositoryProxyBean
 	}
 
 	@Override
-	public int getFileEntriesCount(long folderId) throws SystemException {
+	public int getFileEntriesCount(long folderId)
+		throws PortalException, SystemException {
+
 		return _baseRepository.getFileEntriesCount(folderId);
 	}
 
 	@Override
 	public int getFileEntriesCount(long folderId, long documentTypeId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		return _baseRepository.getFileEntriesCount(folderId, documentTypeId);
 	}
@@ -424,7 +426,7 @@ public class BaseRepositoryProxyBean
 
 	@Override
 	public int getFoldersFileEntriesCount(List<Long> folderIds, int status)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		return _baseRepository.getFoldersFileEntriesCount(folderIds, status);
 	}
@@ -449,7 +451,7 @@ public class BaseRepositoryProxyBean
 
 	@Override
 	public int getMountFoldersCount(long parentFolderId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		return _baseRepository.getMountFoldersCount(parentFolderId);
 	}
@@ -633,6 +635,23 @@ public class BaseRepositoryProxyBean
 		throws PortalException, SystemException {
 
 		_baseRepository.revertFileEntry(fileEntryId, version, serviceContext);
+	}
+
+	@Override
+	public Hits search(long creatorUserId, int status, int start, int end)
+		throws PortalException, SystemException {
+
+		return _baseRepository.search(creatorUserId, status, start, end);
+	}
+
+	@Override
+	public Hits search(
+			long creatorUserId, long folderId, String[] mimeTypes, int status,
+			int start, int end)
+		throws PortalException, SystemException {
+
+		return _baseRepository.search(
+			creatorUserId, folderId, mimeTypes, status, start, end);
 	}
 
 	@Override

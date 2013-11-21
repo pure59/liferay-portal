@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 
-<project name="build-common" xmlns:antelope="antlib:ise.antelope.tasks">
+<project name="build-common"
+	xmlns:antelope="antlib:ise.antelope.tasks"
+	xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+>
 	<dirname file="${ant.file.build-common}" property="project.dir" />
 
 	<property name="test.properties" value="com/liferay/portal/tools/dependencies/portal-tools.properties" />
@@ -65,14 +68,16 @@
 		<pathelement location="${project.dir}/portal-service/classes" />
 		<fileset dir="${project.dir}/lib/development" includes="jsp-api.jar,mail.jar,servlet-api.jar" />
 		<fileset dir="${project.dir}/lib/global" includes="*.jar" />
+		<fileset dir="${project.dir}/lib/portal" includes="bnd.jar" />
 		<path refid="web-lib.classpath" />
 	</path>
 
-	<taskdef classpathref="lib.classpath" resource="net/sf/antcontrib/antlib.xml" />
-	<taskdef classpathref="lib.classpath" resource="axis-tasks.properties" />
-	<taskdef classpathref="lib.classpath" resource="ise/antelope/tasks/antlib.xml" uri="antlib:ise.antelope.tasks" />
 	<taskdef classpathref="lib.classpath" resource="aQute/bnd/ant/taskdef.properties" />
+	<taskdef classpathref="lib.classpath" resource="axis-tasks.properties" />
 	<taskdef classpathref="lib.classpath" resource="com/orangevolt/tools/ant/taskdefs.properties" />
+	<taskdef classpathref="lib.classpath" resource="ise/antelope/tasks/antlib.xml" uri="antlib:ise.antelope.tasks" />
+	<taskdef classpathref="lib.classpath" resource="net/sf/antcontrib/antlib.xml" />
+	<typedef classpathref="lib.classpath" resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" />
 	<taskdef classpathref="lib.classpath" resource="tasks.properties" />
 
 	<taskdef classname="com.tonicsystems.jarjar.JarJarTask" classpath="${project.dir}/lib/development/jarjar.jar" name="jarjar" />
@@ -236,14 +241,17 @@
 		<dtd publicId="-//Liferay//DTD Display 6.0.0//EN" location="${definitions.dir}/liferay-display_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Display 6.1.0//EN" location="${definitions.dir}/liferay-display_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Display 6.2.0//EN" location="${definitions.dir}/liferay-display_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Display 7.0.0//EN" location="${definitions.dir}/liferay-display_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Friendly URL Routes 6.0.0//EN" location="${definitions.dir}/liferay-friendly-url-routes_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Friendly URL Routes 6.1.0//EN" location="${definitions.dir}/liferay-friendly-url-routes_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Friendly URL Routes 6.2.0//EN" location="${definitions.dir}/liferay-friendly-url-routes_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Friendly URL Routes 7.0.0//EN" location="${definitions.dir}/liferay-friendly-url-routes_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Hook 5.1.0//EN" location="${definitions.dir}/liferay-hook_5_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Hook 5.2.0//EN" location="${definitions.dir}/liferay-hook_5_2_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Hook 6.0.0//EN" location="${definitions.dir}/liferay-hook_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Hook 6.1.0//EN" location="${definitions.dir}/liferay-hook_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Hook 6.2.0//EN" location="${definitions.dir}/liferay-hook_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Hook 7.0.0//EN" location="${definitions.dir}/liferay-hook_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Layout Templates 3.6.0//EN" location="${definitions.dir}/liferay-layout-templates_3_6_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Layout Templates 4.0.0//EN" location="${definitions.dir}/liferay-layout-templates_4_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Layout Templates 4.3.0//EN" location="${definitions.dir}/liferay-layout-templates_4_3_0.dtd" />
@@ -253,6 +261,7 @@
 		<dtd publicId="-//Liferay//DTD Layout Templates 6.0.0//EN" location="${definitions.dir}/liferay-layout-templates_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Layout Templates 6.1.0//EN" location="${definitions.dir}/liferay-layout-templates_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Layout Templates 6.2.0//EN" location="${definitions.dir}/liferay-layout-templates_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Layout Templates 7.0.0//EN" location="${definitions.dir}/liferay-layout-templates_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Look and Feel 3.5.0//EN" location="${definitions.dir}/liferay-look-and-feel_3_5_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Look and Feel 4.0.0//EN" location="${definitions.dir}/liferay-look-and-feel_4_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Look and Feel 4.3.0//EN" location="${definitions.dir}/liferay-look-and-feel_4_3_0.dtd" />
@@ -262,6 +271,7 @@
 		<dtd publicId="-//Liferay//DTD Look and Feel 6.0.0//EN" location="${definitions.dir}/liferay-look-and-feel_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Look and Feel 6.1.0//EN" location="${definitions.dir}/liferay-look-and-feel_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Look and Feel 6.2.0//EN" location="${definitions.dir}/liferay-look-and-feel_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Look and Feel 7.0.0//EN" location="${definitions.dir}/liferay-look-and-feel_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Plugin Package 4.3.0//EN" location="${definitions.dir}/liferay-plugin-package_4_3_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Plugin Package 5.0.0//EN" location="${definitions.dir}/liferay-plugin-package_5_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Plugin Package 5.1.0//EN" location="${definitions.dir}/liferay-plugin-package_5_1_0.dtd" />
@@ -269,6 +279,7 @@
 		<dtd publicId="-//Liferay//DTD Plugin Package 6.0.0//EN" location="${definitions.dir}/liferay-plugin-package_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Plugin Package 6.1.0//EN" location="${definitions.dir}/liferay-plugin-package_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Plugin Package 6.2.0//EN" location="${definitions.dir}/liferay-plugin-package_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Plugin Package 7.0.0//EN" location="${definitions.dir}/liferay-plugin-package_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Plugin Repository 4.3.0//EN" location="${definitions.dir}/liferay-plugin-repository_4_3_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Plugin Repository 5.0.0//EN" location="${definitions.dir}/liferay-plugin-repository_5_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Plugin Repository 5.1.0//EN" location="${definitions.dir}/liferay-plugin-repository_5_1_0.dtd" />
@@ -276,6 +287,7 @@
 		<dtd publicId="-//Liferay//DTD Plugin Repository 6.0.0//EN" location="${definitions.dir}/liferay-plugin-repository_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Plugin Repository 6.1.0//EN" location="${definitions.dir}/liferay-plugin-repository_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Plugin Repository 6.2.0//EN" location="${definitions.dir}/liferay-plugin-repository_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Plugin Repository 7.0.0//EN" location="${definitions.dir}/liferay-plugin-repository_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD PORTLET 2.0.0//EN" location="${definitions.dir}/liferay-portlet_2_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD PORTLET 2.2.0//EN" location="${definitions.dir}/liferay-portlet_2_2_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Portlet Application 3.5.0//EN" location="${definitions.dir}/liferay-portlet-app_3_5_0.dtd" />
@@ -293,9 +305,11 @@
 		<dtd publicId="-//Liferay//DTD Portlet Application 6.0.0//EN" location="${definitions.dir}/liferay-portlet-app_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Portlet Application 6.1.0//EN" location="${definitions.dir}/liferay-portlet-app_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Portlet Application 6.2.0//EN" location="${definitions.dir}/liferay-portlet-app_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Portlet Application 7.0.0//EN" location="${definitions.dir}/liferay-portlet-app_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Resource Action Mapping 6.0.0//EN" location="${definitions.dir}/liferay-resource-action-mapping_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Resource Action Mapping 6.1.0//EN" location="${definitions.dir}/liferay-resource-action-mapping_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Resource Action Mapping 6.2.0//EN" location="${definitions.dir}/liferay-resource-action-mapping_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Resource Action Mapping 7.0.0//EN" location="${definitions.dir}/liferay-resource-action-mapping_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Service Builder 3.5.0//EN" location="${definitions.dir}/liferay-service-builder_3_5_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Service Builder 3.6.1//EN" location="${definitions.dir}/liferay-service-builder_3_6_1.dtd" />
 		<dtd publicId="-//Liferay//DTD Service Builder 4.0.0//EN" location="${definitions.dir}/liferay-service-builder_4_0_0.dtd" />
@@ -309,9 +323,11 @@
 		<dtd publicId="-//Liferay//DTD Service Builder 6.0.0//EN" location="${definitions.dir}/liferay-service-builder_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Service Builder 6.1.0//EN" location="${definitions.dir}/liferay-service-builder_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Service Builder 6.2.0//EN" location="${definitions.dir}/liferay-service-builder_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Service Builder 7.0.0//EN" location="${definitions.dir}/liferay-service-builder_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD SKIN 2.0.0//EN" location="${definitions.dir}/liferay-skin_2_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Social 6.1.0//EN" location="${definitions.dir}/liferay-social_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Social 6.2.0//EN" location="${definitions.dir}/liferay-social_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Social 7.0.0//EN" location="${definitions.dir}/liferay-social_7_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Theme Loader 4.3.0//EN" location="${definitions.dir}/liferay-theme-loader_4_3_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Theme Loader 5.0.0//EN" location="${definitions.dir}/liferay-theme-loader_5_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Theme Loader 5.1.0//EN" location="${definitions.dir}/liferay-theme-loader_5_1_0.dtd" />
@@ -319,6 +335,9 @@
 		<dtd publicId="-//Liferay//DTD Theme Loader 6.0.0//EN" location="${definitions.dir}/liferay-theme-loader_6_0_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Theme Loader 6.1.0//EN" location="${definitions.dir}/liferay-theme-loader_6_1_0.dtd" />
 		<dtd publicId="-//Liferay//DTD Theme Loader 6.2.0//EN" location="${definitions.dir}/liferay-theme-loader_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD Theme Loader 7.0.0//EN" location="${definitions.dir}/liferay-theme-loader_7_0_0.dtd" />
+		<dtd publicId="-//Liferay//DTD User Notification Definition 6.2.0//EN" location="${definitions.dir}/liferay-user-notification-definitions_6_2_0.dtd" />
+		<dtd publicId="-//Liferay//DTD User Notification Definition 7.0.0//EN" location="${definitions.dir}/liferay-user-notification-definitions_7_0_0.dtd" />
 		<dtd publicId="-//MuleSource //DTD mule-configuration XML V1.0//EN" location="${definitions.dir}/mule-configuration.dtd" />
 		<dtd publicId="-//SPRING//DTD BEAN//EN" location="${definitions.dir}/spring-beans.dtd" />
 		<dtd publicId="-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" location="${definitions.dir}/struts-config_1_2.dtd" />
@@ -418,6 +437,51 @@ Please set the environment variable ANT_OPTS to the recommended value of
 		</then>
 	</if>
 
+	<macrodef name="baseline-jar-macro">
+		<attribute name="bndRootFile" />
+		<attribute name="file" />
+		<attribute name="outputPath" />
+		<attribute name="rootProjectDir" />
+		<attribute name="sourcePath" />
+
+		<sequential>
+			<trycatch>
+				<try>
+					<taskdef
+						classname="com.liferay.util.ant.bnd.BaselineJarTask"
+						classpathref="project.classpath"
+						name="baseline-jar"
+					/>
+				</try>
+				<catch>
+					<ant antfile="${project.dir}/portal-service/build.xml" target="compile" inheritAll="false" />
+					<ant antfile="${project.dir}/util-java/build.xml" target="compile" inheritAll="false" />
+
+					<taskdef
+						classname="com.liferay.util.ant.bnd.BaselineJarTask"
+						classpathref="project.classpath"
+						name="baseline-jar"
+					/>
+				</catch>
+			</trycatch>
+
+			<manifest-helper />
+
+			<bndexpand propertyfile="@{bndRootFile}" />
+
+			<baseline-jar
+				bndRootFile="@{bndRootFile}"
+				file="@{file}"
+				outputPath="@{outputPath}"
+				sourcePath="@{sourcePath}"
+			>
+				<classpath>
+					<pathelement location="@{sourcePath}/classes" />
+				</classpath>
+			</baseline-jar>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="manifest-helper">
 		<attribute name="analyze" default="false" />
 
@@ -450,6 +514,41 @@ Please set the environment variable ANT_OPTS to the recommended value of
 		</sequential>
 	</macrodef>
 
+	<macrodef name="release-to-repo-macro">
+		<attribute name="bndRootFile" />
+		<attribute name="file" />
+
+		<sequential>
+			<trycatch>
+				<try>
+					<taskdef
+						classname="com.liferay.util.ant.bnd.ReleaseToRepoTask"
+						classpathref="project.classpath"
+						name="release-to-repo"
+					/>
+				</try>
+				<catch>
+					<ant antfile="${project.dir}/portal-service/build.xml" target="compile" inheritAll="false" />
+					<ant antfile="${project.dir}/util-java/build.xml" target="compile" inheritAll="false" />
+
+					<taskdef
+						classname="com.liferay.util.ant.bnd.ReleaseToRepoTask"
+						classpathref="project.classpath"
+						name="release-to-repo"
+					/>
+				</catch>
+			</trycatch>
+
+			<bndexpand propertyfile="@{bndRootFile}" />
+
+			<release-to-repo
+				bndRootFile="@{bndRootFile}"
+				deployRepo="baselinerepo"
+				file="@{file}"
+			/>
+		</sequential>
+	</macrodef>
+
 	<target name="compile">
 	</target>
 
@@ -476,9 +575,9 @@ Please set the environment variable ANT_OPTS to the recommended value of
 				<mkdir dir="test-classes/${test.type}" />
 				<mkdir dir="test-results/${test.type}" />
 
-				<copy todir="test-classes/${test.type}">
+				<copy todir="test-classes/${test.type}" preservelastmodified="true">
 					<fileset dir="test" includes="*.properties,META-INF/*.dtd,META-INF/*.xml" />
-					<fileset dir="test/${test.type}" includes="**/*.properties,**/dependencies/**,META-INF/*.xml" />
+					<fileset dir="test/${test.type}" includes="**/*.policy,**/*.properties,**/dependencies/**,META-INF/*.xml" />
 				</copy>
 
 				<javac
@@ -542,6 +641,10 @@ Please set the environment variable ANT_OPTS to the recommended value of
 		</tstamp>
 
 		<echo message="${current.time}" />
+	</target>
+
+	<target name="print-properties">
+		<echoproperties />
 	</target>
 
 	<target name="report-test-coverage">
@@ -709,44 +812,56 @@ Please set the environment variable ANT_OPTS to the recommended value of
 
 	<target name="test-class" depends="compile,compile-test">
 		<if>
-			<available file="test/functional" type="dir" />
+			<not>
+				<isset property="test.type" />
+			</not>
 			<then>
-				<resourcecount property="test.functional.count">
-					<fileset dir="test-classes/functional" includes="**/${class}.class" />
-				</resourcecount>
-			</then>
-		</if>
+				<if>
+					<available file="test/functional" type="dir" />
+					<then>
+						<resourcecount property="test.functional.count">
+							<fileset dir="test-classes/functional" includes="**/${test.class}.class" />
+						</resourcecount>
+					</then>
+				</if>
 
-		<if>
-			<available file="test/functional-generated" type="dir" />
-			<then>
-				<resourcecount property="test.functional-generated.count">
-					<fileset dir="test-classes/functional-generated" includes="**/${class}.class" />
-				</resourcecount>
-			</then>
-		</if>
+				<if>
+					<available file="test/functional-generated" type="dir" />
+					<then>
+						<resourcecount property="test.functional-generated.count">
+							<fileset dir="test-classes/functional-generated" includes="**/${test.class}.class" />
+						</resourcecount>
+					</then>
+				</if>
 
-		<if>
-			<available file="test/integration" type="dir" />
-			<then>
-				<resourcecount property="test.integration.count">
-					<fileset dir="test-classes/integration" includes="**/${class}.class" />
-				</resourcecount>
-			</then>
-		</if>
+				<if>
+					<available file="test/integration" type="dir" />
+					<then>
+						<resourcecount property="test.integration.count">
+							<fileset dir="test-classes/integration" includes="**/${test.class}.class" />
+						</resourcecount>
+					</then>
+				</if>
 
-		<if>
-			<available file="test/unit" type="dir" />
-			<then>
-				<resourcecount property="test.unit.count">
-					<fileset dir="test-classes/unit" includes="**/${class}.class" />
-				</resourcecount>
+				<if>
+					<available file="test/unit" type="dir" />
+					<then>
+						<resourcecount property="test.unit.count">
+							<fileset dir="test-classes/unit" includes="**/${test.class}.class" />
+						</resourcecount>
+					</then>
+				</if>
 			</then>
+			<else>
+				<resourcecount property="test.${test.type}.count">
+					<fileset dir="test-classes/${test.type}" includes="**/${test.class}.class" />
+				</resourcecount>
+			</else>
 		</if>
 
 		<if>
 			<and>
-				<isset property="test.functional.count"/>
+				<isset property="test.functional.count" />
 				<not>
 					<equals arg1="${test.functional.count}" arg2="0" />
 				</not>
@@ -756,7 +871,7 @@ Please set the environment variable ANT_OPTS to the recommended value of
 			</then>
 			<elseif>
 				<and>
-					<isset property="test.functional-generated.count"/>
+					<isset property="test.functional-generated.count" />
 					<not>
 						<equals arg1="${test.functional-generated.count}" arg2="0" />
 					</not>
@@ -768,7 +883,7 @@ Please set the environment variable ANT_OPTS to the recommended value of
 			</elseif>
 			<elseif>
 				<and>
-					<isset property="test.integration.count"/>
+					<isset property="test.integration.count" />
 					<not>
 						<equals arg1="${test.integration.count}" arg2="0" />
 					</not>
@@ -779,7 +894,7 @@ Please set the environment variable ANT_OPTS to the recommended value of
 			</elseif>
 			<elseif>
 				<and>
-					<isset property="test.unit.count"/>
+					<isset property="test.unit.count" />
 					<not>
 						<equals arg1="${test.unit.count}" arg2="0" />
 					</not>
@@ -791,17 +906,17 @@ Please set the environment variable ANT_OPTS to the recommended value of
 			<else>
 				<if>
 					<not>
-						<isset property="class" />
+						<isset property="test.class" />
 					</not>
 					<then>
-						<fail>Missing class argument. Use "ant test-class -Dclass=TestClassName".</fail>
+						<fail>Use "ant test-class -Dtest.class=StringUtilTest".</fail>
 					</then>
 					<elseif>
 						<not>
 							<isset property="test.type" />
 						</not>
 						<then>
-							<fail>Class ${class} cannot be found.</fail>
+							<fail>Test class ${test.class} cannot be found.</fail>
 						</then>
 					</elseif>
 				</if>
@@ -809,7 +924,7 @@ Please set the environment variable ANT_OPTS to the recommended value of
 		</if>
 
 		<ant target="test-cmd">
-			<property name="junit.forkmode" value="once" />
+			<property name="junit.forkmode" value="perTest" />
 			<property name="test.type" value="${test.type}" />
 		</ant>
 
@@ -829,44 +944,111 @@ Please set the environment variable ANT_OPTS to the recommended value of
 		</if>
 
 		<if>
-			<available file="test/${test.type}" type="dir" />
+			<available file="test/${test.dir}" type="dir" />
 			<then>
-				<junit dir="${project.dir}" fork="on" forkmode="${junit.forkmode}" haltonfailure="${junit.halt.on.failure}" outputtoformatters="false" printsummary="on" showoutput="true">
-					<sysproperty key="junit.aspectj.dump" file="woven-classes" />
-					<sysproperty key="junit.cobertura.agent" value="${junit.cobertura.agent}" />
-					<sysproperty key="junit.code.coverage" value="${junit.code.coverage}" />
-					<sysproperty key="junit.debug" value="${junit.debug}" />
-					<sysproperty key="net.sourceforge.cobertura.datafile" file="test-coverage/${test.type}/cobertura.ser" />
-					<jvmarg line="${junit.cobertura.agent}" />
-					<jvmarg line="${junit.debug.jpda}" />
-					<jvmarg value="-Xmx${junit.java.mx}" />
-					<jvmarg value="-XX:MaxPermSize=${junit.java.maxpermsize}" />
-					<jvmarg value="-Dexternal-properties=${test.properties}" />
-					<jvmarg value="-Dfile.encoding=UTF-8" />
-					<jvmarg value="-Djava.net.preferIPv4Stack=true" />
-					<jvmarg value="-Duser.timezone=GMT" />
-					<classpath location="test-coverage" />
-					<classpath refid="test.classpath" />
-					<formatter type="brief" usefile="false" />
-					<formatter type="xml" />
-					<batchtest todir="test-results/${test.type}">
-						<fileset dir="test-classes/${test.dir}" includes="**/${class}.class">
-							<exclude name="**/DLAppServiceHttpTest.class" />
-							<exclude name="**/DLAppServiceJsonTest.class" />
-							<exclude name="**/DLAppServiceSoapTest.class" />
-							<exclude name="**/UserServiceHttpTest.class" />
-							<exclude name="**/UserServiceSoapTest.class" />
-							<exclude name="${test.excludes}" />
-							<filename regex="${junit.test.excludes}" negate="true" />
-						</fileset>
-					</batchtest>
-				</junit>
+				<resourcecount property="test.with.security.count">
+					<fileset
+						dir="test-classes/${test.dir}"
+						includes="**/${test.class}.class"
+					>
+						<filename regex=".*/pacl/test/[\w]+Test.class" negate="false" />
+					</fileset>
+				</resourcecount>
+
+				<if>
+					<not>
+						<equals arg1="${test.with.security.count}" arg2="0" />
+					</not>
+					<then>
+						<junit dir="${project.dir}" fork="on" forkmode="${junit.forkmode}" haltonfailure="${junit.halt.on.failure}" outputtoformatters="false" printsummary="on" showoutput="true">
+							<sysproperty key="junit.aspectj.dump" file="woven-classes" />
+							<sysproperty key="junit.cobertura.agent" value="${junit.cobertura.agent}" />
+							<sysproperty key="junit.code.coverage" value="${junit.code.coverage}" />
+							<sysproperty key="junit.debug" value="${junit.debug}" />
+							<sysproperty key="net.sourceforge.cobertura.datafile" file="test-coverage/${test.type}/cobertura.ser" />
+							<jvmarg line="${junit.cobertura.agent}" />
+							<jvmarg line="${junit.debug.jpda}" />
+							<jvmarg value="-Xmx${junit.java.mx}" />
+							<jvmarg value="-XX:MaxPermSize=${junit.java.maxpermsize}" />
+							<jvmarg value="-Dexternal-properties=${test.properties}" />
+							<jvmarg value="-Dfile.encoding=UTF-8" />
+							<jvmarg value="-Djava.net.preferIPv4Stack=true" />
+							<jvmarg value="-Djava.security.manager" />
+							<jvmarg value="-Djava.security.policy=${basedir}/test-classes/${test.type}/com/liferay/portal/security/pacl/security.policy" />
+							<jvmarg value="-Duser.timezone=GMT" />
+							<classpath location="test-coverage" />
+							<classpath refid="test.classpath" />
+							<formatter type="brief" usefile="false" />
+							<formatter type="xml" />
+							<batchtest todir="test-results/${test.type}">
+								<fileset dir="test-classes/${test.dir}" includes="**/${test.class}.class">
+									<exclude name="**/DLAppServiceHttpTest.class" />
+									<exclude name="**/DLAppServiceJsonTest.class" />
+									<exclude name="**/DLAppServiceSoapTest.class" />
+									<exclude name="**/UserServiceHttpTest.class" />
+									<exclude name="**/UserServiceSoapTest.class" />
+									<exclude name="${test.excludes}" />
+									<filename regex="${junit.test.excludes}" negate="true" />
+									<filename regex=".*/pacl/test/[\w]+Test.class" negate="false" />
+								</fileset>
+							</batchtest>
+						</junit>
+					</then>
+				</if>
+
+				<resourcecount property="test.without.security.count">
+					<fileset
+						dir="test-classes/${test.dir}"
+						includes="**/${test.class}.class"
+					>
+						<filename regex=".*/pacl/test/[\w]+Test.class" negate="true" />
+					</fileset>
+				</resourcecount>
+
+				<if>
+					<not>
+						<equals arg1="${test.without.security.count}" arg2="0" />
+					</not>
+					<then>
+						<junit dir="${project.dir}" fork="on" forkmode="${junit.forkmode}" haltonfailure="${junit.halt.on.failure}" outputtoformatters="false" printsummary="on" showoutput="true">
+							<sysproperty key="junit.aspectj.dump" file="woven-classes" />
+							<sysproperty key="junit.cobertura.agent" value="${junit.cobertura.agent}" />
+							<sysproperty key="junit.code.coverage" value="${junit.code.coverage}" />
+							<sysproperty key="junit.debug" value="${junit.debug}" />
+							<sysproperty key="net.sourceforge.cobertura.datafile" file="test-coverage/${test.type}/cobertura.ser" />
+							<jvmarg line="${junit.cobertura.agent}" />
+							<jvmarg line="${junit.debug.jpda}" />
+							<jvmarg value="-Xmx${junit.java.mx}" />
+							<jvmarg value="-XX:MaxPermSize=${junit.java.maxpermsize}" />
+							<jvmarg value="-Dexternal-properties=${test.properties}" />
+							<jvmarg value="-Dfile.encoding=UTF-8" />
+							<jvmarg value="-Djava.net.preferIPv4Stack=true" />
+							<jvmarg value="-Duser.timezone=GMT" />
+							<classpath location="test-coverage" />
+							<classpath refid="test.classpath" />
+							<formatter type="brief" usefile="false" />
+							<formatter type="xml" />
+							<batchtest todir="test-results/${test.type}">
+								<fileset dir="test-classes/${test.dir}" includes="**/${test.class}.class">
+									<exclude name="**/DLAppServiceHttpTest.class" />
+									<exclude name="**/DLAppServiceJsonTest.class" />
+									<exclude name="**/DLAppServiceSoapTest.class" />
+									<exclude name="**/UserServiceHttpTest.class" />
+									<exclude name="**/UserServiceSoapTest.class" />
+									<exclude name="${test.excludes}" />
+									<filename regex="${junit.test.excludes}" negate="true" />
+									<filename regex=".*/pacl/test/[\w]+Test.class" negate="true" />
+								</fileset>
+							</batchtest>
+						</junit>
+					</then>
+				</if>
 			</then>
 		</if>
 	</target>
 
 	<target name="test-integration" depends="compile,compile-test-integration">
-		<var name="class" value="*Test" />
+		<var name="test.class" value="*Test" />
 
 		<ant target="test-cmd">
 			<property name="junit.forkmode" value="once" />
@@ -874,7 +1056,7 @@ Please set the environment variable ANT_OPTS to the recommended value of
 			<property name="test.type" value="integration" />
 		</ant>
 
-		<var name="class" value="*PersistenceTest" />
+		<var name="test.class" value="*PersistenceTest" />
 
 		<ant target="test-cmd">
 			<property name="junit.forkmode" value="once" />
@@ -887,6 +1069,15 @@ Please set the environment variable ANT_OPTS to the recommended value of
 	</target>
 
 	<target name="test-method" depends="compile,compile-test">
+		<if>
+			<not>
+				<isset property="test.type" />
+			</not>
+			<then>
+				<var name="test.type" value="" />
+			</then>
+		</if>
+
 		<junit dir="${project.dir}" fork="on" forkmode="once" haltonfailure="${junit.halt.on.failure}" outputtoformatters="false" printsummary="on" showoutput="true">
 			<sysproperty key="junit.aspectj.dump" file="woven-classes" />
 			<sysproperty key="junit.cobertura.agent" value="${junit.cobertura.agent}" />
@@ -903,12 +1094,120 @@ Please set the environment variable ANT_OPTS to the recommended value of
 			<jvmarg value="-Duser.timezone=GMT" />
 			<classpath location="test-coverage" />
 			<classpath refid="test.classpath" />
-			<test name="${class}" methods="${methods}"/>
+			<formatter type="brief" usefile="false" />
+			<formatter type="xml" />
+			<test name="${test.class}" methods="${test.methods}" todir="test-results/${test.type}" />
 		</junit>
 	</target>
 
+	<target name="test-package" depends="compile,compile-test">
+		<if>
+			<not>
+				<isset property="test.package" />
+			</not>
+			<then>
+				<fail>Use "ant test-package -Dtest.package=com.liferay.portal.kernel.util".</fail>
+			</then>
+		</if>
+
+		<propertyregex
+			global="true"
+			input="${test.package}"
+			property="test.package.dir"
+			regexp="\."
+			replace="/"
+		/>
+
+		<if>
+			<available file="test/integration" type="dir" />
+			<then>
+				<resourcecount property="test.integration.other.count">
+					<fileset
+						dir="test/integration"
+						excludes="**/${test.package.dir}/*PersistenceTest.java"
+						includes="**/${test.package.dir}/*Test.java"
+					/>
+				</resourcecount>
+
+				<if>
+					<not>
+						<equals arg1="${test.integration.other.count}" arg2="0" />
+					</not>
+					<then>
+						<var name="test.class" value="**/${test.package.dir}/*Test" />
+
+						<ant target="test-cmd">
+							<property name="junit.forkmode" value="once" />
+							<property name="test.excludes" value="**/*PersistenceTest.class" />
+							<property name="test.type" value="integration" />
+						</ant>
+
+						<antcall target="report-test-coverage">
+							<param name="test.type" value="integration" />
+						</antcall>
+					</then>
+				</if>
+
+				<resourcecount property="test.integration.persistence.count">
+					<fileset
+						dir="test/integration"
+						includes="**/${test.package.dir}/*PersistenceTest.java"
+					/>
+				</resourcecount>
+
+				<if>
+					<not>
+						<equals arg1="${test.integration.persistence.count}" arg2="0" />
+					</not>
+					<then>
+						<var name="test.class" value="**/${test.package.dir}/*PersistenceTest" />
+
+						<ant target="test-cmd">
+							<property name="junit.forkmode" value="once" />
+							<property name="test.type" value="integration" />
+						</ant>
+
+						<antcall target="report-test-coverage">
+							<param name="test.type" value="integration" />
+						</antcall>
+					</then>
+				</if>
+			</then>
+		</if>
+
+		<if>
+			<available file="test/unit" type="dir" />
+			<then>
+				<resourcecount property="test.unit.count">
+					<fileset
+						dir="test/unit"
+						includes="**/${test.package.dir}/*Test.java"
+					/>
+				</resourcecount>
+
+				<if>
+					<not>
+						<equals arg1="${test.unit.count}" arg2="0" />
+					</not>
+					<then>
+						<var name="test.class" value="**/${test.package.dir}/*Test" />
+
+						<ant target="test-cmd">
+							<property name="junit.forkmode" value="perTest" />
+							<property name="test.type" value="unit" />
+						</ant>
+
+						<antcall target="report-test-coverage" >
+							<param name="test.type" value="unit" />
+						</antcall>
+					</then>
+				</if>
+			</then>
+		</if>
+	</target>
+
 	<target name="test-unit" depends="compile,compile-test-unit">
-		<property name="class" value="*Test" />
+		<property name="test.class" value="*Test" />
 
 		<ant target="test-cmd">
 			<property name="junit.forkmode" value="perTest" />

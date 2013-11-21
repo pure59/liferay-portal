@@ -35,7 +35,6 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.Portal;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
-import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.blogs.NoSuchEntryException;
 import com.liferay.portlet.blogs.model.BlogsEntry;
 import com.liferay.portlet.blogs.util.LinkbackConsumerUtil;
@@ -89,10 +88,16 @@ public class TrackbackAction extends PortletAction {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		String title = ParamUtil.getString(actionRequest, "title");
-		String excerpt = ParamUtil.getString(actionRequest, "excerpt");
-		String url = ParamUtil.getString(actionRequest, "url");
-		String blogName = ParamUtil.getString(actionRequest, "blog_name");
+		HttpServletRequest request = PortalUtil.getHttpServletRequest(
+			actionRequest);
+
+		HttpServletRequest originalRequest =
+			PortalUtil.getOriginalServletRequest(request);
+
+		String title = ParamUtil.getString(originalRequest, "title");
+		String excerpt = ParamUtil.getString(originalRequest, "excerpt");
+		String url = ParamUtil.getString(originalRequest, "url");
+		String blogName = ParamUtil.getString(originalRequest, "blog_name");
 
 		if (!isCommentsEnabled(actionRequest)) {
 			sendError(
@@ -109,9 +114,6 @@ public class TrackbackAction extends PortletAction {
 
 			return;
 		}
-
-		HttpServletRequest request = PortalUtil.getHttpServletRequest(
-			actionRequest);
 
 		String remoteIp = request.getRemoteAddr();
 
@@ -193,14 +195,11 @@ public class TrackbackAction extends PortletAction {
 	protected boolean isCommentsEnabled(ActionRequest actionRequest)
 		throws Exception {
 
-		PortletPreferences portletPreferences = actionRequest.getPreferences();
+		PortletPreferences portletPreferences = getStrictPortletSetup(
+			actionRequest);
 
-		String portletResource = ParamUtil.getString(
-			actionRequest, "portletResource");
-
-		if (Validator.isNotNull(portletResource)) {
-			portletPreferences = PortletPreferencesFactoryUtil.getPortletSetup(
-				actionRequest, portletResource);
+		if (portletPreferences == null) {
+			portletPreferences = actionRequest.getPreferences();
 		}
 
 		return GetterUtil.getBoolean(

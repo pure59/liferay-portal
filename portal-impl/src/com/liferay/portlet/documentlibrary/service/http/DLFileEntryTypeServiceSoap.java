@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service.http;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
@@ -65,6 +67,7 @@ import java.util.Map;
  * @see com.liferay.portlet.documentlibrary.service.DLFileEntryTypeServiceUtil
  * @generated
  */
+@ProviderType
 public class DLFileEntryTypeServiceSoap {
 	public static com.liferay.portlet.documentlibrary.model.DLFileEntryTypeSoap addFileEntryType(
 		long groupId, java.lang.String fileEntryTypeKey,
@@ -145,6 +148,22 @@ public class DLFileEntryTypeServiceSoap {
 		try {
 			java.util.List<com.liferay.portlet.documentlibrary.model.DLFileEntryType> returnValue =
 				DLFileEntryTypeServiceUtil.getFileEntryTypes(groupIds);
+
+			return com.liferay.portlet.documentlibrary.model.DLFileEntryTypeSoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.documentlibrary.model.DLFileEntryTypeSoap[] getFileEntryTypes(
+		long[] groupIds, int start, int end) throws RemoteException {
+		try {
+			java.util.List<com.liferay.portlet.documentlibrary.model.DLFileEntryType> returnValue =
+				DLFileEntryTypeServiceUtil.getFileEntryTypes(groupIds, start,
+					end);
 
 			return com.liferay.portlet.documentlibrary.model.DLFileEntryTypeSoap.toSoapModels(returnValue);
 		}

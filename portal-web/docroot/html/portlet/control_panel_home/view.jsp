@@ -23,27 +23,32 @@
 		Map<String, List<Portlet>> categoriesMap = PortalUtil.getControlPanelCategoriesMap(request);
 
 		for (String category : categoriesMap.keySet()) {
-			String title = LanguageUtil.get(pageContext, "category." + category);
-
-			List<Portlet> categoryPortlets = categoriesMap.get(category);
+			String categoryHeaderId = "control-panel-home-category-header" + category;
 		%>
 
 			<aui:col width="<%= 25 %>">
-				<h3 class="control-panel-home-category-header" id='<%= "control-panel-home-category-header" + category %>'><%= title %></h3>
+				<h3 class="control-panel-home-category-header" id="<%= categoryHeaderId %>">
+					<aui:a href='<%= HttpUtil.setParameter(themeDisplay.getURLControlPanel(), "controlPanelCategory", category) %>'>
+						<%= LanguageUtil.get(pageContext, "category." + category) %>
+					</aui:a>
+				</h3>
 
-					<ul class="unstyled">
+				<ul aria-labelledby="<%= categoryHeaderId %>" class="unstyled" role="menu">
 
-						<%
-						for (Portlet categoryPortlet : categoryPortlets) {
-							String categoryPortletId = categoryPortlet.getPortletId();
+					<%
+					List<Portlet> categoryPortlets = categoriesMap.get(category);
 
-							String urlCategoryPortlet = HttpUtil.setParameter(themeDisplay.getURLControlPanel(), "p_p_id", categoryPortletId);
+					for (Portlet categoryPortlet : categoryPortlets) {
+						String categoryPortletId = categoryPortlet.getPortletId();
 
-							String portletDescription = PortalUtil.getPortletDescription(categoryPortlet, application, locale);
-						%>
+						String urlCategoryPortlet = HttpUtil.setParameter(themeDisplay.getURLControlPanel(), "p_p_id", categoryPortletId);
 
-							<li>
+						String portletDescription = PortalUtil.getPortletDescription(categoryPortlet, application, locale);
+					%>
+
+							<li role="presentation">
 								<liferay-ui:icon
+									ariaRole="menuitem"
 									cssClass="control-panel-home-link"
 									id='<%= "controlPanelPortletLink_" + categoryPortletId %>'
 									label="<%= true %>"
@@ -52,17 +57,17 @@
 									url="<%= urlCategoryPortlet %>"
 								/>
 
-								<c:if test='<%= Validator.isNotNull(portletDescription) && !portletDescription.startsWith("javax.portlet.description") %>'>
-									<liferay-ui:icon-help message="<%= portletDescription %>" />
-								</c:if>
-							</li>
+							<c:if test='<%= Validator.isNotNull(portletDescription) && !portletDescription.startsWith("javax.portlet.description") %>'>
+								<liferay-ui:icon-help message="<%= portletDescription %>" />
+							</c:if>
+						</li>
 
-						<%
-						}
-						%>
+					<%
+					}
+					%>
 
-					</ul>
-			 </aui:col>
+				</ul>
+			</aui:col>
 
 		<%
 		}

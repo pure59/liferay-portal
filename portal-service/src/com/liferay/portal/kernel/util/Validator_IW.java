@@ -195,6 +195,10 @@ public class Validator_IW {
 		return Validator.isName(name);
 	}
 
+	public boolean isNotNull(java.lang.Integer i) {
+		return Validator.isNotNull(i);
+	}
+
 	public boolean isNotNull(java.lang.Long l) {
 		return Validator.isNotNull(l);
 	}
@@ -203,12 +207,19 @@ public class Validator_IW {
 		return Validator.isNotNull(obj);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public boolean isNotNull(java.lang.Object[] array) {
 		return Validator.isNotNull(array);
 	}
 
 	public boolean isNotNull(java.lang.String s) {
 		return Validator.isNotNull(s);
+	}
+
+	public boolean isNull(java.lang.Integer i) {
+		return Validator.isNull(i);
 	}
 
 	public boolean isNull(java.lang.Long l) {
@@ -219,6 +230,9 @@ public class Validator_IW {
 		return Validator.isNull(obj);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public boolean isNull(java.lang.Object[] array) {
 		return Validator.isNull(array);
 	}

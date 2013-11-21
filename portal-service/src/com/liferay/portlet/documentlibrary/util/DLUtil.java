@@ -137,11 +137,19 @@ public class DLUtil {
 		return _dl;
 	}
 
-	public static String getDLControlPanelLink(
+	public static String getDLFileEntryControlPanelLink(
+			PortletRequest portletRequest, long fileEntryId)
+		throws PortalException, SystemException {
+
+		return getDL().getDLFileEntryControlPanelLink(
+			portletRequest, fileEntryId);
+	}
+
+	public static String getDLFolderControlPanelLink(
 			PortletRequest portletRequest, long folderId)
 		throws PortalException, SystemException {
 
-		return getDL().getDLControlPanelLink(portletRequest, folderId);
+		return getDL().getDLFolderControlPanelLink(portletRequest, folderId);
 	}
 
 	public static Map<Locale, String> getEmailFileEntryAddedBodyMap(
@@ -389,6 +397,10 @@ public class DLUtil {
 
 		return getDL().isSubscribedToFolder(
 			companyId, groupId, userId, folderId, recursive);
+	}
+
+	public static boolean isValidVersion(String version) {
+		return getDL().isValidVersion(version);
 	}
 
 	public void setDL(DL dl) {

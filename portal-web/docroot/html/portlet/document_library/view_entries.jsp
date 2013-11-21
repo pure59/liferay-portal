@@ -31,7 +31,7 @@ String dlFileEntryTypeName = LanguageUtil.get(pageContext, "basic-document");
 
 int status = WorkflowConstants.STATUS_APPROVED;
 
-if (permissionChecker.isCompanyAdmin() || permissionChecker.isGroupAdmin(scopeGroupId)) {
+if (permissionChecker.isContentReviewer(user.getCompanyId(), scopeGroupId)) {
 	status = WorkflowConstants.STATUS_ANY;
 }
 
@@ -148,9 +148,9 @@ if (fileEntryTypeId >= 0) {
 		orderByCol = "modified";
 	}
 
-	Sort sort = new Sort(orderByCol, !orderByType.equalsIgnoreCase("asc"));
+	Sort sort = new Sort(orderByCol, !StringUtil.equalsIgnoreCase(orderByType, "asc"));
 
-	searchContext.setSorts(new Sort[] {sort});
+	searchContext.setSorts(sort);
 
 	searchContext.setStart(entryStart);
 
@@ -160,21 +160,11 @@ if (fileEntryTypeId >= 0) {
 
 	searchContainer.setTotal(total);
 
-	if (total <= entryStart) {
-		entryStart = (searchContainer.getCur() - 1) * searchContainer.getDelta();
-		entryEnd = entryStart + searchContainer.getDelta();
+	Document[] docs = hits.getDocs();
 
-		searchContext.setEnd(entryEnd);
-		searchContext.setStart(entryStart);
+	results = new ArrayList(docs.length);
 
-		hits = indexer.search(searchContext);
-	}
-
-	results = new ArrayList();
-
-	for (int i = 0; i < hits.getDocs().length; i++) {
-		Document doc = hits.doc(i);
-
+	for (Document doc : docs) {
 		long fileEntryId = GetterUtil.getLong(doc.get(Field.ENTRY_CLASS_PK));
 
 		FileEntry fileEntry = null;
@@ -247,7 +237,7 @@ else {
 			entryEnd = entryStart + searchContainer.getDelta();
 		}
 
-		results = DLAppServiceUtil.getGroupFileEntries(repositoryId, groupFileEntriesUserId, folderId, null, status, entryStart, entryEnd, null);
+		results = DLAppServiceUtil.getGroupFileEntries(repositoryId, groupFileEntriesUserId, folderId, null, status, entryStart, entryEnd, searchContainer.getOrderByComparator());
 	}
 }
 
@@ -255,8 +245,8 @@ searchContainer.setResults(results);
 
 request.setAttribute("view.jsp-total", String.valueOf(total));
 
-request.setAttribute("view_entries.jsp-entryStart", String.valueOf(entryStart));
-request.setAttribute("view_entries.jsp-entryEnd", String.valueOf(entryEnd));
+request.setAttribute("view_entries.jsp-entryStart", String.valueOf(searchContainer.getStart()));
+request.setAttribute("view_entries.jsp-entryEnd", String.valueOf(searchContainer.getEnd()));
 %>
 
 <div class="subscribe-action">
@@ -403,7 +393,7 @@ for (int i = 0; i < results.size(); i++) {
 					<%
 					FileVersion latestFileVersion = fileEntry.getFileVersion();
 
-					if ((user.getUserId() == fileEntry.getUserId()) || permissionChecker.isCompanyAdmin() || permissionChecker.isGroupAdmin(scopeGroupId) || DLFileEntryPermission.contains(permissionChecker, fileEntry, ActionKeys.UPDATE)) {
+					if ((user.getUserId() == fileEntry.getUserId()) || permissionChecker.isContentReviewer(user.getCompanyId(), scopeGroupId) || DLFileEntryPermission.contains(permissionChecker, fileEntry, ActionKeys.UPDATE)) {
 						latestFileVersion = fileEntry.getLatestFileVersion();
 					}
 					%>
@@ -426,10 +416,6 @@ for (int i = 0; i < results.size(); i++) {
 							title="<%= latestFileVersion.getTitle() %>"
 							url="<%= rowURL.toString() %>"
 						/>
-					</liferay-util:buffer>
-
-					<liferay-util:buffer var="fileEntryStatus">
-						<aui:workflow-status showIcon="<%= false %>" showLabel="<%= false %>" status="<%= latestFileVersion.getStatus() %>" />
 					</liferay-util:buffer>
 
 					<%
@@ -483,11 +469,7 @@ for (int i = 0; i < results.size(); i++) {
 						}
 
 						if (columnName.equals("status")) {
-							TextSearchEntry fileEntryStatusSearchEntry = new TextSearchEntry();
-
-							fileEntryStatusSearchEntry.setName(fileEntryStatus);
-
-							row.addSearchEntry(fileEntryStatusSearchEntry);
+							row.addStatus(latestFileVersion.getStatus(), latestFileVersion.getStatusByUserId(), latestFileVersion.getStatusDate());
 						}
 					}
 
@@ -609,6 +591,10 @@ for (int i = 0; i < results.size(); i++) {
 						}
 
 						if (columnName.equals("size")) {
+							row.addText("--");
+						}
+
+						if (columnName.equals("status")) {
 							row.addText("--");
 						}
 					}

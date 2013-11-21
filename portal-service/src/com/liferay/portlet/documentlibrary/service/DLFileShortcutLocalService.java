@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.transaction.Isolation;
@@ -34,6 +36,7 @@ import com.liferay.portal.service.PersistedModelLocalService;
  * @see com.liferay.portlet.documentlibrary.service.impl.DLFileShortcutLocalServiceImpl
  * @generated
  */
+@ProviderType
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface DLFileShortcutLocalService extends BaseLocalService,
@@ -369,6 +372,9 @@ public interface DLFileShortcutLocalService extends BaseLocalService,
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getFileShortcutsCount(long groupId, long folderId,
 		boolean active, int status)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	public void rebuildTree(long companyId)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
 	public void updateAsset(long userId,

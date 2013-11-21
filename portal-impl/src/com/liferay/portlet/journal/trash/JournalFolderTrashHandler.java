@@ -23,7 +23,6 @@ import com.liferay.portal.model.ContainerModel;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.journal.NoSuchFolderException;
 import com.liferay.portlet.journal.asset.JournalFolderAssetRenderer;
 import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.journal.service.JournalFolderLocalServiceUtil;
@@ -95,7 +94,19 @@ public class JournalFolderTrashHandler extends JournalBaseTrashHandler {
 	}
 
 	@Override
-	public String getRestoreLink(PortletRequest portletRequest, long classPK)
+	public String getRestoreContainedModelLink(
+			PortletRequest portletRequest, long classPK)
+		throws PortalException, SystemException {
+
+		JournalFolder folder = JournalFolderLocalServiceUtil.getFolder(classPK);
+
+		return JournalUtil.getJournalControlPanelLink(
+			portletRequest, folder.getFolderId());
+	}
+
+	@Override
+	public String getRestoreContainerModelLink(
+			PortletRequest portletRequest, long classPK)
 		throws PortalException, SystemException {
 
 		JournalFolder folder = JournalFolderLocalServiceUtil.getFolder(classPK);
@@ -115,12 +126,12 @@ public class JournalFolderTrashHandler extends JournalBaseTrashHandler {
 	}
 
 	@Override
-	public ContainerModel getTrashContainer(long classPK)
+	public TrashEntry getTrashEntry(long classPK)
 		throws PortalException, SystemException {
 
-		JournalFolder folder = getJournalFolder(classPK);
+		JournalFolder folder = JournalFolderLocalServiceUtil.getFolder(classPK);
 
-		return folder.getTrashContainer();
+		return folder.getTrashEntry();
 	}
 
 	@Override
@@ -176,10 +187,10 @@ public class JournalFolderTrashHandler extends JournalBaseTrashHandler {
 
 		JournalFolder folder = getJournalFolder(classPK);
 
-		try {
-			folder.getParentFolder();
-		}
-		catch (NoSuchFolderException nsfe) {
+		if ((folder.getParentFolderId() > 0) &&
+			(JournalFolderLocalServiceUtil.fetchFolder(
+				folder.getParentFolderId()) == null)) {
+
 			return false;
 		}
 

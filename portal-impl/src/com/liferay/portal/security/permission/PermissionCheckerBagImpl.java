@@ -17,11 +17,14 @@ package com.liferay.portal.security.permission;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.Group;
+import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.Organization;
 import com.liferay.portal.model.OrganizationConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
+import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.permission.LayoutPrototypePermissionUtil;
 import com.liferay.portal.service.permission.LayoutSetPrototypePermissionUtil;
@@ -129,6 +132,23 @@ public class PermissionCheckerBagImpl implements PermissionCheckerBag {
 	}
 
 	@Override
+	public boolean isContentReviewer(
+			PermissionChecker permissionChecker, Group group)
+		throws Exception {
+
+		Boolean value = _contentReviewers.get(group.getCompanyId());
+
+		if (value == null) {
+			value = Boolean.valueOf(
+				isContentReviewerImpl(permissionChecker, group));
+
+			_contentReviewers.put(group.getCompanyId(), value);
+		}
+
+		return value.booleanValue();
+	}
+
+	@Override
 	public boolean isGroupAdmin(
 			PermissionChecker permissionChecker, Group group)
 		throws Exception {
@@ -150,9 +170,9 @@ public class PermissionCheckerBagImpl implements PermissionCheckerBag {
 		throws Exception {
 
 		for (Role role : _roles) {
-			String name = role.getName();
+			String roleName = role.getName();
 
-			if (name.equals(RoleConstants.SITE_MEMBER)) {
+			if (roleName.equals(RoleConstants.SITE_MEMBER)) {
 				return true;
 			}
 		}
@@ -216,9 +236,48 @@ public class PermissionCheckerBagImpl implements PermissionCheckerBag {
 		return value.booleanValue();
 	}
 
+	protected boolean isContentReviewerImpl(
+			PermissionChecker permissionChecker, Group group)
+		throws PortalException, SystemException {
+
+		if (permissionChecker.isCompanyAdmin() ||
+			permissionChecker.isGroupAdmin(group.getGroupId())) {
+
+			return true;
+		}
+
+		if (RoleLocalServiceUtil.hasUserRole(
+				_userId, group.getCompanyId(),
+				RoleConstants.PORTAL_CONTENT_REVIEWER, true)) {
+
+			return true;
+		}
+
+		if (group.isSite()) {
+			if (UserGroupRoleLocalServiceUtil.hasUserGroupRole(
+					_userId, group.getGroupId(),
+					RoleConstants.SITE_CONTENT_REVIEWER, true)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	protected boolean isGroupAdminImpl(
 			PermissionChecker permissionChecker, Group group)
 		throws PortalException, SystemException {
+
+		if (group.isLayout()) {
+			long parentGroupId = group.getParentGroupId();
+
+			if (parentGroupId == GroupConstants.DEFAULT_PARENT_GROUP_ID) {
+				return false;
+			}
+
+			group = GroupLocalServiceUtil.getGroup(parentGroupId);
+		}
 
 		if (group.isSite()) {
 			if (UserGroupRoleLocalServiceUtil.hasUserGroupRole(
@@ -270,9 +329,7 @@ public class PermissionCheckerBagImpl implements PermissionCheckerBag {
 					OrganizationLocalServiceUtil.getOrganization(
 						organizationId);
 
-				Group organizationGroup = organization.getGroup();
-
-				long organizationGroupId = organizationGroup.getGroupId();
+				long organizationGroupId = organization.getGroupId();
 
 				if (UserGroupRoleLocalServiceUtil.hasUserGroupRole(
 						_userId, organizationGroupId,
@@ -334,9 +391,7 @@ public class PermissionCheckerBagImpl implements PermissionCheckerBag {
 					OrganizationLocalServiceUtil.getOrganization(
 						organizationId);
 
-				Group organizationGroup = organization.getGroup();
-
-				long organizationGroupId = organizationGroup.getGroupId();
+				long organizationGroupId = organization.getGroupId();
 
 				if (UserGroupRoleLocalServiceUtil.hasUserGroupRole(
 						_userId, organizationGroupId,
@@ -364,9 +419,7 @@ public class PermissionCheckerBagImpl implements PermissionCheckerBag {
 		throws PortalException, SystemException {
 
 		while (organization != null) {
-			Group organizationGroup = organization.getGroup();
-
-			long organizationGroupId = organizationGroup.getGroupId();
+			long organizationGroupId = organization.getGroupId();
 
 			if (UserGroupRoleLocalServiceUtil.hasUserGroupRole(
 					_userId, organizationGroupId,
@@ -389,9 +442,7 @@ public class PermissionCheckerBagImpl implements PermissionCheckerBag {
 		throws PortalException, SystemException {
 
 		while (organization != null) {
-			Group organizationGroup = organization.getGroup();
-
-			long organizationGroupId = organizationGroup.getGroupId();
+			long organizationGroupId = organization.getGroupId();
 
 			if (UserGroupRoleLocalServiceUtil.hasUserGroupRole(
 					_userId, organizationGroupId,
@@ -406,6 +457,7 @@ public class PermissionCheckerBagImpl implements PermissionCheckerBag {
 		return false;
 	}
 
+	private Map<Long, Boolean> _contentReviewers = new HashMap<Long, Boolean>();
 	private Map<Long, Boolean> _groupAdmins = new HashMap<Long, Boolean>();
 	private Map<Long, Boolean> _groupOwners = new HashMap<Long, Boolean>();
 	private List<Group> _groups;

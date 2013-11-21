@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.documentlibrary.service.impl.DLFileShortcutLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class DLFileShortcutLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -440,6 +443,11 @@ public class DLFileShortcutLocalServiceUtil {
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService()
 				   .getFileShortcutsCount(groupId, folderId, active, status);
+	}
+
+	public static void rebuildTree(long companyId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		getService().rebuildTree(companyId);
 	}
 
 	public static void updateAsset(long userId,

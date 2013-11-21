@@ -346,6 +346,10 @@ public class UserNotificationDeliveryPersistenceImpl extends BasePersistenceImpl
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUserId(userId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<UserNotificationDelivery> list = findByUserId(userId, count - 1,
 				count, orderByComparator);
 
@@ -920,6 +924,10 @@ public class UserNotificationDeliveryPersistenceImpl extends BasePersistenceImpl
 	private static final String _FINDER_COLUMN_U_P_C_N_D_NOTIFICATIONTYPE_2 = "userNotificationDelivery.notificationType = ? AND ";
 	private static final String _FINDER_COLUMN_U_P_C_N_D_DELIVERYTYPE_2 = "userNotificationDelivery.deliveryType = ?";
 
+	public UserNotificationDeliveryPersistenceImpl() {
+		setModelClass(UserNotificationDelivery.class);
+	}
+
 	/**
 	 * Caches the user notification delivery in the entity cache if it is enabled.
 	 *
@@ -1254,6 +1262,8 @@ public class UserNotificationDeliveryPersistenceImpl extends BasePersistenceImpl
 
 		clearUniqueFindersCache(userNotificationDelivery);
 		cacheUniqueFindersCache(userNotificationDelivery);
+
+		userNotificationDelivery.resetOriginalValues();
 
 		return userNotificationDelivery;
 	}

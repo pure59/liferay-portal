@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.LockLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class LockLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -356,12 +359,33 @@ public class LockLocalServiceUtil {
 	}
 
 	public static com.liferay.portal.model.Lock lock(
+		java.lang.String className, java.lang.String key, java.lang.String owner)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().lock(className, key, owner);
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #lock(String, String,
+	String)}
+	*/
+	public static com.liferay.portal.model.Lock lock(
 		java.lang.String className, java.lang.String key,
 		java.lang.String owner, boolean retrieveFromCache)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService().lock(className, key, owner, retrieveFromCache);
 	}
 
+	public static com.liferay.portal.model.Lock lock(
+		java.lang.String className, java.lang.String key,
+		java.lang.String expectedOwner, java.lang.String updatedOwner)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().lock(className, key, expectedOwner, updatedOwner);
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #lock(String, String, String,
+	String)}
+	*/
 	public static com.liferay.portal.model.Lock lock(
 		java.lang.String className, java.lang.String key,
 		java.lang.String expectedOwner, java.lang.String updatedOwner,
@@ -389,6 +413,16 @@ public class LockLocalServiceUtil {
 		getService().unlock(className, key);
 	}
 
+	public static void unlock(java.lang.String className, java.lang.String key,
+		java.lang.String owner)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		getService().unlock(className, key, owner);
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #unlock(String, String,
+	String)}
+	*/
 	public static void unlock(java.lang.String className, java.lang.String key,
 		java.lang.String owner, boolean retrieveFromCache)
 		throws com.liferay.portal.kernel.exception.SystemException {

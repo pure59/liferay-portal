@@ -35,6 +35,9 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.TreeModelFinder;
+import com.liferay.portal.kernel.util.TreePathUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Company;
@@ -55,7 +58,9 @@ import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.base.OrganizationLocalServiceBaseImpl;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.portal.util.comparator.OrganizationIdComparator;
 import com.liferay.portal.util.comparator.OrganizationNameComparator;
+import com.liferay.util.dao.orm.CustomSQLUtil;
 
 import java.io.Serializable;
 
@@ -531,6 +536,11 @@ public class OrganizationLocalServiceImpl
 		return organizationPersistence.fetchByC_N(companyId, name);
 	}
 
+	@Override
+	public List<Organization> getNoAssetOrganizations() throws SystemException {
+		return organizationFinder.findByNoAssets();
+	}
+
 	/**
 	 * Returns the organization with the name.
 	 *
@@ -587,9 +597,7 @@ public class OrganizationLocalServiceImpl
 		while (iterator.hasNext()) {
 			Organization organization = iterator.next();
 
-			if ((organization.getCompanyId() != user.getCompanyId()) ||
-				(organization.getParentOrganization() == null)) {
-
+			if (organization.getCompanyId() != user.getCompanyId()) {
 				iterator.remove();
 			}
 		}
@@ -604,11 +612,7 @@ public class OrganizationLocalServiceImpl
 
 		Collections.sort(organizations, obc);
 
-		if ((start != QueryUtil.ALL_POS) || (end != QueryUtil.ALL_POS)) {
-			organizations = ListUtil.subList(organizations, start, end);
-		}
-
-		return organizations;
+		return ListUtil.subList(organizations, start, end);
 	}
 
 	/**
@@ -1003,48 +1007,24 @@ public class OrganizationLocalServiceImpl
 	public void rebuildTree(long companyId)
 		throws PortalException, SystemException {
 
-		List<Organization> organizations =
-			organizationPersistence.findByCompanyId(companyId);
+		TreePathUtil.rebuildTree(
+			companyId, OrganizationConstants.DEFAULT_PARENT_ORGANIZATION_ID,
+			new TreeModelFinder<Organization>() {
 
-		for (Organization organization : organizations) {
-			organization.setTreePath(organization.buildTreePath());
+				@Override
+				public List<Organization> findTreeModels(
+						long previousId, long companyId, long parentPrimaryKey,
+						int size)
+					throws SystemException {
 
-			organizationPersistence.update(organization);
-		}
-	}
+					return organizationPersistence.findByO_C_P(
+						previousId, companyId, parentPrimaryKey,
+						QueryUtil.ALL_POS, size,
+						new OrganizationIdComparator(true));
+				}
 
-	/**
-	 * Returns a range of all the organizations of the company.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end -
-	 * start</code> instances. <code>start</code> and <code>end</code> are not
-	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
-	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
-	 * result set.
-	 * </p>
-	 *
-	 * @param  companyId the primary key of the company
-	 * @param  params the finder parameters (optionally <code>null</code>). For
-	 *         more information see {@link
-	 *         com.liferay.portlet.usersadmin.util.OrganizationIndexer}
-	 * @param  start the lower bound of the range of organizations to return
-	 * @param  end the upper bound of the range of organizations to return (not
-	 *         inclusive)
-	 * @return the range of all the organizations of the company
-	 * @throws SystemException if a system exception occurred
-	 */
-	@Override
-	public List<Organization> search(
-			long companyId, LinkedHashMap<String, Object> params, int start,
-			int end)
-		throws SystemException {
-
-		return organizationFinder.findByCompanyId(
-			companyId, params, start, end,
-			new OrganizationNameComparator(true));
+			}
+		);
 	}
 
 	/**
@@ -1444,7 +1424,7 @@ public class OrganizationLocalServiceImpl
 			searchContext.setQueryConfig(queryConfig);
 
 			if (sort != null) {
-				searchContext.setSorts(new Sort[] {sort});
+				searchContext.setSorts(sort);
 			}
 
 			searchContext.setStart(start);
@@ -1855,18 +1835,11 @@ public class OrganizationLocalServiceImpl
 	protected long[] getReindexOrganizationIds(Organization organization)
 		throws PortalException, SystemException {
 
-		List<Organization> organizationsTree = new ArrayList<Organization>();
-
-		organizationsTree.add(organization);
-
-		LinkedHashMap<String, Object> params =
-			new LinkedHashMap<String, Object>();
-
-		params.put("organizationsTree", organizationsTree);
-
-		List<Organization> organizations = search(
-			organization.getCompanyId(), params, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS);
+		List<Organization> organizations = organizationPersistence.findByC_T(
+			organization.getCompanyId(),
+			CustomSQLUtil.keywords(organization.getTreePath())[0],
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			new OrganizationNameComparator(true));
 
 		long[] organizationIds = new long[organizations.size()];
 
@@ -2009,7 +1982,7 @@ public class OrganizationLocalServiceImpl
 				companyId, name);
 
 			if ((organization != null) &&
-				organization.getName().equalsIgnoreCase(name)) {
+				StringUtil.equalsIgnoreCase(organization.getName(), name)) {
 
 				if ((organizationId <= 0) ||
 					(organization.getOrganizationId() != organizationId)) {

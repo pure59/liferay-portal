@@ -112,13 +112,20 @@ public class TestPropsValues {
 	}
 
 	public static String getLogin() throws Exception {
+		return getLogin(true);
+	}
+
+	public static String getLogin(boolean encodeLogin) throws Exception {
 		String login = null;
 
 		String authType = PropsValues.COMPANY_SECURITY_AUTH_TYPE;
 
 		if (authType.equals(CompanyConstants.AUTH_TYPE_EA)) {
 			login = getUser().getEmailAddress();
-			login = HttpUtil.encodeURL(login);
+
+			if (encodeLogin) {
+				login = HttpUtil.encodeURL(login);
+			}
 		}
 		else if (authType.equals(CompanyConstants.AUTH_TYPE_SN)) {
 			login = getUser().getScreenName();
@@ -187,9 +194,11 @@ public class TestPropsValues {
 			List<User> users = UserLocalServiceUtil.getRoleUsers(
 				role.getRoleId(), 0, 2);
 
-			_user = users.get(0);
+			if (!users.isEmpty()) {
+				_user = users.get(0);
 
-			_userId = _user.getUserId();
+				_userId = _user.getUserId();
+			}
 		}
 
 		return _user;
@@ -197,7 +206,11 @@ public class TestPropsValues {
 
 	public static long getUserId() throws PortalException, SystemException {
 		if (_userId == 0) {
-			_userId = getUser().getUserId();
+			User user = getUser();
+
+			if (user != null) {
+				_userId = user.getUserId();
+			}
 		}
 
 		return _userId;

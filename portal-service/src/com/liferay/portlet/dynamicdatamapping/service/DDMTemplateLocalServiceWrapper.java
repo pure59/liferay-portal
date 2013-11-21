@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatamapping.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see DDMTemplateLocalService
  * @generated
  */
+@ProviderType
 public class DDMTemplateLocalServiceWrapper implements DDMTemplateLocalService,
 	ServiceWrapper<DDMTemplateLocalService> {
 	public DDMTemplateLocalServiceWrapper(
@@ -922,6 +925,24 @@ public class DDMTemplateLocalServiceWrapper implements DDMTemplateLocalService,
 	public int getTemplatesCount(long groupId, long classNameId)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _ddmTemplateLocalService.getTemplatesCount(groupId, classNameId);
+	}
+
+	/**
+	* Returns the number of templates matching the group, class name ID, and
+	* class PK.
+	*
+	* @param groupId the primary key of the group
+	* @param classNameId the primary key of the class name for the template's
+	related model
+	* @param classPK the primary key of the template's related entity
+	* @return the number of matching templates
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public int getTemplatesCount(long groupId, long classNameId, long classPK)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _ddmTemplateLocalService.getTemplatesCount(groupId, classNameId,
+			classPK);
 	}
 
 	/**

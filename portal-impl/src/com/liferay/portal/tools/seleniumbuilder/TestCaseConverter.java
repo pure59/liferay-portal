@@ -28,7 +28,10 @@ public class TestCaseConverter extends BaseConverter {
 	public void convert(String testCaseName) throws Exception {
 		Map<String, Object> context = getContext();
 
+		context.put("logicalOperatorElementStack", new FreeMarkerStack());
 		context.put("macroNameStack", new FreeMarkerStack());
+		context.put("testCaseElementsStack", new FreeMarkerStack());
+		context.put("testCaseNameStack", new FreeMarkerStack());
 		context.put("testCaseName", testCaseName);
 
 		String javaContent = processTemplate("test_case.ftl", context);

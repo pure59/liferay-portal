@@ -20,17 +20,16 @@ import com.liferay.portal.NoSuchGroupException;
 import com.liferay.portal.RemoteExportException;
 import com.liferay.portal.RemoteOptionsException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.util.Constants;
-import com.liferay.portal.kernel.util.DateRange;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.security.auth.AuthException;
 import com.liferay.portal.security.auth.PrincipalException;
+import com.liferay.portal.security.auth.RemoteAuthException;
 import com.liferay.portlet.sites.action.ActionUtil;
-
-import java.util.Date;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -79,9 +78,13 @@ public class PublishLayoutsAction extends EditLayoutsAction {
 					StagingUtil.copyFromLive(actionRequest);
 				}
 				else if (cmd.equals("publish_to_live")) {
+					hideDefaultSuccessMessage(actionRequest);
+
 					StagingUtil.publishToLive(actionRequest);
 				}
 				else if (cmd.equals("publish_to_remote")) {
+					hideDefaultSuccessMessage(actionRequest);
+
 					StagingUtil.publishToRemote(actionRequest);
 				}
 				else if (cmd.equals("schedule_copy_from_live")) {
@@ -107,28 +110,6 @@ public class PublishLayoutsAction extends EditLayoutsAction {
 					portletConfig, actionRequest, actionResponse, redirect,
 					closeRedirect);
 			}
-			else {
-				long groupId = ParamUtil.getLong(actionRequest, "groupId");
-				boolean privateLayout = ParamUtil.getBoolean(
-					actionRequest, "privateLayout");
-
-				DateRange dateRange = ExportImportHelperUtil.getDateRange(
-					actionRequest, groupId, privateLayout, 0, null);
-
-				Date startDate = dateRange.getStartDate();
-
-				if (startDate != null) {
-					actionResponse.setRenderParameter(
-						"startDate", String.valueOf(startDate.getTime()));
-				}
-
-				Date endDate = dateRange.getEndDate();
-
-				if (endDate != null) {
-					actionResponse.setRenderParameter(
-						"endDate", String.valueOf(endDate.getTime()));
-				}
-			}
 		}
 		catch (Exception e) {
 			if (e instanceof PrincipalException) {
@@ -136,15 +117,27 @@ public class PublishLayoutsAction extends EditLayoutsAction {
 
 				setForward(actionRequest, "portlet.layouts_admin.error");
 			}
-			else if (e instanceof DuplicateLockException ||
+			else if (e instanceof AuthException ||
+					 e instanceof DuplicateLockException ||
 					 e instanceof LayoutPrototypeException ||
+					 e instanceof RemoteAuthException ||
 					 e instanceof RemoteExportException ||
 					 e instanceof RemoteOptionsException ||
 					 e instanceof SystemException) {
 
-				SessionErrors.add(actionRequest, e.getClass(), e);
+				if (e instanceof RemoteAuthException) {
+					SessionErrors.add(actionRequest, AuthException.class, e);
+				}
+				else {
+					SessionErrors.add(actionRequest, e.getClass(), e);
+				}
 
-				redirect = ParamUtil.getString(actionRequest, "pagesRedirect");
+				redirect = ParamUtil.getString(
+					actionRequest, "pagesRedirect", redirect);
+
+				redirect = StringUtil.replace(
+					redirect, "tabs2=current-and-previous",
+					"tabs2=new-publication-process");
 
 				sendRedirect(
 					portletConfig, actionRequest, actionResponse, redirect,

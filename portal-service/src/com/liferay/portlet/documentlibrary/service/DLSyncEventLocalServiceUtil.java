@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.documentlibrary.service.impl.DLSyncEventLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class DLSyncEventLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -280,9 +283,14 @@ public class DLSyncEventLocalServiceUtil {
 	}
 
 	public static java.util.List<com.liferay.portlet.documentlibrary.model.DLSyncEvent> getDLSyncEvents(
-		long modifiedDate)
+		long modifiedTime)
 		throws com.liferay.portal.kernel.exception.SystemException {
-		return getService().getDLSyncEvents(modifiedDate);
+		return getService().getDLSyncEvents(modifiedTime);
+	}
+
+	public static java.util.List<com.liferay.portlet.documentlibrary.model.DLSyncEvent> getLatestDLSyncEvents()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getLatestDLSyncEvents();
 	}
 
 	public static DLSyncEventLocalService getService() {

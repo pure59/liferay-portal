@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.social.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
 
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see SocialActivity
  * @generated
  */
+@ProviderType
 public class SocialActivityWrapper implements SocialActivity,
 	ModelWrapper<SocialActivity> {
 	public SocialActivityWrapper(SocialActivity socialActivity) {
@@ -631,6 +634,13 @@ public class SocialActivityWrapper implements SocialActivity,
 	}
 
 	@Override
+	public java.lang.String getExtraDataValue(java.lang.String key,
+		java.util.Locale locale)
+		throws com.liferay.portal.kernel.json.JSONException {
+		return _socialActivity.getExtraDataValue(key, locale);
+	}
+
+	@Override
 	public boolean isClassName(java.lang.String className) {
 		return _socialActivity.isClassName(className);
 	}
@@ -639,6 +649,12 @@ public class SocialActivityWrapper implements SocialActivity,
 	public void setAssetEntry(
 		com.liferay.portlet.asset.model.AssetEntry assetEntry) {
 		_socialActivity.setAssetEntry(assetEntry);
+	}
+
+	@Override
+	public void setExtraDataValue(java.lang.String key, java.lang.String value)
+		throws com.liferay.portal.kernel.json.JSONException {
+		_socialActivity.setExtraDataValue(key, value);
 	}
 
 	@Override

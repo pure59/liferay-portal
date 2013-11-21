@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.servlet.TempAttributesServletRequest;
 import com.liferay.portal.kernel.struts.LastPath;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -182,6 +183,14 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 			return;
 		}
 
+		if (!isValidPortletId(portlet.getPortletId())) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Invalid portlet id " + portlet.getPortletId());
+			}
+
+			throw new PrincipalException();
+		}
+
 		if (portlet.isUndeployedPortlet()) {
 			return;
 		}
@@ -217,17 +226,14 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 			HttpServletRequest request, Portlet portlet)
 		throws PortalException {
 
-		if (!PropsValues.AUTH_TOKEN_CHECK_ENABLED) {
-			return;
-		}
-
 		Map<String, String> initParams = portlet.getInitParams();
 
 		boolean checkAuthToken = GetterUtil.getBoolean(
 			initParams.get("check-auth-token"), true);
 
 		if (checkAuthToken) {
-			AuthTokenUtil.check(request);
+			AuthTokenUtil.checkCSRFToken(
+				request, SecurityPortletContainerWrapper.class.getName());
 		}
 	}
 
@@ -577,6 +583,32 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 		return false;
 	}
 
+	protected boolean isValidPortletId(String portletId) {
+		for (int i = 0; i < portletId.length(); i++) {
+			char c = portletId.charAt(i);
+
+			if ((c >= CharPool.LOWER_CASE_A) && (c <= CharPool.LOWER_CASE_Z)) {
+				continue;
+			}
+
+			if ((c >= CharPool.UPPER_CASE_A) && (c <= CharPool.UPPER_CASE_Z)) {
+				continue;
+			}
+
+			if ((c >= CharPool.NUMBER_0) && (c <= CharPool.NUMBER_9)) {
+				continue;
+			}
+
+			if (c == CharPool.UNDERLINE) {
+				continue;
+			}
+
+			return false;
+		}
+
+		return true;
+	}
+
 	protected ActionResult processActionException(
 		HttpServletRequest request, HttpServletResponse response,
 		Portlet portlet, PrincipalException e) {
@@ -587,9 +619,11 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 		String url = getOriginalURL(request);
 
-		_log.warn(
-			"Reject process action for " + url + " on " +
-				portlet.getPortletId());
+		if (_log.isWarnEnabled()) {
+			_log.warn(
+				"Reject process action for " + url + " on " +
+					portlet.getPortletId());
+		}
 
 		return ActionResult.EMPTY_ACTION_RESULT;
 	}
@@ -634,9 +668,11 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
-		_log.warn(
-			"Reject serveResource for " + url + " on " +
-				portlet.getPortletId());
+		if (_log.isWarnEnabled()) {
+			_log.warn(
+				"Reject serveResource for " + url + " on " +
+					portlet.getPortletId());
+		}
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(

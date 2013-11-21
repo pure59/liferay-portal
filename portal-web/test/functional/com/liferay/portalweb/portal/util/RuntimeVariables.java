@@ -14,6 +14,7 @@
 
 package com.liferay.portalweb.portal.util;
 
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -28,12 +29,41 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-
 /**
  * @author Brian Wing Shun Chan
  */
 public class RuntimeVariables {
+
+	public static String evaluateLocator(
+			String locator, Map<String, String> context)
+		throws Exception {
+
+		String locatorValue = locator;
+
+		if (locatorValue.contains("${") && locatorValue.contains("}")) {
+			String regex = "\\$\\{([^}]*?)\\}";
+
+			Pattern pattern = Pattern.compile(regex);
+
+			Matcher matcher = pattern.matcher(locatorValue);
+
+			while (matcher.find()) {
+				String variableKey = matcher.group(1);
+
+				if (context.containsKey(variableKey)) {
+					locatorValue = locatorValue.replaceFirst(
+						regex, context.get(variableKey));
+				}
+				else {
+					throw new Exception(
+						"Variable \"" + variableKey + "\" found in \"" +
+							locator + "\" is not set");
+				}
+			}
+		}
+
+		return locatorValue;
+	}
 
 	public static String evaluateVariable(
 		String value, Map<String, String> context) {
@@ -44,11 +74,11 @@ public class RuntimeVariables {
 
 		Matcher matcher = pattern.matcher(varValue);
 
+		Pattern statementPattern = Pattern.compile(
+			"(.*)\\?(.*)\\(([^\\)]*?)\\)");
+
 		while (matcher.find()) {
 			String statement = matcher.group(1);
-
-			Pattern statementPattern = Pattern.compile(
-				"(.*)\\?(.*)\\(([^\\)]*?)\\)");
 
 			Matcher statementMatcher = statementPattern.matcher(statement);
 
@@ -60,7 +90,7 @@ public class RuntimeVariables {
 				}
 
 				String[] arguments = StringUtil.split(
-					statementMatcher.group(3));
+					statementMatcher.group(3), "'");
 
 				List<String> argumentsList = new ArrayList<String>();
 
@@ -76,17 +106,28 @@ public class RuntimeVariables {
 
 				String replaceRegex = "\\$\\{([^}]*?)\\}";
 
-				if (method.startsWith("replace")) {
-					String result = operandValue.replace(
-						argumentsList.get(0), argumentsList.get(1));
+				String result = "";
 
-					varValue = varValue.replaceFirst(replaceRegex, result);
+				if (method.startsWith("getFirstNumber")) {
+					result = operandValue.replaceFirst("\\D*(\\d*).*", "$1");
+				}
+				else if (method.startsWith("increment")) {
+					int i = GetterUtil.getInteger(operandValue) + 1;
+
+					result = String.valueOf(i);
+				}
+				else if (method.startsWith("length")) {
+					result = String.valueOf(operandValue.length());
 				}
 				else if (method.startsWith("lowercase")) {
-					String result = operandValue.toLowerCase();
-
-					varValue = varValue.replaceFirst(replaceRegex, result);
+					result = StringUtil.toLowerCase(operandValue);
 				}
+				else if (method.startsWith("replace")) {
+					result = operandValue.replace(
+						argumentsList.get(0), argumentsList.get(1));
+				}
+
+				varValue = varValue.replaceFirst(replaceRegex, result);
 			}
 			else {
 				String varName = statement;
@@ -109,7 +150,7 @@ public class RuntimeVariables {
 		varValue = varValue.replace("\\{", "{");
 		varValue = varValue.replace("\\}", "}");
 
-		return StringEscapeUtils.escapeJava(varValue);
+		return varValue;
 	}
 
 	public static String getValue(String key) {

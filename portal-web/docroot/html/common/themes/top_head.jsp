@@ -14,7 +14,7 @@
  */
 --%>
 
-<%@ include file="/html/common/init.jsp" %>
+<%@ include file="/html/common/themes/init.jsp" %>
 
 <c:if test="<%= PropsValues.MONITORING_PORTAL_REQUEST %>">
 	<%@ include file="/html/common/themes/top_monitoring.jspf" %>
@@ -37,14 +37,14 @@ if (!themeDisplay.isSignedIn() && layout.isPublicLayout()) {
 	<link href="<%= HtmlUtil.escapeAttribute(canonicalURL) %>" rel="canonical" />
 
 	<%
-	Locale[] availableLocales = LanguageUtil.getAvailableLocales();
+	Locale[] availableLocales = LanguageUtil.getAvailableLocales(themeDisplay.getSiteGroupId());
 
 	if (availableLocales.length > 1) {
 		for (Locale availableLocale : availableLocales) {
 	%>
 
 			<c:if test="<%= availableLocale.equals(LocaleUtil.getDefault()) %>">
-				<link href="<%= PortalUtil.getCanonicalURL(completeURL, themeDisplay, layout) %>" hreflang="x-default" rel="alternate" />
+				<link href="<%= canonicalURL %>" hreflang="x-default" rel="alternate" />
 			</c:if>
 
 			<link href="<%= HtmlUtil.escapeAttribute(PortalUtil.getAlternateURL(canonicalURL, themeDisplay, availableLocale, layout)) %>" hreflang="<%= LocaleUtil.toW3cLanguageId(availableLocale) %>" rel="alternate" />

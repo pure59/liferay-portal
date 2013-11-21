@@ -55,6 +55,7 @@ import com.liferay.portal.model.Image;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutConstants;
 import com.liferay.portal.model.LayoutSet;
+import com.liferay.portal.model.LayoutTemplate;
 import com.liferay.portal.model.LayoutTypePortlet;
 import com.liferay.portal.model.LayoutTypePortletConstants;
 import com.liferay.portal.model.Portlet;
@@ -81,6 +82,7 @@ import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.permission.GroupPermissionUtil;
 import com.liferay.portal.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.service.permission.PortalPermissionUtil;
+import com.liferay.portal.service.permission.PortletPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.theme.ThemeDisplayFactory;
 import com.liferay.portal.util.LayoutClone;
@@ -324,6 +326,8 @@ public class ServicePreAction extends Action {
 
 		long plid = ParamUtil.getLong(request, "p_l_id");
 
+		boolean viewableSourceGroup = true;
+
 		if (plid > 0) {
 			layout = LayoutLocalServiceUtil.getLayout(plid);
 
@@ -340,7 +344,7 @@ public class ServicePreAction extends Action {
 					layout = new VirtualLayout(layout, sourceGroup);
 				}
 				else {
-					layout = null;
+					viewableSourceGroup = false;
 				}
 			}
 		}
@@ -372,7 +376,9 @@ public class ServicePreAction extends Action {
 				request.setAttribute(WebKeys.REQUESTED_LAYOUT, layout);
 			}
 
-			if (Validator.isNull(controlPanelCategory) &&
+			if ((Validator.isNull(controlPanelCategory) ||
+				 controlPanelCategory.equals(PortletCategoryKeys.MY) ||
+				 controlPanelCategory.equals(PortletCategoryKeys.PORTLET)) &&
 				Validator.isNotNull(ppid) &&
 				(LiferayWindowState.isPopUp(request) ||
 				 LiferayWindowState.isExclusive(request))) {
@@ -409,19 +415,20 @@ public class ServicePreAction extends Action {
 			boolean viewableStaging =
 				!group.isControlPanel() &&
 				GroupPermissionUtil.contains(
-					permissionChecker, group.getGroupId(),
-					ActionKeys.VIEW_STAGING);
+					permissionChecker, group, ActionKeys.VIEW_STAGING);
 
 			if (viewableStaging) {
 				layouts = LayoutLocalServiceUtil.getLayouts(
 					layout.getGroupId(), layout.isPrivateLayout(),
 					LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
 			}
-			else if (!viewableGroup && group.isStagingGroup()) {
+			else if ((!viewableGroup || !viewableSourceGroup) &&
+					 group.isStagingGroup()) {
+
 				layout = null;
 			}
 			else if (!isLoginRequest(request) &&
-					 (!viewableGroup ||
+					 ((!viewableGroup || !viewableSourceGroup) ||
 					  (!redirectToDefaultLayout &&
 					   !hasAccessPermission(
 						   permissionChecker, layout, doAsGroupId,
@@ -504,6 +511,7 @@ public class ServicePreAction extends Action {
 		LayoutSet layoutSet = null;
 
 		boolean hasCustomizeLayoutPermission = false;
+		boolean hasDeleteLayoutPermission = false;
 		boolean hasUpdateLayoutPermission = false;
 
 		boolean customizedView = SessionParamUtil.getBoolean(
@@ -513,6 +521,8 @@ public class ServicePreAction extends Action {
 			if (!layout.isTypeControlPanel()) {
 				hasCustomizeLayoutPermission = LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.CUSTOMIZE);
+				hasDeleteLayoutPermission = LayoutPermissionUtil.contains(
+					permissionChecker, layout, ActionKeys.DELETE);
 				hasUpdateLayoutPermission = LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.UPDATE);
 			}
@@ -584,7 +594,7 @@ public class ServicePreAction extends Action {
 
 				PortalPreferences portalPreferences =
 					PortletPreferencesFactoryUtil.getPortalPreferences(
-						companyId, user.getUserId(), true);
+						user.getUserId(), true);
 
 				layoutTypePortlet.setPortalPreferences(portalPreferences);
 			}
@@ -815,10 +825,18 @@ public class ServicePreAction extends Action {
 
 		themeDisplay.setShowHomeIcon(true);
 		themeDisplay.setShowMyAccountIcon(signedIn);
-		themeDisplay.setShowPageSettingsIcon(false);
+		themeDisplay.setShowPageSettingsIcon(hasDeleteLayoutPermission);
 		themeDisplay.setShowPortalIcon(true);
 		themeDisplay.setShowSignInIcon(!signedIn);
-		themeDisplay.setShowSignOutIcon(signedIn);
+
+		boolean showSignOutIcon = signedIn;
+
+		if (themeDisplay.isImpersonated()) {
+			showSignOutIcon = false;
+		}
+
+		themeDisplay.setShowSignOutIcon(showSignOutIcon);
+
 		themeDisplay.setShowStagingIcon(false);
 
 		boolean showSiteAdministrationIcon = false;
@@ -1034,23 +1052,25 @@ public class ServicePreAction extends Action {
 				}
 			}
 
+			Group scopeGroup = GroupLocalServiceUtil.getGroup(scopeGroupId);
+
 			boolean hasAddLayoutGroupPermission = GroupPermissionUtil.contains(
-				permissionChecker, scopeGroupId, ActionKeys.ADD_LAYOUT);
+				permissionChecker, scopeGroup, ActionKeys.ADD_LAYOUT);
 			boolean hasAddLayoutLayoutPermission =
 				!layout.isTypeControlPanel() &&
 				LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.ADD_LAYOUT);
 			boolean hasManageLayoutsGroupPermission =
 				GroupPermissionUtil.contains(
-					permissionChecker, scopeGroupId, ActionKeys.MANAGE_LAYOUTS);
+					permissionChecker, scopeGroup, ActionKeys.MANAGE_LAYOUTS);
 			boolean hasManageStagingPermission = GroupPermissionUtil.contains(
-				permissionChecker, scopeGroupId, ActionKeys.MANAGE_STAGING);
+				permissionChecker, scopeGroup, ActionKeys.MANAGE_STAGING);
 			boolean hasPublishStagingPermission = GroupPermissionUtil.contains(
-				permissionChecker, scopeGroupId, ActionKeys.PUBLISH_STAGING);
+				permissionChecker, scopeGroup, ActionKeys.PUBLISH_STAGING);
 			boolean hasUpdateGroupPermission = GroupPermissionUtil.contains(
-				permissionChecker, scopeGroupId, ActionKeys.UPDATE);
+				permissionChecker, scopeGroup, ActionKeys.UPDATE);
 			boolean hasViewStagingPermission = GroupPermissionUtil.contains(
-				permissionChecker, scopeGroupId, ActionKeys.VIEW_STAGING);
+				permissionChecker, scopeGroup, ActionKeys.VIEW_STAGING);
 
 			if (!group.isControlPanel() && !group.isUser() &&
 				!group.isUserGroup() && hasUpdateGroupPermission) {
@@ -1134,7 +1154,6 @@ public class ServicePreAction extends Action {
 			if (group.hasStagingGroup() && !group.isStagingGroup()) {
 				themeDisplay.setShowAddContentIcon(false);
 				themeDisplay.setShowLayoutTemplatesIcon(false);
-				themeDisplay.setShowPageSettingsIcon(false);
 				themeDisplay.setURLPublishToLive(null);
 			}
 
@@ -1241,14 +1260,24 @@ public class ServicePreAction extends Action {
 		if (group.hasStagingGroup() && !group.isStagingGroup()) {
 			themeDisplay.setShowLayoutTemplatesIcon(false);
 			themeDisplay.setShowPageCustomizationIcon(false);
-			themeDisplay.setShowPageSettingsIcon(false);
 			themeDisplay.setShowSiteMapSettingsIcon(false);
 			themeDisplay.setShowSiteSettingsIcon(false);
 		}
 
 		themeDisplay.setURLPortal(portalURL.concat(contextPath));
 
-		String urlSignIn = mainPath.concat(_PATH_PORTAL_LOGIN);
+		boolean secure = false;
+
+		if (PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS ||
+			request.isSecure()) {
+
+			secure = true;
+		}
+
+		String securePortalURL = PortalUtil.getPortalURL(request, secure);
+
+		String urlSignIn = securePortalURL.concat(mainPath).concat(
+			_PATH_PORTAL_LOGIN);
 
 		if (layout != null) {
 			urlSignIn = HttpUtil.addParameter(
@@ -1264,6 +1293,84 @@ public class ServicePreAction extends Action {
 			PortletRequest.RENDER_PHASE);
 
 		themeDisplay.setURLUpdateManager(updateManagerURL);
+
+		// Control Panel redirects
+
+		if (group.isControlPanel() && Validator.isNotNull(ppid)) {
+			boolean switchGroup = ParamUtil.getBoolean(request, "switchGroup");
+
+			if (switchGroup &&
+				!PortletPermissionUtil.hasControlPanelAccessPermission(
+					permissionChecker, scopeGroupId, ppid)) {
+
+				String redirect = HttpUtil.removeParameter(
+					currentURL, "p_p_id");
+
+				response.sendRedirect(redirect);
+			}
+		}
+		else if (group.isControlPanel() && Validator.isNull(ppid)) {
+			if (controlPanelCategory.startsWith(
+					PortletCategoryKeys.CURRENT_SITE)) {
+
+				if (controlPanelCategory.indexOf(StringPool.PERIOD) == -1) {
+					controlPanelCategory = StringUtil.replace(
+						controlPanelCategory, PortletCategoryKeys.CURRENT_SITE,
+						PortletCategoryKeys.SITE_ADMINISTRATION);
+				}
+				else {
+					controlPanelCategory = StringUtil.replace(
+						controlPanelCategory,
+						PortletCategoryKeys.CURRENT_SITE + StringPool.PERIOD,
+						PortletCategoryKeys.SITE_ADMINISTRATION);
+				}
+			}
+
+			if (controlPanelCategory.equals(
+					PortletCategoryKeys.SITE_ADMINISTRATION)) {
+
+				Portlet firstPortlet =
+					PortalUtil.getFirstSiteAdministrationPortlet(themeDisplay);
+
+				String redirect = HttpUtil.setParameter(
+					currentURL, "p_p_id", firstPortlet.getPortletId());
+
+				response.sendRedirect(
+					PortalUtil.getAbsoluteURL(request, redirect));
+			}
+			else {
+				List<Portlet> portlets = PortalUtil.getControlPanelPortlets(
+					controlPanelCategory, themeDisplay);
+
+				Portlet firstPortlet = null;
+
+				for (Portlet portlet : portlets) {
+					if (PortletPermissionUtil.hasControlPanelAccessPermission(
+							permissionChecker, scopeGroupId, portlet)) {
+
+						firstPortlet = portlet;
+
+						break;
+					}
+				}
+
+				if ((firstPortlet == null) &&
+					controlPanelCategory.startsWith(
+						PortletCategoryKeys.SITE_ADMINISTRATION)) {
+
+					firstPortlet = PortalUtil.getFirstSiteAdministrationPortlet(
+						themeDisplay);
+				}
+
+				if (firstPortlet != null) {
+					String redirect = HttpUtil.setParameter(
+						currentURL, "p_p_id", firstPortlet.getPortletId());
+
+					response.sendRedirect(
+						PortalUtil.getAbsoluteURL(request, redirect));
+				}
+			}
+		}
 
 		return themeDisplay;
 	}
@@ -1339,15 +1446,15 @@ public class ServicePreAction extends Action {
 		layoutTypePortlet.setLayoutTemplateId(
 			0, PropsValues.DEFAULT_USER_PRIVATE_LAYOUT_TEMPLATE_ID, false);
 
-		for (int i = 0; i < 10; i++) {
-			String columnId = "column-" + i;
-			String portletIds = PropsUtil.get(
-				PropsKeys.DEFAULT_USER_PRIVATE_LAYOUT_COLUMN + i);
+		LayoutTemplate layoutTemplate = layoutTypePortlet.getLayoutTemplate();
 
-			String[] portletIdsArray = StringUtil.split(portletIds);
+		for (String columnId : layoutTemplate.getColumns()) {
+			String keyPrefix = PropsKeys.DEFAULT_USER_PRIVATE_LAYOUT_PREFIX;
+
+			String portletIds = PropsUtil.get(keyPrefix.concat(columnId));
 
 			layoutTypePortlet.addPortletIds(
-				0, portletIdsArray, columnId, false);
+				0, StringUtil.split(portletIds), columnId, false);
 		}
 
 		LayoutLocalServiceUtil.updateLayout(
@@ -1437,15 +1544,15 @@ public class ServicePreAction extends Action {
 		layoutTypePortlet.setLayoutTemplateId(
 			0, PropsValues.DEFAULT_USER_PUBLIC_LAYOUT_TEMPLATE_ID, false);
 
-		for (int i = 0; i < 10; i++) {
-			String columnId = "column-" + i;
-			String portletIds = PropsUtil.get(
-				PropsKeys.DEFAULT_USER_PUBLIC_LAYOUT_COLUMN + i);
+		LayoutTemplate layoutTemplate = layoutTypePortlet.getLayoutTemplate();
 
-			String[] portletIdsArray = StringUtil.split(portletIds);
+		for (String columnId : layoutTemplate.getColumns()) {
+			String keyPrefix = PropsKeys.DEFAULT_USER_PUBLIC_LAYOUT_PREFIX;
+
+			String portletIds = PropsUtil.get(keyPrefix.concat(columnId));
 
 			layoutTypePortlet.addPortletIds(
-				0, portletIdsArray, columnId, false);
+				0, StringUtil.split(portletIds), columnId, false);
 		}
 
 		LayoutLocalServiceUtil.updateLayout(
@@ -1686,8 +1793,7 @@ public class ServicePreAction extends Action {
 			(group.isStagingGroup() || group.isStagedRemotely()) &&
 			 !group.isControlPanel() &&
 			 GroupPermissionUtil.contains(
-				 permissionChecker, group.getGroupId(),
-				 ActionKeys.VIEW_STAGING);
+				 permissionChecker, group, ActionKeys.VIEW_STAGING);
 
 		if (hasAccessPermission(
 				permissionChecker, layout, doAsGroupId, controlPanelCategory,
@@ -1762,7 +1868,7 @@ public class ServicePreAction extends Action {
 				}
 
 				if (GroupPermissionUtil.contains(
-						permissionChecker, group.getGroupId(),
+						permissionChecker, group,
 						ActionKeys.VIEW_SITE_ADMINISTRATION)) {
 
 					return true;
@@ -2045,7 +2151,7 @@ public class ServicePreAction extends Action {
 		// Parallel render
 
 		if (PropsValues.LAYOUT_PARALLEL_RENDER_ENABLE &&
-			ServerDetector.isTomcat()) {
+			ServerDetector.isTomcat() && !PropsValues.TCK_URL) {
 
 			boolean portletParallelRender = ParamUtil.getBoolean(
 				request, "p_p_parallel", true);

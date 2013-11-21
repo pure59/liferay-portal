@@ -17,7 +17,7 @@
 <%@ include file="/html/portlet/dynamic_data_lists/init.jsp" %>
 
 <%
-String toolbarItem = ParamUtil.getString(request, "toolbarItem", "view-all");
+String toolbarItem = ParamUtil.getString(request, "toolbarItem");
 %>
 
 <aui:nav-bar>
@@ -26,18 +26,15 @@ String toolbarItem = ParamUtil.getString(request, "toolbarItem", "view-all");
 			<portlet:param name="struts_action" value="/dynamic_data_lists/view" />
 		</portlet:renderURL>
 
-		<aui:nav-item href="<%= viewRecordsURL %>" label="view-all" selected='<%= toolbarItem.equals("view-all") %>' />
-
 		<c:if test="<%= DDLPermission.contains(permissionChecker, scopeGroupId, ActionKeys.ADD_RECORD_SET) %>">
 			<portlet:renderURL var="addRecordSetURL">
 				<portlet:param name="struts_action" value="/dynamic_data_lists/edit_record_set" />
-				<portlet:param name="redirect" value="<%= viewRecordsURL %>" />
-				<portlet:param name="backURL" value="<%= viewRecordsURL %>" />
+				<portlet:param name="redirect" value="<%= currentURL %>" />
 			</portlet:renderURL>
 
-			<aui:nav-item href="<%= addRecordSetURL %>" iconClass="icon-plus" label="add" selected='<%= toolbarItem.equals("add") %>' />
+			<aui:nav-item href="<%= addRecordSetURL %>" iconCssClass="icon-plus" label="add" selected='<%= toolbarItem.equals("add") %>' />
 
-			<aui:nav-item anchorId="manageDDMStructuresLink" iconClass="icon-cog" label="manage-data-definitions" selected='<%= toolbarItem.equals("manage-data-definitions") %>' />
+			<aui:nav-item anchorId="manageDDMStructuresLink" iconCssClass="icon-cog" label="manage-data-definitions" selected='<%= toolbarItem.equals("manage-data-definitions") %>' />
 		</c:if>
 	</aui:nav>
 

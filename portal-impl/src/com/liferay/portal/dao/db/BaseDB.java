@@ -113,8 +113,8 @@ public abstract class BaseDB implements DB {
 	public void buildCreateFile(String sqlDir, String databaseName)
 		throws IOException {
 
-		buildCreateFile(sqlDir, databaseName, POPULATED);
-		buildCreateFile(sqlDir, databaseName, MINIMAL);
+		buildCreateFile(sqlDir, databaseName, BARE);
+		buildCreateFile(sqlDir, databaseName, DEFAULT);
 		buildCreateFile(sqlDir, databaseName, SHARDED);
 	}
 
@@ -139,21 +139,21 @@ public abstract class BaseDB implements DB {
 		}
 		else {
 			String content = buildCreateFileContent(
-				sqlDir, databaseName, MINIMAL);
+				sqlDir, databaseName, DEFAULT);
 
 			if (content != null) {
 				FileUtil.write(file, content);
 			}
 
 			content = buildCreateFileContent(
-				sqlDir, databaseName + "1", MINIMAL);
+				sqlDir, databaseName + "1", DEFAULT);
 
 			if (content != null) {
 				FileUtil.write(file, content, false, true);
 			}
 
 			content = buildCreateFileContent(
-				sqlDir, databaseName + "2", MINIMAL);
+				sqlDir, databaseName + "2", DEFAULT);
 
 			if (content != null) {
 				FileUtil.write(file, content, false, true);
@@ -447,20 +447,21 @@ public abstract class BaseDB implements DB {
 							if (failOnError) {
 								throw sqle;
 							}
-							else if (_log.isWarnEnabled()) {
-								String message = GetterUtil.getString(
-									sqle.getMessage());
 
-								if (!message.startsWith("Duplicate key name")) {
-									_log.warn(message + ": " + buildSQL(sql));
-								}
+							String message = GetterUtil.getString(
+								sqle.getMessage());
 
-								if (message.startsWith("Duplicate entry") ||
-									message.startsWith(
-										"Specified key was too long")) {
+							if (!message.startsWith("Duplicate key name") &&
+								_log.isWarnEnabled()) {
 
-									_log.error(line);
-								}
+								_log.warn(message + ": " + buildSQL(sql));
+							}
+
+							if (message.startsWith("Duplicate entry") ||
+								message.startsWith(
+									"Specified key was too long")) {
+
+								_log.error(line);
 							}
 						}
 					}
@@ -505,7 +506,7 @@ public abstract class BaseDB implements DB {
 			validIndexNames = new HashSet<String>();
 
 			for (Index index : indexes) {
-				String indexName = index.getIndexName().toUpperCase();
+				String indexName = StringUtil.toUpperCase(index.getIndexName());
 
 				validIndexNames.add(indexName);
 			}
@@ -581,7 +582,7 @@ public abstract class BaseDB implements DB {
 
 		String template = readFile(sqlDir + "/" + fileName + ".sql");
 
-		if (fileName.equals("portal") || fileName.equals("portal-minimal") ||
+		if (fileName.equals("portal") ||
 			fileName.equals("update-5.0.1-5.1.0")) {
 
 			UnsyncBufferedReader unsyncBufferedReader =
@@ -668,8 +669,8 @@ public abstract class BaseDB implements DB {
 			return validIndexNames;
 		}
 
-		String tablesSQLLowerCase = tablesSQL.toLowerCase();
-		String indexesSQLLowerCase = indexesSQL.toLowerCase();
+		String tablesSQLLowerCase = StringUtil.toLowerCase(tablesSQL);
+		String indexesSQLLowerCase = StringUtil.toLowerCase(indexesSQL);
 
 		Properties indexesPropertiesObj = PropertiesUtil.load(
 			indexesProperties);
@@ -682,14 +683,17 @@ public abstract class BaseDB implements DB {
 
 			String value = indexesPropertiesObj.getProperty(key);
 
-			indexesPropertiesObj.setProperty(key.toLowerCase(), value);
+			indexesPropertiesObj.setProperty(
+				StringUtil.toLowerCase(key), value);
 		}
 
 		for (Index index : indexes) {
-			String indexNameUpperCase = index.getIndexName().toUpperCase();
-			String indexNameLowerCase = indexNameUpperCase.toLowerCase();
+			String indexNameUpperCase = StringUtil.toUpperCase(
+				index.getIndexName());
+			String indexNameLowerCase = StringUtil.toLowerCase(
+				indexNameUpperCase);
 			String tableName = index.getTableName();
-			String tableNameLowerCase = tableName.toLowerCase();
+			String tableNameLowerCase = StringUtil.toLowerCase(tableName);
 			boolean unique = index.isUnique();
 
 			validIndexNames.add(indexNameUpperCase);
@@ -801,8 +805,8 @@ public abstract class BaseDB implements DB {
 	protected abstract String getServerName();
 
 	protected String getSuffix(int type) {
-		if (type == MINIMAL) {
-			return "-minimal";
+		if (type == BARE) {
+			return "-bare";
 		}
 		else if (type == SHARDED) {
 			return "-sharded";

@@ -1,15 +1,121 @@
 <definition>
-	<command name="addPG">
-		<execute macro="Page#gotoPG">
-			<var name="pageName" value="${pageName}" />
-		</execute>
-
-		<execute action="Dockbar#assertClick" locator-key1="ADD" value1="Add" />
+	<command name="addDuplicatePG">
+		<execute action="Dockbar#click" locator-key1="ADD" value1="Add" />
 		<execute action="Dockbar#assertClick" locator-key1="ADD_APPLICATION_LINK" value1="Applications" />
 		<execute action="Dockbar#type" locator-key1="ADD_APPLICATION_SEARCH_FIELD" value1="${portletName}" />
-		<execute action="Dockbar#makeVisible" locator1="//span[@class='add-content-item ' and @data-title='${portletName}']" />
-		<execute action="Dockbar#assertClick" locator1="//span[@class='add-content-item ' and @data-title='${portletName}']" value1="Add" />
 
-		<execute action="Home#assertElementPresent" locator-key1="PORTLET_1" />
+		<var name="portletLocator" value="//span[@data-title='${portletName}' and contains(@class,'add-content-item')]" />
+
+		<if>
+			<or>
+				<equals arg1="${portletName}" arg2="Asset Publisher" />
+				<equals arg1="${portletName}" arg2="Documents and Media Display" />
+				<equals arg1="${portletName}" arg2="Navigation" />
+				<equals arg1="${portletName}" arg2="Web Content Display" />
+			</or>
+			<then>
+				<var name="portletLocator" value="xpath=(${portletLocator})[2]" />
+			</then>
+		</if>
+
+		<execute action="Dockbar#assertElementNotPresent" locator1="${portletLocator}" value1="Add" />
+	</command>
+
+	<command name="addPG">
+		<var name="i" value="1" />
+
+		<while>
+			<not>
+				<equals arg1="${i}" arg2="5" />
+			</not>
+			<then>
+				<var name="i" value="${i?increment()}" />
+				<var name="key_portletName" value="${portletName}" />
+
+				<execute action="Home#refresh" />
+
+				<execute action="Dockbar#pause" locator1="1000" />
+
+				<if>
+					<condition action="Home#isElementNotPresent" locator-key1="PORTLET" />
+					<then>
+						<execute macro="Portlet#addPGCmd">
+							<var name="portletName" value="${portletName}" />
+						</execute>
+					</then>
+					<else>
+						<var name="i" value="5" />
+					</else>
+				</if>
+			</then>
+		</while>
+
+		<execute action="Home#assertElementPresent" locator-key1="PORTLET" />
+	</command>
+
+	<command name="addPGCmd">
+		<execute action="Dockbar#click" locator-key1="ADD" value1="Add" />
+		<execute action="Dockbar#assertClick" locator-key1="ADD_APPLICATION_LINK" value1="Applications" />
+		<execute action="Dockbar#type" locator-key1="ADD_APPLICATION_SEARCH_FIELD" value1="${portletName}" />
+
+		<var name="portletLocator" value="//span[@data-title='${portletName}' and contains(@class,'add-content-item')]" />
+
+		<if>
+			<or>
+				<equals arg1="${portletName}" arg2="Asset Publisher" />
+				<equals arg1="${portletName}" arg2="Documents and Media Display" />
+				<equals arg1="${portletName}" arg2="Navigation" />
+				<equals arg1="${portletName}" arg2="OpenSocial Gadget" />
+				<equals arg1="${portletName}" arg2="Web Content Display" />
+			</or>
+			<then>
+				<var name="portletLocator" value="xpath=(${portletLocator})[2]" />
+			</then>
+			<elseif>
+				<or>
+					<equals arg1="${portletName}" arg2="Friends' Activities" />
+					<equals arg1="${portletName}" arg2="Members' Activities" />
+				</or>
+				<then>
+					<var name="portletLocator" value="//span[@data-title=&quot;${portletName}&quot; and contains(@class,'add-content-item')]" />
+				</then>
+			</elseif>
+		</if>
+
+		<execute action="Dockbar#assertClick" locator1="${portletLocator}" value1="Add" />
+	</command>
+
+	<command name="deletePG">
+		<var name="portletLocator" value="//h1[@class='portlet-title']/span[contains(.,'${portletName}')]/../../menu//a[@title='Options']" />
+
+		<execute action="BasePortlet#assertClick" locator1="${portletLocator}" value1="Options" />
+		<execute action="BasePortlet#assertClick" locator-key1="REMOVE" value1="Remove" />
+		<execute action="BasePortlet#confirm" locator-key1="PORTLET_CONFIRM" value1="Are you sure you want to remove this component?" />
+	</command>
+
+	<command name="gotoPortletOptions">
+		<execute action="BasePortlet#assertClick" locator-key1="OPTIONS_ICON" value1="Options" />
+
+		<if>
+			<equals arg1="${portletOption}" arg2="Look and Feel" />
+			<then>
+				<execute action="BasePortlet#assertClick" locator-key1="OPTIONS_MENULIST_LOOK_AND_FEEL" value1="Look and Feel" />
+			</then>
+			<elseif>
+				<equals arg1="${portletOption}" arg2="Configuration" />
+				<then>
+					<execute action="BasePortlet#assertClick" locator-key1="OPTIONS_MENULIST_CONFIGURATION" value1="Configuration" />
+				</then>
+			</elseif>
+			<elseif>
+				<equals arg1="${portletOption}" arg2="Export / Import" />
+				<then>
+					<execute action="BasePortlet#assertClick" locator-key1="OPTIONS_MENULIST_EXPORT_IMPORT" value1="Export / Import" />
+				</then>
+			</elseif>
+			<else>
+				<fail message="Invalid var portletOption. Must be (Look and Feel|Configuration|Export / Import)." />
+			</else>
+		</if>
 	</command>
 </definition>

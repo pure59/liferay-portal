@@ -14,8 +14,11 @@
 
 package com.liferay.portlet.journal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.util.Accessor;
 import com.liferay.portal.model.PersistedModel;
+import com.liferay.portal.model.TreeModel;
 
 /**
  * The extended model interface for the JournalArticle service. Represents a row in the &quot;JournalArticle&quot; database table, with each column mapped to a property of this class.
@@ -26,7 +29,9 @@ import com.liferay.portal.model.PersistedModel;
  * @see com.liferay.portlet.journal.model.impl.JournalArticleModelImpl
  * @generated
  */
-public interface JournalArticle extends JournalArticleModel, PersistedModel {
+@ProviderType
+public interface JournalArticle extends JournalArticleModel, PersistedModel,
+	TreeModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -39,6 +44,11 @@ public interface JournalArticle extends JournalArticleModel, PersistedModel {
 			}
 		};
 
+	@Override
+	public java.lang.String buildTreePath()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
 	public java.lang.String getArticleImageURL(
 		com.liferay.portal.theme.ThemeDisplay themeDisplay);
 
@@ -50,10 +60,16 @@ public interface JournalArticle extends JournalArticleModel, PersistedModel {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getAvailableLanguageIds}
+	*/
 	public java.lang.String[] getAvailableLocales();
 
 	public java.lang.String getContentByLocale(java.lang.String languageId);
 
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getDefaultLanguageId}
+	*/
 	public java.lang.String getDefaultLocale();
 
 	public com.liferay.portlet.journal.model.JournalFolder getFolder()
@@ -64,13 +80,8 @@ public interface JournalArticle extends JournalArticleModel, PersistedModel {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
-	public com.liferay.portlet.journal.model.JournalFolder getTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
-
-	public boolean isInTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+	public boolean hasApprovedVersion()
+		throws com.liferay.portal.kernel.exception.SystemException;
 
 	public boolean isTemplateDriven();
 

@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link OrganizationLocalService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see OrganizationLocalService
  * @generated
  */
+@ProviderType
 public class OrganizationLocalServiceWrapper implements OrganizationLocalService,
 	ServiceWrapper<OrganizationLocalService> {
 	public OrganizationLocalServiceWrapper(
@@ -810,6 +813,12 @@ public class OrganizationLocalServiceWrapper implements OrganizationLocalService
 		return _organizationLocalService.fetchOrganization(companyId, name);
 	}
 
+	@Override
+	public java.util.List<com.liferay.portal.model.Organization> getNoAssetOrganizations()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _organizationLocalService.getNoAssetOrganizations();
+	}
+
 	/**
 	* Returns the organization with the name.
 	*
@@ -1136,38 +1145,6 @@ public class OrganizationLocalServiceWrapper implements OrganizationLocalService
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		_organizationLocalService.rebuildTree(companyId);
-	}
-
-	/**
-	* Returns a range of all the organizations of the company.
-	*
-	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end -
-	* start</code> instances. <code>start</code> and <code>end</code> are not
-	* primary keys, they are indexes in the result set. Thus, <code>0</code>
-	* refers to the first result in the set. Setting both <code>start</code>
-	* and <code>end</code> to {@link
-	* com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
-	* result set.
-	* </p>
-	*
-	* @param companyId the primary key of the company
-	* @param params the finder parameters (optionally <code>null</code>). For
-	more information see {@link
-	com.liferay.portlet.usersadmin.util.OrganizationIndexer}
-	* @param start the lower bound of the range of organizations to return
-	* @param end the upper bound of the range of organizations to return (not
-	inclusive)
-	* @return the range of all the organizations of the company
-	* @throws SystemException if a system exception occurred
-	*/
-	@Override
-	public java.util.List<com.liferay.portal.model.Organization> search(
-		long companyId,
-		java.util.LinkedHashMap<java.lang.String, java.lang.Object> params,
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		return _organizationLocalService.search(companyId, params, start, end);
 	}
 
 	/**

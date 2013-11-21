@@ -45,7 +45,7 @@ if (PropsValues.MOBILE_DEVICE_STYLING_WAP_ENABLED) {
 						<aui:select inlineField="<%= true %>" label="portlet-title" name="lfr-portlet-language">
 
 							<%
-							Locale[] locales = LanguageUtil.getAvailableLocales();
+							Locale[] locales = LanguageUtil.getAvailableLocales(themeDisplay.getSiteGroupId());
 
 							for (int i = 0; i < locales.length; i++) {
 							%>
@@ -463,17 +463,19 @@ if (PropsValues.MOBILE_DEVICE_STYLING_WAP_ENABLED) {
 					<aui:input cssClass="lfr-textarea-container" label="enter-your-custom-css" name="lfr-custom-css" type="textarea" />
 				</aui:fieldset>
 
-				<aui:fieldset id="wap-styling">
-					<aui:input label="title" name="lfr-wap-title" />
+				<c:if test="<%= PropsValues.MOBILE_DEVICE_STYLING_WAP_ENABLED %>">
+					<aui:fieldset id="wap-styling">
+						<aui:input label="title" name="lfr-wap-title" />
 
-					<aui:select label="initial-window-state" name="lfr-wap-initial-window-state">
-						<aui:option label="minimized" value="MINIMIZED" />
-						<aui:option label="normal" value="NORMAL" />
-					</aui:select>
-				</aui:fieldset>
+						<aui:select label="initial-window-state" name="lfr-wap-initial-window-state">
+							<aui:option label="minimized" value="MINIMIZED" />
+							<aui:option label="normal" value="NORMAL" />
+						</aui:select>
+					</aui:fieldset>
+				</c:if>
 
 				<aui:button-row>
-					<aui:button name="lfr-lookfeel-save" value="save" />
+					<aui:button name="lfr-lookfeel-save" primary="<%= true %>" value="save" />
 
 					<aui:button name="lfr-lookfeel-reset" value="reset" />
 				</aui:button-row>

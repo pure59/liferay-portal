@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import java.util.Map;
  * @see Portlet
  * @generated
  */
+@ProviderType
 public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	public PortletWrapper(Portlet portlet) {
 		_portlet = portlet;
@@ -511,6 +514,16 @@ public class PortletWrapper implements Portlet, ModelWrapper<Portlet> {
 	@Override
 	public com.liferay.portal.kernel.portlet.ConfigurationAction getConfigurationActionInstance() {
 		return _portlet.getConfigurationActionInstance();
+	}
+
+	/**
+	* Returns the servlet context name of the portlet.
+	*
+	* @return the servlet context name of the portlet
+	*/
+	@Override
+	public java.lang.String getContextName() {
+		return _portlet.getContextName();
 	}
 
 	/**

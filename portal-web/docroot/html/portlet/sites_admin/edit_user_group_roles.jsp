@@ -26,7 +26,7 @@ String backURL = ParamUtil.getString(request, "backURL", redirect);
 
 Group group = (Group)request.getAttribute(WebKeys.GROUP);
 
-String groupName = group.getDescriptiveName(locale);
+String groupDescriptiveName = group.getDescriptiveName(locale);
 
 Role role = (Role)request.getAttribute(WebKeys.ROLE);
 
@@ -71,7 +71,7 @@ request.setAttribute("edit_user_group_roles.jsp-cur", cur);
 request.setAttribute("edit_user_group_roles.jsp-redirect", redirect);
 
 request.setAttribute("edit_user_group_roles.jsp-group", group);
-request.setAttribute("edit_user_group_roles.jsp-groupName", groupName);
+request.setAttribute("edit_user_group_roles.jsp-groupDescriptiveName", groupDescriptiveName);
 request.setAttribute("edit_user_group_roles.jsp-role", role);
 request.setAttribute("edit_user_group_roles.jsp-roleId", roleId);
 request.setAttribute("edit_user_group_roles.jsp-roleType", roleType);
@@ -80,14 +80,12 @@ request.setAttribute("edit_user_group_roles.jsp-organization", organization);
 request.setAttribute("edit_user_group_roles.jsp-portletURL", portletURL);
 %>
 
-<c:if test="<%= !layout.isTypeControlPanel() %>">
-	<liferay-ui:header
-		backURL="<%= backURL %>"
-		escapeXml="<%= false %>"
-		localizeTitle="<%= false %>"
-		title="<%= HtmlUtil.escape(groupName) %>"
-	/>
-</c:if>
+<liferay-ui:header
+	backURL="<%= redirect %>"
+	escapeXml="<%= false %>"
+	localizeTitle="<%= false %>"
+	title='<%= LanguageUtil.get(pageContext, "add-site-roles-to") + ": " + LanguageUtil.get(pageContext, "user-groups") %>'
+/>
 
 <aui:form action="<%= portletURL.toString() %>" method="post" name="fm">
 	<aui:input name="<%= Constants.CMD %>" type="hidden" />

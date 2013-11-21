@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.social.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see SocialRequestLocalService
  * @generated
  */
+@ProviderType
 public class SocialRequestLocalServiceWrapper
 	implements SocialRequestLocalService,
 		ServiceWrapper<SocialRequestLocalService> {
@@ -420,6 +423,12 @@ public class SocialRequestLocalServiceWrapper
 		com.liferay.portlet.social.model.SocialRequest request)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		_socialRequestLocalService.deleteRequest(request);
+	}
+
+	@Override
+	public void deleteRequests(long className, long classPK)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_socialRequestLocalService.deleteRequests(className, classPK);
 	}
 
 	/**

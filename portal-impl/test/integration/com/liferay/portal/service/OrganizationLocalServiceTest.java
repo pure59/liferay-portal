@@ -14,7 +14,6 @@
 
 package com.liferay.portal.service;
 
-import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.model.Group;
@@ -31,7 +30,6 @@ import com.liferay.portal.util.TestPropsValues;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -47,11 +45,6 @@ import org.junit.runner.RunWith;
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
 @Transactional
 public class OrganizationLocalServiceTest {
-
-	@Before
-	public void setUp() throws Exception {
-		FinderCacheUtil.clearCache();
-	}
 
 	@Test
 	public void testAddOrganization() throws Exception {

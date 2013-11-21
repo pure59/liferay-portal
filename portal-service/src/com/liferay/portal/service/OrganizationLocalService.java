@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.transaction.Isolation;
@@ -32,6 +34,7 @@ import com.liferay.portal.kernel.transaction.Transactional;
  * @see com.liferay.portal.service.impl.OrganizationLocalServiceImpl
  * @generated
  */
+@ProviderType
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface OrganizationLocalService extends BaseLocalService,
@@ -649,6 +652,10 @@ public interface OrganizationLocalService extends BaseLocalService,
 		long companyId, java.lang.String name)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.portal.model.Organization> getNoAssetOrganizations()
+		throws com.liferay.portal.kernel.exception.SystemException;
+
 	/**
 	* Returns the organization with the name.
 	*
@@ -932,36 +939,6 @@ public interface OrganizationLocalService extends BaseLocalService,
 	public void rebuildTree(long companyId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
-
-	/**
-	* Returns a range of all the organizations of the company.
-	*
-	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end -
-	* start</code> instances. <code>start</code> and <code>end</code> are not
-	* primary keys, they are indexes in the result set. Thus, <code>0</code>
-	* refers to the first result in the set. Setting both <code>start</code>
-	* and <code>end</code> to {@link
-	* com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
-	* result set.
-	* </p>
-	*
-	* @param companyId the primary key of the company
-	* @param params the finder parameters (optionally <code>null</code>). For
-	more information see {@link
-	com.liferay.portlet.usersadmin.util.OrganizationIndexer}
-	* @param start the lower bound of the range of organizations to return
-	* @param end the upper bound of the range of organizations to return (not
-	inclusive)
-	* @return the range of all the organizations of the company
-	* @throws SystemException if a system exception occurred
-	*/
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public java.util.List<com.liferay.portal.model.Organization> search(
-		long companyId,
-		java.util.LinkedHashMap<java.lang.String, java.lang.Object> params,
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException;
 
 	/**
 	* Returns an ordered range of all the organizations that match the

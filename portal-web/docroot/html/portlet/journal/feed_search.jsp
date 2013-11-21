@@ -29,7 +29,7 @@ FeedDisplayTerms displayTerms = (FeedDisplayTerms)searchContainer.getDisplayTerm
 	id="toggle_id_journal_feed_search"
 >
 	<aui:fieldset>
-		<aui:input autoFocus="<%= (windowState.equals(WindowState.MAXIMIZED) || windowState.equals(LiferayWindowState.POP_UP)) %>" label="id" name="<%= displayTerms.FEED_ID %>" size="20" type="text" value="<%= displayTerms.getFeedId() %>" />
+		<aui:input label="id" name="<%= displayTerms.FEED_ID %>" size="20" type="text" value="<%= displayTerms.getFeedId() %>" />
 
 		<aui:input name="<%= displayTerms.NAME %>" size="20" type="text" value="<%= displayTerms.getName() %>" />
 
@@ -54,9 +54,10 @@ boolean showPermissionsButton = JournalPermission.contains(permissionChecker, sc
 				modelResourceDescription="<%= HtmlUtil.escape(themeDisplay.getScopeGroupName()) %>"
 				resourcePrimKey="<%= String.valueOf(scopeGroupId) %>"
 				var="permissionsURL"
+				windowState="<%= LiferayWindowState.POP_UP.toString() %>"
 			/>
 
-			<aui:button href="<%= permissionsURL %>" value="permissions" />
+			<aui:button href="<%= permissionsURL %>" useDialog="<%= true %>" value="permissions" />
 		</c:if>
 	</aui:button-row>
 </c:if>
@@ -65,7 +66,7 @@ boolean showPermissionsButton = JournalPermission.contains(permissionChecker, sc
 	function <portlet:namespace />addFeed() {
 		var url = '<portlet:renderURL><portlet:param name="struts_action" value="/journal/edit_feed" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:renderURL>';
 
-		if (document.<portlet:namespace />fm.<%= displayTerms.ADVANCED_SEARCH %>.value == 'false') {
+		if (document.<portlet:namespace />fm.<portlet:namespace /><%= displayTerms.ADVANCED_SEARCH %>.value == 'false') {
 			url += '&<portlet:namespace /><%= displayTerms.NAME %>=' + document.<portlet:namespace />fm.<portlet:namespace /><%= displayTerms.KEYWORDS %>.value;
 
 			submitForm(document.hrefFm, url);

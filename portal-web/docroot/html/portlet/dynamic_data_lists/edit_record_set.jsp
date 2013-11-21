@@ -18,7 +18,6 @@
 
 <%
 String redirect = ParamUtil.getString(request, "redirect");
-String backURL = ParamUtil.getString(request, "backURL");
 
 String portletResource = ParamUtil.getString(request, "portletResource");
 
@@ -48,7 +47,7 @@ if (ddmStructureId > 0) {
 %>
 
 <liferay-ui:header
-	backURL="<%= backURL %>"
+	backURL="<%= redirect %>"
 	localizeTitle="<%= (recordSet == null) %>"
 	title='<%= (recordSet == null) ? "new-list" : recordSet.getName(locale) %>'
 />
@@ -60,7 +59,6 @@ if (ddmStructureId > 0) {
 <aui:form action="<%= editRecordSetURL %>" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveRecordSet();" %>'>
 	<aui:input name="<%= Constants.CMD %>" type="hidden" />
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
-	<aui:input name="backURL" type="hidden" value="<%= backURL %>" />
 	<aui:input name="portletResource" type="hidden" value="<%= portletResource %>" />
 	<aui:input name="groupId" type="hidden" value="<%= groupId %>" />
 	<aui:input name="recordSetId" type="hidden" value="<%= recordSetId %>" />
@@ -82,13 +80,12 @@ if (ddmStructureId > 0) {
 		<aui:input name="description" />
 
 		<aui:field-wrapper label="data-definition" required="<%= true %>">
-			<span id="<portlet:namespace />ddmStructureNameDisplay">
-				<%= ddmStructureName %>
-			</span>
+			<liferay-ui:input-resource id="ddmStructureNameDisplay" url="<%= ddmStructureName %>" />
 
 			<liferay-ui:icon
-				image="add"
+				iconCssClass="icon-search"
 				label="<%= true %>"
+				linkCssClass="btn"
 				message="select"
 				url='<%= "javascript:" + renderResponse.getNamespace() + "openDDMStructureSelector();" %>'
 			/>
@@ -129,6 +126,14 @@ if (ddmStructureId > 0) {
 			</aui:select>
 		</c:if>
 
+		<c:if test="<%= recordSet == null %>">
+			<aui:field-wrapper label="permissions">
+				<liferay-ui:input-permissions
+					modelName="<%= DDLRecordSet.class.getName() %>"
+				/>
+			</aui:field-wrapper>
+		</c:if>
+
 		<aui:button-row>
 			<aui:button name="saveButton" type="submit" value="save" />
 
@@ -155,6 +160,7 @@ if (ddmStructureId > 0) {
 
 				refererPortletName: '<%= portlet.getPortletName() %>',
 				refererWebDAVToken: '<%= portlet.getWebDAVStorageToken() %>',
+				showGlobalScope: true,
 				struts_action: '/dynamic_data_mapping/select_structure',
 				title: '<%= UnicodeLanguageUtil.get(pageContext, "data-definitions") %>'
 			},
@@ -163,7 +169,7 @@ if (ddmStructureId > 0) {
 
 				A.one('#<portlet:namespace />ddmStructureId').val(event.ddmstructureid);
 
-				A.one('#<portlet:namespace />ddmStructureNameDisplay').setContent(event.name);
+				A.one('#<portlet:namespace />ddmStructureNameDisplay').val(event.name);
 			}
 		);
 	}

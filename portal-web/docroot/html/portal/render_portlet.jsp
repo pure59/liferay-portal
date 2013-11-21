@@ -46,11 +46,11 @@ boolean modeHelp = layoutTypePortlet.hasModeHelpPortletId(portletId);
 boolean modePreview = layoutTypePortlet.hasModePreviewPortletId(portletId);
 boolean modePrint = layoutTypePortlet.hasModePrintPortletId(portletId);
 
-PortletPreferences portletSetup = PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(layout, portletId);
-
 PortletPreferencesIds portletPreferencesIds = PortletPreferencesFactoryUtil.getPortletPreferencesIds(request, portletId);
 
-PortletPreferences portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(portletPreferencesIds);
+PortletPreferences portletPreferences = PortletPreferencesLocalServiceUtil.getStrictPreferences(portletPreferencesIds);
+
+PortletPreferences portletSetup = PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(layout, portletId);
 
 Group group = null;
 boolean privateLayout = false;
@@ -76,7 +76,7 @@ if (Validator.isNotNull(scopeLayoutUuid)) {
 	if (scopeLayout != null) {
 		portletPreferencesIds = PortletPreferencesFactoryUtil.getPortletPreferencesIds(request, scopeLayout, portletId);
 
-		portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(portletPreferencesIds);
+		portletPreferences = PortletPreferencesLocalServiceUtil.getStrictPreferences(portletPreferencesIds);
 	}
 }
 
@@ -203,15 +203,17 @@ if ((portletParallelRender != null) && (portletParallelRender.booleanValue() == 
 }
 
 if (!portletId.equals(PortletKeys.PORTLET_CONFIGURATION)) {
+	Layout curLayout = PortletConfigurationLayoutUtil.getLayout(themeDisplay);
+
 	if ((!group.hasStagingGroup() || group.isStagingGroup()) &&
-		(PortletPermissionUtil.contains(permissionChecker, layout, portlet, ActionKeys.CONFIGURATION))) {
+		(PortletPermissionUtil.contains(permissionChecker, themeDisplay.getScopeGroupId(), curLayout, portlet, ActionKeys.CONFIGURATION))) {
 
 		showConfigurationIcon = true;
 
-		boolean supportsLAR = Validator.isNotNull(portlet.getPortletDataHandlerClass());
-		boolean supportsSetup = Validator.isNotNull(portlet.getConfigurationActionClass());
+		boolean supportsConfigurationLAR = Validator.isNotNull(portlet.getConfigurationActionClass());
+		boolean supportsDataLAR = !(portlet.getPortletDataHandlerInstance() instanceof DefaultConfigurationPortletDataHandler);
 
-		if (supportsLAR || (supportsSetup && !group.isControlPanel())) {
+		if (supportsConfigurationLAR || supportsDataLAR || !group.isControlPanel()) {
 			showExportImportIcon = true;
 		}
 
@@ -758,7 +760,7 @@ if ((invokerPortlet != null) && (invokerPortlet.isStrutsPortlet() || invokerPort
 	request.removeAttribute(ComponentConstants.COMPONENT_CONTEXT);
 }
 
-if ((layout.isTypePanel() || layout.isTypeControlPanel()) && !portletDisplay.getId().equals(PortletKeys.CONTROL_PANEL_MENU)) {
+if ((layout.isTypePanel() || layout.isTypeControlPanel()) && !portletDisplay.getId().equals(PortletKeys.CONTROL_PANEL_MENU) && !portlet.isStatic()) {
 	PortalUtil.setPageTitle(portletDisplay.getTitle(), request);
 }
 
@@ -768,7 +770,7 @@ Boolean renderPortletBoundary = GetterUtil.getBoolean(request.getAttribute(WebKe
 <c:if test="<%= renderPortletBoundary %>">
 
 	<%
-	if (themeDisplay.isStatePopUp() || themeDisplay.isWidget()) {
+	if ((themeDisplay.isStatePopUp() || themeDisplay.isWidget()) && !portlet.isStatic()) {
 		PortalUtil.setPageTitle(portletDisplay.getTitle(), request);
 	}
 
@@ -895,7 +897,7 @@ Boolean renderPortletBoundary = GetterUtil.getBoolean(request.getAttribute(WebKe
 		<%
 			}
 			else {
-				if (useDefaultTemplate) {
+				if (useDefaultTemplate || !portlet.isActive()) {
 					renderRequestImpl.setAttribute(WebKeys.PORTLET_CONTENT, bufferCacheServletResponse.getString());
 		%>
 
@@ -1012,7 +1014,7 @@ if (themeDisplay.isStatePopUp()) {
 
 				};
 
-				Liferay.Util.getOpener().Liferay.Portlet.refresh('#p_p_id_<%= refreshPortletId %>_', data);
+				Liferay.Util.getOpener().Liferay.Portlet.refresh('#p_p_id_<%= HtmlUtil.escapeJS(refreshPortletId) %>_', data);
 			}
 		</aui:script>
 

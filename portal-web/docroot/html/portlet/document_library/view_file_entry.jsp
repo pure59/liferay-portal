@@ -48,7 +48,7 @@ boolean versionSpecific = false;
 if (fileVersion != null) {
 	versionSpecific = true;
 }
-else if ((user.getUserId() == fileEntry.getUserId()) || permissionChecker.isCompanyAdmin() || permissionChecker.isGroupAdmin(scopeGroupId) || DLFileEntryPermission.contains(permissionChecker, fileEntry, ActionKeys.UPDATE)) {
+else if ((user.getUserId() == fileEntry.getUserId()) || permissionChecker.isContentReviewer(user.getCompanyId(), scopeGroupId) || DLFileEntryPermission.contains(permissionChecker, fileEntry, ActionKeys.UPDATE)) {
 	fileVersion = fileEntry.getLatestFileVersion();
 }
 else {
@@ -75,7 +75,7 @@ if (PropsValues.DL_FILE_ENTRY_CONVERSIONS_ENABLED && PrefsPropsUtil.getBoolean(P
 
 long assetClassPK = 0;
 
-if (!fileVersion.isApproved() && !fileVersion.getVersion().equals(DLFileEntryConstants.VERSION_DEFAULT) && !fileVersion.isInTrash()) {
+if (!fileVersion.isApproved() && !fileVersion.getVersion().equals(DLFileEntryConstants.VERSION_DEFAULT) && !fileEntry.isInTrash()) {
 	assetClassPK = fileVersion.getFileVersionId();
 }
 else {
@@ -146,7 +146,7 @@ request.setAttribute("view_file_entry.jsp-fileEntry", fileEntry);
 								<c:otherwise>
 
 									<%
-									String lockExpirationTime = LanguageUtil.getTimeDescription(pageContext, DLFileEntryConstants.LOCK_EXPIRATION_TIME).toLowerCase();
+									String lockExpirationTime = StringUtil.toLowerCase(LanguageUtil.getTimeDescription(pageContext, DLFileEntryConstants.LOCK_EXPIRATION_TIME));
 									%>
 
 									<%= LanguageUtil.format(pageContext, "you-now-have-a-lock-on-this-document", lockExpirationTime, false) %>
@@ -166,15 +166,15 @@ request.setAttribute("view_file_entry.jsp-fileEntry", fileEntry);
 				<%= fileVersion.getTitle() %>
 
 				<c:if test="<%= versionSpecific %>">
-					(<liferay-ui:message key="version" /> <%= HtmlUtil.escape(fileVersion.getVersion()) %>)
+					(<liferay-ui:message key="version" /> <%= fileVersion.getVersion() %>)
 				</c:if>
 			</liferay-util:buffer>
 
 			<div class="body-row">
 				<div class="document-info">
 					<c:if test="<%= showAssetMetadata %>">
-						<h2 class="document-title" title="<%= documentTitle %>">
-							<%= documentTitle %>
+						<h2 class="document-title" title="<%= HtmlUtil.escapeAttribute(documentTitle) %>">
+							<%= HtmlUtil.escape(documentTitle) %>
 						</h2>
 
 						<span class="document-thumbnail">
@@ -325,11 +325,18 @@ request.setAttribute("view_file_entry.jsp-fileEntry", fileEntry);
 
 						<c:choose>
 							<c:when test="<%= previewFileCount == 0 %>">
-								<c:if test="<%= AudioProcessorUtil.isAudioSupported(fileVersion) || ImageProcessorUtil.isImageSupported(fileVersion) || PDFProcessorUtil.isDocumentSupported(fileVersion) || VideoProcessorUtil.isVideoSupported(fileVersion) %>">
-									<div class="alert alert-info">
-										<liferay-ui:message key="generating-preview-will-take-a-few-minutes" />
-									</div>
-								</c:if>
+								<c:choose>
+									<c:when test="<%= !DLProcessorRegistryUtil.isPreviewableSize(fileVersion) && (AudioProcessorUtil.isAudioSupported(fileVersion.getMimeType()) || ImageProcessorUtil.isImageSupported(fileVersion.getMimeType()) || PDFProcessorUtil.isDocumentSupported(fileVersion.getMimeType()) || VideoProcessorUtil.isVideoSupported(fileVersion.getMimeType())) %>">
+										<div class="alert alert-info">
+											<liferay-ui:message key="file-is-too-large-for-preview-or-thumbnail-generation" />
+										</div>
+									</c:when>
+									<c:when test="<%= AudioProcessorUtil.isAudioSupported(fileVersion) || ImageProcessorUtil.isImageSupported(fileVersion) || PDFProcessorUtil.isDocumentSupported(fileVersion) || VideoProcessorUtil.isVideoSupported(fileVersion) %>">
+										<div class="alert alert-info">
+											<liferay-ui:message key="generating-preview-will-take-a-few-minutes" />
+										</div>
+									</c:when>
+								</c:choose>
 							</c:when>
 							<c:otherwise>
 								<c:choose>
@@ -419,7 +426,6 @@ request.setAttribute("view_file_entry.jsp-fileEntry", fileEntry);
 							formName="fm2"
 							ratingsEnabled="<%= enableCommentRatings %>"
 							redirect="<%= currentURL %>"
-							subject="<%= TrashUtil.getOriginalTitle(fileEntry.getTitle()) %>"
 							userId="<%= fileEntry.getUserId() %>"
 						/>
 					</liferay-ui:panel>
@@ -476,7 +482,7 @@ request.setAttribute("view_file_entry.jsp-fileEntry", fileEntry);
 								<liferay-ui:icon
 									image='<%= "../file_system/small/" + conversion %>'
 									label="<%= true %>"
-									message="<%= conversion.toUpperCase() %>"
+									message="<%= StringUtil.toUpperCase(conversion) %>"
 									url='<%= DLUtil.getPreviewURL(fileEntry, fileVersion, themeDisplay, "&targetExtension=" + conversion) %>'
 								/>
 
@@ -637,7 +643,7 @@ request.setAttribute("view_file_entry.jsp-fileEntry", fileEntry);
 								boolean comparableFileEntry = DocumentConversionUtil.isComparableVersion(fileVersion.getExtension());
 								boolean showNonApprovedDocuments = false;
 
-								if ((user.getUserId() == fileEntry.getUserId()) || permissionChecker.isCompanyAdmin() || permissionChecker.isGroupAdmin(scopeGroupId)) {
+								if ((user.getUserId() == fileEntry.getUserId()) || permissionChecker.isContentReviewer(user.getCompanyId(), scopeGroupId)) {
 									showNonApprovedDocuments = true;
 								}
 
@@ -696,7 +702,7 @@ request.setAttribute("view_file_entry.jsp-fileEntry", fileEntry);
 									// Status
 
 									if (showNonApprovedDocuments && !portletId.equals(PortletKeys.TRASH)) {
-										row.addText(LanguageUtil.get(pageContext, WorkflowConstants.getStatusLabel(curFileVersion.getStatus())));
+										row.addStatus(curFileVersion.getStatus(), curFileVersion.getStatusByUserId(), curFileVersion.getStatusDate());
 									}
 
 									// Action
@@ -972,13 +978,19 @@ request.setAttribute("view_file_entry.jsp-fileEntry", fileEntry);
 						modelResourceDescription="<%= fileEntry.getTitle() %>"
 						resourcePrimKey="<%= String.valueOf(fileEntry.getFileEntryId()) %>"
 						var="permissionsURL"
+						windowState="<%= LiferayWindowState.POP_UP.toString() %>"
 					/>
 
 					icon: 'icon-permissions',
 					label: '<%= UnicodeLanguageUtil.get(pageContext, "permissions") %>',
 					on: {
 						click: function(event) {
-							location.href = '<%= permissionsURL.toString() %>';
+							Liferay.Util.openWindow(
+								{
+									title: '<%= UnicodeLanguageUtil.get(pageContext, "permissions") %>',
+									uri: '<%= permissionsURL.toString() %>',
+								}
+							);
 						}
 					}
 				}

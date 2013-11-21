@@ -29,6 +29,7 @@ import com.liferay.portal.theme.ThemeDisplay;
 import java.io.File;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 
 import javax.portlet.PortletPreferences;
@@ -49,11 +50,12 @@ public class ExportImportHelperUtil {
 
 	public static DateRange getDateRange(
 			PortletRequest portletRequest, long groupId, boolean privateLayout,
-			long plid, String portletId)
+			long plid, String portletId, String defaultRange)
 		throws Exception {
 
 		return getExportImportHelper().getDateRange(
-			portletRequest, groupId, privateLayout, plid, portletId);
+			portletRequest, groupId, privateLayout, plid, portletId,
+			defaultRange);
 	}
 
 	public static Layout getExportableLayout(ThemeDisplay themeDisplay)
@@ -75,6 +77,17 @@ public class ExportImportHelperUtil {
 			ExportImportHelperUtil.class);
 
 		return _exportImportHelper;
+	}
+
+	public static Map<Long, Boolean> getLayoutIdMap(
+			PortletRequest portletRequest)
+		throws Exception {
+
+		return getExportImportHelper().getLayoutIdMap(portletRequest);
+	}
+
+	public static long[] getLayoutIds(List<Layout> layouts) {
+		return getExportImportHelper().getLayoutIds(layouts);
 	}
 
 	public static ManifestSummary getManifestSummary(

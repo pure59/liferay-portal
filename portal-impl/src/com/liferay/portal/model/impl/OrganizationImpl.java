@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.SetUtil;
-import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UniqueList;
 import com.liferay.portal.model.Address;
@@ -93,15 +91,6 @@ public class OrganizationImpl extends OrganizationBaseImpl {
 	}
 
 	public OrganizationImpl() {
-	}
-
-	@Override
-	public String buildTreePath() throws PortalException, SystemException {
-		StringBundler sb = new StringBundler();
-
-		buildTreePath(sb, this);
-
-		return sb.toString();
 	}
 
 	@Override
@@ -231,12 +220,11 @@ public class OrganizationImpl extends OrganizationBaseImpl {
 
 	@Override
 	public PortletPreferences getPreferences() throws SystemException {
-		long companyId = getCompanyId();
 		long ownerId = getOrganizationId();
 		int ownerType = PortletKeys.PREFS_OWNER_TYPE_ORGANIZATION;
 
 		return PortalPreferencesLocalServiceUtil.getPreferences(
-			companyId, ownerId, ownerType);
+			ownerId, ownerType);
 	}
 
 	@Override
@@ -368,20 +356,6 @@ public class OrganizationImpl extends OrganizationBaseImpl {
 		}
 
 		return false;
-	}
-
-	protected void buildTreePath(StringBundler sb, Organization organization)
-		throws PortalException, SystemException {
-
-		if (organization == null) {
-			sb.append(StringPool.SLASH);
-		}
-		else {
-			buildTreePath(sb, organization.getParentOrganization());
-
-			sb.append(organization.getOrganizationId());
-			sb.append(StringPool.SLASH);
-		}
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(OrganizationImpl.class);

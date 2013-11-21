@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.bookmarks.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see BookmarksFolderService
  * @generated
  */
+@ProviderType
 public class BookmarksFolderServiceWrapper implements BookmarksFolderService,
 	ServiceWrapper<BookmarksFolderService> {
 	public BookmarksFolderServiceWrapper(
@@ -204,10 +207,11 @@ public class BookmarksFolderServiceWrapper implements BookmarksFolderService,
 	}
 
 	@Override
-	public void moveFolderToTrash(long folderId)
+	public com.liferay.portlet.bookmarks.model.BookmarksFolder moveFolderToTrash(
+		long folderId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		_bookmarksFolderService.moveFolderToTrash(folderId);
+		return _bookmarksFolderService.moveFolderToTrash(folderId);
 	}
 
 	@Override

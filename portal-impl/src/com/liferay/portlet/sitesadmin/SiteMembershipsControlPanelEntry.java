@@ -32,15 +32,23 @@ public class SiteMembershipsControlPanelEntry extends BaseControlPanelEntry {
 			PermissionChecker permissionChecker, Group group, Portlet portlet)
 		throws Exception {
 
-		if (group.isCompany() || group.isUser() ||
-			!GroupPermissionUtil.contains(
-				permissionChecker, group.getGroupId(),
-				ActionKeys.ASSIGN_MEMBERS)) {
+		if (group.isCompany() || group.isLayoutSetPrototype() ||
+			!group.isManualMembership() || group.isUser()) {
 
 			return true;
 		}
 
-		if (!group.isManualMembership()) {
+		return false;
+	}
+
+	@Override
+	protected boolean hasPermissionImplicitlyGranted(
+			PermissionChecker permissionChecker, Group group, Portlet portlet)
+		throws Exception {
+
+		if (GroupPermissionUtil.contains(
+				permissionChecker, group, ActionKeys.ASSIGN_MEMBERS)) {
+
 			return true;
 		}
 

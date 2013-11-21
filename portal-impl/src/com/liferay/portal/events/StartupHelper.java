@@ -20,12 +20,12 @@ import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeException;
+import com.liferay.portal.kernel.upgrade.util.UpgradeProcessUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.upgrade.UpgradeProcessUtil;
 import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.verify.VerifyException;
@@ -140,8 +140,11 @@ public class StartupHelper {
 			ClassLoaderUtil.getPortalClassLoader());
 	}
 
-	public void verifyProcess(boolean verified) throws VerifyException {
-		_verified = VerifyProcessUtil.verifyProcess(_upgraded, verified);
+	public void verifyProcess(boolean newBuildNumber, boolean verified)
+		throws VerifyException {
+
+		_verified = VerifyProcessUtil.verifyProcess(
+			_upgraded, newBuildNumber, verified);
 	}
 
 	protected String[] getUpgradeProcessClassNames(String key) {

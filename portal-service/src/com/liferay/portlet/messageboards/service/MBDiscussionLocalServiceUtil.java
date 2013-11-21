@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.messageboards.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.messageboards.service.impl.MBDiscussionLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class MBDiscussionLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -336,6 +339,18 @@ public class MBDiscussionLocalServiceUtil {
 		return getService()
 				   .addDiscussion(userId, classNameId, classPK, threadId,
 			serviceContext);
+	}
+
+	public static com.liferay.portlet.messageboards.model.MBDiscussion fetchDiscussion(
+		long discussionId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().fetchDiscussion(discussionId);
+	}
+
+	public static com.liferay.portlet.messageboards.model.MBDiscussion fetchDiscussion(
+		java.lang.String className, long classPK)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().fetchDiscussion(className, classPK);
 	}
 
 	public static com.liferay.portlet.messageboards.model.MBDiscussion getDiscussion(

@@ -17,7 +17,7 @@
 <%@ include file="/html/portlet/workflow_instances/init.jsp" %>
 
 <%
-String randomId = PwdGenerator.getPassword(PwdGenerator.KEY3, 4);
+String randomId = StringUtil.randomId();
 
 ResultRow row = (ResultRow)request.getAttribute(WebKeys.SEARCH_CONTAINER_RESULT_ROW);
 
@@ -106,6 +106,7 @@ WorkflowTask workflowTask = (WorkflowTask)row.getObject();
 			{
 				dialog: {
 					bodyContent: form,
+					height: 420,
 					toolbars: {
 						footer: [
 							{
@@ -125,7 +126,8 @@ WorkflowTask workflowTask = (WorkflowTask)row.getObject();
 								}
 							}
 						]
-					}
+					},
+					width: 350
 				},
 				title: title
 			}

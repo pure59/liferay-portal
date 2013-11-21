@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DLFileVersion
  * @generated
  */
+@ProviderType
 public class DLFileVersionWrapper implements DLFileVersion,
 	ModelWrapper<DLFileVersion> {
 	public DLFileVersionWrapper(DLFileVersion dlFileVersion) {
@@ -62,6 +65,7 @@ public class DLFileVersionWrapper implements DLFileVersion,
 		attributes.put("repositoryId", getRepositoryId());
 		attributes.put("folderId", getFolderId());
 		attributes.put("fileEntryId", getFileEntryId());
+		attributes.put("treePath", getTreePath());
 		attributes.put("extension", getExtension());
 		attributes.put("mimeType", getMimeType());
 		attributes.put("title", getTitle());
@@ -146,6 +150,12 @@ public class DLFileVersionWrapper implements DLFileVersion,
 
 		if (fileEntryId != null) {
 			setFileEntryId(fileEntryId);
+		}
+
+		String treePath = (String)attributes.get("treePath");
+
+		if (treePath != null) {
+			setTreePath(treePath);
 		}
 
 		String extension = (String)attributes.get("extension");
@@ -493,6 +503,26 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	@Override
 	public void setFileEntryId(long fileEntryId) {
 		_dlFileVersion.setFileEntryId(fileEntryId);
+	}
+
+	/**
+	* Returns the tree path of this document library file version.
+	*
+	* @return the tree path of this document library file version
+	*/
+	@Override
+	public java.lang.String getTreePath() {
+		return _dlFileVersion.getTreePath();
+	}
+
+	/**
+	* Sets the tree path of this document library file version.
+	*
+	* @param treePath the tree path of this document library file version
+	*/
+	@Override
+	public void setTreePath(java.lang.String treePath) {
+		_dlFileVersion.setTreePath(treePath);
 	}
 
 	/**
@@ -866,16 +896,6 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	}
 
 	/**
-	* Returns <code>true</code> if this document library file version is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this document library file version is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _dlFileVersion.isInTrash();
-	}
-
-	/**
 	* Returns <code>true</code> if this document library file version is pending.
 	*
 	* @return <code>true</code> if this document library file version is pending; <code>false</code> otherwise
@@ -1001,6 +1021,19 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	}
 
 	@Override
+	public void updateTreePath(java.lang.String treePath)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_dlFileVersion.updateTreePath(treePath);
+	}
+
+	@Override
+	public java.lang.String buildTreePath()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _dlFileVersion.buildTreePath();
+	}
+
+	@Override
 	public java.io.InputStream getContentStream(boolean incrementCounter)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
@@ -1029,20 +1062,6 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	@Override
 	public java.lang.String getIcon() {
 		return _dlFileVersion.getIcon();
-	}
-
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _dlFileVersion.getTrashContainer();
-	}
-
-	@Override
-	public boolean isInTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _dlFileVersion.isInTrashContainer();
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE resource-action-mapping PUBLIC "-//Liferay//DTD Resource Action Mapping 6.2.0//EN" "http://www.liferay.com/dtd/liferay-resource-action-mapping_6_2_0.dtd">
+<!DOCTYPE resource-action-mapping PUBLIC "-//Liferay//DTD Resource Action Mapping 7.0.0//EN" "http://www.liferay.com/dtd/liferay-resource-action-mapping_7_0_0.dtd">
 
 <resource-action-mapping>
 	<portlet-resource>
@@ -32,6 +32,7 @@
 			<portlet-name>31</portlet-name>
 			<portlet-name>110</portlet-name>
 		</portlet-ref>
+		<root>true</root>
 		<weight>1</weight>
 		<permissions>
 			<supports>
@@ -47,6 +48,9 @@
 				<action-key>VIEW</action-key>
 			</supports>
 			<site-member-defaults>
+				<action-key>ADD_DOCUMENT</action-key>
+				<action-key>ADD_FOLDER</action-key>
+				<action-key>ADD_SHORTCUT</action-key>
 				<action-key>SUBSCRIBE</action-key>
 				<action-key>VIEW</action-key>
 			</site-member-defaults>
@@ -141,28 +145,21 @@
 		<weight>4</weight>
 		<permissions>
 			<supports>
-				<action-key>ADD_DISCUSSION</action-key>
 				<action-key>DELETE</action-key>
-				<action-key>DELETE_DISCUSSION</action-key>
 				<action-key>PERMISSIONS</action-key>
 				<action-key>UPDATE</action-key>
-				<action-key>UPDATE_DISCUSSION</action-key>
 				<action-key>VIEW</action-key>
 			</supports>
 			<site-member-defaults>
-				<action-key>ADD_DISCUSSION</action-key>
 				<action-key>VIEW</action-key>
 			</site-member-defaults>
 			<guest-defaults>
 				<action-key>VIEW</action-key>
 			</guest-defaults>
 			<guest-unsupported>
-				<action-key>ADD_DISCUSSION</action-key>
 				<action-key>DELETE</action-key>
-				<action-key>DELETE_DISCUSSION</action-key>
 				<action-key>PERMISSIONS</action-key>
 				<action-key>UPDATE</action-key>
-				<action-key>UPDATE_DISCUSSION</action-key>
 			</guest-unsupported>
 		</permissions>
 	</model-resource>

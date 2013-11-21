@@ -15,17 +15,27 @@
 package com.liferay.portlet.dynamicdatalists.lar;
 
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.Property;
+import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BasePortletDataHandler;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.xml.Element;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.dynamicdatalists.model.DDLRecordSet;
 import com.liferay.portlet.dynamicdatalists.service.DDLRecordSetLocalServiceUtil;
 import com.liferay.portlet.dynamicdatalists.service.permission.DDLPermission;
 import com.liferay.portlet.dynamicdatalists.service.persistence.DDLRecordSetExportActionableDynamicQuery;
+import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
+import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
+import com.liferay.portlet.dynamicdatamapping.service.persistence.DDMStructureExportActionableDynamicQuery;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.portlet.PortletPreferences;
@@ -44,7 +54,10 @@ public class DDLPortletDataHandler extends BasePortletDataHandler {
 		setExportControls(
 			new PortletDataHandlerBoolean(
 				NAMESPACE, "record-sets", true, false, null,
-				DDLRecordSet.class.getName()));
+				DDLRecordSet.class.getName()),
+			new PortletDataHandlerBoolean(
+				NAMESPACE, "data-definitions", true, false, null,
+				DDMStructure.class.getName(), DDLRecordSet.class.getName()));
 		setImportControls(getExportControls());
 	}
 
@@ -72,19 +85,34 @@ public class DDLPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences)
 		throws Exception {
 
+		portletDataContext.addPortletPermissions(DDLPermission.RESOURCE_NAME);
+
 		Element rootElement = addExportDataRootElement(portletDataContext);
 
-		if (!portletDataContext.getBooleanParameter(NAMESPACE, "record-sets")) {
-			return getExportDataRootElementString(rootElement);
+		if (portletDataContext.getBooleanParameter(
+				NAMESPACE, "data-definitions")) {
+
+			List<DDMTemplate> ddmTemplates = new ArrayList<DDMTemplate>();
+
+			ActionableDynamicQuery ddmStructureActionableDynamicQuery =
+				getDDMStructureActionableDynamicQuery(
+					portletDataContext, ddmTemplates);
+
+			ddmStructureActionableDynamicQuery.performActions();
+
+			for (DDMTemplate ddmTemplate : ddmTemplates) {
+				StagedModelDataHandlerUtil.exportStagedModel(
+					portletDataContext, ddmTemplate);
+			}
 		}
 
-		portletDataContext.addPermissions(
-			DDLPermission.RESOURCE_NAME, portletDataContext.getScopeGroupId());
+		if (portletDataContext.getBooleanParameter(NAMESPACE, "record-sets")) {
+			ActionableDynamicQuery recordSetActionableDynamicQuery =
+				new DDLRecordSetExportActionableDynamicQuery(
+					portletDataContext);
 
-		ActionableDynamicQuery actionableDynamicQuery =
-			new DDLRecordSetExportActionableDynamicQuery(portletDataContext);
-
-		actionableDynamicQuery.performActions();
+			recordSetActionableDynamicQuery.performActions();
+		}
 
 		return getExportDataRootElementString(rootElement);
 	}
@@ -95,22 +123,46 @@ public class DDLPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences, String data)
 		throws Exception {
 
-		if (!portletDataContext.getBooleanParameter(NAMESPACE, "record-sets")) {
-			return null;
+		portletDataContext.importPortletPermissions(
+			DDLPermission.RESOURCE_NAME);
+
+		if (portletDataContext.getBooleanParameter(
+				NAMESPACE, "data-definitions")) {
+
+			Element ddmStructuresElement =
+				portletDataContext.getImportDataGroupElement(
+					DDMStructure.class);
+
+			List<Element> ddmStructureElements =
+				ddmStructuresElement.elements();
+
+			for (Element ddmStructureElement : ddmStructureElements) {
+				StagedModelDataHandlerUtil.importStagedModel(
+					portletDataContext, ddmStructureElement);
+			}
+
+			Element ddmTemplatesElement =
+				portletDataContext.getImportDataGroupElement(DDMTemplate.class);
+
+			List<Element> ddmTemplateElements = ddmTemplatesElement.elements();
+
+			for (Element ddmTemplateElement : ddmTemplateElements) {
+				StagedModelDataHandlerUtil.importStagedModel(
+					portletDataContext, ddmTemplateElement);
+			}
 		}
 
-		portletDataContext.importPermissions(
-			DDLPermission.RESOURCE_NAME, portletDataContext.getSourceGroupId(),
-			portletDataContext.getScopeGroupId());
+		if (portletDataContext.getBooleanParameter(NAMESPACE, "record-sets")) {
+			Element recordSetsElement =
+				portletDataContext.getImportDataGroupElement(
+					DDLRecordSet.class);
 
-		Element recordSetsElement =
-			portletDataContext.getImportDataGroupElement(DDLRecordSet.class);
+			List<Element> recordSetElements = recordSetsElement.elements();
 
-		List<Element> recordSetElements = recordSetsElement.elements();
-
-		for (Element recordSetElement : recordSetElements) {
-			StagedModelDataHandlerUtil.importStagedModel(
-				portletDataContext, recordSetElement);
+			for (Element recordSetElement : recordSetElements) {
+				StagedModelDataHandlerUtil.importStagedModel(
+					portletDataContext, recordSetElement);
+			}
 		}
 
 		return portletPreferences;
@@ -122,10 +174,62 @@ public class DDLPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences)
 		throws Exception {
 
-		ActionableDynamicQuery actionableDynamicQuery =
+		List<DDMTemplate> ddmTemplates = new ArrayList<DDMTemplate>();
+
+		ActionableDynamicQuery ddmStructureActionableDynamicQuery =
+			getDDMStructureActionableDynamicQuery(
+				portletDataContext, ddmTemplates);
+
+		ddmStructureActionableDynamicQuery.performCount();
+
+		ActionableDynamicQuery recordSetActionableDynamicQuery =
 			new DDLRecordSetExportActionableDynamicQuery(portletDataContext);
 
-		actionableDynamicQuery.performCount();
+		recordSetActionableDynamicQuery.performCount();
+	}
+
+	protected ActionableDynamicQuery getDDMStructureActionableDynamicQuery(
+			final PortletDataContext portletDataContext,
+			final List<DDMTemplate> ddmTemplates)
+		throws SystemException {
+
+		return new DDMStructureExportActionableDynamicQuery(
+			portletDataContext) {
+
+			@Override
+			protected void addCriteria(DynamicQuery dynamicQuery) {
+				super.addCriteria(dynamicQuery);
+
+				Property classNameIdProperty = PropertyFactoryUtil.forName(
+					"classNameId");
+
+				long classNameId = PortalUtil.getClassNameId(
+					DDLRecordSet.class);
+
+				dynamicQuery.add(classNameIdProperty.eq(classNameId));
+			}
+
+			@Override
+			protected StagedModelType getStagedModelType() {
+				return new StagedModelType(
+					DDMStructure.class.getName(), DDLRecordSet.class.getName());
+			}
+
+			@Override
+			protected void performAction(Object object) throws PortalException {
+				DDMStructure ddmStructure = (DDMStructure)object;
+
+				StagedModelDataHandlerUtil.exportStagedModel(
+					portletDataContext, ddmStructure);
+
+				try {
+					ddmTemplates.addAll(ddmStructure.getTemplates());
+				}
+				catch (SystemException se) {
+				}
+			}
+
+		};
 	}
 
 }

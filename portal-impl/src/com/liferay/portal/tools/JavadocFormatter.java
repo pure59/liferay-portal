@@ -179,7 +179,13 @@ public class JavadocFormatter {
 		for (String fileName : fileNames) {
 			fileName = StringUtil.replace(fileName, "\\", "/");
 
-			_format(fileName);
+			try {
+				_format(fileName);
+			}
+			catch (Exception e) {
+				throw new RuntimeException(
+					"Unable to format file " + fileName, e);
+			}
 		}
 
 		for (Map.Entry<String, Tuple> entry : _javadocxXmlTuples.entrySet()) {
@@ -554,10 +560,7 @@ public class JavadocFormatter {
 		for (DocletTag paramDocletTag : paramDocletTags) {
 			String curValue = paramDocletTag.getValue();
 
-			if (!curValue.startsWith(name)) {
-				continue;
-			}
-			else {
+			if (curValue.equals(name) || curValue.startsWith(name + " ")) {
 				value = curValue;
 
 				break;
@@ -774,27 +777,37 @@ public class JavadocFormatter {
 			fileName, originalContent, javadocLessContent, document);
 	}
 
-	private String _formatCDATA(String cdata, String exclude) {
-		StringBundler sb = new StringBundler();
+	private String _formatCDATA(String cdata) {
+		cdata = cdata.replaceAll(
+			"(?s)\\s*<(p|[ou]l)>\\s*(.*?)\\s*</\\1>\\s*",
+			"\n\n<$1>\n$2\n</$1>\n\n");
+		cdata = cdata.replaceAll(
+			"(?s)\\s*<li>\\s*(.*?)\\s*</li>\\s*", "\n<li>\n$1\n</li>\n");
+		cdata = StringUtil.replace(cdata, "</li>\n\n<li>", "</li>\n<li>");
+		cdata = cdata.replaceAll("\n\\s+\n", "\n\n");
+		cdata = cdata.replaceAll(" +", " ");
 
-		String startTag = "<" + exclude + ">";
-		String endTag = "</" + exclude + ">";
+		// Trim whitespace inside paragraph tags or in the first paragraph
 
-		String[] cdataParts = cdata.split(startTag);
+		Matcher matcher = _paragraphTagPattern.matcher(cdata);
 
-		for (String cdataPart : cdataParts) {
-			if (!cdataPart.contains(endTag)) {
-				cdataPart = _getCDATA(cdataPart);
-			}
+		StringBuffer sb = new StringBuffer();
 
-			if (cdataPart.contains("</" + exclude + ">")) {
-				sb.append(startTag);
-			}
+		while (matcher.find()) {
+			String trimmed = _trimMultilineText(matcher.group());
 
-			sb.append(cdataPart);
+			// Escape dollar signs
+
+			trimmed = trimmed.replaceAll("\\$", "\\\\\\$");
+
+			matcher.appendReplacement(sb, trimmed);
 		}
 
-		return sb.toString();
+		matcher.appendTail(sb);
+
+		cdata = sb.toString();
+
+		return cdata.trim();
 	}
 
 	private String _formatInlines(String text) {
@@ -816,48 +829,89 @@ public class JavadocFormatter {
 	}
 
 	private String _getCDATA(String cdata) {
-		if (cdata == null) {
+		StringBundler sb = new StringBundler();
+
+		if ((cdata == null) || cdata.isEmpty()) {
 			return StringPool.BLANK;
 		}
-		else if (cdata.contains("<pre>")) {
-			cdata = _formatCDATA(cdata, "pre");
-		}
-		else if (cdata.contains("<table>")) {
-			cdata = _formatCDATA(cdata, "table");
-		}
-		else {
-			cdata = cdata.replaceAll(
-				"(?s)\\s*<(p|[ou]l)>\\s*(.*?)\\s*</\\1>\\s*",
-				"\n\n<$1>\n$2\n</$1>\n\n");
-			cdata = cdata.replaceAll(
-				"(?s)\\s*<li>\\s*(.*?)\\s*</li>\\s*", "\n<li>\n$1\n</li>\n");
-			cdata = StringUtil.replace(cdata, "</li>\n\n<li>", "</li>\n<li>");
-			cdata = cdata.replaceAll("\n\\s+\n", "\n\n");
-			cdata.replaceAll(" +", " ");
 
-			// Trim whitespace inside paragraph tags or in the first paragraph
+		int cdataBeginIndex = 0;
 
-			Pattern pattern = Pattern.compile(
-				"(^.*?(?=\n\n|$)+|(?<=<p>\n).*?(?=\n</p>))", Pattern.DOTALL);
+		while (!cdata.isEmpty()) {
+			int preTagIndex = cdata.indexOf("<pre>");
+			int tableTagIndex = cdata.indexOf("<table>");
 
-			Matcher matcher = pattern.matcher(cdata);
+			boolean hasPreTag = (preTagIndex != -1) ? true : false;
+			boolean hasTableTag = (tableTagIndex != -1) ? true : false;
 
-			StringBuffer sb = new StringBuffer();
+			if (!hasPreTag && !hasTableTag) {
+				sb.append(_formatCDATA(cdata));
 
-			while (matcher.find()) {
-				String trimmed = _trimMultilineText(matcher.group());
-
-				// Escape dollar signs
-
-				trimmed = trimmed.replaceAll("\\$", "\\\\\\$");
-
-				matcher.appendReplacement(sb, trimmed);
+				break;
 			}
 
-			matcher.appendTail(sb);
+			boolean startsWithPreTag = (preTagIndex == 0) ? true : false;
+			boolean startsWithTableTag = (tableTagIndex == 0) ? true : false;
 
-			cdata = sb.toString();
+			if (startsWithPreTag || startsWithTableTag) {
+				sb.append("\n");
+
+				String tagName = null;
+
+				if (preTagIndex == 0) {
+					tagName = "pre";
+				}
+				else {
+					tagName = "table";
+				}
+
+				String startTag = "<" + tagName + ">";
+				String endTag = "</" + tagName + ">";
+
+				int startTagLength = startTag.length();
+				int endTagLength = endTag.length();
+
+				int endTagIndex = cdata.indexOf(endTag, startTagLength - 1);
+
+				sb.append(cdata.substring(0, endTagIndex + endTagLength));
+
+				sb.append("\n");
+
+				cdataBeginIndex = endTagIndex + endTagLength;
+			}
+			else {
+
+				// Format the cdata up to the next pre or table tag
+
+				int startTagIndex = 0;
+
+				if (hasPreTag && hasTableTag) {
+					if (preTagIndex < tableTagIndex) {
+						startTagIndex = preTagIndex;
+					}
+					else {
+						startTagIndex = tableTagIndex;
+					}
+				}
+				else if (hasPreTag && !hasTableTag) {
+					startTagIndex = preTagIndex;
+				}
+				else {
+
+					// Must have table tag and no pre tag
+
+					startTagIndex = tableTagIndex;
+				}
+
+				sb.append(_formatCDATA(cdata.substring(0, startTagIndex)));
+
+				cdataBeginIndex = startTagIndex;
+			}
+
+			cdata = cdata.substring(cdataBeginIndex);
 		}
+
+		cdata = sb.toString();
 
 		return cdata.trim();
 	}
@@ -1456,16 +1510,16 @@ public class JavadocFormatter {
 			if (samePackage) {
 				return !ancestorJavaMethod.isPrivate();
 			}
-			else {
-				if (ancestorJavaMethod.isProtected() ||
-					ancestorJavaMethod.isPublic()) {
 
-					return true;
-				}
-				else {
-					return false;
-				}
+			if (ancestorJavaMethod.isProtected() ||
+				ancestorJavaMethod.isPublic()) {
+
+				return true;
 			}
+			else {
+				return false;
+			}
+
 		}
 
 		return false;
@@ -1556,7 +1610,9 @@ public class JavadocFormatter {
 			}
 		}
 
-		return sb.toString().trim();
+		content = sb.toString();
+
+		return content.trim();
 	}
 
 	private String _trimMultilineText(String text) {
@@ -1720,7 +1776,9 @@ public class JavadocFormatter {
 			sb.append("\n");
 		}
 
-		String formattedContent = sb.toString().trim();
+		String formattedContent = sb.toString();
+
+		formattedContent = formattedContent.trim();
 
 		if (!originalContent.equals(formattedContent)) {
 			File file = new File(_inputDir + fileName);
@@ -1822,7 +1880,8 @@ public class JavadocFormatter {
 			}
 
 			if (line.startsWith(linePrefix)) {
-				sb.append(linePrefix + value);
+				sb.append(linePrefix);
+				sb.append(value);
 			}
 			else {
 				sb.append(line);
@@ -1902,6 +1961,8 @@ public class JavadocFormatter {
 	private Properties _languageProperties;
 	private File _languagePropertiesFile;
 	private String _outputFilePrefix;
+	private Pattern _paragraphTagPattern = Pattern.compile(
+		"(^.*?(?=\n\n|$)+|(?<=<p>\n).*?(?=\n</p>))", Pattern.DOTALL);
 	private boolean _updateJavadocs;
 
 }

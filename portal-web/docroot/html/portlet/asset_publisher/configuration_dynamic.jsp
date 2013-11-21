@@ -337,69 +337,119 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 						{
 							contentBox: '#<portlet:namespace />queryRules > fieldset',
 							fieldIndexes: '<portlet:namespace />queryLogicIndexes',
+							namespace: '<portlet:namespace />',
 							url: '<portlet:renderURL windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="struts_action" value="/portlet_configuration/edit_query_rule" /></portlet:renderURL>'
 						}
 					).render();
 				</aui:script>
 			</liferay-ui:panel>
 
-			<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherCustomUserAttributesQueryRulesPanelContainer" persistState="<%= true %>" title="custom-user-attributes">
-				<aui:input helpMessage="custom-user-attributes-help" label="displayed-assets-must-match-these-custom-user-profile-attributes" name="preferences--customUserAttributes--" value="<%= customUserAttributes %>" />
-			</liferay-ui:panel>
+			<%
+			String[] sections = PropsValues.ASSET_PUBLISHER_QUERY_FORM_CONFIGURATION;
 
-			<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherOrderingAndGroupingPanel" persistState="<%= true %>" title="ordering-and-grouping">
-				<aui:fieldset>
-					<span class="field-row">
-						<aui:select inlineField="<%= true %>" inlineLabel="left" label="order-by" name="preferences--orderByColumn1--">
-							<aui:option label="title" selected='<%= orderByColumn1.equals("title") %>' />
-							<aui:option label="create-date" selected='<%= orderByColumn1.equals("createDate") %>' value="createDate" />
-							<aui:option label="modified-date" selected='<%= orderByColumn1.equals("modifiedDate") %>' value="modifiedDate" />
-							<aui:option label="publish-date" selected='<%= orderByColumn1.equals("publishDate") %>' value="publishDate" />
-							<aui:option label="expiration-date" selected='<%= orderByColumn1.equals("expirationDate") %>' value="expirationDate" />
-							<aui:option label="priority" selected='<%= orderByColumn1.equals("priority") %>' value="priority" />
-							<aui:option label="view-count" selected='<%= orderByColumn1.equals("viewCount") %>' value="viewCount" />
-							<aui:option label="ratings" selected='<%= orderByColumn1.equals("ratings") %>' value="ratings" />
-						</aui:select>
+			for (String section : sections) {
+				String sectionId = renderResponse.getNamespace() + _getSectionId(section);
+			%>
 
-						<aui:select inlineField="<%= true %>" label="" name="preferences--orderByType1--">
-							<aui:option label="ascending" selected='<%= orderByType1.equals("ASC") %>' value="ASC" />
-							<aui:option label="descending" selected='<%= orderByType1.equals("DESC") %>' value="DESC" />
-						</aui:select>
-					</span>
+				<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id='<%= "assetPublisherPanelContainerSection_" + sectionId %>' persistState="<%= true %>" title="<%= section %>">
+					<liferay-util:include page='<%= "/html/portlet/asset_publisher/query/" + _getSectionJsp(section) + ".jsp" %>' />
+				</liferay-ui:panel>
 
-					<span class="field-row">
-						<aui:select inlineField="<%= true %>" inlineLabel="left" label="and-then-by" name="preferences--orderByColumn2--">
-							<aui:option label="title" selected='<%= orderByColumn2.equals("title") %>' />
-							<aui:option label="create-date" selected='<%= orderByColumn2.equals("createDate") %>' value="createDate" />
-							<aui:option label="modified-date" selected='<%= orderByColumn2.equals("modifiedDate") %>' value="modifiedDate" />
-							<aui:option label="publish-date" selected='<%= orderByColumn2.equals("publishDate") %>' value="publishDate" />
-							<aui:option label="expiration-date" selected='<%= orderByColumn2.equals("expirationDate") %>' value="expirationDate" />
-							<aui:option label="priority" selected='<%= orderByColumn2.equals("priority") %>' value="priority" />
-							<aui:option label="view-count" selected='<%= orderByColumn2.equals("viewCount") %>' value="viewCount" />
-							<aui:option label="ratings" selected='<%= orderByColumn2.equals("ratings") %>' value="ratings" />
-						</aui:select>
+			<%
+			}
+			%>
 
-						<aui:select inlineField="<%= true %>" label="" name="preferences--orderByType2--">
-							<aui:option label="ascending" selected='<%= orderByType2.equals("ASC") %>' value="ASC" />
-							<aui:option label="descending" selected='<%= orderByType2.equals("DESC") %>' value="DESC" />
-						</aui:select>
-					</span>
+			<c:if test="<%= !rootPortletId.equals(PortletKeys.HIGHEST_RATED_ASSETS) && !rootPortletId.equals(PortletKeys.MOST_VIEWED_ASSETS) %>">
+				<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherOrderingAndGroupingPanel" persistState="<%= true %>" title="ordering-and-grouping">
+					<aui:fieldset>
+						<span class="field-row">
+							<aui:select inlineField="<%= true %>" inlineLabel="left" label="order-by" name="preferences--orderByColumn1--">
+								<aui:option label="title" selected='<%= orderByColumn1.equals("title") %>' />
+								<aui:option label="create-date" selected='<%= orderByColumn1.equals("createDate") %>' value="createDate" />
+								<aui:option label="modified-date" selected='<%= orderByColumn1.equals("modifiedDate") %>' value="modifiedDate" />
+								<aui:option label="publish-date" selected='<%= orderByColumn1.equals("publishDate") %>' value="publishDate" />
+								<aui:option label="expiration-date" selected='<%= orderByColumn1.equals("expirationDate") %>' value="expirationDate" />
+								<aui:option label="priority" selected='<%= orderByColumn1.equals("priority") %>' value="priority" />
 
-					<span class="field-row">
-						<aui:select inlineField="<%= true %>" inlineLabel="left" label="group-by" name="preferences--assetVocabularyId--">
-							<aui:option value="" />
-							<aui:option label="asset-types" selected="<%= assetVocabularyId == -1 %>" value="-1" />
+								<c:if test="<%= !PropsValues.ASSET_PUBLISHER_SEARCH_WITH_INDEX %>">
+									<aui:option label="view-count" selected='<%= orderByColumn1.equals("viewCount") %>' value="viewCount" />
+									<aui:option label="ratings" selected='<%= orderByColumn1.equals("ratings") %>' value="ratings" />
+								</c:if>
+							</aui:select>
+
+							<aui:select inlineField="<%= true %>" label="" name="preferences--orderByType1--">
+								<aui:option label="ascending" selected='<%= orderByType1.equals("ASC") %>' value="ASC" />
+								<aui:option label="descending" selected='<%= orderByType1.equals("DESC") %>' value="DESC" />
+							</aui:select>
+						</span>
+
+						<span class="field-row">
+							<aui:select inlineField="<%= true %>" inlineLabel="left" label="and-then-by" name="preferences--orderByColumn2--">
+								<aui:option label="title" selected='<%= orderByColumn2.equals("title") %>' />
+								<aui:option label="create-date" selected='<%= orderByColumn2.equals("createDate") %>' value="createDate" />
+								<aui:option label="modified-date" selected='<%= orderByColumn2.equals("modifiedDate") %>' value="modifiedDate" />
+								<aui:option label="publish-date" selected='<%= orderByColumn2.equals("publishDate") %>' value="publishDate" />
+								<aui:option label="expiration-date" selected='<%= orderByColumn2.equals("expirationDate") %>' value="expirationDate" />
+								<aui:option label="priority" selected='<%= orderByColumn2.equals("priority") %>' value="priority" />
+
+								<c:if test="<%= !PropsValues.ASSET_PUBLISHER_SEARCH_WITH_INDEX %>">
+									<aui:option label="view-count" selected='<%= orderByColumn2.equals("viewCount") %>' value="viewCount" />
+									<aui:option label="ratings" selected='<%= orderByColumn2.equals("ratings") %>' value="ratings" />
+								</c:if>
+							</aui:select>
+
+							<aui:select inlineField="<%= true %>" label="" name="preferences--orderByType2--">
+								<aui:option label="ascending" selected='<%= orderByType2.equals("ASC") %>' value="ASC" />
+								<aui:option label="descending" selected='<%= orderByType2.equals("DESC") %>' value="DESC" />
+							</aui:select>
+						</span>
+
+						<span class="field-row">
 
 							<%
-							Group companyGroup = company.getGroup();
+							long assetVocabularyId = GetterUtil.getLong(portletPreferences.getValue("assetVocabularyId", null));
+							%>
 
-							if (scopeGroupId != companyGroup.getGroupId()) {
-								List<AssetVocabulary> assetVocabularies = AssetVocabularyLocalServiceUtil.getGroupVocabularies(scopeGroupId, false);
+							<aui:select inlineField="<%= true %>" inlineLabel="left" label="group-by" name="preferences--assetVocabularyId--">
+								<aui:option value="" />
+								<aui:option label="asset-types" selected="<%= assetVocabularyId == -1 %>" value="-1" />
+
+								<%
+								Group companyGroup = company.getGroup();
+
+								if (scopeGroupId != companyGroup.getGroupId()) {
+									List<AssetVocabulary> assetVocabularies = AssetVocabularyLocalServiceUtil.getGroupVocabularies(scopeGroupId, false);
+
+									if (!assetVocabularies.isEmpty()) {
+									%>
+
+										<optgroup label="<liferay-ui:message key="vocabularies" />">
+
+											<%
+											for (AssetVocabulary assetVocabulary : assetVocabularies) {
+												assetVocabulary = assetVocabulary.toEscapedModel();
+											%>
+
+												<aui:option label="<%= assetVocabulary.getTitle(locale) %>" selected="<%= assetVocabularyId == assetVocabulary.getVocabularyId() %>" value="<%= assetVocabulary.getVocabularyId() %>" />
+
+											<%
+											}
+											%>
+
+										</optgroup>
+
+									<%
+									}
+								}
+								%>
+
+								<%
+								List<AssetVocabulary> assetVocabularies = AssetVocabularyLocalServiceUtil.getGroupVocabularies(companyGroup.getGroupId(), false);
 
 								if (!assetVocabularies.isEmpty()) {
 								%>
 
-									<optgroup label="<liferay-ui:message key="vocabularies" />">
+									<optgroup label="<liferay-ui:message key="vocabularies" /> (<liferay-ui:message key="global" />)">
 
 										<%
 										for (AssetVocabulary assetVocabulary : assetVocabularies) {
@@ -416,38 +466,13 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 
 								<%
 								}
-							}
-							%>
+								%>
 
-							<%
-							List<AssetVocabulary> assetVocabularies = AssetVocabularyLocalServiceUtil.getGroupVocabularies(companyGroup.getGroupId(), false);
-
-							if (!assetVocabularies.isEmpty()) {
-							%>
-
-								<optgroup label="<liferay-ui:message key="vocabularies" /> (<liferay-ui:message key="global" />)">
-
-									<%
-									for (AssetVocabulary assetVocabulary : assetVocabularies) {
-										assetVocabulary = assetVocabulary.toEscapedModel();
-									%>
-
-										<aui:option label="<%= assetVocabulary.getTitle(locale) %>" selected="<%= assetVocabularyId == assetVocabulary.getVocabularyId() %>" value="<%= assetVocabulary.getVocabularyId() %>" />
-
-									<%
-									}
-									%>
-
-								</optgroup>
-
-							<%
-							}
-							%>
-
-						</aui:select>
-					</span>
-				</aui:fieldset>
-			</liferay-ui:panel>
+							</aui:select>
+						</span>
+					</aui:fieldset>
+				</liferay-ui:panel>
+			</c:if>
 		</liferay-ui:panel-container>
 	</liferay-ui:section>
 
@@ -461,6 +486,16 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 		<liferay-ui:error-marker key="errorSection" value="subscriptions" />
 
 		<c:if test="<%= PortalUtil.isRSSFeedsEnabled() %>">
+
+			<%
+			boolean enableRSS = GetterUtil.getBoolean(portletPreferences.getValue("enableRss", null));
+
+			int rssDelta = GetterUtil.getInteger(portletPreferences.getValue("rssDelta", StringPool.BLANK), SearchContainer.DEFAULT_DELTA);
+			String rssDisplayStyle = portletPreferences.getValue("rssDisplayStyle", RSSUtil.DISPLAY_STYLE_ABSTRACT);
+			String rssFeedType = portletPreferences.getValue("rssFeedType", RSSUtil.FEED_TYPE_DEFAULT);
+			String rssName = portletPreferences.getValue("rssName", portletDisplay.getTitle());
+			%>
+
 			<liferay-ui:rss-settings
 				delta="<%= rssDelta %>"
 				displayStyle="<%= rssDisplayStyle %>"
@@ -553,7 +588,7 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 
 			<%
 			for (Tuple classTypeFieldName : classTypeFieldNames) {
-				String value = DDMIndexerUtil.encodeName(subtypeId, (String)classTypeFieldName.getObject(1));
+				String value = DDMIndexerUtil.encodeName((Long)classTypeFieldName.getObject(3), (String)classTypeFieldName.getObject(1));
 				String selectedOrderByColumn1 = StringPool.BLANK;
 				String selectedOrderByColumn2 = StringPool.BLANK;
 
@@ -713,7 +748,7 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 					},
 					eventName: '<portlet:namespace />selectDDMStructureField',
 					id: '<portlet:namespace />selectDDMStructure' + event.currentTarget.attr('id'),
-					title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "structure-field") %>',
+					title: '<liferay-ui:message arguments="structure-field" key="select-x" />',
 					uri: event.target.attr('data-href')
 				},
 				function(event) {
@@ -758,5 +793,13 @@ private long[] _getCategorizableGroupIds(long[] groupIds) throws Exception {
 	}
 
 	return ArrayUtil.toLongArray(categorizableGroupIds);
+}
+
+private String _getSectionId(String name) {
+	return TextFormatter.format(name, TextFormatter.M);
+}
+
+private String _getSectionJsp(String name) {
+	return TextFormatter.format(name, TextFormatter.N);
 }
 %>

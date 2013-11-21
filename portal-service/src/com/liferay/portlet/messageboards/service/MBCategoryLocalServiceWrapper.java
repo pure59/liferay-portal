@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.messageboards.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see MBCategoryLocalService
  * @generated
  */
+@ProviderType
 public class MBCategoryLocalServiceWrapper implements MBCategoryLocalService,
 	ServiceWrapper<MBCategoryLocalService> {
 	public MBCategoryLocalServiceWrapper(
@@ -666,15 +669,6 @@ public class MBCategoryLocalServiceWrapper implements MBCategoryLocalService,
 			outServerName, outServerPort, outUseSSL, outUserName, outPassword,
 			allowAnonymous, mailingListActive, mergeWithParentCategory,
 			serviceContext);
-	}
-
-	@Override
-	public void updateDependentStatus(com.liferay.portal.model.User user,
-		java.util.List<java.lang.Object> categoriesAndThreads, int status)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		_mbCategoryLocalService.updateDependentStatus(user,
-			categoriesAndThreads, status);
 	}
 
 	@Override

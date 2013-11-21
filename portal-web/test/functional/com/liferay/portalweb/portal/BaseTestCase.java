@@ -29,16 +29,6 @@ public class BaseTestCase extends LiferaySeleneseTestCase {
 
 	public BaseTestCase() {
 		InitUtil.initWithSpring();
-
-		String chromeDriverPath =
-			TestPropsValues.SELENIUM_EXECUTABLE_DIR + "\\chromedriver.exe";
-
-		System.setProperty("webdriver.chrome.driver", chromeDriverPath);
-
-		String ieDriverPath =
-			TestPropsValues.SELENIUM_EXECUTABLE_DIR + "\\IEDriverServer.exe";
-
-		System.setProperty("webdriver.ie.driver", ieDriverPath);
 	}
 
 	@Override
@@ -64,9 +54,13 @@ public class BaseTestCase extends LiferaySeleneseTestCase {
 			testCaseCount--;
 		}
 
-		if (!primaryTestSuiteName.contains("TestSuite") &&
+		if (!primaryTestSuiteName.endsWith("TestSuite") &&
 			(testCaseCount < 1)) {
 
+			SeleniumUtil.stopSelenium();
+		}
+
+		if (TestPropsValues.TESTING_CLASS_METHOD) {
 			SeleniumUtil.stopSelenium();
 		}
 	}
@@ -120,9 +114,9 @@ public class BaseTestCase extends LiferaySeleneseTestCase {
 
 			selenium.getEval("window.Liferay.fire(\'initDockbar\');");
 		}
-
 	}
 
+	protected static String currentTestCaseName;
 	protected static int testCaseCount;
 
 	protected Map<String, String> commandScopeVariables;
