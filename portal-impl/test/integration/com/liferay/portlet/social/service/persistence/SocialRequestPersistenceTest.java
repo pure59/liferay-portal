@@ -345,13 +345,6 @@ public class SocialRequestPersistenceTest {
 			existingSocialRequestModelImpl.getOriginalClassNameId());
 		Assert.assertEquals(existingSocialRequestModelImpl.getClassPK(),
 			existingSocialRequestModelImpl.getOriginalClassPK());
-
-		Assert.assertEquals(existingSocialRequestModelImpl.getUserId(),
-			existingSocialRequestModelImpl.getOriginalUserId());
-		Assert.assertEquals(existingSocialRequestModelImpl.getClassNameId(),
-			existingSocialRequestModelImpl.getOriginalClassNameId());
-		Assert.assertEquals(existingSocialRequestModelImpl.getClassPK(),
-			existingSocialRequestModelImpl.getOriginalClassPK());
 		Assert.assertEquals(existingSocialRequestModelImpl.getType(),
 			existingSocialRequestModelImpl.getOriginalType());
 		Assert.assertEquals(existingSocialRequestModelImpl.getReceiverUserId(),

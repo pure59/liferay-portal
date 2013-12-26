@@ -529,25 +529,6 @@ public class SocialRequestLocalServiceWrapper
 	}
 
 	/**
-	* Returns the social request for the requesting user.
-	*
-	* @param userId the primary key of the requesting user
-	* @param className the class name of the asset that is the subject of the
-	request
-	* @param classPK the primary key of the asset that is the subject of the
-	request
-	* @throws SystemException if a system exception occurred
-	*/
-	@Override
-	public com.liferay.portlet.social.model.SocialRequest getUserRequest(
-		long userId, java.lang.String className, long classPK)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.social.NoSuchRequestException {
-		return _socialRequestLocalService.getUserRequest(userId, className,
-			classPK);
-	}
-
-	/**
 	* Returns a range of all the social requests for the requesting user.
 	*
 	* <p>
@@ -600,6 +581,26 @@ public class SocialRequestLocalServiceWrapper
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _socialRequestLocalService.getUserRequests(userId, status,
 			start, end);
+	}
+
+	/**
+	* Returns all social requests with the given class name and primary key for
+	* the requesting user.
+	*
+	* @param userId the primary key of the requesting user
+	* @param className the class name of the asset that is the subject of the
+	request
+	* @param classPK the primary key of the asset that is the subject of the
+	request
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public java.util.List<com.liferay.portlet.social.model.SocialRequest> getUserRequests(
+		long userId, java.lang.String className, long classPK)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialRequestLocalService.getUserRequests(userId, className,
+			classPK);
 	}
 
 	/**

@@ -296,11 +296,11 @@ public class MembershipRequestLocalServiceUtil {
 		getService().deleteMembershipRequestsByUserId(userId);
 	}
 
-	public static com.liferay.portal.model.MembershipRequest getMembershipRequest(
+	public static java.util.List<com.liferay.portal.model.MembershipRequest> getMembershipRequests(
 		long groupId, long userId)
-		throws com.liferay.portal.NoSuchMembershipRequestException,
+		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return getService().getMembershipRequest(groupId, userId);
+		return getService().getMembershipRequests(groupId, userId);
 	}
 
 	public static java.util.List<com.liferay.portal.model.MembershipRequest> getMembershipRequests(
