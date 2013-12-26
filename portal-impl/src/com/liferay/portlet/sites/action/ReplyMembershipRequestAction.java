@@ -30,6 +30,8 @@ import com.liferay.portlet.social.model.SocialRequest;
 import com.liferay.portlet.social.service.SocialRequestLocalServiceUtil;
 import com.liferay.portlet.social.service.SocialRequestServiceUtil;
 
+import java.util.List;
+
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletConfig;
@@ -67,14 +69,16 @@ public class ReplyMembershipRequestAction extends PortletAction {
 				MembershipRequestServiceUtil.getMembershipRequest(
 					membershipRequestId);
 
-			SocialRequest socialRequest =
-				SocialRequestLocalServiceUtil.getUserRequest(
+			List<SocialRequest> socialRequests =
+				SocialRequestLocalServiceUtil.getUserRequests(
 					membershipRequest.getUserId(), Group.class.getName(),
 					membershipRequest.getGroupId());
 
-			SocialRequestServiceUtil.updateRequest(
-				socialRequest.getRequestId(), statusId, themeDisplay,
-				replyComments);
+			for (SocialRequest socialRequest : socialRequests) {
+				SocialRequestServiceUtil.updateRequest(
+					socialRequest.getRequestId(), statusId, themeDisplay,
+					replyComments);
+			}
 
 			SessionMessages.add(actionRequest, "membershipReplySent");
 

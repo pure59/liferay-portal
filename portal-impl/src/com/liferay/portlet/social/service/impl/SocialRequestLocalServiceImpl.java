@@ -22,7 +22,6 @@ import com.liferay.portal.model.Group;
 import com.liferay.portal.model.MembershipRequest;
 import com.liferay.portal.model.User;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portlet.social.NoSuchRequestException;
 import com.liferay.portlet.social.RequestUserIdException;
 import com.liferay.portlet.social.model.SocialRequest;
 import com.liferay.portlet.social.model.SocialRequestConstants;
@@ -272,27 +271,6 @@ public class SocialRequestLocalServiceImpl
 	}
 
 	/**
-	 * Returns the social request for the requesting user.
-	 *
-	 * @param userId the primary key of the requesting user
-	 * @param className the class name of the asset that is the subject of the
-	 *         request
-	 * @param classPK the primary key of the asset that is the subject of the
-	 *         request
-	 * @throws SystemException if a system exception occurred
-	 */
-	@Override
-	public SocialRequest getUserRequest(
-			long userId, String className, long classPK)
-		throws NoSuchRequestException, SystemException {
-
-		long classNameId = classNameLocalService.getClassNameId(className);
-
-		return socialRequestPersistence.findByU_C_C(
-			userId, classNameId, classPK);
-	}
-
-	/**
 	 * Returns a range of all the social requests for the requesting user.
 	 *
 	 * <p>
@@ -345,6 +323,28 @@ public class SocialRequestLocalServiceImpl
 		throws SystemException {
 
 		return socialRequestPersistence.findByU_S(userId, status, start, end);
+	}
+
+	/**
+	 * Returns all social requests with the given class name and primary key for
+	 * the requesting user.
+	 *
+	 * @param userId the primary key of the requesting user
+	 * @param className the class name of the asset that is the subject of the
+	 *         request
+	 * @param classPK the primary key of the asset that is the subject of the
+	 *         request
+	 * @throws SystemException if a system exception occurred
+	 */
+	@Override
+	public List<SocialRequest> getUserRequests(
+			long userId, String className, long classPK)
+		throws PortalException, SystemException {
+
+		long classNameId = classNameLocalService.getClassNameId(className);
+
+		return socialRequestPersistence.findByU_C_C(
+			userId, classNameId, classPK);
 	}
 
 	/**
@@ -542,13 +542,15 @@ public class SocialRequestLocalServiceImpl
 		if (request.getClassNameId() == classNameLocalService.getClassNameId(
 				Group.class)) {
 
-			MembershipRequest membershipRequest =
-				membershipRequestLocalService.getMembershipRequest(
+			List<MembershipRequest> membershipRequests =
+				membershipRequestLocalService.getMembershipRequests(
 					request.getClassPK(), request.getUserId());
 
-			membershipRequestService.updateStatus(
-				membershipRequest.getMembershipRequestId(), comments, status,
-				null);
+			for (MembershipRequest membershipRequest : membershipRequests) {
+				membershipRequestService.updateStatus(
+					membershipRequest.getMembershipRequestId(), comments,
+					status, null);
+			}
 		}
 
 		if (status == SocialRequestConstants.STATUS_CONFIRM) {
