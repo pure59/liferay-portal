@@ -199,10 +199,10 @@ public class UserGroupGroupRoleLocalServiceImpl
 	}
 
 	@Override
-	public List<UserGroupGroupRole> getUserGroupGroupRolesByUserId(long userId)
+	public List<UserGroupGroupRole> getUserGroupGroupRolesByUser(long userId)
 		throws SystemException {
 
-		return userGroupGroupRoleFinder.findByUserId(userId);
+		return userGroupGroupRoleFinder.findByUserGroupsUsers(userId);
 	}
 
 	@Override
