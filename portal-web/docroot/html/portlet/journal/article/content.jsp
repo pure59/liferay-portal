@@ -775,7 +775,7 @@ private String _getTemplateImage(ThemeDisplay themeDisplay, DDMTemplate ddmTempl
 
 	if (ddmTemplate.isSmallImage()) {
 		if (Validator.isNotNull(ddmTemplate.getSmallImageURL())) {
-			imageURL = ddmTemplate.getSmallImageURL();
+			imageURL = HtmlUtil.escape(ddmTemplate.getSmallImageURL());
 		}
 		else {
 			imageURL = themeDisplay.getPathImage() + "/journal/template?img_id=" + ddmTemplate.getSmallImageId() + "&t=" + WebServerServletTokenUtil.getToken(ddmTemplate.getSmallImageId());
