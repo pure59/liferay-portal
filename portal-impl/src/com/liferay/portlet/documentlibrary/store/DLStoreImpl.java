@@ -653,6 +653,7 @@ public class DLStoreImpl implements DLStore {
 		validate(fileName, validateFileExtension);
 
 		if (!ExportImportThreadLocal.isExportInProcess() &&
+			!ExportImportThreadLocal.isImportInProcess() &&
 			(PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE) > 0) &&
 			((bytes == null) ||
 			 (bytes.length >
@@ -670,6 +671,7 @@ public class DLStoreImpl implements DLStore {
 		validate(fileName, validateFileExtension);
 
 		if (!ExportImportThreadLocal.isExportInProcess() &&
+			!ExportImportThreadLocal.isImportInProcess() &&
 			(PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE) > 0) &&
 			((file == null) ||
 			 (file.length() >
@@ -689,7 +691,8 @@ public class DLStoreImpl implements DLStore {
 		// LEP-4851
 
 		try {
-			if (!ExportImportThreadLocal.isExportInProcess() && ((is == null) ||
+			if (!ExportImportThreadLocal.isExportInProcess() &&
+				!ExportImportThreadLocal.isImportInProcess() && ((is == null) ||
 				 ((PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE) > 0) &&
 				  (is.available() >
 					PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE))))) {
@@ -712,7 +715,8 @@ public class DLStoreImpl implements DLStore {
 			fileName, fileExtension, sourceFileName, validateFileExtension,
 			StringPool.BLANK);
 
-		if (!ExportImportThreadLocal.isExportInProcess() && (file != null) &&
+		if (!ExportImportThreadLocal.isExportInProcess() &&
+			!ExportImportThreadLocal.isImportInProcess() && (file != null) &&
 			(PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE) > 0) &&
 			(file.length() >
 				PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE))) {
@@ -732,7 +736,8 @@ public class DLStoreImpl implements DLStore {
 			StringPool.BLANK);
 
 		try {
-			if (!ExportImportThreadLocal.isExportInProcess() && (is != null) &&
+			if (!ExportImportThreadLocal.isExportInProcess() &&
+				!ExportImportThreadLocal.isImportInProcess() && (is != null) &&
 				(PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE) > 0) &&
 				(is.available() >
 					PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE))) {
