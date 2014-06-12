@@ -303,6 +303,8 @@ public class JournalArticleLocalServiceImpl
 				displayDateHour, displayDateMinute, user.getTimeZone(),
 				ArticleDisplayDateException.class);
 
+			System.out.println("addArticle-displayDate: " + displayDate.toString());
+
 			if (!neverExpire) {
 				expirationDate = PortalUtil.getDate(
 					expirationDateMonth, expirationDateDay, expirationDateYear,

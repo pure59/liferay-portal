@@ -420,6 +420,8 @@ public class JournalArticleServiceTest {
 	public void testUpdateArticle() throws Exception {
 		Date firstVersionDate = _article.getDisplayDate();
 
+		System.out.println("firstVersionDate: " + firstVersionDate.toString());
+
 		Date now = new Date();
 
 		_article.setDisplayDate(now);
