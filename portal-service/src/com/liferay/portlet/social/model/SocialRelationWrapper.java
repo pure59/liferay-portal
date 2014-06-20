@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.social.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see SocialRelation
  * @generated
  */
+@ProviderType
 public class SocialRelationWrapper implements SocialRelation,
 	ModelWrapper<SocialRelation> {
 	public SocialRelationWrapper(SocialRelation socialRelation) {
@@ -365,8 +368,7 @@ public class SocialRelationWrapper implements SocialRelation,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_socialRelation.persist();
 	}
 
@@ -393,6 +395,7 @@ public class SocialRelationWrapper implements SocialRelation,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public SocialRelation getWrappedSocialRelation() {
 		return _socialRelation;
 	}
@@ -400,6 +403,16 @@ public class SocialRelationWrapper implements SocialRelation,
 	@Override
 	public SocialRelation getWrappedModel() {
 		return _socialRelation;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _socialRelation.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _socialRelation.isFinderCacheEnabled();
 	}
 
 	@Override

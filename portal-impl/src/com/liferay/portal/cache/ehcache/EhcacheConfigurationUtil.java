@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -23,8 +23,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.ehcache.config.CacheConfiguration.CacheEventListenerFactoryConfiguration;
 import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.config.CacheConfiguration.CacheEventListenerFactoryConfiguration;
 import net.sf.ehcache.config.Configuration;
 import net.sf.ehcache.config.ConfigurationFactory;
 
@@ -70,7 +70,7 @@ public class EhcacheConfigurationUtil {
 	public static Configuration getConfiguration(
 		URL configurationURL, boolean clusterAware, boolean usingDefault) {
 
-		if (Validator.isNull(configurationURL)) {
+		if (configurationURL == null) {
 			return null;
 		}
 
@@ -139,6 +139,10 @@ public class EhcacheConfigurationUtil {
 			return;
 		}
 
+		if (!PropsValues.EHCACHE_BOOTSTRAP_CACHE_LOADER_ENABLED) {
+			cacheConfiguration.addBootstrapCacheLoaderFactory(null);
+		}
+
 		List<CacheEventListenerFactoryConfiguration>
 			cacheEventListenerFactoryConfigurations =
 				cacheConfiguration.getCacheEventListenerConfigurations();
@@ -198,7 +202,7 @@ public class EhcacheConfigurationUtil {
 
 		boolean clearCachePeerProviderConfigurations = false;
 
-		if ((usingDefault && enableClusterLinkReplication) ||
+		if ((enableClusterLinkReplication) ||
 			(usingDefault && !PropsValues.CLUSTER_LINK_ENABLED)) {
 
 			clearCachePeerProviderConfigurations = true;

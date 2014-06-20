@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,12 +16,15 @@ package com.liferay.portal.template;
 
 import com.liferay.portal.kernel.audit.AuditMessageFactoryUtil;
 import com.liferay.portal.kernel.audit.AuditRouterUtil;
+import com.liferay.portal.kernel.image.ImageToolUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.language.UnicodeLanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletModeFactory_IW;
+import com.liferay.portal.kernel.portlet.PortletRequestModel;
+import com.liferay.portal.kernel.portlet.PortletRequestModelFactory;
 import com.liferay.portal.kernel.portlet.WindowStateFactory_IW;
 import com.liferay.portal.kernel.servlet.BrowserSnifferUtil;
 import com.liferay.portal.kernel.template.Template;
@@ -29,6 +32,7 @@ import com.liferay.portal.kernel.template.TemplateHandler;
 import com.liferay.portal.kernel.template.TemplateHandlerRegistryUtil;
 import com.liferay.portal.kernel.template.TemplateVariableGroup;
 import com.liferay.portal.kernel.util.ArrayUtil_IW;
+import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.DateUtil_IW;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -41,7 +45,6 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil_IW;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsUtil;
-import com.liferay.portal.kernel.util.Randomizer_IW;
 import com.liferay.portal.kernel.util.StaticFieldGetter;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil_IW;
@@ -86,13 +89,8 @@ import com.liferay.portlet.expando.service.ExpandoTableLocalService;
 import com.liferay.portlet.expando.service.ExpandoValueLocalService;
 import com.liferay.portlet.journalcontent.util.JournalContentUtil;
 import com.liferay.taglib.util.VelocityTaglibImpl;
-import com.liferay.util.portlet.PortletRequestUtil;
 
 import java.lang.reflect.Method;
-
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -134,8 +132,11 @@ public class TemplateContextHelper {
 			templateHandler.getTemplateVariableGroups(
 				classPK, language, locale);
 
+		String[] restrictedVariables = templateHandler.getRestrictedVariables(
+			language);
+
 		TemplateVariableGroup portalServicesTemplateVariableGroup =
-			new TemplateVariableGroup("portal-services");
+			new TemplateVariableGroup("portal-services", restrictedVariables);
 
 		portalServicesTemplateVariableGroup.setAutocompleteEnabled(false);
 
@@ -152,21 +153,51 @@ public class TemplateContextHelper {
 		return templateVariableGroups;
 	}
 
-	public Map<String, Object> getHelperUtilities(boolean restricted) {
-		TemplateControlContext templateControlContext =
-			getTemplateControlContext();
+	public Map<String, Object> getHelperUtilities(
+		ClassLoader classLoader, boolean restricted) {
 
-		AccessControlContext accessControlContext =
-			templateControlContext.getAccessControlContext();
-		ClassLoader classLoader = templateControlContext.getClassLoader();
+		Map<String, Object>[] helperUtilitiesArray = _helperUtilitiesMaps.get(
+			classLoader);
 
-		if (accessControlContext == null) {
-			return doGetHelperUtilities(classLoader, restricted);
+		if (helperUtilitiesArray == null) {
+			helperUtilitiesArray = (Map<String, Object>[])new Map<?, ?>[2];
+
+			_helperUtilitiesMaps.put(classLoader, helperUtilitiesArray);
+		}
+		else {
+			Map<String, Object> helperUtilities = null;
+
+			if (restricted) {
+				helperUtilities = helperUtilitiesArray[1];
+			}
+			else {
+				helperUtilities = helperUtilitiesArray[0];
+			}
+
+			if (helperUtilities != null) {
+				return helperUtilities;
+			}
 		}
 
-		return AccessController.doPrivileged(
-			new DoGetHelperUtilitiesPrivilegedAction(classLoader, restricted),
-			accessControlContext);
+		Map<String, Object> helperUtilities = new HashMap<String, Object>();
+
+		populateCommonHelperUtilities(helperUtilities);
+		populateExtraHelperUtilities(helperUtilities);
+
+		if (restricted) {
+			Set<String> restrictedVariables = getRestrictedVariables();
+
+			for (String restrictedVariable : restrictedVariables) {
+				helperUtilities.remove(restrictedVariable);
+			}
+
+			helperUtilitiesArray[1] = helperUtilities;
+		}
+		else {
+			helperUtilitiesArray[0] = helperUtilities;
+		}
+
+		return helperUtilities;
 	}
 
 	public Set<String> getRestrictedVariables() {
@@ -220,13 +251,23 @@ public class TemplateContextHelper {
 
 		if ((portletRequest != null) && (portletResponse != null)) {
 			template.put(
+				"portletRequestModelFactory",
+				new PortletRequestModelFactory(
+					portletRequest, portletResponse));
+
+			// Deprecated
+
+			template.put(
 				"xmlRequest",
 				new Object() {
 
 					@Override
 					public String toString() {
-						return PortletRequestUtil.toXML(
-							portletRequest, portletResponse);
+						PortletRequestModel portletRequestModel =
+							new PortletRequestModel(
+								portletRequest, portletResponse);
+
+						return portletRequestModel.toXML();
 					}
 
 				}
@@ -322,51 +363,10 @@ public class TemplateContextHelper {
 		_helperUtilitiesMaps.remove(classLoader);
 	}
 
-	protected Map<String, Object> doGetHelperUtilities(
-		ClassLoader classLoader, boolean restricted) {
+	public interface PACL {
 
-		Map<String, Object> helperUtilities = null;
+		public TemplateControlContext getTemplateControlContext();
 
-		Map<String, Object>[] helperUtilitiesArray = _helperUtilitiesMaps.get(
-			classLoader);
-
-		if (helperUtilitiesArray == null) {
-			helperUtilitiesArray = (Map<String, Object>[])new Map<?, ?>[2];
-
-			_helperUtilitiesMaps.put(classLoader, helperUtilitiesArray);
-		}
-		else {
-			if (restricted) {
-				helperUtilities = helperUtilitiesArray[1];
-			}
-			else {
-				helperUtilities = helperUtilitiesArray[0];
-			}
-
-			if (helperUtilities != null) {
-				return helperUtilities;
-			}
-		}
-
-		helperUtilities = new HashMap<String, Object>();
-
-		populateCommonHelperUtilities(helperUtilities);
-		populateExtraHelperUtilities(helperUtilities);
-
-		if (restricted) {
-			Set<String> restrictedVariables = getRestrictedVariables();
-
-			for (String restrictedVariable : restrictedVariables) {
-				helperUtilities.remove(restrictedVariable);
-			}
-
-			helperUtilitiesArray[1] = helperUtilities;
-		}
-		else {
-			helperUtilitiesArray[0] = helperUtilities;
-		}
-
-		return helperUtilities;
 	}
 
 	protected void populateCommonHelperUtilities(
@@ -401,6 +401,16 @@ public class TemplateContextHelper {
 		try {
 			variables.put(
 				"browserSniffer", BrowserSnifferUtil.getBrowserSniffer());
+		}
+		catch (SecurityException se) {
+			_log.error(se, se);
+		}
+
+		// Calendar factory
+
+		try {
+			variables.put(
+				"calendarFactory", CalendarFactoryUtil.getCalendarFactory());
 		}
 		catch (SecurityException se) {
 			_log.error(se, se);
@@ -520,6 +530,15 @@ public class TemplateContextHelper {
 			_log.error(se, se);
 		}
 
+		// Image tool util
+
+		try {
+			variables.put("imageToolUtil", ImageToolUtil.getImageTool());
+		}
+		catch (SecurityException se) {
+			_log.error(se, se);
+		}
+
 		// Journal content util
 
 		try {
@@ -615,16 +634,6 @@ public class TemplateContextHelper {
 			variables.put(
 				"portletURLFactory",
 				PortletURLFactoryUtil.getPortletURLFactory());
-		}
-		catch (SecurityException se) {
-			_log.error(se, se);
-		}
-
-		// Randomizer
-
-		try {
-			variables.put(
-				"randomizer", Randomizer_IW.getInstance().getWrappedInstance());
 		}
 		catch (SecurityException se) {
 			_log.error(se, se);
@@ -803,6 +812,13 @@ public class TemplateContextHelper {
 
 		// Deprecated
 
+		populateDeprecatedCommonHelperUtilities(variables);
+	}
+
+	@SuppressWarnings("deprecation")
+	protected void populateDeprecatedCommonHelperUtilities(
+		Map<String, Object> variables) {
+
 		try {
 			variables.put(
 				"dateFormats",
@@ -825,6 +841,16 @@ public class TemplateContextHelper {
 			variables.put(
 				"locationPermission",
 				OrganizationPermissionUtil.getOrganizationPermission());
+		}
+		catch (SecurityException se) {
+			_log.error(se, se);
+		}
+
+		try {
+			com.liferay.portal.kernel.util.Randomizer_IW randomizer =
+				com.liferay.portal.kernel.util.Randomizer_IW.getInstance();
+
+			variables.put("randomizer", randomizer.getWrappedInstance());
 		}
 		catch (SecurityException se) {
 			_log.error(se, se);
@@ -883,32 +909,6 @@ public class TemplateContextHelper {
 
 			return new TemplateControlContext(null, contextClassLoader);
 		}
-
-	}
-
-	public static interface PACL {
-
-		public TemplateControlContext getTemplateControlContext();
-
-	}
-
-	private class DoGetHelperUtilitiesPrivilegedAction
-		implements PrivilegedAction<Map<String, Object>> {
-
-		public DoGetHelperUtilitiesPrivilegedAction(
-			ClassLoader classLoader, boolean restricted) {
-
-			_classLoader = classLoader;
-			_restricted = restricted;
-		}
-
-		@Override
-		public Map<String, Object> run() {
-			return doGetHelperUtilities(_classLoader, _restricted);
-		}
-
-		private ClassLoader _classLoader;
-		private boolean _restricted;
 
 	}
 

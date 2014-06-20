@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,7 +17,7 @@
 <%@ include file="/html/taglib/init.jsp" %>
 
 <%
-String randomNamespace = PortalUtil.generateRandomKey(request, "taglib_ui_flash_page") + StringPool.UNDERLINE;
+String randomNamespace = StringUtil.randomId() + StringPool.UNDERLINE;
 
 String allowFullScreen = (String)request.getAttribute("liferay-ui:flash:allowFullScreen");
 String allowScriptAccess = (String)request.getAttribute("liferay-ui:flash:allowScriptAccess");

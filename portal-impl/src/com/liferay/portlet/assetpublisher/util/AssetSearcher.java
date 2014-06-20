@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,40 +14,39 @@
 
 package com.liferay.portlet.assetpublisher.util;
 
-import com.liferay.portal.kernel.search.BaseIndexer;
+import com.liferay.portal.kernel.search.BaseSearcher;
 import com.liferay.portal.kernel.search.BooleanClauseOccur;
 import com.liferay.portal.kernel.search.BooleanQuery;
 import com.liferay.portal.kernel.search.BooleanQueryFactoryUtil;
-import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.DocumentImpl;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Indexer;
-import com.liferay.portal.kernel.search.IndexerPostProcessor;
 import com.liferay.portal.kernel.search.SearchContext;
-import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.asset.model.AssetCategory;
 import com.liferay.portlet.asset.service.AssetCategoryLocalServiceUtil;
 import com.liferay.portlet.asset.service.persistence.AssetEntryQuery;
+import com.liferay.portlet.asset.util.AssetUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
-import javax.portlet.PortletURL;
 
 /**
  * @author Eudaldo Alonso
  */
-public class AssetSearcher extends BaseIndexer {
+public class AssetSearcher extends BaseSearcher {
 
 	public static Indexer getInstance() {
 		return new AssetSearcher();
 	}
 
 	public AssetSearcher() {
+		setDefaultSelectedFieldNames(
+			Field.ENTRY_CLASS_NAME, Field.ENTRY_CLASS_PK);
 		setFilterSearch(true);
 		setPermissionAware(true);
 	}
@@ -67,30 +66,22 @@ public class AssetSearcher extends BaseIndexer {
 		return classNames;
 	}
 
-	@Override
-	public IndexerPostProcessor[] getIndexerPostProcessors() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String getPortletId() {
-		return null;
-	}
-
-	@Override
-	public void registerIndexerPostProcessor(
-		IndexerPostProcessor indexerPostProcessor) {
-
-		throw new UnsupportedOperationException();
-	}
-
 	public void setAssetEntryQuery(AssetEntryQuery assetEntryQuery) {
 		_assetEntryQuery = assetEntryQuery;
+	}
+
+	protected void addImpossibleTerm(BooleanQuery contextQuery, String field)
+		throws Exception {
+
+		contextQuery.addTerm(field, "-1", false, BooleanClauseOccur.MUST);
 	}
 
 	protected void addSearchAllCategories(
 			BooleanQuery contextQuery, SearchContext searchContext)
 		throws Exception {
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
 
 		long[] allCategoryIds = _assetEntryQuery.getAllCategoryIds();
 
@@ -98,10 +89,19 @@ public class AssetSearcher extends BaseIndexer {
 			return;
 		}
 
+		long[] filteredAllCategoryIds = AssetUtil.filterCategoryIds(
+			permissionChecker, allCategoryIds);
+
+		if (allCategoryIds.length != filteredAllCategoryIds.length) {
+			addImpossibleTerm(contextQuery, Field.ASSET_CATEGORY_IDS);
+
+			return;
+		}
+
 		BooleanQuery categoryIdsQuery = BooleanQueryFactoryUtil.create(
 			searchContext);
 
-		for (long allCategoryId : allCategoryIds) {
+		for (long allCategoryId : filteredAllCategoryIds) {
 			AssetCategory assetCategory =
 				AssetCategoryLocalServiceUtil.fetchAssetCategory(allCategoryId);
 
@@ -137,9 +137,21 @@ public class AssetSearcher extends BaseIndexer {
 			BooleanQuery contextQuery, SearchContext searchContext)
 		throws Exception {
 
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
 		long[] allTagIds = _assetEntryQuery.getAllTagIds();
 
 		if (allTagIds.length == 0) {
+			return;
+		}
+
+		long[] filteredAllTagIds = AssetUtil.filterTagIds(
+			permissionChecker, allTagIds);
+
+		if (allTagIds.length != filteredAllTagIds.length) {
+			addImpossibleTerm(contextQuery, Field.ASSET_TAG_IDS);
+
 			return;
 		}
 
@@ -157,16 +169,28 @@ public class AssetSearcher extends BaseIndexer {
 			BooleanQuery contextQuery, SearchContext searchContext)
 		throws Exception {
 
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
 		long[] anyCategoryIds = _assetEntryQuery.getAnyCategoryIds();
 
 		if (anyCategoryIds.length == 0) {
 			return;
 		}
 
+		long[] filteredAnyCategoryIds = AssetUtil.filterCategoryIds(
+			permissionChecker, anyCategoryIds);
+
+		if (filteredAnyCategoryIds.length == 0) {
+			addImpossibleTerm(contextQuery, Field.ASSET_CATEGORY_IDS);
+
+			return;
+		}
+
 		BooleanQuery categoryIdsQuery = BooleanQueryFactoryUtil.create(
 			searchContext);
 
-		for (long anyCategoryId : anyCategoryIds) {
+		for (long anyCategoryId : filteredAnyCategoryIds) {
 			AssetCategory assetCategory =
 				AssetCategoryLocalServiceUtil.fetchAssetCategory(anyCategoryId);
 
@@ -197,9 +221,21 @@ public class AssetSearcher extends BaseIndexer {
 			BooleanQuery contextQuery, SearchContext searchContext)
 		throws Exception {
 
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
 		long[] anyTagIds = _assetEntryQuery.getAnyTagIds();
 
 		if (anyTagIds.length == 0) {
+			return;
+		}
+
+		long[] filteredAnyTagIds = AssetUtil.filterTagIds(
+			permissionChecker, anyTagIds);
+
+		if (filteredAnyTagIds.length == 0) {
+			addImpossibleTerm(contextQuery, Field.ASSET_TAG_IDS);
+
 			return;
 		}
 
@@ -395,42 +431,11 @@ public class AssetSearcher extends BaseIndexer {
 	}
 
 	@Override
-	protected void doDelete(Object obj) throws Exception {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected Document doGetDocument(Object obj) throws Exception {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected Summary doGetSummary(
-			Document document, Locale locale, String snippet,
-			PortletURL portletURL)
+	protected void postProcessFullQuery(
+			BooleanQuery fullQuery, SearchContext searchContext)
 		throws Exception {
 
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected void doReindex(Object obj) throws Exception {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected void doReindex(String className, long classPK) throws Exception {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected void doReindex(String[] ids) throws Exception {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected String getPortletId(SearchContext searchContext) {
-		return null;
+		fullQuery.addRequiredTerm("visible", true);
 	}
 
 	private AssetEntryQuery _assetEntryQuery;

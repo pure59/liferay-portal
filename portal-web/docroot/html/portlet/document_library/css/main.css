@@ -1,14 +1,11 @@
 @import "compass";
+@import "mixins";
 
 .portlet-document-library, .portlet-document-library-display {
 	.select-all-entries {
 		display: inline-block;
 		margin-left: 10px;
 		margin-top: 15px;
-	}
-
-	.display-style-buttons-container {
-		margin-right: 10px;
 	}
 
 	.file-entry-list-description {
@@ -37,11 +34,14 @@
 	}
 
 	.lfr-asset-panels .lfr-panel.lfr-extended {
-		border-bottom: none;
+		border-bottom-width: 0;
 	}
 
 	.document-container .search-info {
 		background-color: #D3E8F1;
+
+		@include hyphenation;
+
 		margin-bottom: 0.5em;
 		padding: 0.5em 0.75em;
 		padding-right: 30px;
@@ -71,6 +71,12 @@
 		margin-bottom: 0;
 	}
 
+	.drive-error {
+		.icon-hdd {
+			color: #C00;
+		}
+	}
+
 	.move-list {
 		.move-file, .move-folder {
 			background: #F0FAF0 url() no-repeat 5px 50%;
@@ -79,21 +85,11 @@
 			font-weight: bold;
 			margin-bottom: 1px;
 			padding: 5px;
-			padding-left: 25px;
 			position: relative;
-		}
-
-		.move-file {
-			background-image: url(@theme_image_path@/file_system/small/jpg.png);
-		}
-
-		.move-folder {
-			background-image: url(@theme_image_path@/common/folder.png);
 		}
 
 		.move-error {
 			background-color: #FDD;
-			background-image: url(@theme_image_path@/messages/error.png);
 			font-weight: normal;
 
 			@include opacity(0.6);
@@ -104,7 +100,7 @@
 			}
 		}
 
-		.unstyled {
+		.list-unstyled {
 			margin: 0;
 		}
 	}
@@ -117,17 +113,13 @@
 		}
 	}
 
-	.document-container {
-		overflow: auto;
-	}
-
 	.document-container, .document-entries-pagination {
 		clear: both;
 	}
 
 	.document-entries-pagination {
-		text-align: center;
 		margin: 10px 0;
+		text-align: center;
 
 		.pagination-content {
 			margin: 0;
@@ -136,12 +128,6 @@
 
 	.folder.error:hover {
 		background-color: #FDD;
-	}
-
-	.expand-folder-container {
-		position: absolute;
-		right: 0;
-		top: 0;
 	}
 
 	.folder-search {
@@ -172,7 +158,7 @@
 		.lfr-asset-summary {
 			margin-left: 5px;
 
-			.download-document, .conversions, .lfr-asset-author, .webdav-url {
+			.download-document, .conversions, .webdav-url {
 				display: block;
 				margin: 0.7em 0;
 			}
@@ -191,50 +177,6 @@
 				font-weight: bold;
 			}
 		}
-
-		.icon-delete, .icon-download, .icon-edit, .icon-lock, .icon-move, .icon-permissions, .icon-trash, .icon-undo, .icon-unlock {
-			background: url() no-repeat 0 0;
-		}
-
-		.icon-delete {
-			background-image: url(@theme_image_path@/common/delete.png);
-		}
-
-		.icon-download {
-			background-image: url(@theme_image_path@/common/download.png);
-		}
-
-		.icon-edit {
-			background-image: url(@theme_image_path@/common/edit.png);
-		}
-
-		.icon-lock {
-			background-image: url(@theme_image_path@/common/lock.png);
-		}
-
-		.icon-move {
-			background-image: url(@theme_image_path@/common/submit.png);
-		}
-
-		.icon-msoffice {
-			background-image: url(@theme_image_path@/document_library/msoffice.png);
-		}
-
-		.icon-permissions {
-			background-image: url(@theme_image_path@/common/permissions.png);
-		}
-
-		.icon-trash {
-			background-image: url(@theme_image_path@/common/trash.png);
-		}
-
-		.icon-undo {
-			background-image: url(@theme_image_path@/common/undo.png);
-		}
-
-		.icon-unlock {
-			background-image: url(@theme_image_path@/common/unlock.png);
-		}
 	}
 
 	.lfr-header-row-content {
@@ -247,7 +189,7 @@
 	}
 
 	.lfr-app-column-view {
-		border: none;
+		border-width: 0;
 
 		.sync-notification {
 			border-top-width: 1px;
@@ -264,14 +206,9 @@
 	}
 
 	.taglib-search-iterator-page-iterator-top, .taglib-search-iterator-page-iterator-bottom, .paginator-container {
-		background: #D9D9D9 url(@theme_image_path@/application/subheader_bg.png) 0 0 repeat-x;
 		clear: both;
 		padding: 5px;
 		position: relative;
-	}
-
-	.taglib-search-iterator-page-iterator-top, .taglib-search-iterator-page-iterator-bottom, .paginator-container {
-		text-align: center;
 	}
 
 	.taglib-search-iterator-page-iterator-top.page-iterator-bottom, .lfr-app-column-view .taglib-search-iterator-page-iterator-bottom {
@@ -279,14 +216,6 @@
 		left: 0;
 		position: absolute;
 		right: 0;
-	}
-
-	.taglib-search-iterator {
-		table-layout: fixed;
-
-		.align-left {
-			word-wrap: break-word;
-		}
 	}
 
 	.taglib-webdav {
@@ -325,18 +254,13 @@
 
 	.lfr-document-library-comments.lfr-panel.lfr-extended {
 		background: #FFF;
-		border-width: 0;
-		border-right: 1px solid #CCC;
+		border: 0 solid #CCC;
+		border-right-width: 1px;
 		margin-bottom: 0;
 
 		.lfr-panel-titlebar {
 			margin-top: 0;
 		}
-	}
-
-	.version.document-locked {
-		background: url(@theme_image_path@/common/lock.png) no-repeat 0 50%;
-		padding-left: 20px;
 	}
 
 	.common-file-metadata-container {
@@ -413,7 +337,11 @@
 		}
 
 		.entry-title {
+			@include ellipsis;
+
+			overflow: hidden;
 			position: relative;
+			white-space: nowrap;
 		}
 
 		.entry-title-text {
@@ -454,8 +382,8 @@
 
 		&:after {
 			clear: both;
-			content: "";
-			display:block;
+			content: '';
+			display: block;
 			height: 0;
 		}
 
@@ -471,8 +399,11 @@
 		}
 
 		.document-description {
-			margin: 8px 0;
 			display: block;
+
+			@include hyphenation;
+
+			margin: 8px 0;
 		}
 
 		.document-thumbnail {
@@ -502,30 +433,33 @@
 			}
 
 			.lfr-asset-icon {
-				background-position: 0 2px;
-				background-repeat: no-repeat;
 				border-right-width: 0;
+				display: block;
 				float: none;
-				padding: 2px 0 2px 20px;
-			}
-
-			.lfr-asset-author {
-				background-image: url(@theme_image_path@/portlet/edit_defaults.png);
-			}
-
-			.lfr-asset-downloads {
-				background-image: url(@theme_image_path@/common/download.png);
+				padding: 2px 0 2px 0;
 			}
 
 			.lfr-asset-ratings {
 				margin: 0 0 1em;
 			}
+
+			.workflow-status {
+				padding-left: 0;
+			}
+		}
+
+		.lfr-asset-description {
+			@include hyphenation;
 		}
 	}
 
 	.taglib-discussion {
-		width: 90%;
 		margin: 0 auto;
+		width: 90%;
+
+		@include respond-to(phone) {
+			width: auto;
+		}
 	}
 
 	.taglib-ratings.stars {
@@ -571,10 +505,6 @@
 }
 
 .portlet-document-library {
-	.taglib-search-iterator .results-header input {
-		display: none;
-	}
-
 	.lfr-asset-column-details .lfr-panel {
 		margin-bottom: 0.5em;
 		padding-bottom: 0;
@@ -600,9 +530,9 @@
 }
 
 .active-area-proxy {
-	background: #FFFFE0 url(@theme_image_path@/portlet/pop_up.png) no-repeat 10px 50%;
+	background-color: #FFFFE0;
 	font-size: 1.2em;
-	padding: 0.3em 0.3em 0.3em 2em;
+	padding: 0.3em;
 }
 
 .ie6, .ie7 {
@@ -615,7 +545,7 @@
 			background-image: url(@theme_image_path@/application/button_bg_selected.png);
 			height: 21px;
 			position: absolute;
-			right: 0px;
+			right: 0;
 			width: 21px;
 			z-index: 1;
 		}

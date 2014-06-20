@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.journal.action;
 
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -33,7 +35,6 @@ import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.dynamicdatamapping.NoSuchStructureException;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
-import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.service.DDMStructureServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.storage.Field;
@@ -171,18 +172,25 @@ public class ActionUtil {
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		long resourcePrimKey = ParamUtil.getLong(request, "resourcePrimKey");
 		long groupId = ParamUtil.getLong(
 			request, "groupId", themeDisplay.getScopeGroupId());
 		long classNameId = ParamUtil.getLong(request, "classNameId");
 		long classPK = ParamUtil.getLong(request, "classPK");
 		String articleId = ParamUtil.getString(request, "articleId");
 		String structureId = ParamUtil.getString(request, "structureId");
+		int status = ParamUtil.getInteger(
+			request, "status", WorkflowConstants.STATUS_ANY);
 
 		JournalArticle article = null;
 
-		if (!cmd.equals(Constants.ADD) && Validator.isNotNull(articleId)) {
+		if (cmd.equals(Constants.ADD) && (resourcePrimKey != 0)) {
+			article = JournalArticleLocalServiceUtil.getLatestArticle(
+				resourcePrimKey, status, false);
+		}
+		else if (!cmd.equals(Constants.ADD) && Validator.isNotNull(articleId)) {
 			article = JournalArticleServiceUtil.getLatestArticle(
-				groupId, articleId, WorkflowConstants.STATUS_ANY);
+				groupId, articleId, status);
 		}
 		else if ((classNameId > 0) &&
 				 (classPK > JournalArticleConstants.CLASSNAME_ID_DEFAULT)) {
@@ -192,28 +200,16 @@ public class ActionUtil {
 			article = JournalArticleServiceUtil.getLatestArticle(
 				groupId, className, classPK);
 		}
-		else if (Validator.isNotNull(structureId)) {
+		else {
 			DDMStructure ddmStructure = null;
 
 			try {
 				ddmStructure = DDMStructureServiceUtil.getStructure(
 					groupId, PortalUtil.getClassNameId(JournalArticle.class),
-					structureId);
+					structureId, true);
 			}
 			catch (NoSuchStructureException nsse1) {
-				if (groupId == themeDisplay.getCompanyGroupId()) {
-					return;
-				}
-
-				try {
-					ddmStructure = DDMStructureServiceUtil.getStructure(
-						themeDisplay.getCompanyGroupId(),
-						PortalUtil.getClassNameId(JournalArticle.class),
-						structureId);
-				}
-				catch (NoSuchStructureException nsse2) {
-					return;
-				}
+				return;
 			}
 
 			article = JournalArticleServiceUtil.getArticle(
@@ -223,6 +219,7 @@ public class ActionUtil {
 			article.setNew(true);
 
 			article.setId(0);
+			article.setGroupId(groupId);
 			article.setClassNameId(
 				JournalArticleConstants.CLASSNAME_ID_DEFAULT);
 			article.setClassPK(0);
@@ -282,13 +279,9 @@ public class ActionUtil {
 	}
 
 	public static Object[] getContentAndImages(
-			long groupId, String structureId, Locale locale,
+			DDMStructure ddmStructure, Locale locale,
 			ServiceContext serviceContext)
 		throws Exception {
-
-		DDMStructure ddmStructure = DDMStructureLocalServiceUtil.getStructure(
-			groupId, PortalUtil.getClassNameId(JournalArticle.class),
-			structureId, true);
 
 		Fields fields = DDMUtil.getFields(
 			ddmStructure.getStructureId(), serviceContext);
@@ -387,12 +380,8 @@ public class ActionUtil {
 		long classNameId = ParamUtil.getLong(request, "classNameId");
 		String structureId = ParamUtil.getString(request, "structureId");
 
-		DDMStructure ddmStructure = null;
-
-		if (Validator.isNotNull(structureId)) {
-			ddmStructure = DDMStructureServiceUtil.getStructure(
-				groupId, classNameId, structureId);
-		}
+		DDMStructure ddmStructure = DDMStructureServiceUtil.getStructure(
+			groupId, classNameId, structureId);
 
 		request.setAttribute(WebKeys.JOURNAL_STRUCTURE, ddmStructure);
 	}
@@ -422,7 +411,7 @@ public class ActionUtil {
 		if (Validator.isNotNull(templateId)) {
 			ddmTemplate = DDMTemplateServiceUtil.getTemplate(
 				groupId, PortalUtil.getClassNameId(DDMStructure.class),
-				templateId);
+				templateId, true);
 		}
 
 		request.setAttribute(WebKeys.JOURNAL_TEMPLATE, ddmTemplate);
@@ -457,12 +446,6 @@ public class ActionUtil {
 			List<Serializable> values = field.getValues(locale);
 
 			for (int i = 0; i < values.size(); i++) {
-				String content = (String)values.get(i);
-
-				if (content.equals("update")) {
-					continue;
-				}
-
 				StringBundler sb = new StringBundler(6);
 
 				sb.append(StringPool.UNDERLINE);
@@ -471,6 +454,11 @@ public class ActionUtil {
 				sb.append(i);
 				sb.append(StringPool.UNDERLINE);
 				sb.append(LanguageUtil.getLanguageId(locale));
+
+				JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
+					(String)values.get(i));
+
+				String content = jsonObject.getString("data");
 
 				images.put(sb.toString(), UnicodeFormatter.hexToBytes(content));
 			}

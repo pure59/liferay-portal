@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link LayoutSetBranchService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see LayoutSetBranchService
  * @generated
  */
+@ProviderType
 public class LayoutSetBranchServiceWrapper implements LayoutSetBranchService,
 	ServiceWrapper<LayoutSetBranchService> {
 	public LayoutSetBranchServiceWrapper(
@@ -54,8 +57,7 @@ public class LayoutSetBranchServiceWrapper implements LayoutSetBranchService,
 		java.lang.String description, boolean master,
 		long copyLayoutSetBranchId,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutSetBranchService.addLayoutSetBranch(groupId,
 			privateLayout, name, description, master, copyLayoutSetBranchId,
 			serviceContext);
@@ -63,15 +65,13 @@ public class LayoutSetBranchServiceWrapper implements LayoutSetBranchService,
 
 	@Override
 	public void deleteLayoutSetBranch(long layoutSetBranchId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_layoutSetBranchService.deleteLayoutSetBranch(layoutSetBranchId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.LayoutSetBranch> getLayoutSetBranches(
-		long groupId, boolean privateLayout)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, boolean privateLayout) {
 		return _layoutSetBranchService.getLayoutSetBranches(groupId,
 			privateLayout);
 	}
@@ -80,8 +80,7 @@ public class LayoutSetBranchServiceWrapper implements LayoutSetBranchService,
 	public com.liferay.portal.model.LayoutSetBranch mergeLayoutSetBranch(
 		long layoutSetBranchId, long mergeLayoutSetBranchId,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutSetBranchService.mergeLayoutSetBranch(layoutSetBranchId,
 			mergeLayoutSetBranchId, serviceContext);
 	}
@@ -91,8 +90,7 @@ public class LayoutSetBranchServiceWrapper implements LayoutSetBranchService,
 		long groupId, long layoutSetBranchId, java.lang.String name,
 		java.lang.String description,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutSetBranchService.updateLayoutSetBranch(groupId,
 			layoutSetBranchId, name, description, serviceContext);
 	}
@@ -100,6 +98,7 @@ public class LayoutSetBranchServiceWrapper implements LayoutSetBranchService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public LayoutSetBranchService getWrappedLayoutSetBranchService() {
 		return _layoutSetBranchService;
 	}
@@ -107,6 +106,7 @@ public class LayoutSetBranchServiceWrapper implements LayoutSetBranchService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedLayoutSetBranchService(
 		LayoutSetBranchService layoutSetBranchService) {
 		_layoutSetBranchService = layoutSetBranchService;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -96,10 +96,9 @@ public class LiferayInputStream extends ServletInputStreamAdapter {
 
 		if ((curPercent == null) || ((percent - curPercent.intValue()) >= 1)) {
 			if (progressTracker == null) {
-				progressTracker = new ProgressTracker(
-					_session, StringPool.BLANK);
+				progressTracker = new ProgressTracker(StringPool.BLANK);
 
-				progressTracker.initialize();
+				progressTracker.initialize(_session);
 			}
 
 			progressTracker.setPercent(percent);

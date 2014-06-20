@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -26,14 +26,16 @@ JournalArticle latestApprovedArticleVersion = null;
 Date createDate = article.getCreateDate();
 
 if (article.getVersion() > JournalArticleConstants.VERSION_DEFAULT) {
-	JournalArticle firstArticleVersion = JournalArticleLocalServiceUtil.getArticle(article.getGroupId(), article.getArticleId(), JournalArticleConstants.VERSION_DEFAULT);
+	JournalArticle firstArticleVersion = JournalArticleLocalServiceUtil.getOldestArticle(article.getGroupId(), article.getArticleId());
 
 	createDate = firstArticleVersion.getCreateDate();
 
 	if (article.getStatus() > WorkflowConstants.STATUS_APPROVED) {
-		latestApprovedArticleVersion = JournalArticleLocalServiceUtil.getLatestArticle(article.getGroupId(), article.getArticleId(), WorkflowConstants.STATUS_APPROVED);
+		latestApprovedArticleVersion = JournalArticleLocalServiceUtil.fetchLatestArticle(article.getGroupId(), article.getArticleId(), WorkflowConstants.STATUS_APPROVED);
 	}
 }
+
+DDMStructure ddmStructure = DDMStructureLocalServiceUtil.getStructure(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(JournalArticle.class), article.getStructureId(), true);
 
 String articleImageURL = article.getArticleImageURL(themeDisplay);
 %>
@@ -45,20 +47,22 @@ String articleImageURL = article.getArticleImageURL(themeDisplay);
 	assetTagClassName="<%= JournalArticle.class.getName() %>"
 	assetTagClassPK="<%= article.getResourcePrimKey() %>"
 	author="<%= article.getUserName() %>"
+	classTypeName="<%= ddmStructure.getName(locale) %>"
 	createDate="<%= createDate %>"
 	description="<%= article.getDescription(locale) %>"
 	displayDate="<%= article.getDisplayDate() %>"
 	displayStyle="descriptive"
 	expirationDate="<%= article.getExpirationDate() %>"
+	groupId="<%= article.getGroupId() %>"
 	latestApprovedVersion="<%= (latestApprovedArticleVersion != null) ? String.valueOf(latestApprovedArticleVersion.getVersion()) : null %>"
 	latestApprovedVersionAuthor="<%= (latestApprovedArticleVersion != null) ? String.valueOf(latestApprovedArticleVersion.getUserName()) : null %>"
 	modifiedDate="<%= article.getModifiedDate() %>"
 	reviewDate="<%= article.getReviewDate() %>"
 	rowCheckerId="<%= String.valueOf(article.getArticleId()) %>"
 	rowCheckerName="<%= JournalArticle.class.getSimpleName() %>"
-	showCheckbox="<%= JournalArticlePermission.contains(permissionChecker, article, ActionKeys.DELETE) || JournalArticlePermission.contains(permissionChecker, article, ActionKeys.UPDATE) %>"
+	showCheckbox="<%= JournalArticlePermission.contains(permissionChecker, article, ActionKeys.DELETE) || JournalArticlePermission.contains(permissionChecker, article, ActionKeys.EXPIRE) || JournalArticlePermission.contains(permissionChecker, article, ActionKeys.UPDATE) %>"
 	status="<%= article.getStatus() %>"
-	thumbnailDivStyle="height: 136px; width: 136px;"
+	thumbnailDivStyle="height: 146px; width: 146px;"
 	thumbnailSrc='<%= Validator.isNotNull(articleImageURL) ? articleImageURL : themeDisplay.getPathThemeImages() + "/file_system/large/article.png" %>'
 	thumbnailStyle="max-height: 128px; max-width: 128px;"
 	title="<%= article.getTitle(locale) %>"

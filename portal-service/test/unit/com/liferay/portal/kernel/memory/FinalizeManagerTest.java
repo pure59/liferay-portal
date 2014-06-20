@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,6 +17,9 @@ package com.liferay.portal.kernel.memory;
 import com.liferay.portal.kernel.test.CodeCoverageAssertor;
 import com.liferay.portal.kernel.test.NewClassLoaderJUnitTestRunner;
 import com.liferay.portal.kernel.util.ThreadUtil;
+
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -40,6 +43,11 @@ public class FinalizeManagerTest {
 	}
 
 	@Test
+	public void testConstructor() {
+		new FinalizeManager();
+	}
+
+	@Test
 	public void testRegisterWithoutThread() throws InterruptedException {
 		System.setProperty(_THREAD_ENABLED_KEY, Boolean.FALSE.toString());
 
@@ -53,16 +61,7 @@ public class FinalizeManagerTest {
 
 		testObject = null;
 
-		long startTime = System.currentTimeMillis();
-
-		while ((System.currentTimeMillis() - startTime) < 100) {
-			System.gc();
-			Thread.sleep(1);
-
-			if (markFinalizeAction.isMarked()) {
-				break;
-			}
-		}
+		gc();
 
 		FinalizeManager.register(new Object(), markFinalizeAction);
 
@@ -83,16 +82,14 @@ public class FinalizeManagerTest {
 
 		testObject = null;
 
+		gc();
+
 		long startTime = System.currentTimeMillis();
 
-		while ((System.currentTimeMillis() - startTime) < 100) {
-			System.gc();
+		while (!markFinalizeAction.isMarked() &&
+			   ((System.currentTimeMillis() - startTime) < 10000)) {
 
 			Thread.sleep(1);
-
-			if (markFinalizeAction.isMarked()) {
-				break;
-			}
 		}
 
 		Assert.assertTrue(markFinalizeAction.isMarked());
@@ -136,6 +133,21 @@ public class FinalizeManagerTest {
 						"state");
 			}
 		}
+	}
+
+	private static void gc() throws InterruptedException {
+		ReferenceQueue<Object> referenceQueue = new ReferenceQueue<Object>();
+
+		WeakReference<Object> weakReference = new WeakReference<Object>(
+			new Object(), referenceQueue);
+
+		while (weakReference.get() != null) {
+			System.gc();
+
+			System.runFinalization();
+		}
+
+		Assert.assertSame(weakReference, referenceQueue.remove());
 	}
 
 	private static final String _THREAD_ENABLED_KEY =

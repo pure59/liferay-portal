@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -28,6 +30,7 @@ import java.util.Map;
  * @see OrgLabor
  * @generated
  */
+@ProviderType
 public class OrgLaborWrapper implements OrgLabor, ModelWrapper<OrgLabor> {
 	public OrgLaborWrapper(OrgLabor orgLabor) {
 		_orgLabor = orgLabor;
@@ -47,6 +50,7 @@ public class OrgLaborWrapper implements OrgLabor, ModelWrapper<OrgLabor> {
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("orgLaborId", getOrgLaborId());
 		attributes.put("organizationId", getOrganizationId());
 		attributes.put("typeId", getTypeId());
@@ -70,6 +74,12 @@ public class OrgLaborWrapper implements OrgLabor, ModelWrapper<OrgLabor> {
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long orgLaborId = (Long)attributes.get("orgLaborId");
 
 		if (orgLaborId != null) {
@@ -191,6 +201,26 @@ public class OrgLaborWrapper implements OrgLabor, ModelWrapper<OrgLabor> {
 	@Override
 	public void setPrimaryKey(long primaryKey) {
 		_orgLabor.setPrimaryKey(primaryKey);
+	}
+
+	/**
+	* Returns the mvcc version of this org labor.
+	*
+	* @return the mvcc version of this org labor
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _orgLabor.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this org labor.
+	*
+	* @param mvccVersion the mvcc version of this org labor
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_orgLabor.setMvccVersion(mvccVersion);
 	}
 
 	/**
@@ -632,15 +662,13 @@ public class OrgLaborWrapper implements OrgLabor, ModelWrapper<OrgLabor> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_orgLabor.persist();
 	}
 
 	@Override
 	public com.liferay.portal.model.ListType getType()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _orgLabor.getType();
 	}
 
@@ -666,6 +694,7 @@ public class OrgLaborWrapper implements OrgLabor, ModelWrapper<OrgLabor> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public OrgLabor getWrappedOrgLabor() {
 		return _orgLabor;
 	}
@@ -673,6 +702,16 @@ public class OrgLaborWrapper implements OrgLabor, ModelWrapper<OrgLabor> {
 	@Override
 	public OrgLabor getWrappedModel() {
 		return _orgLabor;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _orgLabor.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _orgLabor.isFinderCacheEnabled();
 	}
 
 	@Override

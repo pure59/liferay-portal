@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,20 +14,22 @@
 
 package com.liferay.portlet.journal.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * @author Brian Wing Shun Chan
  */
+@ProviderType
 public class JournalArticleFinderUtil {
 	public static int countByKeywords(long companyId, long groupId,
 		java.util.List<java.lang.Long> folderIds, long classNameId,
 		java.lang.String keywords, java.lang.Double version,
 		java.lang.String type, java.lang.String ddmStructureKey,
 		java.lang.String ddmTemplateKey, java.util.Date displayDateGT,
-		java.util.Date displayDateLT, int status, java.util.Date reviewDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.Date displayDateLT, int status, java.util.Date reviewDate) {
 		return getFinder()
 				   .countByKeywords(companyId, groupId, folderIds, classNameId,
 			keywords, version, type, ddmStructureKey, ddmTemplateKey,
@@ -36,15 +38,13 @@ public class JournalArticleFinderUtil {
 
 	public static int countByG_F(long groupId,
 		java.util.List<java.lang.Long> folderIds,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder().countByG_F(groupId, folderIds, queryDefinition);
 	}
 
 	public static int countByG_C_S(long groupId, long classNameId,
 		java.lang.String ddmStructureKey,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .countByG_C_S(groupId, classNameId, ddmStructureKey,
 			queryDefinition);
@@ -52,8 +52,7 @@ public class JournalArticleFinderUtil {
 
 	public static int countByG_U_F_C(long groupId, long userId,
 		java.util.List<java.lang.Long> folderIds, long classNameId,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .countByG_U_F_C(groupId, userId, folderIds, classNameId,
 			queryDefinition);
@@ -67,8 +66,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String ddmStructureKey, java.lang.String ddmTemplateKey,
 		java.util.Date displayDateGT, java.util.Date displayDateLT,
 		java.util.Date reviewDate, boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .countByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId, groupId,
 			folderIds, classNameId, articleId, version, title, description,
@@ -85,8 +83,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String[] ddmTemplateKeys, java.util.Date displayDateGT,
 		java.util.Date displayDateLT, java.util.Date reviewDate,
 		boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .countByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId, groupId,
 			folderIds, classNameId, articleId, version, title, description,
@@ -103,8 +100,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String[] ddmTemplateKeys, java.util.Date displayDateGT,
 		java.util.Date displayDateLT, java.util.Date reviewDate,
 		boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .countByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId, groupId,
 			folderIds, classNameId, articleIds, version, titles, descriptions,
@@ -117,8 +113,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String keywords, java.lang.Double version,
 		java.lang.String type, java.lang.String ddmStructureKey,
 		java.lang.String ddmTemplateKey, java.util.Date displayDateGT,
-		java.util.Date displayDateLT, int status, java.util.Date reviewDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.Date displayDateLT, int status, java.util.Date reviewDate) {
 		return getFinder()
 				   .filterCountByKeywords(companyId, groupId, folderIds,
 			classNameId, keywords, version, type, ddmStructureKey,
@@ -127,15 +122,13 @@ public class JournalArticleFinderUtil {
 
 	public static int filterCountByG_F(long groupId,
 		java.util.List<java.lang.Long> folderIds,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder().filterCountByG_F(groupId, folderIds, queryDefinition);
 	}
 
 	public static int filterCountByG_C_S(long groupId, long classNameId,
 		java.lang.String ddmStructureKey,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .filterCountByG_C_S(groupId, classNameId, ddmStructureKey,
 			queryDefinition);
@@ -143,8 +136,7 @@ public class JournalArticleFinderUtil {
 
 	public static int filterCountByG_U_F_C(long groupId, long userId,
 		java.util.List<java.lang.Long> folderIds, long classNameId,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .filterCountByG_U_F_C(groupId, userId, folderIds,
 			classNameId, queryDefinition);
@@ -158,8 +150,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String ddmStructureKey, java.lang.String ddmTemplateKey,
 		java.util.Date displayDateGT, java.util.Date displayDateLT,
 		java.util.Date reviewDate, boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .filterCountByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId,
 			groupId, folderIds, classNameId, articleId, version, title,
@@ -177,8 +168,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String[] ddmTemplateKeys, java.util.Date displayDateGT,
 		java.util.Date displayDateLT, java.util.Date reviewDate,
 		boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .filterCountByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId,
 			groupId, folderIds, classNameId, articleId, version, title,
@@ -196,8 +186,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String[] ddmTemplateKeys, java.util.Date displayDateGT,
 		java.util.Date displayDateLT, java.util.Date reviewDate,
 		boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .filterCountByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId,
 			groupId, folderIds, classNameId, articleIds, version, titles,
@@ -213,8 +202,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String ddmTemplateKey, java.util.Date displayDateGT,
 		java.util.Date displayDateLT, int status, java.util.Date reviewDate,
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getFinder()
 				   .filterFindByKeywords(companyId, groupId, folderIds,
 			classNameId, keywords, version, type, ddmStructureKey,
@@ -224,15 +212,13 @@ public class JournalArticleFinderUtil {
 
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticle> filterFindByG_F(
 		long groupId, java.util.List<java.lang.Long> folderIds,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder().filterFindByG_F(groupId, folderIds, queryDefinition);
 	}
 
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticle> filterFindByG_C_S(
 		long groupId, long classNameId, java.lang.String ddmStructureKey,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .filterFindByG_C_S(groupId, classNameId, ddmStructureKey,
 			queryDefinition);
@@ -241,8 +227,7 @@ public class JournalArticleFinderUtil {
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticle> filterFindByG_U_F_C(
 		long groupId, long userId, java.util.List<java.lang.Long> folderIds,
 		long classNameId,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .filterFindByG_U_F_C(groupId, userId, folderIds,
 			classNameId, queryDefinition);
@@ -256,8 +241,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String ddmStructureKey, java.lang.String ddmTemplateKey,
 		java.util.Date displayDateGT, java.util.Date displayDateLT,
 		java.util.Date reviewDate, boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .filterFindByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId, groupId,
 			folderIds, classNameId, articleId, version, title, description,
@@ -274,8 +258,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String[] ddmTemplateKeys, java.util.Date displayDateGT,
 		java.util.Date displayDateLT, java.util.Date reviewDate,
 		boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .filterFindByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId, groupId,
 			folderIds, classNameId, articleId, version, title, description,
@@ -292,8 +275,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String[] ddmTemplateKeys, java.util.Date displayDateGT,
 		java.util.Date displayDateLT, java.util.Date reviewDate,
 		boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .filterFindByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId, groupId,
 			folderIds, classNameId, articleIds, version, titles, descriptions,
@@ -303,8 +285,7 @@ public class JournalArticleFinderUtil {
 
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticle> findByExpirationDate(
 		long classNameId, java.util.Date expirationDateLT,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .findByExpirationDate(classNameId, expirationDateLT,
 			queryDefinition);
@@ -317,8 +298,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String ddmTemplateKey, java.util.Date displayDateGT,
 		java.util.Date displayDateLT, int status, java.util.Date reviewDate,
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getFinder()
 				   .findByKeywords(companyId, groupId, folderIds, classNameId,
 			keywords, version, type, ddmStructureKey, ddmTemplateKey,
@@ -328,8 +308,7 @@ public class JournalArticleFinderUtil {
 
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticle> findByReviewDate(
 		long classNameId, java.util.Date reviewDateLT,
-		java.util.Date reviewDateGT)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.Date reviewDateGT) {
 		return getFinder()
 				   .findByReviewDate(classNameId, reviewDateLT, reviewDateGT);
 	}
@@ -343,15 +322,13 @@ public class JournalArticleFinderUtil {
 
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticle> findByG_F(
 		long groupId, java.util.List<java.lang.Long> folderIds,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder().findByG_F(groupId, folderIds, queryDefinition);
 	}
 
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticle> findByG_C_S(
 		long groupId, long classNameId, java.lang.String ddmStructureKey,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .findByG_C_S(groupId, classNameId, ddmStructureKey,
 			queryDefinition);
@@ -360,8 +337,7 @@ public class JournalArticleFinderUtil {
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticle> findByG_U_F_C(
 		long groupId, long userId, java.util.List<java.lang.Long> folderIds,
 		long classNameId,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .findByG_U_F_C(groupId, userId, folderIds, classNameId,
 			queryDefinition);
@@ -375,8 +351,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String ddmStructureKey, java.lang.String ddmTemplateKey,
 		java.util.Date displayDateGT, java.util.Date displayDateLT,
 		java.util.Date reviewDate, boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .findByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId, groupId,
 			folderIds, classNameId, articleId, version, title, description,
@@ -393,8 +368,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String[] ddmTemplateKeys, java.util.Date displayDateGT,
 		java.util.Date displayDateLT, java.util.Date reviewDate,
 		boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .findByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId, groupId,
 			folderIds, classNameId, articleId, version, title, description,
@@ -411,8 +385,7 @@ public class JournalArticleFinderUtil {
 		java.lang.String[] ddmTemplateKeys, java.util.Date displayDateGT,
 		java.util.Date displayDateLT, java.util.Date reviewDate,
 		boolean andOperator,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
 		return getFinder()
 				   .findByC_G_F_C_A_V_T_D_C_T_S_T_D_R(companyId, groupId,
 			folderIds, classNameId, articleIds, version, titles, descriptions,

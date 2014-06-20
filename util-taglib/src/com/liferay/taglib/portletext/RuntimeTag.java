@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -25,8 +25,9 @@ import com.liferay.portal.kernel.portlet.PortletLayoutListener;
 import com.liferay.portal.kernel.portlet.PortletParameterUtil;
 import com.liferay.portal.kernel.portlet.RestrictPortletServletRequest;
 import com.liferay.portal.kernel.servlet.DynamicServletRequest;
-import com.liferay.portal.kernel.servlet.PipingServletResponse;
 import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.PrefixPredicateFilter;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.Layout;
@@ -37,9 +38,13 @@ import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.taglib.servlet.PipingServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,8 +91,16 @@ public class RuntimeTag extends TagSupport {
 
 		queryString = PortletParameterUtil.addNamespace(portletId, queryString);
 
+		Map<String, String[]> parameterMap = request.getParameterMap();
+
+		if (!portletId.equals(request.getParameter("p_p_id"))) {
+			parameterMap = MapUtil.filter(
+				parameterMap, new HashMap<String, String[]>(),
+				new PrefixPredicateFilter("p_p_"));
+		}
+
 		request = DynamicServletRequest.addQueryString(
-			restrictPortletServletRequest, queryString);
+			restrictPortletServletRequest, parameterMap, queryString, false);
 
 		try {
 			request.setAttribute(WebKeys.RENDER_PORTLET_RESOURCE, Boolean.TRUE);
@@ -219,10 +232,18 @@ public class RuntimeTag extends TagSupport {
 			HttpServletResponse response, JSONObject jsonObject)
 		throws IOException {
 
-		PrintWriter printWriter = response.getWriter();
-
 		JSONArray footerCssPathsJSONArray = jsonObject.getJSONArray(
 			"footerCssPaths");
+		JSONArray footerJavaScriptPathsJSONArray = jsonObject.getJSONArray(
+			"footerJavaScriptPaths");
+
+		if ((footerCssPathsJSONArray.length() == 0) &&
+			(footerJavaScriptPathsJSONArray.length() == 0)) {
+
+			return;
+		}
+
+		PrintWriter printWriter = response.getWriter();
 
 		for (int i = 0; i < footerCssPathsJSONArray.length(); i++) {
 			String value = footerCssPathsJSONArray.getString(i);
@@ -232,9 +253,6 @@ public class RuntimeTag extends TagSupport {
 			printWriter.println("\" rel=\"stylesheet\" type=\"text/css\" />");
 		}
 
-		JSONArray footerJavaScriptPathsJSONArray = jsonObject.getJSONArray(
-			"footerJavaScriptPaths");
-
 		for (int i = 0; i < footerJavaScriptPathsJSONArray.length(); i++) {
 			String value = footerJavaScriptPathsJSONArray.getString(i);
 
@@ -242,18 +260,24 @@ public class RuntimeTag extends TagSupport {
 			printWriter.print(HtmlUtil.escape(value));
 			printWriter.println("\" type=\"text/javascript\"></script>");
 		}
-
-		printWriter.flush();
 	}
 
 	protected static void writeHeaderPaths(
 			HttpServletResponse response, JSONObject jsonObject)
 		throws IOException {
 
-		PrintWriter printWriter = response.getWriter();
-
 		JSONArray headerCssPathsJSONArray = jsonObject.getJSONArray(
 			"headerCssPaths");
+		JSONArray headerJavaScriptPathsJSONArray = jsonObject.getJSONArray(
+			"headerJavaScriptPaths");
+
+		if ((headerCssPathsJSONArray.length() == 0) &&
+			(headerJavaScriptPathsJSONArray.length() == 0)) {
+
+			return;
+		}
+
+		PrintWriter printWriter = response.getWriter();
 
 		for (int i = 0; i < headerCssPathsJSONArray.length(); i++) {
 			String value = headerCssPathsJSONArray.getString(i);
@@ -263,9 +287,6 @@ public class RuntimeTag extends TagSupport {
 			printWriter.println("\" rel=\"stylesheet\" type=\"text/css\" />");
 		}
 
-		JSONArray headerJavaScriptPathsJSONArray = jsonObject.getJSONArray(
-			"headerJavaScriptPaths");
-
 		for (int i = 0; i < headerJavaScriptPathsJSONArray.length(); i++) {
 			String value = headerJavaScriptPathsJSONArray.getString(i);
 
@@ -273,8 +294,6 @@ public class RuntimeTag extends TagSupport {
 			printWriter.print(HtmlUtil.escape(value));
 			printWriter.println("\" type=\"text/javascript\"></script>");
 		}
-
-		printWriter.flush();
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(RuntimeTag.class);

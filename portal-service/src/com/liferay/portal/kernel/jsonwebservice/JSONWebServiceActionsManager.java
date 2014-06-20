@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -44,6 +45,8 @@ public interface JSONWebServiceActionsManager {
 
 	public int getJSONWebServiceActionsCount(String contextPath);
 
+	public JSONWebServiceNaming getJSONWebServiceNaming();
+
 	public void registerJSONWebServiceAction(
 		String contextPath, Class<?> actionClass, Method actionMethod,
 		String path, String method);
@@ -52,8 +55,14 @@ public interface JSONWebServiceActionsManager {
 		String contextPath, Object actionObject, Class<?> actionClass,
 		Method actionMethod, String path, String method);
 
+	public int registerServletContext(ServletContext servletContext);
+
+	public int registerServletContext(String contextPath);
+
 	public int unregisterJSONWebServiceActions(Object actionObject);
 
 	public int unregisterJSONWebServiceActions(String contextPath);
+
+	public int unregisterServletContext(ServletContext servletContext);
 
 }

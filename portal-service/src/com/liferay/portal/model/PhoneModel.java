@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,8 +14,9 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -37,7 +38,8 @@ import java.util.Date;
  * @see com.liferay.portal.model.impl.PhoneModelImpl
  * @generated
  */
-public interface PhoneModel extends AttachedModel, BaseModel<Phone>,
+@ProviderType
+public interface PhoneModel extends AttachedModel, BaseModel<Phone>, MVCCModel,
 	StagedAuditedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -58,6 +60,22 @@ public interface PhoneModel extends AttachedModel, BaseModel<Phone>,
 	 * @param primaryKey the primary key of this phone
 	 */
 	public void setPrimaryKey(long primaryKey);
+
+	/**
+	 * Returns the mvcc version of this phone.
+	 *
+	 * @return the mvcc version of this phone
+	 */
+	@Override
+	public long getMvccVersion();
+
+	/**
+	 * Sets the mvcc version of this phone.
+	 *
+	 * @param mvccVersion the mvcc version of this phone
+	 */
+	@Override
+	public void setMvccVersion(long mvccVersion);
 
 	/**
 	 * Returns the uuid of this phone.
@@ -126,10 +144,9 @@ public interface PhoneModel extends AttachedModel, BaseModel<Phone>,
 	 * Returns the user uuid of this phone.
 	 *
 	 * @return the user uuid of this phone
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getUserUuid() throws SystemException;
+	public String getUserUuid();
 
 	/**
 	 * Sets the user uuid of this phone.

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see LayoutSet
  * @generated
  */
+@ProviderType
 public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 	public LayoutSetWrapper(LayoutSet layoutSet) {
 		_layoutSet = layoutSet;
@@ -48,13 +51,13 @@ public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("layoutSetId", getLayoutSetId());
 		attributes.put("groupId", getGroupId());
 		attributes.put("companyId", getCompanyId());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("privateLayout", getPrivateLayout());
-		attributes.put("logo", getLogo());
 		attributes.put("logoId", getLogoId());
 		attributes.put("themeId", getThemeId());
 		attributes.put("colorSchemeId", getColorSchemeId());
@@ -72,6 +75,12 @@ public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long layoutSetId = (Long)attributes.get("layoutSetId");
 
 		if (layoutSetId != null) {
@@ -106,12 +115,6 @@ public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 
 		if (privateLayout != null) {
 			setPrivateLayout(privateLayout);
-		}
-
-		Boolean logo = (Boolean)attributes.get("logo");
-
-		if (logo != null) {
-			setLogo(logo);
 		}
 
 		Long logoId = (Long)attributes.get("logoId");
@@ -195,6 +198,26 @@ public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 	@Override
 	public void setPrimaryKey(long primaryKey) {
 		_layoutSet.setPrimaryKey(primaryKey);
+	}
+
+	/**
+	* Returns the mvcc version of this layout set.
+	*
+	* @return the mvcc version of this layout set
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _layoutSet.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this layout set.
+	*
+	* @param mvccVersion the mvcc version of this layout set
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_layoutSet.setMvccVersion(mvccVersion);
 	}
 
 	/**
@@ -325,36 +348,6 @@ public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 	@Override
 	public void setPrivateLayout(boolean privateLayout) {
 		_layoutSet.setPrivateLayout(privateLayout);
-	}
-
-	/**
-	* Returns the logo of this layout set.
-	*
-	* @return the logo of this layout set
-	*/
-	@Override
-	public boolean getLogo() {
-		return _layoutSet.getLogo();
-	}
-
-	/**
-	* Returns <code>true</code> if this layout set is logo.
-	*
-	* @return <code>true</code> if this layout set is logo; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isLogo() {
-		return _layoutSet.isLogo();
-	}
-
-	/**
-	* Sets whether this layout set is logo.
-	*
-	* @param logo the logo of this layout set
-	*/
-	@Override
-	public void setLogo(boolean logo) {
-		_layoutSet.setLogo(logo);
 	}
 
 	/**
@@ -668,34 +661,35 @@ public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_layoutSet.persist();
 	}
 
 	@Override
-	public com.liferay.portal.model.ColorScheme getColorScheme()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public com.liferay.portal.model.ColorScheme getColorScheme() {
 		return _layoutSet.getColorScheme();
 	}
 
 	@Override
 	public com.liferay.portal.model.Group getGroup()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutSet.getGroup();
 	}
 
 	@Override
 	public long getLayoutSetPrototypeId()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutSet.getLayoutSetPrototypeId();
 	}
 
 	@Override
 	public long getLiveLogoId() {
 		return _layoutSet.getLiveLogoId();
+	}
+
+	@Override
+	public boolean getLogo() {
+		return _layoutSet.getLogo();
 	}
 
 	@Override
@@ -709,15 +703,13 @@ public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 	}
 
 	@Override
-	public com.liferay.portal.model.Theme getTheme()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public com.liferay.portal.model.Theme getTheme() {
 		return _layoutSet.getTheme();
 	}
 
 	@Override
 	public java.lang.String getThemeSetting(java.lang.String key,
-		java.lang.String device)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String device) {
 		return _layoutSet.getThemeSetting(key, device);
 	}
 
@@ -727,20 +719,23 @@ public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 	}
 
 	@Override
-	public com.liferay.portal.model.ColorScheme getWapColorScheme()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public com.liferay.portal.model.ColorScheme getWapColorScheme() {
 		return _layoutSet.getWapColorScheme();
 	}
 
 	@Override
-	public com.liferay.portal.model.Theme getWapTheme()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public com.liferay.portal.model.Theme getWapTheme() {
 		return _layoutSet.getWapTheme();
 	}
 
 	@Override
 	public boolean isLayoutSetPrototypeLinkActive() {
 		return _layoutSet.isLayoutSetPrototypeLinkActive();
+	}
+
+	@Override
+	public boolean isLogo() {
+		return _layoutSet.isLogo();
 	}
 
 	@Override
@@ -776,6 +771,7 @@ public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public LayoutSet getWrappedLayoutSet() {
 		return _layoutSet;
 	}
@@ -783,6 +779,16 @@ public class LayoutSetWrapper implements LayoutSet, ModelWrapper<LayoutSet> {
 	@Override
 	public LayoutSet getWrappedModel() {
 		return _layoutSet;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _layoutSet.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _layoutSet.isFinderCacheEnabled();
 	}
 
 	@Override

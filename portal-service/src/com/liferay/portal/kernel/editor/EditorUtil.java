@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -50,19 +50,7 @@ public class EditorUtil {
 		}
 
 		if (!BrowserSnifferUtil.isRtf(request)) {
-			if (BrowserSnifferUtil.isSafari(request) &&
-				BrowserSnifferUtil.isMobile(request)) {
-
-				editorImpl = "simple";
-			}
-			else if (BrowserSnifferUtil.isSafari(request) &&
-					 !editorImpl.contains("simple")) {
-
-				editorImpl = "tinymce_simple";
-			}
-			else {
-				editorImpl = "simple";
-			}
+			editorImpl = "simple";
 		}
 
 		if (Validator.isNull(editorImpl)) {

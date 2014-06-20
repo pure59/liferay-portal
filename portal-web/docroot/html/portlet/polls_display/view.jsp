@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -53,7 +53,7 @@ PollsQuestion question = (PollsQuestion)request.getAttribute(WebKeys.POLLS_QUEST
 			<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.VOTE %>" />
 			<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 			<aui:input name="questionId" type="hidden" value="<%= question.getQuestionId() %>" />
-			<aui:input name="successMessage" type="hidden" value='<%= LanguageUtil.get(pageContext, "thank-you-for-your-vote") %>' />
+			<aui:input name="successMessage" type="hidden" value='<%= LanguageUtil.get(request, "thank-you-for-your-vote") %>' />
 
 			<liferay-ui:error exception="<%= DuplicateVoteException.class %>" message="you-may-only-vote-once" />
 			<liferay-ui:error exception="<%= NoSuchChoiceException.class %>" message="please-select-an-option" />
@@ -123,32 +123,33 @@ boolean showIconsActions = themeDisplay.isSignedIn() && (hasConfigurationPermiss
 	<div class="lfr-meta-actions icons-container">
 		<div class="lfr-icon-actions">
 			<c:if test="<%= showEditPollIcon %>">
-				<liferay-portlet:renderURL doAsGroupId="<%= scopeGroupId %>" plid="<%= controlPanelPlid %>" portletName="<%= PortletKeys.POLLS %>" refererPlid="<%= plid %>" var="editPollURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+				<liferay-portlet:renderURL doAsGroupId="<%= scopeGroupId %>" plid="<%= controlPanelPlid %>" portletName="<%= PortletKeys.POLLS %>" refererPlid="<%= plid %>" var="editQuestionURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
 					<liferay-portlet:param name="struts_action" value="/polls/edit_question" />
 					<liferay-portlet:param name="redirect" value="<%= redirectURL.toString() %>" />
 					<liferay-portlet:param name="referringPortletResource" value="<%= portletDisplay.getId() %>" />
 					<liferay-portlet:param name="questionId" value="<%= String.valueOf(question.getQuestionId()) %>" />
+					<liferay-portlet:param name="showHeader" value="<%= Boolean.FALSE.toString() %>" />
 				</liferay-portlet:renderURL>
 
 				<%
-				String editQuestionURL = "javascript:Liferay.Util.openWindow({id: '" + liferayPortletResponse.getNamespace() + "editQuestion', title: '" + UnicodeFormatter.toString(ResourceActionsUtil.getModelResource(locale, PollsQuestion.class.getName())) + "', uri:'" + HtmlUtil.escapeURL(editPollURL.toString()) + "'});";
+				String taglibEditQuestionURL = "javascript:Liferay.Util.openWindow({id: '" + liferayPortletResponse.getNamespace() + "editQuestion', title: '" + HtmlUtil.escapeJS(ResourceActionsUtil.getModelResource(locale, PollsQuestion.class.getName())) + "', uri:'" + HtmlUtil.escapeJS(editQuestionURL.toString()) + "'});";
 				%>
 
 				<liferay-ui:icon
-					cssClass="lfr-icon-action lfr-icon-action-edit"
-					image="edit"
+					cssClass="lfr-icon-action"
+					iconCssClass="icon-pencil"
 					label="<%= true %>"
 					message="edit-question"
-					url="<%= editQuestionURL %>"
+					url="<%= taglibEditQuestionURL %>"
 				/>
 			</c:if>
 
 			<c:if test="<%= hasConfigurationPermission %>">
 				<liferay-ui:icon
-					cssClass="lfr-icon-action lfr-icon-action-configuration"
-					image="configuration"
+					cssClass="lfr-icon-action"
+					iconCssClass="icon-cog"
 					label="<%= true %>"
-					message="select-question"
+					message="select-poll"
 					method="get"
 					onClick="<%= portletDisplay.getURLConfigurationJS() %>"
 					url="<%= portletDisplay.getURLConfiguration() %>"
@@ -156,22 +157,23 @@ boolean showIconsActions = themeDisplay.isSignedIn() && (hasConfigurationPermiss
 			</c:if>
 
 			<c:if test="<%= showAddPollIcon %>">
-				<liferay-portlet:renderURL doAsGroupId="<%= scopeGroupId %>" plid="<%= controlPanelPlid %>" portletName="<%= PortletKeys.POLLS %>" refererPlid="<%= plid %>" var="addPollURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+				<liferay-portlet:renderURL doAsGroupId="<%= scopeGroupId %>" plid="<%= controlPanelPlid %>" portletName="<%= PortletKeys.POLLS %>" refererPlid="<%= plid %>" var="editQuestionURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
 					<liferay-portlet:param name="struts_action" value="/polls/edit_question" />
 					<liferay-portlet:param name="redirect" value="<%= redirectURL.toString() %>" />
 					<liferay-portlet:param name="referringPortletResource" value="<%= portletDisplay.getId() %>" />
+					<liferay-portlet:param name="showHeader" value="<%= Boolean.FALSE.toString() %>" />
 				</liferay-portlet:renderURL>
 
 				<%
-				String addQuestionURL = "javascript:Liferay.Util.openWindow({id: '" + liferayPortletResponse.getNamespace() + "editQuestion', title: '" + UnicodeFormatter.toString(ResourceActionsUtil.getModelResource(locale, PollsQuestion.class.getName())) + "', uri:'" + HtmlUtil.escapeURL(addPollURL.toString()) + "'});";
+				String taglibEditQuestionURL = "javascript:Liferay.Util.openWindow({id: '" + liferayPortletResponse.getNamespace() + "editQuestion', title: '" + HtmlUtil.escapeJS(LanguageUtil.get(request, "new-poll")) + "', uri:'" + HtmlUtil.escapeJS(editQuestionURL.toString()) + "'});";
 				%>
 
 				<liferay-ui:icon
-					cssClass="lfr-icon-action lfr-icon-action-add"
-					image="add_article"
+					cssClass="lfr-icon-action"
+					iconCssClass="icon-plus"
 					label="<%= true %>"
-					message="add-question"
-					url="<%= addQuestionURL %>"
+					message="add"
+					url="<%= taglibEditQuestionURL %>"
 				/>
 			</c:if>
 		</div>

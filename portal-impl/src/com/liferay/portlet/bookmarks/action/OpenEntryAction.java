@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -47,12 +47,12 @@ public class OpenEntryAction extends Action {
 
 			BookmarksEntry entry = BookmarksEntryServiceUtil.getEntry(entryId);
 
-			if (entry.isInTrash() || entry.isInTrashContainer()) {
+			if (entry.isInTrash()) {
 				int status = ParamUtil.getInteger(
 					request, "status", WorkflowConstants.STATUS_APPROVED);
 
 				if (status != WorkflowConstants.STATUS_IN_TRASH) {
-					throw new NoSuchEntryException();
+					throw new NoSuchEntryException("{entryId=" + entryId + "}");
 				}
 			}
 

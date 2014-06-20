@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,7 @@
 package com.liferay.portal.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -27,7 +27,9 @@ import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.Repository;
 import com.liferay.portal.model.RepositoryModel;
 import com.liferay.portal.model.RepositorySoap;
+import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -66,6 +68,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	 */
 	public static final String TABLE_NAME = "Repository";
 	public static final Object[][] TABLE_COLUMNS = {
+			{ "mvccVersion", Types.BIGINT },
 			{ "uuid_", Types.VARCHAR },
 			{ "repositoryId", Types.BIGINT },
 			{ "groupId", Types.BIGINT },
@@ -81,7 +84,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 			{ "typeSettings", Types.CLOB },
 			{ "dlFolderId", Types.BIGINT }
 		};
-	public static final String TABLE_SQL_CREATE = "create table Repository (uuid_ VARCHAR(75) null,repositoryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,name VARCHAR(75) null,description STRING null,portletId VARCHAR(200) null,typeSettings TEXT null,dlFolderId LONG)";
+	public static final String TABLE_SQL_CREATE = "create table Repository (mvccVersion LONG default 0,uuid_ VARCHAR(75) null,repositoryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,name VARCHAR(75) null,description STRING null,portletId VARCHAR(200) null,typeSettings TEXT null,dlFolderId LONG)";
 	public static final String TABLE_SQL_DROP = "drop table Repository";
 	public static final String ORDER_BY_JPQL = " ORDER BY repository.repositoryId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY Repository.repositoryId ASC";
@@ -117,6 +120,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 
 		Repository model = new RepositoryImpl();
 
+		model.setMvccVersion(soapModel.getMvccVersion());
 		model.setUuid(soapModel.getUuid());
 		model.setRepositoryId(soapModel.getRepositoryId());
 		model.setGroupId(soapModel.getGroupId());
@@ -195,6 +199,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
 		attributes.put("repositoryId", getRepositoryId());
 		attributes.put("groupId", getGroupId());
@@ -210,11 +215,20 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		attributes.put("typeSettings", getTypeSettings());
 		attributes.put("dlFolderId", getDlFolderId());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		String uuid = (String)attributes.get("uuid");
 
 		if (uuid != null) {
@@ -300,8 +314,19 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -324,8 +349,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getRepositoryId() {
 		return _repositoryId;
 	}
@@ -335,8 +360,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		_repositoryId = repositoryId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -358,8 +383,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -381,8 +406,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -393,17 +418,23 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -418,8 +449,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -429,8 +460,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -460,8 +491,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		setClassNameId(classNameId);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassNameId() {
 		return _classNameId;
 	}
@@ -471,8 +502,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		_classNameId = classNameId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -497,8 +528,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		return GetterUtil.getString(_originalName);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -513,8 +544,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		_description = description;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getPortletId() {
 		if (_portletId == null) {
 			return StringPool.BLANK;
@@ -539,8 +570,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		return GetterUtil.getString(_originalPortletId);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getTypeSettings() {
 		if (_typeSettings == null) {
 			return StringPool.BLANK;
@@ -555,8 +586,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		_typeSettings = typeSettings;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getDlFolderId() {
 		return _dlFolderId;
 	}
@@ -603,6 +634,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	public Object clone() {
 		RepositoryImpl repositoryImpl = new RepositoryImpl();
 
+		repositoryImpl.setMvccVersion(getMvccVersion());
 		repositoryImpl.setUuid(getUuid());
 		repositoryImpl.setRepositoryId(getRepositoryId());
 		repositoryImpl.setGroupId(getGroupId());
@@ -666,6 +698,16 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	}
 
 	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
+	}
+
+	@Override
 	public void resetOriginalValues() {
 		RepositoryModelImpl repositoryModelImpl = this;
 
@@ -689,6 +731,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	@Override
 	public CacheModel<Repository> toCacheModel() {
 		RepositoryCacheModel repositoryCacheModel = new RepositoryCacheModel();
+
+		repositoryCacheModel.mvccVersion = getMvccVersion();
 
 		repositoryCacheModel.uuid = getUuid();
 
@@ -773,9 +817,11 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(29);
+		StringBundler sb = new StringBundler(31);
 
-		sb.append("{uuid=");
+		sb.append("{mvccVersion=");
+		sb.append(getMvccVersion());
+		sb.append(", uuid=");
 		sb.append(getUuid());
 		sb.append(", repositoryId=");
 		sb.append(getRepositoryId());
@@ -810,12 +856,16 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(46);
+		StringBundler sb = new StringBundler(49);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.model.Repository");
 		sb.append("</model-name>");
 
+		sb.append(
+			"<column><column-name>mvccVersion</column-name><column-value><![CDATA[");
+		sb.append(getMvccVersion());
+		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>uuid</column-name><column-value><![CDATA[");
 		sb.append(getUuid());
@@ -882,6 +932,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	private static Class<?>[] _escapedModelInterfaces = new Class[] {
 			Repository.class
 		};
+	private long _mvccVersion;
 	private String _uuid;
 	private String _originalUuid;
 	private long _repositoryId;
@@ -892,7 +943,6 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;

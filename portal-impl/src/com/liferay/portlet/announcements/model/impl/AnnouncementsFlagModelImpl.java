@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,16 +15,18 @@
 package com.liferay.portlet.announcements.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.service.UserLocalServiceUtil;
 
 import com.liferay.portlet.announcements.model.AnnouncementsFlag;
 import com.liferay.portlet.announcements.model.AnnouncementsFlagModel;
@@ -181,6 +183,9 @@ public class AnnouncementsFlagModelImpl extends BaseModelImpl<AnnouncementsFlag>
 		attributes.put("entryId", getEntryId());
 		attributes.put("value", getValue());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
@@ -217,8 +222,8 @@ public class AnnouncementsFlagModelImpl extends BaseModelImpl<AnnouncementsFlag>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getFlagId() {
 		return _flagId;
 	}
@@ -228,8 +233,8 @@ public class AnnouncementsFlagModelImpl extends BaseModelImpl<AnnouncementsFlag>
 		_flagId = flagId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -248,21 +253,27 @@ public class AnnouncementsFlagModelImpl extends BaseModelImpl<AnnouncementsFlag>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
 	public long getOriginalUserId() {
 		return _originalUserId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -274,8 +285,8 @@ public class AnnouncementsFlagModelImpl extends BaseModelImpl<AnnouncementsFlag>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getEntryId() {
 		return _entryId;
 	}
@@ -297,8 +308,8 @@ public class AnnouncementsFlagModelImpl extends BaseModelImpl<AnnouncementsFlag>
 		return _originalEntryId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getValue() {
 		return _value;
 	}
@@ -418,6 +429,16 @@ public class AnnouncementsFlagModelImpl extends BaseModelImpl<AnnouncementsFlag>
 	}
 
 	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
+	}
+
+	@Override
 	public void resetOriginalValues() {
 		AnnouncementsFlagModelImpl announcementsFlagModelImpl = this;
 
@@ -519,7 +540,6 @@ public class AnnouncementsFlagModelImpl extends BaseModelImpl<AnnouncementsFlag>
 		};
 	private long _flagId;
 	private long _userId;
-	private String _userUuid;
 	private long _originalUserId;
 	private boolean _setOriginalUserId;
 	private Date _createDate;

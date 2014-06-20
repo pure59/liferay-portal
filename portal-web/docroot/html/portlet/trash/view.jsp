@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -35,12 +35,29 @@ PortletURL portletURL = renderResponse.createRenderURL();
 
 portletURL.setParameter("struts_action", "/trash/view");
 portletURL.setParameter("tabs1", tabs1);
+
+PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "recycle-bin"), portletURL.toString());
+
+if (Validator.isNotNull(keywords)) {
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "search") + ": " + keywords, currentURL);
+}
 %>
 
 <liferay-util:include page="/html/portlet/trash/restore_path.jsp" />
 
-<liferay-ui:error exception="<%= DuplicateEntryException.class %>">
-	<liferay-ui:message key="unable-to-move-this-item-to-the-selected-destination" />
+<liferay-ui:error exception="<%= RestoreEntryException.class %>">
+
+	<%
+	RestoreEntryException ree = (RestoreEntryException)errorException;
+	%>
+
+	<c:if test="<%= ree.getType() == RestoreEntryException.DUPLICATE %>">
+		<liferay-ui:message key="unable-to-move-this-item-to-the-selected-destination" />
+	</c:if>
+
+	<c:if test="<%= ree.getType() == RestoreEntryException.INVALID_CONTAINER %>">
+		<liferay-ui:message key="the-destination-you-selected-is-an-invalid-container.-please-select-a-different-destination" />
+	</c:if>
 </liferay-ui:error>
 
 <liferay-ui:error exception="<%= TrashPermissionException.class %>">
@@ -82,13 +99,6 @@ portletURL.setParameter("tabs1", tabs1);
 	/>
 </c:if>
 
-<c:if test="<%= Validator.isNotNull(keywords) %>">
-	<liferay-ui:header
-		backURL="<%= redirect %>"
-		title="search"
-	/>
-</c:if>
-
 <liferay-portlet:renderURL varImpl="searchURL">
 	<portlet:param name="struts_action" value="/trash/view" />
 </liferay-portlet:renderURL>
@@ -109,38 +119,26 @@ portletURL.setParameter("tabs1", tabs1);
 		if (Validator.isNotNull(searchTerms.getKeywords())) {
 			Sort sort = SortFactoryUtil.getSort(TrashEntry.class, searchContainer.getOrderByCol(), searchContainer.getOrderByType());
 
-			Hits hits = TrashEntryLocalServiceUtil.search(company.getCompanyId(), groupId, user.getUserId(), searchTerms.getKeywords(), searchContainer.getStart(), searchContainer.getEnd(), sort);
+			BaseModelSearchResult<TrashEntry> baseModelSearchResult = TrashEntryLocalServiceUtil.searchTrashEntries(company.getCompanyId(), groupId, user.getUserId(), searchTerms.getKeywords(), searchContainer.getStart(), searchContainer.getEnd(), sort);
 
-			total = hits.getLength();
+			searchContainer.setTotal(baseModelSearchResult.getLength());
 
-			searchContainer.setTotal(total);
-
-			if (searchContainer.isRecalculateCur()) {
-				hits = TrashEntryLocalServiceUtil.search(company.getCompanyId(), groupId, user.getUserId(), searchTerms.getKeywords(), searchContainer.getStart(), searchContainer.getEnd(), sort);
-			}
-
-			pageContext.setAttribute("results", TrashUtil.getEntries(hits));
-			pageContext.setAttribute("total", total);
+			results = baseModelSearchResult.getBaseModels();
 		}
 		else {
 			TrashEntryList trashEntryList = TrashEntryServiceUtil.getEntries(groupId, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 
-			total = trashEntryList.getCount();
+			searchContainer.setTotal(trashEntryList.getCount());
 
-			searchContainer.setTotal(total);
-
-			if (searchContainer.isRecalculateCur()) {
-				trashEntryList = TrashEntryServiceUtil.getEntries(groupId, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
-			}
-
-			pageContext.setAttribute("results", TrashEntryImpl.toModels(trashEntryList.getArray()));
-			pageContext.setAttribute("total", total);
+			results = TrashEntryImpl.toModels(trashEntryList.getArray());
 
 			approximate = trashEntryList.isApproximate();
 		}
 
-		if ((total == 0) && Validator.isNotNull(searchTerms.getKeywords())) {
-			searchContainer.setEmptyResultsMessage(LanguageUtil.format(pageContext, "no-entries-were-found-that-matched-the-keywords-x", "<strong>" + HtmlUtil.escape(searchTerms.getKeywords()) + "</strong>"));
+		searchContainer.setResults(results);
+
+		if ((searchContainer.getTotal() == 0) && Validator.isNotNull(searchTerms.getKeywords())) {
+			searchContainer.setEmptyResultsMessage(LanguageUtil.format(request, "no-entries-were-found-that-matched-the-keywords-x", "<strong>" + HtmlUtil.escape(searchTerms.getKeywords()) + "</strong>", false));
 		}
 		%>
 
@@ -185,7 +183,13 @@ portletURL.setParameter("tabs1", tabs1);
 		<liferay-ui:search-container-column-text
 			name="name"
 		>
-			<liferay-ui:icon label="<%= true %>" message="<%= HtmlUtil.escape(trashRenderer.getTitle(locale)) %>" src="<%= trashRenderer.getIconPath(renderRequest) %>" url="<%= viewContentURLString %>" />
+			<liferay-ui:icon
+				iconCssClass="<%= trashRenderer.getIconCssClass() %>"
+				label="<%= true %>"
+				message="<%= HtmlUtil.escape(trashRenderer.getTitle(locale)) %>"
+				method="get"
+				url="<%= viewContentURLString %>"
+			/>
 
 			<c:if test="<%= entry.getRootEntry() != null %>">
 
@@ -215,14 +219,15 @@ portletURL.setParameter("tabs1", tabs1);
 
 				<liferay-util:buffer var="rootEntryIcon">
 					<liferay-ui:icon
+						iconCssClass="<%= rootTrashRenderer.getIconCssClass() %>"
 						label="<%= true %>"
-						message="<%= rootTrashRenderer.getTitle(locale) %>"
-						src="<%= rootTrashRenderer.getIconPath(renderRequest) %>"
+						message="<%= HtmlUtil.escape(rootTrashRenderer.getTitle(locale)) %>"
+						method="get"
 						url="<%= viewRootContentURLString %>"
 					/>
 				</liferay-util:buffer>
 
-				<span class="trash-root-entry">(<liferay-ui:message arguments="<%= rootEntryIcon %>" key="<%= rootTrashHandler.getDeleteMessage() %>" />)</span>
+				<span class="trash-root-entry">(<liferay-ui:message arguments="<%= rootEntryIcon %>" key="<%= rootTrashHandler.getDeleteMessage() %>" translateArguments="<%= false %>" />)</span>
 			</c:if>
 		</liferay-ui:search-container-column-text>
 
@@ -248,17 +253,19 @@ portletURL.setParameter("tabs1", tabs1);
 			<c:when test="<%= Validator.isNotNull(trashRenderer.renderActions(renderRequest, renderResponse)) %>">
 				<liferay-ui:search-container-column-jsp
 					align="right"
+					cssClass="entry-action"
 					path="<%= trashRenderer.renderActions(renderRequest, renderResponse) %>"
 				/>
 			</c:when>
 			<c:when test="<%= entry.getRootEntry() == null %>">
 				<liferay-ui:search-container-column-jsp
 					align="right"
+					cssClass="entry-action"
 					path="/html/portlet/trash/entry_action.jsp"
 				/>
 			</c:when>
 			<c:otherwise>
-				<liferay-ui:search-container-column-text align="right">
+				<liferay-ui:search-container-column-text align="right" cssClass="entry-action">
 
 					<%
 					request.removeAttribute(WebKeys.SEARCH_CONTAINER_RESULT_ROW);
@@ -274,11 +281,12 @@ portletURL.setParameter("tabs1", tabs1);
 
 	<portlet:actionURL var="emptyTrashURL">
 		<portlet:param name="struts_action" value="/trash/edit_entry" />
+		<portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" />
 	</portlet:actionURL>
 
 	<liferay-ui:trash-empty
 		portletURL="<%= emptyTrashURL %>"
-		totalEntries="<%= total %>"
+		totalEntries="<%= searchContainer.getTotal() %>"
 	/>
 
 	<aui:form action="<%= searchURL.toString() %>" method="get" name="fm">
@@ -288,20 +296,19 @@ portletURL.setParameter("tabs1", tabs1);
 		<aui:input name="deleteTrashEntryIds" type="hidden" />
 		<aui:input name="restoreTrashEntryIds" type="hidden" />
 
-		<aui:button-row>
-			<liferay-ui:search-form
-				page="/html/portlet/trash/entry_search.jsp"
-			/>
-		</aui:button-row>
+		<liferay-ui:search-form
+			page="/html/portlet/trash/entry_search.jsp"
+		/>
 	</aui:form>
+
+	<liferay-ui:breadcrumb
+		showCurrentGroup="<%= false %>"
+		showGuestGroup="<%= false %>"
+		showLayout="<%= false %>"
+		showParentGroups="<%= false %>"
+	/>
 
 	<div class="separator"><!-- --></div>
 
 	<liferay-ui:search-iterator type='<%= approximate ? "more" : "regular" %>' />
 </liferay-ui:search-container>
-
-<%
-if (Validator.isNotNull(keywords)) {
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "search") + ": " + keywords, currentURL);
-}
-%>

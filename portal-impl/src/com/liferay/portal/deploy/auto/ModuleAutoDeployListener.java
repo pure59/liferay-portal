@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,9 @@
 
 package com.liferay.portal.deploy.auto;
 
-import aQute.lib.osgi.Constants;
-
-import aQute.libg.header.OSGiHeader;
+import aQute.bnd.header.OSGiHeader;
+import aQute.bnd.header.Parameters;
+import aQute.bnd.osgi.Constants;
 
 import com.liferay.portal.kernel.deploy.auto.AutoDeployException;
 import com.liferay.portal.kernel.deploy.auto.AutoDeployer;
@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.deploy.auto.BaseAutoDeployListener;
 import com.liferay.portal.kernel.deploy.auto.context.AutoDeploymentContext;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
@@ -31,7 +32,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarInputStream;
@@ -80,16 +80,20 @@ public class ModuleAutoDeployListener extends BaseAutoDeployListener {
 			return false;
 		}
 
+		JarInputStream jarInputStream = null;
+
 		Manifest manifest = null;
 
 		try {
-			JarInputStream jarInputStream = new JarInputStream(
-				new FileInputStream(file));
+			jarInputStream = new JarInputStream(new FileInputStream(file));
 
 			manifest = jarInputStream.getManifest();
 		}
 		catch (IOException ioe) {
 			throw new AutoDeployException(ioe);
+		}
+		finally {
+			StreamUtil.cleanUp(jarInputStream);
 		}
 
 		if (manifest == null) {
@@ -101,8 +105,8 @@ public class ModuleAutoDeployListener extends BaseAutoDeployListener {
 		String bundleSymbolicNameAttributeValue = attributes.getValue(
 			Constants.BUNDLE_SYMBOLICNAME);
 
-		Map<String, Map<String, String>> bundleSymbolicNameMap =
-			OSGiHeader.parseHeader(bundleSymbolicNameAttributeValue);
+		Parameters bundleSymbolicNameMap = OSGiHeader.parseHeader(
+			bundleSymbolicNameAttributeValue);
 
 		Set<String> bundleSymbolicNameSet = bundleSymbolicNameMap.keySet();
 

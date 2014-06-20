@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -67,11 +67,12 @@ public class DDMWebDavUtil {
 
 			String xsd = StringUtil.read(request.getInputStream());
 
-			String defaultLocale = LocalizationUtil.getDefaultLocale(xsd);
+			String defaultLanguageId = LocalizationUtil.getDefaultLanguageId(
+				xsd);
 
 			Map<Locale, String> nameMap = new HashMap<Locale, String>();
 
-			nameMap.put(LocaleUtil.fromLanguageId(defaultLocale), typeId);
+			nameMap.put(LocaleUtil.fromLanguageId(defaultLanguageId), typeId);
 
 			ServiceContext serviceContext = new ServiceContext();
 

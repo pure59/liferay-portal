@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,8 +14,9 @@
 
 package com.liferay.portlet.assetpublisher.util;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.security.pacl.permission.PortalRuntimePermission;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
@@ -24,6 +25,7 @@ import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portlet.asset.model.AssetEntry;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
+import com.liferay.portlet.asset.model.ClassType;
 import com.liferay.portlet.asset.service.persistence.AssetEntryQuery;
 
 import java.util.List;
@@ -36,6 +38,7 @@ import javax.portlet.PortletRequest;
 /**
  * @author Eudaldo Alonso
  */
+@ProviderType
 public class AssetPublisherUtil {
 
 	public static void addAndStoreSelection(
@@ -87,15 +90,77 @@ public class AssetPublisherUtil {
 		getAssetPublisher().checkAssetEntries();
 	}
 
-	public static List<AssetEntry> getAssetEntries(
-			PortletPreferences preferences, Layout layout, long scopeGroupId,
-			int max, boolean checkPermission)
-		throws PortalException, SystemException {
+	public static long[] getAssetCategoryIds(
+			PortletPreferences portletPreferences)
+		throws Exception {
 
-		return getAssetPublisher().getAssetEntries(
-			preferences, layout, scopeGroupId, max, checkPermission);
+		return getAssetPublisher().getAssetCategoryIds(portletPreferences);
 	}
 
+	public static List<AssetEntry> getAssetEntries(
+			PortletPreferences portletPreferences, Layout layout,
+			long scopeGroupId, int max, boolean checkPermission)
+		throws PortalException {
+
+		return getAssetPublisher().getAssetEntries(
+			portletPreferences, layout, scopeGroupId, max, checkPermission);
+	}
+
+	public static List<AssetEntry> getAssetEntries(
+			PortletRequest portletRequest,
+			PortletPreferences portletPreferences,
+			PermissionChecker permissionChecker, long[] groupIds,
+			boolean deleteMissingAssetEntries, boolean checkPermission)
+		throws Exception {
+
+		return getAssetPublisher().getAssetEntries(
+			portletRequest, portletPreferences, permissionChecker, groupIds,
+			deleteMissingAssetEntries, checkPermission);
+	}
+
+	public static List<AssetEntry> getAssetEntries(
+			PortletRequest portletRequest,
+			PortletPreferences portletPreferences,
+			PermissionChecker permissionChecker, long[] groupIds,
+			long[] allCategoryIds, String[] allTagNames,
+			boolean deleteMissingAssetEntries, boolean checkPermission)
+		throws Exception {
+
+		return getAssetPublisher().getAssetEntries(
+			portletRequest, portletPreferences, permissionChecker, groupIds,
+			allCategoryIds, allTagNames, deleteMissingAssetEntries,
+			checkPermission);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             AssetPublisherUtil#getAssetEntries( PortletRequest,
+	 *             PortletPreferences, PermissionChecker, long[], long[],
+	 *             String[], boolean , boolean)}
+	 */
+	@Deprecated
+	public static List<AssetEntry> getAssetEntries(
+			PortletRequest portletRequest,
+			PortletPreferences portletPreferences,
+			PermissionChecker permissionChecker, long[] groupIds,
+			long[] assetCategoryIds, String[] assetEntryXmls,
+			String[] assetTagNames, boolean deleteMissingAssetEntries,
+			boolean checkPermission)
+		throws Exception {
+
+		return getAssetPublisher().getAssetEntries(
+			portletRequest, portletPreferences, permissionChecker, groupIds,
+			assetCategoryIds, assetEntryXmls, assetTagNames,
+			deleteMissingAssetEntries, checkPermission);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             AssetPublisherUtil#getAssetEntries( PortletRequest,
+	 *             PortletPreferences, PermissionChecker, long[], boolean,
+	 *             boolean)}
+	 */
+	@Deprecated
 	public static List<AssetEntry> getAssetEntries(
 			PortletRequest portletRequest,
 			PortletPreferences portletPreferences,
@@ -109,12 +174,29 @@ public class AssetPublisherUtil {
 			assetEntryXmls, deleteMissingAssetEntries, checkPermission);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             AssetPublisherUtil#getAssetEntryQuery(PortletPreferences,
+	 *             long[], long[], String[])}
+	 */
+	@Deprecated
 	public static AssetEntryQuery getAssetEntryQuery(
-			PortletPreferences portletPreferences, long[] scopeGroupIds)
-		throws PortalException, SystemException {
+			PortletPreferences portletPreferences, long[] siteGroupIds)
+		throws PortalException {
 
 		return getAssetPublisher().getAssetEntryQuery(
-			portletPreferences, scopeGroupIds);
+			portletPreferences, siteGroupIds);
+	}
+
+	public static AssetEntryQuery getAssetEntryQuery(
+			PortletPreferences portletPreferences, long[] scopeGroupIds,
+			long[] overrideAllAssetCategoryIds,
+			String[] overrideAllAssetTagNames)
+		throws PortalException {
+
+		return getAssetPublisher().getAssetEntryQuery(
+			portletPreferences, scopeGroupIds, overrideAllAssetCategoryIds,
+			overrideAllAssetTagNames);
 	}
 
 	public static AssetPublisher getAssetPublisher() {
@@ -123,6 +205,18 @@ public class AssetPublisherUtil {
 		return _assetPublisher;
 	}
 
+	public static String[] getAssetTagNames(
+			PortletPreferences portletPreferences)
+		throws Exception {
+
+		return getAssetPublisher().getAssetTagNames(portletPreferences);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             AssetPublisherUtil#getAssetTagNames(PortletPreferences)}
+	 */
+	@Deprecated
 	public static String[] getAssetTagNames(
 			PortletPreferences portletPreferences, long scopeGroupId)
 		throws Exception {
@@ -146,6 +240,14 @@ public class AssetPublisherUtil {
 
 	public static Long[] getClassTypeIds(
 		PortletPreferences portletPreferences, String className,
+		List<ClassType> availableClassTypes) {
+
+		return getAssetPublisher().getClassTypeIds(
+			portletPreferences, className, availableClassTypes);
+	}
+
+	public static Long[] getClassTypeIds(
+		PortletPreferences portletPreferences, String className,
 		Long[] availableClassTypeIds) {
 
 		return getAssetPublisher().getClassTypeIds(
@@ -153,41 +255,51 @@ public class AssetPublisherUtil {
 	}
 
 	public static Map<Locale, String> getEmailAssetEntryAddedBodyMap(
-		PortletPreferences preferences) {
+		PortletPreferences portletPreferences) {
 
-		return getAssetPublisher().getEmailAssetEntryAddedBodyMap(preferences);
+		return getAssetPublisher().getEmailAssetEntryAddedBodyMap(
+			portletPreferences);
 	}
 
 	public static boolean getEmailAssetEntryAddedEnabled(
-		PortletPreferences preferences) {
+		PortletPreferences portletPreferences) {
 
-		return getAssetPublisher().getEmailAssetEntryAddedEnabled(preferences);
+		return getAssetPublisher().getEmailAssetEntryAddedEnabled(
+			portletPreferences);
 	}
 
 	public static Map<Locale, String> getEmailAssetEntryAddedSubjectMap(
-		PortletPreferences preferences) {
+		PortletPreferences portletPreferences) {
 
 		return getAssetPublisher().getEmailAssetEntryAddedSubjectMap(
-			preferences);
+			portletPreferences);
+	}
+
+	public static Map<String, String> getEmailDefinitionTerms(
+		PortletRequest portletRequest, String emailFromAddress,
+		String emailFromName) {
+
+		return getAssetPublisher().getEmailDefinitionTerms(
+			portletRequest, emailFromAddress, emailFromName);
 	}
 
 	public static String getEmailFromAddress(
-			PortletPreferences preferences, long companyId)
-		throws SystemException {
+		PortletPreferences portletPreferences, long companyId) {
 
-		return getAssetPublisher().getEmailFromAddress(preferences, companyId);
+		return getAssetPublisher().getEmailFromAddress(
+			portletPreferences, companyId);
 	}
 
 	public static String getEmailFromName(
-			PortletPreferences preferences, long companyId)
-		throws SystemException {
+		PortletPreferences portletPreferences, long companyId) {
 
-		return getAssetPublisher().getEmailFromName(preferences, companyId);
+		return getAssetPublisher().getEmailFromName(
+			portletPreferences, companyId);
 	}
 
 	public static long getGroupIdFromScopeId(
 			String scopeId, long siteGroupId, boolean privateLayout)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return getAssetPublisher().getGroupIdFromScopeId(
 			scopeId, siteGroupId, privateLayout);
@@ -208,15 +320,21 @@ public class AssetPublisherUtil {
 	}
 
 	public static String getScopeId(Group group, long scopeGroupId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return getAssetPublisher().getScopeId(group, scopeGroupId);
+	}
+
+	public static long getSubscriptionClassPK(long plid, String portletId)
+		throws PortalException {
+
+		return getAssetPublisher().getSubscriptionClassPK(plid, portletId);
 	}
 
 	public static boolean isScopeIdSelectable(
 			PermissionChecker permissionChecker, String scopeId,
 			long companyGroupId, Layout layout)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return getAssetPublisher().isScopeIdSelectable(
 			permissionChecker, scopeId, companyGroupId, layout);
@@ -224,19 +342,35 @@ public class AssetPublisherUtil {
 
 	public static boolean isSubscribed(
 			long companyId, long userId, long plid, String portletId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return getAssetPublisher().isSubscribed(
 			companyId, userId, plid, portletId);
 	}
 
 	public static void notifySubscribers(
-			PortletPreferences preferences, long plid, String portletId,
+			PortletPreferences portletPreferences, long plid, String portletId,
 			List<AssetEntry> assetEntries)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		getAssetPublisher().notifySubscribers(
-			preferences, plid, portletId, assetEntries);
+			portletPreferences, plid, portletId, assetEntries);
+	}
+
+	public static void processAssetEntryQuery(
+			User user, PortletPreferences portletPreferences,
+			AssetEntryQuery assetEntryQuery)
+		throws Exception {
+
+		getAssetPublisher().processAssetEntryQuery(
+			user, portletPreferences, assetEntryQuery);
+	}
+
+	public static void registerAssetQueryProcessor(
+		String name, AssetEntryQueryProcessor assetQueryProcessor) {
+
+		getAssetPublisher().registerAssetQueryProcessor(
+			name, assetQueryProcessor);
 	}
 
 	public static void removeAndStoreSelection(
@@ -257,15 +391,22 @@ public class AssetPublisherUtil {
 	public static void subscribe(
 			PermissionChecker permissionChecker, long groupId, long plid,
 			String portletId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		getAssetPublisher().subscribe(
 			permissionChecker, groupId, plid, portletId);
 	}
 
+	public static void unregisterAssetQueryProcessor(
+		String assetQueryProcessorClassName) {
+
+		getAssetPublisher().unregisterAssetQueryProcessor(
+			assetQueryProcessorClassName);
+	}
+
 	public static void unsubscribe(
 			PermissionChecker permissionChecker, long plid, String portletId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		getAssetPublisher().unsubscribe(permissionChecker, plid, portletId);
 	}

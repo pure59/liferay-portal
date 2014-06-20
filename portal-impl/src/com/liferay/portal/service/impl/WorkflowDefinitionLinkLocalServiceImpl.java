@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,7 +16,6 @@ package com.liferay.portal.service.impl;
 
 import com.liferay.portal.NoSuchWorkflowDefinitionLinkException;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.spring.aop.Skip;
 import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.util.CharPool;
@@ -29,7 +28,6 @@ import com.liferay.portal.kernel.workflow.WorkflowEngineManagerUtil;
 import com.liferay.portal.model.User;
 import com.liferay.portal.model.WorkflowDefinitionLink;
 import com.liferay.portal.service.base.WorkflowDefinitionLinkLocalServiceBaseImpl;
-import com.liferay.portal.util.PortalUtil;
 
 import java.util.Date;
 import java.util.List;
@@ -49,11 +47,11 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 			long userId, long companyId, long groupId, String className,
 			long classPK, long typePK, String workflowDefinitionName,
 			int workflowDefinitionVersion)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(userId);
 		groupId = StagingUtil.getLiveGroupId(groupId);
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 		Date now = new Date();
 
 		long workflowDefinitionLinkId = counterLocalService.increment();
@@ -84,7 +82,7 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 	public void deleteWorkflowDefinitionLink(
 			long companyId, long groupId, String className, long classPK,
 			long typePK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		WorkflowDefinitionLink workflowDefinitionLink =
 			fetchWorkflowDefinitionLink(
@@ -97,14 +95,13 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 
 	@Override
 	public WorkflowDefinitionLink fetchDefaultWorkflowDefinitionLink(
-			long companyId, String className, long classPK, long typePK)
-		throws SystemException {
+		long companyId, String className, long classPK, long typePK) {
 
 		if (!WorkflowEngineManagerUtil.isDeployed()) {
 			return null;
 		}
 
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 
 		return workflowDefinitionLinkPersistence.fetchByG_C_C_C_T(
 			WorkflowConstants.DEFAULT_GROUP_ID, companyId, classNameId, classPK,
@@ -115,7 +112,7 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 	public WorkflowDefinitionLink fetchWorkflowDefinitionLink(
 			long companyId, long groupId, String className, long classPK,
 			long typePK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return fetchWorkflowDefinitionLink(
 			companyId, groupId, className, classPK, typePK, false);
@@ -125,14 +122,14 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 	public WorkflowDefinitionLink fetchWorkflowDefinitionLink(
 			long companyId, long groupId, String className, long classPK,
 			long typePK, boolean strict)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (!WorkflowEngineManagerUtil.isDeployed()) {
 			return null;
 		}
 
 		groupId = StagingUtil.getLiveGroupId(groupId);
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 
 		WorkflowDefinitionLink workflowDefinitionLink = null;
 
@@ -153,13 +150,13 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 	@Override
 	public WorkflowDefinitionLink getDefaultWorkflowDefinitionLink(
 			long companyId, String className, long classPK, long typePK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (!WorkflowEngineManagerUtil.isDeployed()) {
 			throw new NoSuchWorkflowDefinitionLinkException();
 		}
 
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 
 		return workflowDefinitionLinkPersistence.findByG_C_C_C_T(
 			WorkflowConstants.DEFAULT_GROUP_ID, companyId, classNameId, classPK,
@@ -170,7 +167,7 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 	public WorkflowDefinitionLink getWorkflowDefinitionLink(
 			long companyId, long groupId, String className, long classPK,
 			long typePK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return getWorkflowDefinitionLink(
 			companyId, groupId, className, classPK, typePK, false);
@@ -180,7 +177,7 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 	public WorkflowDefinitionLink getWorkflowDefinitionLink(
 			long companyId, long groupId, String className, long classPK,
 			long typePK, boolean strict)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (!WorkflowEngineManagerUtil.isDeployed()) {
 			throw new NoSuchWorkflowDefinitionLinkException();
@@ -201,9 +198,17 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 
 	@Override
 	public int getWorkflowDefinitionLinksCount(
-			long companyId, String workflowDefinitionName,
-			int workflowDefinitionVersion)
-		throws SystemException {
+		long companyId, long groupId, String className) {
+
+		return workflowDefinitionLinkPersistence.countByG_C_C(
+			groupId, companyId,
+			classNameLocalService.getClassNameId(className));
+	}
+
+	@Override
+	public int getWorkflowDefinitionLinksCount(
+		long companyId, String workflowDefinitionName,
+		int workflowDefinitionVersion) {
 
 		if (!WorkflowEngineManagerUtil.isDeployed()) {
 			return 0;
@@ -217,7 +222,7 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 	@Skip
 	public boolean hasWorkflowDefinitionLink(
 			long companyId, long groupId, String className)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return hasWorkflowDefinitionLink(companyId, groupId, className, 0);
 	}
@@ -226,7 +231,7 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 	@Skip
 	public boolean hasWorkflowDefinitionLink(
 			long companyId, long groupId, String className, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return hasWorkflowDefinitionLink(
 			companyId, groupId, className, classPK, 0);
@@ -237,7 +242,7 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 	public boolean hasWorkflowDefinitionLink(
 			long companyId, long groupId, String className, long classPK,
 			long typePK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (!WorkflowEngineManagerUtil.isDeployed()) {
 			return false;
@@ -258,7 +263,7 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 	public void updateWorkflowDefinitionLink(
 			long userId, long companyId, long groupId, String className,
 			long classPK, long typePK, String workflowDefinition)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (Validator.isNull(workflowDefinition)) {
 			deleteWorkflowDefinitionLink(
@@ -283,11 +288,11 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 			long userId, long companyId, long groupId, String className,
 			long classPK, long typePK, String workflowDefinitionName,
 			int workflowDefinitionVersion)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(userId);
 		groupId = StagingUtil.getLiveGroupId(groupId);
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 		Date now = new Date();
 
 		WorkflowDefinitionLink workflowDefinitionLink =
@@ -323,7 +328,7 @@ public class WorkflowDefinitionLinkLocalServiceImpl
 			long userId, long companyId, long groupId, String className,
 			long classPK,
 			List<ObjectValuePair<Long, String>> workflowDefinitionOVPs)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		for (ObjectValuePair<Long, String> workflowDefinitionOVP :
 				workflowDefinitionOVPs) {

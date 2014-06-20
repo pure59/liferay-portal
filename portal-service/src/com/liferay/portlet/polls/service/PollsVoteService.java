@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.polls.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -33,6 +35,7 @@ import com.liferay.portal.service.BaseService;
  * @see com.liferay.portlet.polls.service.impl.PollsVoteServiceImpl
  * @generated
  */
+@ProviderType
 @AccessControlled
 @JSONWebService
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
@@ -60,6 +63,5 @@ public interface PollsVoteService extends BaseService {
 
 	public com.liferay.portlet.polls.model.PollsVote addVote(long questionId,
 		long choiceId, com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 }

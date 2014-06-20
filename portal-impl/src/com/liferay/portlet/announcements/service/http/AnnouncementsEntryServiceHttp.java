@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -60,8 +60,7 @@ public class AnnouncementsEntryServiceHttp {
 		boolean displayImmediately, int expirationDateMonth,
 		int expirationDateDay, int expirationDateYear, int expirationDateHour,
 		int expirationDateMinute, int priority, boolean alert)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(AnnouncementsEntryServiceUtil.class,
 					"addEntry", _addEntryParameterTypes0);
@@ -81,10 +80,6 @@ public class AnnouncementsEntryServiceHttp {
 			catch (Exception e) {
 				if (e instanceof com.liferay.portal.kernel.exception.PortalException) {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
-				}
-
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
 				}
 
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
@@ -107,8 +102,7 @@ public class AnnouncementsEntryServiceHttp {
 		int expirationDateMonth, int expirationDateDay, int expirationDateYear,
 		int expirationDateHour, int expirationDateMinute, int priority,
 		boolean alert)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(AnnouncementsEntryServiceUtil.class,
 					"addEntry", _addEntryParameterTypes1);
@@ -130,10 +124,6 @@ public class AnnouncementsEntryServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -147,8 +137,7 @@ public class AnnouncementsEntryServiceHttp {
 	}
 
 	public static void deleteEntry(HttpPrincipal httpPrincipal, long entryId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(AnnouncementsEntryServiceUtil.class,
 					"deleteEntry", _deleteEntryParameterTypes2);
@@ -163,10 +152,6 @@ public class AnnouncementsEntryServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 		}
@@ -179,8 +164,7 @@ public class AnnouncementsEntryServiceHttp {
 
 	public static com.liferay.portlet.announcements.model.AnnouncementsEntry getEntry(
 		HttpPrincipal httpPrincipal, long entryId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(AnnouncementsEntryServiceUtil.class,
 					"getEntry", _getEntryParameterTypes3);
@@ -195,10 +179,6 @@ public class AnnouncementsEntryServiceHttp {
 			catch (Exception e) {
 				if (e instanceof com.liferay.portal.kernel.exception.PortalException) {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
-				}
-
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
 				}
 
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
@@ -217,11 +197,10 @@ public class AnnouncementsEntryServiceHttp {
 		HttpPrincipal httpPrincipal, long entryId, java.lang.String title,
 		java.lang.String content, java.lang.String url, java.lang.String type,
 		int displayDateMonth, int displayDateDay, int displayDateYear,
-		int displayDateHour, int displayDateMinute, int expirationDateMonth,
-		int expirationDateDay, int expirationDateYear, int expirationDateHour,
-		int expirationDateMinute, int priority)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		int displayDateHour, int displayDateMinute, boolean displayImmediately,
+		int expirationDateMonth, int expirationDateDay, int expirationDateYear,
+		int expirationDateHour, int expirationDateMinute, int priority)
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(AnnouncementsEntryServiceUtil.class,
 					"updateEntry", _updateEntryParameterTypes4);
@@ -229,8 +208,8 @@ public class AnnouncementsEntryServiceHttp {
 			MethodHandler methodHandler = new MethodHandler(methodKey, entryId,
 					title, content, url, type, displayDateMonth,
 					displayDateDay, displayDateYear, displayDateHour,
-					displayDateMinute, expirationDateMonth, expirationDateDay,
-					expirationDateYear, expirationDateHour,
+					displayDateMinute, displayImmediately, expirationDateMonth,
+					expirationDateDay, expirationDateYear, expirationDateHour,
 					expirationDateMinute, priority);
 
 			Object returnObj = null;
@@ -241,10 +220,6 @@ public class AnnouncementsEntryServiceHttp {
 			catch (Exception e) {
 				if (e instanceof com.liferay.portal.kernel.exception.PortalException) {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
-				}
-
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
 				}
 
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
@@ -283,7 +258,7 @@ public class AnnouncementsEntryServiceHttp {
 	private static final Class<?>[] _updateEntryParameterTypes4 = new Class[] {
 			long.class, java.lang.String.class, java.lang.String.class,
 			java.lang.String.class, java.lang.String.class, int.class, int.class,
-			int.class, int.class, int.class, int.class, int.class, int.class,
-			int.class, int.class, int.class
+			int.class, int.class, int.class, boolean.class, int.class, int.class,
+			int.class, int.class, int.class, int.class
 		};
 }

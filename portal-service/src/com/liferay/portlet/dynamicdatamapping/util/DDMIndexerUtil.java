@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -40,6 +40,13 @@ public class DDMIndexerUtil {
 		long ddmStructureId, String fieldName, Locale locale) {
 
 		return getDDMIndexer().encodeName(ddmStructureId, fieldName, locale);
+	}
+
+	public static String extractAttributes(
+		DDMStructure ddmStructure, Fields fields, Locale locale) {
+
+		return getDDMIndexer().extractIndexableAttributes(
+			ddmStructure, fields, locale);
 	}
 
 	public static DDMIndexer getDDMIndexer() {

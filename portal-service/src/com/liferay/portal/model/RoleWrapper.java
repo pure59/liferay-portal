@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see Role
  * @generated
  */
+@ProviderType
 public class RoleWrapper implements Role, ModelWrapper<Role> {
 	public RoleWrapper(Role role) {
 		_role = role;
@@ -49,6 +52,7 @@ public class RoleWrapper implements Role, ModelWrapper<Role> {
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
 		attributes.put("roleId", getRoleId());
 		attributes.put("companyId", getCompanyId());
@@ -69,6 +73,12 @@ public class RoleWrapper implements Role, ModelWrapper<Role> {
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		String uuid = (String)attributes.get("uuid");
 
 		if (uuid != null) {
@@ -175,6 +185,26 @@ public class RoleWrapper implements Role, ModelWrapper<Role> {
 	}
 
 	/**
+	* Returns the mvcc version of this role.
+	*
+	* @return the mvcc version of this role
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _role.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this role.
+	*
+	* @param mvccVersion the mvcc version of this role
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_role.setMvccVersion(mvccVersion);
+	}
+
+	/**
 	* Returns the uuid of this role.
 	*
 	* @return the uuid of this role
@@ -258,11 +288,9 @@ public class RoleWrapper implements Role, ModelWrapper<Role> {
 	* Returns the user uuid of this role.
 	*
 	* @return the user uuid of this role
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _role.getUserUuid();
 	}
 
@@ -792,6 +820,22 @@ public class RoleWrapper implements Role, ModelWrapper<Role> {
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _role.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _role.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_role.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -839,15 +883,13 @@ public class RoleWrapper implements Role, ModelWrapper<Role> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_role.persist();
 	}
 
 	@Override
 	public java.lang.String getDescriptiveName()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _role.getDescriptiveName();
 	}
 
@@ -888,6 +930,7 @@ public class RoleWrapper implements Role, ModelWrapper<Role> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public Role getWrappedRole() {
 		return _role;
 	}
@@ -895,6 +938,16 @@ public class RoleWrapper implements Role, ModelWrapper<Role> {
 	@Override
 	public Role getWrappedModel() {
 		return _role;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _role.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _role.isFinderCacheEnabled();
 	}
 
 	@Override

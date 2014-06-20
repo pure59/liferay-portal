@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,18 +14,25 @@
 
 package com.liferay.portlet.wiki.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.wiki.NoSuchPageException;
+import com.liferay.portlet.documentlibrary.NoSuchFileException;
+import com.liferay.portlet.documentlibrary.lar.FileEntryUtil;
+import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.model.WikiPage;
 import com.liferay.portlet.wiki.service.WikiPageLocalServiceUtil;
@@ -44,6 +51,20 @@ public class WikiPageStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {WikiPage.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException {
+
+		WikiPage wikiPage =
+			WikiPageLocalServiceUtil.fetchWikiPageByUuidAndGroupId(
+				uuid, groupId);
+
+		if (wikiPage != null) {
+			WikiPageLocalServiceUtil.deletePage(wikiPage);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -53,13 +74,12 @@ public class WikiPageStagedModelDataHandler
 			PortletDataContext portletDataContext, WikiPage page)
 		throws Exception {
 
-		Element pageElement = portletDataContext.getExportDataElement(page);
-
-		StagedModelDataHandlerUtil.exportStagedModel(
-			portletDataContext, page.getNode());
+		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			portletDataContext, page, page.getNode(),
+			PortletDataContext.REFERENCE_TYPE_PARENT);
 
 		String content = ExportImportHelperUtil.replaceExportContentReferences(
-			portletDataContext, page, pageElement, page.getContent(),
+			portletDataContext, page, page.getContent(),
 			portletDataContext.getBooleanParameter(
 				WikiPortletDataHandler.NAMESPACE, "referenced-content"));
 
@@ -67,24 +87,33 @@ public class WikiPageStagedModelDataHandler
 
 		if (page.isHead()) {
 			for (FileEntry fileEntry : page.getAttachmentsFileEntries()) {
-				StagedModelDataHandlerUtil.exportStagedModel(
-					portletDataContext, fileEntry);
-
-				portletDataContext.addReferenceElement(
-					page, pageElement, fileEntry, FileEntry.class,
-					PortletDataContext.REFERENCE_TYPE_WEAK, false);
-			}
-
-			long folderId = page.getAttachmentsFolderId();
-
-			if (folderId != 0) {
-				page.setAttachmentsFolderId(folderId);
+				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+					portletDataContext, page, fileEntry,
+					PortletDataContext.REFERENCE_TYPE_WEAK);
 			}
 		}
 
+		Element pageElement = portletDataContext.getExportDataElement(page);
+
 		portletDataContext.addClassedModel(
-			pageElement, ExportImportPathUtil.getModelPath(page), page,
-			WikiPortletDataHandler.NAMESPACE);
+			pageElement, ExportImportPathUtil.getModelPath(page), page);
+	}
+
+	@Override
+	protected void doImportMissingReference(
+			PortletDataContext portletDataContext, String uuid, long groupId,
+			long pageId)
+		throws Exception {
+
+		WikiPage existingPage =
+			WikiPageLocalServiceUtil.fetchWikiPageByUuidAndGroupId(
+				uuid, groupId);
+
+		Map<Long, Long> pageIds =
+			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+				WikiPage.class);
+
+		pageIds.put(pageId, existingPage.getPageId());
 	}
 
 	@Override
@@ -94,26 +123,21 @@ public class WikiPageStagedModelDataHandler
 
 		long userId = portletDataContext.getUserId(page.getUserUuid());
 
-		String nodePath = ExportImportPathUtil.getModelPath(
-			portletDataContext, WikiNode.class.getName(), page.getNodeId());
-
-		WikiNode node = (WikiNode)portletDataContext.getZipEntryAsObject(
-			nodePath);
-
-		StagedModelDataHandlerUtil.importStagedModel(portletDataContext, node);
+		StagedModelDataHandlerUtil.importReferenceStagedModel(
+			portletDataContext, page, WikiNode.class, page.getNodeId());
 
 		Element pageElement =
 			portletDataContext.getImportDataStagedModelElement(page);
 
 		String content = ExportImportHelperUtil.replaceImportContentReferences(
-			portletDataContext, pageElement, page.getContent(),
-			portletDataContext.getBooleanParameter(
-				WikiPortletDataHandler.NAMESPACE, "referenced-content"));
+			portletDataContext, page, page.getContent());
 
 		page.setContent(content);
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			page, WikiPortletDataHandler.NAMESPACE);
+			page);
+
+		serviceContext.setUuid(page.getUuid());
 
 		Map<Long, Long> nodeIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -124,22 +148,10 @@ public class WikiPageStagedModelDataHandler
 
 		WikiPage importedPage = null;
 
-		WikiPage existingPage =
-			WikiPageLocalServiceUtil.fetchWikiPageByUuidAndGroupId(
-				page.getUuid(), portletDataContext.getScopeGroupId());
+		WikiPage existingPage = WikiPageLocalServiceUtil.fetchPage(
+			nodeId, page.getTitle());
 
 		if (existingPage == null) {
-			try {
-				existingPage = WikiPageLocalServiceUtil.getPage(
-					nodeId, page.getTitle());
-			}
-			catch (NoSuchPageException nspe) {
-			}
-		}
-
-		if (existingPage == null) {
-			serviceContext.setUuid(page.getUuid());
-
 			importedPage = WikiPageLocalServiceUtil.addPage(
 				userId, nodeId, page.getTitle(), page.getVersion(),
 				page.getContent(), page.getSummary(), page.isMinorEdit(),
@@ -147,21 +159,35 @@ public class WikiPageStagedModelDataHandler
 				page.getRedirectTitle(), serviceContext);
 		}
 		else {
-			importedPage = WikiPageLocalServiceUtil.updatePage(
-				userId, nodeId, existingPage.getTitle(), 0, page.getContent(),
-				page.getSummary(), page.isMinorEdit(), page.getFormat(),
-				page.getParentTitle(), page.getRedirectTitle(), serviceContext);
+			existingPage =
+				WikiPageLocalServiceUtil.fetchWikiPageByUuidAndGroupId(
+					page.getUuid(), portletDataContext.getScopeGroupId());
+
+			if (existingPage == null) {
+				existingPage = WikiPageLocalServiceUtil.fetchPage(
+					nodeId, page.getTitle(), page.getVersion());
+			}
+
+			if (existingPage == null) {
+				importedPage = WikiPageLocalServiceUtil.updatePage(
+					userId, nodeId, page.getTitle(), 0.0, page.getContent(),
+					page.getSummary(), page.isMinorEdit(), page.getFormat(),
+					page.getParentTitle(), page.getRedirectTitle(),
+					serviceContext);
+			}
+			else {
+				importedPage = existingPage;
+			}
 		}
 
 		if (page.isHead()) {
 			List<Element> attachmentElements =
 				portletDataContext.getReferenceDataElements(
-					pageElement, FileEntry.class,
+					pageElement, DLFileEntry.class,
 					PortletDataContext.REFERENCE_TYPE_WEAK);
 
 			for (Element attachmentElement : attachmentElements) {
 				String path = attachmentElement.attributeValue("path");
-				String binPath = attachmentElement.attributeValue("bin-path");
 
 				FileEntry fileEntry =
 					(FileEntry)portletDataContext.getZipEntryAsObject(path);
@@ -170,19 +196,37 @@ public class WikiPageStagedModelDataHandler
 				String mimeType = null;
 
 				try {
-					inputStream = portletDataContext.getZipEntryAsInputStream(
-						binPath);
+					String binPath = attachmentElement.attributeValue(
+						"bin-path");
+
+					if (Validator.isNull(binPath) &&
+						portletDataContext.isPerformDirectBinaryImport()) {
+
+						try {
+							inputStream = FileEntryUtil.getContentStream(
+								fileEntry);
+						}
+						catch (NoSuchFileException nsfe) {
+						}
+					}
+					else {
+						inputStream =
+							portletDataContext.getZipEntryAsInputStream(
+								binPath);
+					}
+
+					if (inputStream == null) {
+						if (_log.isWarnEnabled()) {
+							_log.warn(
+								"Unable to import attachment for file entry " +
+									fileEntry.getFileEntryId());
+						}
+
+						continue;
+					}
 
 					mimeType = MimeTypesUtil.getContentType(
 						inputStream, fileEntry.getTitle());
-				}
-				finally {
-					StreamUtil.cleanUp(inputStream);
-				}
-
-				try {
-					inputStream = portletDataContext.getZipEntryAsInputStream(
-						binPath);
 
 					WikiPageLocalServiceUtil.addPageAttachment(
 						userId, importedPage.getNodeId(),
@@ -195,8 +239,39 @@ public class WikiPageStagedModelDataHandler
 			}
 		}
 
-		portletDataContext.importClassedModel(
-			page, importedPage, WikiPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(page, importedPage);
+
+		Map<Long, Long> pageIds =
+			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+				WikiPage.class + ".pageId");
+
+		pageIds.put(page.getPageId(), importedPage.getPageId());
 	}
+
+	@Override
+	protected void doRestoreStagedModel(
+			PortletDataContext portletDataContext, WikiPage page)
+		throws Exception {
+
+		long userId = portletDataContext.getUserId(page.getUserUuid());
+
+		WikiPage existingPage =
+			WikiPageLocalServiceUtil.fetchWikiPageByUuidAndGroupId(
+				page.getUuid(), portletDataContext.getScopeGroupId());
+
+		if ((existingPage == null) || !existingPage.isInTrash()) {
+			return;
+		}
+
+		TrashHandler trashHandler = existingPage.getTrashHandler();
+
+		if (trashHandler.isRestorable(existingPage.getResourcePrimKey())) {
+			trashHandler.restoreTrashEntry(
+				userId, existingPage.getResourcePrimKey());
+		}
+	}
+
+	private static Log _log = LogFactoryUtil.getLog(
+		WikiPageStagedModelDataHandler.class);
 
 }

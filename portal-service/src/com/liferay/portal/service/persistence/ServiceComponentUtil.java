@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,10 @@
 
 package com.liferay.portal.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.model.ServiceComponent;
@@ -36,6 +37,7 @@ import java.util.List;
  * @see ServiceComponentPersistenceImpl
  * @generated
  */
+@ProviderType
 public class ServiceComponentUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -60,8 +62,7 @@ public class ServiceComponentUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#countWithDynamicQuery(DynamicQuery)
 	 */
-	public long countWithDynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
 	}
 
@@ -69,7 +70,7 @@ public class ServiceComponentUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery)
 	 */
 	public static List<ServiceComponent> findWithDynamicQuery(
-		DynamicQuery dynamicQuery) throws SystemException {
+		DynamicQuery dynamicQuery) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -77,8 +78,7 @@ public class ServiceComponentUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery, int, int)
 	 */
 	public static List<ServiceComponent> findWithDynamicQuery(
-		DynamicQuery dynamicQuery, int start, int end)
-		throws SystemException {
+		DynamicQuery dynamicQuery, int start, int end) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -87,7 +87,7 @@ public class ServiceComponentUtil {
 	 */
 	public static List<ServiceComponent> findWithDynamicQuery(
 		DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
+		OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findWithDynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
@@ -96,8 +96,7 @@ public class ServiceComponentUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel)
 	 */
-	public static ServiceComponent update(ServiceComponent serviceComponent)
-		throws SystemException {
+	public static ServiceComponent update(ServiceComponent serviceComponent) {
 		return getPersistence().update(serviceComponent);
 	}
 
@@ -105,7 +104,7 @@ public class ServiceComponentUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel, ServiceContext)
 	 */
 	public static ServiceComponent update(ServiceComponent serviceComponent,
-		ServiceContext serviceContext) throws SystemException {
+		ServiceContext serviceContext) {
 		return getPersistence().update(serviceComponent, serviceContext);
 	}
 
@@ -114,11 +113,9 @@ public class ServiceComponentUtil {
 	*
 	* @param buildNamespace the build namespace
 	* @return the matching service components
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.ServiceComponent> findByBuildNamespace(
-		java.lang.String buildNamespace)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String buildNamespace) {
 		return getPersistence().findByBuildNamespace(buildNamespace);
 	}
 
@@ -133,11 +130,9 @@ public class ServiceComponentUtil {
 	* @param start the lower bound of the range of service components
 	* @param end the upper bound of the range of service components (not inclusive)
 	* @return the range of matching service components
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.ServiceComponent> findByBuildNamespace(
-		java.lang.String buildNamespace, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String buildNamespace, int start, int end) {
 		return getPersistence().findByBuildNamespace(buildNamespace, start, end);
 	}
 
@@ -153,12 +148,10 @@ public class ServiceComponentUtil {
 	* @param end the upper bound of the range of service components (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching service components
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.ServiceComponent> findByBuildNamespace(
 		java.lang.String buildNamespace, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByBuildNamespace(buildNamespace, start, end,
 			orderByComparator);
@@ -171,13 +164,11 @@ public class ServiceComponentUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching service component
 	* @throws com.liferay.portal.NoSuchServiceComponentException if a matching service component could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent findByBuildNamespace_First(
 		java.lang.String buildNamespace,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchServiceComponentException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchServiceComponentException {
 		return getPersistence()
 				   .findByBuildNamespace_First(buildNamespace, orderByComparator);
 	}
@@ -188,12 +179,10 @@ public class ServiceComponentUtil {
 	* @param buildNamespace the build namespace
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching service component, or <code>null</code> if a matching service component could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent fetchByBuildNamespace_First(
 		java.lang.String buildNamespace,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByBuildNamespace_First(buildNamespace,
 			orderByComparator);
@@ -206,13 +195,11 @@ public class ServiceComponentUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching service component
 	* @throws com.liferay.portal.NoSuchServiceComponentException if a matching service component could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent findByBuildNamespace_Last(
 		java.lang.String buildNamespace,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchServiceComponentException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchServiceComponentException {
 		return getPersistence()
 				   .findByBuildNamespace_Last(buildNamespace, orderByComparator);
 	}
@@ -223,12 +210,10 @@ public class ServiceComponentUtil {
 	* @param buildNamespace the build namespace
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching service component, or <code>null</code> if a matching service component could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent fetchByBuildNamespace_Last(
 		java.lang.String buildNamespace,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByBuildNamespace_Last(buildNamespace, orderByComparator);
 	}
@@ -241,13 +226,11 @@ public class ServiceComponentUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next service component
 	* @throws com.liferay.portal.NoSuchServiceComponentException if a service component with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent[] findByBuildNamespace_PrevAndNext(
 		long serviceComponentId, java.lang.String buildNamespace,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchServiceComponentException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchServiceComponentException {
 		return getPersistence()
 				   .findByBuildNamespace_PrevAndNext(serviceComponentId,
 			buildNamespace, orderByComparator);
@@ -257,10 +240,8 @@ public class ServiceComponentUtil {
 	* Removes all the service components where buildNamespace = &#63; from the database.
 	*
 	* @param buildNamespace the build namespace
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByBuildNamespace(java.lang.String buildNamespace)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByBuildNamespace(java.lang.String buildNamespace) {
 		getPersistence().removeByBuildNamespace(buildNamespace);
 	}
 
@@ -269,10 +250,8 @@ public class ServiceComponentUtil {
 	*
 	* @param buildNamespace the build namespace
 	* @return the number of matching service components
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByBuildNamespace(java.lang.String buildNamespace)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByBuildNamespace(java.lang.String buildNamespace) {
 		return getPersistence().countByBuildNamespace(buildNamespace);
 	}
 
@@ -283,12 +262,10 @@ public class ServiceComponentUtil {
 	* @param buildNumber the build number
 	* @return the matching service component
 	* @throws com.liferay.portal.NoSuchServiceComponentException if a matching service component could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent findByBNS_BNU(
 		java.lang.String buildNamespace, long buildNumber)
-		throws com.liferay.portal.NoSuchServiceComponentException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchServiceComponentException {
 		return getPersistence().findByBNS_BNU(buildNamespace, buildNumber);
 	}
 
@@ -298,11 +275,9 @@ public class ServiceComponentUtil {
 	* @param buildNamespace the build namespace
 	* @param buildNumber the build number
 	* @return the matching service component, or <code>null</code> if a matching service component could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent fetchByBNS_BNU(
-		java.lang.String buildNamespace, long buildNumber)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String buildNamespace, long buildNumber) {
 		return getPersistence().fetchByBNS_BNU(buildNamespace, buildNumber);
 	}
 
@@ -313,12 +288,10 @@ public class ServiceComponentUtil {
 	* @param buildNumber the build number
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching service component, or <code>null</code> if a matching service component could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent fetchByBNS_BNU(
 		java.lang.String buildNamespace, long buildNumber,
-		boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByBNS_BNU(buildNamespace, buildNumber,
 			retrieveFromCache);
@@ -330,12 +303,10 @@ public class ServiceComponentUtil {
 	* @param buildNamespace the build namespace
 	* @param buildNumber the build number
 	* @return the service component that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent removeByBNS_BNU(
 		java.lang.String buildNamespace, long buildNumber)
-		throws com.liferay.portal.NoSuchServiceComponentException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchServiceComponentException {
 		return getPersistence().removeByBNS_BNU(buildNamespace, buildNumber);
 	}
 
@@ -345,11 +316,9 @@ public class ServiceComponentUtil {
 	* @param buildNamespace the build namespace
 	* @param buildNumber the build number
 	* @return the number of matching service components
-	* @throws SystemException if a system exception occurred
 	*/
 	public static int countByBNS_BNU(java.lang.String buildNamespace,
-		long buildNumber)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long buildNumber) {
 		return getPersistence().countByBNS_BNU(buildNamespace, buildNumber);
 	}
 
@@ -390,18 +359,15 @@ public class ServiceComponentUtil {
 	* @param serviceComponentId the primary key of the service component
 	* @return the service component that was removed
 	* @throws com.liferay.portal.NoSuchServiceComponentException if a service component with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent remove(
 		long serviceComponentId)
-		throws com.liferay.portal.NoSuchServiceComponentException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchServiceComponentException {
 		return getPersistence().remove(serviceComponentId);
 	}
 
 	public static com.liferay.portal.model.ServiceComponent updateImpl(
-		com.liferay.portal.model.ServiceComponent serviceComponent)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.ServiceComponent serviceComponent) {
 		return getPersistence().updateImpl(serviceComponent);
 	}
 
@@ -411,12 +377,10 @@ public class ServiceComponentUtil {
 	* @param serviceComponentId the primary key of the service component
 	* @return the service component
 	* @throws com.liferay.portal.NoSuchServiceComponentException if a service component with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent findByPrimaryKey(
 		long serviceComponentId)
-		throws com.liferay.portal.NoSuchServiceComponentException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchServiceComponentException {
 		return getPersistence().findByPrimaryKey(serviceComponentId);
 	}
 
@@ -425,22 +389,23 @@ public class ServiceComponentUtil {
 	*
 	* @param serviceComponentId the primary key of the service component
 	* @return the service component, or <code>null</code> if a service component with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.ServiceComponent fetchByPrimaryKey(
-		long serviceComponentId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long serviceComponentId) {
 		return getPersistence().fetchByPrimaryKey(serviceComponentId);
+	}
+
+	public static java.util.Map<java.io.Serializable, com.liferay.portal.model.ServiceComponent> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys) {
+		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
 	* Returns all the service components.
 	*
 	* @return the service components
-	* @throws SystemException if a system exception occurred
 	*/
-	public static java.util.List<com.liferay.portal.model.ServiceComponent> findAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static java.util.List<com.liferay.portal.model.ServiceComponent> findAll() {
 		return getPersistence().findAll();
 	}
 
@@ -454,11 +419,9 @@ public class ServiceComponentUtil {
 	* @param start the lower bound of the range of service components
 	* @param end the upper bound of the range of service components (not inclusive)
 	* @return the range of service components
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.ServiceComponent> findAll(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return getPersistence().findAll(start, end);
 	}
 
@@ -473,22 +436,17 @@ public class ServiceComponentUtil {
 	* @param end the upper bound of the range of service components (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of service components
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.ServiceComponent> findAll(
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findAll(start, end, orderByComparator);
 	}
 
 	/**
 	* Removes all the service components from the database.
-	*
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeAll() {
 		getPersistence().removeAll();
 	}
 
@@ -496,10 +454,8 @@ public class ServiceComponentUtil {
 	* Returns the number of service components.
 	*
 	* @return the number of service components
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countAll() {
 		return getPersistence().countAll();
 	}
 
@@ -517,6 +473,7 @@ public class ServiceComponentUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setPersistence(ServiceComponentPersistence persistence) {
 	}
 

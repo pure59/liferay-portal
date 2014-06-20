@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link AccountService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see AccountService
  * @generated
  */
+@ProviderType
 public class AccountServiceWrapper implements AccountService,
 	ServiceWrapper<AccountService> {
 	public AccountServiceWrapper(AccountService accountService) {
@@ -50,6 +53,7 @@ public class AccountServiceWrapper implements AccountService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public AccountService getWrappedAccountService() {
 		return _accountService;
 	}
@@ -57,6 +61,7 @@ public class AccountServiceWrapper implements AccountService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedAccountService(AccountService accountService) {
 		_accountService = accountService;
 	}

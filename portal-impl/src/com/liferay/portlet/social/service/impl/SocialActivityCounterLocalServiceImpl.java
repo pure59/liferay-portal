@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,7 +18,6 @@ import com.liferay.portal.kernel.cache.MultiVMPoolUtil;
 import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lock.LockProtectedAction;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
@@ -32,6 +31,7 @@ import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.asset.model.AssetEntry;
 import com.liferay.portlet.social.model.SocialAchievement;
 import com.liferay.portlet.social.model.SocialActivity;
+import com.liferay.portlet.social.model.SocialActivityConstants;
 import com.liferay.portlet.social.model.SocialActivityCounter;
 import com.liferay.portlet.social.model.SocialActivityCounterConstants;
 import com.liferay.portlet.social.model.SocialActivityCounterDefinition;
@@ -95,16 +95,16 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @return     the added activity counter
 	 * @throws     PortalException if the group or the previous activity counter
 	 *             could not be found
-	 * @throws     SystemException if a system exception occurred
 	 * @deprecated As of 6.2.0, replaced by {@link #addActivityCounter(long,
 	 *             long, long, String, int, int, long, int)}
 	 */
+	@Deprecated
 	@Override
 	public SocialActivityCounter addActivityCounter(
 			long groupId, long classNameId, long classPK, String name,
 			int ownerType, int currentValue, int totalValue, int startPeriod,
 			int endPeriod)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return addActivityCounter(
 			groupId, classNameId, classPK, name, ownerType, totalValue, 0, 0);
@@ -147,16 +147,16 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @return     the added activity counter
 	 * @throws     PortalException if the group or the previous activity counter
 	 *             could not be found
-	 * @throws     SystemException if a system exception occurred
 	 * @deprecated As of 6.2.0, replaced by {@link #addActivityCounter(long,
 	 *             long, long, String, int, int, long, int)}
 	 */
+	@Deprecated
 	@Override
 	public SocialActivityCounter addActivityCounter(
 			long groupId, long classNameId, long classPK, String name,
 			int ownerType, int currentValue, int totalValue, int startPeriod,
 			int endPeriod, long previousActivityCounterId, int periodLength)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return addActivityCounter(
 			groupId, classNameId, classPK, name, ownerType, totalValue,
@@ -195,7 +195,6 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @return the added activity counter
 	 * @throws PortalException if the group or the previous activity counter
 	 *         could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -203,7 +202,7 @@ public class SocialActivityCounterLocalServiceImpl
 			long groupId, long classNameId, long classPK, String name,
 			int ownerType, int totalValue, long previousActivityCounterId,
 			int periodLength)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		SocialActivityCounter activityCounter = null;
 
@@ -289,11 +288,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  activity the social activity
 	 * @throws PortalException if an expected group or expected previous
 	 *         activity counters could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void addActivityCounters(SocialActivity activity)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (!socialActivitySettingLocalService.isEnabled(
 				activity.getGroupId(), activity.getClassNameId())) {
@@ -304,6 +302,28 @@ public class SocialActivityCounterLocalServiceImpl
 		if (!socialActivitySettingLocalService.isEnabled(
 				activity.getGroupId(), activity.getClassNameId(),
 				activity.getClassPK())) {
+
+			return;
+		}
+
+		if ((activity.getType() ==
+				SocialActivityConstants.TYPE_MOVE_ATTACHMENT_TO_TRASH) ||
+			(activity.getType() ==
+				SocialActivityConstants.TYPE_MOVE_TO_TRASH)) {
+
+			disableActivityCounters(
+				activity.getClassNameId(), activity.getClassPK());
+
+			return;
+		}
+
+		if ((activity.getType() ==
+				SocialActivityConstants.TYPE_RESTORE_ATTACHMENT_FROM_TRASH) ||
+			(activity.getType() ==
+				SocialActivityConstants.TYPE_RESTORE_FROM_TRASH)) {
+
+			enableActivityCounters(
+				activity.getClassNameId(), activity.getClassPK());
 
 			return;
 		}
@@ -340,7 +360,8 @@ public class SocialActivityCounterLocalServiceImpl
 				activityDefinition.getActivityCounterDefinitions()) {
 
 			if (isAddActivityCounter(
-					user, assetEntryUser, activityCounterDefinition)) {
+					user, assetEntryUser, assetEntry,
+					activityCounterDefinition)) {
 
 				SocialActivityCounter activityCounter = addActivityCounter(
 					activity.getGroupId(), user, activity,
@@ -352,7 +373,9 @@ public class SocialActivityCounterLocalServiceImpl
 
 		SocialActivityCounter assetActivitiesCounter = null;
 
-		if (!assetEntryUser.isDefaultUser() && assetEntryUser.isActive()) {
+		if (!assetEntryUser.isDefaultUser() && assetEntryUser.isActive() &&
+			assetEntry.isVisible()) {
+
 			assetActivitiesCounter = addAssetActivitiesCounter(activity);
 		}
 
@@ -414,17 +437,17 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @return     the created activity counter
 	 * @throws     PortalException if the group or a previous activity counter
 	 *             could not be found
-	 * @throws     SystemException if a system exception occurred
 	 * @deprecated As of 6.2.0, replaced by {@link #addActivityCounter(long,
 	 *             long, long, String, int, int, long, int)}
 	 */
+	@Deprecated
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public SocialActivityCounter createActivityCounter(
 			long groupId, long classNameId, long classPK, String name,
 			int ownerType, int currentValue, int totalValue, int startPeriod,
 			int endPeriod)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return addActivityCounter(
 			groupId, classNameId, classPK, name, ownerType, totalValue, 0, 0);
@@ -466,17 +489,17 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @return     the created activity counter
 	 * @throws     PortalException if the group or the previous activity counter
 	 *             could not be found
-	 * @throws     SystemException if a system exception occurred
 	 * @deprecated As of 6.2.0, replaced by {@link #addActivityCounter(long,
 	 *             long, long, String, int, int, long, int)}
 	 */
+	@Deprecated
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public SocialActivityCounter createActivityCounter(
 			long groupId, long classNameId, long classPK, String name,
 			int ownerType, int currentValue, int totalValue, int startPeriod,
 			int endPeriod, long previousActivityCounterId, int periodLength)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return addActivityCounter(
 			groupId, classNameId, classPK, name, ownerType, totalValue,
@@ -495,11 +518,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  assetEntry the asset entry
 	 * @throws PortalException if the new contribution counter could not be
 	 *         created
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void deleteActivityCounters(AssetEntry assetEntry)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (assetEntry == null) {
 			return;
@@ -528,11 +550,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  classPK the primary key of the entity
 	 * @throws PortalException if the entity is an asset and its owner's
 	 *         contribution counter could not be updated
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void deleteActivityCounters(long classNameId, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		String className = PortalUtil.getClassName(classNameId);
 
@@ -559,11 +580,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  classPK the primary key of the entity
 	 * @throws PortalException if the entity is an asset and its owner's
 	 *         contribution counter could not be updated
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void deleteActivityCounters(String className, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (!className.equals(User.class.getName())) {
 			AssetEntry assetEntry = assetEntryLocalService.fetchEntry(
@@ -572,7 +592,7 @@ public class SocialActivityCounterLocalServiceImpl
 			deleteActivityCounters(assetEntry);
 		}
 		else {
-			long classNameId = PortalUtil.getClassNameId(className);
+			long classNameId = classNameLocalService.getClassNameId(className);
 
 			socialActivityCounterPersistence.removeByC_C(classNameId, classPK);
 
@@ -595,11 +615,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  classPK the primary key of the asset
 	 * @throws PortalException if the asset owner's contribution counter could
 	 *         not be updated
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void disableActivityCounters(long classNameId, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		String className = PortalUtil.getClassName(classNameId);
 
@@ -619,11 +638,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  classPK the primary key of the asset
 	 * @throws PortalException if the asset owner's contribution counter could
 	 *         not be updated
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void disableActivityCounters(String className, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		AssetEntry assetEntry = assetEntryLocalService.fetchEntry(
 			className, classPK);
@@ -662,11 +680,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  classPK the primary key of the asset
 	 * @throws PortalException if the asset owner's contribution counter could
 	 *         not be updated
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void enableActivityCounters(long classNameId, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		String className = PortalUtil.getClassName(classNameId);
 
@@ -686,11 +703,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  classPK the primary key of the asset
 	 * @throws PortalException if the asset owner's contribution counter could
 	 *         not be updated
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void enableActivityCounters(String className, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		AssetEntry assetEntry = assetEntryLocalService.fetchEntry(
 			className, classPK);
@@ -727,13 +743,11 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  ownerType the owner type
 	 * @param  endPeriod the end period, <code>-1</code> for the latest one
 	 * @return the matching activity counter
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public SocialActivityCounter fetchActivityCounterByEndPeriod(
-			long groupId, long classNameId, long classPK, String name,
-			int ownerType, int endPeriod)
-		throws SystemException {
+		long groupId, long classNameId, long classPK, String name,
+		int ownerType, int endPeriod) {
 
 		return socialActivityCounterPersistence.fetchByG_C_C_N_O_E(
 			groupId, classNameId, classPK, name, ownerType, endPeriod);
@@ -750,13 +764,11 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  ownerType the owner type
 	 * @param  startPeriod the start period
 	 * @return the matching activity counter
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public SocialActivityCounter fetchActivityCounterByStartPeriod(
-			long groupId, long classNameId, long classPK, String name,
-			int ownerType, int startPeriod)
-		throws SystemException {
+		long groupId, long classNameId, long classPK, String name,
+		int ownerType, int startPeriod) {
 
 		return socialActivityCounterPersistence.fetchByG_C_C_N_O_S(
 			groupId, classNameId, classPK, name, ownerType, startPeriod);
@@ -772,13 +784,11 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  name the counter name
 	 * @param  ownerType the owner type
 	 * @return the matching activity counter
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public SocialActivityCounter fetchLatestActivityCounter(
-			long groupId, long classNameId, long classPK, String name,
-			int ownerType)
-		throws SystemException {
+		long groupId, long classNameId, long classPK, String name,
+		int ownerType) {
 
 		return socialActivityCounterPersistence.fetchByG_C_C_N_O_E(
 			groupId, classNameId, classPK, name, ownerType,
@@ -798,12 +808,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  startOffset the offset for the start period
 	 * @param  endOffset the offset for the end period
 	 * @return the matching activity counters
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public List<SocialActivityCounter> getOffsetActivityCounters(
-			long groupId, String name, int startOffset, int endOffset)
-		throws SystemException {
+		long groupId, String name, int startOffset, int endOffset) {
 
 		int startPeriod = SocialCounterPeriodUtil.getStartPeriod(startOffset);
 		int endPeriod = SocialCounterPeriodUtil.getEndPeriod(endOffset);
@@ -827,12 +835,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  startOffset the offset for the start period
 	 * @param  endOffset the offset for the end period
 	 * @return the distribution of matching activity counters
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public List<SocialActivityCounter> getOffsetDistributionActivityCounters(
-			long groupId, String name, int startOffset, int endOffset)
-		throws SystemException {
+		long groupId, String name, int startOffset, int endOffset) {
 
 		int startPeriod = SocialCounterPeriodUtil.getStartPeriod(startOffset);
 		int endPeriod = SocialCounterPeriodUtil.getEndPeriod(endOffset);
@@ -855,12 +861,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  startPeriod the start period
 	 * @param  endPeriod the end period
 	 * @return the matching activity counters
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public List<SocialActivityCounter> getPeriodActivityCounters(
-			long groupId, String name, int startPeriod, int endPeriod)
-		throws SystemException {
+		long groupId, String name, int startPeriod, int endPeriod) {
 
 		if (endPeriod == SocialActivityCounterConstants.END_PERIOD_UNDEFINED) {
 			endPeriod = SocialCounterPeriodUtil.getEndPeriod();
@@ -890,12 +894,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  startPeriod the start period
 	 * @param  endPeriod the end period
 	 * @return the distribution of matching activity counters
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public List<SocialActivityCounter> getPeriodDistributionActivityCounters(
-			long groupId, String name, int startPeriod, int endPeriod)
-		throws SystemException {
+		long groupId, String name, int startPeriod, int endPeriod) {
 
 		int offset = SocialCounterPeriodUtil.getOffset(endPeriod);
 
@@ -932,13 +934,11 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching tuples
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public List<Tuple> getUserActivityCounters(
-			long groupId, String[] rankingNames, String[] selectedNames,
-			int start, int end)
-		throws SystemException {
+		long groupId, String[] rankingNames, String[] selectedNames, int start,
+		int end) {
 
 		List<Long> userIds = socialActivityCounterFinder.findU_ByG_N(
 			groupId, rankingNames, start, end);
@@ -989,11 +989,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  groupId the primary key of the group
 	 * @param  rankingNames the ranking counter names
 	 * @return the number of matching users
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public int getUserActivityCountersCount(long groupId, String[] rankingNames)
-		throws SystemException {
+	public int getUserActivityCountersCount(
+		long groupId, String[] rankingNames) {
 
 		return socialActivityCounterFinder.countU_ByG_N(groupId, rankingNames);
 	}
@@ -1010,11 +1009,10 @@ public class SocialActivityCounterLocalServiceImpl
 	 * @param  groupId the primary key of the group
 	 * @throws PortalException if the group or an expected previous activity
 	 *         counter could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void incrementUserAchievementCounter(long userId, long groupId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(userId);
 
@@ -1029,7 +1027,7 @@ public class SocialActivityCounterLocalServiceImpl
 	protected SocialActivityCounter addActivityCounter(
 			final long groupId, final User user, final SocialActivity activity,
 			final SocialActivityCounterDefinition activityCounterDefinition)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		int ownerType = activityCounterDefinition.getOwnerType();
 
@@ -1075,7 +1073,7 @@ public class SocialActivityCounterLocalServiceImpl
 
 	protected SocialActivityCounter addAssetActivitiesCounter(
 			SocialActivity activity)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(activity.getUserId());
 
@@ -1086,7 +1084,7 @@ public class SocialActivityCounterLocalServiceImpl
 
 	protected SocialActivityCounter addUserActivitiesCounter(
 			SocialActivity activity)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(activity.getUserId());
 
@@ -1096,7 +1094,7 @@ public class SocialActivityCounterLocalServiceImpl
 	}
 
 	protected void adjustUserContribution(AssetEntry assetEntry, boolean enable)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (assetEntry == null) {
 			return;
@@ -1125,7 +1123,7 @@ public class SocialActivityCounterLocalServiceImpl
 		SocialActivityCounter latestContributionActivityCounter =
 			fetchLatestActivityCounter(
 				assetEntry.getGroupId(),
-				PortalUtil.getClassNameId(User.class.getName()),
+				classNameLocalService.getClassNameId(User.class.getName()),
 				assetEntry.getUserId(),
 				SocialActivityCounterConstants.NAME_CONTRIBUTION,
 				SocialActivityCounterConstants.TYPE_CREATOR);
@@ -1168,7 +1166,7 @@ public class SocialActivityCounterLocalServiceImpl
 	protected boolean checkActivityLimit(
 			User user, SocialActivity activity,
 			SocialActivityCounterDefinition activityCounterDefinition)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (activityCounterDefinition.getLimitValue() == 0) {
 			return true;
@@ -1215,7 +1213,7 @@ public class SocialActivityCounterLocalServiceImpl
 			return assetEntry.getClassNameId();
 		}
 
-		return PortalUtil.getClassNameId(User.class.getName());
+		return classNameLocalService.getClassNameId(User.class.getName());
 	}
 
 	protected long getClassPK(User user, AssetEntry assetEntry, int ownerType) {
@@ -1244,9 +1242,8 @@ public class SocialActivityCounterLocalServiceImpl
 	}
 
 	protected void incrementActivityCounter(
-			SocialActivityCounter activityCounter,
-			SocialActivityCounterDefinition activityCounterDefinition)
-		throws SystemException {
+		SocialActivityCounter activityCounter,
+		SocialActivityCounterDefinition activityCounterDefinition) {
 
 		activityCounter.setCurrentValue(
 			activityCounter.getCurrentValue() +
@@ -1261,7 +1258,7 @@ public class SocialActivityCounterLocalServiceImpl
 	}
 
 	protected boolean isAddActivityCounter(
-		User user, User assetEntryUser,
+		User user, User assetEntryUser, AssetEntry assetEntry,
 		SocialActivityCounterDefinition activityCounterDefinition) {
 
 		if ((user.isDefaultUser() || !user.isActive()) &&
@@ -1293,6 +1290,13 @@ public class SocialActivityCounterLocalServiceImpl
 			return false;
 		}
 
+		if ((activityCounterDefinition.getOwnerType() ==
+				SocialActivityCounterConstants.TYPE_ASSET) &&
+			!assetEntry.isVisible()) {
+
+			return false;
+		}
+
 		return true;
 	}
 
@@ -1300,7 +1304,7 @@ public class SocialActivityCounterLocalServiceImpl
 			final long groupId, final long classNameId, final long classPK,
 			final String name, final int ownerType, final int totalValue,
 			final long previousActivityCounterId, final int periodLength)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		String lockKey = StringUtil.merge(
 			new Object[] {
@@ -1316,7 +1320,7 @@ public class SocialActivityCounterLocalServiceImpl
 
 			@Override
 			protected SocialActivityCounter performProtectedAction()
-				throws PortalException, SystemException {
+				throws PortalException {
 
 				SocialActivityCounter activityCounter =
 					socialActivityCounterLocalService.addActivityCounter(
@@ -1336,7 +1340,7 @@ public class SocialActivityCounterLocalServiceImpl
 	protected void lockProtectedGetActivityLimit(
 			final long groupId, final User user, final SocialActivity activity,
 			final SocialActivityCounterDefinition activityCounterDefinition)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		final long classPK = getLimitClassPK(
 			activity, activityCounterDefinition);
@@ -1356,7 +1360,7 @@ public class SocialActivityCounterLocalServiceImpl
 
 			@Override
 			protected SocialActivityLimit performProtectedAction()
-				throws PortalException, SystemException {
+				throws PortalException {
 
 				SocialActivityLimit activityLimit =
 					socialActivityLimitPersistence.fetchByG_U_C_C_A_A(

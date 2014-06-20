@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.mobiledevicerules.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see MDRRuleGroupInstanceService
  * @generated
  */
+@ProviderType
 public class MDRRuleGroupInstanceServiceWrapper
 	implements MDRRuleGroupInstanceService,
 		ServiceWrapper<MDRRuleGroupInstanceService> {
@@ -56,8 +59,7 @@ public class MDRRuleGroupInstanceServiceWrapper
 		long groupId, java.lang.String className, long classPK,
 		long ruleGroupId, int priority,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrRuleGroupInstanceService.addRuleGroupInstance(groupId,
 			className, classPK, ruleGroupId, priority, serviceContext);
 	}
@@ -67,32 +69,28 @@ public class MDRRuleGroupInstanceServiceWrapper
 		long groupId, java.lang.String className, long classPK,
 		long ruleGroupId,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrRuleGroupInstanceService.addRuleGroupInstance(groupId,
 			className, classPK, ruleGroupId, serviceContext);
 	}
 
 	@Override
 	public void deleteRuleGroupInstance(long ruleGroupInstanceId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_mdrRuleGroupInstanceService.deleteRuleGroupInstance(ruleGroupInstanceId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.mobiledevicerules.model.MDRRuleGroupInstance> getRuleGroupInstances(
 		java.lang.String className, long classPK, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return _mdrRuleGroupInstanceService.getRuleGroupInstances(className,
 			classPK, start, end, orderByComparator);
 	}
 
 	@Override
 	public int getRuleGroupInstancesCount(java.lang.String className,
-		long classPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long classPK) {
 		return _mdrRuleGroupInstanceService.getRuleGroupInstancesCount(className,
 			classPK);
 	}
@@ -100,8 +98,7 @@ public class MDRRuleGroupInstanceServiceWrapper
 	@Override
 	public com.liferay.portlet.mobiledevicerules.model.MDRRuleGroupInstance updateRuleGroupInstance(
 		long ruleGroupInstanceId, int priority)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrRuleGroupInstanceService.updateRuleGroupInstance(ruleGroupInstanceId,
 			priority);
 	}
@@ -109,6 +106,7 @@ public class MDRRuleGroupInstanceServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public MDRRuleGroupInstanceService getWrappedMDRRuleGroupInstanceService() {
 		return _mdrRuleGroupInstanceService;
 	}
@@ -116,6 +114,7 @@ public class MDRRuleGroupInstanceServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedMDRRuleGroupInstanceService(
 		MDRRuleGroupInstanceService mdrRuleGroupInstanceService) {
 		_mdrRuleGroupInstanceService = mdrRuleGroupInstanceService;

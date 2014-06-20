@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -32,6 +34,7 @@ import com.liferay.portal.security.ac.AccessControlled;
  * @see com.liferay.portal.service.impl.LayoutSetServiceImpl
  * @generated
  */
+@ProviderType
 @AccessControlled
 @JSONWebService
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
@@ -75,47 +78,38 @@ public interface LayoutSetService extends BaseService {
 	* @param layoutSetPrototypeUuid the uuid of the layout set prototype to
 	link with
 	* @throws PortalException if a portal exception occurred
-	* @throws SystemException if a system exception occurred
 	*/
 	public void updateLayoutSetPrototypeLinkEnabled(long groupId,
 		boolean privateLayout, boolean layoutSetPrototypeLinkEnabled,
 		java.lang.String layoutSetPrototypeUuid)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public void updateLogo(long groupId, boolean privateLayout, boolean logo,
 		byte[] bytes)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public void updateLogo(long groupId, boolean privateLayout, boolean logo,
 		java.io.File file)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public void updateLogo(long groupId, boolean privateLayout, boolean logo,
 		java.io.InputStream inputStream)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public void updateLogo(long groupId, boolean privateLayout, boolean logo,
 		java.io.InputStream inputStream, boolean cleanUpStream)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public com.liferay.portal.model.LayoutSet updateLookAndFeel(long groupId,
 		boolean privateLayout, java.lang.String themeId,
 		java.lang.String colorSchemeId, java.lang.String css, boolean wapTheme)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public com.liferay.portal.model.LayoutSet updateSettings(long groupId,
 		boolean privateLayout, java.lang.String settings)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public com.liferay.portal.model.LayoutSet updateVirtualHost(long groupId,
 		boolean privateLayout, java.lang.String virtualHost)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 }

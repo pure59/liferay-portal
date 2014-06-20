@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,11 +15,9 @@
 package com.liferay.portal.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Shard;
 import com.liferay.portal.service.base.ShardLocalServiceBaseImpl;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsValues;
 
 /**
@@ -28,10 +26,8 @@ import com.liferay.portal.util.PropsValues;
 public class ShardLocalServiceImpl extends ShardLocalServiceBaseImpl {
 
 	@Override
-	public Shard addShard(String className, long classPK, String name)
-		throws SystemException {
-
-		long classNameId = PortalUtil.getClassNameId(className);
+	public Shard addShard(String className, long classPK, String name) {
+		long classNameId = classNameLocalService.getClassNameId(className);
 
 		if (Validator.isNull(name)) {
 			name = PropsValues.SHARD_DEFAULT_NAME;
@@ -52,9 +48,9 @@ public class ShardLocalServiceImpl extends ShardLocalServiceBaseImpl {
 
 	@Override
 	public Shard getShard(String className, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 
 		return shardPersistence.findByC_C(classNameId, classPK);
 	}

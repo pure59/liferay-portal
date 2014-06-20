@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.2.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_2_0.dtd">
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 7.0.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_7_0_0.dtd">
 
-<service-builder package-path="com.liferay.portlet.journal">
+<service-builder package-path="com.liferay.portlet.journal" auto-import-default-references="false">
 	<namespace>Journal</namespace>
-	<entity name="JournalArticle" uuid="true" local-service="true" remote-service="true">
+	<entity name="JournalArticle" uuid="true" local-service="true" remote-service="true" trash-enabled="true">
 
 		<!-- PK fields -->
 
@@ -30,6 +30,7 @@
 		<column name="folderId" type="long" />
 		<column name="classNameId" type="long" />
 		<column name="classPK" type="long" />
+		<column name="treePath" type="String" />
 		<column name="articleId" type="String" accessor="true" />
 		<column name="version" type="double" />
 		<column name="title" type="String" localized="true" />
@@ -82,6 +83,10 @@
 		<finder name="SmallImageId" return-type="Collection">
 			<finder-column name="smallImageId" />
 		</finder>
+		<finder name="R_I" return-type="Collection">
+			<finder-column name="resourcePrimKey" />
+			<finder-column name="indexable" />
+		</finder>
 		<finder name="R_ST" return-type="Collection">
 			<finder-column name="resourcePrimKey" />
 			<finder-column name="status" />
@@ -126,6 +131,24 @@
 			<finder-column name="companyId" />
 			<finder-column name="status" />
 		</finder>
+		<finder name="C_NotST" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="status" comparator="!=" />
+		</finder>
+		<finder name="LtD_S" return-type="Collection">
+			<finder-column name="displayDate" comparator="&lt;" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="R_I_S" return-type="Collection">
+			<finder-column name="resourcePrimKey" />
+			<finder-column name="indexable" />
+			<finder-column name="status" arrayable-operator="OR" />
+		</finder>
+		<finder name="G_U_C" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="userId" />
+			<finder-column name="classNameId" />
+		</finder>
 		<finder name="G_F_ST" return-type="Collection">
 			<finder-column name="groupId" />
 			<finder-column name="folderId" />
@@ -151,11 +174,6 @@
 			<finder-column name="classNameId" />
 			<finder-column name="layoutUuid" />
 		</finder>
-		<finder name="G_U_C" return-type="Collection">
-			<finder-column name="groupId" />
-			<finder-column name="userId" />
-			<finder-column name="classNameId" />
-		</finder>
 		<finder name="G_A_V" return-type="JournalArticle" unique="true">
 			<finder-column name="groupId" />
 			<finder-column name="articleId" />
@@ -165,6 +183,11 @@
 			<finder-column name="groupId" />
 			<finder-column name="articleId" />
 			<finder-column name="status" arrayable-operator="OR" />
+		</finder>
+		<finder name="G_A_NotST" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="articleId" />
+			<finder-column name="status" comparator="!=" />
 		</finder>
 		<finder name="G_UT_ST" return-type="Collection">
 			<finder-column name="groupId" />
@@ -180,11 +203,15 @@
 		<!-- References -->
 
 		<reference package-path="com.liferay.mail" entity="Mail" />
+		<reference package-path="com.liferay.portal" entity="ClassName" />
 		<reference package-path="com.liferay.portal" entity="Company" />
 		<reference package-path="com.liferay.portal" entity="Group" />
 		<reference package-path="com.liferay.portal" entity="Image" />
 		<reference package-path="com.liferay.portal" entity="PortletPreferences" />
+		<reference package-path="com.liferay.portal" entity="Resource" />
 		<reference package-path="com.liferay.portal" entity="Subscription" />
+		<reference package-path="com.liferay.portal" entity="SystemEvent" />
+		<reference package-path="com.liferay.portal" entity="User" />
 		<reference package-path="com.liferay.portal" entity="WorkflowDefinitionLink" />
 		<reference package-path="com.liferay.portal" entity="WorkflowInstanceLink" />
 		<reference package-path="com.liferay.portlet.asset" entity="AssetCategory" />
@@ -194,11 +221,15 @@
 		<reference package-path="com.liferay.portlet.dynamicdatamapping" entity="DDMStructure" />
 		<reference package-path="com.liferay.portlet.dynamicdatamapping" entity="DDMTemplate" />
 		<reference package-path="com.liferay.portlet.expando" entity="ExpandoRow" />
+		<reference package-path="com.liferay.portlet.journal" entity="JournalArticleImage" />
+		<reference package-path="com.liferay.portlet.journal" entity="JournalArticleResource" />
+		<reference package-path="com.liferay.portlet.journal" entity="JournalContentSearch" />
+		<reference package-path="com.liferay.portlet.journal" entity="JournalFolder" />
 		<reference package-path="com.liferay.portlet.messageboards" entity="MBMessage" />
 		<reference package-path="com.liferay.portlet.ratings" entity="RatingsStats" />
 		<reference package-path="com.liferay.portlet.social" entity="SocialActivity" />
-		<reference package-path="com.liferay.portlet.social" entity="SocialActivityCounter" />
 		<reference package-path="com.liferay.portlet.trash" entity="TrashEntry" />
+		<reference package-path="com.liferay.portlet.trash" entity="TrashVersion" />
 	</entity>
 	<entity name="JournalArticleImage" local-service="true" remote-service="false">
 
@@ -387,11 +418,14 @@
 
 		<!-- References -->
 
+		<reference package-path="com.liferay.portal" entity="ClassName" />
+		<reference package-path="com.liferay.portal" entity="Resource" />
 		<reference package-path="com.liferay.portal" entity="SystemEvent" />
+		<reference package-path="com.liferay.portal" entity="User" />
 		<reference package-path="com.liferay.portlet.dynamicdatamapping" entity="DDMStructure" />
 		<reference package-path="com.liferay.portlet.expando" entity="ExpandoValue" />
 	</entity>
-	<entity name="JournalFolder" uuid="true" local-service="true" remote-service="true">
+	<entity name="JournalFolder" uuid="true" local-service="true" remote-service="true" trash-enabled="true">
 
 		<!-- PK fields -->
 
@@ -411,13 +445,19 @@
 
 		<!-- Other fields -->
 
-		<column name="parentFolderId" type="long" />
+		<column name="parentFolderId" type="long" parent-container-model="true" />
+		<column name="treePath" type="String" />
 		<column name="name" type="String" />
 		<column name="description" type="String" />
+		<column name="restrictionType" type="int" />
 		<column name="status" type="int" />
 		<column name="statusByUserId" type="long" />
 		<column name="statusByUserName" type="String" />
 		<column name="statusDate" type="Date" />
+
+		<!-- Relationships -->
+
+		<column name="ddmStructure" type="Collection" entity="com.liferay.portlet.dynamicdatamapping.DDMStructure" mapping-table="JournalFolders_DDMStructures" />
 
 		<!-- Order -->
 
@@ -442,6 +482,16 @@
 			<finder-column name="groupId" />
 			<finder-column name="name" />
 		</finder>
+		<finder name="C_NotS" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="status" comparator="!=" />
+		</finder>
+		<finder name="F_C_P_NotS" return-type="Collection" db-index="false">
+			<finder-column name="folderId" comparator="&gt;" />
+			<finder-column name="companyId" />
+			<finder-column name="parentFolderId" />
+			<finder-column name="status" comparator="!=" />
+		</finder>
 		<finder name="G_P_N" return-type="JournalFolder" unique="true">
 			<finder-column name="groupId" />
 			<finder-column name="parentFolderId" />
@@ -460,29 +510,21 @@
 
 		<!-- References -->
 
+		<reference package-path="com.liferay.portal" entity="ClassName" />
 		<reference package-path="com.liferay.portal" entity="Group" />
+		<reference package-path="com.liferay.portal" entity="Resource" />
+		<reference package-path="com.liferay.portal" entity="Subscription" />
+		<reference package-path="com.liferay.portal" entity="User" />
+		<reference package-path="com.liferay.portal" entity="WorkflowDefinitionLink" />
 		<reference package-path="com.liferay.portal" entity="WorkflowInstanceLink" />
 		<reference package-path="com.liferay.portlet.asset" entity="AssetEntry" />
 		<reference package-path="com.liferay.portlet.asset" entity="AssetLink" />
-		<reference package-path="com.liferay.portlet.expando" entity="ExpandoValue" />
-		<reference package-path="com.liferay.portlet.social" entity="SocialActivity" />
-		<reference package-path="com.liferay.portlet.social" entity="SocialActivityCounter" />
-		<reference package-path="com.liferay.portlet.trash" entity="TrashEntry" />
-	</entity>
-	<entity name="JournalStructure" local-service="true" remote-service="true" deprecated="true">
-
-		<!-- References -->
-
-		<reference package-path="com.liferay.portal" entity="Group" />
 		<reference package-path="com.liferay.portlet.dynamicdatamapping" entity="DDMStructure" />
-	</entity>
-	<entity name="JournalTemplate" local-service="true" remote-service="true" deprecated="true">
-
-		<!-- References -->
-
-		<reference package-path="com.liferay.portal" entity="Group" />
-		<reference package-path="com.liferay.portal" entity="Image" />
-		<reference package-path="com.liferay.portlet.dynamicdatamapping" entity="DDMTemplate" />
+		<reference package-path="com.liferay.portlet.expando" entity="ExpandoValue" />
+		<reference package-path="com.liferay.portlet.journal" entity="JournalArticle" />
+		<reference package-path="com.liferay.portlet.social" entity="SocialActivity" />
+		<reference package-path="com.liferay.portlet.trash" entity="TrashEntry" />
+		<reference package-path="com.liferay.portlet.trash" entity="TrashVersion" />
 	</entity>
 	<exceptions>
 		<exception>ArticleContent</exception>
@@ -499,25 +541,12 @@
 		<exception>DuplicateArticleImageId</exception>
 		<exception>DuplicateFeedId</exception>
 		<exception>DuplicateFolderName</exception>
-		<exception>DuplicateStructureElement</exception>
-		<exception>DuplicateStructureId</exception>
-		<exception>DuplicateTemplateId</exception>
 		<exception>FeedContentField</exception>
 		<exception>FeedId</exception>
 		<exception>FeedName</exception>
 		<exception>FeedTargetLayoutFriendlyUrl</exception>
 		<exception>FeedTargetPortletId</exception>
 		<exception>FolderName</exception>
-		<exception>RequiredStructure</exception>
-		<exception>RequiredTemplate</exception>
-		<exception>StructureId</exception>
-		<exception>StructureInheritance</exception>
-		<exception>StructureName</exception>
-		<exception>StructureXsd</exception>
-		<exception>TemplateId</exception>
-		<exception>TemplateName</exception>
-		<exception>TemplateSmallImageName</exception>
-		<exception>TemplateSmallImageSize</exception>
-		<exception>TemplateXsl</exception>
+		<exception>InvalidDDMStructure</exception>
 	</exceptions>
 </service-builder>

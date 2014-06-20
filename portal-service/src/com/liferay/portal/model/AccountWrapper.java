@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see Account
  * @generated
  */
+@ProviderType
 public class AccountWrapper implements Account, ModelWrapper<Account> {
 	public AccountWrapper(Account account) {
 		_account = account;
@@ -48,6 +51,7 @@ public class AccountWrapper implements Account, ModelWrapper<Account> {
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("accountId", getAccountId());
 		attributes.put("companyId", getCompanyId());
 		attributes.put("userId", getUserId());
@@ -70,6 +74,12 @@ public class AccountWrapper implements Account, ModelWrapper<Account> {
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long accountId = (Long)attributes.get("accountId");
 
 		if (accountId != null) {
@@ -188,6 +198,26 @@ public class AccountWrapper implements Account, ModelWrapper<Account> {
 	}
 
 	/**
+	* Returns the mvcc version of this account.
+	*
+	* @return the mvcc version of this account
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _account.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this account.
+	*
+	* @param mvccVersion the mvcc version of this account
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_account.setMvccVersion(mvccVersion);
+	}
+
+	/**
 	* Returns the account ID of this account.
 	*
 	* @return the account ID of this account
@@ -251,11 +281,9 @@ public class AccountWrapper implements Account, ModelWrapper<Account> {
 	* Returns the user uuid of this account.
 	*
 	* @return the user uuid of this account
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _account.getUserUuid();
 	}
 
@@ -628,8 +656,7 @@ public class AccountWrapper implements Account, ModelWrapper<Account> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_account.persist();
 	}
 
@@ -655,6 +682,7 @@ public class AccountWrapper implements Account, ModelWrapper<Account> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public Account getWrappedAccount() {
 		return _account;
 	}
@@ -662,6 +690,16 @@ public class AccountWrapper implements Account, ModelWrapper<Account> {
 	@Override
 	public Account getWrappedModel() {
 		return _account;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _account.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _account.isFinderCacheEnabled();
 	}
 
 	@Override

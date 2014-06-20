@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portlet.messageboards.model.MBCategory;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil;
 import com.liferay.portlet.messageboards.service.permission.MBMessagePermission;
@@ -59,18 +60,11 @@ public class MBMessageActivityInterpreter
 
 		String categoryLink = sb.toString();
 
+		categoryLink = addNoSuchEntryRedirect(
+			categoryLink, MBCategory.class.getName(), message.getCategoryId(),
+			serviceContext);
+
 		return wrapLink(categoryLink, "go-to-category", serviceContext);
-	}
-
-	@Override
-	protected String getEntryTitle(
-			SocialActivity activity, ServiceContext serviceContext)
-		throws Exception {
-
-		MBMessage message = MBMessageLocalServiceUtil.getMessage(
-			activity.getClassPK());
-
-		return message.getSubject();
 	}
 
 	@Override

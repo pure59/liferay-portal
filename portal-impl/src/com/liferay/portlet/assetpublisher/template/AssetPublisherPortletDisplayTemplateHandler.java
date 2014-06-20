@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -71,8 +71,11 @@ public class AssetPublisherPortletDisplayTemplateHandler
 		Map<String, TemplateVariableGroup> templateVariableGroups =
 			super.getTemplateVariableGroups(classPK, language, locale);
 
+		String[] restrictedVariables = getRestrictedVariables(language);
+
 		TemplateVariableGroup assetPublisherUtilTemplateVariableGroup =
-			new TemplateVariableGroup("asset-publisher-util");
+			new TemplateVariableGroup(
+				"asset-publisher-util", restrictedVariables);
 
 		assetPublisherUtilTemplateVariableGroup.addVariable(
 			"asset-publisher-helper", AssetPublisherHelper.class,
@@ -95,7 +98,7 @@ public class AssetPublisherPortletDisplayTemplateHandler
 			PortletDisplayTemplateConstants.ENTRY, "getTitle(locale)");
 
 		TemplateVariableGroup assetServicesTemplateVariableGroup =
-			new TemplateVariableGroup("asset-services");
+			new TemplateVariableGroup("asset-services", restrictedVariables);
 
 		assetServicesTemplateVariableGroup.setAutocompleteEnabled(false);
 

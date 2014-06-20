@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,18 +15,19 @@
 package com.liferay.portlet.bookmarks.trash;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.trash.TrashActionKeys;
 import com.liferay.portal.model.ContainerModel;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.bookmarks.NoSuchFolderException;
 import com.liferay.portlet.bookmarks.model.BookmarksEntry;
 import com.liferay.portlet.bookmarks.service.BookmarksEntryLocalServiceUtil;
+import com.liferay.portlet.bookmarks.service.BookmarksFolderLocalServiceUtil;
 import com.liferay.portlet.bookmarks.service.permission.BookmarksEntryPermission;
 import com.liferay.portlet.bookmarks.service.permission.BookmarksFolderPermission;
 import com.liferay.portlet.bookmarks.util.BookmarksUtil;
+import com.liferay.portlet.trash.model.TrashEntry;
 
 import javax.portlet.PortletRequest;
 
@@ -39,9 +40,7 @@ import javax.portlet.PortletRequest;
 public class BookmarksEntryTrashHandler extends BookmarksBaseTrashHandler {
 
 	@Override
-	public void deleteTrashEntry(long classPK)
-		throws PortalException, SystemException {
-
+	public void deleteTrashEntry(long classPK) throws PortalException {
 		BookmarksEntryLocalServiceUtil.deleteEntry(classPK);
 	}
 
@@ -52,7 +51,7 @@ public class BookmarksEntryTrashHandler extends BookmarksBaseTrashHandler {
 
 	@Override
 	public ContainerModel getParentContainerModel(long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		BookmarksEntry entry = BookmarksEntryLocalServiceUtil.getEntry(classPK);
 
@@ -66,8 +65,18 @@ public class BookmarksEntryTrashHandler extends BookmarksBaseTrashHandler {
 	}
 
 	@Override
-	public String getRestoreLink(PortletRequest portletRequest, long classPK)
-		throws PortalException, SystemException {
+	public ContainerModel getParentContainerModel(TrashedModel trashedModel)
+		throws PortalException {
+
+		BookmarksEntry entry = (BookmarksEntry)trashedModel;
+
+		return getContainerModel(entry.getFolderId());
+	}
+
+	@Override
+	public String getRestoreContainerModelLink(
+			PortletRequest portletRequest, long classPK)
+		throws PortalException {
 
 		BookmarksEntry entry = BookmarksEntryLocalServiceUtil.getEntry(classPK);
 
@@ -77,7 +86,7 @@ public class BookmarksEntryTrashHandler extends BookmarksBaseTrashHandler {
 
 	@Override
 	public String getRestoreMessage(PortletRequest portletRequest, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		BookmarksEntry entry = BookmarksEntryLocalServiceUtil.getEntry(classPK);
 
@@ -86,19 +95,17 @@ public class BookmarksEntryTrashHandler extends BookmarksBaseTrashHandler {
 	}
 
 	@Override
-	public ContainerModel getTrashContainer(long classPK)
-		throws PortalException, SystemException {
-
+	public TrashEntry getTrashEntry(long classPK) throws PortalException {
 		BookmarksEntry entry = BookmarksEntryLocalServiceUtil.getEntry(classPK);
 
-		return entry.getTrashContainer();
+		return entry.getTrashEntry();
 	}
 
 	@Override
 	public boolean hasTrashPermission(
 			PermissionChecker permissionChecker, long groupId, long classPK,
 			String trashActionId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (trashActionId.equals(TrashActionKeys.MOVE)) {
 			return BookmarksFolderPermission.contains(
@@ -110,33 +117,27 @@ public class BookmarksEntryTrashHandler extends BookmarksBaseTrashHandler {
 	}
 
 	@Override
-	public boolean isInTrash(long classPK)
-		throws PortalException, SystemException {
-
+	public boolean isInTrash(long classPK) throws PortalException {
 		BookmarksEntry entry = BookmarksEntryLocalServiceUtil.getEntry(classPK);
 
 		return entry.isInTrash();
 	}
 
 	@Override
-	public boolean isInTrashContainer(long classPK)
-		throws PortalException, SystemException {
-
+	public boolean isInTrashContainer(long classPK) throws PortalException {
 		BookmarksEntry entry = BookmarksEntryLocalServiceUtil.getEntry(classPK);
 
 		return entry.isInTrashContainer();
 	}
 
 	@Override
-	public boolean isRestorable(long classPK)
-		throws PortalException, SystemException {
-
+	public boolean isRestorable(long classPK) throws PortalException {
 		BookmarksEntry entry = BookmarksEntryLocalServiceUtil.getEntry(classPK);
 
-		try {
-			entry.getFolder();
-		}
-		catch (NoSuchFolderException nsfe) {
+		if ((entry.getFolderId() > 0) &&
+			(BookmarksFolderLocalServiceUtil.fetchBookmarksFolder(
+				entry.getFolderId()) == null)) {
+
 			return false;
 		}
 
@@ -147,7 +148,7 @@ public class BookmarksEntryTrashHandler extends BookmarksBaseTrashHandler {
 	public void moveEntry(
 			long userId, long classPK, long containerModelId,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		BookmarksEntryLocalServiceUtil.moveEntry(classPK, containerModelId);
 	}
@@ -156,7 +157,7 @@ public class BookmarksEntryTrashHandler extends BookmarksBaseTrashHandler {
 	public void moveTrashEntry(
 			long userId, long classPK, long containerId,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		BookmarksEntryLocalServiceUtil.moveEntryFromTrash(
 			userId, classPK, containerId);
@@ -164,15 +165,13 @@ public class BookmarksEntryTrashHandler extends BookmarksBaseTrashHandler {
 
 	@Override
 	public void restoreTrashEntry(long userId, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		BookmarksEntryLocalServiceUtil.restoreEntryFromTrash(userId, classPK);
 	}
 
 	@Override
-	protected long getGroupId(long classPK)
-		throws PortalException, SystemException {
-
+	protected long getGroupId(long classPK) throws PortalException {
 		BookmarksEntry entry = BookmarksEntryLocalServiceUtil.getEntry(classPK);
 
 		return entry.getGroupId();
@@ -181,7 +180,7 @@ public class BookmarksEntryTrashHandler extends BookmarksBaseTrashHandler {
 	@Override
 	protected boolean hasPermission(
 			PermissionChecker permissionChecker, long classPK, String actionId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		BookmarksEntry entry = BookmarksEntryLocalServiceUtil.getEntry(classPK);
 

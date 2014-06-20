@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -25,6 +25,8 @@ import java.util.TimeZone;
  * @author Raymond Augé
  */
 public class TimeZoneUtil {
+
+	public static TimeZone GMT;
 
 	public static TimeZone getDefault() {
 		return getInstance()._getDefault();
@@ -79,6 +81,10 @@ public class TimeZoneUtil {
 	}
 
 	private static TimeZoneUtil _instance = new TimeZoneUtil();
+
+	static {
+		GMT = getTimeZone("GMT");
+	}
 
 	private TimeZone _timeZone;
 	private Map<String, TimeZone> _timeZones = new HashMap<String, TimeZone>();

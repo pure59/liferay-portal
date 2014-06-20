@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,7 @@
 package com.liferay.portlet.polls.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -23,8 +23,10 @@ import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -202,6 +204,9 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		attributes.put("choiceId", getChoiceId());
 		attributes.put("voteDate", getVoteDate());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
@@ -274,8 +279,8 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -298,8 +303,8 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getVoteId() {
 		return _voteId;
 	}
@@ -309,8 +314,8 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		_voteId = voteId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -332,8 +337,8 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -355,8 +360,8 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -375,21 +380,27 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
 	public long getOriginalUserId() {
 		return _originalUserId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -404,8 +415,8 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -415,8 +426,8 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -426,8 +437,8 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		_modifiedDate = modifiedDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getQuestionId() {
 		return _questionId;
 	}
@@ -449,8 +460,8 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		return _originalQuestionId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getChoiceId() {
 		return _choiceId;
 	}
@@ -472,8 +483,8 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 		return _originalChoiceId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getVoteDate() {
 		return _voteDate;
 	}
@@ -577,6 +588,16 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 	@Override
 	public int hashCode() {
 		return (int)getPrimaryKey();
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
 	}
 
 	@Override
@@ -773,7 +794,6 @@ public class PollsVoteModelImpl extends BaseModelImpl<PollsVote>
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private long _originalUserId;
 	private boolean _setOriginalUserId;
 	private String _userName;

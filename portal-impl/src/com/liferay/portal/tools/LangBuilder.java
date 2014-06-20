@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,14 +21,13 @@ import com.liferay.portal.kernel.io.unsync.UnsyncStringReader;
 import com.liferay.portal.kernel.microsofttranslator.MicrosoftTranslatorException;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.NumericalStringComparator;
+import com.liferay.portal.kernel.util.NaturalOrderStringComparator;
 import com.liferay.portal.kernel.util.PropertiesUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.webcache.WebCacheItem;
-import com.liferay.portal.util.InitUtil;
 import com.liferay.portlet.translator.model.Translation;
 import com.liferay.portlet.translator.util.TranslationWebCacheItem;
 
@@ -41,8 +40,7 @@ import java.io.InputStream;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 /**
  * @author Brian Wing Shun Chan
@@ -55,11 +53,11 @@ public class LangBuilder {
 		" (Automatic Translation)";
 
 	public static void main(String[] args) {
+		ToolDependencies.wireBasic();
+
 		Map<String, String> arguments = ArgumentsUtil.parseArguments(args);
 
 		System.setProperty("line.separator", StringPool.NEW_LINE);
-
-		InitUtil.initWithSpring();
 
 		String langDir = arguments.get("lang.dir");
 		String langFile = arguments.get("lang.file");
@@ -275,7 +273,7 @@ public class LangBuilder {
 							baseKey);
 
 						if (Validator.isNotNull(translatedBaseKey)) {
-							translatedText = translatedBaseKey + AUTOMATIC_COPY;
+							translatedText = translatedBaseKey;
 						}
 						else {
 							translatedText = value + AUTOMATIC_COPY;
@@ -297,6 +295,11 @@ public class LangBuilder {
 						translatedText = "";
 					}
 					else if (languageId.equals("es") && key.equals("am")) {
+						translatedText = "";
+					}
+					else if (languageId.equals("fi") &&
+							 (key.equals("on") || key.equals("the"))) {
+
 						translatedText = "";
 					}
 					else if (languageId.equals("it") && key.equals("am")) {
@@ -483,8 +486,8 @@ public class LangBuilder {
 		UnsyncBufferedWriter unsyncBufferedWriter = new UnsyncBufferedWriter(
 			new FileWriter(propertiesFile));
 
-		Set<String> messages = new TreeSet<String>(
-			new NumericalStringComparator(true, true));
+		Map<String, String> messages = new TreeMap<String, String>(
+			new NaturalOrderStringComparator(true, true));
 
 		boolean begin = false;
 		boolean firstLine = true;
@@ -497,20 +500,24 @@ public class LangBuilder {
 			if (pos != -1) {
 				String key = line.substring(0, pos);
 
-				String value = _fixTranslation(line.substring(pos + 1));
+				String value = line.substring(pos + 1);
 
-				value = _fixEnglishTranslation(key, value);
+				if (Validator.isNotNull(value)) {
+					value = _fixTranslation(line.substring(pos + 1));
 
-				if (_portalLanguageProperties != null) {
-					String portalValue = String.valueOf(
-						_portalLanguageProperties.get(key));
+					value = _fixEnglishTranslation(key, value);
 
-					if (value.equals(portalValue)) {
-						System.out.println("Duplicate key " + key);
+					if (_portalLanguageProperties != null) {
+						String portalValue = String.valueOf(
+							_portalLanguageProperties.get(key));
+
+						if (value.equals(portalValue)) {
+							System.out.println("Duplicate key " + key);
+						}
 					}
-				}
 
-				messages.add(key + "=" + value);
+					messages.put(key, value);
+				}
 			}
 			else {
 				if (begin && line.equals(StringPool.BLANK)) {
@@ -545,18 +552,20 @@ public class LangBuilder {
 	}
 
 	private void _sortAndWrite(
-			UnsyncBufferedWriter unsyncBufferedWriter, Set<String> messages,
-			boolean firstLine)
+			UnsyncBufferedWriter unsyncBufferedWriter,
+			Map<String, String> messages, boolean firstLine)
 		throws IOException {
 
-		String[] messagesArray = messages.toArray(new String[messages.size()]);
+		boolean firstEntry = true;
 
-		for (int i = 0; i < messagesArray.length; i++) {
-			if (!firstLine || (i != 0)) {
+		for (Map.Entry<String, String> entry : messages.entrySet()) {
+			if (!firstLine || !firstEntry) {
 				unsyncBufferedWriter.newLine();
 			}
 
-			unsyncBufferedWriter.write(messagesArray[i]);
+			firstEntry = false;
+
+			unsyncBufferedWriter.write(entry.getKey() + "=" + entry.getValue());
 		}
 
 		messages.clear();

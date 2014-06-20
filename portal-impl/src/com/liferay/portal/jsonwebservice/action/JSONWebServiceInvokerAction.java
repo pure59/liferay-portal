@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -30,6 +30,8 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.IOException;
+
+import java.lang.reflect.Array;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -135,16 +137,17 @@ public class JSONWebServiceInvokerAction implements JSONWebServiceAction {
 
 	public class InvokerResult implements JSONSerializable {
 
+		public JSONWebServiceInvokerAction getJSONWebServiceInvokerAction() {
+			return JSONWebServiceInvokerAction.this;
+		}
+
 		@Override
 		public String toJSONString() {
 			if (_result == null) {
 				return JSONFactoryUtil.getNullJSON();
 			}
 
-			JSONSerializer jsonSerializer =
-				JSONFactoryUtil.createJSONSerializer();
-
-			jsonSerializer.exclude("*.class");
+			JSONSerializer jsonSerializer = createJSONSerializer();
 
 			for (Statement statement : _statements) {
 				if (_includes != null) {
@@ -173,8 +176,17 @@ public class JSONWebServiceInvokerAction implements JSONWebServiceAction {
 			return _result;
 		}
 
-		private InvokerResult(Object result) {
+		public InvokerResult(Object result) {
 			_result = result;
+		}
+
+		protected JSONSerializer createJSONSerializer() {
+			JSONSerializer jsonSerializer =
+				JSONFactoryUtil.createJSONSerializer();
+
+			jsonSerializer.exclude("*.class");
+
+			return jsonSerializer;
 		}
 
 		private Object _result;
@@ -318,11 +330,23 @@ public class JSONWebServiceInvokerAction implements JSONWebServiceAction {
 
 		Class<?> clazz = object.getClass();
 
-		if (clazz.isArray()) {
+		if (!clazz.isArray()) {
+			return null;
+		}
+
+		Class<?> componentType = clazz.getComponentType();
+
+		if (!componentType.isPrimitive()) {
 			return ListUtil.toList((Object[])object);
 		}
 
-		return null;
+		List<Object> list = new ArrayList<Object>();
+
+		for (int i = 0; i < Array.getLength(object); i++) {
+			list.add(Array.get(object, i));
+		}
+
+		return list;
 	}
 
 	private Map<String, Object> _convertObjectToMap(

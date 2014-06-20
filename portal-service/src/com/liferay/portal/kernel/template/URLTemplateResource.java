@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -52,6 +53,7 @@ public class URLTemplateResource implements TemplateResource {
 
 		_templateId = templateId;
 		_templateURL = templateURL;
+		_templateURLExternalForm = templateURL.toExternalForm();
 	}
 
 	@Override
@@ -67,7 +69,8 @@ public class URLTemplateResource implements TemplateResource {
 		URLTemplateResource urlTemplateResource = (URLTemplateResource)obj;
 
 		if (_templateId.equals(urlTemplateResource._templateId) &&
-			_templateURL.equals(urlTemplateResource._templateURL)) {
+			_templateURLExternalForm.equals(
+				urlTemplateResource._templateURLExternalForm)) {
 
 			return true;
 		}
@@ -93,9 +96,8 @@ public class URLTemplateResource implements TemplateResource {
 				if (protocol.equals("file")) {
 					return new File(url.getFile()).lastModified();
 				}
-				else {
-					urlConnection = url.openConnection();
-				}
+
+				urlConnection = url.openConnection();
 			}
 
 			return urlConnection.getLastModified();
@@ -110,7 +112,9 @@ public class URLTemplateResource implements TemplateResource {
 		finally {
 			if (urlConnection != null) {
 				try {
-					urlConnection.getInputStream().close();
+					InputStream inputStream = urlConnection.getInputStream();
+
+					inputStream.close();
 				}
 				catch (IOException ioe) {
 				}
@@ -133,24 +137,28 @@ public class URLTemplateResource implements TemplateResource {
 
 	@Override
 	public int hashCode() {
-		return _templateId.hashCode() * 11 + _templateURL.hashCode();
+		return _templateId.hashCode() * 11 +
+			_templateURLExternalForm.hashCode();
 	}
 
 	@Override
 	public void readExternal(ObjectInput objectInput) throws IOException {
 		_templateId = objectInput.readUTF();
-		_templateURL = new URL(objectInput.readUTF());
+		_templateURLExternalForm = objectInput.readUTF();
+
+		_templateURL = new URL(_templateURLExternalForm);
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput objectOutput) throws IOException {
 		objectOutput.writeUTF(_templateId);
-		objectOutput.writeUTF(_templateURL.toExternalForm());
+		objectOutput.writeUTF(_templateURLExternalForm);
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(URLTemplateResource.class);
 
 	private String _templateId;
 	private URL _templateURL;
+	private String _templateURLExternalForm;
 
 }

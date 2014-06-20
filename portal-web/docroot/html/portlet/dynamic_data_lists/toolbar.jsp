@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,31 +17,26 @@
 <%@ include file="/html/portlet/dynamic_data_lists/init.jsp" %>
 
 <%
-String toolbarItem = ParamUtil.getString(request, "toolbarItem", "view-all");
+SearchContainer searchContainer = (SearchContainer)request.getAttribute(WebKeys.SEARCH_CONTAINER);
+
+String toolbarItem = ParamUtil.getString(request, "toolbarItem");
 %>
 
 <aui:nav-bar>
-	<aui:nav>
-		<portlet:renderURL var="viewRecordsURL">
-			<portlet:param name="struts_action" value="/dynamic_data_lists/view" />
-		</portlet:renderURL>
-
-		<aui:nav-item href="<%= viewRecordsURL %>" label="view-all" selected='<%= toolbarItem.equals("view-all") %>' />
-
+	<aui:nav cssClass="navbar-nav" searchContainer="<%= searchContainer %>">
 		<c:if test="<%= DDLPermission.contains(permissionChecker, scopeGroupId, ActionKeys.ADD_RECORD_SET) %>">
 			<portlet:renderURL var="addRecordSetURL">
 				<portlet:param name="struts_action" value="/dynamic_data_lists/edit_record_set" />
-				<portlet:param name="redirect" value="<%= viewRecordsURL %>" />
-				<portlet:param name="backURL" value="<%= viewRecordsURL %>" />
+				<portlet:param name="redirect" value="<%= currentURL %>" />
 			</portlet:renderURL>
 
-			<aui:nav-item href="<%= addRecordSetURL %>" iconClass="icon-plus" label="add" selected='<%= toolbarItem.equals("add") %>' />
+			<aui:nav-item href="<%= addRecordSetURL %>" iconCssClass="icon-plus" label="add" selected='<%= toolbarItem.equals("add") %>' />
 
-			<aui:nav-item anchorId="manageDDMStructuresLink" iconClass="icon-cog" label="manage-data-definitions" selected='<%= toolbarItem.equals("manage-data-definitions") %>' />
+			<aui:nav-item anchorId="manageDDMStructuresLink" iconCssClass="icon-cog" label="manage-data-definitions" selected='<%= toolbarItem.equals("manage-data-definitions") %>' />
 		</c:if>
 	</aui:nav>
 
-	<aui:nav-bar-search cssClass="pull-right" file="/html/portlet/dynamic_data_lists/record_set_search.jsp" />
+	<aui:nav-bar-search cssClass="navbar-search-advanced" file="/html/portlet/dynamic_data_lists/record_set_search.jsp" searchContainer="<%= searchContainer %>" />
 </aui:nav-bar>
 
 <c:if test="<%= DDLPermission.contains(permissionChecker, scopeGroupId, ActionKeys.ADD_RECORD_SET) %>">
@@ -60,7 +55,7 @@ String toolbarItem = ParamUtil.getString(request, "toolbarItem", "view-all");
 
 						refererPortletName: '<%= portlet.getPortletName() %>',
 						refererWebDAVToken: '<%= portlet.getWebDAVStorageToken() %>',
-						title: '<%= UnicodeLanguageUtil.get(pageContext, "data-definitions") %>'
+						title: '<%= UnicodeLanguageUtil.get(request, "data-definitions") %>'
 					}
 				);
 			});

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,13 +14,11 @@
 
 package com.liferay.portal.lar;
 
-import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.lar.ManifestSummary;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.PortletDataContextFactoryUtil;
 import com.liferay.portal.kernel.lar.PortletDataHandler;
 import com.liferay.portal.kernel.lar.PortletDataHandlerBoolean;
-import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.LongWrapper;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.xml.Element;
@@ -28,8 +26,8 @@ import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.kernel.zip.ZipWriter;
 import com.liferay.portal.kernel.zip.ZipWriterFactoryUtil;
 import com.liferay.portal.model.Group;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.util.GroupTestUtil;
+import com.liferay.portal.test.DeleteAfterTestRun;
+import com.liferay.portal.util.test.GroupTestUtil;
 import com.liferay.portlet.PortletPreferencesImpl;
 
 import java.util.Date;
@@ -37,35 +35,24 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.powermock.api.mockito.PowerMockito;
-
 /**
  * @author Zsolt Berentey
  */
-public abstract class BasePortletDataHandlerTestCase extends PowerMockito {
+public abstract class BasePortletDataHandlerTestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		FinderCacheUtil.clearCache();
-
 		stagingGroup = GroupTestUtil.addGroup();
 
 		portletDataHandler = createPortletDataHandler();
 		portletId = getPortletId();
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		GroupLocalServiceUtil.deleteGroup(stagingGroup);
-	}
-
 	@Test
-	@Transactional
 	public void testPrepareManifestSummary() throws Exception {
 		initExport();
 
@@ -126,14 +113,15 @@ public abstract class BasePortletDataHandlerTestCase extends PowerMockito {
 
 			LongWrapper expectedModelAdditionCounter =
 				expectedModelAdditionCounters.get(manifestSummaryKey);
+			LongWrapper modelAdditionCounter = modelAdditionCounters.get(
+				manifestSummaryKey);
 
-			if (expectedModelAdditionCounter.getValue() == 0) {
+			if ((expectedModelAdditionCounter.getValue() == 0) &&
+				(modelAdditionCounter == null)) {
+
 				expectedModelAdditionCountersSize--;
 			}
 			else {
-				LongWrapper modelAdditionCounter = modelAdditionCounters.get(
-					manifestSummaryKey);
-
 				Assert.assertEquals(
 					expectedModelAdditionCounter.getValue(),
 					modelAdditionCounter.getValue());
@@ -141,7 +129,7 @@ public abstract class BasePortletDataHandlerTestCase extends PowerMockito {
 		}
 
 		Assert.assertEquals(
-			modelAdditionCounters.size(), expectedModelAdditionCountersSize);
+			expectedModelAdditionCountersSize, modelAdditionCounters.size());
 	}
 
 	protected abstract PortletDataHandler createPortletDataHandler();
@@ -185,7 +173,10 @@ public abstract class BasePortletDataHandlerTestCase extends PowerMockito {
 	protected PortletDataHandler portletDataHandler;
 	protected String portletId;
 	protected Element rootElement;
+
+	@DeleteAfterTestRun
 	protected Group stagingGroup;
+
 	protected ZipWriter zipWriter;
 
 }

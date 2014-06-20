@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -90,8 +90,8 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 
 			BackgroundTaskStatusMessageTranslator
 				backgroundTaskStatusMessageTranslator =
-				backgroundTaskExecutor.
-					getBackgroundTaskStatusMessageTranslator();
+					backgroundTaskExecutor.
+						getBackgroundTaskStatusMessageTranslator();
 
 			if (backgroundTaskStatusMessageTranslator != null) {
 				backgroundTaskStatusMessageListener =
@@ -103,6 +103,9 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 					DestinationNames.BACKGROUND_TASK_STATUS,
 					backgroundTaskStatusMessageListener);
 			}
+
+			backgroundTask = BackgroundTaskLocalServiceUtil.fetchBackgroundTask(
+				backgroundTask.getBackgroundTaskId());
 
 			BackgroundTaskResult backgroundTaskResult =
 				backgroundTaskExecutor.execute(backgroundTask);
@@ -123,16 +126,15 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 
 			if (_log.isInfoEnabled()) {
 				if (statusMessage != null) {
-					statusMessage.concat(StackTraceUtil.getStackTrace(e));
+					statusMessage = statusMessage.concat(
+						StackTraceUtil.getStackTrace(e));
 				}
 				else {
 					statusMessage = StackTraceUtil.getStackTrace(e);
 				}
 			}
 
-			if (_log.isDebugEnabled()) {
-				_log.debug("Unable to execute background task", e);
-			}
+			_log.error("Unable to execute background task", e);
 		}
 		finally {
 			BackgroundTaskLocalServiceUtil.amendBackgroundTask(

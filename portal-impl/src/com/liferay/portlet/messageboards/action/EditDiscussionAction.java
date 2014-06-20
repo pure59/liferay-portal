@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -25,7 +25,6 @@ import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
-import com.liferay.portal.service.SubscriptionLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
@@ -35,6 +34,7 @@ import com.liferay.portlet.messageboards.MessageBodyException;
 import com.liferay.portlet.messageboards.NoSuchMessageException;
 import com.liferay.portlet.messageboards.RequiredMessageException;
 import com.liferay.portlet.messageboards.model.MBMessage;
+import com.liferay.portlet.messageboards.service.MBDiscussionLocalServiceUtil;
 import com.liferay.portlet.messageboards.service.MBMessageServiceUtil;
 
 import javax.portlet.ActionRequest;
@@ -69,17 +69,21 @@ public class EditDiscussionAction extends PortletAction {
 			if (cmd.equals(Constants.ADD) || cmd.equals(Constants.UPDATE)) {
 				MBMessage message = updateMessage(actionRequest);
 
-				String randomNamespace = ParamUtil.getString(
-					actionRequest, "randomNamespace");
+				boolean ajax = ParamUtil.getBoolean(actionRequest, "ajax");
 
-				JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+				if (ajax) {
+					String randomNamespace = ParamUtil.getString(
+						actionRequest, "randomNamespace");
 
-				jsonObject.put("messageId", message.getMessageId());
-				jsonObject.put("randomNamespace", randomNamespace);
+					JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-				writeJSON(actionRequest, actionResponse, jsonObject);
+					jsonObject.put("messageId", message.getMessageId());
+					jsonObject.put("randomNamespace", randomNamespace);
 
-				return;
+					writeJSON(actionRequest, actionResponse, jsonObject);
+
+					return;
+				}
 			}
 			else if (cmd.equals(Constants.DELETE)) {
 				deleteMessage(actionRequest);
@@ -175,12 +179,12 @@ public class EditDiscussionAction extends PortletAction {
 		long classPK = ParamUtil.getLong(actionRequest, "classPK");
 
 		if (subscribe) {
-			SubscriptionLocalServiceUtil.addSubscription(
+			MBDiscussionLocalServiceUtil.subscribeDiscussion(
 				themeDisplay.getUserId(), themeDisplay.getScopeGroupId(),
 				className, classPK);
 		}
 		else {
-			SubscriptionLocalServiceUtil.deleteSubscription(
+			MBDiscussionLocalServiceUtil.unsubscribeDiscussion(
 				themeDisplay.getUserId(), className, classPK);
 		}
 	}
@@ -264,7 +268,7 @@ public class EditDiscussionAction extends PortletAction {
 		boolean subscribe = ParamUtil.getBoolean(actionRequest, "subscribe");
 
 		if (subscribe) {
-			SubscriptionLocalServiceUtil.addSubscription(
+			MBDiscussionLocalServiceUtil.subscribeDiscussion(
 				themeDisplay.getUserId(), themeDisplay.getScopeGroupId(),
 				className, classPK);
 		}

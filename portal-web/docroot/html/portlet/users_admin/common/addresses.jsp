@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -132,6 +132,7 @@ else {
 				{
 					contentBox: '#<portlet:namespace />addresses > fieldset',
 					fieldIndexes: '<portlet:namespace />addressesIndexes',
+					namespace: '<portlet:namespace />',
 					on: {
 						'clone': function(event) {
 							var row = event.row;
@@ -151,14 +152,14 @@ else {
 										selectDesc: 'nameCurrentValue',
 										selectSort: '<%= true %>',
 										selectId: 'countryId',
-										selectVal: ''
+										selectVal: '0'
 									},
 									{
 										select: '<portlet:namespace />addressRegionId' + guid,
 										selectData: Liferay.Address.getRegions,
 										selectDesc: 'name',
 										selectId: 'regionId',
-										selectVal: ''
+										selectVal: '0'
 									}
 								]
 							);

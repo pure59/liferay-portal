@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,12 +17,11 @@
 <%@ include file="/html/portlet/asset_publisher/init.jsp" %>
 
 <%
-List<AssetRendererFactory> classTypesAssetRendererFactories = (List<AssetRendererFactory>)request.getAttribute("configuration.jsp-classTypesAssetRendererFactories");
 PortletURL configurationRenderURL = (PortletURL)request.getAttribute("configuration.jsp-configurationRenderURL");
-String redirect = (String)request.getAttribute("configuration.jsp-redirect");
 String rootPortletId = (String)request.getAttribute("configuration.jsp-rootPortletId");
 String selectScope = (String)request.getAttribute("configuration.jsp-selectScope");
 String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle");
+String eventName = "_" + HtmlUtil.escapeJS(portletResource) + "_selectAsset";
 %>
 
 <liferay-ui:tabs
@@ -43,7 +42,7 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 		<aui:fieldset label="model.resource.com.liferay.portlet.asset">
 
 			<%
-			List<AssetEntry> assetEntries = AssetPublisherUtil.getAssetEntries(renderRequest, portletPreferences, permissionChecker, groupIds, assetEntryXmls, true, enablePermissions);
+			List<AssetEntry> assetEntries = AssetPublisherUtil.getAssetEntries(renderRequest, portletPreferences, permissionChecker, assetPublisherDisplayContext.getGroupIds(), true, assetPublisherDisplayContext.isEnablePermissions());
 			%>
 
 			<liferay-ui:search-container
@@ -51,20 +50,14 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 				iteratorURL="<%= configurationRenderURL %>"
 				total="<%= assetEntries.size() %>"
 			>
-				<liferay-ui:search-container-results>
-
-					<%
-					int end = (assetEntries.size() < searchContainer.getEnd()) ? assetEntries.size() : searchContainer.getEnd();
-
-					pageContext.setAttribute("results", assetEntries.subList(searchContainer.getStart(), end));
-					%>
-
-				</liferay-ui:search-container-results>
+				<liferay-ui:search-container-results
+					results="<%= assetEntries.subList(searchContainer.getStart(), searchContainer.getResultEnd()) %>"
+				/>
 
 				<liferay-ui:search-container-row
 					className="com.liferay.portlet.asset.model.AssetEntry"
 					escapedModel="<%= true %>"
-					keyProperty="assetEntryId"
+					keyProperty="entryId"
 					modelVar="assetEntry"
 				>
 
@@ -75,12 +68,14 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 					%>
 
 					<liferay-ui:search-container-column-text name="title">
-						<img alt="" src="<%= assetRenderer.getIconPath(renderRequest) %>" /><%= assetRenderer.getTitle(locale) %>
+						<i class="<%= assetRenderer.getIconCssClass() %>"></i>
+
+						<%= HtmlUtil.escape(assetRenderer.getTitle(locale)) %>
 					</liferay-ui:search-container-column-text>
 
 					<liferay-ui:search-container-column-text
 						name="type"
-						value="<%= assetRendererFactory.getTypeName(locale, false) %>"
+						value="<%= assetRendererFactory.getTypeName(locale) %>"
 					/>
 
 					<liferay-ui:search-container-column-date
@@ -90,6 +85,7 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 
 					<liferay-ui:search-container-column-jsp
 						align="right"
+						cssClass="entry-action"
 						path="/html/portlet/asset_publisher/asset_selection_action.jsp"
 					/>
 				</liferay-ui:search-container-row>
@@ -104,16 +100,19 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 			</c:if>
 
 			<%
-			classNameIds = availableClassNameIds;
-
-			String portletId = portletResource;
+			long[] groupIds = assetPublisherDisplayContext.getGroupIds();
 
 			for (long groupId : groupIds) {
 			%>
 
 				<div class="select-asset-selector">
 					<div class="lfr-meta-actions edit-controls">
-						<liferay-ui:icon-menu cssClass="select-existing-selector" direction="right" icon='<%= themeDisplay.getPathThemeImages() + "/common/add.png" %>' message='<%= LanguageUtil.format(pageContext, (groupIds.length == 1) ? "select" : "select-in-x", new Object[] {HtmlUtil.escape((GroupLocalServiceUtil.getGroup(groupId)).getDescriptiveName(locale))}) %>' showWhenSingleIcon="<%= true %>">
+						<liferay-ui:icon-menu
+							cssClass="select-existing-selector"
+							direction="right" icon="../aui/plus"
+							message='<%= LanguageUtil.format(request, (groupIds.length == 1) ? "select" : "select-in-x", HtmlUtil.escape((GroupLocalServiceUtil.getGroup(groupId)).getDescriptiveName(locale)), false) %>'
+							showWhenSingleIcon="<%= true %>"
+						>
 
 							<%
 							PortletURL assetBrowserURL = PortletURLFactoryUtil.create(request, PortletKeys.ASSET_BROWSER, PortalUtil.getControlPanelPlid(company.getCompanyId()), PortletRequest.RENDER_PHASE);
@@ -121,23 +120,71 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 							assetBrowserURL.setParameter("struts_action", "/asset_browser/view");
 							assetBrowserURL.setParameter("groupId", String.valueOf(groupId));
 							assetBrowserURL.setParameter("selectedGroupIds", String.valueOf(groupId));
-							assetBrowserURL.setParameter("callback", liferayPortletResponse.getNamespace() + "selectAsset");
+							assetBrowserURL.setParameter("eventName", eventName);
 							assetBrowserURL.setPortletMode(PortletMode.VIEW);
 							assetBrowserURL.setWindowState(LiferayWindowState.POP_UP);
 
-							for (AssetRendererFactory curRendererFactory : AssetRendererFactoryRegistryUtil.getAssetRendererFactories(company.getCompanyId())) {
+							List <AssetRendererFactory> assetRendererFactories = ListUtil.sort(AssetRendererFactoryRegistryUtil.getAssetRendererFactories(company.getCompanyId()), new AssetRendererFactoryTypeNameComparator(locale));
+
+							for (AssetRendererFactory curRendererFactory : assetRendererFactories) {
 								if (!curRendererFactory.isSelectable()) {
 									continue;
 								}
 
 								assetBrowserURL.setParameter("typeSelection", curRendererFactory.getClassName());
 
-								String taglibURL = "javascript:Liferay.Util.openWindow({id: '" + liferayPortletResponse.getNamespace() + "selectAsset', title: '" + LanguageUtil.format(pageContext, "select-x", curRendererFactory.getTypeName(locale, false)) + "', uri:'" + HtmlUtil.escapeURL(assetBrowserURL.toString()) + "'});";
+								Map<String, Object> data = new HashMap<String, Object>();
+
+								data.put("groupid", String.valueOf(groupId));
+
+								if (!curRendererFactory.isSupportsClassTypes()) {
+									data.put("href", assetBrowserURL.toString());
+
+									String type = curRendererFactory.getTypeName(locale);
+
+									data.put("title", LanguageUtil.format(request, "select-x", type, false));
+									data.put("type", type);
 							%>
 
-								<liferay-ui:icon message="<%= curRendererFactory.getTypeName(locale, false) %>" src="<%= curRendererFactory.getIconPath(renderRequest) %>" url="<%= taglibURL %>" />
+									<liferay-ui:icon
+										cssClass="asset-selector"
+										data="<%= data %>"
+										iconCssClass="<%= curRendererFactory.getIconCssClass() %>"
+										id="<%= groupId + FriendlyURLNormalizerUtil.normalize(type) %>"
+										message="<%= type %>"
+										url="javascript:;"
+									/>
 
 							<%
+								}
+								else {
+									ClassTypeReader classTypeReader = curRendererFactory.getClassTypeReader();
+
+									List<ClassType> assetAvailableClassTypes = classTypeReader.getAvailableClassTypes(PortalUtil.getCurrentAndAncestorSiteGroupIds(groupId), locale);
+
+									for (ClassType assetAvailableClassType : assetAvailableClassTypes) {
+										assetBrowserURL.setParameter("subtypeSelectionId", String.valueOf(assetAvailableClassType.getClassTypeId()));
+
+										data.put("href", assetBrowserURL.toString());
+
+										String type = assetAvailableClassType.getName();
+
+										data.put("title", LanguageUtil.format(request, "select-x", type, false));
+										data.put("type", type);
+							%>
+
+										<liferay-ui:icon
+											cssClass="asset-selector"
+											data="<%= data %>"
+											iconCssClass="<%= curRendererFactory.getIconCssClass() %>"
+											id="<%= groupId + FriendlyURLNormalizerUtil.normalize(type) %>"
+											message="<%= type %>"
+											url="javascript:;"
+										/>
+
+							<%
+									}
+								}
 							}
 							%>
 
@@ -166,3 +213,40 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 <aui:button-row>
 	<aui:button onClick='<%= renderResponse.getNamespace() + "saveSelectBoxes();" %>' type="submit" />
 </aui:button-row>
+
+<aui:script use="aui-base">
+	function selectAsset(assetEntryId, assetClassName, assetType, assetEntryTitle, groupName) {
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = 'add-selection';
+		document.<portlet:namespace />fm.<portlet:namespace />assetEntryId.value = assetEntryId;
+		document.<portlet:namespace />fm.<portlet:namespace />assetEntryType.value = assetClassName;
+
+		submitForm(document.<portlet:namespace />fm);
+	}
+
+	A.getBody().delegate(
+		'click',
+		function(event) {
+			event.preventDefault();
+
+			var currentTarget = event.currentTarget;
+
+			Liferay.Util.selectEntity(
+				{
+					dialog: {
+						constrain: true,
+						destroyOnHide: true,
+						modal: true
+					},
+					eventName: '<%= eventName %>',
+					id: '<%= eventName %>' + currentTarget.attr('id'),
+					title: currentTarget.attr('data-title'),
+					uri: currentTarget.attr('data-href')
+				},
+				function(event) {
+					selectAsset(event.assetentryid, event.assetclassname, event.assettype, event.assettitle, event.groupdescriptivename);
+				}
+			);
+		},
+		'.asset-selector a'
+	);
+</aui:script>

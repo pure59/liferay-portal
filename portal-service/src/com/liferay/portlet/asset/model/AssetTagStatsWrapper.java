@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.asset.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see AssetTagStats
  * @generated
  */
+@ProviderType
 public class AssetTagStatsWrapper implements AssetTagStats,
 	ModelWrapper<AssetTagStats> {
 	public AssetTagStatsWrapper(AssetTagStats assetTagStats) {
@@ -299,8 +302,7 @@ public class AssetTagStatsWrapper implements AssetTagStats,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_assetTagStats.persist();
 	}
 
@@ -326,6 +328,7 @@ public class AssetTagStatsWrapper implements AssetTagStats,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public AssetTagStats getWrappedAssetTagStats() {
 		return _assetTagStats;
 	}
@@ -333,6 +336,16 @@ public class AssetTagStatsWrapper implements AssetTagStats,
 	@Override
 	public AssetTagStats getWrappedModel() {
 		return _assetTagStats;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _assetTagStats.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _assetTagStats.isFinderCacheEnabled();
 	}
 
 	@Override

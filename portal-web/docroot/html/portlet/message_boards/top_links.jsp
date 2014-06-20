@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -23,15 +23,13 @@ MBCategory category = (MBCategory)request.getAttribute(WebKeys.MESSAGE_BOARDS_CA
 
 long categoryId = MBUtil.getCategoryId(request, category);
 
-boolean viewCategory = GetterUtil.getBoolean((String)request.getAttribute("view.jsp-viewCategory"));
-
 PortletURL portletURL = renderResponse.createRenderURL();
 
 portletURL.setParameter("struts_action", "/message_boards/view");
 %>
 
 <aui:nav-bar>
-	<aui:nav>
+	<aui:nav cssClass="navbar-nav">
 
 		<%
 		String label = "message-boards-home";
@@ -50,7 +48,7 @@ portletURL.setParameter("struts_action", "/message_boards/view");
 
 		<aui:nav-item cssClass='<%= topLink.equals(label) ? "active" : StringPool.BLANK %>' href="<%= portletURL.toString() %>" label="<%= label %>" selected="<%= topLink.equals(label) %>" />
 
-		<c:if test="<%= themeDisplay.isSignedIn() %>">
+		<c:if test="<%= themeDisplay.isSignedIn() && !portletName.equals(PortletKeys.MESSAGE_BOARDS_ADMIN) %>">
 
 			<%
 			label = "my-posts";
@@ -60,7 +58,7 @@ portletURL.setParameter("struts_action", "/message_boards/view");
 
 			<aui:nav-item cssClass='<%= topLink.equals(label) ? "active" : StringPool.BLANK %>' href="<%= portletURL.toString() %>" label="<%= label %>" selected="<%= topLink.equals(label) %>" />
 
-			<c:if test="<%= MBUtil.getEmailMessageAddedEnabled(portletPreferences) || MBUtil.getEmailMessageUpdatedEnabled(portletPreferences) %>">
+			<c:if test="<%= mbSettings.isEmailMessageAddedEnabled() || mbSettings.isEmailMessageUpdatedEnabled() %>">
 
 				<%
 				label = "my-subscriptions";
@@ -97,33 +95,23 @@ portletURL.setParameter("struts_action", "/message_boards/view");
 			<portlet:param name="struts_action" value="/message_boards/search" />
 		</liferay-portlet:renderURL>
 
-		<div class="navbar-search pull-right">
-			<div class="form-search">
+		<aui:nav-bar-search>
+			<div class="col-xs-12 form-search">
 				<aui:form action="<%= searchURL %>" method="get" name="searchFm">
 					<liferay-portlet:renderURLParams varImpl="searchURL" />
 					<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 					<aui:input name="breadcrumbsCategoryId" type="hidden" value="<%= categoryId %>" />
 					<aui:input name="searchCategoryId" type="hidden" value="<%= categoryId %>" />
 
-					<div class="input-append">
-						<input class="search-query span9" id="<portlet:namespace/>keywords1" name="<portlet:namespace/>keywords" placeholder="<liferay-ui:message key="keywords" />" type="text" />
-
-						<aui:button primary="<%= false %>" type="submit" value="search" />
-					</div>
+					<liferay-ui:input-search id="keywords1" />
 				</aui:form>
 			</div>
-		</div>
-
-		<c:if test="<%= windowState.equals(WindowState.MAXIMIZED) && !themeDisplay.isFacebook() %>">
-			<aui:script>
-				Liferay.Util.focusFormField(document.getElementById('<portlet:namespace />keywords1'));
-			</aui:script>
-		</c:if>
+		</aui:nav-bar-search>
 	</c:if>
 </aui:nav-bar>
 
 <c:if test="<%= layout.isTypeControlPanel() %>">
 	<div id="breadcrumb">
-		<liferay-ui:breadcrumb showCurrentGroup="<%= false %>" showCurrentPortlet="<%= false %>" showGuestGroup="<%= false %>" showLayout="<%= false %>" showPortletBreadcrumb="<%= true %>" />
+		<liferay-ui:breadcrumb showCurrentGroup="<%= false %>" showGuestGroup="<%= false %>" showLayout="<%= false %>" showPortletBreadcrumb="<%= true %>" />
 	</div>
 </c:if>

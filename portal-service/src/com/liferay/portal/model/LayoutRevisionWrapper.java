@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see LayoutRevision
  * @generated
  */
+@ProviderType
 public class LayoutRevisionWrapper implements LayoutRevision,
 	ModelWrapper<LayoutRevision> {
 	public LayoutRevisionWrapper(LayoutRevision layoutRevision) {
@@ -49,6 +52,7 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("layoutRevisionId", getLayoutRevisionId());
 		attributes.put("groupId", getGroupId());
 		attributes.put("companyId", getCompanyId());
@@ -69,7 +73,6 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 		attributes.put("keywords", getKeywords());
 		attributes.put("robots", getRobots());
 		attributes.put("typeSettings", getTypeSettings());
-		attributes.put("iconImage", getIconImage());
 		attributes.put("iconImageId", getIconImageId());
 		attributes.put("themeId", getThemeId());
 		attributes.put("colorSchemeId", getColorSchemeId());
@@ -86,6 +89,12 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long layoutRevisionId = (Long)attributes.get("layoutRevisionId");
 
 		if (layoutRevisionId != null) {
@@ -207,12 +216,6 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 			setTypeSettings(typeSettings);
 		}
 
-		Boolean iconImage = (Boolean)attributes.get("iconImage");
-
-		if (iconImage != null) {
-			setIconImage(iconImage);
-		}
-
 		Long iconImageId = (Long)attributes.get("iconImageId");
 
 		if (iconImageId != null) {
@@ -292,6 +295,26 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	@Override
 	public void setPrimaryKey(long primaryKey) {
 		_layoutRevision.setPrimaryKey(primaryKey);
+	}
+
+	/**
+	* Returns the mvcc version of this layout revision.
+	*
+	* @return the mvcc version of this layout revision
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _layoutRevision.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this layout revision.
+	*
+	* @param mvccVersion the mvcc version of this layout revision
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_layoutRevision.setMvccVersion(mvccVersion);
 	}
 
 	/**
@@ -378,11 +401,9 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	* Returns the user uuid of this layout revision.
 	*
 	* @return the user uuid of this layout revision
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _layoutRevision.getUserUuid();
 	}
 
@@ -1351,36 +1372,6 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	}
 
 	/**
-	* Returns the icon image of this layout revision.
-	*
-	* @return the icon image of this layout revision
-	*/
-	@Override
-	public boolean getIconImage() {
-		return _layoutRevision.getIconImage();
-	}
-
-	/**
-	* Returns <code>true</code> if this layout revision is icon image.
-	*
-	* @return <code>true</code> if this layout revision is icon image; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isIconImage() {
-		return _layoutRevision.isIconImage();
-	}
-
-	/**
-	* Sets whether this layout revision is icon image.
-	*
-	* @param iconImage the icon image of this layout revision
-	*/
-	@Override
-	public void setIconImage(boolean iconImage) {
-		_layoutRevision.setIconImage(iconImage);
-	}
-
-	/**
 	* Returns the icon image ID of this layout revision.
 	*
 	* @return the icon image ID of this layout revision
@@ -1544,11 +1535,9 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	* Returns the status by user uuid of this layout revision.
 	*
 	* @return the status by user uuid of this layout revision
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getStatusByUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getStatusByUserUuid() {
 		return _layoutRevision.getStatusByUserUuid();
 	}
 
@@ -1605,6 +1594,7 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
+	@Deprecated
 	@Override
 	public boolean getApproved() {
 		return _layoutRevision.getApproved();
@@ -1668,16 +1658,6 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	@Override
 	public boolean isIncomplete() {
 		return _layoutRevision.isIncomplete();
-	}
-
-	/**
-	* Returns <code>true</code> if this layout revision is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this layout revision is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _layoutRevision.isInTrash();
 	}
 
 	/**
@@ -1759,6 +1739,22 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _layoutRevision.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _layoutRevision.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_layoutRevision.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -1806,28 +1802,24 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_layoutRevision.persist();
 	}
 
 	@Override
-	public java.util.List<com.liferay.portal.model.LayoutRevision> getChildren()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.util.List<com.liferay.portal.model.LayoutRevision> getChildren() {
 		return _layoutRevision.getChildren();
 	}
 
 	@Override
 	public com.liferay.portal.model.ColorScheme getColorScheme()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutRevision.getColorScheme();
 	}
 
 	@Override
 	public java.lang.String getCssText()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutRevision.getCssText();
 	}
 
@@ -1842,24 +1834,39 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	}
 
 	@Override
+	public boolean getIconImage() {
+		return _layoutRevision.getIconImage();
+	}
+
+	@Override
 	public com.liferay.portal.model.LayoutBranch getLayoutBranch()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutRevision.getLayoutBranch();
 	}
 
 	@Override
 	public com.liferay.portal.model.LayoutSet getLayoutSet()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutRevision.getLayoutSet();
 	}
 
 	@Override
+	public java.lang.String getRegularURL(
+		javax.servlet.http.HttpServletRequest request)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _layoutRevision.getRegularURL(request);
+	}
+
+	@Override
 	public com.liferay.portal.model.Theme getTheme()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutRevision.getTheme();
+	}
+
+	@Override
+	public java.lang.String getThemeSetting(java.lang.String key,
+		java.lang.String device) {
+		return _layoutRevision.getThemeSetting(key, device);
 	}
 
 	@Override
@@ -1868,23 +1875,41 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	}
 
 	@Override
+	public java.lang.String getTypeSettingsProperty(java.lang.String key) {
+		return _layoutRevision.getTypeSettingsProperty(key);
+	}
+
+	@Override
+	public java.lang.String getTypeSettingsProperty(java.lang.String key,
+		java.lang.String defaultValue) {
+		return _layoutRevision.getTypeSettingsProperty(key, defaultValue);
+	}
+
+	@Override
 	public com.liferay.portal.model.ColorScheme getWapColorScheme()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutRevision.getWapColorScheme();
 	}
 
 	@Override
 	public com.liferay.portal.model.Theme getWapTheme()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutRevision.getWapTheme();
 	}
 
 	@Override
-	public boolean hasChildren()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public boolean hasChildren() {
 		return _layoutRevision.hasChildren();
+	}
+
+	@Override
+	public boolean isContentDisplayPage() {
+		return _layoutRevision.isContentDisplayPage();
+	}
+
+	@Override
+	public boolean isIconImage() {
+		return _layoutRevision.isIconImage();
 	}
 
 	@Override
@@ -1926,6 +1951,7 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public LayoutRevision getWrappedLayoutRevision() {
 		return _layoutRevision;
 	}
@@ -1933,6 +1959,16 @@ public class LayoutRevisionWrapper implements LayoutRevision,
 	@Override
 	public LayoutRevision getWrappedModel() {
 		return _layoutRevision;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _layoutRevision.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _layoutRevision.isFinderCacheEnabled();
 	}
 
 	@Override

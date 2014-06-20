@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,11 @@
 
 package com.liferay.portlet.dynamicdatamapping.util;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
-import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
 
@@ -26,6 +28,7 @@ import java.util.Set;
 /**
  * @author Eduardo Garcia
  */
+@ProviderType
 public interface DDMDisplay {
 
 	public String getAddStructureActionId();
@@ -69,6 +72,10 @@ public interface DDMDisplay {
 			long companyId, long classNameId, long classPK)
 		throws Exception;
 
+	public long[] getTemplateGroupIds(
+			ThemeDisplay themeDisplay, boolean includeAncestorTemplates)
+		throws Exception;
+
 	public long getTemplateHandlerClassNameId(
 		DDMTemplate template, long classNameId);
 
@@ -88,12 +95,19 @@ public interface DDMDisplay {
 	public Set<String> getViewTemplatesExcludedColumnNames();
 
 	public String getViewTemplatesTitle(
+		DDMStructure structure, boolean controlPanel, boolean search,
+		Locale locale);
+
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
+	public String getViewTemplatesTitle(
 		DDMStructure structure, boolean controlPanel, Locale locale);
 
 	public String getViewTemplatesTitle(DDMStructure structure, Locale locale);
 
-	public boolean isShowAddStructureButton(
-		PermissionChecker permissionChecker, long groupId);
+	public boolean isShowAddStructureButton();
 
 	public boolean isShowStructureSelector();
 

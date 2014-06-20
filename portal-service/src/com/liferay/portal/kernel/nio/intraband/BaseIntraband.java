@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -284,7 +284,7 @@ public abstract class BaseIntraband implements Intraband {
 					"Removed timeout response waiting datagram " + datagram);
 			}
 
-			datagram.completionHandler.timeouted(datagram.attachment);
+			datagram.completionHandler.timedOut(datagram.attachment);
 		}
 	}
 
@@ -572,7 +572,7 @@ public abstract class BaseIntraband implements Intraband {
 		}
 
 		@Override
-		public void timeouted(Object attachment) {
+		public void timedOut(Object attachment) {
 		}
 
 		public Datagram waitResult(long timeout)

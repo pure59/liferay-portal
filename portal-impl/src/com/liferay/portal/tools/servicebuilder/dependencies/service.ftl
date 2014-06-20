@@ -1,5 +1,7 @@
 package ${packagePath}.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
@@ -45,6 +47,14 @@ import com.liferay.portal.service.PersistedModelLocalService;
  */
 </#if>
 
+<#if classDeprecated>
+	@Deprecated
+</#if>
+
+<#if pluginName == "">
+	@ProviderType
+</#if>
+
 <#if entity.hasRemoteService() && sessionTypeName != "Local">
 	@AccessControlled
 	@JSONWebService
@@ -69,7 +79,7 @@ public interface ${entity.name}${sessionTypeName}Service
 			, PersistedModelLocalService
 		</#if>
 
-		<#assign overrideMethodNames = overrideMethodNames + ["getPersistedModel"]>
+		<#assign overrideMethodNames = overrideMethodNames + ["deletePersistedModel", "getPersistedModel"]>
 	</#if>
 
 	{
@@ -87,6 +97,10 @@ public interface ${entity.name}${sessionTypeName}Service
 	<#list methods as method>
 		<#if !method.isConstructor() && !method.isStatic() && method.isPublic() && serviceBuilder.isCustomMethod(method) && !serviceBuilder.isDuplicateMethod(method, tempMap)>
 			${serviceBuilder.getJavadocComment(method)}
+
+			<#if serviceBuilder.hasAnnotation(method, "Deprecated")>
+				@Deprecated
+			</#if>
 
 			<#if overrideMethodNames?seq_index_of(method.name) != -1>
 				@Override

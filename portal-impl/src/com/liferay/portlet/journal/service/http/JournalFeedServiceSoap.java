@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.journal.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -61,6 +63,7 @@ import java.rmi.RemoteException;
  * @see com.liferay.portlet.journal.service.JournalFeedServiceUtil
  * @generated
  */
+@ProviderType
 public class JournalFeedServiceSoap {
 	public static com.liferay.portlet.journal.model.JournalFeedSoap addFeed(
 		long groupId, java.lang.String feedId, boolean autoFeedId,
@@ -89,6 +92,21 @@ public class JournalFeedServiceSoap {
 		}
 	}
 
+	public static void deleteFeed(long feedId) throws RemoteException {
+		try {
+			JournalFeedServiceUtil.deleteFeed(feedId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #deleteFeed(long, String)}
+	*/
+	@Deprecated
 	public static void deleteFeed(long groupId, long feedId)
 		throws RemoteException {
 		try {
@@ -113,6 +131,24 @@ public class JournalFeedServiceSoap {
 		}
 	}
 
+	public static com.liferay.portlet.journal.model.JournalFeedSoap getFeed(
+		long feedId) throws RemoteException {
+		try {
+			com.liferay.portlet.journal.model.JournalFeed returnValue = JournalFeedServiceUtil.getFeed(feedId);
+
+			return com.liferay.portlet.journal.model.JournalFeedSoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getFeed(long, String)}
+	*/
+	@Deprecated
 	public static com.liferay.portlet.journal.model.JournalFeedSoap getFeed(
 		long groupId, long feedId) throws RemoteException {
 		try {

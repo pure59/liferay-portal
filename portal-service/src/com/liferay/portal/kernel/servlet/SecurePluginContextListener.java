@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,6 +16,7 @@ package com.liferay.portal.kernel.servlet;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.kernel.util.InstanceFactory;
 import com.liferay.portal.kernel.util.StringUtil;
 
@@ -273,7 +274,20 @@ public class SecurePluginContextListener
 			for (ServletContextListener servletContextListener :
 					_servletContextListeners) {
 
-				servletContextListener.contextDestroyed(servletContextEvent);
+				try {
+					servletContextListener.contextDestroyed(
+						servletContextEvent);
+				}
+				catch (Throwable t) {
+					String className = ClassUtil.getClassName(
+						servletContextListener.getClass());
+
+					_log.error(
+						className + " is unable to process a context " +
+							"destroyed event for " +
+								servletContext.getServletContextName(),
+						t);
+				}
 			}
 		}
 

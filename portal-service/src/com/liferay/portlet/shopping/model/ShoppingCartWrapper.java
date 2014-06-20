@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.shopping.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see ShoppingCart
  * @generated
  */
+@ProviderType
 public class ShoppingCartWrapper implements ShoppingCart,
 	ModelWrapper<ShoppingCart> {
 	public ShoppingCartWrapper(ShoppingCart shoppingCart) {
@@ -238,11 +241,9 @@ public class ShoppingCartWrapper implements ShoppingCart,
 	* Returns the user uuid of this shopping cart.
 	*
 	* @return the user uuid of this shopping cart
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _shoppingCart.getUserUuid();
 	}
 
@@ -506,8 +507,7 @@ public class ShoppingCartWrapper implements ShoppingCart,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_shoppingCart.persist();
 	}
 
@@ -518,14 +518,12 @@ public class ShoppingCartWrapper implements ShoppingCart,
 
 	@Override
 	public com.liferay.portlet.shopping.model.ShoppingCoupon getCoupon()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _shoppingCart.getCoupon();
 	}
 
 	@Override
-	public java.util.Map<com.liferay.portlet.shopping.model.ShoppingCartItem, java.lang.Integer> getItems()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.util.Map<com.liferay.portlet.shopping.model.ShoppingCartItem, java.lang.Integer> getItems() {
 		return _shoppingCart.getItems();
 	}
 
@@ -556,6 +554,7 @@ public class ShoppingCartWrapper implements ShoppingCart,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public ShoppingCart getWrappedShoppingCart() {
 		return _shoppingCart;
 	}
@@ -563,6 +562,16 @@ public class ShoppingCartWrapper implements ShoppingCart,
 	@Override
 	public ShoppingCart getWrappedModel() {
 		return _shoppingCart;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _shoppingCart.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _shoppingCart.isFinderCacheEnabled();
 	}
 
 	@Override

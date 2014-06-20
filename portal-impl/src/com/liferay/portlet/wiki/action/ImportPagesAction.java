@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -113,12 +113,11 @@ public class ImportPagesAction extends PortletAction {
 		String importProgressId = ParamUtil.getString(
 			uploadPortletRequest, "importProgressId");
 
-		ProgressTracker progressTracker = new ProgressTracker(
-			actionRequest, importProgressId);
+		ProgressTracker progressTracker = new ProgressTracker(importProgressId);
 
 		ProgressTrackerThreadLocal.setProgressTracker(progressTracker);
 
-		progressTracker.start();
+		progressTracker.start(actionRequest);
 
 		long nodeId = ParamUtil.getLong(uploadPortletRequest, "nodeId");
 		String importer = ParamUtil.getString(uploadPortletRequest, "importer");
@@ -149,7 +148,7 @@ public class ImportPagesAction extends PortletAction {
 
 		WikiCacheUtil.clearCache(nodeId);
 
-		progressTracker.finish();
+		progressTracker.finish(actionRequest);
 	}
 
 }

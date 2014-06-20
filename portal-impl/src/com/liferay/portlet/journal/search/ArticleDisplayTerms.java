@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,11 +15,18 @@
 package com.liferay.portlet.journal.search;
 
 import com.liferay.portal.kernel.dao.search.DisplayTerms;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
+import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
+import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
+import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
+import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil;
+import com.liferay.portlet.journal.model.JournalArticle;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,7 +75,7 @@ public class ArticleDisplayTerms extends DisplayTerms {
 		description = ParamUtil.getString(portletRequest, DESCRIPTION);
 		folderId = ParamUtil.getLong(portletRequest, FOLDER_ID);
 		navigation = ParamUtil.getString(portletRequest, NAVIGATION);
-		status = ParamUtil.getString(portletRequest, STATUS);
+		status = ParamUtil.getInteger(portletRequest, STATUS);
 		structureId = ParamUtil.getString(portletRequest, STRUCTURE_ID);
 		templateId = ParamUtil.getString(portletRequest, TEMPLATE_ID);
 		title = ParamUtil.getString(portletRequest, TITLE);
@@ -122,7 +129,7 @@ public class ArticleDisplayTerms extends DisplayTerms {
 		return navigation;
 	}
 
-	public String getStatus() {
+	public int getStatus() {
 		return status;
 	}
 
@@ -178,20 +185,51 @@ public class ArticleDisplayTerms extends DisplayTerms {
 	public long setGroupId(PortletRequest portletRequest) {
 		groupId = ParamUtil.getLong(portletRequest, GROUP_ID);
 
-		if ((groupId == 0) && Validator.isNull(structureId) &&
-			Validator.isNull(templateId)) {
-
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)portletRequest.getAttribute(
-					WebKeys.THEME_DISPLAY);
-
-			groupId = themeDisplay.getScopeGroupId();
+		if (groupId != 0) {
+			return groupId;
 		}
 
-		return groupId;
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		if (Validator.isNotNull(structureId) && !structureId.equals("0")) {
+			DDMStructure ddmStructure = null;
+
+			try {
+				ddmStructure = DDMStructureLocalServiceUtil.fetchStructure(
+					themeDisplay.getSiteGroupId(),
+					PortalUtil.getClassNameId(JournalArticle.class),
+					structureId);
+			}
+			catch (SystemException se) {
+			}
+
+			if (ddmStructure != null) {
+				return 0;
+			}
+		}
+
+		if (Validator.isNotNull(templateId) && !templateId.equals("0")) {
+			DDMTemplate ddmTemplate = null;
+
+			try {
+				ddmTemplate = DDMTemplateLocalServiceUtil.fetchTemplate(
+					themeDisplay.getSiteGroupId(),
+					PortalUtil.getClassNameId(JournalArticle.class),
+					templateId);
+			}
+			catch (SystemException se) {
+			}
+
+			if (ddmTemplate != null) {
+				return 0;
+			}
+		}
+
+		return themeDisplay.getScopeGroupId();
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 
@@ -204,7 +242,7 @@ public class ArticleDisplayTerms extends DisplayTerms {
 	protected List<Long> folderIds;
 	protected long groupId;
 	protected String navigation;
-	protected String status;
+	protected int status;
 	protected String structureId;
 	protected String templateId;
 	protected String title;

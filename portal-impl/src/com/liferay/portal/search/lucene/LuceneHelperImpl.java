@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -32,15 +32,21 @@ import com.liferay.portal.kernel.io.unsync.UnsyncPrintWriter;
 import com.liferay.portal.kernel.io.unsync.UnsyncStringReader;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.messaging.Destination;
+import com.liferay.portal.kernel.messaging.MessageBus;
+import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.messaging.proxy.MessageValuesThreadLocal;
 import com.liferay.portal.kernel.search.BooleanClauseOccur;
 import com.liferay.portal.kernel.search.Field;
+import com.liferay.portal.kernel.search.SearchEngineUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.MethodHandler;
 import com.liferay.portal.kernel.util.MethodKey;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnsyncPrintWriterPool;
@@ -53,13 +59,13 @@ import com.liferay.portal.util.PortalInstances;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.util.lucene.KeywordsUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -69,6 +75,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -102,6 +109,7 @@ import org.apache.lucene.util.Version;
  * @author Shuyang Zhou
  * @author Tina Tian
  * @author Hugo Huijser
+ * @author Andrea Di Giorgi
  */
 public class LuceneHelperImpl implements LuceneHelper {
 
@@ -123,14 +131,39 @@ public class LuceneHelperImpl implements LuceneHelper {
 
 	@Override
 	public void addNumericRangeTerm(
+		BooleanQuery booleanQuery, String field, Integer startValue,
+		Integer endValue) {
+
+		NumericRangeQuery<?> numericRangeQuery = NumericRangeQuery.newIntRange(
+			field, startValue, endValue, true, true);
+
+		booleanQuery.add(numericRangeQuery, BooleanClause.Occur.SHOULD);
+	}
+
+	@Override
+	public void addNumericRangeTerm(
+		BooleanQuery booleanQuery, String field, Long startValue,
+		Long endValue) {
+
+		NumericRangeQuery<?> numericRangeQuery = NumericRangeQuery.newLongRange(
+			field, startValue, endValue, true, true);
+
+		booleanQuery.add(numericRangeQuery, BooleanClause.Occur.SHOULD);
+	}
+
+	/**
+	 * @deprecated As of 6.2.0, replaced by {@link
+	 *             #addNumericRangeTerm(BooleanQuery, String, Long, Long)}
+	 */
+	@Deprecated
+	@Override
+	public void addNumericRangeTerm(
 		BooleanQuery booleanQuery, String field, String startValue,
 		String endValue) {
 
-		NumericRangeQuery<?> numericRangeQuery = NumericRangeQuery.newLongRange(
-			field, GetterUtil.getLong(startValue), GetterUtil.getLong(endValue),
-			true, true);
-
-		booleanQuery.add(numericRangeQuery, BooleanClause.Occur.SHOULD);
+		addNumericRangeTerm(
+			booleanQuery, field, GetterUtil.getLong(startValue),
+			GetterUtil.getLong(endValue));
 	}
 
 	@Override
@@ -220,25 +253,6 @@ public class LuceneHelperImpl implements LuceneHelper {
 
 			Query query = queryParser.parse(value);
 
-			try {
-				if (like && (query instanceof TermQuery)) {
-
-					// LUCENE-89
-
-					TermQuery termQuery = (TermQuery)query;
-
-					Term term = termQuery.getTerm();
-
-					value = term.text();
-					value = value.toLowerCase(queryParser.getLocale());
-
-					query = new TermQuery(term.createTerm(value));
-				}
-			}
-			catch (Exception e) {
-				query = queryParser.parse(KeywordsUtil.escape(value));
-			}
-
 			BooleanClause.Occur occur = null;
 
 			if (booleanClauseOccur.equals(BooleanClauseOccur.MUST)) {
@@ -251,7 +265,7 @@ public class LuceneHelperImpl implements LuceneHelper {
 				occur = BooleanClause.Occur.SHOULD;
 			}
 
-			_includeIfUnique(booleanQuery, query, occur, like);
+			_includeIfUnique(booleanQuery, like, queryParser, query, occur);
 		}
 		catch (Exception e) {
 			if (_log.isWarnEnabled()) {
@@ -270,6 +284,11 @@ public class LuceneHelperImpl implements LuceneHelper {
 		}
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #releaseIndexSearcher(long,
+	 *             IndexSearcher)}
+	 */
+	@Deprecated
 	@Override
 	public void cleanUp(IndexSearcher indexSearcher) {
 		if (indexSearcher == null) {
@@ -374,6 +393,9 @@ public class LuceneHelperImpl implements LuceneHelper {
 				indexAccessor = new IndexAccessorImpl(companyId);
 
 				if (isLoadIndexFromClusterEnabled()) {
+					indexAccessor = new SynchronizedIndexAccessorImpl(
+						indexAccessor);
+
 					boolean clusterForwardMessage = GetterUtil.getBoolean(
 						MessageValuesThreadLocal.getValue(
 							ClusterLink.CLUSTER_FORWARD_MESSAGE));
@@ -386,9 +408,6 @@ public class LuceneHelperImpl implements LuceneHelper {
 						}
 					}
 					else {
-						indexAccessor = new SynchronizedIndexAccessorImpl(
-							indexAccessor);
-
 						try {
 							_loadIndexFromCluster(
 								indexAccessor,
@@ -411,6 +430,13 @@ public class LuceneHelperImpl implements LuceneHelper {
 	}
 
 	@Override
+	public IndexSearcher getIndexSearcher(long companyId) throws IOException {
+		IndexAccessor indexAccessor = getIndexAccessor(companyId);
+
+		return indexAccessor.acquireIndexSearcher();
+	}
+
+	@Override
 	public long getLastGeneration(long companyId) {
 		if (!isLoadIndexFromClusterEnabled()) {
 			return IndexAccessor.DEFAULT_LAST_GENERATION;
@@ -427,8 +453,7 @@ public class LuceneHelperImpl implements LuceneHelper {
 
 	@Override
 	public InputStream getLoadIndexesInputStreamFromCluster(
-			long companyId, Address bootupAddress)
-		throws SystemException {
+		long companyId, Address bootupAddress) {
 
 		if (!isLoadIndexFromClusterEnabled()) {
 			return null;
@@ -506,6 +531,10 @@ public class LuceneHelperImpl implements LuceneHelper {
 		return queryTerms;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #getIndexSearcher(long)}
+	 */
+	@Deprecated
 	@Override
 	public IndexSearcher getSearcher(long companyId, boolean readOnly)
 		throws IOException {
@@ -517,7 +546,7 @@ public class LuceneHelperImpl implements LuceneHelper {
 
 		IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 
-		indexSearcher.setDefaultFieldSortScoring(true, true);
+		indexSearcher.setDefaultFieldSortScoring(true, false);
 		indexSearcher.setSimilarity(new FieldWeightSimilarity());
 
 		return indexSearcher;
@@ -552,7 +581,7 @@ public class LuceneHelperImpl implements LuceneHelper {
 			return snippet;
 		}
 		catch (InvalidTokenOffsetsException itoe) {
-			throw new IOException(itoe.getMessage());
+			throw new IOException(itoe);
 		}
 	}
 
@@ -596,15 +625,13 @@ public class LuceneHelperImpl implements LuceneHelper {
 			return;
 		}
 
-		StopWatch stopWatch = null;
+		StopWatch stopWatch = new StopWatch();
+
+		stopWatch.start();
 
 		if (_log.isInfoEnabled()) {
 			_log.info(
 				"Start loading Lucene index files for company " + companyId);
-
-			stopWatch = new StopWatch();
-
-			stopWatch.start();
 		}
 
 		indexAccessor.loadIndex(inputStream);
@@ -617,7 +644,7 @@ public class LuceneHelperImpl implements LuceneHelper {
 	}
 
 	@Override
-	public void loadIndexesFromCluster(long companyId) throws SystemException {
+	public void loadIndexesFromCluster(long companyId) {
 		if (!isLoadIndexFromClusterEnabled()) {
 			return;
 		}
@@ -631,6 +658,16 @@ public class LuceneHelperImpl implements LuceneHelper {
 		long localLastGeneration = getLastGeneration(companyId);
 
 		_loadIndexFromCluster(indexAccessor, localLastGeneration);
+	}
+
+	@Override
+	public void releaseIndexSearcher(
+			long companyId, IndexSearcher indexSearcher)
+		throws IOException {
+
+		IndexAccessor indexAccessor = getIndexAccessor(companyId);
+
+		indexAccessor.releaseIndexSearcher(indexSearcher);
 	}
 
 	public void setAnalyzer(Analyzer analyzer) {
@@ -660,6 +697,49 @@ public class LuceneHelperImpl implements LuceneHelper {
 				_loadIndexClusterEventListener);
 		}
 
+		MessageBus messageBus = MessageBusUtil.getMessageBus();
+
+		for (String searchEngineId : SearchEngineUtil.getSearchEngineIds()) {
+			String searchWriterDestinationName =
+				SearchEngineUtil.getSearchWriterDestinationName(searchEngineId);
+
+			Destination searchWriteDestination = messageBus.getDestination(
+				searchWriterDestinationName);
+
+			if (searchWriteDestination != null) {
+				ThreadPoolExecutor threadPoolExecutor =
+					PortalExecutorManagerUtil.getPortalExecutor(
+						searchWriterDestinationName);
+
+				int maxPoolSize = threadPoolExecutor.getMaxPoolSize();
+
+				CountDownLatch countDownLatch = new CountDownLatch(maxPoolSize);
+
+				ShutdownSyncJob shutdownSyncJob = new ShutdownSyncJob(
+					countDownLatch);
+
+				for (int i = 0; i < maxPoolSize; i++) {
+					threadPoolExecutor.submit(shutdownSyncJob);
+				}
+
+				try {
+					countDownLatch.await();
+				}
+				catch (InterruptedException ie) {
+					_log.error("Shutdown waiting interrupted", ie);
+				}
+
+				List<Runnable> runnables = threadPoolExecutor.shutdownNow();
+
+				if (_log.isDebugEnabled()) {
+					_log.debug(
+						"Cancelled appending indexing jobs: " + runnables);
+				}
+
+				searchWriteDestination.close(true);
+			}
+		}
+
 		for (IndexAccessor indexAccessor : _indexAccessors.values()) {
 			indexAccessor.close();
 		}
@@ -669,7 +749,7 @@ public class LuceneHelperImpl implements LuceneHelper {
 	public void shutdown(long companyId) {
 		IndexAccessor indexAccessor = getIndexAccessor(companyId);
 
-		_indexAccessors.remove(indexAccessor);
+		_indexAccessors.remove(companyId);
 
 		indexAccessor.close();
 	}
@@ -730,15 +810,24 @@ public class LuceneHelperImpl implements LuceneHelper {
 		}
 
 		BooleanQuery.setMaxClauseCount(_LUCENE_BOOLEAN_QUERY_CLAUSE_MAX_SIZE);
+
+		if (StringUtil.equalsIgnoreCase(
+				Http.HTTPS, PropsValues.WEB_SERVER_PROTOCOL)) {
+
+			_protocol = Http.HTTPS;
+		}
+		else {
+			_protocol = Http.HTTP;
+		}
 	}
 
 	private ObjectValuePair<String, URL>
-			_getBootupClusterNodeObjectValuePair(Address bootupAddress)
-		throws SystemException {
+			_getBootupClusterNodeObjectValuePair(Address bootupAddress) {
 
 		ClusterRequest clusterRequest = ClusterRequest.createUnicastRequest(
 			new MethodHandler(
-				_createTokenMethodKey, _TRANSIENT_TOKEN_KEEP_ALIVE_TIME),
+				_createTokenMethodKey,
+				_CLUSTER_LINK_NODE_BOOTUP_RESPONSE_TIMEOUT),
 			bootupAddress);
 
 		FutureClusterResponses futureClusterResponses =
@@ -752,11 +841,25 @@ public class LuceneHelperImpl implements LuceneHelper {
 				_CLUSTER_LINK_NODE_BOOTUP_RESPONSE_TIMEOUT,
 				TimeUnit.MILLISECONDS);
 
-			String transientToken = (String)clusterNodeResponse.getResult();
-
 			ClusterNode clusterNode = clusterNodeResponse.getClusterNode();
 
-			InetAddress inetAddress = clusterNode.getInetAddress();
+			InetSocketAddress inetSocketAddress =
+				clusterNode.getPortalInetSocketAddress();
+
+			if (inetSocketAddress == null) {
+				StringBundler sb = new StringBundler(6);
+
+				sb.append("Invalid cluster node InetSocketAddress ");
+				sb.append(". The InetSocketAddress is set by the first ");
+				sb.append("request or configured in portal.properties by the");
+				sb.append("properties ");
+				sb.append("\"portal.instance.http.inet.socket.address\" and ");
+				sb.append("\"portal.instance.https.inet.socket.address\".");
+
+				throw new Exception(sb.toString());
+			}
+
+			InetAddress inetAddress = inetSocketAddress.getAddress();
 
 			String fileName = PortalUtil.getPathContext();
 
@@ -767,8 +870,10 @@ public class LuceneHelperImpl implements LuceneHelper {
 			fileName = fileName.concat("lucene/dump");
 
 			URL url = new URL(
-				"http", inetAddress.getHostAddress(), clusterNode.getPort(),
-				fileName);
+				_protocol, inetAddress.getHostAddress(),
+				inetSocketAddress.getPort(), fileName);
+
+			String transientToken = (String)clusterNodeResponse.getResult();
 
 			return new ObjectValuePair<String, URL>(transientToken, url);
 		}
@@ -778,18 +883,24 @@ public class LuceneHelperImpl implements LuceneHelper {
 	}
 
 	private void _includeIfUnique(
-		BooleanQuery booleanQuery, Query query, BooleanClause.Occur occur,
-		boolean like) {
+		BooleanQuery booleanQuery, boolean like, QueryParser queryParser,
+		Query query, BooleanClause.Occur occur) {
 
 		if (query instanceof TermQuery) {
 			Set<Term> terms = new HashSet<Term>();
 
-			query.extractTerms(terms);
+			TermQuery termQuery = (TermQuery)query;
+
+			termQuery.extractTerms(terms);
+
+			float boost = termQuery.getBoost();
 
 			for (Term term : terms) {
 				String termValue = term.text();
 
 				if (like) {
+					termValue = termValue.toLowerCase(queryParser.getLocale());
+
 					term = term.createTerm(
 						StringPool.STAR.concat(termValue).concat(
 							StringPool.STAR));
@@ -799,6 +910,8 @@ public class LuceneHelperImpl implements LuceneHelper {
 				else {
 					query = new TermQuery(term);
 				}
+
+				query.setBoost(boost);
 
 				boolean included = false;
 
@@ -820,8 +933,8 @@ public class LuceneHelperImpl implements LuceneHelper {
 
 			for (BooleanClause booleanClause : curBooleanQuery.getClauses()) {
 				_includeIfUnique(
-					containerBooleanQuery, booleanClause.getQuery(),
-					booleanClause.getOccur(), like);
+					containerBooleanQuery, like, queryParser,
+					booleanClause.getQuery(), booleanClause.getOccur());
 			}
 
 			if (containerBooleanQuery.getClauses().length > 0) {
@@ -844,8 +957,7 @@ public class LuceneHelperImpl implements LuceneHelper {
 	}
 
 	private void _loadIndexFromCluster(
-			IndexAccessor indexAccessor, long localLastGeneration)
-		throws SystemException {
+		IndexAccessor indexAccessor, long localLastGeneration) {
 
 		List<Address> clusterNodeAddresses =
 			ClusterExecutorUtil.getClusterNodeAddresses();
@@ -881,8 +993,6 @@ public class LuceneHelperImpl implements LuceneHelper {
 			PropsUtil.get(PropsKeys.LUCENE_BOOLEAN_QUERY_CLAUSE_MAX_SIZE),
 			BooleanQuery.getMaxClauseCount());
 
-	private static final long _TRANSIENT_TOKEN_KEEP_ALIVE_TIME = 10000;
-
 	private static Log _log = LogFactoryUtil.getLog(LuceneHelperImpl.class);
 
 	private static MethodKey _createTokenMethodKey = new MethodKey(
@@ -895,7 +1005,31 @@ public class LuceneHelperImpl implements LuceneHelper {
 		new ConcurrentHashMap<Long, IndexAccessor>();
 	private LoadIndexClusterEventListener _loadIndexClusterEventListener;
 	private ThreadPoolExecutor _luceneIndexThreadPoolExecutor;
+	private String _protocol;
 	private Version _version;
+
+	private static class ShutdownSyncJob implements Runnable {
+
+		public ShutdownSyncJob(CountDownLatch countDownLatch) {
+			_countDownLatch = countDownLatch;
+		}
+
+		@Override
+		public void run() {
+			_countDownLatch.countDown();
+
+			try {
+				synchronized (this) {
+					wait();
+				}
+			}
+			catch (InterruptedException ie) {
+			}
+		}
+
+		private final CountDownLatch _countDownLatch;
+
+	}
 
 	private class LoadIndexClusterEventListener
 		implements ClusterEventListener {
@@ -995,7 +1129,7 @@ public class LuceneHelperImpl implements LuceneHelper {
 
 				ClusterNode clusterNode = clusterNodeResponse.getClusterNode();
 
-				if (clusterNode.getPort() > 0) {
+				if (clusterNode.getPortalInetSocketAddress() != null) {
 					try {
 						long remoteLastGeneration =
 							(Long)clusterNodeResponse.getResult();
@@ -1017,12 +1151,10 @@ public class LuceneHelperImpl implements LuceneHelper {
 						continue;
 					}
 				}
-				else {
-					if (_log.isDebugEnabled()) {
-						_log.debug(
-							"Cluster node " + clusterNode +
-								" has invalid port");
-					}
+				else if (_log.isDebugEnabled()) {
+					_log.debug(
+						"Cluster node " + clusterNode +
+							" has invalid InetSocketAddress");
 				}
 			}
 			while ((bootupAddress == null) && (_clusterNodeAddressesCount > 1));

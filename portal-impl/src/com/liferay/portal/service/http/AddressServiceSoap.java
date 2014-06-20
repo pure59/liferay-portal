@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -60,12 +62,14 @@ import java.rmi.RemoteException;
  * @see com.liferay.portal.service.AddressServiceUtil
  * @generated
  */
+@ProviderType
 public class AddressServiceSoap {
 	/**
-	* @deprecated As of 6.2.0, replaced by {@link #addAddress( String, long,
+	* @deprecated As of 6.2.0, replaced by {@link #addAddress(String, long,
 	String, String, String, String, String, long, long, int,
 	boolean, boolean, ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portal.model.AddressSoap addAddress(
 		java.lang.String className, long classPK, java.lang.String street1,
 		java.lang.String street2, java.lang.String street3,

@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,15 +22,12 @@ page import="com.liferay.portlet.dynamicdatalists.model.DDLRecordSetConstants" %
 page import="com.liferay.portlet.dynamicdatalists.search.RecordSetSearch" %><%@
 page import="com.liferay.portlet.dynamicdatalists.search.RecordSetSearchTerms" %><%@
 page import="com.liferay.portlet.dynamicdatalists.service.DDLRecordSetLocalServiceUtil" %><%@
+page import="com.liferay.portlet.dynamicdatalists.service.DDLRecordSetServiceUtil" %><%@
 page import="com.liferay.portlet.dynamicdatalists.service.permission.DDLPermission" %><%@
 page import="com.liferay.portlet.dynamicdatalists.service.permission.DDLRecordSetPermission" %><%@
 page import="com.liferay.portlet.dynamicdatalists.util.DDLUtil" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.model.DDMStructure" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.model.DDMTemplate" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.model.DDMTemplateConstants" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.service.permission.DDMPermission" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.service.permission.DDMTemplatePermission" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.util.DDMDisplay" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.util.DDMDisplayRegistryUtil" %>
 
@@ -42,8 +39,7 @@ long recordSetId = GetterUtil.getLong(portletPreferences.getValue("recordSetId",
 long displayDDMTemplateId = GetterUtil.getLong(portletPreferences.getValue("displayDDMTemplateId", StringPool.BLANK));
 long formDDMTemplateId = GetterUtil.getLong(portletPreferences.getValue("formDDMTemplateId", StringPool.BLANK));
 
-boolean editable = DDLUtil.isEditable(portletPreferences, portletDisplay.getId(), themeDisplay.getScopeGroupId());
-
+boolean editable = GetterUtil.getBoolean(portletPreferences.getValue("editable", Boolean.TRUE.toString()));
 boolean spreadsheet = GetterUtil.getBoolean(portletPreferences.getValue("spreadsheet", Boolean.FALSE.toString()));
 
 DDMDisplay ddmDisplay = DDMDisplayRegistryUtil.getDDMDisplay(PortletKeys.DYNAMIC_DATA_LISTS);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,8 +14,8 @@
 
 package com.liferay.taglib.portletext;
 
-import com.liferay.portal.kernel.servlet.taglib.FileAvailabilityUtil;
 import com.liferay.portal.theme.PortletDisplay;
+import com.liferay.taglib.FileAvailabilityUtil;
 import com.liferay.taglib.ui.IconTag;
 
 /**
@@ -38,7 +38,7 @@ public class IconPortletCssTag extends IconTag {
 		}
 
 		setCssClass("portlet-css portlet-css-icon lfr-js-required");
-		setImage("../portlet/portlet_css");
+		setImage("../aui/picture");
 		setMessage("look-and-feel");
 
 		String onClick =

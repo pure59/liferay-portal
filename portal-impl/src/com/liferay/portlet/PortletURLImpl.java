@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -211,7 +211,7 @@ public class PortletURLImpl
 	public String getParameter(String name) {
 		String[] values = _params.get(name);
 
-		if ((values != null) && (values.length > 0)) {
+		if (ArrayUtil.isNotEmpty(values)) {
 			return values[0];
 		}
 		else {
@@ -253,10 +253,11 @@ public class PortletURLImpl
 		Portlet portlet = getPortlet();
 
 		if (portlet != null) {
-			FriendlyURLMapper mapper = portlet.getFriendlyURLMapperInstance();
+			FriendlyURLMapper friendlyURLMapper =
+				portlet.getFriendlyURLMapperInstance();
 
-			if (mapper != null) {
-				portletFriendlyURLPath = mapper.buildPath(this);
+			if (friendlyURLMapper != null) {
+				portletFriendlyURLPath = friendlyURLMapper.buildPath(this);
 
 				if (_log.isDebugEnabled()) {
 					_log.debug(
@@ -411,8 +412,14 @@ public class PortletURLImpl
 			throw new IllegalArgumentException();
 		}
 
+		Portlet portlet = getPortlet();
+
+		if (portlet == null) {
+			return;
+		}
+
 		PublicRenderParameter publicRenderParameter =
-			_portlet.getPublicRenderParameter(name);
+			portlet.getPublicRenderParameter(name);
 
 		if (publicRenderParameter == null) {
 			if (_log.isWarnEnabled()) {
@@ -635,7 +642,10 @@ public class PortletURLImpl
 		throws PortletModeException {
 
 		if (_portletRequest != null) {
-			if (!getPortlet().hasPortletMode(
+			Portlet portlet = getPortlet();
+
+			if ((portlet != null) &&
+				!portlet.hasPortletMode(
 					_portletRequest.getResponseContentType(), portletMode)) {
 
 				throw new PortletModeException(
@@ -755,10 +765,16 @@ public class PortletURLImpl
 			return;
 		}
 
+		Portlet portlet = getPortlet();
+
+		if (portlet == null) {
+			return;
+		}
+
 		String strutsAction = getParameter("struts_action");
 
 		if (AuthTokenWhitelistUtil.isPortletCSRFWhitelisted(
-				_portlet.getCompanyId(), _portletId, strutsAction)) {
+				portlet.getCompanyId(), _portletId, strutsAction)) {
 
 			return;
 		}
@@ -774,14 +790,20 @@ public class PortletURLImpl
 			return;
 		}
 
-		if (!_portlet.isAddDefaultResource()) {
+		Portlet portlet = getPortlet();
+
+		if (portlet == null) {
+			return;
+		}
+
+		if (!portlet.isAddDefaultResource()) {
 			return;
 		}
 
 		String strutsAction = getParameter("struts_action");
 
 		if (AuthTokenWhitelistUtil.isPortletInvocationWhitelisted(
-				_portlet.getCompanyId(), _portletId, strutsAction)) {
+				portlet.getCompanyId(), _portletId, strutsAction)) {
 
 			return;
 		}
@@ -800,15 +822,8 @@ public class PortletURLImpl
 			}
 		}
 
-		Portlet portlet = (Portlet)_request.getAttribute(
-			WebKeys.RENDER_PORTLET);
-
-		if (portlet != null) {
-			String portletId = portlet.getPortletId();
-
-			if (portletId.equals(PortletKeys.CONTROL_PANEL_MENU)) {
-				return;
-			}
+		if (_portletId.equals(PortletKeys.CONTROL_PANEL_MENU)) {
+			return;
 		}
 
 		sb.append("p_p_auth");
@@ -851,7 +866,8 @@ public class PortletURLImpl
 
 					if (_secure) {
 						_layoutFriendlyURL = HttpUtil.protocolize(
-							_layoutFriendlyURL, true);
+							_layoutFriendlyURL,
+							PropsValues.WEB_SERVER_HTTPS_PORT, true);
 					}
 				}
 			}
@@ -1089,7 +1105,9 @@ public class PortletURLImpl
 		}
 
 		if (_encrypt) {
-			sb.append(StringPool.AMPERSAND + WebKeys.ENCRYPT + "=1");
+			sb.append(StringPool.AMPERSAND);
+			sb.append(WebKeys.ENCRYPT);
+			sb.append("=1");
 		}
 
 		if (PropsValues.PORTLET_URL_ANCHOR_ENABLE) {
@@ -1149,8 +1167,8 @@ public class PortletURLImpl
 			result = HtmlUtil.escape(result);
 		}
 
-		if (result.length() > _URL_MAXIMUM_LENGTH) {
-			result = shortenURL(result, 2);
+		if (result.length() > Http.URL_MAXIMUM_LENGTH) {
+			result = HttpUtil.shortenURL(result, 2);
 		}
 
 		return result;
@@ -1377,66 +1395,14 @@ public class PortletURLImpl
 		if (key == null) {
 			return HttpUtil.encodeURL(value);
 		}
-		else {
-			try {
-				return HttpUtil.encodeURL(Encryptor.encrypt(key, value));
-			}
-			catch (EncryptorException ee) {
-				return value;
-			}
+
+		try {
+			return HttpUtil.encodeURL(Encryptor.encrypt(key, value));
+		}
+		catch (EncryptorException ee) {
+			return value;
 		}
 	}
-
-	protected String shortenURL(String url, int count) {
-		if (count == 0) {
-			return null;
-		}
-
-		StringBundler sb = new StringBundler();
-
-		String[] params = url.split(StringPool.AMPERSAND);
-
-		for (int i = 0; i < params.length; i++) {
-			String param = params[i];
-
-			if (param.contains("_backURL=") || param.contains("_redirect=") ||
-				param.contains("_returnToFullPageURL=")) {
-
-				int pos = param.indexOf(StringPool.EQUAL);
-
-				String qName = param.substring(0, pos);
-
-				String redirect = param.substring(pos + 1);
-
-				redirect = HttpUtil.decodeURL(redirect);
-
-				String newURL = shortenURL(redirect, count - 1);
-
-				if (newURL != null) {
-					newURL = HttpUtil.encodeURL(newURL);
-
-					sb.append(qName);
-					sb.append(StringPool.EQUAL);
-					sb.append(newURL);
-
-					if (i < (params.length - 1)) {
-						sb.append(StringPool.AMPERSAND);
-					}
-				}
-			}
-			else {
-				sb.append(param);
-
-				if (i < (params.length - 1)) {
-					sb.append(StringPool.AMPERSAND);
-				}
-			}
-		}
-
-		return sb.toString();
-	}
-
-	private static final long _URL_MAXIMUM_LENGTH = 2083;
 
 	private static Log _log = LogFactoryUtil.getLog(PortletURLImpl.class);
 

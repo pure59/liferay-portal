@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.asset.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.asset.service.impl.AssetEntryServiceImpl
  * @generated
  */
+@ProviderType
 public class AssetEntryServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -57,41 +60,35 @@ public class AssetEntryServiceUtil {
 	}
 
 	public static java.util.List<com.liferay.portlet.asset.model.AssetEntry> getCompanyEntries(
-		long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, int start, int end) {
 		return getService().getCompanyEntries(companyId, start, end);
 	}
 
-	public static int getCompanyEntriesCount(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getCompanyEntriesCount(long companyId) {
 		return getService().getCompanyEntriesCount(companyId);
 	}
 
 	public static java.util.List<com.liferay.portlet.asset.model.AssetEntry> getEntries(
 		com.liferay.portlet.asset.service.persistence.AssetEntryQuery entryQuery)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getEntries(entryQuery);
 	}
 
 	public static int getEntriesCount(
 		com.liferay.portlet.asset.service.persistence.AssetEntryQuery entryQuery)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getEntriesCount(entryQuery);
 	}
 
 	public static com.liferay.portlet.asset.model.AssetEntry getEntry(
 		long entryId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getEntry(entryId);
 	}
 
 	public static com.liferay.portlet.asset.model.AssetEntry incrementViewCounter(
 		java.lang.String className, long classPK)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().incrementViewCounter(className, classPK);
 	}
 
@@ -105,8 +102,7 @@ public class AssetEntryServiceUtil {
 		java.lang.String summary, java.lang.String url,
 		java.lang.String layoutUuid, int height, int width,
 		java.lang.Integer priority, boolean sync)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateEntry(groupId, createDate, modifiedDate, className,
 			classPK, classUuid, classTypeId, categoryIds, tagNames, visible,
@@ -120,6 +116,7 @@ public class AssetEntryServiceUtil {
 	Date, String, String, String, String, String, String, int,
 	int, Integer, boolean)}
 	*/
+	@Deprecated
 	public static com.liferay.portlet.asset.model.AssetEntry updateEntry(
 		long groupId, java.lang.String className, long classPK,
 		java.lang.String classUuid, long classTypeId, long[] categoryIds,
@@ -130,8 +127,7 @@ public class AssetEntryServiceUtil {
 		java.lang.String summary, java.lang.String url,
 		java.lang.String layoutUuid, int height, int width,
 		java.lang.Integer priority, boolean sync)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateEntry(groupId, className, classPK, classUuid,
 			classTypeId, categoryIds, tagNames, visible, startDate, endDate,
@@ -145,6 +141,7 @@ public class AssetEntryServiceUtil {
 	Date, Date, Date, String, String, String, String, String,
 	String, int, int, Integer, boolean)}
 	*/
+	@Deprecated
 	public static com.liferay.portlet.asset.model.AssetEntry updateEntry(
 		long groupId, java.lang.String className, long classPK,
 		java.lang.String classUuid, long classTypeId, long[] categoryIds,
@@ -154,8 +151,7 @@ public class AssetEntryServiceUtil {
 		java.lang.String description, java.lang.String summary,
 		java.lang.String url, java.lang.String layoutUuid, int height,
 		int width, java.lang.Integer priority, boolean sync)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateEntry(groupId, className, classPK, classUuid,
 			classTypeId, categoryIds, tagNames, visible, startDate, endDate,
@@ -177,6 +173,7 @@ public class AssetEntryServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(AssetEntryService service) {
 	}
 

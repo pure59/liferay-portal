@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.LayoutPrototypeServiceImpl
  * @generated
  */
+@ProviderType
 public class LayoutPrototypeServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -56,72 +59,98 @@ public class LayoutPrototypeServiceUtil {
 		getService().setBeanIdentifier(beanIdentifier);
 	}
 
+	public static com.liferay.portal.model.LayoutPrototype addLayoutPrototype(
+		java.util.Map<java.util.Locale, java.lang.String> nameMap,
+		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
+		boolean active, com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .addLayoutPrototype(nameMap, descriptionMap, active,
+			serviceContext);
+	}
+
 	/**
 	* @deprecated As of 6.2.0, replaced by {@link #addLayoutPrototype(Map,
 	String, boolean, ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portal.model.LayoutPrototype addLayoutPrototype(
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,
 		java.lang.String description, boolean active)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().addLayoutPrototype(nameMap, description, active);
 	}
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #addLayoutPrototype(Map, Map,
+	boolean, ServiceContext)}
+	*/
+	@Deprecated
 	public static com.liferay.portal.model.LayoutPrototype addLayoutPrototype(
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,
 		java.lang.String description, boolean active,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addLayoutPrototype(nameMap, description, active,
 			serviceContext);
 	}
 
 	public static void deleteLayoutPrototype(long layoutPrototypeId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteLayoutPrototype(layoutPrototypeId);
 	}
 
 	public static com.liferay.portal.model.LayoutPrototype getLayoutPrototype(
 		long layoutPrototypeId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getLayoutPrototype(layoutPrototypeId);
 	}
 
 	public static java.util.List<com.liferay.portal.model.LayoutPrototype> search(
 		long companyId, java.lang.Boolean active,
 		com.liferay.portal.kernel.util.OrderByComparator obc)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().search(companyId, active, obc);
+	}
+
+	public static com.liferay.portal.model.LayoutPrototype updateLayoutPrototype(
+		long layoutPrototypeId,
+		java.util.Map<java.util.Locale, java.lang.String> nameMap,
+		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
+		boolean active, com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .updateLayoutPrototype(layoutPrototypeId, nameMap,
+			descriptionMap, active, serviceContext);
 	}
 
 	/**
 	* @deprecated As of 6.2.0, replaced by {@link #updateLayoutPrototype(long,
 	Map, String, boolean, ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portal.model.LayoutPrototype updateLayoutPrototype(
 		long layoutPrototypeId,
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,
 		java.lang.String description, boolean active)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateLayoutPrototype(layoutPrototypeId, nameMap,
 			description, active);
 	}
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #updateLayoutPrototype(long,
+	Map, Map, boolean, ServiceContext)}
+	*/
+	@Deprecated
 	public static com.liferay.portal.model.LayoutPrototype updateLayoutPrototype(
 		long layoutPrototypeId,
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,
 		java.lang.String description, boolean active,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateLayoutPrototype(layoutPrototypeId, nameMap,
 			description, active, serviceContext);
@@ -141,6 +170,7 @@ public class LayoutPrototypeServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(LayoutPrototypeService service) {
 	}
 

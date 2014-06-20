@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.messageboards.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see MBThread
  * @generated
  */
+@ProviderType
 public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	public MBThreadWrapper(MBThread mbThread) {
 		_mbThread = mbThread;
@@ -328,11 +331,9 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	* Returns the user uuid of this message boards thread.
 	*
 	* @return the user uuid of this message boards thread
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _mbThread.getUserUuid();
 	}
 
@@ -470,11 +471,9 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	* Returns the root message user uuid of this message boards thread.
 	*
 	* @return the root message user uuid of this message boards thread
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getRootMessageUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getRootMessageUserUuid() {
 		return _mbThread.getRootMessageUserUuid();
 	}
 
@@ -552,11 +551,9 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	* Returns the last post by user uuid of this message boards thread.
 	*
 	* @return the last post by user uuid of this message boards thread
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getLastPostByUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getLastPostByUserUuid() {
 		return _mbThread.getLastPostByUserUuid();
 	}
 
@@ -684,11 +681,9 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	* Returns the status by user uuid of this message boards thread.
 	*
 	* @return the status by user uuid of this message boards thread
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getStatusByUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getStatusByUserUuid() {
 		return _mbThread.getStatusByUserUuid();
 	}
 
@@ -743,8 +738,70 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	}
 
 	/**
+	* Returns the trash entry created when this message boards thread was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this message boards thread.
+	*
+	* @return the trash entry created when this message boards thread was moved to the Recycle Bin
+	*/
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry getTrashEntry()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mbThread.getTrashEntry();
+	}
+
+	/**
+	* Returns the class primary key of the trash entry for this message boards thread.
+	*
+	* @return the class primary key of the trash entry for this message boards thread
+	*/
+	@Override
+	public long getTrashEntryClassPK() {
+		return _mbThread.getTrashEntryClassPK();
+	}
+
+	/**
+	* Returns the trash handler for this message boards thread.
+	*
+	* @return the trash handler for this message boards thread
+	*/
+	@Override
+	public com.liferay.portal.kernel.trash.TrashHandler getTrashHandler() {
+		return _mbThread.getTrashHandler();
+	}
+
+	/**
+	* Returns <code>true</code> if this message boards thread is in the Recycle Bin.
+	*
+	* @return <code>true</code> if this message boards thread is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrash() {
+		return _mbThread.isInTrash();
+	}
+
+	/**
+	* Returns <code>true</code> if the parent of this message boards thread is in the Recycle Bin.
+	*
+	* @return <code>true</code> if the parent of this message boards thread is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrashContainer() {
+		return _mbThread.isInTrashContainer();
+	}
+
+	@Override
+	public boolean isInTrashExplicitly() {
+		return _mbThread.isInTrashExplicitly();
+	}
+
+	@Override
+	public boolean isInTrashImplicitly() {
+		return _mbThread.isInTrashImplicitly();
+	}
+
+	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
+	@Deprecated
 	@Override
 	public boolean getApproved() {
 		return _mbThread.getApproved();
@@ -811,16 +868,6 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	}
 
 	/**
-	* Returns <code>true</code> if this message boards thread is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this message boards thread is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _mbThread.isInTrash();
-	}
-
-	/**
 	* Returns <code>true</code> if this message boards thread is pending.
 	*
 	* @return <code>true</code> if this message boards thread is pending; <code>false</code> otherwise
@@ -853,7 +900,7 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	/**
 	* Sets the container model ID of this message boards thread.
 	*
-	* @param container model ID of this message boards thread
+	* @param containerModelId the container model ID of this message boards thread
 	*/
 	@Override
 	public void setContainerModelId(long containerModelId) {
@@ -883,7 +930,7 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	/**
 	* Sets the parent container model ID of this message boards thread.
 	*
-	* @param parent container model ID of this message boards thread
+	* @param parentContainerModelId the parent container model ID of this message boards thread
 	*/
 	@Override
 	public void setParentContainerModelId(long parentContainerModelId) {
@@ -990,28 +1037,24 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_mbThread.persist();
 	}
 
 	@Override
 	public com.liferay.portal.kernel.repository.model.Folder addAttachmentsFolder()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbThread.addAttachmentsFolder();
 	}
 
 	@Override
-	public long getAttachmentsFolderId()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public long getAttachmentsFolderId() {
 		return _mbThread.getAttachmentsFolderId();
 	}
 
 	@Override
 	public com.liferay.portlet.messageboards.model.MBCategory getCategory()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbThread.getCategory();
 	}
 
@@ -1021,18 +1064,13 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	}
 
 	@Override
-	public com.liferay.portlet.messageboards.model.MBCategory getTrashContainer() {
-		return _mbThread.getTrashContainer();
+	public long[] getParticipantUserIds() {
+		return _mbThread.getParticipantUserIds();
 	}
 
 	@Override
 	public boolean hasLock(long userId) {
 		return _mbThread.hasLock(userId);
-	}
-
-	@Override
-	public boolean isInTrashContainer() {
-		return _mbThread.isInTrashContainer();
 	}
 
 	@Override
@@ -1067,6 +1105,7 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public MBThread getWrappedMBThread() {
 		return _mbThread;
 	}
@@ -1074,6 +1113,16 @@ public class MBThreadWrapper implements MBThread, ModelWrapper<MBThread> {
 	@Override
 	public MBThread getWrappedModel() {
 		return _mbThread;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _mbThread.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _mbThread.isFinderCacheEnabled();
 	}
 
 	@Override

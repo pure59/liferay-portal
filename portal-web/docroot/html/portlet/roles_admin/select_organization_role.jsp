@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -75,18 +75,11 @@ if (step == 1) {
 
 			<liferay-ui:search-container
 				searchContainer="<%= new OrganizationSearch(renderRequest, portletURL) %>"
+				total="<%= organizations.size() %>"
 			>
-				<liferay-ui:search-container-results>
-
-					<%
-					total = organizations.size();
-					results = ListUtil.subList(organizations, searchContainer.getStart(), searchContainer.getEnd());
-
-					pageContext.setAttribute("results", results);
-					pageContext.setAttribute("total", total);
-					%>
-
-				</liferay-ui:search-container-results>
+				<liferay-ui:search-container-results
+					results="<%= ListUtil.subList(organizations, searchContainer.getStart(), searchContainer.getEnd()) %>"
+				/>
 
 				<liferay-ui:search-container-row
 					className="com.liferay.portal.model.Organization"
@@ -102,32 +95,14 @@ if (step == 1) {
 					/>
 
 					<liferay-ui:search-container-column-text
-						buffer="buffer"
 						name="parent-organization"
-					>
-
-						<%
-						String parentOrganizationName = StringPool.BLANK;
-
-						if (organization.getParentOrganizationId() > 0) {
-							try {
-								Organization parentOrganization = OrganizationLocalServiceUtil.getOrganization(organization.getParentOrganizationId());
-
-								parentOrganizationName = parentOrganization.getName();
-							}
-							catch (Exception e) {
-							}
-						}
-
-						buffer.append(HtmlUtil.escape(parentOrganizationName));
-						%>
-
-					</liferay-ui:search-container-column-text>
+						value="<%= HtmlUtil.escape(organization.getParentOrganizationName()) %>"
+					/>
 
 					<liferay-ui:search-container-column-text
 						name="type"
 						orderable="<%= true %>"
-						value="<%= LanguageUtil.get(pageContext, organization.getType()) %>"
+						value="<%= LanguageUtil.get(request, organization.getType()) %>"
 					/>
 
 					<liferay-ui:search-container-column-text
@@ -177,7 +152,7 @@ if (step == 1) {
 						portletURL.setParameter("step", "2");
 						%>
 
-						submitForm(document.<portlet:namespace />selectOrganizationRoleFm, "<%= portletURL.toString() %>");
+						submitForm(document.<portlet:namespace />selectOrganizationRoleFm, '<%= portletURL.toString() %>');
 					},
 					'.organization-selector-button'
 				);
@@ -202,7 +177,7 @@ if (step == 1) {
 
 			portletURL.setParameter("step", "1");
 
-			String breadcrumbs = "<a href=\"" + portletURL.toString() + "\">" + LanguageUtil.get(pageContext, "organizations") + "</a> &raquo; " + HtmlUtil.escape(organization.getName());
+			String breadcrumbs = "<a href=\"" + portletURL.toString() + "\">" + LanguageUtil.get(request, "organizations") + "</a> &raquo; " + HtmlUtil.escape(organization.getName());
 			%>
 
 			<div class="breadcrumbs">
@@ -235,15 +210,20 @@ if (step == 1) {
 						roles = UsersAdminUtil.filterGroupRoles(permissionChecker, organization.getGroup().getGroupId(), roles);
 
 						total = roles.size();
+
+						searchContainer.setTotal(total);
+
 						results = ListUtil.subList(roles, searchContainer.getStart(), searchContainer.getEnd());
 					}
 					else {
-						results = RoleLocalServiceUtil.search(company.getCompanyId(), searchTerms.getKeywords(), new Integer[] {RoleConstants.TYPE_ORGANIZATION}, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 						total = RoleLocalServiceUtil.searchCount(company.getCompanyId(), searchTerms.getKeywords(), new Integer[] {RoleConstants.TYPE_ORGANIZATION});
+
+						searchContainer.setTotal(total);
+
+						results = RoleLocalServiceUtil.search(company.getCompanyId(), searchTerms.getKeywords(), new Integer[] {RoleConstants.TYPE_ORGANIZATION}, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 					}
 
-					pageContext.setAttribute("results", results);
-					pageContext.setAttribute("total", total);
+					searchContainer.setResults(results);
 					%>
 
 				</liferay-ui:search-container-results>
@@ -253,13 +233,15 @@ if (step == 1) {
 					keyProperty="roleId"
 					modelVar="role"
 				>
-					<liferay-util:param name="className" value="<%= RolesAdminUtil.getCssClassName(role) %>" />
-					<liferay-util:param name="classHoverName" value="<%= RolesAdminUtil.getCssClassName(role) %>" />
-
 					<liferay-ui:search-container-column-text
 						name="title"
-						value="<%= HtmlUtil.escape(role.getTitle(locale)) %>"
-					/>
+					>
+						<liferay-ui:icon
+							iconCssClass="<%= RolesAdminUtil.getIconCssClass(role) %>"
+							label="<%= true %>"
+							message="<%= HtmlUtil.escape(role.getTitle(locale)) %>"
+						/>
+					</liferay-ui:search-container-column-text>
 
 					<liferay-ui:search-container-column-text>
 						<c:if test="<%= Validator.isNull(p_u_i_d) || OrganizationMembershipPolicyUtil.isRoleAllowed((selUser != null) ? selUser.getUserId() : 0, organization.getOrganizationId(), role.getRoleId()) %>">
@@ -267,14 +249,27 @@ if (step == 1) {
 							<%
 							Map<String, Object> data = new HashMap<String, Object>();
 
-							data.put("groupid", organization.getGroup().getGroupId());
-							data.put("groupname", HtmlUtil.escapeAttribute(organization.getGroup().getDescriptiveName(locale)));
+							data.put("iconcssclass", RolesAdminUtil.getIconCssClass(role));
+							data.put("groupdescriptivename", organization.getGroup().getDescriptiveName(locale));
+							data.put("groupid", organization.getGroupId());
 							data.put("roleid", role.getRoleId());
-							data.put("roletitle", HtmlUtil.escapeAttribute(role.getTitle(locale)));
+							data.put("roletitle", role.getTitle(locale));
 							data.put("searchcontainername", "organizationRoles");
+
+							boolean disabled = false;
+
+							List<UserGroupRole> userGroupRoles = UserGroupRoleLocalServiceUtil.getUserGroupRoles(selUser.getUserId());
+
+							for (UserGroupRole userGroupRole : userGroupRoles) {
+								if ((organization.getGroupId() == userGroupRole.getGroupId()) && (userGroupRole.getRoleId() == role.getRoleId())) {
+									disabled = true;
+
+									break;
+								}
+							}
 							%>
 
-							<aui:button cssClass="selector-button" data="<%= data %>" value="choose" />
+							<aui:button cssClass="selector-button" data="<%= data %>" disabled="<%= disabled %>" value="choose" />
 						</c:if>
 					</liferay-ui:search-container-column-text>
 				</liferay-ui:search-container-row>
@@ -288,15 +283,14 @@ if (step == 1) {
 <aui:script use="aui-base">
 	var Util = Liferay.Util;
 
-	A.one('#<portlet:namespace />selectOrganizationRoleFm').delegate(
-		'click',
-		function(event) {
-			var result = Util.getAttributes(event.currentTarget, 'data-');
+	var openingLiferay = Util.getOpener().Liferay;
 
-			Util.getOpener().Liferay.fire('<%= HtmlUtil.escapeJS(eventName) %>', result);
-
-			Util.getWindow().hide();
-		},
-		'.selector-button'
+	openingLiferay.fire(
+		'<portlet:namespace />syncOrganizationRoles',
+		{
+			selectors: A.all('.selector-button')
+		}
 	);
+
+	Util.selectEntityHandler('#<portlet:namespace />selectOrganizationRoleFm', '<%= HtmlUtil.escapeJS(eventName) %>');
 </aui:script>

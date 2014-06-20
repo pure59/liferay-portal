@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,6 @@
 package com.liferay.portlet.asset.model;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.security.permission.PermissionChecker;
@@ -46,11 +45,19 @@ public interface AssetRenderer {
 
 	public int getAssetRendererType();
 
+	public String[] getAvailableLanguageIds() throws Exception;
+
+	/**
+	 * @deprecated As of 6.2.0, replaced by {@link #getAvailableLanguageIds}
+	 */
+	@Deprecated
 	public String[] getAvailableLocales() throws Exception;
 
 	public String getClassName();
 
 	public long getClassPK();
+
+	public DDMFieldReader getDDMFieldReader();
 
 	public String getDiscussionPath();
 
@@ -58,17 +65,31 @@ public interface AssetRenderer {
 
 	public long getGroupId();
 
+	public String getIconCssClass() throws PortalException;
+
 	public String getIconPath(PortletRequest portletRequest);
 
 	public String getNewName(String oldName, String token);
 
 	public String getPreviewPath(
-			PortletRequest portletRequest, PortletResponse PortletResponse)
+			PortletRequest portletRequest, PortletResponse portletResponse)
 		throws Exception;
 
 	public String getSearchSummary(Locale locale);
 
+	public String getSummary();
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #getSummary(PortletRequest,
+	 *             PortletResponse)}
+	 */
+	@Deprecated
 	public String getSummary(Locale locale);
+
+	public String getSummary(
+		PortletRequest portletRequest, PortletResponse portletResponse);
+
+	public String[] getSupportedConversions();
 
 	public String getThumbnailPath(PortletRequest portletRequest)
 		throws Exception;
@@ -103,6 +124,11 @@ public interface AssetRenderer {
 			WindowState windowState)
 		throws Exception;
 
+	public PortletURL getURLViewDiffs(
+			LiferayPortletRequest liferayPortletRequest,
+			LiferayPortletResponse liferayPortletResponse)
+		throws Exception;
+
 	public String getURLViewInContext(
 			LiferayPortletRequest liferayPortletRequest,
 			LiferayPortletResponse liferayPortletResponse,
@@ -118,10 +144,10 @@ public interface AssetRenderer {
 	public String getViewInContextMessage();
 
 	public boolean hasEditPermission(PermissionChecker permissionChecker)
-		throws PortalException, SystemException;
+		throws PortalException;
 
 	public boolean hasViewPermission(PermissionChecker permissionChecker)
-		throws PortalException, SystemException;
+		throws PortalException;
 
 	public boolean isConvertible();
 

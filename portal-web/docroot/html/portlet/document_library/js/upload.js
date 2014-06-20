@@ -67,9 +67,11 @@ AUI.add(
 
 		var SELECTOR_SEARCH_CONTAINER = '.searchcontainer';
 
-		var SELECTOR_ENTRY_DISPLAY_STYLE = '.' + CSS_ENTRY_DISPLAY_STYLE;
+		var STR_DOT = '.';
 
-		var SELECTOR_TAGLIB_ICON = '.' + CSS_TAGLIB_ICON;
+		var SELECTOR_ENTRY_DISPLAY_STYLE = STR_DOT + CSS_ENTRY_DISPLAY_STYLE;
+
+		var SELECTOR_TAGLIB_ICON = STR_DOT + CSS_TAGLIB_ICON;
 
 		var SIZE_DENOMINATOR = 1024;
 
@@ -85,11 +87,7 @@ AUI.add(
 
 		var STR_NAVIGATION_OVERLAY_BACKGROUND = '#FFF';
 
-		var STR_SIZE_SUFFIX_KB = 'k';
-
-		var STR_SIZE_SUFFIX_MB = 'MB';
-
-		var STR_SIZE_SUFFIX_GB = 'GB';
+		var STR_SPACE = ' ';
 
 		var STR_THUMBNAIL_EXTENSION = '.png';
 
@@ -107,7 +105,7 @@ AUI.add(
 
 		var UPLOADER_TYPE = A.Uploader.TYPE || 'none';
 
-		var TPL_ENTRY_ROW_TITLE = '<span class="' + CSS_APP_VIEW_ENTRY + ' ' + CSS_ENTRY_DISPLAY_STYLE + '">' +
+		var TPL_ENTRY_ROW_TITLE = '<span class="' + CSS_APP_VIEW_ENTRY + STR_SPACE + CSS_ENTRY_DISPLAY_STYLE + '">' +
 			'<a class="' + CSS_TAGLIB_ICON + '">' +
 				'<img alt="" class="' + CSS_ICON + '" src="' + PATH_THEME_IMAGES + '/file_system/small/page.png" />' +
 				'<span class="' + CSS_TAGLIB_TEXT + '">{0}</span>' +
@@ -117,7 +115,7 @@ AUI.add(
 		var TPL_ERROR_FOLDER = new A.Template(
 			'<span class="lfr-status-success-label">{validFilesLength}</span>',
 			'<span class="lfr-status-error-label">{invalidFilesLength}</span>',
-			'<ul class="unstyled">',
+			'<ul class="list-unstyled">',
 				'<tpl for="invalidFiles">',
 					'<li><b>{name}</b>: {errorMessage}</li>',
 				'</tpl>',
@@ -126,7 +124,7 @@ AUI.add(
 
 		var TPL_IMAGE_THUMBNAIL = themeDisplay.getPathContext() + '/documents/' + themeDisplay.getScopeGroupId() + '/{0}/{1}';
 
-		DocumentLibraryUpload = function() {
+		var DocumentLibraryUpload = function() {
 		};
 
 		DocumentLibraryUpload.NAME = 'documentlibraryupload';
@@ -135,7 +133,7 @@ AUI.add(
 			initializer: function() {
 				var instance = this;
 
-				if (themeDisplay.isSignedIn()) {
+				if (themeDisplay.isSignedIn() && (UPLOADER_TYPE === 'html5') && !UA.touch && instance.one('#addButtonContainer')) {
 					instance._initDLUpload();
 				}
 			},
@@ -164,6 +162,8 @@ AUI.add(
 				if (instance._tooltipDelegate) {
 					instance._tooltipDelegate.destroy();
 				}
+
+				(new A.EventHandle(instance._eventHandles)).detach();
 			},
 
 			_addFilesToQueueBottom: function(files) {
@@ -173,7 +173,7 @@ AUI.add(
 
 				AArray.each(
 					files,
-					function(item, index, collection) {
+					function(item, index) {
 						queue.addToQueueBottom(item);
 					}
 				);
@@ -190,9 +190,9 @@ AUI.add(
 
 				A.getWin()._node.onbeforeunload = A.bind('_confirmUnload', instance);
 
-				Liferay.on(instance.ns('dataRequest'), instance._onDataRequest, instance);
+				var onDataRequestHandle = Liferay.on(instance.ns('dataRequest'), instance._onDataRequest, instance);
 
-				Liferay.after(
+				var afterDataRequestHandle = Liferay.after(
 					'liferay-app-view-folders:dataRequest',
 					function(event) {
 						var requestParams = event.requestParams;
@@ -210,63 +210,98 @@ AUI.add(
 					500
 				);
 
-				docElement.on(
+				if (instance._appViewMove.get('updateable')) {
+					var dd = instance._appViewMove._ddHandler.dd;
+
+					dd.addInvalid(STR_DOT + CSS_UPLOAD_ERROR);
+				}
+
+				var onDragOverHandle = docElement.on(
 					'dragover',
 					function(event) {
-						var originalEvent = event._event;
+						var dataTransfer = event._event.dataTransfer;
 
-						var dataTransfer = originalEvent.dataTransfer;
+						if (dataTransfer && dataTransfer.types) {
+							var dataTransferTypes = dataTransfer.types || [];
 
-						if (dataTransfer && AArray.indexOf(dataTransfer.types, 'Files') > -1) {
-							event.halt();
+							if ((AArray.indexOf(dataTransferTypes, 'Files') > -1) && (AArray.indexOf(dataTransferTypes, 'text/html') === -1)) {
+								event.halt();
 
-							docElement.addClass('upload-drop-intent');
+								dataTransfer.dropEffect = 'copy';
 
-							var target = event.target;
+								docElement.addClass('upload-drop-intent');
 
-							docElement.toggleClass('upload-drop-active', (target.compareTo(entriesContainer) || entriesContainer.contains(target)));
+								var target = event.target;
 
-							dataTransfer.dropEffect = 'copy';
+								docElement.toggleClass('upload-drop-active', (target.compareTo(entriesContainer) || entriesContainer.contains(target)));
+
+								removeCssClassTask();
+							}
 						}
-
-						removeCssClassTask();
 					}
 				);
 
-				docElement.delegate(
+				var onDropHandle = docElement.delegate(
 					'drop',
 					function(event) {
 						var dataTransfer = event._event.dataTransfer;
 
-						var dragDropFiles = dataTransfer && AArray(dataTransfer.files);
+						if (dataTransfer) {
+							var dataTransferTypes = dataTransfer.types || [];
 
-						if (AArray.indexOf(dataTransfer.types, 'Files') > -1) {
-							event.halt();
+							if ((AArray.indexOf(dataTransferTypes, 'Files') > -1) && (AArray.indexOf(dataTransferTypes, 'text/html') === -1)) {
+								event.halt();
 
-							event.fileList = AArray.map(
-								dragDropFiles,
-								function(item, index, collection) {
-									return new A.FileHTML5(item);
-								}
-							);
+								var dragDropFiles = AArray(dataTransfer.files);
 
-							var uploader = instance._getUploader();
+								event.fileList = AArray.map(
+									dragDropFiles,
+									function(item, index) {
+										return new A.FileHTML5(item);
+									}
+								);
 
-							uploader.fire('fileselect', event);
+								var uploader = instance._getUploader();
+
+								uploader.fire('fileselect', event);
+							}
 						}
 					},
 					'body, .document-container, .overlaymask, .progressbar, [data-folder="true"]'
 				);
 
-				entriesContainer.delegate(
+				var entriesDragDelegateHandle = entriesContainer.delegate(
 					['dragleave', 'dragover'],
 					function(event) {
-						var parentElement = event.target.ancestor(SELECTOR_ENTRY_DISPLAY_STYLE);
+						var dataTransfer = event._event.dataTransfer;
 
-						parentElement.toggleClass(CSS_ACTIVE_AREA, event.type == 'dragover');
+						var dataTransferTypes = dataTransfer.types;
+
+						if ((AArray.indexOf(dataTransferTypes, 'Files') > -1) && (AArray.indexOf(dataTransferTypes, 'text/html') === -1)) {
+							var parentElement = event.target.ancestor(SELECTOR_ENTRY_DISPLAY_STYLE);
+
+							parentElement.toggleClass(CSS_ACTIVE_AREA, event.type == 'dragover');
+						}
 					},
 					SELECTOR_DATA_FOLDER
 				);
+
+				var entriesClickDelegateHandle = entriesContainer.delegate(
+					'click',
+					function(event) {
+						event.preventDefault();
+					},
+					STR_DOT + CSS_UPLOAD_ERROR + STR_SPACE + SELECTOR_ENTRY_LINK
+				);
+
+				instance._eventHandles = [
+					onDataRequestHandle,
+					afterDataRequestHandle,
+					onDragOverHandle,
+					onDropHandle,
+					entriesDragDelegateHandle,
+					entriesClickDelegateHandle
+				];
 			},
 
 			_attachSubscriptions: function(data) {
@@ -299,7 +334,7 @@ AUI.add(
 
 				AArray.each(
 					queuedFiles,
-					function(item, index, collection) {
+					function(item, index) {
 						fileList.push(item);
 					}
 				);
@@ -308,7 +343,9 @@ AUI.add(
 			_confirmUnload: function() {
 				var instance = this;
 
-				return instance._isUploading() ? Liferay.Language.get('uploads-are-in-progress-confirmation') : null;
+				if (instance._isUploading()) {
+					return Liferay.Language.get('uploads-are-in-progress-confirmation');
+				}
 			},
 
 			_createEntryNode: function(name, size, displayStyle) {
@@ -362,22 +399,20 @@ AUI.add(
 			_createEntryRow: function(name, size) {
 				var instance = this;
 
-				var storageSize = instance._formatStorageSize(size);
-
 				var searchContainerNode = instance._entriesContainer.one(SELECTOR_SEARCH_CONTAINER);
 
 				var searchContainer = Liferay.SearchContainer.get(searchContainerNode.attr('id'));
 
 				var columnValues = AArray.map(
 					instance._columnNames,
-					function(item, index, collection) {
+					function(item, index) {
 						var value = '';
 
 						if (item == 'name') {
 							value = sub(TPL_ENTRY_ROW_TITLE, [name]);
 						}
 						else if (item == 'size') {
-							value = storageSize;
+							value = instance.formatStorage(size);
 						}
 						else if (item == 'downloads') {
 							value = '0';
@@ -464,7 +499,7 @@ AUI.add(
 				if (!currentUploadData.folder) {
 					AArray.each(
 						fileList,
-						function(item, index, collection) {
+						function(item, index) {
 							item.overlay.destroy();
 
 							item.progressBar.destroy();
@@ -565,34 +600,6 @@ AUI.add(
 
 					resultsNode.addClass(uploadResultClass);
 				}
-			},
-
-			_formatStorageSize: function(size) {
-				var instance = this;
-
-				var suffix = STR_SIZE_SUFFIX_KB;
-
-				size /= SIZE_DENOMINATOR;
-
-				if (size > SIZE_DENOMINATOR) {
-					suffix = STR_SIZE_SUFFIX_MB;
-
-					size /= SIZE_DENOMINATOR;
-				}
-
-				if (size > SIZE_DENOMINATOR) {
-					suffix = STR_SIZE_SUFFIX_GB;
-
-					size /= SIZE_DENOMINATOR;
-				}
-
-				var precision = 1;
-
-				if (suffix == STR_SIZE_SUFFIX_KB) {
-					precision = 0;
-				}
-
-				return LString.round(size, precision) + suffix;
 			},
 
 			_getCurrentUploadData: function() {
@@ -744,35 +751,6 @@ AUI.add(
 				return navigationOverlays;
 			},
 
-			_getUploadResponse: function(responseData) {
-				var instance = this;
-
-				var error;
-				var message;
-
-				try {
-					responseData = A.JSON.parse(responseData);
-				}
-				catch (err) {
-				}
-
-				if (Lang.isObject(responseData)) {
-					error = responseData.status && (responseData.status >= 490 && responseData.status < 500);
-
-					if (error) {
-						message = responseData.message;
-					}
-					else {
-						message = instance.ns('fileEntryId=') + responseData.fileEntryId;
-					}
-				}
-
-				return {
-					error: error,
-					message: message
-				};
-			},
-
 			_getUploader: function() {
 				var instance = this;
 
@@ -823,6 +801,43 @@ AUI.add(
 				return uploader;
 			},
 
+			_getUploadResponse: function(responseData) {
+				var instance = this;
+
+				var error;
+				var message;
+
+				try {
+					responseData = A.JSON.parse(responseData);
+				}
+				catch (err) {
+				}
+
+				if (Lang.isObject(responseData)) {
+					error = responseData.status && (responseData.status >= 490 && responseData.status < 500);
+
+					if (error) {
+						message = responseData.message;
+					}
+					else {
+						message = instance.ns('fileEntryId=') + responseData.fileEntryId;
+					}
+				}
+
+				return {
+					error: error,
+					message: message
+				};
+			},
+
+			_getUploadStatus: function(key) {
+				var instance = this;
+
+				var dataSet = instance._getDataSet();
+
+				return dataSet.item(String(key));
+			},
+
 			_getUploadURL: function(folderId) {
 				var instance = this;
 
@@ -855,41 +870,40 @@ AUI.add(
 			_initDLUpload: function() {
 				var instance = this;
 
-				if (UPLOADER_TYPE == 'html5' && !UA.touch) {
-					var config = instance._config;
+				var config = instance._config;
 
-					var maxFileSize = config.maxFileSize;
+				var maxFileSize = config.maxFileSize;
 
-					var foldersConfig = config.folders;
+				var foldersConfig = config.folders;
 
-					instance._folderId = foldersConfig.defaultParentFolderId;
+				instance._folderId = foldersConfig.defaultParentFolderId;
 
-					instance._attachEventHandlers();
+				instance._attachEventHandlers();
 
-					var columnNames = config.columnNames;
+				var columnNames = config.columnNames;
 
-					columnNames.push('');
-					columnNames.unshift('');
+				columnNames.push('');
+				columnNames.unshift('');
 
-					instance._columnNames = columnNames;
+				instance._columnNames = columnNames;
 
-					instance._dimensions = foldersConfig.dimensions;
+				instance._dimensions = foldersConfig.dimensions;
 
-					instance._handles = [];
-					instance._tooltipDelegates = [];
+				instance._handles = [];
+				instance._tooltipDelegates = [];
 
-					var appViewEntryTemplates = instance.byId('appViewEntryTemplates');
+				var appViewEntryTemplates = instance.byId('appViewEntryTemplates');
 
-					instance._invisibleDescriptiveEntry = appViewEntryTemplates.one(SELECTOR_ENTRY_DISPLAY_STYLE + SELECTOR_DISPLAY_DESCRIPTIVE);
-					instance._invisibleIconEntry = appViewEntryTemplates.one(SELECTOR_ENTRY_DISPLAY_STYLE + SELECTOR_DISPLAY_ICON);
+				instance._invisibleDescriptiveEntry = appViewEntryTemplates.one(SELECTOR_ENTRY_DISPLAY_STYLE + SELECTOR_DISPLAY_DESCRIPTIVE);
+				instance._invisibleIconEntry = appViewEntryTemplates.one(SELECTOR_ENTRY_DISPLAY_STYLE + SELECTOR_DISPLAY_ICON);
 
-					instance._maxFileSize = maxFileSize;
+				instance._maxFileSize = maxFileSize;
 
-					instance._viewFileEntryURL = config.viewFileEntryURL;
+				instance._viewFileEntryURL = config.viewFileEntryURL;
 
-					instance._invalidFileSizeText = Liferay.Language.get('please-enter-a-file-with-a-valid-file-size-no-larger-than-x');
-					instance._zeroByteFileText = Liferay.Language.get('the-file-contains-no-data-and-cannot-be-uploaded.-please-use-the-classic-uploader');
-				}
+				instance._invalidFileSizeText = Liferay.Language.get('please-enter-a-file-with-a-valid-file-size-no-larger-than-x');
+				instance._invalidFileType = Liferay.Language.get('please-enter-a-file-with-a-valid-file-type');
+				instance._zeroByteFileText = Liferay.Language.get('the-file-contains-no-data-and-cannot-be-uploaded.-please-use-the-classic-uploader');
 			},
 
 			_isUploading: function() {
@@ -908,14 +922,6 @@ AUI.add(
 				if (instance._isUploading()) {
 					event.halt();
 				}
-			},
-
-			_getUploadStatus: function(key) {
-				var instance = this;
-
-				var dataSet = instance._getDataSet();
-
-				return dataSet.item(String(key));
 			},
 
 			_onFileSelect: function(event) {
@@ -965,10 +971,10 @@ AUI.add(
 						key,
 						{
 							fileList: validFiles,
-							target: folderNode,
 							folder: (key != instance._folderId),
 							folderId: key,
-							invalidFiles: filesPartition.rejects
+							invalidFiles: filesPartition.rejects,
+							target: folderNode
 						}
 					);
 				}
@@ -1131,7 +1137,7 @@ AUI.add(
 				var selector = SELECTOR_ENTRY_LINK;
 
 				if (displayStyleList) {
-					selector = SELECTOR_ENTRY_DISPLAY_STYLE + ' ' + SELECTOR_TAGLIB_ICON;
+					selector = SELECTOR_ENTRY_DISPLAY_STYLE + STR_SPACE + SELECTOR_TAGLIB_ICON;
 				}
 
 				var link = node.one(selector);
@@ -1145,16 +1151,6 @@ AUI.add(
 				var instance = this;
 
 				progressBar.set('value', Math.ceil(value));
-			},
-
-			_updateThumbnail: function(node, fileName) {
-				var instance = this;
-
-				var imageNode = node.one('img');
-
-				var thumbnailPath = instance._getMediaThumbnail(fileName);
-
-				imageNode.attr('src', thumbnailPath);
 			},
 
 			_updateStatusUI: function(target, filesPartition) {
@@ -1203,22 +1199,34 @@ AUI.add(
 				}
 			},
 
+			_updateThumbnail: function(node, fileName) {
+				var instance = this;
+
+				var imageNode = node.one('img');
+
+				var thumbnailPath = instance._getMediaThumbnail(fileName);
+
+				imageNode.attr('src', thumbnailPath);
+			},
+
 			_validateFiles: function(data) {
 				var instance = this;
 
 				var maxFileSize = instance._maxFileSize;
 
-				var invalidSizeText = sub(instance._invalidFileSizeText, [maxFileSize / 1024]);
-
 				return AArray.partition(
 					data,
-					function(item, index, collection) {
+					function(item, index) {
 						var errorMessage;
 
 						var size = item.get('size') || 0;
+						var type = item.get('type') || '';
 
 						if ((maxFileSize !== 0) && (size > maxFileSize)) {
-							errorMessage = invalidSizeText;
+							errorMessage = sub(instance._invalidFileSizeText, [instance.formatStorage(instance._maxFileSize)]);
+						}
+						else if (!type) {
+							errorMessage = instance._invalidFileType;
 						}
 						else if (size === 0) {
 							errorMessage = instance._zeroByteFileText;
@@ -1239,6 +1247,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-data-set-deprecated', 'aui-overlay-manager-deprecated', 'aui-overlay-mask-deprecated', 'aui-progressbar', 'aui-template-deprecated', 'aui-tooltip', 'liferay-app-view-folders', 'liferay-app-view-move', 'liferay-app-view-paginator', 'liferay-app-view-select', 'liferay-search-container', 'uploader']
+		requires: ['aui-data-set-deprecated', 'aui-overlay-manager-deprecated', 'aui-overlay-mask-deprecated', 'aui-progressbar', 'aui-template-deprecated', 'aui-tooltip', 'liferay-app-view-folders', 'liferay-app-view-move', 'liferay-app-view-paginator', 'liferay-app-view-select', 'liferay-search-container', 'liferay-storage-formatter', 'uploader']
 	}
 );

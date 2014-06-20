@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -33,10 +33,11 @@ import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.KMPSearch;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.minifier.MinifierUtil;
 import com.liferay.portal.servlet.filters.BasePortalFilter;
 import com.liferay.portal.servlet.filters.dynamiccss.DynamicCSSUtil;
-import com.liferay.portal.util.MinifierUtil;
 import com.liferay.portal.util.PropsValues;
 
 import java.io.Writer;
@@ -294,7 +295,8 @@ public class StripFilter extends BasePortalFilter {
 				if (PropsValues.STRIP_CSS_SASS_ENABLED) {
 					try {
 						content = DynamicCSSUtil.parseSass(
-							_servletContext, request, null, content);
+							_servletContext, request, request.getRequestURI(),
+							content);
 					}
 					catch (ScriptingException se) {
 						_log.error("Unable to parse SASS on CSS " + key, se);
@@ -360,7 +362,9 @@ public class StripFilter extends BasePortalFilter {
 			filterChain);
 
 		String contentType = GetterUtil.getString(
-			bufferCacheServletResponse.getContentType()).toLowerCase();
+			bufferCacheServletResponse.getContentType());
+
+		contentType = StringUtil.toLowerCase(contentType);
 
 		if (_log.isDebugEnabled()) {
 			_log.debug("Stripping content of type " + contentType);
@@ -426,7 +430,8 @@ public class StripFilter extends BasePortalFilter {
 	}
 
 	protected void processJavaScript(
-			CharBuffer charBuffer, Writer writer, char[] openTag)
+			String resourceName, CharBuffer charBuffer, Writer writer,
+			char[] openTag)
 		throws Exception {
 
 		int endPos = openTag.length + 1;
@@ -528,7 +533,8 @@ public class StripFilter extends BasePortalFilter {
 			minifiedContent = _minifierCache.get(key);
 
 			if (minifiedContent == null) {
-				minifiedContent = MinifierUtil.minifyJavaScript(content);
+				minifiedContent = MinifierUtil.minifyJavaScript(
+					resourceName, content);
 
 				boolean skipCache = false;
 
@@ -666,7 +672,11 @@ public class StripFilter extends BasePortalFilter {
 					continue;
 				}
 				else if (hasMarker(charBuffer, _MARKER_SCRIPT_OPEN)) {
-					processJavaScript(charBuffer, writer, _MARKER_SCRIPT_OPEN);
+					StringBuffer requestURL = request.getRequestURL();
+
+					processJavaScript(
+						requestURL.toString(), charBuffer, writer,
+						_MARKER_SCRIPT_OPEN);
 
 					continue;
 				}

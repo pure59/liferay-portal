@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,7 +21,6 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.ServletContextPool;
 import com.liferay.portal.kernel.servlet.WebDirDetector;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.ContextPathUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.PathUtil;
@@ -52,8 +51,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
-
-import sun.reflect.Reflection;
 
 /**
  * @author Brian Wing Shun Chan
@@ -97,8 +94,8 @@ public class FileChecker extends BaseChecker {
 			"${com.sun.aas.instanceRoot}",
 			"${com.sun.aas.installRoot}",
 			"${file.separator}",
-			"${java.io.tmpdir}",
 			"${java.home}",
+			"${java.io.tmpdir}",
 			"${jboss.home.dir}",
 			"${jetty.home}",
 			"${jonas.base}",
@@ -114,6 +111,7 @@ public class FileChecker extends BaseChecker {
 			"${user.home}",
 			"${user.name}",
 			"${weblogic.domain.dir}",
+			"${websphere.cell}",
 			"${websphere.profile.dir}",
 			StringPool.DOUBLE_SLASH
 		};
@@ -135,7 +133,8 @@ public class FileChecker extends BaseChecker {
 			System.getProperty("com.sun.aas.instanceRoot"),
 			System.getProperty("com.sun.aas.installRoot"),
 			System.getProperty("file.separator"),
-			System.getProperty("java.io.tmpdir"), System.getenv("JAVA_HOME"),
+			System.getProperty("java.home"),
+			System.getProperty("java.io.tmpdir"),
 			System.getProperty("jboss.home.dir"),
 			System.getProperty("jetty.home"), System.getProperty("jonas.base"),
 			_portalDir, PropsValues.LIFERAY_HOME,
@@ -145,7 +144,8 @@ public class FileChecker extends BaseChecker {
 			ReleaseInfo.getVersion(), System.getProperty("resin.home"),
 			System.getProperty("user.dir"), System.getProperty("user.home"),
 			System.getProperty("user.name"), System.getenv("DOMAIN_HOME"),
-			System.getenv("USER_INSTALL_ROOT"), StringPool.SLASH
+			System.getenv("WAS_CELL"), System.getProperty("server.root"),
+			StringPool.SLASH
 		};
 
 		if (_log.isDebugEnabled()) {
@@ -208,22 +208,6 @@ public class FileChecker extends BaseChecker {
 			return true;
 		}
 
-		int stackIndex = getStackIndex(10, 9);
-
-		Class<?> callerClass1 = Reflection.getCallerClass(stackIndex);
-		Class<?> callerClass2 = Reflection.getCallerClass(stackIndex + 1);
-
-		Package callerClass1Package = callerClass1.getPackage();
-
-		String callerClass1PackageName = callerClass1Package.getName();
-
-		if (callerClass1PackageName.startsWith("java.") &&
-			!callerClass1.equals(ProcessBuilder.class) &&
-			isTrustedCaller(callerClass2, permission)) {
-
-			return true;
-		}
-
 		logSecurityException(
 			_log,
 			"Attempted to " + permission.getActions() + " on file " +
@@ -266,7 +250,7 @@ public class FileChecker extends BaseChecker {
 
 		File[] files = directory.listFiles();
 
-		if ((files == null) || (files.length == 0)) {
+		if (ArrayUtil.isEmpty(files)) {
 			return;
 		}
 
@@ -364,16 +348,18 @@ public class FileChecker extends BaseChecker {
 
 		// Plugin can do anything, except execute, in its own work folder
 
-		String pathContext = ContextPathUtil.getContextPath(
-			PortalContextLoaderListener.getPortalServletContextPath());
-
-		ServletContext servletContext = ServletContextPool.get(pathContext);
+		ServletContext servletContext = ServletContextPool.get(
+			PortalContextLoaderListener.getPortalServlerContextName());
 
 		if (!actions.equals(FILE_PERMISSION_ACTION_EXECUTE) &&
 			(_workDir != null)) {
 
 			addPermission(_workDir, actions);
 			addPermission(_workDir + "/-", actions);
+
+			if (ServerDetector.isWebLogic()) {
+				addPermission(_workDir + "/../-", actions);
+			}
 
 			if (servletContext != null) {
 				File tempDir = (File)servletContext.getAttribute(
@@ -431,6 +417,31 @@ public class FileChecker extends BaseChecker {
 
 					if (pos != -1) {
 						fileName = fileName.substring(0, pos + 1);
+					}
+
+					if (ServerDetector.isJBoss7()) {
+						String jBossHomeDir = System.getProperty(
+							"jboss.home.dir");
+
+						if (fileName.startsWith(jBossHomeDir)) {
+							continue;
+						}
+					}
+
+					if (ServerDetector.isJetty()) {
+						String jettyHome = System.getProperty("jetty.home");
+
+						if (fileName.startsWith(jettyHome)) {
+							continue;
+						}
+					}
+
+					if (ServerDetector.isResin()) {
+						String resinHome = System.getProperty("resin.home");
+
+						if (fileName.startsWith(resinHome)) {
+							continue;
+						}
 					}
 
 					addCanonicalPath(paths, fileName);

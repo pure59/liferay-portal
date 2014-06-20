@@ -5,6 +5,8 @@ AUI.add(
 
 		var AddSearch = Dockbar.AddSearch;
 
+		var CSS_LFR_CONTENT_ITEM_SELECTOR = '.lfr-content-item';
+
 		var CSS_LFR_CATEGORY_CONTAINER = 'lfr-add-content';
 
 		var CSS_LFR_CATEGORY_CONTAINER_SELECTOR = '.' + CSS_LFR_CATEGORY_CONTAINER;
@@ -22,13 +24,13 @@ AUI.add(
 			initializer: function(config) {
 				var instance = this;
 
-				var namespace = config.namespace || "";
+				var namespace = config.namespace || '';
 
 				var nodeList = instance.get('nodeList');
 
 				instance._categories = nodeList.all(CSS_LFR_CONTENT_CATEGORY_SELECTOR);
 				instance._categoryContainers = nodeList.all(CSS_LFR_CATEGORY_CONTAINER_SELECTOR);
-				instance._togglerDelegate = Liferay.component(namespace + "addApplicationPanelContainer");
+				instance._togglerDelegate = Liferay.component(namespace + 'addApplicationPanelContainer');
 
 				var applicationSearch = new AddSearch(
 					{
@@ -45,15 +47,32 @@ AUI.add(
 			_bindUISearch: function() {
 				var instance = this;
 
-				instance._search.on('results', instance._updateList, instance);
+				instance._eventHandles = instance._eventHandles || [];
 
-				instance.get('inputNode').on('keydown', instance._onSearchInputKeyDown, instance);
+				instance._eventHandles.push(
+					instance._search.on('results', instance._updateList, instance),
+					instance.get('inputNode').on('keydown', instance._onSearchInputKeyDown, instance)
+				);
 			},
 
 			_onSearchInputKeyDown: function(event) {
 				if (event.isKey('ENTER')) {
 					event.halt();
 				}
+			},
+
+			_setItemsVisibility: function(visible) {
+				var instance = this;
+
+				instance.get(STR_NODES).each(
+					function(item, index) {
+						var contentItem = item.ancestor(CSS_LFR_CONTENT_ITEM_SELECTOR);
+
+						if (contentItem) {
+							contentItem.toggle(visible);
+						}
+					}
+				);
 			},
 
 			_updateList: function(event) {
@@ -67,7 +86,7 @@ AUI.add(
 					instance._collapsedCategories = [];
 
 					instance._categories.each(
-						function(item, index, collection) {
+						function(item, index) {
 							var header = item.one('.toggler-header');
 
 							if (header && header.hasClass('toggler-header-collapsed')) {
@@ -80,12 +99,12 @@ AUI.add(
 				if (!query) {
 					instance._categoryContainers.show();
 
-					instance.get(STR_NODES).show();
+					instance._setItemsVisibility(true);
 
 					if (instance._collapsedCategories) {
 						A.each(
 							instance._collapsedCategories,
-							function(item, index, collection) {
+							function(item, index) {
 								var categoryIndex = instance._categories.indexOf(item);
 
 								var togglerItems = instance._togglerDelegate.items;
@@ -105,19 +124,19 @@ AUI.add(
 					if (query === '*') {
 						instance._categoryContainers.show();
 
-						instance.get(STR_NODES).show();
+						instance._setItemsVisibility(true);
 					}
 					else {
 						instance._categoryContainers.hide();
 
-						instance.get(STR_NODES).hide();
+						instance._setItemsVisibility(false);
 
 						A.each(
 							event.results,
-							function(item, index, collection) {
+							function(item, index) {
 								var node = item.raw.node;
 
-								node.show();
+								node.ancestor(CSS_LFR_CONTENT_ITEM_SELECTOR).show();
 
 								var contentParent = node.ancestorsByClassName(CSS_LFR_CATEGORY_CONTAINER);
 

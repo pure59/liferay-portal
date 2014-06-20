@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.mobiledevicerules.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see MDRRule
  * @generated
  */
+@ProviderType
 public class MDRRuleWrapper implements MDRRule, ModelWrapper<MDRRule> {
 	public MDRRuleWrapper(MDRRule mdrRule) {
 		_mdrRule = mdrRule;
@@ -272,11 +275,9 @@ public class MDRRuleWrapper implements MDRRule, ModelWrapper<MDRRule> {
 	* Returns the user uuid of this m d r rule.
 	*
 	* @return the user uuid of this m d r rule
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _mdrRule.getUserUuid();
 	}
 
@@ -751,6 +752,22 @@ public class MDRRuleWrapper implements MDRRule, ModelWrapper<MDRRule> {
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _mdrRule.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _mdrRule.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_mdrRule.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -799,8 +816,7 @@ public class MDRRuleWrapper implements MDRRule, ModelWrapper<MDRRule> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_mdrRule.persist();
 	}
 
@@ -842,6 +858,7 @@ public class MDRRuleWrapper implements MDRRule, ModelWrapper<MDRRule> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public MDRRule getWrappedMDRRule() {
 		return _mdrRule;
 	}
@@ -849,6 +866,16 @@ public class MDRRuleWrapper implements MDRRule, ModelWrapper<MDRRule> {
 	@Override
 	public MDRRule getWrappedModel() {
 		return _mdrRule;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _mdrRule.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _mdrRule.isFinderCacheEnabled();
 	}
 
 	@Override

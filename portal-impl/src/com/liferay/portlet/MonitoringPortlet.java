@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,6 @@
 
 package com.liferay.portlet;
 
-import com.liferay.portal.kernel.messaging.sender.SingleDestinationMessageSender;
 import com.liferay.portal.kernel.monitoring.RequestStatus;
 import com.liferay.portal.kernel.monitoring.statistics.DataSampleThreadLocal;
 import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
@@ -87,12 +86,8 @@ public class MonitoringPortlet implements InvokerPortlet {
 	public MonitoringPortlet() {
 	}
 
-	public MonitoringPortlet(
-		InvokerPortlet invokerPortlet,
-		SingleDestinationMessageSender singleDestinationMessageSender) {
-
+	public MonitoringPortlet(InvokerPortlet invokerPortlet) {
 		_invokerPortlet = invokerPortlet;
-		_singleDestinationMessageSender = singleDestinationMessageSender;
 	}
 
 	@Override
@@ -179,6 +174,8 @@ public class MonitoringPortlet implements InvokerPortlet {
 				portletRequestDataSample.setTimeout(_actionTimeout);
 
 				portletRequestDataSample.prepare();
+
+				DataSampleThreadLocal.initialize();
 			}
 
 			_invokerPortlet.processAction(actionRequest, actionResponse);
@@ -193,8 +190,6 @@ public class MonitoringPortlet implements InvokerPortlet {
 		}
 		finally {
 			if (portletRequestDataSample != null) {
-				_singleDestinationMessageSender.send(portletRequestDataSample);
-
 				DataSampleThreadLocal.addDataSample(portletRequestDataSample);
 			}
 		}
@@ -213,6 +208,8 @@ public class MonitoringPortlet implements InvokerPortlet {
 					PortletRequestType.EVENT, eventRequest, eventResponse);
 
 				portletRequestDataSample.prepare();
+
+				DataSampleThreadLocal.initialize();
 			}
 
 			_invokerPortlet.processEvent(eventRequest, eventResponse);
@@ -227,8 +224,6 @@ public class MonitoringPortlet implements InvokerPortlet {
 		}
 		finally {
 			if (portletRequestDataSample != null) {
-				_singleDestinationMessageSender.send(portletRequestDataSample);
-
 				DataSampleThreadLocal.addDataSample(portletRequestDataSample);
 			}
 		}
@@ -249,6 +244,8 @@ public class MonitoringPortlet implements InvokerPortlet {
 				portletRequestDataSample.setTimeout(_renderTimeout);
 
 				portletRequestDataSample.prepare();
+
+				DataSampleThreadLocal.initialize();
 			}
 
 			_invokerPortlet.render(renderRequest, renderResponse);
@@ -263,8 +260,6 @@ public class MonitoringPortlet implements InvokerPortlet {
 		}
 		finally {
 			if (portletRequestDataSample != null) {
-				_singleDestinationMessageSender.send(portletRequestDataSample);
-
 				DataSampleThreadLocal.addDataSample(portletRequestDataSample);
 			}
 		}
@@ -284,6 +279,8 @@ public class MonitoringPortlet implements InvokerPortlet {
 					resourceResponse);
 
 				portletRequestDataSample.prepare();
+
+				DataSampleThreadLocal.initialize();
 			}
 
 			_invokerPortlet.serveResource(resourceRequest, resourceResponse);
@@ -298,8 +295,6 @@ public class MonitoringPortlet implements InvokerPortlet {
 		}
 		finally {
 			if (portletRequestDataSample != null) {
-				_singleDestinationMessageSender.send(portletRequestDataSample);
-
 				DataSampleThreadLocal.addDataSample(portletRequestDataSample);
 			}
 		}
@@ -312,12 +307,6 @@ public class MonitoringPortlet implements InvokerPortlet {
 	@Override
 	public void setPortletFilters() throws PortletException {
 		_invokerPortlet.setPortletFilters();
-	}
-
-	public void setSingleDestinationMessageSender(
-		SingleDestinationMessageSender singleDestinationMessageSender) {
-
-		_singleDestinationMessageSender = singleDestinationMessageSender;
 	}
 
 	private void _processException(
@@ -352,6 +341,5 @@ public class MonitoringPortlet implements InvokerPortlet {
 	private long _actionTimeout;
 	private InvokerPortlet _invokerPortlet;
 	private long _renderTimeout;
-	private SingleDestinationMessageSender _singleDestinationMessageSender;
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,12 +14,15 @@
 
 package com.liferay.portlet.usersadmin.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.EmailAddress;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.service.EmailAddressLocalServiceUtil;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 
 /**
@@ -29,6 +32,20 @@ public class EmailAddressStagedModelDataHandler
 	extends BaseStagedModelDataHandler<EmailAddress> {
 
 	public static final String[] CLASS_NAMES = {EmailAddress.class.getName()};
+
+	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException {
+
+		Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+		EmailAddress emailAddress =
+			EmailAddressLocalServiceUtil.fetchEmailAddressByUuidAndCompanyId(
+				uuid, group.getCompanyId());
+
+		EmailAddressLocalServiceUtil.deleteEmailAddress(emailAddress);
+	}
 
 	@Override
 	public String[] getClassNames() {
@@ -45,8 +62,7 @@ public class EmailAddressStagedModelDataHandler
 
 		portletDataContext.addClassedModel(
 			emailAddressElement,
-			ExportImportPathUtil.getModelPath(emailAddress), emailAddress,
-			UsersAdminPortletDataHandler.NAMESPACE);
+			ExportImportPathUtil.getModelPath(emailAddress), emailAddress);
 	}
 
 	@Override
@@ -57,7 +73,7 @@ public class EmailAddressStagedModelDataHandler
 		long userId = portletDataContext.getUserId(emailAddress.getUserUuid());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			emailAddress, UsersAdminPortletDataHandler.NAMESPACE);
+			emailAddress);
 
 		EmailAddress existingEmailAddress =
 			EmailAddressLocalServiceUtil.fetchEmailAddressByUuidAndCompanyId(
@@ -82,8 +98,7 @@ public class EmailAddressStagedModelDataHandler
 		}
 
 		portletDataContext.importClassedModel(
-			emailAddress, importedEmailAddress,
-			UsersAdminPortletDataHandler.NAMESPACE);
+			emailAddress, importedEmailAddress);
 	}
 
 }

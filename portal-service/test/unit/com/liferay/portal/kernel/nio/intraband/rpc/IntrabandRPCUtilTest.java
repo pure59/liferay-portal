@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,32 +16,50 @@ package com.liferay.portal.kernel.nio.intraband.rpc;
 
 import com.liferay.portal.kernel.io.Deserializer;
 import com.liferay.portal.kernel.io.Serializer;
-import com.liferay.portal.kernel.nio.intraband.CompletionHandler;
 import com.liferay.portal.kernel.nio.intraband.Datagram;
-import com.liferay.portal.kernel.nio.intraband.DatagramHelper;
-import com.liferay.portal.kernel.nio.intraband.MockIntraband;
-import com.liferay.portal.kernel.nio.intraband.MockRegistrationReference;
-import com.liferay.portal.kernel.nio.intraband.RegistrationReference;
+import com.liferay.portal.kernel.nio.intraband.SystemDataType;
+import com.liferay.portal.kernel.nio.intraband.rpc.IntrabandRPCUtil.FutureCompletionHandler;
+import com.liferay.portal.kernel.nio.intraband.rpc.IntrabandRPCUtil.FutureResult;
+import com.liferay.portal.kernel.nio.intraband.test.MockIntraband;
+import com.liferay.portal.kernel.nio.intraband.test.MockRegistrationReference;
 import com.liferay.portal.kernel.process.ProcessCallable;
 import com.liferay.portal.kernel.test.CodeCoverageAssertor;
+import com.liferay.portal.kernel.test.NewClassLoaderJUnitTestRunner;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 
+import java.io.IOException;
 import java.io.Serializable;
 
-import java.util.concurrent.TimeUnit;
+import java.nio.ByteBuffer;
+
+import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * @author Shuyang Zhou
  */
+@RunWith(NewClassLoaderJUnitTestRunner.class)
 public class IntrabandRPCUtilTest {
 
 	@ClassRule
 	public static CodeCoverageAssertor codeCoverageAssertor =
-		new CodeCoverageAssertor();
+		new CodeCoverageAssertor() {
+
+			@Override
+			public void appendAssertClasses(List<Class<?>> assertClasses) {
+				assertClasses.add(RPCResponse.class);
+			}
+
+		};
 
 	@Test
 	public void testConstructor() {
@@ -49,82 +67,30 @@ public class IntrabandRPCUtilTest {
 	}
 
 	@Test
-	public void testExecuteFail() {
-		PortalClassLoaderUtil.setClassLoader(getClass().getClassLoader());
-
-		MockIntraband mockIntraband = new MockIntraband() {
-
-			@Override
-			protected void doSendDatagram(
-				RegistrationReference registrationReference,
-				Datagram datagram) {
-
-				throw new RuntimeException();
-			}
-
-		};
-
-		try {
-			IntrabandRPCUtil.execute(
-				new MockRegistrationReference(mockIntraband),
-				new TestProcessCallable());
-
-			Assert.fail();
-		}
-		catch (IntrabandRPCException ibrpce) {
-			Throwable throwable = ibrpce.getCause();
-
-			Assert.assertSame(RuntimeException.class, throwable.getClass());
-		}
-
-		try {
-			IntrabandRPCUtil.execute(
-				new MockRegistrationReference(mockIntraband),
-				new TestProcessCallable(), 1, TimeUnit.MILLISECONDS);
-
-			Assert.fail();
-		}
-		catch (IntrabandRPCException ibrpce) {
-			Throwable throwable = ibrpce.getCause();
-
-			Assert.assertSame(RuntimeException.class, throwable.getClass());
-		}
+	public void testEmptyCallable() throws Exception {
+		Assert.assertNull(IntrabandRPCUtil.emptyCallable.call());
 	}
 
 	@Test
-	public void testExecuteSuccess() throws IntrabandRPCException {
+	public void testExecuteFail() throws Exception {
 		PortalClassLoaderUtil.setClassLoader(getClass().getClassLoader());
+
+		final Exception exception = new Exception("Execution error");
 
 		MockIntraband mockIntraband = new MockIntraband() {
 
 			@Override
-			protected void doSendDatagram(
-				RegistrationReference registrationReference,
-				Datagram datagram) {
-
-				Deserializer deserializer = new Deserializer(
-					datagram.getDataByteBuffer());
-
+			protected Datagram processDatagram(Datagram datagram) {
 				try {
-					ProcessCallable<Serializable> processCallable =
-						deserializer.readObject();
-
-					Serializable result = processCallable.call();
-
 					Serializer serializer = new Serializer();
 
-					serializer.writeObject(result);
+					serializer.writeObject(new RPCResponse(exception));
 
-					CompletionHandler<Object> completionHandler =
-						DatagramHelper.getCompletionHandler(datagram);
-
-					completionHandler.replied(
-						null,
-						Datagram.createResponseDatagram(
-							datagram, serializer.toByteBuffer()));
+					return Datagram.createResponseDatagram(
+						datagram, serializer.toByteBuffer());
 				}
 				catch (Exception e) {
-					Assert.fail(e.getMessage());
+					throw new RuntimeException();
 				}
 			}
 
@@ -133,16 +99,166 @@ public class IntrabandRPCUtilTest {
 		MockRegistrationReference mockRegistrationReference =
 			new MockRegistrationReference(mockIntraband);
 
-		String result = IntrabandRPCUtil.execute(
+		Future<String> futureResult = IntrabandRPCUtil.execute(
 			mockRegistrationReference, new TestProcessCallable());
 
-		Assert.assertEquals(TestProcessCallable.class.getName(), result);
+		try {
+			futureResult.get();
 
-		result = IntrabandRPCUtil.execute(
-			mockRegistrationReference, new TestProcessCallable(), 1,
-			TimeUnit.MILLISECONDS);
+			Assert.fail();
+		}
+		catch (ExecutionException ee) {
+			Throwable t = ee.getCause();
 
-		Assert.assertEquals(TestProcessCallable.class.getName(), result);
+			Assert.assertEquals(exception.getMessage(), t.getMessage());
+		}
+	}
+
+	@Test
+	public void testExecuteSuccess() throws Exception {
+		PortalClassLoaderUtil.setClassLoader(getClass().getClassLoader());
+
+		MockIntraband mockIntraband = new MockIntraband() {
+
+			@Override
+			protected Datagram processDatagram(Datagram datagram) {
+				Deserializer deserializer = new Deserializer(
+					datagram.getDataByteBuffer());
+
+				try {
+					Serializer serializer = new Serializer();
+
+					ProcessCallable<Serializable> processCallable =
+						deserializer.readObject();
+
+					serializer.writeObject(
+						new RPCResponse(processCallable.call()));
+
+					return Datagram.createResponseDatagram(
+						datagram, serializer.toByteBuffer());
+				}
+				catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+		};
+
+		MockRegistrationReference mockRegistrationReference =
+			new MockRegistrationReference(mockIntraband);
+
+		Future<String> futureResult = IntrabandRPCUtil.execute(
+			mockRegistrationReference, new TestProcessCallable());
+
+		Assert.assertEquals(
+			TestProcessCallable.class.getName(), futureResult.get());
+	}
+
+	@Test
+	public void testFutureCompletionHandler() throws Exception {
+
+		// Failed
+
+		FutureResult<String> futureResult = new FutureResult<String>();
+
+		FutureCompletionHandler<String> futureCompletionHandler =
+			new FutureCompletionHandler<String>(futureResult);
+
+		futureCompletionHandler.delivered(null);
+		futureCompletionHandler.submitted(null);
+
+		IOException ioe = new IOException();
+
+		futureCompletionHandler.failed(null, ioe);
+
+		try {
+			futureResult.get();
+
+			Assert.fail();
+		}
+		catch (ExecutionException ee) {
+			Assert.assertSame(ioe, ee.getCause());
+		}
+
+		// Class not found exception
+
+		futureResult = new FutureResult<String>();
+
+		futureCompletionHandler = new FutureCompletionHandler<String>(
+			futureResult);
+
+		Serializer serializer = new Serializer();
+
+		serializer.writeObject(new TestProcessCallable());
+
+		ByteBuffer byteBuffer = serializer.toByteBuffer();
+
+		byteBuffer.put(76, (byte)CharPool.UPPER_CASE_S);
+
+		futureCompletionHandler.replied(
+			null, Datagram.createRequestDatagram(SystemDataType.RPC.getValue(),
+			byteBuffer));
+
+		try {
+			futureResult.get();
+
+			Assert.fail();
+		}
+		catch (ExecutionException ee) {
+			Throwable throwable = ee.getCause();
+
+			Assert.assertSame(
+				ClassNotFoundException.class, throwable.getClass());
+		}
+
+		// Timed out
+
+		futureResult = new FutureResult<String>();
+
+		futureCompletionHandler = new FutureCompletionHandler<String>(
+			futureResult);
+
+		futureCompletionHandler.timedOut(null);
+
+		try {
+			futureResult.get();
+
+			Assert.fail();
+		}
+		catch (CancellationException ce) {
+		}
+	}
+
+	@Test
+	public void testFutureResult() throws Exception {
+
+		// Bridge set
+
+		FutureResult<String> futureResult = new FutureResult<String>();
+
+		String s = new String();
+
+		ReflectionTestUtil.invokeBridge(
+			futureResult, "set", new Class<?>[] {Serializable.class}, s);
+
+		Assert.assertSame(s, futureResult.get());
+
+		// Setter
+
+		futureResult = new FutureResult<String>();
+
+		Exception exception = new Exception();
+
+		futureResult.setException(exception);
+
+		try {
+			futureResult.get();
+
+			Assert.fail();
+		}
+		catch (ExecutionException ee) {
+			Assert.assertSame(exception, ee.getCause());
+		}
 	}
 
 	private static class TestProcessCallable

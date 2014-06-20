@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.blogs.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see BlogsEntry
  * @generated
  */
+@ProviderType
 public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	public BlogsEntryWrapper(BlogsEntry blogsEntry) {
 		_blogsEntry = blogsEntry;
@@ -59,6 +62,7 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("title", getTitle());
+		attributes.put("deckTitle", getDeckTitle());
 		attributes.put("urlTitle", getUrlTitle());
 		attributes.put("description", getDescription());
 		attributes.put("content", getContent());
@@ -131,6 +135,12 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 
 		if (title != null) {
 			setTitle(title);
+		}
+
+		String deckTitle = (String)attributes.get("deckTitle");
+
+		if (deckTitle != null) {
+			setDeckTitle(deckTitle);
 		}
 
 		String urlTitle = (String)attributes.get("urlTitle");
@@ -342,11 +352,9 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	* Returns the user uuid of this blogs entry.
 	*
 	* @return the user uuid of this blogs entry
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _blogsEntry.getUserUuid();
 	}
 
@@ -438,6 +446,26 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	@Override
 	public void setTitle(java.lang.String title) {
 		_blogsEntry.setTitle(title);
+	}
+
+	/**
+	* Returns the deck title of this blogs entry.
+	*
+	* @return the deck title of this blogs entry
+	*/
+	@Override
+	public java.lang.String getDeckTitle() {
+		return _blogsEntry.getDeckTitle();
+	}
+
+	/**
+	* Sets the deck title of this blogs entry.
+	*
+	* @param deckTitle the deck title of this blogs entry
+	*/
+	@Override
+	public void setDeckTitle(java.lang.String deckTitle) {
+		_blogsEntry.setDeckTitle(deckTitle);
 	}
 
 	/**
@@ -714,11 +742,9 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	* Returns the status by user uuid of this blogs entry.
 	*
 	* @return the status by user uuid of this blogs entry
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getStatusByUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getStatusByUserUuid() {
 		return _blogsEntry.getStatusByUserUuid();
 	}
 
@@ -773,8 +799,70 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	}
 
 	/**
+	* Returns the trash entry created when this blogs entry was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this blogs entry.
+	*
+	* @return the trash entry created when this blogs entry was moved to the Recycle Bin
+	*/
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry getTrashEntry()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _blogsEntry.getTrashEntry();
+	}
+
+	/**
+	* Returns the class primary key of the trash entry for this blogs entry.
+	*
+	* @return the class primary key of the trash entry for this blogs entry
+	*/
+	@Override
+	public long getTrashEntryClassPK() {
+		return _blogsEntry.getTrashEntryClassPK();
+	}
+
+	/**
+	* Returns the trash handler for this blogs entry.
+	*
+	* @return the trash handler for this blogs entry
+	*/
+	@Override
+	public com.liferay.portal.kernel.trash.TrashHandler getTrashHandler() {
+		return _blogsEntry.getTrashHandler();
+	}
+
+	/**
+	* Returns <code>true</code> if this blogs entry is in the Recycle Bin.
+	*
+	* @return <code>true</code> if this blogs entry is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrash() {
+		return _blogsEntry.isInTrash();
+	}
+
+	/**
+	* Returns <code>true</code> if the parent of this blogs entry is in the Recycle Bin.
+	*
+	* @return <code>true</code> if the parent of this blogs entry is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrashContainer() {
+		return _blogsEntry.isInTrashContainer();
+	}
+
+	@Override
+	public boolean isInTrashExplicitly() {
+		return _blogsEntry.isInTrashExplicitly();
+	}
+
+	@Override
+	public boolean isInTrashImplicitly() {
+		return _blogsEntry.isInTrashImplicitly();
+	}
+
+	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
+	@Deprecated
 	@Override
 	public boolean getApproved() {
 		return _blogsEntry.getApproved();
@@ -838,16 +926,6 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	@Override
 	public boolean isIncomplete() {
 		return _blogsEntry.isIncomplete();
-	}
-
-	/**
-	* Returns <code>true</code> if this blogs entry is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this blogs entry is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _blogsEntry.isInTrash();
 	}
 
 	/**
@@ -969,8 +1047,7 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_blogsEntry.persist();
 	}
 
@@ -982,8 +1059,7 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 
 	@Override
 	public java.lang.String getSmallImageType()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _blogsEntry.getSmallImageType();
 	}
 
@@ -1024,6 +1100,7 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public BlogsEntry getWrappedBlogsEntry() {
 		return _blogsEntry;
 	}
@@ -1031,6 +1108,16 @@ public class BlogsEntryWrapper implements BlogsEntry, ModelWrapper<BlogsEntry> {
 	@Override
 	public BlogsEntry getWrappedModel() {
 		return _blogsEntry;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _blogsEntry.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _blogsEntry.isFinderCacheEnabled();
 	}
 
 	@Override

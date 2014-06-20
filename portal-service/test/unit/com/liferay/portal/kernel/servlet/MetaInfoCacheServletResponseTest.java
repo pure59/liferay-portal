@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,6 +16,7 @@ package com.liferay.portal.kernel.servlet;
 
 import com.liferay.portal.kernel.test.CodeCoverageAssertor;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -423,6 +424,11 @@ public class MetaInfoCacheServletResponseTest {
 				}
 
 				@Override
+				public void sendError(int status) {
+					statusReference.set(status);
+				}
+
+				@Override
 				public void sendError(int status, String errorMessage) {
 					statusReference.set(status);
 					messageReference.set(errorMessage);
@@ -452,6 +458,11 @@ public class MetaInfoCacheServletResponseTest {
 
 				@Override
 				public void setLocale(Locale locale) {
+				}
+
+				@Override
+				public void setStatus(int status) {
+					statusReference.set(status);
 				}
 
 				@Override
@@ -549,7 +560,7 @@ public class MetaInfoCacheServletResponseTest {
 		fromMetaInfoCacheServletResponse.setContentLength(2048);
 		fromMetaInfoCacheServletResponse.setContentType(
 			ContentTypes.TEXT_HTML_UTF8);
-		fromMetaInfoCacheServletResponse.setLocale(Locale.ENGLISH);
+		fromMetaInfoCacheServletResponse.setLocale(LocaleUtil.US);
 		fromMetaInfoCacheServletResponse.setStatus(302, "moved");
 
 		toMetaInfoCacheServletResponse = new MetaInfoCacheServletResponse(
@@ -571,7 +582,7 @@ public class MetaInfoCacheServletResponseTest {
 			ContentTypes.TEXT_HTML,
 			toMetaInfoCacheServletResponse.getContentType());
 		Assert.assertEquals(
-			Locale.ENGLISH, toMetaInfoCacheServletResponse.getLocale());
+			LocaleUtil.US, toMetaInfoCacheServletResponse.getLocale());
 		Assert.assertEquals(2048, contentLengthReference.get());
 		Assert.assertEquals("moved", messageReference.get());
 		Assert.assertEquals(302, statusReference.get());
@@ -917,11 +928,11 @@ public class MetaInfoCacheServletResponseTest {
 
 		// Normal set
 
-		metaInfoCacheServletResponse.setLocale(Locale.ENGLISH);
+		metaInfoCacheServletResponse.setLocale(LocaleUtil.US);
 
 		Assert.assertEquals(
-			Locale.ENGLISH, metaInfoCacheServletResponse.getLocale());
-		Assert.assertEquals(Locale.ENGLISH, localeReference.get());
+			LocaleUtil.US, metaInfoCacheServletResponse.getLocale());
+		Assert.assertEquals(LocaleUtil.US, localeReference.get());
 
 		localeReference.set(null);
 
@@ -929,10 +940,10 @@ public class MetaInfoCacheServletResponseTest {
 
 		metaInfoCacheServletResponse.flushBuffer();
 
-		metaInfoCacheServletResponse.setLocale(Locale.FRENCH);
+		metaInfoCacheServletResponse.setLocale(LocaleUtil.FRENCH);
 
 		Assert.assertEquals(
-			Locale.ENGLISH, metaInfoCacheServletResponse.getLocale());
+			LocaleUtil.US, metaInfoCacheServletResponse.getLocale());
 		Assert.assertNull(localeReference.get());
 	}
 
@@ -1105,6 +1116,11 @@ public class MetaInfoCacheServletResponseTest {
 				}
 
 				@Override
+				public void sendError(int status) {
+					statusReference.set(status);
+				}
+
+				@Override
 				public void sendError(int status, String message) {
 					statusReference.set(status);
 					messageReference.set(message);
@@ -1115,7 +1131,7 @@ public class MetaInfoCacheServletResponseTest {
 		MetaInfoCacheServletResponse metaInfoCacheServletResponse =
 			new MetaInfoCacheServletResponse(stubHttpServletResponse);
 
-		// Set both status and message
+		// Set status and message
 
 		metaInfoCacheServletResponse.sendError(400, "Bad Page");
 
@@ -1142,7 +1158,7 @@ public class MetaInfoCacheServletResponseTest {
 		messageReference.set(null);
 		statusReference.set(0);
 
-		// Set after commit
+		// Set status and message after commit
 
 		metaInfoCacheServletResponse = new MetaInfoCacheServletResponse(
 			stubHttpServletResponse);
@@ -1151,6 +1167,21 @@ public class MetaInfoCacheServletResponseTest {
 
 		try {
 			metaInfoCacheServletResponse.sendError(500, "After commit");
+
+			Assert.fail();
+		}
+		catch (IllegalStateException ise) {
+		}
+
+		// Set status after commit
+
+		metaInfoCacheServletResponse = new MetaInfoCacheServletResponse(
+			stubHttpServletResponse);
+
+		metaInfoCacheServletResponse.flushBuffer();
+
+		try {
+			metaInfoCacheServletResponse.sendError(500);
 
 			Assert.fail();
 		}
@@ -1181,6 +1212,11 @@ public class MetaInfoCacheServletResponseTest {
 			@Override
 			public void sendRedirect(String location) {
 				locationReference.set(location);
+			}
+
+			@Override
+			public void setStatus(int status) {
+				statusReference.set(status);
 			}
 
 			@Override
@@ -1340,6 +1376,11 @@ public class MetaInfoCacheServletResponseTest {
 				}
 
 				@Override
+				public void setStatus(int status) {
+					statusReference.set(status);
+				}
+
+				@Override
 				public void setStatus(int status, String message) {
 					statusReference.set(status);
 					messageReference.set(message);
@@ -1350,7 +1391,7 @@ public class MetaInfoCacheServletResponseTest {
 		MetaInfoCacheServletResponse metaInfoCacheServletResponse =
 			new MetaInfoCacheServletResponse(stubHttpServletResponse);
 
-		// Set both status and message
+		// Set status and message
 
 		metaInfoCacheServletResponse.setStatus(400, "Bad Page");
 
@@ -1372,11 +1413,21 @@ public class MetaInfoCacheServletResponseTest {
 		messageReference.set(null);
 		statusReference.set(0);
 
-		// Set after commit
+		// Set status and message after commit
 
 		metaInfoCacheServletResponse.flushBuffer();
 
 		metaInfoCacheServletResponse.setStatus(500, "After commit");
+
+		Assert.assertNull(messageReference.get());
+		Assert.assertEquals(404, metaInfoCacheServletResponse.getStatus());
+		Assert.assertEquals(0, statusReference.get());
+
+		// Set status after commit
+
+		metaInfoCacheServletResponse.flushBuffer();
+
+		metaInfoCacheServletResponse.setStatus(500);
 
 		Assert.assertNull(messageReference.get());
 		Assert.assertEquals(404, metaInfoCacheServletResponse.getStatus());

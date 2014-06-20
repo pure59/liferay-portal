@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -38,15 +38,6 @@ if (threadId > 0) {
 	if (curParentMessage.isRoot() && curParentMessage.isDiscussion()) {
 		curParentMessage = null;
 	}
-}
-
-if (Validator.isNull(redirect)) {
-	PortletURL viewMessageURL = renderResponse.createRenderURL();
-
-	viewMessageURL.setParameter("struts_action", "/message_boards/view_message");
-	viewMessageURL.setParameter("messageId", String.valueOf(messageId));
-
-	redirect = viewMessageURL.toString();
 }
 
 boolean pending = false;
@@ -110,7 +101,7 @@ if (message != null) {
 
 		<c:if test="<%= (message != null) && message.isApproved() && WorkflowDefinitionLinkLocalServiceUtil.hasWorkflowDefinitionLink(message.getCompanyId(), message.getGroupId(), MBMessage.class.getName()) %>">
 			<div class="alert alert-info">
-				<%= LanguageUtil.format(pageContext, "this-x-is-approved.-publishing-these-changes-will-cause-it-to-be-unpublished-and-go-through-the-approval-process-again", ResourceActionsUtil.getModelResource(locale, MBMessage.class.getName())) %>
+				<%= LanguageUtil.format(request, "this-x-is-approved.-publishing-these-changes-will-cause-it-to-be-unpublished-and-go-through-the-approval-process-again", ResourceActionsUtil.getModelResource(locale, MBMessage.class.getName()), false) %>
 			</div>
 		</c:if>
 
@@ -132,6 +123,6 @@ if (message != null) {
 if (message != null) {
 	MBUtil.addPortletBreadcrumbEntries(message, request, renderResponse);
 
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "update-message"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "update-message"), currentURL);
 }
 %>

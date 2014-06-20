@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -28,10 +28,10 @@ refererURL.setParameter("updateLayout", "true");
 	<aui:input name="<%= WebKeys.REFERER %>" type="hidden" value="<%= refererURL.toString() %>" />
 	<aui:input name="refresh" type="hidden" value="<%= true %>" />
 
-	<div class="row-fluid" id="<portlet:namespace />applicationList">
+	<div id="<portlet:namespace />applicationList">
 		<c:if test="<%= layout.isTypePortlet() %>">
-			<div class="search-panel btn-toolbar">
-				<aui:input cssClass="search-query span12" label="" name="searchApplication" type="text"  />
+			<div class="btn-toolbar search-panel">
+				<aui:input cssClass="col-md-12 search-query" label="" name="searchApplication" type="text" />
 			</div>
 		</c:if>
 
@@ -41,7 +41,7 @@ refererURL.setParameter("updateLayout", "true");
 		List<Portlet> portlets = new ArrayList<Portlet>();
 
 		for (String portletId : PropsValues.DOCKBAR_ADD_PORTLETS) {
-			Portlet portlet = PortletLocalServiceUtil.getPortletById(portletId);
+			Portlet portlet = PortletLocalServiceUtil.getPortletById(user.getCompanyId(), portletId);
 
 			if ((portlet != null) && portlet.isInclude() && portlet.isActive() && PortletPermissionUtil.contains(permissionChecker, layout, portlet, ActionKeys.ADD_TO_PAGE)) {
 				portlets.add(portlet);
@@ -51,7 +51,7 @@ refererURL.setParameter("updateLayout", "true");
 		int portletCategoryIndex = 0;
 		%>
 
-		<liferay-ui:panel-container id="<%= panelContainerId %>">
+		<liferay-ui:panel-container accordion="<%= BrowserSnifferUtil.isMobile(request) %>" id="<%= panelContainerId %>">
 			<c:if test="<%= portlets.size() > 0 %>">
 
 				<%
@@ -59,16 +59,11 @@ refererURL.setParameter("updateLayout", "true");
 				%>
 
 				<div class="lfr-add-content">
-					<liferay-ui:panel collapsible="<%= layout.isTypePortlet() %>" cssClass="lfr-content-category lfr-component panel-page-category" extended="<%= true %>" id="<%= panelId %>" persistState="<%= true %>" title='<%= LanguageUtil.get(pageContext, "highlighted") %>'>
-
-						<aui:nav cssClass="nav-list">
+					<liferay-ui:panel collapsible="<%= layout.isTypePortlet() %>" cssClass="lfr-component lfr-content-category panel-page-category" extended="<%= true %>" id="<%= panelId %>" persistState="<%= true %>" title='<%= LanguageUtil.get(request, "highlighted") %>'>
+						<aui:nav collapsible="<%= false %>">
 
 							<%
 							for (Portlet portlet : portlets) {
-								if (!PortletPermissionUtil.contains(permissionChecker, layout, portlet.getPortletId(), ActionKeys.ADD_TO_PAGE)) {
-									continue;
-								}
-
 								boolean portletInstanceable = portlet.isInstanceable();
 
 								boolean portletUsed = layoutTypePortlet.hasPortletId(portlet.getPortletId());
@@ -93,7 +88,7 @@ refererURL.setParameter("updateLayout", "true");
 
 							<aui:nav-item cssClass="lfr-content-item" href="">
 								<span <%= AUIUtil.buildData(data) %> class="<%= cssClass %>">
-									<icon class="<%= portletInstanceable ? "icon-th-large" : "icon-stop" %>"></icon>
+									<i class="<%= portletInstanceable ? "icon-th-large" : "icon-stop" %>"></i>
 
 									<liferay-ui:message key="<%= PortalUtil.getPortletTitle(portlet, application, locale) %>" />
 								</span>
@@ -112,7 +107,6 @@ refererURL.setParameter("updateLayout", "true");
 							%>
 
 						</aui:nav>
-
 					</liferay-ui:panel>
 				</div>
 
@@ -152,7 +146,16 @@ refererURL.setParameter("updateLayout", "true");
 		</liferay-ui:panel-container>
 
 		<c:if test="<%= layout.isTypePortlet() %>">
-			<div class="alert alert-info">
+			<ul class="lfr-add-apps-legend list-unstyled">
+				<li>
+					<aui:icon image="stop" label="can-be-added-once" />
+				</li>
+				<li>
+					<aui:icon image="th-large" label="can-be-added-several-times" />
+				</li>
+			</ul>
+
+			<div class="alert alert-info lfr-drag-portlet-message">
 				<liferay-ui:message key="to-add-a-portlet-to-the-page-just-drag-it" />
 			</div>
 		</c:if>
@@ -166,16 +169,18 @@ refererURL.setParameter("updateLayout", "true");
 			%>
 
 			<p class="lfr-install-more">
-				<aui:a href='<%= HttpUtil.removeParameter(marketplaceURL.toString(), "controlPanelCategory") %>' label="install-more-applications" />
+				<aui:a cssClass="btn btn-primary" href='<%= HttpUtil.removeParameter(marketplaceURL.toString(), "controlPanelCategory") %>' label="install-more-applications" />
 			</p>
 		</c:if>
 	</div>
 </aui:form>
 
-<aui:script use="liferay-dockbar-add-application,liferay-dockbar-portlet-dd">
+<aui:script use="liferay-dockbar-add-application">
+	var Dockbar = Liferay.Dockbar;
+
 	var searchApplication = A.one('#<portlet:namespace />searchApplication');
 
-	var addApplication = new Liferay.Dockbar.AddApplication(
+	var addApplication = new Dockbar.AddApplication(
 		{
 			focusItem: searchApplication,
 			inputNode: searchApplication,
@@ -186,20 +191,24 @@ refererURL.setParameter("updateLayout", "true");
 		}
 	);
 
-	addApplication.plug(
-		Liferay.Dockbar.PortletDragDrop,
-		{
-			on: {
-				dragEnd: function(event) {
-					addApplication.addPortlet(
-						event.portletNode,
-						{
-							item: event.appendNode
-						}
-					);
-				}
-			},
-			srcNode: '#<portlet:namespace />applicationList'
-		}
-	);
+	if (Dockbar.PortletDragDrop) {
+		addApplication.plug(
+			Dockbar.PortletDragDrop,
+			{
+				on: {
+					dragEnd: function(event) {
+						addApplication.addPortlet(
+							event.portletNode,
+							{
+								item: event.appendNode
+							}
+						);
+					}
+				},
+				srcNode: '#<portlet:namespace />applicationList'
+			}
+		);
+	}
+
+	Liferay.component('<portlet:namespace />addApplication', addApplication);
 </aui:script>

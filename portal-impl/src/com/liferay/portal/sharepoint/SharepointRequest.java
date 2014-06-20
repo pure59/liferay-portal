@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -78,7 +78,7 @@ public class SharepointRequest {
 	public String getParameterValue(String name) {
 		String[] values = _params.get(name);
 
-		if ((values != null) && (values.length > 0)) {
+		if (ArrayUtil.isNotEmpty(values)) {
 			return GetterUtil.getString(_params.get(name)[0]);
 		}
 		else {

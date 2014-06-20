@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,6 +22,7 @@ import java.util.TimeZone;
 
 /**
  * @author Brian Wing Shun Chan
+ * @author Marcellus Tavares
  */
 public class CalendarFactoryUtil {
 
@@ -47,8 +48,32 @@ public class CalendarFactoryUtil {
 			year, month, date, hour, minute, second);
 	}
 
+	public static Calendar getCalendar(
+		int year, int month, int date, int hour, int minute, int second,
+		int millisecond) {
+
+		return getCalendarFactory().getCalendar(
+			year, month, date, hour, minute, second, millisecond);
+	}
+
+	public static Calendar getCalendar(
+		int year, int month, int date, int hour, int minute, int second,
+		int millisecond, TimeZone timeZone) {
+
+		return getCalendarFactory().getCalendar(
+			year, month, date, hour, minute, second, millisecond, timeZone);
+	}
+
 	public static Calendar getCalendar(Locale locale) {
 		return getCalendarFactory().getCalendar(locale);
+	}
+
+	public static Calendar getCalendar(long time) {
+		return getCalendarFactory().getCalendar(time);
+	}
+
+	public static Calendar getCalendar(long time, TimeZone timeZone) {
+		return getCalendarFactory().getCalendar(time, timeZone);
 	}
 
 	public static Calendar getCalendar(TimeZone timeZone) {

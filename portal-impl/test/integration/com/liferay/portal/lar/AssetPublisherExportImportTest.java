@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,7 +16,7 @@ package com.liferay.portal.lar;
 
 import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
-import com.liferay.portal.kernel.transaction.Transactional;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -26,26 +26,33 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.model.PortletConstants;
 import com.liferay.portal.service.CompanyLocalServiceUtil;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
-import com.liferay.portal.test.TransactionalCallbackAwareExecutionTestListener;
-import com.liferay.portal.util.GroupTestUtil;
-import com.liferay.portal.util.LayoutTestUtil;
+import com.liferay.portal.test.Sync;
+import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
-import com.liferay.portal.util.TestPropsValues;
+import com.liferay.portal.util.test.GroupTestUtil;
+import com.liferay.portal.util.test.LayoutTestUtil;
+import com.liferay.portal.util.test.RandomTestUtil;
+import com.liferay.portal.util.test.ServiceContextTestUtil;
+import com.liferay.portal.util.test.TestPropsValues;
+import com.liferay.portlet.asset.model.AssetCategory;
 import com.liferay.portlet.asset.model.AssetVocabulary;
+import com.liferay.portlet.asset.service.AssetCategoryLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil;
+import com.liferay.portlet.asset.util.test.AssetTestUtil;
 import com.liferay.portlet.assetpublisher.util.AssetPublisher;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryType;
-import com.liferay.portlet.documentlibrary.util.DLAppTestUtil;
+import com.liferay.portlet.documentlibrary.util.test.DLAppTestUtil;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
-import com.liferay.portlet.dynamicdatamapping.util.DDMStructureTestUtil;
+import com.liferay.portlet.dynamicdatamapping.util.test.DDMStructureTestUtil;
 import com.liferay.portlet.journal.model.JournalArticle;
 
 import java.util.HashMap;
@@ -54,6 +61,7 @@ import java.util.Map;
 import javax.portlet.PortletPreferences;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -63,12 +71,19 @@ import org.junit.runner.RunWith;
 @ExecutionTestListeners(
 	listeners = {
 		MainServletExecutionTestListener.class,
-		TransactionalCallbackAwareExecutionTestListener.class
+		SynchronousDestinationExecutionTestListener.class
 	})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
-@Transactional
+@Sync
 public class AssetPublisherExportImportTest
 	extends BasePortletExportImportTestCase {
+
+	@Override
+	public String getPortletId() throws Exception {
+		return PortletKeys.ASSET_PUBLISHER +
+			PortletConstants.INSTANCE_SEPARATOR +
+				RandomTestUtil.randomString();
+	}
 
 	@Test
 	public void testAnyDLFileEntryType() throws Exception {
@@ -137,11 +152,47 @@ public class AssetPublisherExportImportTest
 	}
 
 	@Test
+	public void testAssetCategories() throws Exception {
+		AssetVocabulary assetVocabulary = AssetTestUtil.addVocabulary(
+			group.getGroupId());
+
+		AssetCategory assetCategory = AssetTestUtil.addCategory(
+			group.getGroupId(), assetVocabulary.getVocabularyId());
+
+		Map<String, String[]> preferenceMap = new HashMap<String, String[]>();
+
+		preferenceMap.put("queryName0", new String[] {"assetCategories"});
+
+		preferenceMap.put(
+			"queryValues0",
+			new String[] {String.valueOf(assetCategory.getCategoryId())});
+
+		PortletPreferences portletPreferences = getImportedPortletPreferences(
+			preferenceMap);
+
+		long importedAssetCategoryId = GetterUtil.getLong(
+			portletPreferences.getValue("queryValues0", null));
+
+		Assert.assertNotEquals(importedAssetCategoryId, 0L);
+
+		Assert.assertNotEquals(
+			assetCategory.getCategoryId(), importedAssetCategoryId);
+
+		AssetCategory importedAssetCategory =
+			AssetCategoryLocalServiceUtil.fetchAssetCategory(
+				importedAssetCategoryId);
+
+		Assert.assertNotNull(importedAssetCategory);
+		Assert.assertEquals(
+			assetCategory.getUuid(), importedAssetCategory.getUuid());
+	}
+
+	@Test
 	public void testChildLayoutScopeIds() throws Exception {
 		Map<String, String[]> preferenceMap = new HashMap<String, String[]>();
 
 		Group childGroup = GroupTestUtil.addGroup(
-			group.getGroupId(), ServiceTestUtil.randomString());
+			group.getGroupId(), RandomTestUtil.randomString());
 
 		preferenceMap.put(
 			"scopeIds",
@@ -150,18 +201,45 @@ public class AssetPublisherExportImportTest
 					childGroup.getGroupId()
 			});
 
+		try {
+			PortletPreferences portletPreferences =
+				getImportedPortletPreferences(preferenceMap);
+
+			Assert.assertEquals(
+				null, portletPreferences.getValue("scopeId", null));
+			Assert.assertTrue(
+				"The child group ID should have been filtered out on import",
+				ArrayUtil.isEmpty(
+					portletPreferences.getValues("scopeIds", null)));
+		}
+		finally {
+			GroupLocalServiceUtil.deleteGroup(childGroup);
+		}
+	}
+
+	@Test
+	public void testDisplayStyle() throws Exception {
+		Map<String, String[]> preferenceMap = new HashMap<String, String[]>();
+
+		String displayStyle = RandomTestUtil.randomString();
+
+		preferenceMap.put("displayStyle", new String[] {displayStyle});
+
 		PortletPreferences portletPreferences = getImportedPortletPreferences(
 			preferenceMap);
 
-		Assert.assertEquals(null, portletPreferences.getValue("scopeId", null));
+		Assert.assertEquals(
+			displayStyle, portletPreferences.getValue("displayStyle", null));
 		Assert.assertTrue(
-			"The child group ID should have been filtered out on import",
-			Validator.isNull(portletPreferences.getValues("scopeIds", null)));
+			"The display style should not be null",
+			Validator.isNotNull(
+				portletPreferences.getValue("displayStyle", null)));
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testExportImportAssetLinks() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
 	@Test
@@ -205,7 +283,7 @@ public class AssetPublisherExportImportTest
 
 		Assert.assertEquals(
 			AssetPublisher.SCOPE_ID_LAYOUT_UUID_PREFIX +
-			importedLayout.getUuid(),
+				importedLayout.getUuid(),
 			portletPreferences.getValue("scopeIds", null));
 		Assert.assertEquals(null, portletPreferences.getValue("scopeId", null));
 	}
@@ -239,7 +317,8 @@ public class AssetPublisherExportImportTest
 		DLFileEntryType dlFileEntryType = DLAppTestUtil.addDLFileEntryType(
 			group.getGroupId(), ddmStructure.getStructureId());
 
-		ServiceContext serviceContext = ServiceTestUtil.getServiceContext();
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext();
 
 		serviceContext.setUuid(ddmStructure.getUuid());
 
@@ -252,7 +331,7 @@ public class AssetPublisherExportImportTest
 		DLFileEntryType importedDLFileEntryType =
 			DLAppTestUtil.addDLFileEntryType(
 				TestPropsValues.getUserId(), importedGroup.getGroupId(),
-				ServiceTestUtil.randomString(), ServiceTestUtil.randomString(),
+				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 				new long[] {importedDDMStructure.getStructureId()},
 				serviceContext);
 
@@ -303,7 +382,8 @@ public class AssetPublisherExportImportTest
 		DDMStructure ddmStructure = DDMStructureTestUtil.addStructure(
 			group.getGroupId(), JournalArticle.class.getName());
 
-		ServiceContext serviceContext = ServiceTestUtil.getServiceContext();
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext();
 
 		serviceContext.setUuid(ddmStructure.getUuid());
 
@@ -360,7 +440,8 @@ public class AssetPublisherExportImportTest
 		DLFileEntryType dlFileEntryType1 = DLAppTestUtil.addDLFileEntryType(
 			group.getGroupId(), ddmStructure1.getStructureId());
 
-		ServiceContext serviceContext = ServiceTestUtil.getServiceContext();
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext();
 
 		serviceContext.setUuid(ddmStructure1.getUuid());
 
@@ -373,7 +454,7 @@ public class AssetPublisherExportImportTest
 		DLFileEntryType importedDLFileEntryType1 =
 			DLAppTestUtil.addDLFileEntryType(
 				TestPropsValues.getUserId(), importedGroup.getGroupId(),
-				ServiceTestUtil.randomString(), ServiceTestUtil.randomString(),
+				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 				new long[] {importedDDMStructure1.getStructureId()},
 				serviceContext);
 
@@ -394,7 +475,7 @@ public class AssetPublisherExportImportTest
 		DLFileEntryType importedDLFileEntryType2 =
 			DLAppTestUtil.addDLFileEntryType(
 				TestPropsValues.getUserId(), importedGroup.getGroupId(),
-				ServiceTestUtil.randomString(), ServiceTestUtil.randomString(),
+				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 				new long[] {importedDDMStructure2.getStructureId()},
 				serviceContext);
 
@@ -429,7 +510,8 @@ public class AssetPublisherExportImportTest
 		DDMStructure ddmStructure1 = DDMStructureTestUtil.addStructure(
 			group.getGroupId(), JournalArticle.class.getName());
 
-		ServiceContext serviceContext = ServiceTestUtil.getServiceContext();
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext();
 
 		serviceContext.setUuid(ddmStructure1.getUuid());
 
@@ -478,7 +560,7 @@ public class AssetPublisherExportImportTest
 			layout.getCompanyId());
 
 		Layout secondLayout = LayoutTestUtil.addLayout(
-			group.getGroupId(), ServiceTestUtil.randomString());
+			group.getGroupId(), RandomTestUtil.randomString());
 
 		GroupTestUtil.addGroup(TestPropsValues.getUserId(), secondLayout);
 
@@ -527,7 +609,7 @@ public class AssetPublisherExportImportTest
 	@Test
 	public void testSeveralLegacyLayoutScopeIds() throws Exception {
 		Layout secondLayout = LayoutTestUtil.addLayout(
-			group.getGroupId(), ServiceTestUtil.randomString());
+			group.getGroupId(), RandomTestUtil.randomString());
 
 		GroupTestUtil.addGroup(TestPropsValues.getUserId(), secondLayout);
 
@@ -577,7 +659,7 @@ public class AssetPublisherExportImportTest
 	}
 
 	@Override
-	protected void doExportImportPortlet(String portletId) throws Exception {
+	protected void exportImportPortlet(String portletId) throws Exception {
 		larFile = LayoutLocalServiceUtil.exportLayoutsAsFile(
 			layout.getGroupId(), layout.isPrivateLayout(), null,
 			getExportParameterMap(), null, null);
@@ -600,36 +682,23 @@ public class AssetPublisherExportImportTest
 		Map<String, String[]> parameterMap =  new HashMap<String, String[]>();
 
 		parameterMap.put(
-			PortletDataHandlerKeys.CATEGORIES,
-			new String[] {Boolean.TRUE.toString()});
-		parameterMap.put(
 			PortletDataHandlerKeys.PORTLET_CONFIGURATION,
 			new String[] {Boolean.TRUE.toString()});
 		parameterMap.put(
 			PortletDataHandlerKeys.PORTLET_CONFIGURATION_ALL,
 			new String[] {Boolean.TRUE.toString()});
 		parameterMap.put(
+			PortletDataHandlerKeys.PORTLET_DATA,
+			new String[] {Boolean.TRUE.toString()});
+		parameterMap.put(
+			PortletDataHandlerKeys.PORTLET_DATA + StringPool.UNDERLINE +
+				PortletKeys.ASSET_CATEGORIES_ADMIN,
+			new String[] {Boolean.TRUE.toString()});
+		parameterMap.put(
 			PortletDataHandlerKeys.PORTLET_SETUP_ALL,
 			new String[] {Boolean.TRUE.toString()});
 
 		return parameterMap;
-	}
-
-	protected PortletPreferences getImportedPortletPreferences(
-			Map<String, String[]> preferenceMap)
-		throws Exception {
-
-		// Export site LAR
-
-		String assetPublisherPortletId = LayoutTestUtil.addPortletToLayout(
-			TestPropsValues.getUserId(), this.layout,
-			PortletKeys.ASSET_PUBLISHER, "column-1", preferenceMap);
-
-		doExportImportPortlet(assetPublisherPortletId);
-
-		return LayoutTestUtil.getPortletPreferences(
-			importedLayout.getCompanyId(), importedLayout.getPlid(),
-			assetPublisherPortletId);
 	}
 
 	@Override
@@ -646,15 +715,13 @@ public class AssetPublisherExportImportTest
 			Company company = CompanyLocalServiceUtil.getCompany(
 				layout.getCompanyId());
 
-			Group companyGroup = company.getGroup();
-
-			groupId = companyGroup.getGroupId();
+			groupId = company.getGroupId();
 		}
 
 		AssetVocabulary assetVocabulary =
 			AssetVocabularyLocalServiceUtil.addVocabulary(
-				TestPropsValues.getUserId(), ServiceTestUtil.randomString(),
-				ServiceTestUtil.getServiceContext(groupId));
+				TestPropsValues.getUserId(), RandomTestUtil.randomString(),
+				ServiceContextTestUtil.getServiceContext(groupId));
 
 		Map<String, String[]> preferenceMap = new HashMap<String, String[]>();
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.PortletServiceImpl
  * @generated
  */
+@ProviderType
 public class PortletServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -63,8 +66,7 @@ public class PortletServiceUtil {
 	public static com.liferay.portal.model.Portlet updatePortlet(
 		long companyId, java.lang.String portletId, java.lang.String roles,
 		boolean active)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().updatePortlet(companyId, portletId, roles, active);
 	}
 
@@ -82,6 +84,7 @@ public class PortletServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(PortletService service) {
 	}
 

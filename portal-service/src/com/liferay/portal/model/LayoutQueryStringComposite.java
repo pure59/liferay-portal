@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,9 +19,16 @@ package com.liferay.portal.model;
  */
 public class LayoutQueryStringComposite {
 
-	public LayoutQueryStringComposite(Layout layout, String queryString) {
+	public LayoutQueryStringComposite(
+		Layout layout, String friendlyURL, String queryString) {
+
+		_friendlyURL = friendlyURL;
 		_layout = layout;
 		_queryString = queryString;
+	}
+
+	public String getFriendlyURL() {
+		return _friendlyURL;
 	}
 
 	public Layout getLayout() {
@@ -32,6 +39,10 @@ public class LayoutQueryStringComposite {
 		return _queryString;
 	}
 
+	public void setFriendlyURL(String friendlyURL) {
+		_friendlyURL = friendlyURL;
+	}
+
 	public void setLayout(Layout layout) {
 		_layout = layout;
 	}
@@ -40,6 +51,7 @@ public class LayoutQueryStringComposite {
 		_queryString = queryString;
 	}
 
+	private String _friendlyURL;
 	private Layout _layout;
 	private String _queryString;
 

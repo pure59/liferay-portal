@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -59,7 +59,7 @@ public class SerialBackgroundTaskExecutor
 			if (lock != null) {
 				LockLocalServiceUtil.unlock(
 					BackgroundTaskExecutor.class.getName(),
-					backgroundTask.getTaskExecutorClassName(), owner, false);
+					backgroundTask.getTaskExecutorClassName(), owner);
 			}
 		}
 	}
@@ -73,7 +73,7 @@ public class SerialBackgroundTaskExecutor
 			try {
 				lock = LockLocalServiceUtil.lock(
 					BackgroundTaskExecutor.class.getName(),
-					backgroundTask.getTaskExecutorClassName(), owner, false);
+					backgroundTask.getTaskExecutorClassName(), owner);
 
 				break;
 			}

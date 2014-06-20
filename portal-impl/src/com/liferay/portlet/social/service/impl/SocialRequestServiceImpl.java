@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,6 @@
 package com.liferay.portlet.social.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portlet.social.model.SocialRequest;
@@ -23,7 +22,8 @@ import com.liferay.portlet.social.service.base.SocialRequestServiceBaseImpl;
 import com.liferay.portlet.social.service.permission.SocialRequestPermissionUtil;
 
 /**
- * The implementation of the social request remote service.
+ * Provides the remote service for updating social requests. Its methods include
+ * permission checks.
  *
  * @author Brian Wing Shun Chan
  */
@@ -32,7 +32,7 @@ public class SocialRequestServiceImpl extends SocialRequestServiceBaseImpl {
 	@Override
 	public SocialRequest updateRequest(
 			long requestId, int status, ThemeDisplay themeDisplay)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		SocialRequestPermissionUtil.check(
 			getPermissionChecker(), requestId, ActionKeys.UPDATE);

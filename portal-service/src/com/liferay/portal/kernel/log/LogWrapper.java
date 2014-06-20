@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -179,6 +179,11 @@ public class LogWrapper implements Log {
 
 	public void setLog(Log log) {
 		_log = log;
+	}
+
+	@Override
+	public void setLogWrapperClassName(String className) {
+		_log.setLogWrapperClassName(className);
 	}
 
 	@Override

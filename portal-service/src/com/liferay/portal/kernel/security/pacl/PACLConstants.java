@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -97,6 +97,10 @@ public interface PACLConstants {
 		"threadPoolExecutor";
 
 	public static final String PORTAL_SERVICE_PERMISSION_SERVICE = "service";
+
+	public static final String PROPERTY_PERMISSION_READ = "read";
+
+	public static final String PROPERTY_PERMISSION_WRITE = "write";
 
 	public static final String RUNTIME_PERMISSION_ACCESS_CLASS_IN_PACKAGE =
 		"accessClassInPackage";

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,13 +16,27 @@ package com.liferay.portlet.wiki.service.base;
 
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.IdentifiableBean;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.DefaultActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Projection;
+import com.liferay.portal.kernel.dao.orm.Property;
+import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
+import com.liferay.portal.kernel.lar.ManifestSummary;
+import com.liferay.portal.kernel.lar.PortletDataContext;
+import com.liferay.portal.kernel.lar.StagedModelDataHandler;
+import com.liferay.portal.kernel.lar.StagedModelDataHandlerRegistryUtil;
+import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -36,18 +50,17 @@ import com.liferay.portal.service.persistence.SystemEventPersistence;
 import com.liferay.portal.service.persistence.UserFinder;
 import com.liferay.portal.service.persistence.UserPersistence;
 import com.liferay.portal.service.persistence.WorkflowInstanceLinkPersistence;
+import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.asset.service.persistence.AssetEntryFinder;
 import com.liferay.portlet.asset.service.persistence.AssetEntryPersistence;
-import com.liferay.portlet.social.service.persistence.SocialActivityCounterFinder;
-import com.liferay.portlet.social.service.persistence.SocialActivityCounterPersistence;
 import com.liferay.portlet.trash.service.persistence.TrashEntryPersistence;
+import com.liferay.portlet.trash.service.persistence.TrashVersionPersistence;
 import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.service.WikiNodeLocalService;
 import com.liferay.portlet.wiki.service.persistence.WikiNodePersistence;
 import com.liferay.portlet.wiki.service.persistence.WikiPageFinder;
 import com.liferay.portlet.wiki.service.persistence.WikiPagePersistence;
-import com.liferay.portlet.wiki.service.persistence.WikiPageResourcePersistence;
 
 import java.io.Serializable;
 
@@ -80,11 +93,10 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 *
 	 * @param wikiNode the wiki node
 	 * @return the wiki node that was added
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
-	public WikiNode addWikiNode(WikiNode wikiNode) throws SystemException {
+	public WikiNode addWikiNode(WikiNode wikiNode) {
 		wikiNode.setNew(true);
 
 		return wikiNodePersistence.update(wikiNode);
@@ -107,12 +119,10 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param nodeId the primary key of the wiki node
 	 * @return the wiki node that was removed
 	 * @throws PortalException if a wiki node with the primary key could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	@Override
-	public WikiNode deleteWikiNode(long nodeId)
-		throws PortalException, SystemException {
+	public WikiNode deleteWikiNode(long nodeId) throws PortalException {
 		return wikiNodePersistence.remove(nodeId);
 	}
 
@@ -121,11 +131,10 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 *
 	 * @param wikiNode the wiki node
 	 * @return the wiki node that was removed
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	@Override
-	public WikiNode deleteWikiNode(WikiNode wikiNode) throws SystemException {
+	public WikiNode deleteWikiNode(WikiNode wikiNode) {
 		return wikiNodePersistence.remove(wikiNode);
 	}
 
@@ -142,12 +151,10 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 *
 	 * @param dynamicQuery the dynamic query
 	 * @return the matching rows
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public List dynamicQuery(DynamicQuery dynamicQuery) {
 		return wikiNodePersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -162,12 +169,10 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param start the lower bound of the range of model instances
 	 * @param end the upper bound of the range of model instances (not inclusive)
 	 * @return the range of matching rows
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end)
-		throws SystemException {
+	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
 		return wikiNodePersistence.findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -183,12 +188,11 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param end the upper bound of the range of model instances (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching rows
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
 	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
+		OrderByComparator orderByComparator) {
 		return wikiNodePersistence.findWithDynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -198,11 +202,9 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 *
 	 * @param dynamicQuery the dynamic query
 	 * @return the number of rows that match the dynamic query
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public long dynamicQueryCount(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public long dynamicQueryCount(DynamicQuery dynamicQuery) {
 		return wikiNodePersistence.countWithDynamicQuery(dynamicQuery);
 	}
 
@@ -212,17 +214,16 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param dynamicQuery the dynamic query
 	 * @param projection the projection to apply to the query
 	 * @return the number of rows that match the dynamic query
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public long dynamicQueryCount(DynamicQuery dynamicQuery,
-		Projection projection) throws SystemException {
+		Projection projection) {
 		return wikiNodePersistence.countWithDynamicQuery(dynamicQuery,
 			projection);
 	}
 
 	@Override
-	public WikiNode fetchWikiNode(long nodeId) throws SystemException {
+	public WikiNode fetchWikiNode(long nodeId) {
 		return wikiNodePersistence.fetchByPrimaryKey(nodeId);
 	}
 
@@ -232,11 +233,9 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param uuid the wiki node's UUID
 	 * @param  companyId the primary key of the company
 	 * @return the matching wiki node, or <code>null</code> if a matching wiki node could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public WikiNode fetchWikiNodeByUuidAndCompanyId(String uuid, long companyId)
-		throws SystemException {
+	public WikiNode fetchWikiNodeByUuidAndCompanyId(String uuid, long companyId) {
 		return wikiNodePersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
@@ -246,11 +245,9 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param uuid the wiki node's UUID
 	 * @param groupId the primary key of the group
 	 * @return the matching wiki node, or <code>null</code> if a matching wiki node could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public WikiNode fetchWikiNodeByUuidAndGroupId(String uuid, long groupId)
-		throws SystemException {
+	public WikiNode fetchWikiNodeByUuidAndGroupId(String uuid, long groupId) {
 		return wikiNodePersistence.fetchByUUID_G(uuid, groupId);
 	}
 
@@ -260,17 +257,109 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param nodeId the primary key of the wiki node
 	 * @return the wiki node
 	 * @throws PortalException if a wiki node with the primary key could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public WikiNode getWikiNode(long nodeId)
-		throws PortalException, SystemException {
+	public WikiNode getWikiNode(long nodeId) throws PortalException {
 		return wikiNodePersistence.findByPrimaryKey(nodeId);
 	}
 
 	@Override
+	public ActionableDynamicQuery getActionableDynamicQuery() {
+		ActionableDynamicQuery actionableDynamicQuery = new DefaultActionableDynamicQuery();
+
+		actionableDynamicQuery.setBaseLocalService(com.liferay.portlet.wiki.service.WikiNodeLocalServiceUtil.getService());
+		actionableDynamicQuery.setClass(WikiNode.class);
+		actionableDynamicQuery.setClassLoader(getClassLoader());
+
+		actionableDynamicQuery.setPrimaryKeyPropertyName("nodeId");
+
+		return actionableDynamicQuery;
+	}
+
+	protected void initActionableDynamicQuery(
+		ActionableDynamicQuery actionableDynamicQuery) {
+		actionableDynamicQuery.setBaseLocalService(com.liferay.portlet.wiki.service.WikiNodeLocalServiceUtil.getService());
+		actionableDynamicQuery.setClass(WikiNode.class);
+		actionableDynamicQuery.setClassLoader(getClassLoader());
+
+		actionableDynamicQuery.setPrimaryKeyPropertyName("nodeId");
+	}
+
+	@Override
+	public ExportActionableDynamicQuery getExportActionableDynamicQuery(
+		final PortletDataContext portletDataContext) {
+		final ExportActionableDynamicQuery exportActionableDynamicQuery = new ExportActionableDynamicQuery() {
+				@Override
+				public long performCount() throws PortalException {
+					ManifestSummary manifestSummary = portletDataContext.getManifestSummary();
+
+					StagedModelType stagedModelType = getStagedModelType();
+
+					long modelAdditionCount = super.performCount();
+
+					manifestSummary.addModelAdditionCount(stagedModelType.toString(),
+						modelAdditionCount);
+
+					long modelDeletionCount = ExportImportHelperUtil.getModelDeletionCount(portletDataContext,
+							stagedModelType);
+
+					manifestSummary.addModelDeletionCount(stagedModelType.toString(),
+						modelDeletionCount);
+
+					return modelAdditionCount;
+				}
+			};
+
+		initActionableDynamicQuery(exportActionableDynamicQuery);
+
+		exportActionableDynamicQuery.setAddCriteriaMethod(new ActionableDynamicQuery.AddCriteriaMethod() {
+				@Override
+				public void addCriteria(DynamicQuery dynamicQuery) {
+					portletDataContext.addDateRangeCriteria(dynamicQuery,
+						"modifiedDate");
+
+					StagedModelDataHandler<?> stagedModelDataHandler = StagedModelDataHandlerRegistryUtil.getStagedModelDataHandler(WikiNode.class.getName());
+
+					Property workflowStatusProperty = PropertyFactoryUtil.forName(
+							"status");
+
+					dynamicQuery.add(workflowStatusProperty.in(
+							stagedModelDataHandler.getExportableStatuses()));
+				}
+			});
+
+		exportActionableDynamicQuery.setCompanyId(portletDataContext.getCompanyId());
+
+		exportActionableDynamicQuery.setGroupId(portletDataContext.getScopeGroupId());
+
+		exportActionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+				@Override
+				public void performAction(Object object)
+					throws PortalException {
+					WikiNode stagedModel = (WikiNode)object;
+
+					StagedModelDataHandlerUtil.exportStagedModel(portletDataContext,
+						stagedModel);
+				}
+			});
+		exportActionableDynamicQuery.setStagedModelType(new StagedModelType(
+				PortalUtil.getClassNameId(WikiNode.class.getName())));
+
+		return exportActionableDynamicQuery;
+	}
+
+	/**
+	 * @throws PortalException
+	 */
+	@Override
+	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
+		throws PortalException {
+		return deleteWikiNode((WikiNode)persistedModel);
+	}
+
+	@Override
 	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
-		throws PortalException, SystemException {
+		throws PortalException {
 		return wikiNodePersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
@@ -281,11 +370,10 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param  companyId the primary key of the company
 	 * @return the matching wiki node
 	 * @throws PortalException if a matching wiki node could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public WikiNode getWikiNodeByUuidAndCompanyId(String uuid, long companyId)
-		throws PortalException, SystemException {
+		throws PortalException {
 		return wikiNodePersistence.findByUuid_C_First(uuid, companyId, null);
 	}
 
@@ -296,11 +384,10 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param groupId the primary key of the group
 	 * @return the matching wiki node
 	 * @throws PortalException if a matching wiki node could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public WikiNode getWikiNodeByUuidAndGroupId(String uuid, long groupId)
-		throws PortalException, SystemException {
+		throws PortalException {
 		return wikiNodePersistence.findByUUID_G(uuid, groupId);
 	}
 
@@ -314,11 +401,9 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param start the lower bound of the range of wiki nodes
 	 * @param end the upper bound of the range of wiki nodes (not inclusive)
 	 * @return the range of wiki nodes
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public List<WikiNode> getWikiNodes(int start, int end)
-		throws SystemException {
+	public List<WikiNode> getWikiNodes(int start, int end) {
 		return wikiNodePersistence.findAll(start, end);
 	}
 
@@ -326,10 +411,9 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * Returns the number of wiki nodes.
 	 *
 	 * @return the number of wiki nodes
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public int getWikiNodesCount() throws SystemException {
+	public int getWikiNodesCount() {
 		return wikiNodePersistence.countAll();
 	}
 
@@ -338,11 +422,10 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 *
 	 * @param wikiNode the wiki node
 	 * @return the wiki node that was updated
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
-	public WikiNode updateWikiNode(WikiNode wikiNode) throws SystemException {
+	public WikiNode updateWikiNode(WikiNode wikiNode) {
 		return wikiNodePersistence.update(wikiNode);
 	}
 
@@ -400,118 +483,6 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 */
 	public void setWikiNodePersistence(WikiNodePersistence wikiNodePersistence) {
 		this.wikiNodePersistence = wikiNodePersistence;
-	}
-
-	/**
-	 * Returns the wiki page local service.
-	 *
-	 * @return the wiki page local service
-	 */
-	public com.liferay.portlet.wiki.service.WikiPageLocalService getWikiPageLocalService() {
-		return wikiPageLocalService;
-	}
-
-	/**
-	 * Sets the wiki page local service.
-	 *
-	 * @param wikiPageLocalService the wiki page local service
-	 */
-	public void setWikiPageLocalService(
-		com.liferay.portlet.wiki.service.WikiPageLocalService wikiPageLocalService) {
-		this.wikiPageLocalService = wikiPageLocalService;
-	}
-
-	/**
-	 * Returns the wiki page remote service.
-	 *
-	 * @return the wiki page remote service
-	 */
-	public com.liferay.portlet.wiki.service.WikiPageService getWikiPageService() {
-		return wikiPageService;
-	}
-
-	/**
-	 * Sets the wiki page remote service.
-	 *
-	 * @param wikiPageService the wiki page remote service
-	 */
-	public void setWikiPageService(
-		com.liferay.portlet.wiki.service.WikiPageService wikiPageService) {
-		this.wikiPageService = wikiPageService;
-	}
-
-	/**
-	 * Returns the wiki page persistence.
-	 *
-	 * @return the wiki page persistence
-	 */
-	public WikiPagePersistence getWikiPagePersistence() {
-		return wikiPagePersistence;
-	}
-
-	/**
-	 * Sets the wiki page persistence.
-	 *
-	 * @param wikiPagePersistence the wiki page persistence
-	 */
-	public void setWikiPagePersistence(WikiPagePersistence wikiPagePersistence) {
-		this.wikiPagePersistence = wikiPagePersistence;
-	}
-
-	/**
-	 * Returns the wiki page finder.
-	 *
-	 * @return the wiki page finder
-	 */
-	public WikiPageFinder getWikiPageFinder() {
-		return wikiPageFinder;
-	}
-
-	/**
-	 * Sets the wiki page finder.
-	 *
-	 * @param wikiPageFinder the wiki page finder
-	 */
-	public void setWikiPageFinder(WikiPageFinder wikiPageFinder) {
-		this.wikiPageFinder = wikiPageFinder;
-	}
-
-	/**
-	 * Returns the wiki page resource local service.
-	 *
-	 * @return the wiki page resource local service
-	 */
-	public com.liferay.portlet.wiki.service.WikiPageResourceLocalService getWikiPageResourceLocalService() {
-		return wikiPageResourceLocalService;
-	}
-
-	/**
-	 * Sets the wiki page resource local service.
-	 *
-	 * @param wikiPageResourceLocalService the wiki page resource local service
-	 */
-	public void setWikiPageResourceLocalService(
-		com.liferay.portlet.wiki.service.WikiPageResourceLocalService wikiPageResourceLocalService) {
-		this.wikiPageResourceLocalService = wikiPageResourceLocalService;
-	}
-
-	/**
-	 * Returns the wiki page resource persistence.
-	 *
-	 * @return the wiki page resource persistence
-	 */
-	public WikiPageResourcePersistence getWikiPageResourcePersistence() {
-		return wikiPageResourcePersistence;
-	}
-
-	/**
-	 * Sets the wiki page resource persistence.
-	 *
-	 * @param wikiPageResourcePersistence the wiki page resource persistence
-	 */
-	public void setWikiPageResourcePersistence(
-		WikiPageResourcePersistence wikiPageResourcePersistence) {
-		this.wikiPageResourcePersistence = wikiPageResourcePersistence;
 	}
 
 	/**
@@ -890,63 +861,6 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	}
 
 	/**
-	 * Returns the social activity counter local service.
-	 *
-	 * @return the social activity counter local service
-	 */
-	public com.liferay.portlet.social.service.SocialActivityCounterLocalService getSocialActivityCounterLocalService() {
-		return socialActivityCounterLocalService;
-	}
-
-	/**
-	 * Sets the social activity counter local service.
-	 *
-	 * @param socialActivityCounterLocalService the social activity counter local service
-	 */
-	public void setSocialActivityCounterLocalService(
-		com.liferay.portlet.social.service.SocialActivityCounterLocalService socialActivityCounterLocalService) {
-		this.socialActivityCounterLocalService = socialActivityCounterLocalService;
-	}
-
-	/**
-	 * Returns the social activity counter persistence.
-	 *
-	 * @return the social activity counter persistence
-	 */
-	public SocialActivityCounterPersistence getSocialActivityCounterPersistence() {
-		return socialActivityCounterPersistence;
-	}
-
-	/**
-	 * Sets the social activity counter persistence.
-	 *
-	 * @param socialActivityCounterPersistence the social activity counter persistence
-	 */
-	public void setSocialActivityCounterPersistence(
-		SocialActivityCounterPersistence socialActivityCounterPersistence) {
-		this.socialActivityCounterPersistence = socialActivityCounterPersistence;
-	}
-
-	/**
-	 * Returns the social activity counter finder.
-	 *
-	 * @return the social activity counter finder
-	 */
-	public SocialActivityCounterFinder getSocialActivityCounterFinder() {
-		return socialActivityCounterFinder;
-	}
-
-	/**
-	 * Sets the social activity counter finder.
-	 *
-	 * @param socialActivityCounterFinder the social activity counter finder
-	 */
-	public void setSocialActivityCounterFinder(
-		SocialActivityCounterFinder socialActivityCounterFinder) {
-		this.socialActivityCounterFinder = socialActivityCounterFinder;
-	}
-
-	/**
 	 * Returns the trash entry local service.
 	 *
 	 * @return the trash entry local service
@@ -1003,6 +917,118 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 		this.trashEntryPersistence = trashEntryPersistence;
 	}
 
+	/**
+	 * Returns the trash version local service.
+	 *
+	 * @return the trash version local service
+	 */
+	public com.liferay.portlet.trash.service.TrashVersionLocalService getTrashVersionLocalService() {
+		return trashVersionLocalService;
+	}
+
+	/**
+	 * Sets the trash version local service.
+	 *
+	 * @param trashVersionLocalService the trash version local service
+	 */
+	public void setTrashVersionLocalService(
+		com.liferay.portlet.trash.service.TrashVersionLocalService trashVersionLocalService) {
+		this.trashVersionLocalService = trashVersionLocalService;
+	}
+
+	/**
+	 * Returns the trash version persistence.
+	 *
+	 * @return the trash version persistence
+	 */
+	public TrashVersionPersistence getTrashVersionPersistence() {
+		return trashVersionPersistence;
+	}
+
+	/**
+	 * Sets the trash version persistence.
+	 *
+	 * @param trashVersionPersistence the trash version persistence
+	 */
+	public void setTrashVersionPersistence(
+		TrashVersionPersistence trashVersionPersistence) {
+		this.trashVersionPersistence = trashVersionPersistence;
+	}
+
+	/**
+	 * Returns the wiki page local service.
+	 *
+	 * @return the wiki page local service
+	 */
+	public com.liferay.portlet.wiki.service.WikiPageLocalService getWikiPageLocalService() {
+		return wikiPageLocalService;
+	}
+
+	/**
+	 * Sets the wiki page local service.
+	 *
+	 * @param wikiPageLocalService the wiki page local service
+	 */
+	public void setWikiPageLocalService(
+		com.liferay.portlet.wiki.service.WikiPageLocalService wikiPageLocalService) {
+		this.wikiPageLocalService = wikiPageLocalService;
+	}
+
+	/**
+	 * Returns the wiki page remote service.
+	 *
+	 * @return the wiki page remote service
+	 */
+	public com.liferay.portlet.wiki.service.WikiPageService getWikiPageService() {
+		return wikiPageService;
+	}
+
+	/**
+	 * Sets the wiki page remote service.
+	 *
+	 * @param wikiPageService the wiki page remote service
+	 */
+	public void setWikiPageService(
+		com.liferay.portlet.wiki.service.WikiPageService wikiPageService) {
+		this.wikiPageService = wikiPageService;
+	}
+
+	/**
+	 * Returns the wiki page persistence.
+	 *
+	 * @return the wiki page persistence
+	 */
+	public WikiPagePersistence getWikiPagePersistence() {
+		return wikiPagePersistence;
+	}
+
+	/**
+	 * Sets the wiki page persistence.
+	 *
+	 * @param wikiPagePersistence the wiki page persistence
+	 */
+	public void setWikiPagePersistence(WikiPagePersistence wikiPagePersistence) {
+		this.wikiPagePersistence = wikiPagePersistence;
+	}
+
+	/**
+	 * Returns the wiki page finder.
+	 *
+	 * @return the wiki page finder
+	 */
+	public WikiPageFinder getWikiPageFinder() {
+		return wikiPageFinder;
+	}
+
+	/**
+	 * Sets the wiki page finder.
+	 *
+	 * @param wikiPageFinder the wiki page finder
+	 */
+	public void setWikiPageFinder(WikiPageFinder wikiPageFinder) {
+		this.wikiPageFinder = wikiPageFinder;
+	}
+
 	public void afterPropertiesSet() {
 		persistedModelLocalServiceRegistry.register("com.liferay.portlet.wiki.model.WikiNode",
 			wikiNodeLocalService);
@@ -1042,13 +1068,18 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	}
 
 	/**
-	 * Performs an SQL query.
+	 * Performs a SQL query.
 	 *
 	 * @param sql the sql query
 	 */
-	protected void runSQL(String sql) throws SystemException {
+	protected void runSQL(String sql) {
 		try {
 			DataSource dataSource = wikiNodePersistence.getDataSource();
+
+			DB db = DBFactoryUtil.getDB();
+
+			sql = db.buildSQL(sql);
+			sql = PortalUtil.transformSQL(sql);
 
 			SqlUpdate sqlUpdate = SqlUpdateFactoryUtil.getSqlUpdate(dataSource,
 					sql, new int[0]);
@@ -1066,18 +1097,6 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	protected com.liferay.portlet.wiki.service.WikiNodeService wikiNodeService;
 	@BeanReference(type = WikiNodePersistence.class)
 	protected WikiNodePersistence wikiNodePersistence;
-	@BeanReference(type = com.liferay.portlet.wiki.service.WikiPageLocalService.class)
-	protected com.liferay.portlet.wiki.service.WikiPageLocalService wikiPageLocalService;
-	@BeanReference(type = com.liferay.portlet.wiki.service.WikiPageService.class)
-	protected com.liferay.portlet.wiki.service.WikiPageService wikiPageService;
-	@BeanReference(type = WikiPagePersistence.class)
-	protected WikiPagePersistence wikiPagePersistence;
-	@BeanReference(type = WikiPageFinder.class)
-	protected WikiPageFinder wikiPageFinder;
-	@BeanReference(type = com.liferay.portlet.wiki.service.WikiPageResourceLocalService.class)
-	protected com.liferay.portlet.wiki.service.WikiPageResourceLocalService wikiPageResourceLocalService;
-	@BeanReference(type = WikiPageResourcePersistence.class)
-	protected WikiPageResourcePersistence wikiPageResourcePersistence;
 	@BeanReference(type = com.liferay.counter.service.CounterLocalService.class)
 	protected com.liferay.counter.service.CounterLocalService counterLocalService;
 	@BeanReference(type = com.liferay.portal.service.GroupLocalService.class)
@@ -1118,18 +1137,24 @@ public abstract class WikiNodeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	protected AssetEntryPersistence assetEntryPersistence;
 	@BeanReference(type = AssetEntryFinder.class)
 	protected AssetEntryFinder assetEntryFinder;
-	@BeanReference(type = com.liferay.portlet.social.service.SocialActivityCounterLocalService.class)
-	protected com.liferay.portlet.social.service.SocialActivityCounterLocalService socialActivityCounterLocalService;
-	@BeanReference(type = SocialActivityCounterPersistence.class)
-	protected SocialActivityCounterPersistence socialActivityCounterPersistence;
-	@BeanReference(type = SocialActivityCounterFinder.class)
-	protected SocialActivityCounterFinder socialActivityCounterFinder;
 	@BeanReference(type = com.liferay.portlet.trash.service.TrashEntryLocalService.class)
 	protected com.liferay.portlet.trash.service.TrashEntryLocalService trashEntryLocalService;
 	@BeanReference(type = com.liferay.portlet.trash.service.TrashEntryService.class)
 	protected com.liferay.portlet.trash.service.TrashEntryService trashEntryService;
 	@BeanReference(type = TrashEntryPersistence.class)
 	protected TrashEntryPersistence trashEntryPersistence;
+	@BeanReference(type = com.liferay.portlet.trash.service.TrashVersionLocalService.class)
+	protected com.liferay.portlet.trash.service.TrashVersionLocalService trashVersionLocalService;
+	@BeanReference(type = TrashVersionPersistence.class)
+	protected TrashVersionPersistence trashVersionPersistence;
+	@BeanReference(type = com.liferay.portlet.wiki.service.WikiPageLocalService.class)
+	protected com.liferay.portlet.wiki.service.WikiPageLocalService wikiPageLocalService;
+	@BeanReference(type = com.liferay.portlet.wiki.service.WikiPageService.class)
+	protected com.liferay.portlet.wiki.service.WikiPageService wikiPageService;
+	@BeanReference(type = WikiPagePersistence.class)
+	protected WikiPagePersistence wikiPagePersistence;
+	@BeanReference(type = WikiPageFinder.class)
+	protected WikiPageFinder wikiPageFinder;
 	@BeanReference(type = PersistedModelLocalServiceRegistry.class)
 	protected PersistedModelLocalServiceRegistry persistedModelLocalServiceRegistry;
 	private String _beanIdentifier;

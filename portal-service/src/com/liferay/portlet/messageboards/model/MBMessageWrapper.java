@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.messageboards.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see MBMessage
  * @generated
  */
+@ProviderType
 public class MBMessageWrapper implements MBMessage, ModelWrapper<MBMessage> {
 	public MBMessageWrapper(MBMessage mbMessage) {
 		_mbMessage = mbMessage;
@@ -356,11 +359,9 @@ public class MBMessageWrapper implements MBMessage, ModelWrapper<MBMessage> {
 	* Returns the user uuid of this message-boards message.
 	*
 	* @return the user uuid of this message-boards message
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _mbMessage.getUserUuid();
 	}
 
@@ -783,11 +784,9 @@ public class MBMessageWrapper implements MBMessage, ModelWrapper<MBMessage> {
 	* Returns the status by user uuid of this message-boards message.
 	*
 	* @return the status by user uuid of this message-boards message
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getStatusByUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getStatusByUserUuid() {
 		return _mbMessage.getStatusByUserUuid();
 	}
 
@@ -842,8 +841,70 @@ public class MBMessageWrapper implements MBMessage, ModelWrapper<MBMessage> {
 	}
 
 	/**
+	* Returns the trash entry created when this message-boards message was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this message-boards message.
+	*
+	* @return the trash entry created when this message-boards message was moved to the Recycle Bin
+	*/
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry getTrashEntry()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mbMessage.getTrashEntry();
+	}
+
+	/**
+	* Returns the class primary key of the trash entry for this message-boards message.
+	*
+	* @return the class primary key of the trash entry for this message-boards message
+	*/
+	@Override
+	public long getTrashEntryClassPK() {
+		return _mbMessage.getTrashEntryClassPK();
+	}
+
+	/**
+	* Returns the trash handler for this message-boards message.
+	*
+	* @return the trash handler for this message-boards message
+	*/
+	@Override
+	public com.liferay.portal.kernel.trash.TrashHandler getTrashHandler() {
+		return _mbMessage.getTrashHandler();
+	}
+
+	/**
+	* Returns <code>true</code> if this message-boards message is in the Recycle Bin.
+	*
+	* @return <code>true</code> if this message-boards message is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrash() {
+		return _mbMessage.isInTrash();
+	}
+
+	/**
+	* Returns <code>true</code> if the parent of this message-boards message is in the Recycle Bin.
+	*
+	* @return <code>true</code> if the parent of this message-boards message is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrashContainer() {
+		return _mbMessage.isInTrashContainer();
+	}
+
+	@Override
+	public boolean isInTrashExplicitly() {
+		return _mbMessage.isInTrashExplicitly();
+	}
+
+	@Override
+	public boolean isInTrashImplicitly() {
+		return _mbMessage.isInTrashImplicitly();
+	}
+
+	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
+	@Deprecated
 	@Override
 	public boolean getApproved() {
 		return _mbMessage.getApproved();
@@ -907,16 +968,6 @@ public class MBMessageWrapper implements MBMessage, ModelWrapper<MBMessage> {
 	@Override
 	public boolean isIncomplete() {
 		return _mbMessage.isIncomplete();
-	}
-
-	/**
-	* Returns <code>true</code> if this message-boards message is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this message-boards message is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _mbMessage.isInTrash();
 	}
 
 	/**
@@ -1039,50 +1090,43 @@ public class MBMessageWrapper implements MBMessage, ModelWrapper<MBMessage> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_mbMessage.persist();
 	}
 
 	@Override
 	public com.liferay.portal.kernel.repository.model.Folder addAttachmentsFolder()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.addAttachmentsFolder();
 	}
 
 	@Override
-	public java.lang.String[] getAssetTagNames()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String[] getAssetTagNames() {
 		return _mbMessage.getAssetTagNames();
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getAttachmentsFileEntries()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.getAttachmentsFileEntries();
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getAttachmentsFileEntries(
 		int start, int end)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.getAttachmentsFileEntries(start, end);
 	}
 
 	@Override
 	public int getAttachmentsFileEntriesCount()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.getAttachmentsFileEntriesCount();
 	}
 
 	@Override
 	public long getAttachmentsFolderId()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.getAttachmentsFolderId();
 	}
 
@@ -1093,52 +1137,39 @@ public class MBMessageWrapper implements MBMessage, ModelWrapper<MBMessage> {
 
 	@Override
 	public com.liferay.portlet.messageboards.model.MBCategory getCategory()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.getCategory();
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getDeletedAttachmentsFileEntries()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.getDeletedAttachmentsFileEntries();
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getDeletedAttachmentsFileEntries(
 		int start, int end)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.getDeletedAttachmentsFileEntries(start, end);
 	}
 
 	@Override
 	public int getDeletedAttachmentsFileEntriesCount()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.getDeletedAttachmentsFileEntriesCount();
 	}
 
 	@Override
 	public com.liferay.portlet.messageboards.model.MBThread getThread()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.getThread();
 	}
 
 	@Override
 	public long getThreadAttachmentsFolderId()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessage.getThreadAttachmentsFolderId();
-	}
-
-	@Override
-	public com.liferay.portal.model.ContainerModel getTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _mbMessage.getTrashContainer();
 	}
 
 	@Override
@@ -1154,13 +1185,6 @@ public class MBMessageWrapper implements MBMessage, ModelWrapper<MBMessage> {
 	@Override
 	public boolean isFormatBBCode() {
 		return _mbMessage.isFormatBBCode();
-	}
-
-	@Override
-	public boolean isInTrashThread()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _mbMessage.isInTrashThread();
 	}
 
 	@Override
@@ -1205,6 +1229,7 @@ public class MBMessageWrapper implements MBMessage, ModelWrapper<MBMessage> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public MBMessage getWrappedMBMessage() {
 		return _mbMessage;
 	}
@@ -1212,6 +1237,16 @@ public class MBMessageWrapper implements MBMessage, ModelWrapper<MBMessage> {
 	@Override
 	public MBMessage getWrappedModel() {
 		return _mbMessage;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _mbMessage.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _mbMessage.isFinderCacheEnabled();
 	}
 
 	@Override

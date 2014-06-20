@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see Subscription
  * @generated
  */
+@ProviderType
 public class SubscriptionWrapper implements Subscription,
 	ModelWrapper<Subscription> {
 	public SubscriptionWrapper(Subscription subscription) {
@@ -49,6 +52,7 @@ public class SubscriptionWrapper implements Subscription,
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("subscriptionId", getSubscriptionId());
 		attributes.put("companyId", getCompanyId());
 		attributes.put("userId", getUserId());
@@ -64,6 +68,12 @@ public class SubscriptionWrapper implements Subscription,
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long subscriptionId = (Long)attributes.get("subscriptionId");
 
 		if (subscriptionId != null) {
@@ -140,6 +150,26 @@ public class SubscriptionWrapper implements Subscription,
 	}
 
 	/**
+	* Returns the mvcc version of this subscription.
+	*
+	* @return the mvcc version of this subscription
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _subscription.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this subscription.
+	*
+	* @param mvccVersion the mvcc version of this subscription
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_subscription.setMvccVersion(mvccVersion);
+	}
+
+	/**
 	* Returns the subscription ID of this subscription.
 	*
 	* @return the subscription ID of this subscription
@@ -203,11 +233,9 @@ public class SubscriptionWrapper implements Subscription,
 	* Returns the user uuid of this subscription.
 	*
 	* @return the user uuid of this subscription
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _subscription.getUserUuid();
 	}
 
@@ -455,8 +483,7 @@ public class SubscriptionWrapper implements Subscription,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_subscription.persist();
 	}
 
@@ -482,6 +509,7 @@ public class SubscriptionWrapper implements Subscription,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public Subscription getWrappedSubscription() {
 		return _subscription;
 	}
@@ -489,6 +517,16 @@ public class SubscriptionWrapper implements Subscription,
 	@Override
 	public Subscription getWrappedModel() {
 		return _subscription;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _subscription.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _subscription.isFinderCacheEnabled();
 	}
 
 	@Override

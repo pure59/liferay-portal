@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -60,11 +62,13 @@ import java.rmi.RemoteException;
  * @see com.liferay.portal.service.WebsiteServiceUtil
  * @generated
  */
+@ProviderType
 public class WebsiteServiceSoap {
 	/**
-	* @deprecated As of 6.2.0, replaced by {@link #addWebsite( String, long,
+	* @deprecated As of 6.2.0, replaced by {@link #addWebsite(String, long,
 	String, int, boolean, ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portal.model.WebsiteSoap addWebsite(
 		java.lang.String className, long classPK, java.lang.String url,
 		int typeId, boolean primary) throws RemoteException {

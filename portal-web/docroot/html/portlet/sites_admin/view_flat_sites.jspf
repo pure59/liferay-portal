@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -38,16 +38,21 @@
 
 		<%
 		if (searchTerms.isAdvancedSearch()) {
-			results = GroupLocalServiceUtil.search(company.getCompanyId(), classNameIds, searchTerms.getName(), searchTerms.getDescription(), groupParams, searchTerms.isAndOperator(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 			total = GroupLocalServiceUtil.searchCount(company.getCompanyId(), classNameIds, searchTerms.getName(), searchTerms.getDescription(), groupParams, searchTerms.isAndOperator());
+
+			searchContainer.setTotal(total);
+
+			results = GroupLocalServiceUtil.search(company.getCompanyId(), classNameIds, searchTerms.getName(), searchTerms.getDescription(), groupParams, searchTerms.isAndOperator(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 		}
 		else {
-			results = GroupLocalServiceUtil.search(company.getCompanyId(), classNameIds, searchTerms.getKeywords(), groupParams, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 			total = GroupLocalServiceUtil.searchCount(company.getCompanyId(), classNameIds, searchTerms.getKeywords(), groupParams);
+
+			searchContainer.setTotal(total);
+
+			results = GroupLocalServiceUtil.search(company.getCompanyId(), classNameIds, searchTerms.getKeywords(), groupParams, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 		}
 
-		pageContext.setAttribute("results", results);
-		pageContext.setAttribute("total", total);
+		searchContainer.setResults(results);
 		%>
 
 	</liferay-ui:search-container-results>

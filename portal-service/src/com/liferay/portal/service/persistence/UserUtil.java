@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,10 @@
 
 package com.liferay.portal.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.model.User;
@@ -36,6 +37,7 @@ import java.util.List;
  * @see UserPersistenceImpl
  * @generated
  */
+@ProviderType
 public class UserUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -60,16 +62,14 @@ public class UserUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#countWithDynamicQuery(DynamicQuery)
 	 */
-	public long countWithDynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
 	}
 
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery)
 	 */
-	public static List<User> findWithDynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public static List<User> findWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -77,7 +77,7 @@ public class UserUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery, int, int)
 	 */
 	public static List<User> findWithDynamicQuery(DynamicQuery dynamicQuery,
-		int start, int end) throws SystemException {
+		int start, int end) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -85,8 +85,7 @@ public class UserUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery, int, int, OrderByComparator)
 	 */
 	public static List<User> findWithDynamicQuery(DynamicQuery dynamicQuery,
-		int start, int end, OrderByComparator orderByComparator)
-		throws SystemException {
+		int start, int end, OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findWithDynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
@@ -95,15 +94,14 @@ public class UserUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel)
 	 */
-	public static User update(User user) throws SystemException {
+	public static User update(User user) {
 		return getPersistence().update(user);
 	}
 
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel, ServiceContext)
 	 */
-	public static User update(User user, ServiceContext serviceContext)
-		throws SystemException {
+	public static User update(User user, ServiceContext serviceContext) {
 		return getPersistence().update(user, serviceContext);
 	}
 
@@ -112,11 +110,9 @@ public class UserUtil {
 	*
 	* @param uuid the uuid
 	* @return the matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByUuid(
-		java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid) {
 		return getPersistence().findByUuid(uuid);
 	}
 
@@ -131,11 +127,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByUuid(
-		java.lang.String uuid, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, int start, int end) {
 		return getPersistence().findByUuid(uuid, start, end);
 	}
 
@@ -151,12 +145,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByUuid(
 		java.lang.String uuid, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findByUuid(uuid, start, end, orderByComparator);
 	}
 
@@ -167,13 +159,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByUuid_First(
 		java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByUuid_First(uuid, orderByComparator);
 	}
 
@@ -183,12 +173,10 @@ public class UserUtil {
 	* @param uuid the uuid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByUuid_First(
 		java.lang.String uuid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByUuid_First(uuid, orderByComparator);
 	}
 
@@ -199,13 +187,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByUuid_Last(
 		java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByUuid_Last(uuid, orderByComparator);
 	}
 
@@ -215,12 +201,10 @@ public class UserUtil {
 	* @param uuid the uuid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByUuid_Last(
 		java.lang.String uuid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByUuid_Last(uuid, orderByComparator);
 	}
 
@@ -232,13 +216,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next user
 	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User[] findByUuid_PrevAndNext(
 		long userId, java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByUuid_PrevAndNext(userId, uuid, orderByComparator);
 	}
@@ -247,10 +229,8 @@ public class UserUtil {
 	* Removes all the users where uuid = &#63; from the database.
 	*
 	* @param uuid the uuid
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByUuid(java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByUuid(java.lang.String uuid) {
 		getPersistence().removeByUuid(uuid);
 	}
 
@@ -259,10 +239,8 @@ public class UserUtil {
 	*
 	* @param uuid the uuid
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByUuid(java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByUuid(java.lang.String uuid) {
 		return getPersistence().countByUuid(uuid);
 	}
 
@@ -272,11 +250,9 @@ public class UserUtil {
 	* @param uuid the uuid
 	* @param companyId the company ID
 	* @return the matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByUuid_C(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, long companyId) {
 		return getPersistence().findByUuid_C(uuid, companyId);
 	}
 
@@ -292,11 +268,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByUuid_C(
-		java.lang.String uuid, long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, long companyId, int start, int end) {
 		return getPersistence().findByUuid_C(uuid, companyId, start, end);
 	}
 
@@ -313,12 +287,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByUuid_C(
 		java.lang.String uuid, long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByUuid_C(uuid, companyId, start, end, orderByComparator);
 	}
@@ -331,13 +303,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByUuid_C_First(
 		java.lang.String uuid, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByUuid_C_First(uuid, companyId, orderByComparator);
 	}
@@ -349,12 +319,10 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByUuid_C_First(
 		java.lang.String uuid, long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByUuid_C_First(uuid, companyId, orderByComparator);
 	}
@@ -367,13 +335,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByUuid_C_Last(
 		java.lang.String uuid, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByUuid_C_Last(uuid, companyId, orderByComparator);
 	}
@@ -385,12 +351,10 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByUuid_C_Last(
 		java.lang.String uuid, long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByUuid_C_Last(uuid, companyId, orderByComparator);
 	}
@@ -404,13 +368,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next user
 	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User[] findByUuid_C_PrevAndNext(
 		long userId, java.lang.String uuid, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByUuid_C_PrevAndNext(userId, uuid, companyId,
 			orderByComparator);
@@ -421,10 +383,8 @@ public class UserUtil {
 	*
 	* @param uuid the uuid
 	* @param companyId the company ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByUuid_C(java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByUuid_C(java.lang.String uuid, long companyId) {
 		getPersistence().removeByUuid_C(uuid, companyId);
 	}
 
@@ -434,10 +394,8 @@ public class UserUtil {
 	* @param uuid the uuid
 	* @param companyId the company ID
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByUuid_C(java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByUuid_C(java.lang.String uuid, long companyId) {
 		return getPersistence().countByUuid_C(uuid, companyId);
 	}
 
@@ -446,11 +404,9 @@ public class UserUtil {
 	*
 	* @param companyId the company ID
 	* @return the matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByCompanyId(
-		long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId) {
 		return getPersistence().findByCompanyId(companyId);
 	}
 
@@ -465,11 +421,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByCompanyId(
-		long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, int start, int end) {
 		return getPersistence().findByCompanyId(companyId, start, end);
 	}
 
@@ -485,12 +439,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByCompanyId(
 		long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByCompanyId(companyId, start, end, orderByComparator);
 	}
@@ -502,13 +454,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByCompanyId_First(
 		long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByCompanyId_First(companyId, orderByComparator);
 	}
@@ -519,12 +469,10 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByCompanyId_First(
 		long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByCompanyId_First(companyId, orderByComparator);
 	}
@@ -536,13 +484,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByCompanyId_Last(
 		long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByCompanyId_Last(companyId, orderByComparator);
 	}
@@ -553,12 +499,10 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByCompanyId_Last(
 		long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByCompanyId_Last(companyId, orderByComparator);
 	}
@@ -571,13 +515,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next user
 	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User[] findByCompanyId_PrevAndNext(
 		long userId, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByCompanyId_PrevAndNext(userId, companyId,
 			orderByComparator);
@@ -587,10 +529,8 @@ public class UserUtil {
 	* Removes all the users where companyId = &#63; from the database.
 	*
 	* @param companyId the company ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByCompanyId(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByCompanyId(long companyId) {
 		getPersistence().removeByCompanyId(companyId);
 	}
 
@@ -599,10 +539,8 @@ public class UserUtil {
 	*
 	* @param companyId the company ID
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByCompanyId(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByCompanyId(long companyId) {
 		return getPersistence().countByCompanyId(companyId);
 	}
 
@@ -612,11 +550,9 @@ public class UserUtil {
 	* @param contactId the contact ID
 	* @return the matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByContactId(long contactId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByContactId(contactId);
 	}
 
@@ -625,10 +561,8 @@ public class UserUtil {
 	*
 	* @param contactId the contact ID
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
-	public static com.liferay.portal.model.User fetchByContactId(long contactId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static com.liferay.portal.model.User fetchByContactId(long contactId) {
 		return getPersistence().fetchByContactId(contactId);
 	}
 
@@ -638,11 +572,9 @@ public class UserUtil {
 	* @param contactId the contact ID
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByContactId(
-		long contactId, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long contactId, boolean retrieveFromCache) {
 		return getPersistence().fetchByContactId(contactId, retrieveFromCache);
 	}
 
@@ -651,12 +583,9 @@ public class UserUtil {
 	*
 	* @param contactId the contact ID
 	* @return the user that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User removeByContactId(
-		long contactId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long contactId) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().removeByContactId(contactId);
 	}
 
@@ -665,10 +594,8 @@ public class UserUtil {
 	*
 	* @param contactId the contact ID
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByContactId(long contactId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByContactId(long contactId) {
 		return getPersistence().countByContactId(contactId);
 	}
 
@@ -677,11 +604,9 @@ public class UserUtil {
 	*
 	* @param emailAddress the email address
 	* @return the matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByEmailAddress(
-		java.lang.String emailAddress)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String emailAddress) {
 		return getPersistence().findByEmailAddress(emailAddress);
 	}
 
@@ -696,11 +621,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByEmailAddress(
-		java.lang.String emailAddress, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String emailAddress, int start, int end) {
 		return getPersistence().findByEmailAddress(emailAddress, start, end);
 	}
 
@@ -716,12 +639,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByEmailAddress(
 		java.lang.String emailAddress, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByEmailAddress(emailAddress, start, end,
 			orderByComparator);
@@ -734,13 +655,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByEmailAddress_First(
 		java.lang.String emailAddress,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByEmailAddress_First(emailAddress, orderByComparator);
 	}
@@ -751,12 +670,10 @@ public class UserUtil {
 	* @param emailAddress the email address
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByEmailAddress_First(
 		java.lang.String emailAddress,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByEmailAddress_First(emailAddress, orderByComparator);
 	}
@@ -768,13 +685,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByEmailAddress_Last(
 		java.lang.String emailAddress,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByEmailAddress_Last(emailAddress, orderByComparator);
 	}
@@ -785,12 +700,10 @@ public class UserUtil {
 	* @param emailAddress the email address
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByEmailAddress_Last(
 		java.lang.String emailAddress,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByEmailAddress_Last(emailAddress, orderByComparator);
 	}
@@ -803,13 +716,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next user
 	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User[] findByEmailAddress_PrevAndNext(
 		long userId, java.lang.String emailAddress,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByEmailAddress_PrevAndNext(userId, emailAddress,
 			orderByComparator);
@@ -819,10 +730,8 @@ public class UserUtil {
 	* Removes all the users where emailAddress = &#63; from the database.
 	*
 	* @param emailAddress the email address
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByEmailAddress(java.lang.String emailAddress)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByEmailAddress(java.lang.String emailAddress) {
 		getPersistence().removeByEmailAddress(emailAddress);
 	}
 
@@ -831,10 +740,8 @@ public class UserUtil {
 	*
 	* @param emailAddress the email address
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByEmailAddress(java.lang.String emailAddress)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByEmailAddress(java.lang.String emailAddress) {
 		return getPersistence().countByEmailAddress(emailAddress);
 	}
 
@@ -844,12 +751,9 @@ public class UserUtil {
 	* @param portraitId the portrait ID
 	* @return the matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByPortraitId(
-		long portraitId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long portraitId) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByPortraitId(portraitId);
 	}
 
@@ -858,11 +762,9 @@ public class UserUtil {
 	*
 	* @param portraitId the portrait ID
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByPortraitId(
-		long portraitId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long portraitId) {
 		return getPersistence().fetchByPortraitId(portraitId);
 	}
 
@@ -872,11 +774,9 @@ public class UserUtil {
 	* @param portraitId the portrait ID
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByPortraitId(
-		long portraitId, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long portraitId, boolean retrieveFromCache) {
 		return getPersistence().fetchByPortraitId(portraitId, retrieveFromCache);
 	}
 
@@ -885,12 +785,9 @@ public class UserUtil {
 	*
 	* @param portraitId the portrait ID
 	* @return the user that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User removeByPortraitId(
-		long portraitId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long portraitId) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().removeByPortraitId(portraitId);
 	}
 
@@ -899,10 +796,8 @@ public class UserUtil {
 	*
 	* @param portraitId the portrait ID
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByPortraitId(long portraitId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByPortraitId(long portraitId) {
 		return getPersistence().countByPortraitId(portraitId);
 	}
 
@@ -913,12 +808,9 @@ public class UserUtil {
 	* @param userId the user ID
 	* @return the matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_U(long companyId,
-		long userId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long userId) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByC_U(companyId, userId);
 	}
 
@@ -928,10 +820,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param userId the user ID
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_U(long companyId,
-		long userId) throws com.liferay.portal.kernel.exception.SystemException {
+		long userId) {
 		return getPersistence().fetchByC_U(companyId, userId);
 	}
 
@@ -942,11 +833,9 @@ public class UserUtil {
 	* @param userId the user ID
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_U(long companyId,
-		long userId, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long userId, boolean retrieveFromCache) {
 		return getPersistence().fetchByC_U(companyId, userId, retrieveFromCache);
 	}
 
@@ -956,12 +845,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param userId the user ID
 	* @return the user that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User removeByC_U(long companyId,
-		long userId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long userId) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().removeByC_U(companyId, userId);
 	}
 
@@ -971,10 +857,8 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param userId the user ID
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_U(long companyId, long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_U(long companyId, long userId) {
 		return getPersistence().countByC_U(companyId, userId);
 	}
 
@@ -984,11 +868,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param createDate the create date
 	* @return the matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_CD(
-		long companyId, java.util.Date createDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, java.util.Date createDate) {
 		return getPersistence().findByC_CD(companyId, createDate);
 	}
 
@@ -1004,11 +886,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_CD(
-		long companyId, java.util.Date createDate, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, java.util.Date createDate, int start, int end) {
 		return getPersistence().findByC_CD(companyId, createDate, start, end);
 	}
 
@@ -1025,12 +905,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_CD(
 		long companyId, java.util.Date createDate, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByC_CD(companyId, createDate, start, end,
 			orderByComparator);
@@ -1044,13 +922,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_CD_First(
 		long companyId, java.util.Date createDate,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_CD_First(companyId, createDate, orderByComparator);
 	}
@@ -1062,12 +938,10 @@ public class UserUtil {
 	* @param createDate the create date
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_CD_First(
 		long companyId, java.util.Date createDate,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByC_CD_First(companyId, createDate, orderByComparator);
 	}
@@ -1080,13 +954,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_CD_Last(
 		long companyId, java.util.Date createDate,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_CD_Last(companyId, createDate, orderByComparator);
 	}
@@ -1098,12 +970,10 @@ public class UserUtil {
 	* @param createDate the create date
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_CD_Last(
 		long companyId, java.util.Date createDate,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByC_CD_Last(companyId, createDate, orderByComparator);
 	}
@@ -1117,13 +987,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next user
 	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User[] findByC_CD_PrevAndNext(
 		long userId, long companyId, java.util.Date createDate,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_CD_PrevAndNext(userId, companyId, createDate,
 			orderByComparator);
@@ -1134,10 +1002,8 @@ public class UserUtil {
 	*
 	* @param companyId the company ID
 	* @param createDate the create date
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByC_CD(long companyId, java.util.Date createDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByC_CD(long companyId, java.util.Date createDate) {
 		getPersistence().removeByC_CD(companyId, createDate);
 	}
 
@@ -1147,10 +1013,8 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param createDate the create date
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_CD(long companyId, java.util.Date createDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_CD(long companyId, java.util.Date createDate) {
 		return getPersistence().countByC_CD(companyId, createDate);
 	}
 
@@ -1160,11 +1024,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param modifiedDate the modified date
 	* @return the matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_MD(
-		long companyId, java.util.Date modifiedDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, java.util.Date modifiedDate) {
 		return getPersistence().findByC_MD(companyId, modifiedDate);
 	}
 
@@ -1180,11 +1042,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_MD(
-		long companyId, java.util.Date modifiedDate, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, java.util.Date modifiedDate, int start, int end) {
 		return getPersistence().findByC_MD(companyId, modifiedDate, start, end);
 	}
 
@@ -1201,12 +1061,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_MD(
 		long companyId, java.util.Date modifiedDate, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByC_MD(companyId, modifiedDate, start, end,
 			orderByComparator);
@@ -1220,13 +1078,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_MD_First(
 		long companyId, java.util.Date modifiedDate,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_MD_First(companyId, modifiedDate, orderByComparator);
 	}
@@ -1238,12 +1094,10 @@ public class UserUtil {
 	* @param modifiedDate the modified date
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_MD_First(
 		long companyId, java.util.Date modifiedDate,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByC_MD_First(companyId, modifiedDate, orderByComparator);
 	}
@@ -1256,13 +1110,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_MD_Last(
 		long companyId, java.util.Date modifiedDate,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_MD_Last(companyId, modifiedDate, orderByComparator);
 	}
@@ -1274,12 +1126,10 @@ public class UserUtil {
 	* @param modifiedDate the modified date
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_MD_Last(
 		long companyId, java.util.Date modifiedDate,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByC_MD_Last(companyId, modifiedDate, orderByComparator);
 	}
@@ -1293,13 +1143,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next user
 	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User[] findByC_MD_PrevAndNext(
 		long userId, long companyId, java.util.Date modifiedDate,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_MD_PrevAndNext(userId, companyId, modifiedDate,
 			orderByComparator);
@@ -1310,10 +1158,8 @@ public class UserUtil {
 	*
 	* @param companyId the company ID
 	* @param modifiedDate the modified date
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByC_MD(long companyId, java.util.Date modifiedDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByC_MD(long companyId, java.util.Date modifiedDate) {
 		getPersistence().removeByC_MD(companyId, modifiedDate);
 	}
 
@@ -1323,10 +1169,8 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param modifiedDate the modified date
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_MD(long companyId, java.util.Date modifiedDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_MD(long companyId, java.util.Date modifiedDate) {
 		return getPersistence().countByC_MD(companyId, modifiedDate);
 	}
 
@@ -1337,12 +1181,9 @@ public class UserUtil {
 	* @param defaultUser the default user
 	* @return the matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_DU(long companyId,
-		boolean defaultUser)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		boolean defaultUser) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByC_DU(companyId, defaultUser);
 	}
 
@@ -1352,11 +1193,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param defaultUser the default user
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_DU(long companyId,
-		boolean defaultUser)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		boolean defaultUser) {
 		return getPersistence().fetchByC_DU(companyId, defaultUser);
 	}
 
@@ -1367,11 +1206,9 @@ public class UserUtil {
 	* @param defaultUser the default user
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_DU(long companyId,
-		boolean defaultUser, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		boolean defaultUser, boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByC_DU(companyId, defaultUser, retrieveFromCache);
 	}
@@ -1382,12 +1219,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param defaultUser the default user
 	* @return the user that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User removeByC_DU(long companyId,
-		boolean defaultUser)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		boolean defaultUser) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().removeByC_DU(companyId, defaultUser);
 	}
 
@@ -1397,10 +1231,8 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param defaultUser the default user
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_DU(long companyId, boolean defaultUser)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_DU(long companyId, boolean defaultUser) {
 		return getPersistence().countByC_DU(companyId, defaultUser);
 	}
 
@@ -1411,12 +1243,10 @@ public class UserUtil {
 	* @param screenName the screen name
 	* @return the matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_SN(long companyId,
 		java.lang.String screenName)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByC_SN(companyId, screenName);
 	}
 
@@ -1426,11 +1256,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param screenName the screen name
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_SN(long companyId,
-		java.lang.String screenName)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String screenName) {
 		return getPersistence().fetchByC_SN(companyId, screenName);
 	}
 
@@ -1441,11 +1269,9 @@ public class UserUtil {
 	* @param screenName the screen name
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_SN(long companyId,
-		java.lang.String screenName, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String screenName, boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByC_SN(companyId, screenName, retrieveFromCache);
 	}
@@ -1456,12 +1282,10 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param screenName the screen name
 	* @return the user that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User removeByC_SN(long companyId,
 		java.lang.String screenName)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().removeByC_SN(companyId, screenName);
 	}
 
@@ -1471,10 +1295,8 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param screenName the screen name
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_SN(long companyId, java.lang.String screenName)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_SN(long companyId, java.lang.String screenName) {
 		return getPersistence().countByC_SN(companyId, screenName);
 	}
 
@@ -1485,12 +1307,10 @@ public class UserUtil {
 	* @param emailAddress the email address
 	* @return the matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_EA(long companyId,
 		java.lang.String emailAddress)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByC_EA(companyId, emailAddress);
 	}
 
@@ -1500,11 +1320,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param emailAddress the email address
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_EA(long companyId,
-		java.lang.String emailAddress)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String emailAddress) {
 		return getPersistence().fetchByC_EA(companyId, emailAddress);
 	}
 
@@ -1515,11 +1333,9 @@ public class UserUtil {
 	* @param emailAddress the email address
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_EA(long companyId,
-		java.lang.String emailAddress, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String emailAddress, boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByC_EA(companyId, emailAddress, retrieveFromCache);
 	}
@@ -1530,12 +1346,10 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param emailAddress the email address
 	* @return the user that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User removeByC_EA(long companyId,
 		java.lang.String emailAddress)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().removeByC_EA(companyId, emailAddress);
 	}
 
@@ -1545,10 +1359,8 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param emailAddress the email address
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_EA(long companyId, java.lang.String emailAddress)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_EA(long companyId, java.lang.String emailAddress) {
 		return getPersistence().countByC_EA(companyId, emailAddress);
 	}
 
@@ -1559,12 +1371,9 @@ public class UserUtil {
 	* @param facebookId the facebook ID
 	* @return the matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_FID(long companyId,
-		long facebookId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long facebookId) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByC_FID(companyId, facebookId);
 	}
 
@@ -1574,11 +1383,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param facebookId the facebook ID
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_FID(long companyId,
-		long facebookId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long facebookId) {
 		return getPersistence().fetchByC_FID(companyId, facebookId);
 	}
 
@@ -1589,11 +1396,9 @@ public class UserUtil {
 	* @param facebookId the facebook ID
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_FID(long companyId,
-		long facebookId, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long facebookId, boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByC_FID(companyId, facebookId, retrieveFromCache);
 	}
@@ -1604,12 +1409,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param facebookId the facebook ID
 	* @return the user that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User removeByC_FID(long companyId,
-		long facebookId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long facebookId) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().removeByC_FID(companyId, facebookId);
 	}
 
@@ -1619,10 +1421,8 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param facebookId the facebook ID
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_FID(long companyId, long facebookId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_FID(long companyId, long facebookId) {
 		return getPersistence().countByC_FID(companyId, facebookId);
 	}
 
@@ -1633,12 +1433,9 @@ public class UserUtil {
 	* @param openId the open ID
 	* @return the matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_O(long companyId,
-		java.lang.String openId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String openId) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByC_O(companyId, openId);
 	}
 
@@ -1648,11 +1445,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param openId the open ID
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_O(long companyId,
-		java.lang.String openId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String openId) {
 		return getPersistence().fetchByC_O(companyId, openId);
 	}
 
@@ -1663,11 +1458,9 @@ public class UserUtil {
 	* @param openId the open ID
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_O(long companyId,
-		java.lang.String openId, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String openId, boolean retrieveFromCache) {
 		return getPersistence().fetchByC_O(companyId, openId, retrieveFromCache);
 	}
 
@@ -1677,12 +1470,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param openId the open ID
 	* @return the user that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User removeByC_O(long companyId,
-		java.lang.String openId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String openId) throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().removeByC_O(companyId, openId);
 	}
 
@@ -1692,10 +1482,8 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param openId the open ID
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_O(long companyId, java.lang.String openId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_O(long companyId, java.lang.String openId) {
 		return getPersistence().countByC_O(companyId, openId);
 	}
 
@@ -1705,11 +1493,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param status the status
 	* @return the matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_S(
-		long companyId, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, int status) {
 		return getPersistence().findByC_S(companyId, status);
 	}
 
@@ -1725,11 +1511,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_S(
-		long companyId, int status, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, int status, int start, int end) {
 		return getPersistence().findByC_S(companyId, status, start, end);
 	}
 
@@ -1746,12 +1530,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_S(
 		long companyId, int status, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByC_S(companyId, status, start, end, orderByComparator);
 	}
@@ -1764,13 +1546,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_S_First(
 		long companyId, int status,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_S_First(companyId, status, orderByComparator);
 	}
@@ -1782,12 +1562,10 @@ public class UserUtil {
 	* @param status the status
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_S_First(
 		long companyId, int status,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByC_S_First(companyId, status, orderByComparator);
 	}
@@ -1800,13 +1578,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_S_Last(long companyId,
 		int status,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_S_Last(companyId, status, orderByComparator);
 	}
@@ -1818,12 +1594,10 @@ public class UserUtil {
 	* @param status the status
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_S_Last(
 		long companyId, int status,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByC_S_Last(companyId, status, orderByComparator);
 	}
@@ -1837,13 +1611,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next user
 	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User[] findByC_S_PrevAndNext(
 		long userId, long companyId, int status,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_S_PrevAndNext(userId, companyId, status,
 			orderByComparator);
@@ -1854,10 +1626,8 @@ public class UserUtil {
 	*
 	* @param companyId the company ID
 	* @param status the status
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByC_S(long companyId, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByC_S(long companyId, int status) {
 		getPersistence().removeByC_S(companyId, status);
 	}
 
@@ -1867,10 +1637,8 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param status the status
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_S(long companyId, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_S(long companyId, int status) {
 		return getPersistence().countByC_S(companyId, status);
 	}
 
@@ -1881,11 +1649,9 @@ public class UserUtil {
 	* @param createDate the create date
 	* @param modifiedDate the modified date
 	* @return the matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_CD_MD(
-		long companyId, java.util.Date createDate, java.util.Date modifiedDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, java.util.Date createDate, java.util.Date modifiedDate) {
 		return getPersistence()
 				   .findByC_CD_MD(companyId, createDate, modifiedDate);
 	}
@@ -1903,12 +1669,10 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_CD_MD(
 		long companyId, java.util.Date createDate, java.util.Date modifiedDate,
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return getPersistence()
 				   .findByC_CD_MD(companyId, createDate, modifiedDate, start,
 			end);
@@ -1928,13 +1692,11 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findByC_CD_MD(
 		long companyId, java.util.Date createDate, java.util.Date modifiedDate,
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByC_CD_MD(companyId, createDate, modifiedDate, start,
 			end, orderByComparator);
@@ -1949,13 +1711,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_CD_MD_First(
 		long companyId, java.util.Date createDate, java.util.Date modifiedDate,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_CD_MD_First(companyId, createDate, modifiedDate,
 			orderByComparator);
@@ -1969,12 +1729,10 @@ public class UserUtil {
 	* @param modifiedDate the modified date
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_CD_MD_First(
 		long companyId, java.util.Date createDate, java.util.Date modifiedDate,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByC_CD_MD_First(companyId, createDate, modifiedDate,
 			orderByComparator);
@@ -1989,13 +1747,11 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user
 	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByC_CD_MD_Last(
 		long companyId, java.util.Date createDate, java.util.Date modifiedDate,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_CD_MD_Last(companyId, createDate, modifiedDate,
 			orderByComparator);
@@ -2009,12 +1765,10 @@ public class UserUtil {
 	* @param modifiedDate the modified date
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching user, or <code>null</code> if a matching user could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User fetchByC_CD_MD_Last(
 		long companyId, java.util.Date createDate, java.util.Date modifiedDate,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByC_CD_MD_Last(companyId, createDate, modifiedDate,
 			orderByComparator);
@@ -2030,14 +1784,12 @@ public class UserUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next user
 	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User[] findByC_CD_MD_PrevAndNext(
 		long userId, long companyId, java.util.Date createDate,
 		java.util.Date modifiedDate,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence()
 				   .findByC_CD_MD_PrevAndNext(userId, companyId, createDate,
 			modifiedDate, orderByComparator);
@@ -2049,11 +1801,9 @@ public class UserUtil {
 	* @param companyId the company ID
 	* @param createDate the create date
 	* @param modifiedDate the modified date
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeByC_CD_MD(long companyId,
-		java.util.Date createDate, java.util.Date modifiedDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.Date createDate, java.util.Date modifiedDate) {
 		getPersistence().removeByC_CD_MD(companyId, createDate, modifiedDate);
 	}
 
@@ -2064,13 +1814,184 @@ public class UserUtil {
 	* @param createDate the create date
 	* @param modifiedDate the modified date
 	* @return the number of matching users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static int countByC_CD_MD(long companyId, java.util.Date createDate,
-		java.util.Date modifiedDate)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.Date modifiedDate) {
 		return getPersistence()
 				   .countByC_CD_MD(companyId, createDate, modifiedDate);
+	}
+
+	/**
+	* Returns all the users where companyId = &#63; and defaultUser = &#63; and status = &#63;.
+	*
+	* @param companyId the company ID
+	* @param defaultUser the default user
+	* @param status the status
+	* @return the matching users
+	*/
+	public static java.util.List<com.liferay.portal.model.User> findByC_DU_S(
+		long companyId, boolean defaultUser, int status) {
+		return getPersistence().findByC_DU_S(companyId, defaultUser, status);
+	}
+
+	/**
+	* Returns a range of all the users where companyId = &#63; and defaultUser = &#63; and status = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.UserModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param companyId the company ID
+	* @param defaultUser the default user
+	* @param status the status
+	* @param start the lower bound of the range of users
+	* @param end the upper bound of the range of users (not inclusive)
+	* @return the range of matching users
+	*/
+	public static java.util.List<com.liferay.portal.model.User> findByC_DU_S(
+		long companyId, boolean defaultUser, int status, int start, int end) {
+		return getPersistence()
+				   .findByC_DU_S(companyId, defaultUser, status, start, end);
+	}
+
+	/**
+	* Returns an ordered range of all the users where companyId = &#63; and defaultUser = &#63; and status = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.UserModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param companyId the company ID
+	* @param defaultUser the default user
+	* @param status the status
+	* @param start the lower bound of the range of users
+	* @param end the upper bound of the range of users (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @return the ordered range of matching users
+	*/
+	public static java.util.List<com.liferay.portal.model.User> findByC_DU_S(
+		long companyId, boolean defaultUser, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .findByC_DU_S(companyId, defaultUser, status, start, end,
+			orderByComparator);
+	}
+
+	/**
+	* Returns the first user in the ordered set where companyId = &#63; and defaultUser = &#63; and status = &#63;.
+	*
+	* @param companyId the company ID
+	* @param defaultUser the default user
+	* @param status the status
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching user
+	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
+	*/
+	public static com.liferay.portal.model.User findByC_DU_S_First(
+		long companyId, boolean defaultUser, int status,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.NoSuchUserException {
+		return getPersistence()
+				   .findByC_DU_S_First(companyId, defaultUser, status,
+			orderByComparator);
+	}
+
+	/**
+	* Returns the first user in the ordered set where companyId = &#63; and defaultUser = &#63; and status = &#63;.
+	*
+	* @param companyId the company ID
+	* @param defaultUser the default user
+	* @param status the status
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching user, or <code>null</code> if a matching user could not be found
+	*/
+	public static com.liferay.portal.model.User fetchByC_DU_S_First(
+		long companyId, boolean defaultUser, int status,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .fetchByC_DU_S_First(companyId, defaultUser, status,
+			orderByComparator);
+	}
+
+	/**
+	* Returns the last user in the ordered set where companyId = &#63; and defaultUser = &#63; and status = &#63;.
+	*
+	* @param companyId the company ID
+	* @param defaultUser the default user
+	* @param status the status
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching user
+	* @throws com.liferay.portal.NoSuchUserException if a matching user could not be found
+	*/
+	public static com.liferay.portal.model.User findByC_DU_S_Last(
+		long companyId, boolean defaultUser, int status,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.NoSuchUserException {
+		return getPersistence()
+				   .findByC_DU_S_Last(companyId, defaultUser, status,
+			orderByComparator);
+	}
+
+	/**
+	* Returns the last user in the ordered set where companyId = &#63; and defaultUser = &#63; and status = &#63;.
+	*
+	* @param companyId the company ID
+	* @param defaultUser the default user
+	* @param status the status
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching user, or <code>null</code> if a matching user could not be found
+	*/
+	public static com.liferay.portal.model.User fetchByC_DU_S_Last(
+		long companyId, boolean defaultUser, int status,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .fetchByC_DU_S_Last(companyId, defaultUser, status,
+			orderByComparator);
+	}
+
+	/**
+	* Returns the users before and after the current user in the ordered set where companyId = &#63; and defaultUser = &#63; and status = &#63;.
+	*
+	* @param userId the primary key of the current user
+	* @param companyId the company ID
+	* @param defaultUser the default user
+	* @param status the status
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the previous, current, and next user
+	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
+	*/
+	public static com.liferay.portal.model.User[] findByC_DU_S_PrevAndNext(
+		long userId, long companyId, boolean defaultUser, int status,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.NoSuchUserException {
+		return getPersistence()
+				   .findByC_DU_S_PrevAndNext(userId, companyId, defaultUser,
+			status, orderByComparator);
+	}
+
+	/**
+	* Removes all the users where companyId = &#63; and defaultUser = &#63; and status = &#63; from the database.
+	*
+	* @param companyId the company ID
+	* @param defaultUser the default user
+	* @param status the status
+	*/
+	public static void removeByC_DU_S(long companyId, boolean defaultUser,
+		int status) {
+		getPersistence().removeByC_DU_S(companyId, defaultUser, status);
+	}
+
+	/**
+	* Returns the number of users where companyId = &#63; and defaultUser = &#63; and status = &#63;.
+	*
+	* @param companyId the company ID
+	* @param defaultUser the default user
+	* @param status the status
+	* @return the number of matching users
+	*/
+	public static int countByC_DU_S(long companyId, boolean defaultUser,
+		int status) {
+		return getPersistence().countByC_DU_S(companyId, defaultUser, status);
 	}
 
 	/**
@@ -2108,17 +2029,14 @@ public class UserUtil {
 	* @param userId the primary key of the user
 	* @return the user that was removed
 	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User remove(long userId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().remove(userId);
 	}
 
 	public static com.liferay.portal.model.User updateImpl(
-		com.liferay.portal.model.User user)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.User user) {
 		return getPersistence().updateImpl(user);
 	}
 
@@ -2128,11 +2046,9 @@ public class UserUtil {
 	* @param userId the primary key of the user
 	* @return the user
 	* @throws com.liferay.portal.NoSuchUserException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.User findByPrimaryKey(long userId)
-		throws com.liferay.portal.NoSuchUserException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchUserException {
 		return getPersistence().findByPrimaryKey(userId);
 	}
 
@@ -2141,21 +2057,22 @@ public class UserUtil {
 	*
 	* @param userId the primary key of the user
 	* @return the user, or <code>null</code> if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
-	public static com.liferay.portal.model.User fetchByPrimaryKey(long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static com.liferay.portal.model.User fetchByPrimaryKey(long userId) {
 		return getPersistence().fetchByPrimaryKey(userId);
+	}
+
+	public static java.util.Map<java.io.Serializable, com.liferay.portal.model.User> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys) {
+		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
 	* Returns all the users.
 	*
 	* @return the users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static java.util.List<com.liferay.portal.model.User> findAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static java.util.List<com.liferay.portal.model.User> findAll() {
 		return getPersistence().findAll();
 	}
 
@@ -2169,11 +2086,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findAll(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return getPersistence().findAll(start, end);
 	}
 
@@ -2188,22 +2103,17 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> findAll(
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findAll(start, end, orderByComparator);
 	}
 
 	/**
 	* Removes all the users from the database.
-	*
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeAll() {
 		getPersistence().removeAll();
 	}
 
@@ -2211,11 +2121,19 @@ public class UserUtil {
 	* Returns the number of users.
 	*
 	* @return the number of users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countAll() {
 		return getPersistence().countAll();
+	}
+
+	/**
+	* Returns the primaryKeys of groups associated with the user.
+	*
+	* @param pk the primary key of the user
+	* @return long[] of the primaryKeys of groups associated with the user
+	*/
+	public static long[] getGroupPrimaryKeys(long pk) {
+		return getPersistence().getGroupPrimaryKeys(pk);
 	}
 
 	/**
@@ -2223,10 +2141,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @return the groups associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Group> getGroups(
-		long pk) throws com.liferay.portal.kernel.exception.SystemException {
+		long pk) {
 		return getPersistence().getGroups(pk);
 	}
 
@@ -2241,11 +2158,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of groups associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Group> getGroups(
-		long pk, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long pk, int start, int end) {
 		return getPersistence().getGroups(pk, start, end);
 	}
 
@@ -2261,12 +2176,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of groups associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Group> getGroups(
 		long pk, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().getGroups(pk, start, end, orderByComparator);
 	}
 
@@ -2275,10 +2188,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @return the number of groups associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int getGroupsSize(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getGroupsSize(long pk) {
 		return getPersistence().getGroupsSize(pk);
 	}
 
@@ -2288,10 +2199,8 @@ public class UserUtil {
 	* @param pk the primary key of the user
 	* @param groupPK the primary key of the group
 	* @return <code>true</code> if the group is associated with the user; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsGroup(long pk, long groupPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsGroup(long pk, long groupPK) {
 		return getPersistence().containsGroup(pk, groupPK);
 	}
 
@@ -2300,10 +2209,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user to check for associations with groups
 	* @return <code>true</code> if the user has any groups associated with it; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsGroups(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsGroups(long pk) {
 		return getPersistence().containsGroups(pk);
 	}
 
@@ -2312,10 +2219,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param groupPK the primary key of the group
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addGroup(long pk, long groupPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addGroup(long pk, long groupPK) {
 		getPersistence().addGroup(pk, groupPK);
 	}
 
@@ -2324,10 +2229,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param group the group
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addGroup(long pk, com.liferay.portal.model.Group group)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addGroup(long pk, com.liferay.portal.model.Group group) {
 		getPersistence().addGroup(pk, group);
 	}
 
@@ -2336,10 +2239,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param groupPKs the primary keys of the groups
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addGroups(long pk, long[] groupPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addGroups(long pk, long[] groupPKs) {
 		getPersistence().addGroups(pk, groupPKs);
 	}
 
@@ -2348,11 +2249,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param groups the groups
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addGroups(long pk,
-		java.util.List<com.liferay.portal.model.Group> groups)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Group> groups) {
 		getPersistence().addGroups(pk, groups);
 	}
 
@@ -2360,10 +2259,8 @@ public class UserUtil {
 	* Clears all associations between the user and its groups. Also notifies the appropriate model listeners and clears the mapping table finder cache.
 	*
 	* @param pk the primary key of the user to clear the associated groups from
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void clearGroups(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void clearGroups(long pk) {
 		getPersistence().clearGroups(pk);
 	}
 
@@ -2372,10 +2269,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param groupPK the primary key of the group
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeGroup(long pk, long groupPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeGroup(long pk, long groupPK) {
 		getPersistence().removeGroup(pk, groupPK);
 	}
 
@@ -2384,10 +2279,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param group the group
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeGroup(long pk, com.liferay.portal.model.Group group)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeGroup(long pk, com.liferay.portal.model.Group group) {
 		getPersistence().removeGroup(pk, group);
 	}
 
@@ -2396,10 +2289,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param groupPKs the primary keys of the groups
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeGroups(long pk, long[] groupPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeGroups(long pk, long[] groupPKs) {
 		getPersistence().removeGroups(pk, groupPKs);
 	}
 
@@ -2408,11 +2299,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param groups the groups
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeGroups(long pk,
-		java.util.List<com.liferay.portal.model.Group> groups)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Group> groups) {
 		getPersistence().removeGroups(pk, groups);
 	}
 
@@ -2421,10 +2310,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param groupPKs the primary keys of the groups to be associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void setGroups(long pk, long[] groupPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void setGroups(long pk, long[] groupPKs) {
 		getPersistence().setGroups(pk, groupPKs);
 	}
 
@@ -2433,12 +2320,20 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param groups the groups to be associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void setGroups(long pk,
-		java.util.List<com.liferay.portal.model.Group> groups)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Group> groups) {
 		getPersistence().setGroups(pk, groups);
+	}
+
+	/**
+	* Returns the primaryKeys of organizations associated with the user.
+	*
+	* @param pk the primary key of the user
+	* @return long[] of the primaryKeys of organizations associated with the user
+	*/
+	public static long[] getOrganizationPrimaryKeys(long pk) {
+		return getPersistence().getOrganizationPrimaryKeys(pk);
 	}
 
 	/**
@@ -2446,10 +2341,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @return the organizations associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> getOrganizations(
-		long pk) throws com.liferay.portal.kernel.exception.SystemException {
+		long pk) {
 		return getPersistence().getOrganizations(pk);
 	}
 
@@ -2464,11 +2358,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of organizations associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> getOrganizations(
-		long pk, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long pk, int start, int end) {
 		return getPersistence().getOrganizations(pk, start, end);
 	}
 
@@ -2484,12 +2376,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of organizations associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> getOrganizations(
 		long pk, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .getOrganizations(pk, start, end, orderByComparator);
 	}
@@ -2499,10 +2389,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @return the number of organizations associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int getOrganizationsSize(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getOrganizationsSize(long pk) {
 		return getPersistence().getOrganizationsSize(pk);
 	}
 
@@ -2512,10 +2400,8 @@ public class UserUtil {
 	* @param pk the primary key of the user
 	* @param organizationPK the primary key of the organization
 	* @return <code>true</code> if the organization is associated with the user; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsOrganization(long pk, long organizationPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsOrganization(long pk, long organizationPK) {
 		return getPersistence().containsOrganization(pk, organizationPK);
 	}
 
@@ -2524,10 +2410,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user to check for associations with organizations
 	* @return <code>true</code> if the user has any organizations associated with it; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsOrganizations(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsOrganizations(long pk) {
 		return getPersistence().containsOrganizations(pk);
 	}
 
@@ -2536,10 +2420,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param organizationPK the primary key of the organization
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addOrganization(long pk, long organizationPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addOrganization(long pk, long organizationPK) {
 		getPersistence().addOrganization(pk, organizationPK);
 	}
 
@@ -2548,11 +2430,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param organization the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addOrganization(long pk,
-		com.liferay.portal.model.Organization organization)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.Organization organization) {
 		getPersistence().addOrganization(pk, organization);
 	}
 
@@ -2561,10 +2441,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param organizationPKs the primary keys of the organizations
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addOrganizations(long pk, long[] organizationPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addOrganizations(long pk, long[] organizationPKs) {
 		getPersistence().addOrganizations(pk, organizationPKs);
 	}
 
@@ -2573,11 +2451,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param organizations the organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addOrganizations(long pk,
-		java.util.List<com.liferay.portal.model.Organization> organizations)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Organization> organizations) {
 		getPersistence().addOrganizations(pk, organizations);
 	}
 
@@ -2585,10 +2461,8 @@ public class UserUtil {
 	* Clears all associations between the user and its organizations. Also notifies the appropriate model listeners and clears the mapping table finder cache.
 	*
 	* @param pk the primary key of the user to clear the associated organizations from
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void clearOrganizations(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void clearOrganizations(long pk) {
 		getPersistence().clearOrganizations(pk);
 	}
 
@@ -2597,10 +2471,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param organizationPK the primary key of the organization
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeOrganization(long pk, long organizationPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeOrganization(long pk, long organizationPK) {
 		getPersistence().removeOrganization(pk, organizationPK);
 	}
 
@@ -2609,11 +2481,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param organization the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeOrganization(long pk,
-		com.liferay.portal.model.Organization organization)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.Organization organization) {
 		getPersistence().removeOrganization(pk, organization);
 	}
 
@@ -2622,10 +2492,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param organizationPKs the primary keys of the organizations
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeOrganizations(long pk, long[] organizationPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeOrganizations(long pk, long[] organizationPKs) {
 		getPersistence().removeOrganizations(pk, organizationPKs);
 	}
 
@@ -2634,11 +2502,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param organizations the organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeOrganizations(long pk,
-		java.util.List<com.liferay.portal.model.Organization> organizations)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Organization> organizations) {
 		getPersistence().removeOrganizations(pk, organizations);
 	}
 
@@ -2647,10 +2513,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param organizationPKs the primary keys of the organizations to be associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void setOrganizations(long pk, long[] organizationPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void setOrganizations(long pk, long[] organizationPKs) {
 		getPersistence().setOrganizations(pk, organizationPKs);
 	}
 
@@ -2659,12 +2523,20 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param organizations the organizations to be associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void setOrganizations(long pk,
-		java.util.List<com.liferay.portal.model.Organization> organizations)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Organization> organizations) {
 		getPersistence().setOrganizations(pk, organizations);
+	}
+
+	/**
+	* Returns the primaryKeys of roles associated with the user.
+	*
+	* @param pk the primary key of the user
+	* @return long[] of the primaryKeys of roles associated with the user
+	*/
+	public static long[] getRolePrimaryKeys(long pk) {
+		return getPersistence().getRolePrimaryKeys(pk);
 	}
 
 	/**
@@ -2672,10 +2544,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @return the roles associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Role> getRoles(
-		long pk) throws com.liferay.portal.kernel.exception.SystemException {
+		long pk) {
 		return getPersistence().getRoles(pk);
 	}
 
@@ -2690,11 +2561,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of roles associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Role> getRoles(
-		long pk, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long pk, int start, int end) {
 		return getPersistence().getRoles(pk, start, end);
 	}
 
@@ -2710,12 +2579,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of roles associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Role> getRoles(
 		long pk, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().getRoles(pk, start, end, orderByComparator);
 	}
 
@@ -2724,10 +2591,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @return the number of roles associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int getRolesSize(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getRolesSize(long pk) {
 		return getPersistence().getRolesSize(pk);
 	}
 
@@ -2737,10 +2602,8 @@ public class UserUtil {
 	* @param pk the primary key of the user
 	* @param rolePK the primary key of the role
 	* @return <code>true</code> if the role is associated with the user; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsRole(long pk, long rolePK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsRole(long pk, long rolePK) {
 		return getPersistence().containsRole(pk, rolePK);
 	}
 
@@ -2749,10 +2612,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user to check for associations with roles
 	* @return <code>true</code> if the user has any roles associated with it; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsRoles(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsRoles(long pk) {
 		return getPersistence().containsRoles(pk);
 	}
 
@@ -2761,10 +2622,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param rolePK the primary key of the role
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addRole(long pk, long rolePK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addRole(long pk, long rolePK) {
 		getPersistence().addRole(pk, rolePK);
 	}
 
@@ -2773,10 +2632,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param role the role
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addRole(long pk, com.liferay.portal.model.Role role)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addRole(long pk, com.liferay.portal.model.Role role) {
 		getPersistence().addRole(pk, role);
 	}
 
@@ -2785,10 +2642,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param rolePKs the primary keys of the roles
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addRoles(long pk, long[] rolePKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addRoles(long pk, long[] rolePKs) {
 		getPersistence().addRoles(pk, rolePKs);
 	}
 
@@ -2797,11 +2652,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param roles the roles
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addRoles(long pk,
-		java.util.List<com.liferay.portal.model.Role> roles)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Role> roles) {
 		getPersistence().addRoles(pk, roles);
 	}
 
@@ -2809,10 +2662,8 @@ public class UserUtil {
 	* Clears all associations between the user and its roles. Also notifies the appropriate model listeners and clears the mapping table finder cache.
 	*
 	* @param pk the primary key of the user to clear the associated roles from
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void clearRoles(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void clearRoles(long pk) {
 		getPersistence().clearRoles(pk);
 	}
 
@@ -2821,10 +2672,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param rolePK the primary key of the role
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeRole(long pk, long rolePK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeRole(long pk, long rolePK) {
 		getPersistence().removeRole(pk, rolePK);
 	}
 
@@ -2833,10 +2682,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param role the role
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeRole(long pk, com.liferay.portal.model.Role role)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeRole(long pk, com.liferay.portal.model.Role role) {
 		getPersistence().removeRole(pk, role);
 	}
 
@@ -2845,10 +2692,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param rolePKs the primary keys of the roles
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeRoles(long pk, long[] rolePKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeRoles(long pk, long[] rolePKs) {
 		getPersistence().removeRoles(pk, rolePKs);
 	}
 
@@ -2857,11 +2702,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param roles the roles
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeRoles(long pk,
-		java.util.List<com.liferay.portal.model.Role> roles)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Role> roles) {
 		getPersistence().removeRoles(pk, roles);
 	}
 
@@ -2870,10 +2713,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param rolePKs the primary keys of the roles to be associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void setRoles(long pk, long[] rolePKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void setRoles(long pk, long[] rolePKs) {
 		getPersistence().setRoles(pk, rolePKs);
 	}
 
@@ -2882,12 +2723,20 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param roles the roles to be associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void setRoles(long pk,
-		java.util.List<com.liferay.portal.model.Role> roles)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Role> roles) {
 		getPersistence().setRoles(pk, roles);
+	}
+
+	/**
+	* Returns the primaryKeys of teams associated with the user.
+	*
+	* @param pk the primary key of the user
+	* @return long[] of the primaryKeys of teams associated with the user
+	*/
+	public static long[] getTeamPrimaryKeys(long pk) {
+		return getPersistence().getTeamPrimaryKeys(pk);
 	}
 
 	/**
@@ -2895,10 +2744,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @return the teams associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Team> getTeams(
-		long pk) throws com.liferay.portal.kernel.exception.SystemException {
+		long pk) {
 		return getPersistence().getTeams(pk);
 	}
 
@@ -2913,11 +2761,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of teams associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Team> getTeams(
-		long pk, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long pk, int start, int end) {
 		return getPersistence().getTeams(pk, start, end);
 	}
 
@@ -2933,12 +2779,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of teams associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Team> getTeams(
 		long pk, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().getTeams(pk, start, end, orderByComparator);
 	}
 
@@ -2947,10 +2791,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @return the number of teams associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int getTeamsSize(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getTeamsSize(long pk) {
 		return getPersistence().getTeamsSize(pk);
 	}
 
@@ -2960,10 +2802,8 @@ public class UserUtil {
 	* @param pk the primary key of the user
 	* @param teamPK the primary key of the team
 	* @return <code>true</code> if the team is associated with the user; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsTeam(long pk, long teamPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsTeam(long pk, long teamPK) {
 		return getPersistence().containsTeam(pk, teamPK);
 	}
 
@@ -2972,10 +2812,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user to check for associations with teams
 	* @return <code>true</code> if the user has any teams associated with it; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsTeams(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsTeams(long pk) {
 		return getPersistence().containsTeams(pk);
 	}
 
@@ -2984,10 +2822,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param teamPK the primary key of the team
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addTeam(long pk, long teamPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addTeam(long pk, long teamPK) {
 		getPersistence().addTeam(pk, teamPK);
 	}
 
@@ -2996,10 +2832,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param team the team
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addTeam(long pk, com.liferay.portal.model.Team team)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addTeam(long pk, com.liferay.portal.model.Team team) {
 		getPersistence().addTeam(pk, team);
 	}
 
@@ -3008,10 +2842,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param teamPKs the primary keys of the teams
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addTeams(long pk, long[] teamPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addTeams(long pk, long[] teamPKs) {
 		getPersistence().addTeams(pk, teamPKs);
 	}
 
@@ -3020,11 +2852,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param teams the teams
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addTeams(long pk,
-		java.util.List<com.liferay.portal.model.Team> teams)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Team> teams) {
 		getPersistence().addTeams(pk, teams);
 	}
 
@@ -3032,10 +2862,8 @@ public class UserUtil {
 	* Clears all associations between the user and its teams. Also notifies the appropriate model listeners and clears the mapping table finder cache.
 	*
 	* @param pk the primary key of the user to clear the associated teams from
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void clearTeams(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void clearTeams(long pk) {
 		getPersistence().clearTeams(pk);
 	}
 
@@ -3044,10 +2872,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param teamPK the primary key of the team
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeTeam(long pk, long teamPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeTeam(long pk, long teamPK) {
 		getPersistence().removeTeam(pk, teamPK);
 	}
 
@@ -3056,10 +2882,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param team the team
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeTeam(long pk, com.liferay.portal.model.Team team)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeTeam(long pk, com.liferay.portal.model.Team team) {
 		getPersistence().removeTeam(pk, team);
 	}
 
@@ -3068,10 +2892,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param teamPKs the primary keys of the teams
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeTeams(long pk, long[] teamPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeTeams(long pk, long[] teamPKs) {
 		getPersistence().removeTeams(pk, teamPKs);
 	}
 
@@ -3080,11 +2902,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param teams the teams
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeTeams(long pk,
-		java.util.List<com.liferay.portal.model.Team> teams)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Team> teams) {
 		getPersistence().removeTeams(pk, teams);
 	}
 
@@ -3093,10 +2913,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param teamPKs the primary keys of the teams to be associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void setTeams(long pk, long[] teamPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void setTeams(long pk, long[] teamPKs) {
 		getPersistence().setTeams(pk, teamPKs);
 	}
 
@@ -3105,12 +2923,20 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param teams the teams to be associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void setTeams(long pk,
-		java.util.List<com.liferay.portal.model.Team> teams)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Team> teams) {
 		getPersistence().setTeams(pk, teams);
+	}
+
+	/**
+	* Returns the primaryKeys of user groups associated with the user.
+	*
+	* @param pk the primary key of the user
+	* @return long[] of the primaryKeys of user groups associated with the user
+	*/
+	public static long[] getUserGroupPrimaryKeys(long pk) {
+		return getPersistence().getUserGroupPrimaryKeys(pk);
 	}
 
 	/**
@@ -3118,10 +2944,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @return the user groups associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.UserGroup> getUserGroups(
-		long pk) throws com.liferay.portal.kernel.exception.SystemException {
+		long pk) {
 		return getPersistence().getUserGroups(pk);
 	}
 
@@ -3136,11 +2961,9 @@ public class UserUtil {
 	* @param start the lower bound of the range of users
 	* @param end the upper bound of the range of users (not inclusive)
 	* @return the range of user groups associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.UserGroup> getUserGroups(
-		long pk, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long pk, int start, int end) {
 		return getPersistence().getUserGroups(pk, start, end);
 	}
 
@@ -3156,12 +2979,10 @@ public class UserUtil {
 	* @param end the upper bound of the range of users (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of user groups associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.UserGroup> getUserGroups(
 		long pk, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().getUserGroups(pk, start, end, orderByComparator);
 	}
 
@@ -3170,10 +2991,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @return the number of user groups associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int getUserGroupsSize(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getUserGroupsSize(long pk) {
 		return getPersistence().getUserGroupsSize(pk);
 	}
 
@@ -3183,10 +3002,8 @@ public class UserUtil {
 	* @param pk the primary key of the user
 	* @param userGroupPK the primary key of the user group
 	* @return <code>true</code> if the user group is associated with the user; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsUserGroup(long pk, long userGroupPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsUserGroup(long pk, long userGroupPK) {
 		return getPersistence().containsUserGroup(pk, userGroupPK);
 	}
 
@@ -3195,10 +3012,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user to check for associations with user groups
 	* @return <code>true</code> if the user has any user groups associated with it; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsUserGroups(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsUserGroups(long pk) {
 		return getPersistence().containsUserGroups(pk);
 	}
 
@@ -3207,10 +3022,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param userGroupPK the primary key of the user group
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addUserGroup(long pk, long userGroupPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addUserGroup(long pk, long userGroupPK) {
 		getPersistence().addUserGroup(pk, userGroupPK);
 	}
 
@@ -3219,11 +3032,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param userGroup the user group
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addUserGroup(long pk,
-		com.liferay.portal.model.UserGroup userGroup)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.UserGroup userGroup) {
 		getPersistence().addUserGroup(pk, userGroup);
 	}
 
@@ -3232,10 +3043,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param userGroupPKs the primary keys of the user groups
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addUserGroups(long pk, long[] userGroupPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addUserGroups(long pk, long[] userGroupPKs) {
 		getPersistence().addUserGroups(pk, userGroupPKs);
 	}
 
@@ -3244,11 +3053,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param userGroups the user groups
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addUserGroups(long pk,
-		java.util.List<com.liferay.portal.model.UserGroup> userGroups)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.UserGroup> userGroups) {
 		getPersistence().addUserGroups(pk, userGroups);
 	}
 
@@ -3256,10 +3063,8 @@ public class UserUtil {
 	* Clears all associations between the user and its user groups. Also notifies the appropriate model listeners and clears the mapping table finder cache.
 	*
 	* @param pk the primary key of the user to clear the associated user groups from
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void clearUserGroups(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void clearUserGroups(long pk) {
 		getPersistence().clearUserGroups(pk);
 	}
 
@@ -3268,10 +3073,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param userGroupPK the primary key of the user group
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeUserGroup(long pk, long userGroupPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeUserGroup(long pk, long userGroupPK) {
 		getPersistence().removeUserGroup(pk, userGroupPK);
 	}
 
@@ -3280,11 +3083,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param userGroup the user group
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeUserGroup(long pk,
-		com.liferay.portal.model.UserGroup userGroup)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.UserGroup userGroup) {
 		getPersistence().removeUserGroup(pk, userGroup);
 	}
 
@@ -3293,10 +3094,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param userGroupPKs the primary keys of the user groups
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeUserGroups(long pk, long[] userGroupPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeUserGroups(long pk, long[] userGroupPKs) {
 		getPersistence().removeUserGroups(pk, userGroupPKs);
 	}
 
@@ -3305,11 +3104,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param userGroups the user groups
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeUserGroups(long pk,
-		java.util.List<com.liferay.portal.model.UserGroup> userGroups)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.UserGroup> userGroups) {
 		getPersistence().removeUserGroups(pk, userGroups);
 	}
 
@@ -3318,10 +3115,8 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param userGroupPKs the primary keys of the user groups to be associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void setUserGroups(long pk, long[] userGroupPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void setUserGroups(long pk, long[] userGroupPKs) {
 		getPersistence().setUserGroups(pk, userGroupPKs);
 	}
 
@@ -3330,11 +3125,9 @@ public class UserUtil {
 	*
 	* @param pk the primary key of the user
 	* @param userGroups the user groups to be associated with the user
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void setUserGroups(long pk,
-		java.util.List<com.liferay.portal.model.UserGroup> userGroups)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.UserGroup> userGroups) {
 		getPersistence().setUserGroups(pk, userGroups);
 	}
 
@@ -3351,6 +3144,7 @@ public class UserUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setPersistence(UserPersistence persistence) {
 	}
 

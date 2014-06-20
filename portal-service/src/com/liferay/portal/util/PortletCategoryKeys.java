@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -31,6 +31,7 @@ public class PortletCategoryKeys {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public static final String CONTENT = "content";
 
 	public static final String CURRENT_SITE = "current_site";
@@ -38,6 +39,7 @@ public class PortletCategoryKeys {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #APPS}
 	 */
+	@Deprecated
 	public static final String MARKETPLACE = "marketplace";
 
 	public static final String MY = "my";
@@ -46,6 +48,7 @@ public class PortletCategoryKeys {
 	 * @deprecated As of 6.2.0, replaced by {@link #CONFIGURATION}, {@link
 	 *             #SITES}, or {@link #USERS}.
 	 */
+	@Deprecated
 	public static final String PORTAL = CONFIGURATION;
 
 	public static final String PORTLET = "portlet";
@@ -53,6 +56,7 @@ public class PortletCategoryKeys {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #APPS}
 	 */
+	@Deprecated
 	public static final String SERVER = APPS;
 
 	public static final String SITE_ADMINISTRATION = "site_administration.";

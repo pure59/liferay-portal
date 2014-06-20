@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,7 @@
 package com.liferay.portal.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
@@ -25,8 +25,9 @@ import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.LayoutBranch;
 import com.liferay.portal.model.LayoutBranchModel;
 import com.liferay.portal.model.LayoutBranchSoap;
+import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.service.UserLocalServiceUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
@@ -63,6 +64,7 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 	 */
 	public static final String TABLE_NAME = "LayoutBranch";
 	public static final Object[][] TABLE_COLUMNS = {
+			{ "mvccVersion", Types.BIGINT },
 			{ "LayoutBranchId", Types.BIGINT },
 			{ "groupId", Types.BIGINT },
 			{ "companyId", Types.BIGINT },
@@ -74,7 +76,7 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 			{ "description", Types.VARCHAR },
 			{ "master", Types.BOOLEAN }
 		};
-	public static final String TABLE_SQL_CREATE = "create table LayoutBranch (LayoutBranchId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,layoutSetBranchId LONG,plid LONG,name VARCHAR(75) null,description STRING null,master BOOLEAN)";
+	public static final String TABLE_SQL_CREATE = "create table LayoutBranch (mvccVersion LONG default 0,LayoutBranchId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,layoutSetBranchId LONG,plid LONG,name VARCHAR(75) null,description STRING null,master BOOLEAN)";
 	public static final String TABLE_SQL_DROP = "drop table LayoutBranch";
 	public static final String ORDER_BY_JPQL = " ORDER BY layoutBranch.LayoutBranchId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY LayoutBranch.LayoutBranchId ASC";
@@ -109,6 +111,7 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 
 		LayoutBranch model = new LayoutBranchImpl();
 
+		model.setMvccVersion(soapModel.getMvccVersion());
 		model.setLayoutBranchId(soapModel.getLayoutBranchId());
 		model.setGroupId(soapModel.getGroupId());
 		model.setCompanyId(soapModel.getCompanyId());
@@ -183,6 +186,7 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("LayoutBranchId", getLayoutBranchId());
 		attributes.put("groupId", getGroupId());
 		attributes.put("companyId", getCompanyId());
@@ -194,11 +198,20 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 		attributes.put("description", getDescription());
 		attributes.put("master", getMaster());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long LayoutBranchId = (Long)attributes.get("LayoutBranchId");
 
 		if (LayoutBranchId != null) {
@@ -260,8 +273,19 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@JSON
+	@Override
 	public long getLayoutBranchId() {
 		return _LayoutBranchId;
 	}
@@ -271,8 +295,8 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 		_LayoutBranchId = LayoutBranchId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -282,8 +306,8 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 		_groupId = groupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -293,8 +317,8 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 		_companyId = companyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -305,17 +329,23 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -330,8 +360,8 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getLayoutSetBranchId() {
 		return _layoutSetBranchId;
 	}
@@ -353,8 +383,8 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 		return _originalLayoutSetBranchId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getPlid() {
 		return _plid;
 	}
@@ -376,8 +406,8 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 		return _originalPlid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -402,8 +432,8 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 		return GetterUtil.getString(_originalName);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -418,8 +448,8 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 		_description = description;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getMaster() {
 		return _master;
 	}
@@ -477,6 +507,7 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 	public Object clone() {
 		LayoutBranchImpl layoutBranchImpl = new LayoutBranchImpl();
 
+		layoutBranchImpl.setMvccVersion(getMvccVersion());
 		layoutBranchImpl.setLayoutBranchId(getLayoutBranchId());
 		layoutBranchImpl.setGroupId(getGroupId());
 		layoutBranchImpl.setCompanyId(getCompanyId());
@@ -536,6 +567,16 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 	}
 
 	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
+	}
+
+	@Override
 	public void resetOriginalValues() {
 		LayoutBranchModelImpl layoutBranchModelImpl = this;
 
@@ -559,6 +600,8 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 	@Override
 	public CacheModel<LayoutBranch> toCacheModel() {
 		LayoutBranchCacheModel layoutBranchCacheModel = new LayoutBranchCacheModel();
+
+		layoutBranchCacheModel.mvccVersion = getMvccVersion();
 
 		layoutBranchCacheModel.LayoutBranchId = getLayoutBranchId();
 
@@ -603,9 +646,11 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(21);
+		StringBundler sb = new StringBundler(23);
 
-		sb.append("{LayoutBranchId=");
+		sb.append("{mvccVersion=");
+		sb.append(getMvccVersion());
+		sb.append(", LayoutBranchId=");
 		sb.append(getLayoutBranchId());
 		sb.append(", groupId=");
 		sb.append(getGroupId());
@@ -632,12 +677,16 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(34);
+		StringBundler sb = new StringBundler(37);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.model.LayoutBranch");
 		sb.append("</model-name>");
 
+		sb.append(
+			"<column><column-name>mvccVersion</column-name><column-value><![CDATA[");
+		sb.append(getMvccVersion());
+		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>LayoutBranchId</column-name><column-value><![CDATA[");
 		sb.append(getLayoutBranchId());
@@ -688,11 +737,11 @@ public class LayoutBranchModelImpl extends BaseModelImpl<LayoutBranch>
 	private static Class<?>[] _escapedModelInterfaces = new Class[] {
 			LayoutBranch.class
 		};
+	private long _mvccVersion;
 	private long _LayoutBranchId;
 	private long _groupId;
 	private long _companyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private long _layoutSetBranchId;
 	private long _originalLayoutSetBranchId;

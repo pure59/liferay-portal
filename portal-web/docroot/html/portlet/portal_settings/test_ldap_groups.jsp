@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -86,7 +86,7 @@ int counter = 0;
 for (SearchResult searchResult : searchResults) {
 	Attributes attributes = searchResult.getAttributes();
 
-	String name = LDAPUtil.getAttributeString(attributes, groupMappings.getProperty("groupName")).toLowerCase();
+	String name = StringUtil.toLowerCase(LDAPUtil.getAttributeString(attributes, groupMappings.getProperty("groupName")));
 	String description = LDAPUtil.getAttributeString(attributes, groupMappings.getProperty("description"));
 	Attribute attribute = attributes.get(groupMappings.getProperty("user"));
 
@@ -139,10 +139,10 @@ for (SearchResult searchResult : searchResults) {
 			<%= counter %>
 		</td>
 		<td>
-			<%= name %>
+			<%= HtmlUtil.escape(name) %>
 		</td>
 		<td>
-			<%= description %>
+			<%= HtmlUtil.escape(description) %>
 		</td>
 		<td>
 			<%= (attribute == null) ? "0" : String.valueOf(attribute.size()) %>

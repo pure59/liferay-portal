@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,12 @@
 
 package com.liferay.portlet.documentlibrary.service.impl;
 
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.Projection;
+import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.Property;
+import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portlet.documentlibrary.model.DLSyncEvent;
 import com.liferay.portlet.documentlibrary.service.base.DLSyncEventLocalServiceBaseImpl;
 
@@ -27,9 +32,7 @@ public class DLSyncEventLocalServiceImpl
 	extends DLSyncEventLocalServiceBaseImpl {
 
 	@Override
-	public DLSyncEvent addDLSyncEvent(String event, String type, long typePK)
-		throws SystemException {
-
+	public DLSyncEvent addDLSyncEvent(String event, String type, long typePK) {
 		DLSyncEvent dlSyncEvent = dlSyncEventPersistence.fetchByTypePK(typePK);
 
 		if (dlSyncEvent == null) {
@@ -41,22 +44,39 @@ public class DLSyncEventLocalServiceImpl
 			dlSyncEvent.setTypePK(typePK);
 		}
 
-		dlSyncEvent.setModifiedDate(System.currentTimeMillis());
+		dlSyncEvent.setModifiedTime(System.currentTimeMillis());
 		dlSyncEvent.setEvent(event);
 
 		return dlSyncEventPersistence.update(dlSyncEvent);
 	}
 
 	@Override
-	public void deleteDLSyncEvents() throws SystemException {
+	public void deleteDLSyncEvents() {
 		dlSyncEventPersistence.removeAll();
 	}
 
 	@Override
-	public List<DLSyncEvent> getDLSyncEvents(long modifiedDate)
-		throws SystemException {
+	public List<DLSyncEvent> getDLSyncEvents(long modifiedTime) {
+		return dlSyncEventPersistence.findByModifiedTime(modifiedTime);
+	}
 
-		return dlSyncEventPersistence.findByModifiedDate(modifiedDate);
+	@Override
+	public List<DLSyncEvent> getLatestDLSyncEvents() {
+		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
+			DLSyncEvent.class);
+
+		Property property = PropertyFactoryUtil.forName("modifiedTime");
+
+		DynamicQuery modifiedTimeDynamicQuery =
+			DynamicQueryFactoryUtil.forClass(DLSyncEvent.class);
+
+		Projection projection = ProjectionFactoryUtil.max("modifiedTime");
+
+		modifiedTimeDynamicQuery.setProjection(projection);
+
+		dynamicQuery.add(property.eq(modifiedTimeDynamicQuery));
+
+		return dlSyncEventPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
 }

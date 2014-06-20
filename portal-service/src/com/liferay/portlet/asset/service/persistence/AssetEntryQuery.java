@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,7 +17,6 @@ package com.liferay.portlet.asset.service.persistence;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -70,7 +69,9 @@ public class AssetEntryQuery {
 	}
 
 	public static String checkOrderByType(String orderByType) {
-		if ((orderByType == null) || orderByType.equalsIgnoreCase("DESC")) {
+		if ((orderByType == null) ||
+			StringUtil.equalsIgnoreCase(orderByType, "DESC")) {
+
 			return "DESC";
 		}
 		else {
@@ -119,7 +120,7 @@ public class AssetEntryQuery {
 
 	public AssetEntryQuery(
 			long[] classNameIds, SearchContainer<?> searchContainer)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		this();
 
@@ -156,7 +157,7 @@ public class AssetEntryQuery {
 	}
 
 	public AssetEntryQuery(String className, SearchContainer<?> searchContainer)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		this(
 			new long[] {PortalUtil.getClassNameId(className)}, searchContainer);
@@ -548,8 +549,8 @@ public class AssetEntryQuery {
 		sb.append(StringUtil.merge(_classNameIds));
 		sb.append(", classTypeIds=");
 		sb.append(StringUtil.merge(_classTypeIds));
-		sb.append(_description);
 		sb.append(", description=");
+		sb.append(_description);
 
 		if (_layout != null) {
 			sb.append(", layout=");
@@ -563,9 +564,9 @@ public class AssetEntryQuery {
 		sb.append(", expirationDate=");
 		sb.append(_expirationDate);
 		sb.append(", groupIds=");
-		sb.append(_keywords);
-		sb.append(", keywords=");
 		sb.append(StringUtil.merge(_groupIds));
+		sb.append(", keywords=");
+		sb.append(_keywords);
 		sb.append(", linkedAssetEntryId=");
 		sb.append(_linkedAssetEntryId);
 		sb.append(", notAllCategoryIds=");
@@ -590,8 +591,8 @@ public class AssetEntryQuery {
 		sb.append(_publishDate);
 		sb.append(", start=");
 		sb.append(_start);
-		sb.append(_title);
 		sb.append(", title=");
+		sb.append(_title);
 		sb.append(", visible=");
 		sb.append(_visible);
 		sb.append("}");
@@ -643,7 +644,9 @@ public class AssetEntryQuery {
 				leftRightIds[3 * i + 2] = category.getRightCategoryId();
 			}
 			catch (Exception e) {
-				_log.warn("Error retrieving category " + categoryId);
+				if (_log.isWarnEnabled()) {
+					_log.warn("Error retrieving category " + categoryId);
+				}
 			}
 		}
 

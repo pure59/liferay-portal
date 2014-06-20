@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,35 +14,30 @@
 
 package com.liferay.portlet.social.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * @author Brian Wing Shun Chan
  */
+@ProviderType
 public interface SocialActivitySetFinder {
-	public int countByRelation(long userId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public int countByRelation(long userId);
 
-	public int countByRelationType(long userId, int type)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public int countByRelationType(long userId, int type);
 
-	public int countByUser(long userId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public int countByUser(long userId);
 
-	public int countByUserGroups(long userId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public int countByUserGroups(long userId);
 
 	public java.util.List<com.liferay.portlet.social.model.SocialActivitySet> findByRelation(
-		long userId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		long userId, int start, int end);
 
 	public java.util.List<com.liferay.portlet.social.model.SocialActivitySet> findByRelationType(
-		long userId, int type, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		long userId, int type, int start, int end);
 
 	public java.util.List<com.liferay.portlet.social.model.SocialActivitySet> findByUser(
-		long userId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		long userId, int start, int end);
 
 	public java.util.List<com.liferay.portlet.social.model.SocialActivitySet> findByUserGroups(
-		long userId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		long userId, int start, int end);
 }

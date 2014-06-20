@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,10 @@
 
 package com.liferay.portal.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.model.PasswordTracker;
@@ -36,6 +37,7 @@ import java.util.List;
  * @see PasswordTrackerPersistenceImpl
  * @generated
  */
+@ProviderType
 public class PasswordTrackerUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -60,8 +62,7 @@ public class PasswordTrackerUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#countWithDynamicQuery(DynamicQuery)
 	 */
-	public long countWithDynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
 	}
 
@@ -69,7 +70,7 @@ public class PasswordTrackerUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery)
 	 */
 	public static List<PasswordTracker> findWithDynamicQuery(
-		DynamicQuery dynamicQuery) throws SystemException {
+		DynamicQuery dynamicQuery) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -77,8 +78,7 @@ public class PasswordTrackerUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery, int, int)
 	 */
 	public static List<PasswordTracker> findWithDynamicQuery(
-		DynamicQuery dynamicQuery, int start, int end)
-		throws SystemException {
+		DynamicQuery dynamicQuery, int start, int end) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -87,7 +87,7 @@ public class PasswordTrackerUtil {
 	 */
 	public static List<PasswordTracker> findWithDynamicQuery(
 		DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
+		OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findWithDynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
@@ -96,8 +96,7 @@ public class PasswordTrackerUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel)
 	 */
-	public static PasswordTracker update(PasswordTracker passwordTracker)
-		throws SystemException {
+	public static PasswordTracker update(PasswordTracker passwordTracker) {
 		return getPersistence().update(passwordTracker);
 	}
 
@@ -105,7 +104,7 @@ public class PasswordTrackerUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel, ServiceContext)
 	 */
 	public static PasswordTracker update(PasswordTracker passwordTracker,
-		ServiceContext serviceContext) throws SystemException {
+		ServiceContext serviceContext) {
 		return getPersistence().update(passwordTracker, serviceContext);
 	}
 
@@ -114,10 +113,9 @@ public class PasswordTrackerUtil {
 	*
 	* @param userId the user ID
 	* @return the matching password trackers
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PasswordTracker> findByUserId(
-		long userId) throws com.liferay.portal.kernel.exception.SystemException {
+		long userId) {
 		return getPersistence().findByUserId(userId);
 	}
 
@@ -132,11 +130,9 @@ public class PasswordTrackerUtil {
 	* @param start the lower bound of the range of password trackers
 	* @param end the upper bound of the range of password trackers (not inclusive)
 	* @return the range of matching password trackers
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PasswordTracker> findByUserId(
-		long userId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long userId, int start, int end) {
 		return getPersistence().findByUserId(userId, start, end);
 	}
 
@@ -152,12 +148,10 @@ public class PasswordTrackerUtil {
 	* @param end the upper bound of the range of password trackers (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching password trackers
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PasswordTracker> findByUserId(
 		long userId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByUserId(userId, start, end, orderByComparator);
 	}
@@ -169,13 +163,11 @@ public class PasswordTrackerUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching password tracker
 	* @throws com.liferay.portal.NoSuchPasswordTrackerException if a matching password tracker could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PasswordTracker findByUserId_First(
 		long userId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPasswordTrackerException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPasswordTrackerException {
 		return getPersistence().findByUserId_First(userId, orderByComparator);
 	}
 
@@ -185,12 +177,10 @@ public class PasswordTrackerUtil {
 	* @param userId the user ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching password tracker, or <code>null</code> if a matching password tracker could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PasswordTracker fetchByUserId_First(
 		long userId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByUserId_First(userId, orderByComparator);
 	}
 
@@ -201,13 +191,11 @@ public class PasswordTrackerUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching password tracker
 	* @throws com.liferay.portal.NoSuchPasswordTrackerException if a matching password tracker could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PasswordTracker findByUserId_Last(
 		long userId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPasswordTrackerException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPasswordTrackerException {
 		return getPersistence().findByUserId_Last(userId, orderByComparator);
 	}
 
@@ -217,12 +205,10 @@ public class PasswordTrackerUtil {
 	* @param userId the user ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching password tracker, or <code>null</code> if a matching password tracker could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PasswordTracker fetchByUserId_Last(
 		long userId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByUserId_Last(userId, orderByComparator);
 	}
 
@@ -234,13 +220,11 @@ public class PasswordTrackerUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next password tracker
 	* @throws com.liferay.portal.NoSuchPasswordTrackerException if a password tracker with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PasswordTracker[] findByUserId_PrevAndNext(
 		long passwordTrackerId, long userId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPasswordTrackerException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPasswordTrackerException {
 		return getPersistence()
 				   .findByUserId_PrevAndNext(passwordTrackerId, userId,
 			orderByComparator);
@@ -250,10 +234,8 @@ public class PasswordTrackerUtil {
 	* Removes all the password trackers where userId = &#63; from the database.
 	*
 	* @param userId the user ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByUserId(long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByUserId(long userId) {
 		getPersistence().removeByUserId(userId);
 	}
 
@@ -262,10 +244,8 @@ public class PasswordTrackerUtil {
 	*
 	* @param userId the user ID
 	* @return the number of matching password trackers
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByUserId(long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByUserId(long userId) {
 		return getPersistence().countByUserId(userId);
 	}
 
@@ -306,18 +286,15 @@ public class PasswordTrackerUtil {
 	* @param passwordTrackerId the primary key of the password tracker
 	* @return the password tracker that was removed
 	* @throws com.liferay.portal.NoSuchPasswordTrackerException if a password tracker with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PasswordTracker remove(
 		long passwordTrackerId)
-		throws com.liferay.portal.NoSuchPasswordTrackerException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPasswordTrackerException {
 		return getPersistence().remove(passwordTrackerId);
 	}
 
 	public static com.liferay.portal.model.PasswordTracker updateImpl(
-		com.liferay.portal.model.PasswordTracker passwordTracker)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.PasswordTracker passwordTracker) {
 		return getPersistence().updateImpl(passwordTracker);
 	}
 
@@ -327,12 +304,10 @@ public class PasswordTrackerUtil {
 	* @param passwordTrackerId the primary key of the password tracker
 	* @return the password tracker
 	* @throws com.liferay.portal.NoSuchPasswordTrackerException if a password tracker with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PasswordTracker findByPrimaryKey(
 		long passwordTrackerId)
-		throws com.liferay.portal.NoSuchPasswordTrackerException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPasswordTrackerException {
 		return getPersistence().findByPrimaryKey(passwordTrackerId);
 	}
 
@@ -341,22 +316,23 @@ public class PasswordTrackerUtil {
 	*
 	* @param passwordTrackerId the primary key of the password tracker
 	* @return the password tracker, or <code>null</code> if a password tracker with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PasswordTracker fetchByPrimaryKey(
-		long passwordTrackerId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long passwordTrackerId) {
 		return getPersistence().fetchByPrimaryKey(passwordTrackerId);
+	}
+
+	public static java.util.Map<java.io.Serializable, com.liferay.portal.model.PasswordTracker> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys) {
+		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
 	* Returns all the password trackers.
 	*
 	* @return the password trackers
-	* @throws SystemException if a system exception occurred
 	*/
-	public static java.util.List<com.liferay.portal.model.PasswordTracker> findAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static java.util.List<com.liferay.portal.model.PasswordTracker> findAll() {
 		return getPersistence().findAll();
 	}
 
@@ -370,11 +346,9 @@ public class PasswordTrackerUtil {
 	* @param start the lower bound of the range of password trackers
 	* @param end the upper bound of the range of password trackers (not inclusive)
 	* @return the range of password trackers
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PasswordTracker> findAll(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return getPersistence().findAll(start, end);
 	}
 
@@ -389,22 +363,17 @@ public class PasswordTrackerUtil {
 	* @param end the upper bound of the range of password trackers (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of password trackers
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PasswordTracker> findAll(
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findAll(start, end, orderByComparator);
 	}
 
 	/**
 	* Removes all the password trackers from the database.
-	*
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeAll() {
 		getPersistence().removeAll();
 	}
 
@@ -412,10 +381,8 @@ public class PasswordTrackerUtil {
 	* Returns the number of password trackers.
 	*
 	* @return the number of password trackers
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countAll() {
 		return getPersistence().countAll();
 	}
 
@@ -433,6 +400,7 @@ public class PasswordTrackerUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setPersistence(PasswordTrackerPersistence persistence) {
 	}
 

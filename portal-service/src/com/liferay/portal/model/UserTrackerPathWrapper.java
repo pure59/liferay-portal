@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see UserTrackerPath
  * @generated
  */
+@ProviderType
 public class UserTrackerPathWrapper implements UserTrackerPath,
 	ModelWrapper<UserTrackerPath> {
 	public UserTrackerPathWrapper(UserTrackerPath userTrackerPath) {
@@ -49,6 +52,7 @@ public class UserTrackerPathWrapper implements UserTrackerPath,
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("userTrackerPathId", getUserTrackerPathId());
 		attributes.put("userTrackerId", getUserTrackerId());
 		attributes.put("path", getPath());
@@ -59,6 +63,12 @@ public class UserTrackerPathWrapper implements UserTrackerPath,
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long userTrackerPathId = (Long)attributes.get("userTrackerPathId");
 
 		if (userTrackerPathId != null) {
@@ -102,6 +112,26 @@ public class UserTrackerPathWrapper implements UserTrackerPath,
 	@Override
 	public void setPrimaryKey(long primaryKey) {
 		_userTrackerPath.setPrimaryKey(primaryKey);
+	}
+
+	/**
+	* Returns the mvcc version of this user tracker path.
+	*
+	* @return the mvcc version of this user tracker path
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _userTrackerPath.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this user tracker path.
+	*
+	* @param mvccVersion the mvcc version of this user tracker path
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_userTrackerPath.setMvccVersion(mvccVersion);
 	}
 
 	/**
@@ -284,8 +314,7 @@ public class UserTrackerPathWrapper implements UserTrackerPath,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_userTrackerPath.persist();
 	}
 
@@ -312,6 +341,7 @@ public class UserTrackerPathWrapper implements UserTrackerPath,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public UserTrackerPath getWrappedUserTrackerPath() {
 		return _userTrackerPath;
 	}
@@ -319,6 +349,16 @@ public class UserTrackerPathWrapper implements UserTrackerPath,
 	@Override
 	public UserTrackerPath getWrappedModel() {
 		return _userTrackerPath;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _userTrackerPath.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _userTrackerPath.isFinderCacheEnabled();
 	}
 
 	@Override

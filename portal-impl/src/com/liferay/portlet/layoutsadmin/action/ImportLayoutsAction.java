@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,7 +22,6 @@ import com.liferay.portal.LayoutPrototypeException;
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.NoSuchGroupException;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.lar.ExportImportHelper;
@@ -39,10 +38,8 @@ import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
-import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.service.LayoutServiceUtil;
 import com.liferay.portal.struts.PortletAction;
@@ -53,7 +50,6 @@ import com.liferay.portlet.documentlibrary.FileSizeException;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 import com.liferay.portlet.sites.action.ActionUtil;
 
-import java.io.File;
 import java.io.InputStream;
 
 import java.util.Map;
@@ -107,6 +103,8 @@ public class ImportLayoutsAction extends PortletAction {
 					ExportImportHelper.TEMP_FOLDER_NAME);
 			}
 			else if (cmd.equals(Constants.IMPORT)) {
+				hideDefaultSuccessMessage(actionRequest);
+
 				importData(
 					actionRequest, actionResponse,
 					ExportImportHelper.TEMP_FOLDER_NAME);
@@ -296,7 +294,7 @@ public class ImportLayoutsAction extends PortletAction {
 	}
 
 	protected void deleteTempFileEntry(long groupId, String folderName)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		String[] tempFileEntryNames = LayoutServiceUtil.getTempFileEntryNames(
 			groupId, folderName);
@@ -345,55 +343,26 @@ public class ImportLayoutsAction extends PortletAction {
 		FileEntry fileEntry = ExportImportHelperUtil.getTempFileEntry(
 			groupId, themeDisplay.getUserId(), folderName);
 
-		File file = DLFileEntryLocalServiceUtil.getFile(
-			themeDisplay.getUserId(), fileEntry.getFileEntryId(),
-			fileEntry.getVersion(), false);
-
-		if ((file == null) || !file.exists()) {
-			throw new LARFileException("Import file does not exist");
-		}
-
-		boolean successfulRename = false;
-
-		File newFile = null;
+		InputStream inputStream = null;
 
 		try {
-			String newFileName = StringUtil.replace(
-				file.getPath(), file.getName(), fileEntry.getTitle());
+			inputStream = DLFileEntryLocalServiceUtil.getFileAsStream(
+				fileEntry.getFileEntryId(), fileEntry.getVersion(), false);
 
-			newFile = new File(newFileName);
-
-			successfulRename = file.renameTo(newFile);
-
-			if (!successfulRename) {
-				newFile = FileUtil.createTempFile(fileEntry.getExtension());
-
-				FileUtil.copyFile(file, newFile);
-			}
-
-			importData(actionRequest, newFile);
+			importData(actionRequest, fileEntry.getTitle(), inputStream);
 
 			deleteTempFileEntry(groupId, folderName);
 
 			addSuccessMessage(actionRequest, actionResponse);
 		}
 		finally {
-			if (successfulRename) {
-				successfulRename = newFile.renameTo(file);
-
-				if (!successfulRename) {
-					FileUtil.copyFile(newFile, file);
-
-					FileUtil.delete(newFile);
-				}
-			}
-			else {
-				FileUtil.delete(newFile);
-			}
+			StreamUtil.cleanUp(inputStream);
 		}
 	}
 
-	protected void importData(ActionRequest actionRequest, File file)
+	protected void importData(
+			ActionRequest actionRequest, String fileName,
+			InputStream inputStream)
 		throws Exception {
 
 		long groupId = ParamUtil.getLong(actionRequest, "groupId");
@@ -401,8 +370,8 @@ public class ImportLayoutsAction extends PortletAction {
 			actionRequest, "privateLayout");
 
 		LayoutServiceUtil.importLayoutsInBackground(
-			file.getName(), groupId, privateLayout,
-			actionRequest.getParameterMap(), file);
+			fileName, groupId, privateLayout, actionRequest.getParameterMap(),
+			inputStream);
 	}
 
 	protected void validateFile(
@@ -418,34 +387,14 @@ public class ImportLayoutsAction extends PortletAction {
 		FileEntry fileEntry = ExportImportHelperUtil.getTempFileEntry(
 			groupId, themeDisplay.getUserId(), folderName);
 
-		File file = DLFileEntryLocalServiceUtil.getFile(
-			themeDisplay.getUserId(), fileEntry.getFileEntryId(),
-			fileEntry.getVersion(), false);
-
-		if ((file == null) || !file.exists()) {
-			throw new LARFileException("Import file does not exist");
-		}
-
-		boolean successfulRename = false;
-
-		File newFile = null;
+		InputStream inputStream = null;
 
 		try {
-			String newFileName = StringUtil.replace(
-				file.getPath(), file.getName(), fileEntry.getTitle());
-
-			newFile = new File(newFileName);
-
-			successfulRename = file.renameTo(newFile);
-
-			if (!successfulRename) {
-				newFile = FileUtil.createTempFile(fileEntry.getExtension());
-
-				FileUtil.copyFile(file, newFile);
-			}
+			inputStream = DLFileEntryLocalServiceUtil.getFileAsStream(
+				fileEntry.getFileEntryId(), fileEntry.getVersion(), false);
 
 			MissingReferences missingReferences = validateFile(
-				actionRequest, newFile);
+				actionRequest, inputStream);
 
 			Map<String, MissingReference> weakMissingReferences =
 				missingReferences.getWeakMissingReferences();
@@ -457,7 +406,7 @@ public class ImportLayoutsAction extends PortletAction {
 			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
 			if ((weakMissingReferences != null) &&
-				(weakMissingReferences.size() > 0)) {
+				!weakMissingReferences.isEmpty()) {
 
 				jsonObject.put(
 					"warningMessages",
@@ -468,23 +417,12 @@ public class ImportLayoutsAction extends PortletAction {
 			writeJSON(actionRequest, actionResponse, jsonObject);
 		}
 		finally {
-			if (successfulRename) {
-				successfulRename = newFile.renameTo(file);
-
-				if (!successfulRename) {
-					FileUtil.copyFile(newFile, file);
-
-					FileUtil.delete(newFile);
-				}
-			}
-			else {
-				FileUtil.delete(newFile);
-			}
+			StreamUtil.cleanUp(inputStream);
 		}
 	}
 
 	protected MissingReferences validateFile(
-			ActionRequest actionRequest, File file)
+			ActionRequest actionRequest, InputStream inputStream)
 		throws Exception {
 
 		long groupId = ParamUtil.getLong(actionRequest, "groupId");
@@ -492,7 +430,8 @@ public class ImportLayoutsAction extends PortletAction {
 			actionRequest, "privateLayout");
 
 		return LayoutServiceUtil.validateImportLayoutsFile(
-			groupId, privateLayout, actionRequest.getParameterMap(), file);
+			groupId, privateLayout, actionRequest.getParameterMap(),
+			inputStream);
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(ImportLayoutsAction.class);

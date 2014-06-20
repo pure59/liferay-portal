@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,6 +17,7 @@ package com.liferay.portal.test;
 import com.liferay.portal.aspectj.WeavingClassLoader;
 import com.liferay.portal.kernel.process.ClassPathUtil;
 import com.liferay.portal.kernel.test.NewClassLoaderJUnitTestRunner;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
@@ -53,7 +54,7 @@ public class AspectJMockingNewClassLoaderJUnitTestRunner
 
 		Class<?>[] adviceClasses = adviseWith.adviceClasses();
 
-		if ((adviceClasses == null) || (adviceClasses.length == 0)) {
+		if (ArrayUtil.isEmpty(adviceClasses)) {
 			return super.createClassLoader(frameworkMethod);
 		}
 

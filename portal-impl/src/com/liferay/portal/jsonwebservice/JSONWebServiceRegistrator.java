@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -42,7 +42,8 @@ import org.springframework.aop.framework.AdvisedSupport;
 public class JSONWebServiceRegistrator {
 
 	public JSONWebServiceRegistrator() {
-		_jsonWebServiceNaming = new JSONWebServiceNaming();
+		_jsonWebServiceNaming =
+			JSONWebServiceActionsManagerUtil.getJSONWebServiceNaming();
 
 		_jsonWebServiceMappingResolver = new JSONWebServiceMappingResolver(
 			_jsonWebServiceNaming);
@@ -149,7 +150,7 @@ public class JSONWebServiceRegistrator {
 		}
 
 		String utilClassName =
-			_jsonWebServiceNaming.convertImplClassNameToUtilClassName(
+			_jsonWebServiceNaming.convertServiceImplClassToUtilClassName(
 				implementationClass);
 
 		ClassLoader classLoader = implementationClass.getClassLoader();
@@ -233,7 +234,7 @@ public class JSONWebServiceRegistrator {
 			return;
 		}
 
-		if (_wireViaUtil == true) {
+		if (_wireViaUtil) {
 			Class<?> utilClass = loadUtilClass(serviceBeanClass);
 
 			try {
@@ -243,18 +244,21 @@ public class JSONWebServiceRegistrator {
 			catch (NoSuchMethodException nsme) {
 				return;
 			}
+		}
 
-			String path = _jsonWebServiceMappingResolver.resolvePath(
-				serviceBeanClass, method);
+		String path = _jsonWebServiceMappingResolver.resolvePath(
+			serviceBeanClass, method);
 
+		if (!_jsonWebServiceNaming.isIncludedPath(contextPath, path)) {
+			return;
+		}
+
+		if (_wireViaUtil) {
 			JSONWebServiceActionsManagerUtil.registerJSONWebServiceAction(
 				contextPath, method.getDeclaringClass(), method, path,
 				httpMethod);
 		}
 		else {
-			String path = _jsonWebServiceMappingResolver.resolvePath(
-				serviceBeanClass, method);
-
 			JSONWebServiceActionsManagerUtil.registerJSONWebServiceAction(
 				contextPath, serviceBean, serviceBeanClass, method, path,
 				httpMethod);

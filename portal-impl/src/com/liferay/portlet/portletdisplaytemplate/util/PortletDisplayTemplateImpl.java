@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,15 +14,20 @@
 
 package com.liferay.portlet.portletdisplaytemplate.util;
 
+import com.liferay.portal.kernel.bean.ClassLoaderBeanHandler;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.portletdisplaytemplate.BasePortletDisplayTemplateHandler;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
-import com.liferay.portal.kernel.servlet.GenericServletWrapper;
-import com.liferay.portal.kernel.servlet.PipingServletResponse;
+import com.liferay.portal.kernel.servlet.JSPSupportServlet;
 import com.liferay.portal.kernel.template.TemplateConstants;
+import com.liferay.portal.kernel.template.TemplateHandler;
+import com.liferay.portal.kernel.template.TemplateHandlerRegistryUtil;
 import com.liferay.portal.kernel.template.TemplateVariableGroup;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.Group;
@@ -34,16 +39,25 @@ import com.liferay.portlet.PortletURLUtil;
 import com.liferay.portlet.dynamicdatamapping.NoSuchTemplateException;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
 import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil;
+import com.liferay.taglib.servlet.PipingServletResponse;
 import com.liferay.taglib.util.VelocityTaglib;
 import com.liferay.taglib.util.VelocityTaglibImpl;
 import com.liferay.util.freemarker.FreeMarkerTaglibFactoryUtil;
 
+import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.ext.servlet.ServletContextHashModel;
 
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
+import java.io.IOException;
+
+import java.lang.reflect.InvocationHandler;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -56,12 +70,10 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import javax.servlet.GenericServlet;
-import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.PageContext;
 
 /**
  * @author Eduardo Garcia
@@ -171,6 +183,38 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 	}
 
 	@Override
+	public List<TemplateHandler> getPortletDisplayTemplateHandlers() {
+		List<TemplateHandler> templateHandlers =
+			TemplateHandlerRegistryUtil.getTemplateHandlers();
+
+		List<TemplateHandler> portletDisplayTemplateHandlers =
+			new ArrayList<TemplateHandler>();
+
+		for (TemplateHandler templateHandler : templateHandlers) {
+			if (templateHandler instanceof BasePortletDisplayTemplateHandler) {
+				portletDisplayTemplateHandlers.add(templateHandler);
+			}
+			else if (ProxyUtil.isProxyClass(templateHandler.getClass())) {
+				InvocationHandler invocationHandler =
+					ProxyUtil.getInvocationHandler(templateHandler);
+
+				if (invocationHandler instanceof ClassLoaderBeanHandler) {
+					ClassLoaderBeanHandler classLoaderBeanHandler =
+						(ClassLoaderBeanHandler)invocationHandler;
+
+					Object bean = classLoaderBeanHandler.getBean();
+
+					if (bean instanceof BasePortletDisplayTemplateHandler) {
+						portletDisplayTemplateHandlers.add(templateHandler);
+					}
+				}
+			}
+		}
+
+		return portletDisplayTemplateHandlers;
+	}
+
+	@Override
 	public Map<String, TemplateVariableGroup> getTemplateVariableGroups(
 		String language) {
 
@@ -235,18 +279,20 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 
 	@Override
 	public String renderDDMTemplate(
-			PageContext pageContext, long ddmTemplateId, List<?> entries)
+			HttpServletRequest request, HttpServletResponse response,
+			long ddmTemplateId, List<?> entries)
 		throws Exception {
 
 		Map<String, Object> contextObjects = new HashMap<String, Object>();
 
 		return renderDDMTemplate(
-			pageContext, ddmTemplateId, entries, contextObjects);
+			request, response, ddmTemplateId, entries, contextObjects);
 	}
 
 	@Override
 	public String renderDDMTemplate(
-			PageContext pageContext, long ddmTemplateId, List<?> entries,
+			HttpServletRequest request, HttpServletResponse response,
+			long ddmTemplateId, List<?> entries,
 			Map<String, Object> contextObjects)
 		throws Exception {
 
@@ -258,9 +304,6 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 			contextObjects.put(
 				PortletDisplayTemplateConstants.ENTRY, entries.get(0));
 		}
-
-		HttpServletRequest request =
-			(HttpServletRequest)pageContext.getRequest();
 
 		contextObjects.put(
 			PortletDisplayTemplateConstants.LOCALE, request.getLocale());
@@ -291,18 +334,54 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 		contextObjects.put(
 			PortletDisplayTemplateConstants.THEME_DISPLAY, themeDisplay);
 
-		// Taglibs
+		// Custom context objects
 
 		DDMTemplate ddmTemplate = DDMTemplateLocalServiceUtil.getTemplate(
 			ddmTemplateId);
 
 		String language = ddmTemplate.getLanguage();
 
+		TemplateHandler templateHandler =
+			TemplateHandlerRegistryUtil.getTemplateHandler(
+				ddmTemplate.getClassNameId());
+
+		if (templateHandler instanceof BasePortletDisplayTemplateHandler) {
+			BasePortletDisplayTemplateHandler portletDisplayTemplateHandler =
+				(BasePortletDisplayTemplateHandler)templateHandler;
+
+			Map<String, Object> customContextObjects =
+				portletDisplayTemplateHandler.getCustomContextObjects();
+
+			for (String variableName : customContextObjects.keySet()) {
+				if (contextObjects.containsKey(variableName)) {
+					continue;
+				}
+
+				Object object = customContextObjects.get(variableName);
+
+				if (object instanceof Class) {
+					if (language.equals(TemplateConstants.LANG_TYPE_FTL)) {
+						_addStaticClassSupportFTL(
+							contextObjects, variableName, (Class<?>)object);
+					}
+					else if (language.equals(TemplateConstants.LANG_TYPE_VM)) {
+						_addStaticClassSupportVM(
+							contextObjects, variableName, (Class<?>)object);
+					}
+				}
+				else {
+					contextObjects.put(variableName, object);
+				}
+			}
+		}
+
+		// Taglibs
+
 		if (language.equals(TemplateConstants.LANG_TYPE_FTL)) {
-			_addTaglibSupportFTL(contextObjects, pageContext);
+			_addTaglibSupportFTL(contextObjects, request, response);
 		}
 		else if (language.equals(TemplateConstants.LANG_TYPE_VM)) {
-			_addTaglibSupportVM(contextObjects, pageContext);
+			_addTaglibSupportVM(contextObjects, request, response);
 		}
 
 		contextObjects.putAll(_getPortletPreferences(renderRequest));
@@ -311,24 +390,44 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 			themeDisplay, contextObjects, ddmTemplate.getScript(), language);
 	}
 
+	private void _addStaticClassSupportFTL(
+		Map<String, Object> contextObjects, String variableName,
+		Class<?> variableClass) {
+
+		try {
+			BeansWrapper beansWrapper = BeansWrapper.getDefaultInstance();
+
+			TemplateHashModel templateHashModel =
+				beansWrapper.getStaticModels();
+
+			TemplateModel templateModel = templateHashModel.get(
+				variableClass.getCanonicalName());
+
+			contextObjects.put(variableName, templateModel);
+		}
+		catch (TemplateModelException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Variable " + variableName + " registration fail", e);
+			}
+		}
+	}
+
+	private void _addStaticClassSupportVM(
+		Map<String, Object> contextObjects, String variableName,
+		Class<?> variableClass) {
+
+		contextObjects.put(variableName, variableClass);
+	}
+
 	private void _addTaglibSupportFTL(
-			Map<String, Object> contextObjects, PageContext pageContext)
+			Map<String, Object> contextObjects, HttpServletRequest request,
+			HttpServletResponse response)
 		throws Exception {
 
 		// FreeMarker servlet application
 
-		final Servlet servlet = (Servlet)pageContext.getPage();
-
-		GenericServlet genericServlet = null;
-
-		if (servlet instanceof GenericServlet) {
-			genericServlet = (GenericServlet)servlet;
-		}
-		else {
-			genericServlet = new GenericServletWrapper(servlet);
-
-			genericServlet.init(pageContext.getServletConfig());
-		}
+		GenericServlet genericServlet = new JSPSupportServlet(
+			request.getServletContext());
 
 		ServletContextHashModel servletContextHashModel =
 			new ServletContextHashModel(
@@ -339,11 +438,6 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 			servletContextHashModel);
 
 		// FreeMarker servlet request
-
-		HttpServletRequest request =
-			(HttpServletRequest)pageContext.getRequest();
-		HttpServletResponse response =
-			(HttpServletResponse)pageContext.getResponse();
 
 		HttpRequestHashModel requestHashModel = new HttpRequestHashModel(
 			request, response, ObjectWrapper.DEFAULT_WRAPPER);
@@ -356,7 +450,7 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 
 		TemplateHashModel taglibLiferayHash =
 			FreeMarkerTaglibFactoryUtil.createTaglibFactory(
-				pageContext.getServletContext());
+				request.getServletContext());
 
 		contextObjects.put(
 			PortletDisplayTemplateConstants.TAGLIB_LIFERAY_HASH,
@@ -364,11 +458,12 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 	}
 
 	private void _addTaglibSupportVM(
-		Map<String, Object> contextObjects, PageContext pageContext) {
+		Map<String, Object> contextObjects, HttpServletRequest request,
+		HttpServletResponse response) {
 
 		contextObjects.put(
 			PortletDisplayTemplateConstants.TAGLIB_LIFERAY,
-			_getVelocityTaglib(pageContext));
+			_getVelocityTaglib(request, response));
 	}
 
 	private Map<String, Object> _getPortletPreferences(
@@ -386,7 +481,7 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 		for (Map.Entry<String, String[]> entry : map.entrySet()) {
 			String[] values = entry.getValue();
 
-			if ((values == null) || (values.length == 0)) {
+			if (ArrayUtil.isEmpty(values)) {
 				continue;
 			}
 
@@ -402,29 +497,30 @@ public class PortletDisplayTemplateImpl implements PortletDisplayTemplate {
 		return contextObjects;
 	}
 
-	private VelocityTaglib _getVelocityTaglib(PageContext pageContext) {
-		HttpServletRequest request =
-			(HttpServletRequest)pageContext.getRequest();
+	private VelocityTaglib _getVelocityTaglib(
+		HttpServletRequest request, HttpServletResponse response) {
 
 		HttpSession session = request.getSession();
 
 		ServletContext servletContext = session.getServletContext();
 
-		HttpServletResponse response =
-			(HttpServletResponse)pageContext.getResponse();
+		try {
+			VelocityTaglib velocityTaglib = new VelocityTaglibImpl(
+				servletContext, request,
+				new PipingServletResponse(response, response.getWriter()),
+				null);
 
-		VelocityTaglib velocityTaglib = new VelocityTaglibImpl(
-			servletContext, request,
-			new PipingServletResponse(response, pageContext.getOut()),
-			pageContext, null);
-
-		return velocityTaglib;
+			return velocityTaglib;
+		}
+		catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(
 		PortletDisplayTemplateImpl.class);
 
 	private Transformer _transformer = new Transformer(
-		PropsKeys.DYNAMIC_DATA_LISTS_ERROR_TEMPLATE, false);
+		PropsKeys.DYNAMIC_DATA_LISTS_ERROR_TEMPLATE, true);
 
 }

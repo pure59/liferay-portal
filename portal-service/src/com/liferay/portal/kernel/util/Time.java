@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -157,7 +157,7 @@ public class Time {
 			}
 		}
 
-		if (x > 1) {
+		if ((x == 0) || (x > 1)) {
 			s += "s";
 		}
 
@@ -166,6 +166,12 @@ public class Time {
 
 	public static String getDuration(long milliseconds) {
 		return getSimpleDate(new Date(milliseconds), DURATION_FORMAT);
+	}
+
+	public static String getRelativeTimeDescription(
+		Date date, Locale locale, TimeZone timeZone) {
+
+		return getRelativeTimeDescription(date.getTime(), locale, timeZone);
 	}
 
 	public static String getRelativeTimeDescription(
@@ -183,18 +189,19 @@ public class Time {
 		}
 		else if (millisAgo < Time.HOUR) {
 			return LanguageUtil.format(
-				locale, "x-minutes-ago", (millisAgo / Time.MINUTE));
+				locale, "x-minutes-ago", (millisAgo / Time.MINUTE), false);
 		}
 		else if ((millisAgo / Time.HOUR) == 1) {
 			return LanguageUtil.get(locale, "about-an-hour-ago");
 		}
 		else if ((millisAgo < Time.DAY) || (daysBetween == 0)) {
 			return LanguageUtil.format(
-				locale, "x-hours-ago", (millisAgo / Time.HOUR));
+				locale, "x-hours-ago", (millisAgo / Time.HOUR), false);
 		}
 		else if (daysBetween == 1) {
 			return LanguageUtil.format(
-				locale, "yesterday-at-x", timeFormat.format(milliseconds));
+				locale, "yesterday-at-x", timeFormat.format(milliseconds),
+				false);
 		}
 
 		Format dateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat(

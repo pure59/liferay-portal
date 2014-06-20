@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -56,20 +56,20 @@ else if (parentOrganizationId > 0) {
 </aui:nav-bar>
 
 <div id="breadcrumb">
-	<liferay-ui:breadcrumb showCurrentGroup="<%= false %>" showCurrentPortlet="<%= false %>" showGuestGroup="<%= false %>" showLayout="<%= false %>" showPortletBreadcrumb="<%= true %>" />
+	<liferay-ui:breadcrumb showCurrentGroup="<%= false %>" showGuestGroup="<%= false %>" showLayout="<%= false %>" showPortletBreadcrumb="<%= true %>" />
 </div>
 
 <%
 String headerTitle = null;
 
 if (organization != null) {
-	headerTitle = LanguageUtil.format(pageContext, "edit-x", organization.getName());
+	headerTitle = LanguageUtil.format(request, "edit-x", organization.getName(), false);
 }
 else if (Validator.isNotNull(type)) {
-	headerTitle = LanguageUtil.format(pageContext, "add-x", type);
+	headerTitle = LanguageUtil.format(request, "add-x", type, false);
 }
 else {
-	headerTitle = LanguageUtil.get(pageContext, "add-organization");
+	headerTitle = LanguageUtil.get(request, "add-organization");
 }
 %>
 
@@ -85,6 +85,7 @@ else {
 
 <portlet:renderURL var="editOrganizationRenderURL">
 	<portlet:param name="struts_action" value="/users_admin/edit_organization" />
+	<portlet:param name="backURL" value="<%= backURL %>" />
 </portlet:renderURL>
 
 <aui:form action="<%= editOrganizationActionURL %>" method="post" name="fm">

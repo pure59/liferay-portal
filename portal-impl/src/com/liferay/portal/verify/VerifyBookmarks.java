@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,6 +16,7 @@ package com.liferay.portal.verify;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.util.PortalInstances;
 import com.liferay.portlet.bookmarks.model.BookmarksEntry;
 import com.liferay.portlet.bookmarks.model.BookmarksFolder;
 import com.liferay.portlet.bookmarks.service.BookmarksEntryLocalServiceUtil;
@@ -33,6 +34,7 @@ public class VerifyBookmarks extends VerifyProcess {
 	protected void doVerify() throws Exception {
 		updateEntryAssets();
 		updateFolderAssets();
+		verifyTree();
 	}
 
 	protected void updateEntryAssets() throws Exception {
@@ -88,6 +90,15 @@ public class VerifyBookmarks extends VerifyProcess {
 
 		if (_log.isDebugEnabled()) {
 			_log.debug("Assets verified for folders");
+		}
+	}
+
+	protected void verifyTree() throws Exception {
+		long[] companyIds = PortalInstances.getCompanyIdsBySQL();
+
+		for (long companyId : companyIds) {
+			BookmarksEntryLocalServiceUtil.rebuildTree(companyId);
+			BookmarksFolderLocalServiceUtil.rebuildTree(companyId);
 		}
 	}
 

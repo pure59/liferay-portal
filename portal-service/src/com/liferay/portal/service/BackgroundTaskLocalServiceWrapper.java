@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link BackgroundTaskLocalService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see BackgroundTaskLocalService
  * @generated
  */
+@ProviderType
 public class BackgroundTaskLocalServiceWrapper
 	implements BackgroundTaskLocalService,
 		ServiceWrapper<BackgroundTaskLocalService> {
@@ -34,12 +37,10 @@ public class BackgroundTaskLocalServiceWrapper
 	*
 	* @param backgroundTask the background task
 	* @return the background task that was added
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.BackgroundTask addBackgroundTask(
-		com.liferay.portal.model.BackgroundTask backgroundTask)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.BackgroundTask backgroundTask) {
 		return _backgroundTaskLocalService.addBackgroundTask(backgroundTask);
 	}
 
@@ -61,13 +62,11 @@ public class BackgroundTaskLocalServiceWrapper
 	* @param backgroundTaskId the primary key of the background task
 	* @return the background task that was removed
 	* @throws PortalException if a background task with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.BackgroundTask deleteBackgroundTask(
 		long backgroundTaskId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _backgroundTaskLocalService.deleteBackgroundTask(backgroundTaskId);
 	}
 
@@ -77,13 +76,11 @@ public class BackgroundTaskLocalServiceWrapper
 	* @param backgroundTask the background task
 	* @return the background task that was removed
 	* @throws PortalException
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.BackgroundTask deleteBackgroundTask(
 		com.liferay.portal.model.BackgroundTask backgroundTask)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _backgroundTaskLocalService.deleteBackgroundTask(backgroundTask);
 	}
 
@@ -97,13 +94,11 @@ public class BackgroundTaskLocalServiceWrapper
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _backgroundTaskLocalService.dynamicQuery(dynamicQuery);
 	}
 
@@ -118,13 +113,12 @@ public class BackgroundTaskLocalServiceWrapper
 	* @param start the lower bound of the range of model instances
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @return the range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		int end) {
 		return _backgroundTaskLocalService.dynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -140,15 +134,13 @@ public class BackgroundTaskLocalServiceWrapper
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return _backgroundTaskLocalService.dynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -158,12 +150,10 @@ public class BackgroundTaskLocalServiceWrapper
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public long dynamicQueryCount(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _backgroundTaskLocalService.dynamicQueryCount(dynamicQuery);
 	}
 
@@ -173,21 +163,18 @@ public class BackgroundTaskLocalServiceWrapper
 	* @param dynamicQuery the dynamic query
 	* @param projection the projection to apply to the query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public long dynamicQueryCount(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
-		com.liferay.portal.kernel.dao.orm.Projection projection)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.Projection projection) {
 		return _backgroundTaskLocalService.dynamicQueryCount(dynamicQuery,
 			projection);
 	}
 
 	@Override
 	public com.liferay.portal.model.BackgroundTask fetchBackgroundTask(
-		long backgroundTaskId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long backgroundTaskId) {
 		return _backgroundTaskLocalService.fetchBackgroundTask(backgroundTaskId);
 	}
 
@@ -197,21 +184,33 @@ public class BackgroundTaskLocalServiceWrapper
 	* @param backgroundTaskId the primary key of the background task
 	* @return the background task
 	* @throws PortalException if a background task with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.BackgroundTask getBackgroundTask(
 		long backgroundTaskId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _backgroundTaskLocalService.getBackgroundTask(backgroundTaskId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
+		return _backgroundTaskLocalService.getActionableDynamicQuery();
+	}
+
+	/**
+	* @throws PortalException
+	*/
+	@Override
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _backgroundTaskLocalService.deletePersistedModel(persistedModel);
 	}
 
 	@Override
 	public com.liferay.portal.model.PersistedModel getPersistedModel(
 		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _backgroundTaskLocalService.getPersistedModel(primaryKeyObj);
 	}
 
@@ -225,12 +224,10 @@ public class BackgroundTaskLocalServiceWrapper
 	* @param start the lower bound of the range of background tasks
 	* @param end the upper bound of the range of background tasks (not inclusive)
 	* @return the range of background tasks
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return _backgroundTaskLocalService.getBackgroundTasks(start, end);
 	}
 
@@ -238,11 +235,9 @@ public class BackgroundTaskLocalServiceWrapper
 	* Returns the number of background tasks.
 	*
 	* @return the number of background tasks
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public int getBackgroundTasksCount()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getBackgroundTasksCount() {
 		return _backgroundTaskLocalService.getBackgroundTasksCount();
 	}
 
@@ -251,12 +246,10 @@ public class BackgroundTaskLocalServiceWrapper
 	*
 	* @param backgroundTask the background task
 	* @return the background task that was updated
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.BackgroundTask updateBackgroundTask(
-		com.liferay.portal.model.BackgroundTask backgroundTask)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.BackgroundTask backgroundTask) {
 		return _backgroundTaskLocalService.updateBackgroundTask(backgroundTask);
 	}
 
@@ -287,8 +280,7 @@ public class BackgroundTaskLocalServiceWrapper
 		java.lang.Class<?> taskExecutorClass,
 		java.util.Map<java.lang.String, java.io.Serializable> taskContextMap,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _backgroundTaskLocalService.addBackgroundTask(userId, groupId,
 			name, servletContextNames, taskExecutorClass, taskContextMap,
 			serviceContext);
@@ -297,8 +289,7 @@ public class BackgroundTaskLocalServiceWrapper
 	@Override
 	public void addBackgroundTaskAttachment(long userId, long backgroundTaskId,
 		java.lang.String fileName, java.io.File file)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_backgroundTaskLocalService.addBackgroundTaskAttachment(userId,
 			backgroundTaskId, fileName, file);
 	}
@@ -306,8 +297,7 @@ public class BackgroundTaskLocalServiceWrapper
 	@Override
 	public void addBackgroundTaskAttachment(long userId, long backgroundTaskId,
 		java.lang.String fileName, java.io.InputStream inputStream)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_backgroundTaskLocalService.addBackgroundTaskAttachment(userId,
 			backgroundTaskId, fileName, inputStream);
 	}
@@ -316,8 +306,7 @@ public class BackgroundTaskLocalServiceWrapper
 	public com.liferay.portal.model.BackgroundTask amendBackgroundTask(
 		long backgroundTaskId,
 		java.util.Map<java.lang.String, java.io.Serializable> taskContextMap,
-		int status, com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int status, com.liferay.portal.service.ServiceContext serviceContext) {
 		return _backgroundTaskLocalService.amendBackgroundTask(backgroundTaskId,
 			taskContextMap, status, serviceContext);
 	}
@@ -327,36 +316,46 @@ public class BackgroundTaskLocalServiceWrapper
 		long backgroundTaskId,
 		java.util.Map<java.lang.String, java.io.Serializable> taskContextMap,
 		int status, java.lang.String statusMessage,
-		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.service.ServiceContext serviceContext) {
 		return _backgroundTaskLocalService.amendBackgroundTask(backgroundTaskId,
 			taskContextMap, status, statusMessage, serviceContext);
 	}
 
 	@Override
-	public void cleanUpBackgroundTasks()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void cleanUpBackgroundTask(
+		com.liferay.portal.model.BackgroundTask backgroundTask, int status) {
+		_backgroundTaskLocalService.cleanUpBackgroundTask(backgroundTask, status);
+	}
+
+	@Override
+	public void cleanUpBackgroundTasks() {
 		_backgroundTaskLocalService.cleanUpBackgroundTasks();
 	}
 
 	@Override
 	public void deleteCompanyBackgroundTasks(long companyId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_backgroundTaskLocalService.deleteCompanyBackgroundTasks(companyId);
 	}
 
 	@Override
 	public void deleteGroupBackgroundTasks(long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_backgroundTaskLocalService.deleteGroupBackgroundTasks(groupId);
 	}
 
 	@Override
 	public com.liferay.portal.model.BackgroundTask fetchFirstBackgroundTask(
-		java.lang.String taskExecutorClassName, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, java.lang.String taskExecutorClassName,
+		boolean completed,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return _backgroundTaskLocalService.fetchFirstBackgroundTask(groupId,
+			taskExecutorClassName, completed, orderByComparator);
+	}
+
+	@Override
+	public com.liferay.portal.model.BackgroundTask fetchFirstBackgroundTask(
+		java.lang.String taskExecutorClassName, int status) {
 		return _backgroundTaskLocalService.fetchFirstBackgroundTask(taskExecutorClassName,
 			status);
 	}
@@ -364,31 +363,27 @@ public class BackgroundTaskLocalServiceWrapper
 	@Override
 	public com.liferay.portal.model.BackgroundTask fetchFirstBackgroundTask(
 		java.lang.String taskExecutorClassName, int status,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return _backgroundTaskLocalService.fetchFirstBackgroundTask(taskExecutorClassName,
 			status, orderByComparator);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
-		long groupId, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, int status) {
 		return _backgroundTaskLocalService.getBackgroundTasks(groupId, status);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
-		long groupId, java.lang.String taskExecutorClassName)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, java.lang.String taskExecutorClassName) {
 		return _backgroundTaskLocalService.getBackgroundTasks(groupId,
 			taskExecutorClassName);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
-		long groupId, java.lang.String taskExecutorClassName, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, java.lang.String taskExecutorClassName, int status) {
 		return _backgroundTaskLocalService.getBackgroundTasks(groupId,
 			taskExecutorClassName, status);
 	}
@@ -397,8 +392,7 @@ public class BackgroundTaskLocalServiceWrapper
 	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
 		long groupId, java.lang.String taskExecutorClassName, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return _backgroundTaskLocalService.getBackgroundTasks(groupId,
 			taskExecutorClassName, start, end, orderByComparator);
 	}
@@ -407,16 +401,37 @@ public class BackgroundTaskLocalServiceWrapper
 	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
 		long groupId, java.lang.String name,
 		java.lang.String taskExecutorClassName, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return _backgroundTaskLocalService.getBackgroundTasks(groupId, name,
 			taskExecutorClassName, start, end, orderByComparator);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
-		java.lang.String taskExecutorClassName, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, java.lang.String[] taskExecutorClassNames) {
+		return _backgroundTaskLocalService.getBackgroundTasks(groupId,
+			taskExecutorClassNames);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
+		long groupId, java.lang.String[] taskExecutorClassNames, int status) {
+		return _backgroundTaskLocalService.getBackgroundTasks(groupId,
+			taskExecutorClassNames, status);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
+		long groupId, java.lang.String[] taskExecutorClassNames, int start,
+		int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return _backgroundTaskLocalService.getBackgroundTasks(groupId,
+			taskExecutorClassNames, start, end, orderByComparator);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
+		java.lang.String taskExecutorClassName, int status) {
 		return _backgroundTaskLocalService.getBackgroundTasks(taskExecutorClassName,
 			status);
 	}
@@ -424,26 +439,67 @@ public class BackgroundTaskLocalServiceWrapper
 	@Override
 	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
 		java.lang.String taskExecutorClassName, int status, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return _backgroundTaskLocalService.getBackgroundTasks(taskExecutorClassName,
 			status, start, end, orderByComparator);
 	}
 
 	@Override
+	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
+		java.lang.String[] taskExecutorClassNames, int status) {
+		return _backgroundTaskLocalService.getBackgroundTasks(taskExecutorClassNames,
+			status);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portal.model.BackgroundTask> getBackgroundTasks(
+		java.lang.String[] taskExecutorClassNames, int status, int start,
+		int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return _backgroundTaskLocalService.getBackgroundTasks(taskExecutorClassNames,
+			status, start, end, orderByComparator);
+	}
+
+	@Override
 	public int getBackgroundTasksCount(long groupId,
-		java.lang.String taskExecutorClassName)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String taskExecutorClassName) {
 		return _backgroundTaskLocalService.getBackgroundTasksCount(groupId,
 			taskExecutorClassName);
 	}
 
 	@Override
+	public int getBackgroundTasksCount(long groupId,
+		java.lang.String taskExecutorClassName, boolean completed) {
+		return _backgroundTaskLocalService.getBackgroundTasksCount(groupId,
+			taskExecutorClassName, completed);
+	}
+
+	@Override
 	public int getBackgroundTasksCount(long groupId, java.lang.String name,
-		java.lang.String taskExecutorClassName)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String taskExecutorClassName) {
 		return _backgroundTaskLocalService.getBackgroundTasksCount(groupId,
 			name, taskExecutorClassName);
+	}
+
+	@Override
+	public int getBackgroundTasksCount(long groupId, java.lang.String name,
+		java.lang.String taskExecutorClassName, boolean completed) {
+		return _backgroundTaskLocalService.getBackgroundTasksCount(groupId,
+			name, taskExecutorClassName, completed);
+	}
+
+	@Override
+	public int getBackgroundTasksCount(long groupId,
+		java.lang.String[] taskExecutorClassNames) {
+		return _backgroundTaskLocalService.getBackgroundTasksCount(groupId,
+			taskExecutorClassNames);
+	}
+
+	@Override
+	public int getBackgroundTasksCount(long groupId,
+		java.lang.String[] taskExecutorClassNames, boolean completed) {
+		return _backgroundTaskLocalService.getBackgroundTasksCount(groupId,
+			taskExecutorClassNames, completed);
 	}
 
 	@Override
@@ -452,14 +508,19 @@ public class BackgroundTaskLocalServiceWrapper
 	}
 
 	@Override
-	public void resumeBackgroundTask(long backgroundTaskId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void resumeBackgroundTask(long backgroundTaskId) {
 		_backgroundTaskLocalService.resumeBackgroundTask(backgroundTaskId);
+	}
+
+	@Override
+	public void triggerBackgroundTask(long backgroundTaskId) {
+		_backgroundTaskLocalService.triggerBackgroundTask(backgroundTaskId);
 	}
 
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public BackgroundTaskLocalService getWrappedBackgroundTaskLocalService() {
 		return _backgroundTaskLocalService;
 	}
@@ -467,6 +528,7 @@ public class BackgroundTaskLocalServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedBackgroundTaskLocalService(
 		BackgroundTaskLocalService backgroundTaskLocalService) {
 		_backgroundTaskLocalService = backgroundTaskLocalService;

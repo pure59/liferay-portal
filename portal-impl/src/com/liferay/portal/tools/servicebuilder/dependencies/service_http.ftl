@@ -42,6 +42,11 @@ import com.liferay.portal.service.http.TunnelUtil;
 </#if>
  * @generated
  */
+
+<#if classDeprecated>
+	@Deprecated
+</#if>
+
 public class ${entity.name}ServiceHttp {
 
 	<#assign hasMethods = false>
@@ -60,23 +65,18 @@ public class ${entity.name}ServiceHttp {
 			</#list>
 
 			)
-			throws
 
-			<#if !method.exceptions?seq_contains("com.liferay.portal.kernel.exception.SystemException")>
-				com.liferay.portal.kernel.exception.SystemException
+			<#if method.exceptions?size gt 0>
+				throws
 
-				<#if method.exceptions?size gt 0>
-					,
-				</#if>
+				<#list method.exceptions as exception>
+					${exception.value}
+
+					<#if exception_has_next>
+						,
+					</#if>
+				</#list>
 			</#if>
-
-			<#list method.exceptions as exception>
-				${exception.value}
-
-				<#if exception_has_next>
-					,
-				</#if>
-			</#list>
 
 			{
 				try {

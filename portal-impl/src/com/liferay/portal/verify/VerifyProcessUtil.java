@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -33,7 +33,7 @@ import com.liferay.portal.util.PropsValues;
 public class VerifyProcessUtil {
 
 	public static boolean verifyProcess(
-			boolean ranUpgradeProcess, boolean verified)
+			boolean ranUpgradeProcess, boolean newBuildNumber, boolean verified)
 		throws VerifyException {
 
 		int verifyFrequency = GetterUtil.getInteger(
@@ -41,7 +41,7 @@ public class VerifyProcessUtil {
 
 		if ((verifyFrequency == VerifyProcess.ALWAYS) ||
 			((verifyFrequency == VerifyProcess.ONCE) && !verified) ||
-			ranUpgradeProcess) {
+			ranUpgradeProcess || newBuildNumber) {
 
 			return _verifyProcess(ranUpgradeProcess);
 		}
@@ -100,8 +100,9 @@ public class VerifyProcessUtil {
 		}
 
 		try {
-			VerifyProcess verifyProcess = (VerifyProcess)Class.forName(
-				verifyProcessClassName).newInstance();
+			Class<?> clazz = Class.forName(verifyProcessClassName);
+
+			VerifyProcess verifyProcess = (VerifyProcess)clazz.newInstance();
 
 			if (_log.isDebugEnabled()) {
 				_log.debug("Running verification " + verifyProcessClassName);

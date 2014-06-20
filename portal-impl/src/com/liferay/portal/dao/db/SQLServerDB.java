@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -133,14 +133,17 @@ public class SQLServerDB extends BaseDB {
 		sb.append("\n");
 		sb.append("go\n");
 		sb.append("\n");
-		sb.append("use ");
-		sb.append(databaseName);
-		sb.append(";\n\n");
-		sb.append(getCreateTablesContent(sqlDir, suffix));
-		sb.append("\n\n");
-		sb.append(readFile(sqlDir + "/indexes/indexes-sql-server.sql"));
-		sb.append("\n\n");
-		sb.append(readFile(sqlDir + "/sequences/sequences-sql-server.sql"));
+
+		if (population != BARE) {
+			sb.append("use ");
+			sb.append(databaseName);
+			sb.append(";\n\n");
+			sb.append(getCreateTablesContent(sqlDir, suffix));
+			sb.append("\n\n");
+			sb.append(readFile(sqlDir + "/indexes/indexes-sql-server.sql"));
+			sb.append("\n\n");
+			sb.append(readFile(sqlDir + "/sequences/sequences-sql-server.sql"));
+		}
 
 		return sb.toString();
 	}

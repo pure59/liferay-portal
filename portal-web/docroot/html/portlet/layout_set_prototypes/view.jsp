@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -24,9 +24,7 @@ portletURL.setParameter("struts_action", "/layout_set_prototypes/view");
 
 <liferay-ui:error exception="<%= RequiredLayoutSetPrototypeException.class %>" message="you-cannot-delete-site-templates-that-are-used-by-a-site" />
 
-<liferay-util:include page="/html/portlet/layout_set_prototypes/toolbar.jsp">
-	<liferay-util:param name="toolbarItem" value="view-all" />
-</liferay-util:include>
+<liferay-util:include page="/html/portlet/layout_set_prototypes/toolbar.jsp" />
 
 <aui:form action="<%= portletURL.toString() %>" method="get" name="fm">
 	<liferay-portlet:renderURLParams varImpl="portletURL" />
@@ -34,14 +32,15 @@ portletURL.setParameter("struts_action", "/layout_set_prototypes/view");
 	<aui:input name="redirect" type="hidden" value="<%= portletURL.toString() %>" />
 
 	<liferay-ui:search-container
+		emptyResultsMessage="no-site-templates-were-found"
 		headerNames="name"
-		searchContainer='<%= new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, portletURL, null, LanguageUtil.get(pageContext, "no-site-templates-were-found")) %>'
+		iteratorURL="<%= portletURL %>"
+		total="<%= LayoutSetPrototypeLocalServiceUtil.searchCount(company.getCompanyId(), null) %>"
 	>
 		<aui:input name="deleteLayoutSetPrototypesIds" type="hidden" />
 
 		<liferay-ui:search-container-results
 			results="<%= LayoutSetPrototypeLocalServiceUtil.search(company.getCompanyId(), null, searchContainer.getStart(), searchContainer.getEnd(), null) %>"
-			total="<%= LayoutSetPrototypeLocalServiceUtil.searchCount(company.getCompanyId(), null) %>"
 		/>
 
 		<liferay-ui:search-container-row
@@ -50,12 +49,20 @@ portletURL.setParameter("struts_action", "/layout_set_prototypes/view");
 			keyProperty="layoutSetPrototypeId"
 			modelVar="layoutSetPrototype"
 		>
-			<liferay-portlet:renderURL varImpl="rowURL">
-				<portlet:param name="struts_action" value="/layout_set_prototypes/edit_layout_set_prototype" />
-				<portlet:param name="redirect" value="<%= searchContainer.getIteratorURL().toString() %>" />
-				<portlet:param name="backURL" value="<%= searchContainer.getIteratorURL().toString() %>" />
-				<portlet:param name="layoutSetPrototypeId" value="<%= String.valueOf(layoutSetPrototype.getLayoutSetPrototypeId()) %>" />
-			</liferay-portlet:renderURL>
+
+			<%
+			String rowURL = null;
+
+			ThemeDisplay siteThemeDisplay = (ThemeDisplay)themeDisplay.clone();
+
+			siteThemeDisplay.setScopeGroupId(layoutSetPrototype.getGroupId());
+
+			PortletURL siteAdministrationURL = PortalUtil.getSiteAdministrationURL(renderResponse, siteThemeDisplay);
+
+			if (siteAdministrationURL != null) {
+				rowURL = siteAdministrationURL.toString();
+			}
+			%>
 
 			<liferay-ui:search-container-column-text
 				name="name"
@@ -70,21 +77,26 @@ portletURL.setParameter("struts_action", "/layout_set_prototypes/view");
 
 				<c:if test="<%= mergeFailCount > PropsValues.LAYOUT_SET_PROTOTYPE_MERGE_FAIL_THRESHOLD %>">
 					<liferay-ui:icon
-						image="../messages/alert"
-						message='<%= LanguageUtil.format(pageContext, "the-propagation-of-changes-from-the-x-has-been-disabled-temporarily-after-x-errors", new Object[] {mergeFailCount, "site-template"}) %>'
+						iconCssClass="icon-warning-sign"
+						message='<%= LanguageUtil.format(request, "the-propagation-of-changes-from-the-x-has-been-disabled-temporarily-after-x-errors", new Object[] {mergeFailCount, LanguageUtil.get(request, "site-template")}, false) %>'
 					/>
 				</c:if>
 			</liferay-ui:search-container-column-text>
 
 			<liferay-ui:search-container-column-text
-				href="<%= rowURL %>"
+				name="description"
+				value="<%= layoutSetPrototype.getDescription(locale) %>"
+			/>
+
+			<liferay-ui:search-container-column-text
 				name="active"
 			>
-				<%= LanguageUtil.get(pageContext, layoutSetPrototype.isActive()? "yes" : "no") %>
+				<%= LanguageUtil.get(request, layoutSetPrototype.isActive()? "yes" : "no") %>
 			</liferay-ui:search-container-column-text>
 
 			<liferay-ui:search-container-column-jsp
 				align="right"
+				cssClass="entry-action"
 				path="/html/portlet/layout_set_prototypes/layout_set_prototype_action.jsp"
 			/>
 		</liferay-ui:search-container-row>

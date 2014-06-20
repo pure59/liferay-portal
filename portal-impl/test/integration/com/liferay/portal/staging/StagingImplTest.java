@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,34 +17,36 @@ package com.liferay.portal.staging;
 import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
-import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.ServiceTestUtil;
+import com.liferay.portal.service.StagingLocalServiceUtil;
+import com.liferay.portal.test.DeleteAfterTestRun;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.test.Sync;
 import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
-import com.liferay.portal.test.TransactionalExecutionTestListener;
-import com.liferay.portal.util.GroupTestUtil;
-import com.liferay.portal.util.LayoutTestUtil;
 import com.liferay.portal.util.PortletKeys;
-import com.liferay.portal.util.TestPropsValues;
+import com.liferay.portal.util.test.GroupTestUtil;
+import com.liferay.portal.util.test.LayoutTestUtil;
+import com.liferay.portal.util.test.ServiceContextTestUtil;
+import com.liferay.portal.util.test.TestPropsValues;
 import com.liferay.portlet.asset.model.AssetCategory;
 import com.liferay.portlet.asset.model.AssetVocabulary;
 import com.liferay.portlet.asset.service.AssetCategoryLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil;
 import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.journal.service.JournalArticleLocalServiceUtil;
-import com.liferay.portlet.journal.util.JournalTestUtil;
+import com.liferay.portlet.journal.util.test.JournalTestUtil;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -53,13 +55,16 @@ import org.junit.runner.RunWith;
  */
 @ExecutionTestListeners(listeners = {
 	MainServletExecutionTestListener.class,
-	SynchronousDestinationExecutionTestListener.class,
-	TransactionalExecutionTestListener.class
+	SynchronousDestinationExecutionTestListener.class
 })
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
 @Sync
-@Transactional
 public class StagingImplTest {
+
+	@Before
+	public void setUp() throws Exception {
+		_group = GroupTestUtil.addGroup();
+	}
 
 	@Test
 	public void testLocalStagingCategories() throws Exception {
@@ -84,8 +89,8 @@ public class StagingImplTest {
 				locale, description.concat(LocaleUtil.toLanguageId(locale)));
 		}
 
-		ServiceContext serviceContext = ServiceTestUtil.getServiceContext(
-			groupId);
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(groupId);
 
 		AssetVocabulary assetVocabulary =
 			AssetVocabularyLocalServiceUtil.addVocabulary(
@@ -101,49 +106,47 @@ public class StagingImplTest {
 			boolean stageJournal, boolean stageCategories)
 		throws Exception {
 
-		Group group = GroupTestUtil.addGroup();
-
-		LayoutTestUtil.addLayout(group.getGroupId(), "Page1");
-		LayoutTestUtil.addLayout(group.getGroupId(), "Page2");
+		LayoutTestUtil.addLayout(_group.getGroupId(), "Page1");
+		LayoutTestUtil.addLayout(_group.getGroupId(), "Page2");
 
 		int initialPagesCount = LayoutLocalServiceUtil.getLayoutsCount(
-			group, false);
+			_group, false);
 
 		// Create content
 
 		AssetCategory assetCategory = addAssetCategory(
-			group.getGroupId(), "Title", "content");
+			_group.getGroupId(), "Title", "content");
 		JournalArticle journalArticle = JournalTestUtil.addArticle(
-			group.getGroupId(), "Title", "content");
+			_group.getGroupId(), "Title", "content");
 
-		ServiceContext serviceContext = ServiceTestUtil.getServiceContext(
-			group.getGroupId());
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(_group.getGroupId());
 
 		Map<String, String[]> parameters = StagingUtil.getStagingParameters();
 
 		parameters.put(
-			PortletDataHandlerKeys.CATEGORIES,
-			new String[] {String.valueOf(stageCategories)});
-		parameters.put(
-			PortletDataHandlerKeys.PORTLET_CONFIGURATION + "_" +
-				PortletKeys.JOURNAL,
+			PortletDataHandlerKeys.PORTLET_CONFIGURATION +
+				StringPool.UNDERLINE + PortletKeys.JOURNAL,
 			new String[] {String.valueOf(stageJournal)});
 		parameters.put(
 			PortletDataHandlerKeys.PORTLET_CONFIGURATION_ALL,
 			new String[] {Boolean.FALSE.toString()});
 		parameters.put(
-			PortletDataHandlerKeys.PORTLET_DATA + "_" + PortletKeys.JOURNAL,
+			PortletDataHandlerKeys.PORTLET_DATA + StringPool.UNDERLINE +
+				PortletKeys.ASSET_CATEGORIES_ADMIN,
+			new String[] {String.valueOf(stageCategories)});
+		parameters.put(
+			PortletDataHandlerKeys.PORTLET_DATA + StringPool.UNDERLINE +
+				PortletKeys.JOURNAL,
 			new String[] {String.valueOf(stageJournal)});
 		parameters.put(
 			PortletDataHandlerKeys.PORTLET_DATA_ALL,
 			new String[] {Boolean.FALSE.toString()});
 		parameters.put(
-			PortletDataHandlerKeys.PORTLET_SETUP + "_" + PortletKeys.JOURNAL,
+			PortletDataHandlerKeys.PORTLET_SETUP + StringPool.UNDERLINE +
+				PortletKeys.JOURNAL,
 			new String[] {String.valueOf(stageJournal)});
 
-		serviceContext.setAttribute(
-			StagingUtil.getStagedPortletId(PortletDataHandlerKeys.CATEGORIES),
-			stageCategories);
 		serviceContext.setAttribute(
 			StagingUtil.getStagedPortletId(PortletKeys.JOURNAL), stageJournal);
 
@@ -154,11 +157,10 @@ public class StagingImplTest {
 
 		// Enable staging
 
-		StagingUtil.enableLocalStaging(
-			TestPropsValues.getUserId(), group, group, false, false,
-			serviceContext);
+		StagingLocalServiceUtil.enableLocalStaging(
+			TestPropsValues.getUserId(), _group, false, false, serviceContext);
 
-		Group stagingGroup = group.getStagingGroup();
+		Group stagingGroup = _group.getStagingGroup();
 
 		Assert.assertNotNull(stagingGroup);
 
@@ -187,14 +189,14 @@ public class StagingImplTest {
 
 		StagingUtil.publishLayouts(
 			TestPropsValues.getUserId(), stagingGroup.getGroupId(),
-			group.getGroupId(), false, parameters, null, null);
+			_group.getGroupId(), false, parameters, null, null);
 
 		// Retrieve content from live after publishing
 
 		assetCategory = AssetCategoryLocalServiceUtil.getCategory(
-			assetCategory.getUuid(), group.getGroupId());
+			assetCategory.getUuid(), _group.getGroupId());
 		journalArticle = JournalArticleLocalServiceUtil.getArticle(
-			group.getGroupId(), journalArticle.getArticleId());
+			_group.getGroupId(), journalArticle.getArticleId());
 
 		if (stageCategories) {
 			for (Locale locale : _locales) {
@@ -205,9 +207,9 @@ public class StagingImplTest {
 		}
 		else {
 			for (Locale locale : _locales) {
-				Assert.assertFalse(
-					assetCategory.getTitle(locale).equals(
-						stagingAssetCategory.getTitle(locale)));
+				Assert.assertNotEquals(
+					assetCategory.getTitle(locale),
+					stagingAssetCategory.getTitle(locale));
 			}
 		}
 
@@ -220,9 +222,9 @@ public class StagingImplTest {
 		}
 		else {
 			for (Locale locale : _locales) {
-				Assert.assertFalse(
-					journalArticle.getTitle(locale).equals(
-						stagingJournalArticle.getTitle(locale)));
+				Assert.assertNotEquals(
+					journalArticle.getTitle(locale),
+					stagingJournalArticle.getTitle(locale));
 			}
 		}
 	}
@@ -241,12 +243,14 @@ public class StagingImplTest {
 			TestPropsValues.getUserId(), category.getCategoryId(),
 			category.getParentCategoryId(), titleMap,
 			category.getDescriptionMap(), category.getVocabularyId(), null,
-			ServiceTestUtil.getServiceContext());
+			ServiceContextTestUtil.getServiceContext());
 	}
 
 	private static Locale[] _locales = {
-		new Locale("en", "US"), new Locale("es", "ES"),
-		new Locale("de", "DE")
+		LocaleUtil.GERMANY, LocaleUtil.SPAIN, LocaleUtil.US
 	};
+
+	@DeleteAfterTestRun
+	private Group _group;
 
 }

@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,18 +21,18 @@ String currentURL = PortalUtil.getCurrentURL(request);
 
 String referer = ParamUtil.getString(request, WebKeys.REFERER, currentURL);
 
-if (referer.equals(themeDisplay.getPathMain() + "/portal/update_password")) {
-	referer = themeDisplay.getPathMain() + "?doAsUserId=" + themeDisplay.getDoAsUserId();
+String ticketKey = ParamUtil.getString(request, "ticketKey");
+
+if (referer.startsWith(themeDisplay.getPathMain() + "/portal/update_password") && Validator.isNotNull(ticketKey)) {
+	referer = themeDisplay.getPathMain();
 }
 
 PasswordPolicy passwordPolicy = user.getPasswordPolicy();
-
-String ticketKey = ParamUtil.getString(request, "ticketKey");
 %>
 
 <c:choose>
 	<c:when test="<%= SessionErrors.contains(request, UserLockoutException.class.getName()) %>">
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			<liferay-ui:message key="this-account-has-been-locked" />
 		</div>
 	</c:when>
@@ -55,7 +55,7 @@ String ticketKey = ParamUtil.getString(request, "ticketKey");
 				UserPasswordException upe = (UserPasswordException)SessionErrors.get(request, UserPasswordException.class.getName());
 				%>
 
-				<div class="alert alert-error">
+				<div class="alert alert-danger">
 					<c:if test="<%= upe.getType() == UserPasswordException.PASSWORD_ALREADY_USED %>">
 						<liferay-ui:message key="that-password-has-already-been-used-please-enter-in-a-different-password" />
 					</c:if>
@@ -69,7 +69,7 @@ String ticketKey = ParamUtil.getString(request, "ticketKey");
 					</c:if>
 
 					<c:if test="<%= upe.getType() == UserPasswordException.PASSWORD_LENGTH %>">
-						<%= LanguageUtil.format(pageContext, "that-password-is-too-short-or-too-long-please-make-sure-your-password-is-between-x-and-512-characters", String.valueOf(passwordPolicy.getMinLength()), false) %>
+						<%= LanguageUtil.format(request, "that-password-is-too-short-or-too-long-please-make-sure-your-password-is-between-x-and-512-characters", String.valueOf(passwordPolicy.getMinLength()), false) %>
 					</c:if>
 
 					<c:if test="<%= upe.getType() == UserPasswordException.PASSWORD_NOT_CHANGEABLE %>">
@@ -85,7 +85,7 @@ String ticketKey = ParamUtil.getString(request, "ticketKey");
 					</c:if>
 
 					<c:if test="<%= upe.getType() == UserPasswordException.PASSWORD_TOO_YOUNG %>">
-						<%= LanguageUtil.format(pageContext, "you-cannot-change-your-password-yet-please-wait-at-least-x-before-changing-your-password-again", LanguageUtil.getTimeDescription(pageContext, passwordPolicy.getMinAge() * 1000), false) %>
+						<%= LanguageUtil.format(request, "you-cannot-change-your-password-yet-please-wait-at-least-x-before-changing-your-password-again", LanguageUtil.getTimeDescription(request, passwordPolicy.getMinAge() * 1000), false) %>
 					</c:if>
 
 					<c:if test="<%= upe.getType() == UserPasswordException.PASSWORDS_DO_NOT_MATCH %>">

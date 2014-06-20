@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,7 @@
 
 package com.liferay.portal.kernel.util;
 
-import java.lang.reflect.Method;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,6 +31,29 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @RunWith(PowerMockRunner.class)
 public class ValidatorTest extends PowerMockito {
+
+	@Test
+	public void testIsContent() throws Exception {
+		Assert.assertTrue(Validator.isContent("Hello World\n\t"));
+		Assert.assertTrue(Validator.isContent("\n\tHello World"));
+		Assert.assertTrue(Validator.isContent("Hello\n\t World"));
+		Assert.assertFalse(Validator.isContent("\t"));
+		Assert.assertFalse(Validator.isContent("\n"));
+		Assert.assertFalse(Validator.isContent("\n\t"));
+	}
+
+	@Test
+	public void testIsDomain() throws Exception {
+
+		// 来锐.com, живот.рс
+
+		String[] validDomains = new String[] {
+			"localhost", "liferay.com", "\u6765\u9510.com",
+			"\u0436\u0438\u0432\u043E\u0442.\u0440\u0441"
+		};
+
+		testIsValidByMethodName("isDomain", validDomains, true);
+	}
 
 	@Test
 	public void testIsFileExtension() throws Exception {
@@ -79,7 +102,7 @@ public class ValidatorTest extends PowerMockito {
 			"test", "liferay.com", "@liferay.com", "test(@liferay.com",
 			"test)@liferay.com", "test,@liferay.com", ".test@liferay.com",
 			"test.@liferay.com", "te..st@liferay.com", "test user@liferay.com",
-			"test@-liferay.com", "test@liferay"
+			"test@-liferay.com", "test@_liferay.com"
 		};
 
 		testValidEmailAddreses(invalidEmailAddresses, false);
@@ -371,7 +394,8 @@ public class ValidatorTest extends PowerMockito {
 			"test-@liferay.com", "test/@liferay.com", "test=@liferay.com",
 			"test?@liferay.com", "test^@liferay.com", "test_@liferay.com",
 			"test`@liferay.com", "test{@liferay.com", "test|@liferay.com",
-			"test{@liferay.com", "test~@liferay.com"
+			"test{@liferay.com", "test~@liferay.com", "test@liferay.com.",
+			"test@liferay"
 		};
 
 		testValidEmailAddreses(validEmailAddresses, true);
@@ -517,6 +541,10 @@ public class ValidatorTest extends PowerMockito {
 			boolean b = Validator.isNull(string);
 
 			Assert.assertEquals(valid, b);
+
+			boolean notB = Validator.isNotNull(string);
+
+			Assert.assertEquals(valid, !notB);
 		}
 	}
 
@@ -524,13 +552,12 @@ public class ValidatorTest extends PowerMockito {
 			String methodName, String[] params, boolean valid)
 		throws Exception {
 
-		Method method = ReflectionUtil.getDeclaredMethod(
-			Validator.class, methodName, String.class);
-
 		for (String param : params) {
-			Boolean b = (Boolean)method.invoke(null, param);
-
-			Assert.assertEquals(valid, b);
+			Assert.assertEquals(
+				valid,
+				ReflectionTestUtil.invoke(
+					Validator.class, methodName, new Class<?>[] {String.class},
+					param));
 		}
 	}
 

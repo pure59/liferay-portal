@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -28,9 +28,7 @@ import com.liferay.portal.util.PropsValues;
 import java.sql.Connection;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.hibernate.engine.SessionFactoryImplementor;
 
@@ -40,10 +38,6 @@ import org.hibernate.engine.SessionFactoryImplementor;
  */
 public class SessionFactoryImpl implements SessionFactory {
 
-	public static List<PortletSessionFactoryImpl> getPortletSessionFactories() {
-		return portletSessionFactories;
-	}
-
 	@Override
 	public void closeSession(Session session) throws ORMException {
 		if ((session != null) &&
@@ -52,10 +46,6 @@ public class SessionFactoryImpl implements SessionFactory {
 			session.flush();
 			session.close();
 		}
-	}
-
-	public void destroy() {
-		portletSessionFactories.clear();
 	}
 
 	@Override
@@ -157,10 +147,6 @@ public class SessionFactoryImpl implements SessionFactory {
 
 		return liferaySession;
 	}
-
-	protected static final List<PortletSessionFactoryImpl>
-		portletSessionFactories =
-			new CopyOnWriteArrayList<PortletSessionFactoryImpl>();
 
 	private static final String[] _PRELOAD_CLASS_NAMES =
 		PropsValues.

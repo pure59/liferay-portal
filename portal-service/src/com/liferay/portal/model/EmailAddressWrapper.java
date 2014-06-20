@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see EmailAddress
  * @generated
  */
+@ProviderType
 public class EmailAddressWrapper implements EmailAddress,
 	ModelWrapper<EmailAddress> {
 	public EmailAddressWrapper(EmailAddress emailAddress) {
@@ -50,6 +53,7 @@ public class EmailAddressWrapper implements EmailAddress,
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
 		attributes.put("emailAddressId", getEmailAddressId());
 		attributes.put("companyId", getCompanyId());
@@ -68,6 +72,12 @@ public class EmailAddressWrapper implements EmailAddress,
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		String uuid = (String)attributes.get("uuid");
 
 		if (uuid != null) {
@@ -162,6 +172,26 @@ public class EmailAddressWrapper implements EmailAddress,
 	}
 
 	/**
+	* Returns the mvcc version of this email address.
+	*
+	* @return the mvcc version of this email address
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _emailAddress.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this email address.
+	*
+	* @param mvccVersion the mvcc version of this email address
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_emailAddress.setMvccVersion(mvccVersion);
+	}
+
+	/**
 	* Returns the uuid of this email address.
 	*
 	* @return the uuid of this email address
@@ -245,11 +275,9 @@ public class EmailAddressWrapper implements EmailAddress,
 	* Returns the user uuid of this email address.
 	*
 	* @return the user uuid of this email address
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _emailAddress.getUserUuid();
 	}
 
@@ -547,15 +575,13 @@ public class EmailAddressWrapper implements EmailAddress,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_emailAddress.persist();
 	}
 
 	@Override
 	public com.liferay.portal.model.ListType getType()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _emailAddress.getType();
 	}
 
@@ -586,6 +612,7 @@ public class EmailAddressWrapper implements EmailAddress,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public EmailAddress getWrappedEmailAddress() {
 		return _emailAddress;
 	}
@@ -593,6 +620,16 @@ public class EmailAddressWrapper implements EmailAddress,
 	@Override
 	public EmailAddress getWrappedModel() {
 		return _emailAddress;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _emailAddress.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _emailAddress.isFinderCacheEnabled();
 	}
 
 	@Override

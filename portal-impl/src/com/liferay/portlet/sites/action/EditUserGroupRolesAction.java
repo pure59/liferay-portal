@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -84,10 +84,10 @@ public class EditUserGroupRolesAction extends PortletAction {
 			Role role = (Role)renderRequest.getAttribute(WebKeys.ROLE);
 
 			if (role != null) {
-				String name = role.getName();
+				String roleName = role.getName();
 
-				if (name.equals(RoleConstants.ORGANIZATION_USER) ||
-					name.equals(RoleConstants.SITE_MEMBER)) {
+				if (roleName.equals(RoleConstants.ORGANIZATION_USER) ||
+					roleName.equals(RoleConstants.SITE_MEMBER)) {
 
 					throw new NoSuchRoleException();
 				}

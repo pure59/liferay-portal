@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.polls.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see PollsChoiceService
  * @generated
  */
+@ProviderType
 public class PollsChoiceServiceWrapper implements PollsChoiceService,
 	ServiceWrapper<PollsChoiceService> {
 	public PollsChoiceServiceWrapper(PollsChoiceService pollsChoiceService) {
@@ -52,6 +55,7 @@ public class PollsChoiceServiceWrapper implements PollsChoiceService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public PollsChoiceService getWrappedPollsChoiceService() {
 		return _pollsChoiceService;
 	}
@@ -59,6 +63,7 @@ public class PollsChoiceServiceWrapper implements PollsChoiceService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedPollsChoiceService(
 		PollsChoiceService pollsChoiceService) {
 		_pollsChoiceService = pollsChoiceService;

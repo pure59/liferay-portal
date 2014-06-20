@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,14 +16,13 @@ package com.liferay.portal.tools;
 
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.NumericalStringComparator;
+import com.liferay.portal.kernel.util.NaturalOrderStringComparator;
 import com.liferay.portal.kernel.util.OSDetector;
 import com.liferay.portal.kernel.util.PropertiesUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.util.InitUtil;
 
 import java.io.File;
 
@@ -42,7 +41,7 @@ import org.apache.tools.ant.DirectoryScanner;
 public class PluginsSummaryBuilder {
 
 	public static void main(String[] args) {
-		InitUtil.initWithSpring();
+		ToolDependencies.wireBasic();
 
 		File pluginsDir = new File(System.getProperty("plugins.dir"));
 
@@ -170,7 +169,7 @@ public class PluginsSummaryBuilder {
 		throws Exception {
 
 		Set<String> ticketIds = new TreeSet<String>(
-			new NumericalStringComparator()
+			new NaturalOrderStringComparator()
 		);
 
 		Runtime runtime = Runtime.getRuntime();
@@ -410,6 +409,12 @@ public class PluginsSummaryBuilder {
 			}
 		}
 
+		File webInfDir = relengChangeLogFile.getParentFile();
+
+		File docrootDir = webInfDir.getParentFile();
+
+		File pluginDir = docrootDir.getParentFile();
+
 		for (int i = 0; i < relengChangeLogEntries.size(); i++) {
 			String relengChangeLogEntry = relengChangeLogEntries.get(i);
 
@@ -427,12 +432,6 @@ public class PluginsSummaryBuilder {
 
 				break;
 			}
-
-			File webInfDir = relengChangeLogFile.getParentFile();
-
-			File docrootDir = webInfDir.getParentFile();
-
-			File pluginDir = docrootDir.getParentFile();
 
 			Set<String> ticketIds = _extractTicketIds(pluginDir, range);
 
@@ -496,8 +495,7 @@ public class PluginsSummaryBuilder {
 		}
 
 		File pluginPackagePropertiesFile = new File(
-			relengChangeLogFile.getParentFile(),
-			"liferay-plugin-package.properties");
+			webInfDir, "liferay-plugin-package.properties");
 
 		String pluginPackagePropertiesContent = FileUtil.read(
 			pluginPackagePropertiesFile);
@@ -522,6 +520,13 @@ public class PluginsSummaryBuilder {
 			pluginPackagePropertiesFile, pluginPackagePropertiesContent);
 
 		FileUtil.write(relengChangeLogFile, sb.toString());
+
+		File relengChangeLogMD5File = new File(
+			webInfDir, "liferay-releng.changelog.md5");
+
+		String md5Checksum = FileUtil.getMD5Checksum(relengChangeLogFile);
+
+		FileUtil.write(relengChangeLogMD5File, md5Checksum);
 	}
 
 	private String _updateRelengPropertiesFile(
@@ -585,7 +590,7 @@ public class PluginsSummaryBuilder {
 		sb.append(value);
 	}
 
-	private static final String[] _TICKET_ID_PREFIXES = {"LPS", "SOS"};
+	private static final String[] _TICKET_ID_PREFIXES = {"LPS", "SOS", "SYNC"};
 
 	private Set<String> _distinctAuthors = new TreeSet<String>();
 	private Set<String> _distinctLicenses = new TreeSet<String>();

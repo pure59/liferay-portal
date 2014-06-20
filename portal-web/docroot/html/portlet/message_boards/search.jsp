@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -55,11 +55,9 @@ String keywords = ParamUtil.getString(request, "keywords");
 		title="search"
 	/>
 
-	<span class="form-search">
-		<aui:input autoFocus="<%= (windowState.equals(WindowState.MAXIMIZED) && !themeDisplay.isFacebook()) %>" inlineField="<%= true %>" label="" name="keywords" size="30" title="search-messages" type="text" value="<%= keywords %>" />
-
-		<aui:button type="submit" value="search" />
-	</span>
+	<div class="form-search">
+		<liferay-ui:input-search autoFocus="<%= (windowState.equals(WindowState.MAXIMIZED) && !themeDisplay.isFacebook()) %>" placeholder='<%= LanguageUtil.get(locale, "keywords") %>' title='<%= LanguageUtil.get(locale, "search-messages") %>' />
+	</div>
 
 	<%
 	PortletURL portletURL = renderResponse.createRenderURL();
@@ -74,7 +72,7 @@ String keywords = ParamUtil.getString(request, "keywords");
 	%>
 
 	<liferay-ui:search-container
-		emptyResultsMessage='<%= LanguageUtil.format(pageContext, "no-messages-were-found-that-matched-the-keywords-x", "<strong>" + HtmlUtil.escape(keywords) + "</strong>") %>'
+		emptyResultsMessage='<%= LanguageUtil.format(request, "no-messages-were-found-that-matched-the-keywords-x", "<strong>" + HtmlUtil.escape(keywords) + "</strong>", false) %>'
 		iteratorURL="<%= portletURL %>"
 	>
 
@@ -94,32 +92,17 @@ String keywords = ParamUtil.getString(request, "keywords");
 			searchContext.setEnd(searchContainer.getEnd());
 			searchContext.setIncludeAttachments(true);
 			searchContext.setKeywords(keywords);
-
-			QueryConfig queryConfig = new QueryConfig();
-
-			queryConfig.setHighlightEnabled(true);
-
-			searchContext.setQueryConfig(queryConfig);
-
 			searchContext.setStart(searchContainer.getStart());
 
 			hits = indexer.search(searchContext);
 
-			total = hits.getLength();
-
-			searchContainer.setTotal(total);
-
-			if (searchContainer.isRecalculateCur()) {
-				searchContext.setStart(searchContainer.getStart());
-				searchContext.setEnd(searchContainer.getEnd());
-
-				hits = indexer.search(searchContext);
-			}
+			searchContainer.setTotal(hits.getLength());
 
 			PortletURL hitURL = renderResponse.createRenderURL();
 
-			pageContext.setAttribute("results", SearchResultUtil.getSearchResults(hits, locale, hitURL));
-			pageContext.setAttribute("total", total);
+			results = SearchResultUtil.getSearchResults(hits, locale, hitURL);
+
+			searchContainer.setResults(results);
 			%>
 
 		</liferay-ui:search-container-results>
@@ -142,14 +125,12 @@ String keywords = ParamUtil.getString(request, "keywords");
 			</portlet:renderURL>
 
 			<liferay-ui:app-view-search-entry
-				containerIcon="../common/conversation"
 				containerName="<%= MBUtil.getAbsolutePath(renderRequest, message.getCategoryId()) %>"
-				containerType='<%= LanguageUtil.get(locale, "category") %>'
-				cssClass='<%= MathUtil.isEven(index) ? "search alt" : "search" %>'
-				description="<%= (summary != null) ? HtmlUtil.escape(summary.getContent()) : StringPool.BLANK %>"
+				cssClass='<%= MathUtil.isEven(index) ? "search" : "search alt" %>'
+				description="<%= (summary != null) ? summary.getContent() : StringPool.BLANK %>"
 				fileEntryTuples="<%= searchResult.getFileEntryTuples() %>"
 				queryTerms="<%= hits.getQueryTerms() %>"
-				title="<%= (summary != null) ? HtmlUtil.escape(summary.getTitle()) : HtmlUtil.escape(message.getSubject()) %>"
+				title="<%= (summary != null) ? summary.getTitle() : message.getSubject() %>"
 				url="<%= rowURL %>"
 			/>
 		</liferay-ui:search-container-row>
@@ -164,5 +145,5 @@ if (breadcrumbsCategoryId > 0) {
 	MBUtil.addPortletBreadcrumbEntries(breadcrumbsCategoryId, request, renderResponse);
 }
 
-PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "search") + ": " + keywords, currentURL);
+PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "search") + ": " + keywords, currentURL);
 %>

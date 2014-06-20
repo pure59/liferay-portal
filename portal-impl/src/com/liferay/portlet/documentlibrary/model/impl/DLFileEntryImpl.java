@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,22 +15,21 @@
 package com.liferay.portlet.documentlibrary.model.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Lock;
 import com.liferay.portal.model.Repository;
 import com.liferay.portal.service.LockLocalServiceUtil;
 import com.liferay.portal.service.RepositoryLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.NoSuchFolderException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
+import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryMetadata;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryType;
 import com.liferay.portlet.documentlibrary.model.DLFileVersion;
@@ -65,16 +64,19 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 	}
 
 	@Override
-	public InputStream getContentStream()
-		throws PortalException, SystemException {
+	public String buildTreePath() throws PortalException {
+		DLFolder dlFolder = getFolder();
 
+		return dlFolder.buildTreePath();
+	}
+
+	@Override
+	public InputStream getContentStream() throws PortalException {
 		return getContentStream(getVersion());
 	}
 
 	@Override
-	public InputStream getContentStream(String version)
-		throws PortalException, SystemException {
-
+	public InputStream getContentStream(String version) throws PortalException {
 		return DLFileEntryServiceUtil.getFileAsStream(
 			getFileEntryId(), version);
 	}
@@ -127,7 +129,7 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 
 	@Override
 	public Map<String, Fields> getFieldsMap(long fileVersionId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		Map<String, Fields> fieldsMap = new HashMap<String, Fields>();
 
@@ -160,36 +162,30 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 	}
 
 	@Override
-	public DLFileVersion getFileVersion()
-		throws PortalException, SystemException {
-
+	public DLFileVersion getFileVersion() throws PortalException {
 		return getFileVersion(getVersion());
 	}
 
 	@Override
-	public DLFileVersion getFileVersion(String version)
-		throws PortalException, SystemException {
-
+	public DLFileVersion getFileVersion(String version) throws PortalException {
 		return DLFileVersionLocalServiceUtil.getFileVersion(
 			getFileEntryId(), version);
 	}
 
 	@Override
-	public List<DLFileVersion> getFileVersions(int status)
-		throws SystemException {
-
+	public List<DLFileVersion> getFileVersions(int status) {
 		return DLFileVersionLocalServiceUtil.getFileVersions(
 			getFileEntryId(), status);
 	}
 
 	@Override
-	public int getFileVersionsCount(int status) throws SystemException {
+	public int getFileVersionsCount(int status) {
 		return DLFileVersionLocalServiceUtil.getFileVersionsCount(
 			getFileEntryId(), status);
 	}
 
 	@Override
-	public DLFolder getFolder() throws PortalException, SystemException {
+	public DLFolder getFolder() throws PortalException {
 		if (getFolderId() <= 0) {
 			return new DLFolderImpl();
 		}
@@ -203,8 +199,13 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 	}
 
 	@Override
+	public String getIconCssClass() {
+		return DLUtil.getFileIconCssClass(getExtension());
+	}
+
+	@Override
 	public DLFileVersion getLatestFileVersion(boolean trusted)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (trusted) {
 			return DLFileVersionLocalServiceUtil.getLatestFileVersion(
@@ -251,32 +252,25 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 
 	@Override
 	public StagedModelType getStagedModelType() {
-		return new StagedModelType(FileEntry.class);
+		return new StagedModelType(DLFileEntryConstants.getClassName());
 	}
 
 	@Override
-	public DLFolder getTrashContainer()
-		throws PortalException, SystemException {
-
-		DLFolder dlFolder = null;
-
+	public int getStatus() {
 		try {
-			dlFolder = getFolder();
-		}
-		catch (NoSuchFolderException nsfe) {
-			return null;
-		}
+			DLFileVersion dlFileVersion = getFileVersion();
 
-		if (dlFolder.isInTrash()) {
-			return dlFolder;
+			return dlFileVersion.getStatus();
 		}
-
-		return dlFolder.getTrashContainer();
+		catch (Exception e) {
+			return WorkflowConstants.STATUS_APPROVED;
+		}
 	}
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link DLFileVersion#getUserId()}
 	 */
+	@Deprecated
 	@Override
 	public long getVersionUserId() {
 		long versionUserId = 0;
@@ -296,6 +290,7 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link DLFileVersion#getUserName()}
 	 */
+	@Deprecated
 	@Override
 	public String getVersionUserName() {
 		String versionUserName = StringPool.BLANK;
@@ -315,6 +310,7 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link DLFileVersion#getUserUuid()}
 	 */
+	@Deprecated
 	@Override
 	public String getVersionUserUuid() {
 		String versionUserUuid = StringPool.BLANK;
@@ -375,10 +371,8 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 	}
 
 	@Override
-	public boolean isInTrashContainer()
-		throws PortalException, SystemException {
-
-		if (getTrashContainer() != null) {
+	public boolean isInTrash() {
+		if (getStatus() == WorkflowConstants.STATUS_IN_TRASH) {
 			return true;
 		}
 		else {

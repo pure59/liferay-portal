@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,9 @@
 
 package com.liferay.portal.tools.sourceformatter;
 
+import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Tuple;
 import com.liferay.portal.kernel.util.UniqueList;
 
 import java.util.ArrayList;
@@ -27,7 +29,10 @@ public class SourceFormatter {
 
 	public static void main(String[] args) {
 		try {
-			new SourceFormatter(false, false);
+			SourceFormatter sourceFormatter = SourceFormatterUtil.create(
+				false, false, true, true);
+
+			sourceFormatter.format();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -35,9 +40,19 @@ public class SourceFormatter {
 	}
 
 	public SourceFormatter(
-			final boolean useProperties, final boolean throwException)
+			boolean useProperties, boolean throwException, boolean printErrors,
+			boolean autoFix)
 		throws Exception {
 
+		_useProperties = useProperties;
+		_throwException = throwException;
+		_printErrors = printErrors;
+		_autoFix = autoFix;
+
+		_setVersion();
+	}
+
+	public void format() throws Exception {
 		Thread thread1 = new Thread () {
 
 			@Override
@@ -46,6 +61,8 @@ public class SourceFormatter {
 					List<SourceProcessor> sourceProcessors =
 						new ArrayList<SourceProcessor>();
 
+					sourceProcessors.add(
+						CSSSourceProcessor.class.newInstance());
 					sourceProcessors.add(
 						FTLSourceProcessor.class.newInstance());
 					sourceProcessors.add(
@@ -62,10 +79,7 @@ public class SourceFormatter {
 						XMLSourceProcessor.class.newInstance());
 
 					for (SourceProcessor sourceProcessor : sourceProcessors) {
-						sourceProcessor.format(useProperties, throwException);
-
-						_errorMessages.addAll(
-							sourceProcessor.getErrorMessages());
+						_runSourceProcessor(sourceProcessor);
 					}
 				}
 				catch (Exception e) {
@@ -83,9 +97,7 @@ public class SourceFormatter {
 					SourceProcessor sourceProcessor =
 						JSPSourceProcessor.class.newInstance();
 
-					sourceProcessor.format(useProperties, throwException);
-
-					_errorMessages.addAll(sourceProcessor.getErrorMessages());
+					_runSourceProcessor(sourceProcessor);
 				}
 				catch (Exception e) {
 					e.printStackTrace();
@@ -100,11 +112,80 @@ public class SourceFormatter {
 		thread1.join();
 		thread2.join();
 
-		if (throwException && !_errorMessages.isEmpty()) {
-			System.out.println(StringUtil.merge(_errorMessages, "\n"));
+		if (_throwException) {
+			if (!_errorMessages.isEmpty()) {
+				throw new Exception(StringUtil.merge(_errorMessages, "\n"));
+			}
+
+			if (_firstSourceMismatchException != null) {
+				throw _firstSourceMismatchException;
+			}
 		}
 	}
 
-	private static List<String> _errorMessages = new UniqueList<String>();
+	public Tuple format(String fileName) throws Exception {
+		SourceProcessor sourceProcessor = null;
+
+		if (fileName.endsWith(".testjava")) {
+			sourceProcessor = JavaSourceProcessor.class.newInstance();
+		}
+
+		if (sourceProcessor == null) {
+			return null;
+		}
+
+		String newContent = sourceProcessor.format(
+			fileName, _useProperties, _printErrors, _autoFix,
+			_mainReleaseVersion);
+
+		return new Tuple(newContent, sourceProcessor.getErrorMessages());
+	}
+
+	public String getMainReleaseVersion() {
+		return _mainReleaseVersion;
+	}
+
+	private void _runSourceProcessor(SourceProcessor sourceProcessor)
+		throws Exception {
+
+		sourceProcessor.format(
+			_useProperties, _printErrors, _autoFix, _mainReleaseVersion);
+
+		_errorMessages.addAll(sourceProcessor.getErrorMessages());
+
+		if (_firstSourceMismatchException == null) {
+			_firstSourceMismatchException =
+				sourceProcessor.getFirstSourceMismatchException();
+		}
+	}
+
+	private void _setVersion() throws Exception {
+		String releaseInfoVersion = ReleaseInfo.getVersion();
+
+		if (releaseInfoVersion.startsWith("6.1")) {
+			_mainReleaseVersion =
+				BaseSourceProcessor.MAIN_RELEASE_VERSION_6_1_0;
+		}
+		else if (releaseInfoVersion.startsWith("6.2")) {
+			_mainReleaseVersion =
+				BaseSourceProcessor.MAIN_RELEASE_VERSION_6_2_0;
+		}
+		else if (releaseInfoVersion.startsWith("7.0")) {
+			_mainReleaseVersion =
+				BaseSourceProcessor.MAIN_RELEASE_VERSION_7_0_0;
+		}
+		else {
+			throw new Exception(
+				"Invalid release information: " + ReleaseInfo.getVersion());
+		}
+	}
+
+	private boolean _autoFix;
+	private List<String> _errorMessages = new UniqueList<String>();
+	private SourceMismatchException _firstSourceMismatchException;
+	private String _mainReleaseVersion;
+	private boolean _printErrors;
+	private boolean _throwException;
+	private boolean _useProperties;
 
 }

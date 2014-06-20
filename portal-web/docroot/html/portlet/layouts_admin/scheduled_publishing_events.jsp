@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -31,7 +31,7 @@ headerNames.add("end-date");
 headerNames.add(StringPool.BLANK);
 
 searchContainer.setHeaderNames(headerNames);
-searchContainer.setEmptyResultsMessage("there-are-no-scheduled-events");
+searchContainer.setEmptyResultsMessage("there-are-no-scheduled-publication-processes");
 
 List<SchedulerResponse> scheduledJobs = SchedulerEngineHelperUtil.getScheduledJobs(StagingUtil.getSchedulerGroupName(destinationName, groupId), StorageType.PERSISTED);
 
@@ -44,7 +44,7 @@ for (int i = 0; i < scheduledJobs.size(); i++) {
 
 	// Title
 
-	row.addText(schedulerResponse.getDescription());
+	row.addText(HtmlUtil.escape(schedulerResponse.getDescription()));
 
 	// Start date
 
@@ -58,7 +58,7 @@ for (int i = 0; i < scheduledJobs.size(); i++) {
 		row.addDate(endDate);
 	}
 	else {
-		row.addText(LanguageUtil.get(pageContext, "no-end-date"));
+		row.addText(LanguageUtil.get(request, "no-end-date"));
 	}
 
 	// Action
@@ -70,7 +70,7 @@ for (int i = 0; i < scheduledJobs.size(); i++) {
 	sb.append(schedulerResponse.getJobName());
 	sb.append("');");
 
-	row.addButton("right", SearchEntry.DEFAULT_VALIGN, LanguageUtil.get(pageContext, "delete"), sb.toString());
+	row.addButton("right", SearchEntry.DEFAULT_VALIGN, LanguageUtil.get(request, "delete"), sb.toString());
 
 	resultRows.add(row);
 }

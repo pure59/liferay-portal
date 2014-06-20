@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,12 @@
 
 package com.liferay.portlet.usersadmin.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.PortletDataContext;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.model.User;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
 /**
@@ -26,6 +29,21 @@ public class UserStagedModelDataHandler
 	extends BaseStagedModelDataHandler<User> {
 
 	public static final String[] CLASS_NAMES = {User.class.getName()};
+
+	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException {
+
+		Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+		User user = UserLocalServiceUtil.fetchUserByUuidAndCompanyId(
+			uuid, group.getCompanyId());
+
+		if (user != null) {
+			UserLocalServiceUtil.deleteUser(user);
+		}
+	}
 
 	@Override
 	public String[] getClassNames() {

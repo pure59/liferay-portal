@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -122,7 +122,7 @@ public class EditOrganizationAssignmentsAction extends PortletAction {
 		Organization organization =
 			OrganizationLocalServiceUtil.getOrganization(organizationId);
 
-		long groupId = organization.getGroup().getGroupId();
+		long groupId = organization.getGroupId();
 
 		long[] addUserGroupIds = StringUtil.split(
 			ParamUtil.getString(actionRequest, "addUserGroupIds"), 0L);

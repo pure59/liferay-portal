@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see Team
  * @generated
  */
+@ProviderType
 public class TeamWrapper implements Team, ModelWrapper<Team> {
 	public TeamWrapper(Team team) {
 		_team = team;
@@ -48,6 +51,7 @@ public class TeamWrapper implements Team, ModelWrapper<Team> {
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("teamId", getTeamId());
 		attributes.put("companyId", getCompanyId());
 		attributes.put("userId", getUserId());
@@ -63,6 +67,12 @@ public class TeamWrapper implements Team, ModelWrapper<Team> {
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long teamId = (Long)attributes.get("teamId");
 
 		if (teamId != null) {
@@ -139,6 +149,26 @@ public class TeamWrapper implements Team, ModelWrapper<Team> {
 	}
 
 	/**
+	* Returns the mvcc version of this team.
+	*
+	* @return the mvcc version of this team
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _team.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this team.
+	*
+	* @param mvccVersion the mvcc version of this team
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_team.setMvccVersion(mvccVersion);
+	}
+
+	/**
 	* Returns the team ID of this team.
 	*
 	* @return the team ID of this team
@@ -202,11 +232,9 @@ public class TeamWrapper implements Team, ModelWrapper<Team> {
 	* Returns the user uuid of this team.
 	*
 	* @return the user uuid of this team
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _team.getUserUuid();
 	}
 
@@ -439,15 +467,13 @@ public class TeamWrapper implements Team, ModelWrapper<Team> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_team.persist();
 	}
 
 	@Override
 	public com.liferay.portal.model.Role getRole()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _team.getRole();
 	}
 
@@ -473,6 +499,7 @@ public class TeamWrapper implements Team, ModelWrapper<Team> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public Team getWrappedTeam() {
 		return _team;
 	}
@@ -480,6 +507,16 @@ public class TeamWrapper implements Team, ModelWrapper<Team> {
 	@Override
 	public Team getWrappedModel() {
 		return _team;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _team.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _team.isFinderCacheEnabled();
 	}
 
 	@Override

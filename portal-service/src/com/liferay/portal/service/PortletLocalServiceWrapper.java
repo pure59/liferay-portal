@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link PortletLocalService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see PortletLocalService
  * @generated
  */
+@ProviderType
 public class PortletLocalServiceWrapper implements PortletLocalService,
 	ServiceWrapper<PortletLocalService> {
 	public PortletLocalServiceWrapper(PortletLocalService portletLocalService) {
@@ -32,12 +35,10 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	*
 	* @param portlet the portlet
 	* @return the portlet that was added
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.Portlet addPortlet(
-		com.liferay.portal.model.Portlet portlet)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.Portlet portlet) {
 		return _portletLocalService.addPortlet(portlet);
 	}
 
@@ -58,12 +59,10 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	* @param id the primary key of the portlet
 	* @return the portlet that was removed
 	* @throws PortalException if a portlet with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.Portlet deletePortlet(long id)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _portletLocalService.deletePortlet(id);
 	}
 
@@ -72,12 +71,10 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	*
 	* @param portlet the portlet
 	* @return the portlet that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.Portlet deletePortlet(
-		com.liferay.portal.model.Portlet portlet)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.Portlet portlet) {
 		return _portletLocalService.deletePortlet(portlet);
 	}
 
@@ -91,13 +88,11 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _portletLocalService.dynamicQuery(dynamicQuery);
 	}
 
@@ -112,13 +107,12 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	* @param start the lower bound of the range of model instances
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @return the range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		int end) {
 		return _portletLocalService.dynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -134,15 +128,13 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return _portletLocalService.dynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
 	}
@@ -152,12 +144,10 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public long dynamicQueryCount(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _portletLocalService.dynamicQueryCount(dynamicQuery);
 	}
 
@@ -167,19 +157,16 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	* @param dynamicQuery the dynamic query
 	* @param projection the projection to apply to the query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public long dynamicQueryCount(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
-		com.liferay.portal.kernel.dao.orm.Projection projection)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.Projection projection) {
 		return _portletLocalService.dynamicQueryCount(dynamicQuery, projection);
 	}
 
 	@Override
-	public com.liferay.portal.model.Portlet fetchPortlet(long id)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public com.liferay.portal.model.Portlet fetchPortlet(long id) {
 		return _portletLocalService.fetchPortlet(id);
 	}
 
@@ -189,20 +176,32 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	* @param id the primary key of the portlet
 	* @return the portlet
 	* @throws PortalException if a portlet with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.Portlet getPortlet(long id)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _portletLocalService.getPortlet(id);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
+		return _portletLocalService.getActionableDynamicQuery();
+	}
+
+	/**
+	* @throws PortalException
+	*/
+	@Override
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _portletLocalService.deletePersistedModel(persistedModel);
 	}
 
 	@Override
 	public com.liferay.portal.model.PersistedModel getPersistedModel(
 		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _portletLocalService.getPersistedModel(primaryKeyObj);
 	}
 
@@ -216,12 +215,10 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	* @param start the lower bound of the range of portlets
 	* @param end the upper bound of the range of portlets (not inclusive)
 	* @return the range of portlets
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public java.util.List<com.liferay.portal.model.Portlet> getPortlets(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return _portletLocalService.getPortlets(start, end);
 	}
 
@@ -229,11 +226,9 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	* Returns the number of portlets.
 	*
 	* @return the number of portlets
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public int getPortletsCount()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getPortletsCount() {
 		return _portletLocalService.getPortletsCount();
 	}
 
@@ -242,12 +237,10 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	*
 	* @param portlet the portlet
 	* @return the portlet that was updated
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.Portlet updatePortlet(
-		com.liferay.portal.model.Portlet portlet)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.Portlet portlet) {
 		return _portletLocalService.updatePortlet(portlet);
 	}
 
@@ -278,15 +271,13 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 
 	@Override
 	public void checkPortlet(com.liferay.portal.model.Portlet portlet)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_portletLocalService.checkPortlet(portlet);
 	}
 
 	@Override
 	public void checkPortlets(long companyId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_portletLocalService.checkPortlets(companyId);
 	}
 
@@ -303,6 +294,7 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	/**
 	* @deprecated As of 6.1.0, replaced by {@link #clonePortlet(String)}
 	*/
+	@Deprecated
 	@Override
 	public com.liferay.portal.model.Portlet clonePortlet(long companyId,
 		java.lang.String portletId) {
@@ -317,25 +309,20 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 
 	@Override
 	public void deletePortlet(long companyId, java.lang.String portletId,
-		long plid)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long plid) throws com.liferay.portal.kernel.exception.PortalException {
 		_portletLocalService.deletePortlet(companyId, portletId, plid);
 	}
 
 	@Override
 	public void deletePortlets(long companyId, java.lang.String[] portletIds,
-		long plid)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long plid) throws com.liferay.portal.kernel.exception.PortalException {
 		_portletLocalService.deletePortlets(companyId, portletIds, plid);
 	}
 
 	@Override
 	public com.liferay.portal.model.Portlet deployRemotePortlet(
 		com.liferay.portal.model.Portlet portlet, java.lang.String categoryName)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _portletLocalService.deployRemotePortlet(portlet, categoryName);
 	}
 
@@ -343,8 +330,7 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	public com.liferay.portal.model.Portlet deployRemotePortlet(
 		com.liferay.portal.model.Portlet portlet,
 		java.lang.String[] categoryNames)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _portletLocalService.deployRemotePortlet(portlet, categoryNames);
 	}
 
@@ -365,8 +351,7 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 
 	@Override
 	public com.liferay.portal.model.PortletCategory getEARDisplay(
-		java.lang.String xml)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String xml) {
 		return _portletLocalService.getEARDisplay(xml);
 	}
 
@@ -388,8 +373,7 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 
 	@Override
 	public com.liferay.portal.model.Portlet getPortletById(long companyId,
-		java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String portletId) {
 		return _portletLocalService.getPortletById(companyId, portletId);
 	}
 
@@ -401,8 +385,7 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 
 	@Override
 	public com.liferay.portal.model.Portlet getPortletByStrutsPath(
-		long companyId, java.lang.String strutsPath)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, java.lang.String strutsPath) {
 		return _portletLocalService.getPortletByStrutsPath(companyId, strutsPath);
 	}
 
@@ -413,15 +396,13 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 
 	@Override
 	public java.util.List<com.liferay.portal.model.Portlet> getPortlets(
-		long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId) {
 		return _portletLocalService.getPortlets(companyId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.Portlet> getPortlets(
-		long companyId, boolean showSystem, boolean showPortal)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, boolean showSystem, boolean showPortal) {
 		return _portletLocalService.getPortlets(companyId, showSystem,
 			showPortal);
 	}
@@ -433,14 +414,12 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 
 	@Override
 	public com.liferay.portal.model.PortletCategory getWARDisplay(
-		java.lang.String servletContextName, java.lang.String xml)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String servletContextName, java.lang.String xml) {
 		return _portletLocalService.getWARDisplay(servletContextName, xml);
 	}
 
 	@Override
-	public boolean hasPortlet(long companyId, java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public boolean hasPortlet(long companyId, java.lang.String portletId) {
 		return _portletLocalService.hasPortlet(companyId, portletId);
 	}
 
@@ -462,8 +441,7 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 
 	@Override
 	public java.util.Map<java.lang.String, com.liferay.portal.model.Portlet> loadGetPortletsPool(
-		long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId) {
 		return _portletLocalService.loadGetPortletsPool(companyId);
 	}
 
@@ -474,8 +452,7 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 
 	@Override
 	public com.liferay.portal.model.Portlet updatePortlet(long companyId,
-		java.lang.String portletId, java.lang.String roles, boolean active)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String portletId, java.lang.String roles, boolean active) {
 		return _portletLocalService.updatePortlet(companyId, portletId, roles,
 			active);
 	}
@@ -483,6 +460,7 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public PortletLocalService getWrappedPortletLocalService() {
 		return _portletLocalService;
 	}
@@ -490,6 +468,7 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedPortletLocalService(
 		PortletLocalService portletLocalService) {
 		_portletLocalService = portletLocalService;

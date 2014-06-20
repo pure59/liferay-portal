@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,7 +16,6 @@ package com.liferay.portal.model;
 
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.staging.MergeLayoutPrototypesThreadLocal;
@@ -44,6 +43,8 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Raymond Augé
@@ -76,6 +77,14 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 
 			if (methodName.equals("getLayoutType")) {
 				return _getLayoutType();
+			}
+			else if (methodName.equals("getRegularURL")) {
+				Class<?> layoutRevisionClass = _layoutRevision.getClass();
+
+				method = layoutRevisionClass.getMethod(
+					methodName, HttpServletRequest.class);
+
+				return method.invoke(_layoutRevision, arguments);
 			}
 			else if (methodName.equals("toEscapedModel")) {
 				if (_layout.isEscapedModel()) {
@@ -138,7 +147,7 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 
 	private LayoutRevision _getLayoutRevision(
 			Layout layout, LayoutRevision layoutRevision)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (layoutRevision != null) {
 			return layoutRevision;
@@ -147,7 +156,7 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();
 
-		if (!serviceContext.isSignedIn()) {
+		if ((serviceContext == null) || !serviceContext.isSignedIn()) {
 			LayoutRevision lastLayoutRevision = null;
 
 			lastLayoutRevision =
@@ -181,24 +190,28 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 		long layoutRevisionId = ParamUtil.getLong(
 			serviceContext, "layoutRevisionId");
 
-		if (layoutRevisionId <= 0) {
-			layoutRevisionId = StagingUtil.getRecentLayoutRevisionId(
-				user, layoutSetBranchId, layout.getPlid());
-		}
-
 		if (layoutRevisionId > 0) {
 			layoutRevision =
 				LayoutRevisionLocalServiceUtil.fetchLayoutRevision(
 					layoutRevisionId);
-
-			if (layoutRevision.getStatus() !=
-					WorkflowConstants.STATUS_INACTIVE) {
-
-				return layoutRevision;
-			}
-
-			layoutRevision = null;
 		}
+
+		if ((layoutRevisionId <= 0) ||
+			!_isBelongsToLayout(layoutRevision, layout)) {
+
+			layoutRevisionId = StagingUtil.getRecentLayoutRevisionId(
+				user, layoutSetBranchId, layout.getPlid());
+
+			layoutRevision =
+				LayoutRevisionLocalServiceUtil.fetchLayoutRevision(
+					layoutRevisionId);
+		}
+
+		if ((layoutRevision != null) && !layoutRevision.isInactive()) {
+			return layoutRevision;
+		}
+
+		layoutRevision = null;
 
 		List<LayoutRevision> layoutRevisions =
 			LayoutRevisionLocalServiceUtil.getLayoutRevisions(
@@ -268,6 +281,20 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 				new LayoutStagingHandler(_layout, _layoutRevision)));
 	}
 
+	private boolean _isBelongsToLayout(
+		LayoutRevision layoutRevision, Layout layout) {
+
+		if (layoutRevision == null) {
+			return false;
+		}
+
+		if (layoutRevision.getPlid() == layout.getPlid()) {
+			return true;
+		}
+
+		return false;
+	}
+
 	private Object _toEscapedModel() {
 		return ProxyUtil.newProxyInstance(
 			PortalClassLoaderUtil.getClassLoader(), new Class[] {Layout.class},
@@ -286,21 +313,26 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 		_layoutRevisionMethodNames.add("getCss");
 		_layoutRevisionMethodNames.add("getCssText");
 		_layoutRevisionMethodNames.add("getDescription");
+		_layoutRevisionMethodNames.add("getGroupId");
 		_layoutRevisionMethodNames.add("getHTMLTitle");
 		_layoutRevisionMethodNames.add("getIconImage");
 		_layoutRevisionMethodNames.add("getIconImageId");
 		_layoutRevisionMethodNames.add("getKeywords");
+		_layoutRevisionMethodNames.add("getLayoutSet");
 		_layoutRevisionMethodNames.add("getName");
 		_layoutRevisionMethodNames.add("getRobots");
 		_layoutRevisionMethodNames.add("getTheme");
 		_layoutRevisionMethodNames.add("getThemeId");
+		_layoutRevisionMethodNames.add("getThemeSetting");
 		_layoutRevisionMethodNames.add("getTitle");
 		_layoutRevisionMethodNames.add("getTypeSettings");
 		_layoutRevisionMethodNames.add("getTypeSettingsProperties");
+		_layoutRevisionMethodNames.add("getTypeSettingsProperty");
 		_layoutRevisionMethodNames.add("getWapColorScheme");
 		_layoutRevisionMethodNames.add("getWapColorSchemeId");
 		_layoutRevisionMethodNames.add("getWapTheme");
 		_layoutRevisionMethodNames.add("getWapThemeId");
+		_layoutRevisionMethodNames.add("isContentDisplayPage");
 		_layoutRevisionMethodNames.add("isEscapedModel");
 		_layoutRevisionMethodNames.add("isIconImage");
 		_layoutRevisionMethodNames.add("isInheritLookAndFeel");
@@ -310,6 +342,7 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 		_layoutRevisionMethodNames.add("setDescription");
 		_layoutRevisionMethodNames.add("setDescriptionMap");
 		_layoutRevisionMethodNames.add("setEscapedModel");
+		_layoutRevisionMethodNames.add("setGroupId");
 		_layoutRevisionMethodNames.add("setIconImage");
 		_layoutRevisionMethodNames.add("setIconImageId");
 		_layoutRevisionMethodNames.add("setKeywords");

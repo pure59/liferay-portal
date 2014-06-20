@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,10 +15,11 @@
 package com.liferay.portlet.journal.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.staging.permission.StagingPermissionUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.journal.NoSuchFolderException;
 import com.liferay.portlet.journal.model.JournalFolder;
@@ -34,7 +35,7 @@ public class JournalFolderPermission {
 	public static void check(
 			PermissionChecker permissionChecker, JournalFolder folder,
 			String actionId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (!contains(permissionChecker, folder, actionId)) {
 			throw new PrincipalException();
@@ -44,7 +45,7 @@ public class JournalFolderPermission {
 	public static void check(
 			PermissionChecker permissionChecker, long groupId, long folderId,
 			String actionId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (!contains(permissionChecker, groupId, folderId, actionId)) {
 			throw new PrincipalException();
@@ -54,31 +55,33 @@ public class JournalFolderPermission {
 	public static boolean contains(
 			PermissionChecker permissionChecker, JournalFolder folder,
 			String actionId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (actionId.equals(ActionKeys.ADD_FOLDER)) {
 			actionId = ActionKeys.ADD_SUBFOLDER;
 		}
 
-		long folderId = folder.getFolderId();
+		Boolean hasPermission = StagingPermissionUtil.hasPermission(
+			permissionChecker, folder.getGroupId(),
+			JournalFolder.class.getName(), folder.getFolderId(),
+			PortletKeys.JOURNAL, actionId);
 
-		if (PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
-			long originalFolderId = folderId;
+		if (hasPermission != null) {
+			return hasPermission.booleanValue();
+		}
+
+		if (actionId.equals(ActionKeys.VIEW) &&
+			PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
 
 			try {
+				long folderId = folder.getFolderId();
+
 				while (folderId !=
 							JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
 					folder = JournalFolderLocalServiceUtil.getFolder(folderId);
 
-					if (!permissionChecker.hasOwnerPermission(
-							folder.getCompanyId(),
-							JournalFolder.class.getName(), folderId,
-							folder.getUserId(), ActionKeys.VIEW) &&
-						!permissionChecker.hasPermission(
-							folder.getGroupId(), JournalFolder.class.getName(),
-							folderId, ActionKeys.VIEW)) {
-
+					if (!_hasPermission(permissionChecker, folder, actionId)) {
 						return false;
 					}
 
@@ -91,45 +94,17 @@ public class JournalFolderPermission {
 				}
 			}
 
-			if (actionId.equals(ActionKeys.VIEW)) {
-				return true;
-			}
-
-			folderId = originalFolderId;
+			return JournalPermission.contains(
+				permissionChecker, folder.getGroupId(), actionId);
 		}
 
-		try {
-			while (folderId !=
-						JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-
-				folder = JournalFolderLocalServiceUtil.getFolder(folderId);
-
-				if (permissionChecker.hasOwnerPermission(
-						folder.getCompanyId(), JournalFolder.class.getName(),
-						folderId, folder.getUserId(), actionId) ||
-					permissionChecker.hasPermission(
-						folder.getGroupId(), JournalFolder.class.getName(),
-						folderId, actionId)) {
-
-					return true;
-				}
-
-				folderId = folder.getParentFolderId();
-			}
-		}
-		catch (NoSuchFolderException nsfe) {
-			if (!folder.isInTrash()) {
-				throw nsfe;
-			}
-		}
-
-		return false;
+		return _hasPermission(permissionChecker, folder, actionId);
 	}
 
 	public static boolean contains(
 			PermissionChecker permissionChecker, long groupId, long folderId,
 			String actionId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (folderId == JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 			return JournalPermission.contains(
@@ -141,6 +116,23 @@ public class JournalFolderPermission {
 
 			return contains(permissionChecker, folder, actionId);
 		}
+	}
+
+	private static boolean _hasPermission(
+		PermissionChecker permissionChecker, JournalFolder folder,
+		String actionId) {
+
+		if (permissionChecker.hasOwnerPermission(
+				folder.getCompanyId(), JournalFolder.class.getName(),
+				folder.getFolderId(), folder.getUserId(), actionId) ||
+			permissionChecker.hasPermission(
+				folder.getGroupId(), JournalFolder.class.getName(),
+				folder.getFolderId(), actionId)) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 }

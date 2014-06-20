@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,10 +22,8 @@ page import="com.liferay.portal.kernel.mobile.device.rulegroup.ActionHandlerMana
 page import="com.liferay.portal.kernel.mobile.device.rulegroup.RuleGroupProcessorUtil" %><%@
 page import="com.liferay.portal.kernel.mobile.device.rulegroup.action.ActionHandler" %><%@
 page import="com.liferay.portal.kernel.mobile.device.rulegroup.rule.UnknownRuleHandlerException" %><%@
-page import="com.liferay.portal.kernel.plugin.PluginPackage" %><%@
 page import="com.liferay.portal.mobile.device.rulegroup.rule.impl.SimpleRuleHandler" %><%@
 page import="com.liferay.portal.plugin.PluginPackageUtil" %><%@
-page import="com.liferay.portal.plugin.PluginUtil" %><%@
 page import="com.liferay.portlet.mobiledevicerules.ActionTypeException" %><%@
 page import="com.liferay.portlet.mobiledevicerules.NoSuchActionException" %><%@
 page import="com.liferay.portlet.mobiledevicerules.NoSuchRuleException" %><%@
@@ -35,6 +33,7 @@ page import="com.liferay.portlet.mobiledevicerules.model.MDRAction" %><%@
 page import="com.liferay.portlet.mobiledevicerules.model.MDRRule" %><%@
 page import="com.liferay.portlet.mobiledevicerules.model.MDRRuleGroup" %><%@
 page import="com.liferay.portlet.mobiledevicerules.model.MDRRuleGroupInstance" %><%@
+page import="com.liferay.portlet.mobiledevicerules.search.RuleGroupChecker" %><%@
 page import="com.liferay.portlet.mobiledevicerules.search.RuleGroupDisplayTerms" %><%@
 page import="com.liferay.portlet.mobiledevicerules.search.RuleGroupSearch" %><%@
 page import="com.liferay.portlet.mobiledevicerules.search.RuleGroupSearchTerms" %><%@

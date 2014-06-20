@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,7 +22,7 @@ String tabs1 = (String)request.getAttribute("edit_user_group_roles.jsp-tabs1");
 int cur = (Integer)request.getAttribute("edit_user_group_roles.jsp-cur");
 
 Group group = (Group)request.getAttribute("edit_user_group_roles.jsp-group");
-String groupName = (String)request.getAttribute("edit_user_group_roles.jsp-groupName");
+String groupDescriptiveName = (String)request.getAttribute("edit_user_group_roles.jsp-groupDescriptiveName");
 Role role = (Role)request.getAttribute("edit_user_group_roles.jsp-role");
 long roleId = (Long)request.getAttribute("edit_user_group_roles.jsp-roleId");
 Organization organization = (Organization)request.getAttribute("edit_user_group_roles.jsp-organization");
@@ -34,9 +34,9 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_user_group_roles.
 <aui:input name="removeUserGroupIds" type="hidden" />
 
 <div>
-	<%= LanguageUtil.format(pageContext, "step-x-of-x", new String[] {"2", "2"}) %>
+	<%= LanguageUtil.format(request, "step-x-of-x", new String[] {"2", "2"}, false) %>
 
-	<em>Current</em> signifies current user groups associated with the <em><%= HtmlUtil.escape(role.getTitle(locale)) %></em> role. <em>Available</em> signifies all user groups associated with the <em><%= HtmlUtil.escape(groupName) %></em> <%= (group.isOrganization()) ? "organization" : "site" %>.
+	<%= LanguageUtil.format(request, "current-signifies-current-user-groups-associated-with-the-x-role.-available-signifies-all-user-groups-associated-with-the-x-x", new String[] {HtmlUtil.escape(role.getTitle(locale)), HtmlUtil.escape(groupDescriptiveName), LanguageUtil.get(request, (group.isOrganization() ? LanguageUtil.get(request, "organization") : LanguageUtil.get(request, "site")))}, false) %>
 </div>
 
 <br />
@@ -58,7 +58,7 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_user_group_roles.
 	/>
 
 	<%
-	UserGroupSearchTerms searchTerms = (UserGroupSearchTerms)searchContainer.getSearchTerms();
+	UserGroupDisplayTerms searchTerms = (UserGroupDisplayTerms)searchContainer.getSearchTerms();
 
 	LinkedHashMap<String, Object> userGroupParams = new LinkedHashMap<String, Object>();
 
@@ -69,11 +69,14 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_user_group_roles.
 	if (tabs1.equals("current")) {
 		userGroupParams.put("userGroupGroupRole", new Long[] {new Long(roleId), new Long(group.getGroupId())});
 	}
+
+	total = UserGroupLocalServiceUtil.searchCount(company.getCompanyId(), searchTerms.getKeywords(), userGroupParams);
+
+	searchContainer.setTotal(total);
 	%>
 
 	<liferay-ui:search-container-results
 		results="<%= UserGroupLocalServiceUtil.search(company.getCompanyId(), searchTerms.getKeywords(), userGroupParams, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
-		total="<%= UserGroupLocalServiceUtil.searchCount(company.getCompanyId(), searchTerms.getKeywords(), userGroupParams) %>"
 	/>
 
 	<liferay-ui:search-container-row
@@ -98,12 +101,12 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_user_group_roles.
 	<div class="separator"><!-- --></div>
 
 	<%
-	String taglibOnClick = renderResponse.getNamespace() + "updateUserGroupGroupRoleUsers('" + portletURL.toString() + StringPool.AMPERSAND + renderResponse.getNamespace() + "cur=" + cur + "');";
+	portletURL.setParameter("cur", String.valueOf(cur));
+
+	String taglibOnClick = renderResponse.getNamespace() + "updateUserGroupGroupRoleUsers('" + portletURL.toString() + "');";
 	%>
 
-	<aui:button onClick="<%= taglibOnClick %>" value="update-associations" />
-
-	<br /><br />
+	<aui:button onClick="<%= taglibOnClick %>" primary="<%= true %>" value="update-associations" />
 
 	<liferay-ui:search-iterator />
 </liferay-ui:search-container>

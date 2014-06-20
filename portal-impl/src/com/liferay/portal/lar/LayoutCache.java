@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,7 +17,7 @@ package com.liferay.portal.lar;
 import com.liferay.portal.NoSuchRoleException;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Organization;
@@ -30,7 +30,6 @@ import com.liferay.portal.security.permission.ResourceActionsUtil;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
-import com.liferay.portal.service.TeamLocalServiceUtil;
 import com.liferay.portal.service.UserGroupLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
@@ -45,7 +44,7 @@ public class LayoutCache {
 
 	protected long getEntityGroupId(
 			long companyId, String entityName, String name)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		long entityGroupId = 0;
 
@@ -56,12 +55,10 @@ public class LayoutCache {
 				List<UserGroup> userGroups = UserGroupLocalServiceUtil.search(
 					companyId, null, null, 0, 1, (OrderByComparator)null);
 
-				if (userGroups.size() > 0) {
+				if (!userGroups.isEmpty()) {
 					UserGroup userGroup = userGroups.get(0);
 
-					Group group = userGroup.getGroup();
-
-					entityGroupId = group.getGroupId();
+					entityGroupId = userGroup.getGroupId();
 				}
 			}
 			else if (entityName.equals("organization")) {
@@ -71,12 +68,10 @@ public class LayoutCache {
 						OrganizationConstants.ANY_PARENT_ORGANIZATION_ID, name,
 						null, null, null, null, null, null, null, true, 0, 1);
 
-				if (organizations.size() > 0) {
+				if (!organizations.isEmpty()) {
 					Organization organization = organizations.get(0);
 
-					Group group = organization.getGroup();
-
-					entityGroupId = group.getGroupId();
+					entityGroupId = organization.getGroupId();
 				}
 			}
 
@@ -90,7 +85,7 @@ public class LayoutCache {
 	}
 
 	protected Map<String, Long> getEntityMap(long companyId, String entityName)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		Map<String, Long> entityMap = entityMapMap.get(entityName);
 
@@ -134,22 +129,8 @@ public class LayoutCache {
 		return entityMap;
 	}
 
-	protected List<Role> getGroupRoles_1to4(long groupId)
-		throws SystemException {
-
-		List<Role> roles = groupRolesMap.get(groupId);
-
-		if (roles == null) {
-			roles = RoleLocalServiceUtil.getGroupRoles(groupId);
-
-			groupRolesMap.put(groupId, roles);
-		}
-
-		return roles;
-	}
-
-	protected List<Role> getGroupRoles_5(long groupId, String resourceName)
-		throws PortalException, SystemException {
+	protected List<Role> getGroupRoles(long groupId, String resourceName)
+		throws PortalException {
 
 		List<Role> roles = groupRolesMap.get(groupId);
 
@@ -159,14 +140,16 @@ public class LayoutCache {
 
 		Group group = GroupLocalServiceUtil.getGroup(groupId);
 
-		roles = ResourceActionsUtil.getRoles(
-			group.getCompanyId(), group, resourceName, null);
+		roles = ListUtil.copy(
+			ResourceActionsUtil.getRoles(
+				group.getCompanyId(), group, resourceName, null));
 
-		List<Team> teams = TeamLocalServiceUtil.getGroupTeams(groupId);
+		Map<Team, Role> teamRoleMap = RoleLocalServiceUtil.getTeamRoleMap(
+			groupId);
 
-		for (Team team : teams) {
-			Role teamRole = RoleLocalServiceUtil.getTeamRole(
-				group.getCompanyId(), team.getTeamId());
+		for (Map.Entry<Team, Role> entry : teamRoleMap.entrySet()) {
+			Team team = entry.getKey();
+			Role teamRole = entry.getValue();
 
 			teamRole.setName(
 				PermissionExporter.ROLE_TEAM_PREFIX + team.getName());
@@ -180,7 +163,7 @@ public class LayoutCache {
 		return roles;
 	}
 
-	protected List<User> getGroupUsers(long groupId) throws SystemException {
+	protected List<User> getGroupUsers(long groupId) {
 		List<User> users = groupUsersMap.get(groupId);
 
 		if (users == null) {
@@ -193,7 +176,7 @@ public class LayoutCache {
 	}
 
 	protected Role getRole(long companyId, String roleName)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		Role role = rolesMap.get(roleName);
 
@@ -210,7 +193,7 @@ public class LayoutCache {
 		return role;
 	}
 
-	protected List<Role> getUserRoles(long userId) throws SystemException {
+	protected List<Role> getUserRoles(long userId) {
 		List<Role> userRoles = userRolesMap.get(userId);
 
 		if (userRoles == null) {

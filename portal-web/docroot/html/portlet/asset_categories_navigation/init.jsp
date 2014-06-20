@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,17 +16,10 @@
 
 <%@ include file="/html/portlet/init.jsp" %>
 
-<%@ page import="com.liferay.portal.kernel.template.TemplateHandler" %><%@
-page import="com.liferay.portal.kernel.template.TemplateHandlerRegistryUtil" %><%@
-page import="com.liferay.portlet.asset.NoSuchVocabularyException" %><%@
-page import="com.liferay.portlet.asset.model.AssetCategory" %><%@
-page import="com.liferay.portlet.asset.model.AssetVocabulary" %><%@
-page import="com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil" %><%@
-page import="com.liferay.portlet.asset.service.AssetVocabularyServiceUtil" %><%@
-page import="com.liferay.portlet.portletdisplaytemplate.util.PortletDisplayTemplateUtil" %>
+<%@ page import="com.liferay.portlet.asset.NoSuchVocabularyException" %>
 
 <%
-List<AssetVocabulary> assetVocabularies = AssetVocabularyServiceUtil.getGroupsVocabularies(new long[] {scopeGroupId, themeDisplay.getCompanyGroupId()});
+List<AssetVocabulary> assetVocabularies = AssetVocabularyServiceUtil.getGroupVocabularies(PortalUtil.getCurrentAndAncestorSiteGroupIds(scopeGroupId));
 
 long[] availableAssetVocabularyIds = new long[assetVocabularies.size()];
 
@@ -44,7 +37,8 @@ if (!allAssetVocabularies && (portletPreferences.getValues("assetVocabularyIds",
 	assetVocabularyIds = StringUtil.split(portletPreferences.getValue("assetVocabularyIds", null), 0L);
 }
 
-String displayTemplate = portletPreferences.getValue("displayTemplate", StringPool.BLANK);
+String displayStyle = portletPreferences.getValue("displayStyle", StringPool.BLANK);
+long displayStyleGroupId = GetterUtil.getLong(portletPreferences.getValue("displayStyleGroupId", null), themeDisplay.getScopeGroupId());
 %>
 
 <%@ include file="/html/portlet/asset_categories_navigation/init-ext.jsp" %>

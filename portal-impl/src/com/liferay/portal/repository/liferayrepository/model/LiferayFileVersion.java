@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,14 +15,11 @@
 package com.liferay.portal.repository.liferayrepository.model;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portlet.documentlibrary.model.DLFileVersion;
-import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 import com.liferay.portlet.expando.model.ExpandoBridge;
 
@@ -112,7 +109,7 @@ public class LiferayFileVersion extends LiferayModel implements FileVersion {
 
 	@Override
 	public InputStream getContentStream(boolean incrementCounter)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return _dlFileVersion.getContentStream(incrementCounter);
 	}
@@ -142,16 +139,14 @@ public class LiferayFileVersion extends LiferayModel implements FileVersion {
 		return _dlFileVersion.getExtraSettings();
 	}
 
-	public File getFile(boolean incrementCounter)
-		throws PortalException, SystemException {
-
+	public File getFile(boolean incrementCounter) throws PortalException {
 		return DLFileEntryLocalServiceUtil.getFile(
-			PrincipalThreadLocal.getUserId(), _dlFileVersion.getFileEntryId(),
-			_dlFileVersion.getVersion(), incrementCounter);
+			_dlFileVersion.getFileEntryId(), _dlFileVersion.getVersion(),
+			incrementCounter);
 	}
 
 	@Override
-	public FileEntry getFileEntry() throws PortalException, SystemException {
+	public FileEntry getFileEntry() throws PortalException {
 		return new LiferayFileEntry(_dlFileVersion.getFileEntry());
 	}
 
@@ -241,7 +236,7 @@ public class LiferayFileVersion extends LiferayModel implements FileVersion {
 	}
 
 	@Override
-	public String getStatusByUserUuid() throws SystemException {
+	public String getStatusByUserUuid() {
 		return _dlFileVersion.getStatusByUserUuid();
 	}
 
@@ -255,19 +250,6 @@ public class LiferayFileVersion extends LiferayModel implements FileVersion {
 		return _dlFileVersion.getTitle();
 	}
 
-	public DLFolder getTrashContainer() {
-		DLFolder dlFolder = null;
-
-		try {
-			dlFolder = _dlFileVersion.getTrashContainer();
-		}
-		catch (Exception e) {
-			return null;
-		}
-
-		return dlFolder;
-	}
-
 	@Override
 	public long getUserId() {
 		return _dlFileVersion.getUserId();
@@ -279,7 +261,7 @@ public class LiferayFileVersion extends LiferayModel implements FileVersion {
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
+	public String getUserUuid() {
 		return _dlFileVersion.getUserUuid();
 	}
 
@@ -321,21 +303,6 @@ public class LiferayFileVersion extends LiferayModel implements FileVersion {
 	@Override
 	public boolean isExpired() {
 		return _dlFileVersion.isExpired();
-	}
-
-	@Override
-	public boolean isInTrash() {
-		return _dlFileVersion.isInTrash();
-	}
-
-	@Override
-	public boolean isInTrashContainer() {
-		try {
-			return _dlFileVersion.isInTrashContainer();
-		}
-		catch (Exception e) {
-			return false;
-		}
 	}
 
 	@Override

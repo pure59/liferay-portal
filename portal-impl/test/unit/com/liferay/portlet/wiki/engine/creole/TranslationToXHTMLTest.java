@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,6 +15,7 @@
 package com.liferay.portlet.wiki.engine.creole;
 
 import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.parsers.creole.ast.WikiPageNode;
@@ -22,6 +23,7 @@ import com.liferay.portal.parsers.creole.parser.Creole10Lexer;
 import com.liferay.portal.parsers.creole.parser.Creole10Parser;
 import com.liferay.portal.parsers.creole.visitor.impl.XhtmlTranslationVisitor;
 import com.liferay.portal.test.mockito.ReturnArgumentCalledAnswer;
+import com.liferay.portal.util.PropsUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,12 +48,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Miguel Pastor
  * @author Manuel de la Peña
  */
-
-/**
- * @author Miguel Pastor
- * @author Manuel de la Peña
- */
-@PrepareForTest(HtmlUtil.class)
+@PrepareForTest({HtmlUtil.class, PropsUtil.class})
 @RunWith(PowerMockRunner.class)
 public class TranslationToXHTMLTest extends PowerMockito {
 
@@ -64,6 +61,17 @@ public class TranslationToXHTMLTest extends PowerMockito {
 		).then(
 			new ReturnArgumentCalledAnswer<String>(0)
 		);
+
+		mockStatic(PropsUtil.class);
+
+		when(
+			PropsUtil.getArray(
+				PropsKeys.WIKI_PARSERS_CREOLE_SUPPORTED_PROTOCOLS)
+		).thenReturn(
+			new String[] {
+				"http://", "https://", "ftp://", "mailto:", "mms://"
+			}
+		);
 	}
 
 	@After
@@ -75,6 +83,155 @@ public class TranslationToXHTMLTest extends PowerMockito {
 	public void testEscapedEscapedCharacter() {
 		Assert.assertEquals(
 			"<p>~\"~ is escaped\" </p>", translate("escape-2.creole"));
+	}
+
+	@Test
+	public void testInterwikiC2() {
+		Assert.assertEquals(
+			"<p><a href=\"http://c2.com/cgi/wiki?Liferay\">Liferay</a> </p>",
+			translate("interwikic2.creole"));
+	}
+
+	@Test
+	public void testInterwikiDokuWiki() {
+		Assert.assertEquals(
+			"<p><a href=\"http://wiki.splitbrain.org/wiki:Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikidokuwiki.creole"));
+	}
+
+	@Test
+	public void testInterwikiFlickr() {
+		Assert.assertEquals(
+			"<p><a href=\"http://www.flickr.com/search/?w=all&m=text" +
+				"&q=Liferay\">Liferay</a> </p>",
+			translate("interwikiflickr.creole"));
+	}
+
+	@Test
+	public void testInterwikiGoogle() {
+		Assert.assertEquals(
+			"<p><a href=\"http://www.google.com/search?q=Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikigoogle.creole"));
+	}
+
+	@Test
+	public void testInterwikiJspWiki() {
+		Assert.assertEquals(
+			"<p><a href=\"http://www.jspwiki.org/Wiki.jsp?page=Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikijspwiki.creole"));
+	}
+
+	@Test
+	public void testInterwikiMeatBall() {
+		Assert.assertEquals(
+			"<p><a href=\"http://usemod.com/cgi-bin/mb.pl?Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikimeatball.creole"));
+	}
+
+	@Test
+	public void testInterwikiMediaWiki() {
+		Assert.assertEquals(
+			"<p><a href=\"http://www.mediawiki.org/wiki/Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikimediawiki.creole"));
+	}
+
+	@Test
+	public void testInterwikiMoinMoin() {
+		Assert.assertEquals(
+			"<p><a href=\"http://moinmoin.wikiwikiweb.de/Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikimoinmoin.creole"));
+	}
+
+	@Test
+	public void testInterwikiOddMuse() {
+		Assert.assertEquals(
+			"<p><a href=\"http://www.oddmuse.org/cgi-bin/wiki/Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikioddmuse.creole"));
+	}
+
+	@Test
+	public void testInterwikiOhana() {
+		Assert.assertEquals(
+			"<p><a href=\"http://wikiohana.net/cgi-bin/wiki.pl/Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikiohana.creole"));
+	}
+
+	@Test
+	public void testInterwikiPmWiki() {
+		Assert.assertEquals(
+			"<p><a href=\"http://www.pmwiki.com/wiki/PmWiki/Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikipmwiki.creole"));
+	}
+
+	@Test
+	public void testInterwikiPukiWiki() {
+		Assert.assertEquals(
+			"<p><a href=\"http://pukiwiki.sourceforge.jp/?Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikipukiwiki.creole"));
+	}
+
+	@Test
+	public void testInterwikiPurpleWiki() {
+		Assert.assertEquals(
+			"<p><a href=\"http://purplewiki.blueoxen.net/cgi-bin/wiki.pl" +
+				"?Liferay\">Liferay</a> </p>",
+			translate("interwikipurplewiki.creole"));
+	}
+
+	@Test
+	public void testInterwikiRadeox() {
+		Assert.assertEquals(
+			"<p><a href=\"http://radeox.org/space/Liferay\">Liferay</a> </p>",
+			translate("interwikiradeox.creole"));
+	}
+
+	@Test
+	public void testInterwikiSnipSnap() {
+		Assert.assertEquals(
+			"<p><a href=\"http://www.snipsnap.org/space/Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikisnipsnap.creole"));
+	}
+
+	@Test
+	public void testInterwikiTiddlyWiki() {
+		Assert.assertEquals(
+			"<p><a href=\"http://www.tiddlywiki.com/#Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikitiddlywiki.creole"));
+	}
+
+	@Test
+	public void testInterwikiTWiki() {
+		Assert.assertEquals(
+			"<p><a href=\"http://twiki.org/cgi-bin/view/TWiki/Liferay\">" +
+				"Liferay</a> </p>",
+			translate("interwikitwiki.creole"));
+	}
+
+	@Test
+	public void testInterwikiUsemod() {
+		Assert.assertEquals(
+			"<p><a href=\"http://http://www.usemod.com/cgi-bin/wiki.pl" +
+				"?Liferay\">Liferay</a> </p>",
+			translate("interwikiusemod.creole"));
+	}
+
+	@Test
+	public void testInterwikiWikipedia() {
+		Assert.assertEquals(
+			"<p><a href=\"http://wikipedia.org/wiki/Liferay\">Liferay</a> </p>",
+			translate("interwikiwikipedia.creole"));
 	}
 
 	@Test
@@ -306,12 +463,33 @@ public class TranslationToXHTMLTest extends PowerMockito {
 
 	@Test
 	public void testParseLinkEmpty() {
-		Assert.assertEquals("<p> </p>", translate("link-8.creole"));
+		Assert.assertEquals("<p></p>", translate("link-8.creole"));
 	}
 
 	@Test
 	public void testParseLinkEmptyInHeader() {
 		Assert.assertEquals("<h2>  </h2>", translate("link-9.creole"));
+	}
+
+	@Test
+	public void testParseLinkFtp() {
+		Assert.assertEquals(
+			"<p><a href=\"ftp://liferay.com\">Liferay</a> </p>",
+			translate("link-12.creole"));
+	}
+
+	@Test
+	public void testParseLinkHttp() {
+		Assert.assertEquals(
+			"<p><a href=\"http://liferay.com\">Liferay</a> </p>",
+			translate("link-10.creole"));
+	}
+
+	@Test
+	public void testParseLinkHttps() {
+		Assert.assertEquals(
+			"<p><a href=\"https://liferay.com\">Liferay</a> </p>",
+			translate("link-11.creole"));
 	}
 
 	@Test
@@ -334,6 +512,20 @@ public class TranslationToXHTMLTest extends PowerMockito {
 		Assert.assertEquals(
 			"<ul><li>This is an item with a link <a href=\"l\">a</a></li></ul>",
 			translate("list-11.creole"));
+	}
+
+	@Test
+	public void testParseLinkMailTo() {
+		Assert.assertEquals(
+			"<p><a href=\"mailto:liferay@liferay.com\">Liferay Mail</a> </p>",
+			translate("link-13.creole"));
+	}
+
+	@Test
+	public void testParseLinkMMS() {
+		Assert.assertEquals(
+			"<p><a href=\"mms://liferay.com/file\">Liferay File</a> </p>",
+			translate("link-14.creole"));
 	}
 
 	@Test
@@ -493,6 +685,23 @@ public class TranslationToXHTMLTest extends PowerMockito {
 		Assert.assertEquals(
 			"<p>Text with some content in <em>italic</em> </p>",
 			translate("text-3.creole"));
+	}
+
+	@Test
+	public void testParseTableImagesNested() {
+		Assert.assertEquals(
+			"<table><tr><th>H1</th></tr><tr><td><img " +
+				"src=\"image.png\" alt=\"Image\"/></td></tr></table>",
+			translate("table-4.creole"));
+	}
+
+	@Test
+	public void testParseTableLinksNested() {
+		Assert.assertEquals(
+			"<table><tr><th>H1</th></tr><tr><td><a " +
+				"href=\"http://www.liferay.com \"> Liferay</a></td></tr>" +
+					"</table>",
+			translate("table-3.creole"));
 	}
 
 	@Test

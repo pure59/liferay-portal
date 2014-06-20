@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.util.Portal;
 import com.liferay.portlet.login.util.LoginUtil;
 
@@ -139,7 +140,9 @@ public class BasicAuthHeaderAutoLogin
 
 		// We only handle HTTP Basic authentication
 
-		if (!basic.equalsIgnoreCase(HttpServletRequest.BASIC_AUTH)) {
+		if (!StringUtil.equalsIgnoreCase(
+				basic, HttpServletRequest.BASIC_AUTH)) {
+
 			return null;
 		}
 

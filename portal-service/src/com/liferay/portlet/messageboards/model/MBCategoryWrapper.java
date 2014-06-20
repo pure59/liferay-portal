@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.messageboards.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see MBCategory
  * @generated
  */
+@ProviderType
 public class MBCategoryWrapper implements MBCategory, ModelWrapper<MBCategory> {
 	public MBCategoryWrapper(MBCategory mbCategory) {
 		_mbCategory = mbCategory;
@@ -314,11 +317,9 @@ public class MBCategoryWrapper implements MBCategory, ModelWrapper<MBCategory> {
 	* Returns the user uuid of this message boards category.
 	*
 	* @return the user uuid of this message boards category
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _mbCategory.getUserUuid();
 	}
 
@@ -576,11 +577,9 @@ public class MBCategoryWrapper implements MBCategory, ModelWrapper<MBCategory> {
 	* Returns the status by user uuid of this message boards category.
 	*
 	* @return the status by user uuid of this message boards category
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getStatusByUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getStatusByUserUuid() {
 		return _mbCategory.getStatusByUserUuid();
 	}
 
@@ -635,8 +634,70 @@ public class MBCategoryWrapper implements MBCategory, ModelWrapper<MBCategory> {
 	}
 
 	/**
+	* Returns the trash entry created when this message boards category was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this message boards category.
+	*
+	* @return the trash entry created when this message boards category was moved to the Recycle Bin
+	*/
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry getTrashEntry()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mbCategory.getTrashEntry();
+	}
+
+	/**
+	* Returns the class primary key of the trash entry for this message boards category.
+	*
+	* @return the class primary key of the trash entry for this message boards category
+	*/
+	@Override
+	public long getTrashEntryClassPK() {
+		return _mbCategory.getTrashEntryClassPK();
+	}
+
+	/**
+	* Returns the trash handler for this message boards category.
+	*
+	* @return the trash handler for this message boards category
+	*/
+	@Override
+	public com.liferay.portal.kernel.trash.TrashHandler getTrashHandler() {
+		return _mbCategory.getTrashHandler();
+	}
+
+	/**
+	* Returns <code>true</code> if this message boards category is in the Recycle Bin.
+	*
+	* @return <code>true</code> if this message boards category is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrash() {
+		return _mbCategory.isInTrash();
+	}
+
+	/**
+	* Returns <code>true</code> if the parent of this message boards category is in the Recycle Bin.
+	*
+	* @return <code>true</code> if the parent of this message boards category is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrashContainer() {
+		return _mbCategory.isInTrashContainer();
+	}
+
+	@Override
+	public boolean isInTrashExplicitly() {
+		return _mbCategory.isInTrashExplicitly();
+	}
+
+	@Override
+	public boolean isInTrashImplicitly() {
+		return _mbCategory.isInTrashImplicitly();
+	}
+
+	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
+	@Deprecated
 	@Override
 	public boolean getApproved() {
 		return _mbCategory.getApproved();
@@ -703,16 +764,6 @@ public class MBCategoryWrapper implements MBCategory, ModelWrapper<MBCategory> {
 	}
 
 	/**
-	* Returns <code>true</code> if this message boards category is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this message boards category is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _mbCategory.isInTrash();
-	}
-
-	/**
 	* Returns <code>true</code> if this message boards category is pending.
 	*
 	* @return <code>true</code> if this message boards category is pending; <code>false</code> otherwise
@@ -745,7 +796,7 @@ public class MBCategoryWrapper implements MBCategory, ModelWrapper<MBCategory> {
 	/**
 	* Sets the container model ID of this message boards category.
 	*
-	* @param container model ID of this message boards category
+	* @param containerModelId the container model ID of this message boards category
 	*/
 	@Override
 	public void setContainerModelId(long containerModelId) {
@@ -775,7 +826,7 @@ public class MBCategoryWrapper implements MBCategory, ModelWrapper<MBCategory> {
 	/**
 	* Sets the parent container model ID of this message boards category.
 	*
-	* @param parent container model ID of this message boards category
+	* @param parentContainerModelId the parent container model ID of this message boards category
 	*/
 	@Override
 	public void setParentContainerModelId(long parentContainerModelId) {
@@ -882,40 +933,26 @@ public class MBCategoryWrapper implements MBCategory, ModelWrapper<MBCategory> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_mbCategory.persist();
 	}
 
 	@Override
 	public java.util.List<java.lang.Long> getAncestorCategoryIds()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbCategory.getAncestorCategoryIds();
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.messageboards.model.MBCategory> getAncestors()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbCategory.getAncestors();
 	}
 
 	@Override
 	public com.liferay.portlet.messageboards.model.MBCategory getParentCategory()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbCategory.getParentCategory();
-	}
-
-	@Override
-	public com.liferay.portlet.messageboards.model.MBCategory getTrashContainer() {
-		return _mbCategory.getTrashContainer();
-	}
-
-	@Override
-	public boolean isInTrashContainer() {
-		return _mbCategory.isInTrashContainer();
 	}
 
 	@Override
@@ -950,6 +987,7 @@ public class MBCategoryWrapper implements MBCategory, ModelWrapper<MBCategory> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public MBCategory getWrappedMBCategory() {
 		return _mbCategory;
 	}
@@ -957,6 +995,16 @@ public class MBCategoryWrapper implements MBCategory, ModelWrapper<MBCategory> {
 	@Override
 	public MBCategory getWrappedModel() {
 		return _mbCategory;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _mbCategory.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _mbCategory.isFinderCacheEnabled();
 	}
 
 	@Override

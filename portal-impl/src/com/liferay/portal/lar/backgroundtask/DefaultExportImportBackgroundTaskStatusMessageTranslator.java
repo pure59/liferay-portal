@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -46,6 +46,22 @@ public class DefaultExportImportBackgroundTaskStatusMessageTranslator
 		}
 	}
 
+	protected long getTotal(Map<String, LongWrapper> modelCounters) {
+		if (modelCounters == null) {
+			return 0;
+		}
+
+		long total = 0;
+
+		for (Map.Entry<String, LongWrapper> entry : modelCounters.entrySet()) {
+			LongWrapper longWrapper = entry.getValue();
+
+			total += longWrapper.getValue();
+		}
+
+		return total;
+	}
+
 	protected synchronized void translateLayoutMessage(
 		BackgroundTaskStatus backgroundTaskStatus, Message message) {
 
@@ -55,6 +71,8 @@ public class DefaultExportImportBackgroundTaskStatusMessageTranslator
 		backgroundTaskStatus.setAttribute(
 			"allModelAdditionCounters",
 			new HashMap<String, LongWrapper>(modelAdditionCounters));
+		backgroundTaskStatus.setAttribute(
+			"allModelAdditionCountersTotal", getTotal(modelAdditionCounters));
 
 		Map<String, LongWrapper> modelDeletionCounters =
 			(Map<String, LongWrapper>)message.get("modelDeletionCounters");
@@ -62,6 +80,8 @@ public class DefaultExportImportBackgroundTaskStatusMessageTranslator
 		backgroundTaskStatus.setAttribute(
 			"allModelDeletionCounters",
 			new HashMap<String, LongWrapper>(modelDeletionCounters));
+		backgroundTaskStatus.setAttribute(
+			"allModelDeletionCountersTotal", getTotal(modelDeletionCounters));
 	}
 
 	protected synchronized void translatePortletMessage(
@@ -75,6 +95,8 @@ public class DefaultExportImportBackgroundTaskStatusMessageTranslator
 		backgroundTaskStatus.setAttribute(
 			"allModelAdditionCounters",
 			new HashMap<String, LongWrapper>(modelAdditionCounters));
+		backgroundTaskStatus.setAttribute(
+			"allModelAdditionCountersTotal", getTotal(modelAdditionCounters));
 
 		Map<String, LongWrapper> modelDeletionCounters =
 			(Map<String, LongWrapper>)message.get("modelDeletionCounters");
@@ -82,6 +104,8 @@ public class DefaultExportImportBackgroundTaskStatusMessageTranslator
 		backgroundTaskStatus.setAttribute(
 			"allModelDeletionCounters",
 			new HashMap<String, LongWrapper>(modelDeletionCounters));
+		backgroundTaskStatus.setAttribute(
+			"allModelDeletionCountersTotal", getTotal(modelDeletionCounters));
 
 		String portletId = message.getString("portletId");
 
@@ -104,6 +128,9 @@ public class DefaultExportImportBackgroundTaskStatusMessageTranslator
 		backgroundTaskStatus.setAttribute(
 			"currentModelAdditionCounters",
 			new HashMap<String, LongWrapper>(modelAdditionCounters));
+		backgroundTaskStatus.setAttribute(
+			"currentModelAdditionCountersTotal",
+			getTotal(modelAdditionCounters));
 
 		Map<String, LongWrapper> modelDeletionCounters =
 			(Map<String, LongWrapper>)message.get("modelDeletionCounters");
@@ -111,6 +138,13 @@ public class DefaultExportImportBackgroundTaskStatusMessageTranslator
 		backgroundTaskStatus.setAttribute(
 			"currentModelDeletionCounters",
 			new HashMap<String, LongWrapper>(modelDeletionCounters));
+		backgroundTaskStatus.setAttribute(
+			"currentModelDeletionCountersTotal",
+			getTotal(modelDeletionCounters));
+
+		String stagedModelName = message.getString("stagedModelName");
+
+		backgroundTaskStatus.setAttribute("stagedModelName", stagedModelName);
 
 		String stagedModelType = message.getString("stagedModelType");
 

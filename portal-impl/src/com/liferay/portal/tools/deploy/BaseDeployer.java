@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -25,11 +25,13 @@ import com.liferay.portal.kernel.plugin.License;
 import com.liferay.portal.kernel.plugin.PluginPackage;
 import com.liferay.portal.kernel.servlet.PluginContextListener;
 import com.liferay.portal.kernel.servlet.PortalClassLoaderServlet;
+import com.liferay.portal.kernel.servlet.PortalDelegateServlet;
 import com.liferay.portal.kernel.servlet.PortletServlet;
 import com.liferay.portal.kernel.servlet.SecurePluginContextListener;
 import com.liferay.portal.kernel.servlet.SecureServlet;
 import com.liferay.portal.kernel.servlet.SerializableSessionAttributeListener;
 import com.liferay.portal.kernel.servlet.filters.invoker.InvokerFilter;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -50,9 +52,10 @@ import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.plugin.PluginPackageUtil;
+import com.liferay.portal.security.lang.SecurityManagerUtil;
+import com.liferay.portal.tools.ToolDependencies;
 import com.liferay.portal.tools.WebXMLBuilder;
 import com.liferay.portal.util.ExtRegistry;
-import com.liferay.portal.util.InitUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portal.util.PropsUtil;
@@ -91,13 +94,13 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 	public static final String DEPLOY_TO_PREFIX = "DEPLOY_TO__";
 
 	public static void main(String[] args) {
-		InitUtil.initWithSpring();
+		ToolDependencies.wireDeployers();
 
 		List<String> wars = new ArrayList<String>();
 		List<String> jars = new ArrayList<String>();
 
 		for (String arg : args) {
-			String fileName = arg.toLowerCase();
+			String fileName = StringUtil.toLowerCase(arg);
 
 			if (fileName.endsWith(".war")) {
 				wars.add(arg);
@@ -352,6 +355,10 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			String jarName = jarFullName.substring(
 				jarFullName.lastIndexOf("/") + 1);
 
+			if (!FileUtil.exists(jarFullName)) {
+				DeployUtil.getResourcePath(jarName);
+			}
+
 			FileUtil.copyFile(
 				jarFullName, srcFile + "/WEB-INF/lib/" + jarName, false);
 		}
@@ -424,9 +431,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			String[] commonsLoggingJars = pluginLibDir.list(
 				new GlobFilenameFilter("commons-logging*.jar"));
 
-			if ((commonsLoggingJars == null) ||
-				(commonsLoggingJars.length == 0)) {
-
+			if (ArrayUtil.isEmpty(commonsLoggingJars)) {
 				String portalJarPath =
 					PortalUtil.getPortalLibDir() + "commons-logging.jar";
 
@@ -442,7 +447,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			String[] log4jJars = pluginLibDir.list(
 				new GlobFilenameFilter("log4j*.jar"));
 
-			if ((log4jJars == null) || (log4jJars.length == 0)) {
+			if (ArrayUtil.isEmpty(log4jJars)) {
 				String portalJarPath =
 					PortalUtil.getPortalLibDir() + "log4j.jar";
 
@@ -545,7 +550,9 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 	}
 
 	public void copyTomcatContextXml(File targetDir) throws Exception {
-		if (!appServerType.equals(ServerDetector.TOMCAT_ID)) {
+		if (!appServerType.equals(ServerDetector.TOMCAT_ID) ||
+			SecurityManagerUtil.ENABLED) {
+
 			return;
 		}
 
@@ -607,14 +614,14 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			files = FileUtil.sortFiles(files);
 
 			for (File srcFile : files) {
-				String fileName = srcFile.getName().toLowerCase();
+				String fileName = StringUtil.toLowerCase(srcFile.getName());
 
 				boolean deploy = false;
 
 				if (fileName.endsWith(".war") || fileName.endsWith(".zip")) {
 					deploy = true;
 
-					if (wars.size() > 0) {
+					if (!wars.isEmpty()) {
 						if (!wars.contains(srcFile.getName())) {
 							deploy = false;
 						}
@@ -797,7 +804,12 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 					WarTask.war(srcFile, deployDir, excludes, webXml);
 				}
 
-				DeleteTask.deleteDirectory(tempDir);
+				if (tempDir.isDirectory()) {
+					DeleteTask.deleteDirectory(tempDir);
+				}
+				else {
+					tempDir.delete();
+				}
 			}
 		}
 		else {
@@ -850,7 +862,13 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 		File srcFile = autoDeploymentContext.getFile();
 
-		PluginPackage pluginPackage = readPluginPackage(srcFile);
+		PluginPackage pluginPackage = autoDeploymentContext.getPluginPackage();
+
+		if (pluginPackage == null) {
+			pluginPackage = readPluginPackage(srcFile);
+
+			autoDeploymentContext.setPluginPackage(pluginPackage);
+		}
 
 		if (_log.isInfoEnabled()) {
 			_log.info("Deploying " + srcFile.getName());
@@ -1185,11 +1203,13 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			sb.append("</context-param>");
 		}
 
-		sb.append("<listener>");
-		sb.append("<listener-class>");
-		sb.append(SerializableSessionAttributeListener.class.getName());
-		sb.append("</listener-class>");
-		sb.append("</listener>");
+		if (PropsValues.SESSION_VERIFY_SERIALIZABLE_ATTRIBUTE) {
+			sb.append("<listener>");
+			sb.append("<listener-class>");
+			sb.append(SerializableSessionAttributeListener.class.getName());
+			sb.append("</listener-class>");
+			sb.append("</listener>");
+		}
 
 		sb.append(getDynamicResourceServletContent());
 
@@ -1510,8 +1530,8 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 		Map<String, String> filterMap = new HashMap<String, String>();
 
-		filterMap.put("author", pluginPackage.getAuthor());
-		filterMap.put("change_log", pluginPackage.getChangeLog());
+		filterMap.put("author", wrapCDATA(pluginPackage.getAuthor()));
+		filterMap.put("change_log", wrapCDATA(pluginPackage.getChangeLog()));
 		filterMap.put(
 			"licenses",
 			getPluginPackageLicensesXml(pluginPackage.getLicenses()));
@@ -1519,12 +1539,13 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			"liferay_versions",
 			getPluginPackageLiferayVersionsXml(
 				pluginPackage.getLiferayVersions()));
-		filterMap.put("long_description", pluginPackage.getLongDescription());
+		filterMap.put(
+			"long_description", wrapCDATA(pluginPackage.getLongDescription()));
 		filterMap.put("module_artifact_id", pluginPackage.getArtifactId());
 		filterMap.put("module_group_id", pluginPackage.getGroupId());
 		filterMap.put("module_version", pluginPackage.getVersion());
 		filterMap.put("page_url", pluginPackage.getPageURL());
-		filterMap.put("plugin_name", pluginPackage.getName());
+		filterMap.put("plugin_name", wrapCDATA(pluginPackage.getName()));
 		filterMap.put("plugin_type", pluginType);
 		filterMap.put(
 			"plugin_type_name",
@@ -1536,7 +1557,9 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			"required_deployment_contexts",
 			getPluginPackageRequiredDeploymentContextsXml(
 				pluginPackage.getRequiredDeploymentContexts()));
-		filterMap.put("short_description", pluginPackage.getShortDescription());
+		filterMap.put(
+			"short_description",
+			wrapCDATA(pluginPackage.getShortDescription()));
 		filterMap.put("tags", getPluginPackageTagsXml(pluginPackage.getTags()));
 
 		return filterMap;
@@ -1562,7 +1585,8 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 		if (!GetterUtil.getBoolean(
 				properties.getProperty(
-					"servlet-context-include-filters-enabled"), true)) {
+					"servlet-context-include-filters-enabled"),
+				true)) {
 
 			return StringPool.BLANK;
 		}
@@ -1795,7 +1819,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 		Properties properties = getPluginPackageProperties(srcFile);
 
-		if ((properties == null) || (properties.size() == 0)) {
+		if ((properties == null) || properties.isEmpty()) {
 			return null;
 		}
 
@@ -1970,13 +1994,13 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 			// LEP-6415
 
-			if (shortFileName.equalsIgnoreCase("mule-config.xml")) {
+			if (StringUtil.equalsIgnoreCase(shortFileName, "mule-config.xml")) {
 				continue;
 			}
 
 			String ext = GetterUtil.getString(FileUtil.getExtension(fileName));
 
-			if (!ext.equalsIgnoreCase("xml")) {
+			if (!StringUtil.equalsIgnoreCase(ext, "xml")) {
 				continue;
 			}
 
@@ -2022,7 +2046,8 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			String listenerClass = GetterUtil.getString(
 				listenerElement.elementText("listener-class"));
 
-			if (listenerClass.equals(
+			if (listenerClass.equals(PluginContextListener.class.getName()) ||
+				listenerClass.equals(
 					SecurePluginContextListener.class.getName())) {
 
 				continue;
@@ -2055,6 +2080,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 			if (servletClass.equals(
 					PortalClassLoaderServlet.class.getName()) ||
+				servletClass.equals(PortalDelegateServlet.class.getName()) ||
 				servletClass.equals(PortletServlet.class.getName())) {
 
 				continue;
@@ -2310,7 +2336,8 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			String listenerClass = GetterUtil.getString(
 				listenerElement.elementText("listener-class"));
 
-			if (listenerClass.equals(
+			if (listenerClass.equals(PluginContextListener.class.getName()) ||
+				listenerClass.equals(
 					SerializableSessionAttributeListener.class.getName()) ||
 				listenerClass.equals(
 					SecurePluginContextListener.class.getName())) {
@@ -2375,6 +2402,11 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 		if (_log.isInfoEnabled()) {
 			_log.info("Modifying Servlet " + webXmlVersion + " " + webXml);
 		}
+	}
+
+	@Override
+	public String wrapCDATA(String string) {
+		return StringPool.CDATA_OPEN + string + StringPool.CDATA_CLOSE;
 	}
 
 	protected String appServerType;

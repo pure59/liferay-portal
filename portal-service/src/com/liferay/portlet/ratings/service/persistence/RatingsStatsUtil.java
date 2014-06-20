@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,10 @@
 
 package com.liferay.portlet.ratings.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.service.ServiceContext;
@@ -37,6 +38,7 @@ import java.util.List;
  * @see RatingsStatsPersistenceImpl
  * @generated
  */
+@ProviderType
 public class RatingsStatsUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -61,8 +63,7 @@ public class RatingsStatsUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#countWithDynamicQuery(DynamicQuery)
 	 */
-	public long countWithDynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
 	}
 
@@ -70,7 +71,7 @@ public class RatingsStatsUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery)
 	 */
 	public static List<RatingsStats> findWithDynamicQuery(
-		DynamicQuery dynamicQuery) throws SystemException {
+		DynamicQuery dynamicQuery) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -78,8 +79,7 @@ public class RatingsStatsUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery, int, int)
 	 */
 	public static List<RatingsStats> findWithDynamicQuery(
-		DynamicQuery dynamicQuery, int start, int end)
-		throws SystemException {
+		DynamicQuery dynamicQuery, int start, int end) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -88,7 +88,7 @@ public class RatingsStatsUtil {
 	 */
 	public static List<RatingsStats> findWithDynamicQuery(
 		DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
+		OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findWithDynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
@@ -97,8 +97,7 @@ public class RatingsStatsUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel)
 	 */
-	public static RatingsStats update(RatingsStats ratingsStats)
-		throws SystemException {
+	public static RatingsStats update(RatingsStats ratingsStats) {
 		return getPersistence().update(ratingsStats);
 	}
 
@@ -106,7 +105,7 @@ public class RatingsStatsUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel, ServiceContext)
 	 */
 	public static RatingsStats update(RatingsStats ratingsStats,
-		ServiceContext serviceContext) throws SystemException {
+		ServiceContext serviceContext) {
 		return getPersistence().update(ratingsStats, serviceContext);
 	}
 
@@ -117,12 +116,10 @@ public class RatingsStatsUtil {
 	* @param classPK the class p k
 	* @return the matching ratings stats
 	* @throws com.liferay.portlet.ratings.NoSuchStatsException if a matching ratings stats could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.ratings.model.RatingsStats findByC_C(
 		long classNameId, long classPK)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.ratings.NoSuchStatsException {
+		throws com.liferay.portlet.ratings.NoSuchStatsException {
 		return getPersistence().findByC_C(classNameId, classPK);
 	}
 
@@ -132,11 +129,9 @@ public class RatingsStatsUtil {
 	* @param classNameId the class name ID
 	* @param classPK the class p k
 	* @return the matching ratings stats, or <code>null</code> if a matching ratings stats could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.ratings.model.RatingsStats fetchByC_C(
-		long classNameId, long classPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long classNameId, long classPK) {
 		return getPersistence().fetchByC_C(classNameId, classPK);
 	}
 
@@ -147,11 +142,9 @@ public class RatingsStatsUtil {
 	* @param classPK the class p k
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching ratings stats, or <code>null</code> if a matching ratings stats could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.ratings.model.RatingsStats fetchByC_C(
-		long classNameId, long classPK, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long classNameId, long classPK, boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByC_C(classNameId, classPK, retrieveFromCache);
 	}
@@ -162,12 +155,10 @@ public class RatingsStatsUtil {
 	* @param classNameId the class name ID
 	* @param classPK the class p k
 	* @return the ratings stats that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.ratings.model.RatingsStats removeByC_C(
 		long classNameId, long classPK)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.ratings.NoSuchStatsException {
+		throws com.liferay.portlet.ratings.NoSuchStatsException {
 		return getPersistence().removeByC_C(classNameId, classPK);
 	}
 
@@ -177,10 +168,8 @@ public class RatingsStatsUtil {
 	* @param classNameId the class name ID
 	* @param classPK the class p k
 	* @return the number of matching ratings statses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_C(long classNameId, long classPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_C(long classNameId, long classPK) {
 		return getPersistence().countByC_C(classNameId, classPK);
 	}
 
@@ -221,18 +210,14 @@ public class RatingsStatsUtil {
 	* @param statsId the primary key of the ratings stats
 	* @return the ratings stats that was removed
 	* @throws com.liferay.portlet.ratings.NoSuchStatsException if a ratings stats with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.ratings.model.RatingsStats remove(
-		long statsId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.ratings.NoSuchStatsException {
+		long statsId) throws com.liferay.portlet.ratings.NoSuchStatsException {
 		return getPersistence().remove(statsId);
 	}
 
 	public static com.liferay.portlet.ratings.model.RatingsStats updateImpl(
-		com.liferay.portlet.ratings.model.RatingsStats ratingsStats)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.ratings.model.RatingsStats ratingsStats) {
 		return getPersistence().updateImpl(ratingsStats);
 	}
 
@@ -242,12 +227,9 @@ public class RatingsStatsUtil {
 	* @param statsId the primary key of the ratings stats
 	* @return the ratings stats
 	* @throws com.liferay.portlet.ratings.NoSuchStatsException if a ratings stats with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.ratings.model.RatingsStats findByPrimaryKey(
-		long statsId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.ratings.NoSuchStatsException {
+		long statsId) throws com.liferay.portlet.ratings.NoSuchStatsException {
 		return getPersistence().findByPrimaryKey(statsId);
 	}
 
@@ -256,22 +238,23 @@ public class RatingsStatsUtil {
 	*
 	* @param statsId the primary key of the ratings stats
 	* @return the ratings stats, or <code>null</code> if a ratings stats with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.ratings.model.RatingsStats fetchByPrimaryKey(
-		long statsId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long statsId) {
 		return getPersistence().fetchByPrimaryKey(statsId);
+	}
+
+	public static java.util.Map<java.io.Serializable, com.liferay.portlet.ratings.model.RatingsStats> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys) {
+		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
 	* Returns all the ratings statses.
 	*
 	* @return the ratings statses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static java.util.List<com.liferay.portlet.ratings.model.RatingsStats> findAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static java.util.List<com.liferay.portlet.ratings.model.RatingsStats> findAll() {
 		return getPersistence().findAll();
 	}
 
@@ -285,11 +268,9 @@ public class RatingsStatsUtil {
 	* @param start the lower bound of the range of ratings statses
 	* @param end the upper bound of the range of ratings statses (not inclusive)
 	* @return the range of ratings statses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.ratings.model.RatingsStats> findAll(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return getPersistence().findAll(start, end);
 	}
 
@@ -304,22 +285,17 @@ public class RatingsStatsUtil {
 	* @param end the upper bound of the range of ratings statses (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of ratings statses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.ratings.model.RatingsStats> findAll(
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findAll(start, end, orderByComparator);
 	}
 
 	/**
 	* Removes all the ratings statses from the database.
-	*
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeAll() {
 		getPersistence().removeAll();
 	}
 
@@ -327,10 +303,8 @@ public class RatingsStatsUtil {
 	* Returns the number of ratings statses.
 	*
 	* @return the number of ratings statses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countAll() {
 		return getPersistence().countAll();
 	}
 
@@ -348,6 +322,7 @@ public class RatingsStatsUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setPersistence(RatingsStatsPersistence persistence) {
 	}
 

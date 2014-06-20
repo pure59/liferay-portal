@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,6 @@
 package com.liferay.portal.kernel.lock;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.model.Lock;
@@ -41,13 +40,13 @@ public class LockProtectedAction<T> {
 		return _returnValue;
 	}
 
-	public void performAction() throws PortalException, SystemException {
+	public void performAction() throws PortalException {
 		Lock lock = null;
 
 		while (true) {
 			try {
 				lock = LockLocalServiceUtil.lock(
-					_className, _lockKey, _lockKey, false);
+					_className, _lockKey, _lockKey);
 			}
 			catch (Exception e) {
 				if (_log.isWarnEnabled()) {
@@ -62,8 +61,7 @@ public class LockProtectedAction<T> {
 					_returnValue = performProtectedAction();
 				}
 				finally {
-					LockLocalServiceUtil.unlock(
-						_className, _lockKey, _lockKey, false);
+					LockLocalServiceUtil.unlock(_className, _lockKey, _lockKey);
 				}
 
 				break;
@@ -75,7 +73,7 @@ public class LockProtectedAction<T> {
 					_timeout) {
 
 				LockLocalServiceUtil.unlock(
-					_className, _lockKey, lock.getOwner(), false);
+					_className, _lockKey, lock.getOwner());
 
 				if (_log.isWarnEnabled()) {
 					_log.warn("Removed lock " + lock + " due to timeout");
@@ -96,9 +94,7 @@ public class LockProtectedAction<T> {
 	}
 
 	@SuppressWarnings("unused")
-	protected T performProtectedAction()
-		throws PortalException, SystemException {
-
+	protected T performProtectedAction() throws PortalException {
 		return null;
 	}
 

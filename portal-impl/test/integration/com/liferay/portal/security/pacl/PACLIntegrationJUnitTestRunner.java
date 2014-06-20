@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,6 @@
 
 package com.liferay.portal.security.pacl;
 
-import com.liferay.portal.deploy.hot.HookHotDeployListener;
-import com.liferay.portal.kernel.deploy.hot.HotDeployUtil;
-import com.liferay.portal.kernel.util.PortalLifecycleUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
@@ -61,20 +58,14 @@ public class PACLIntegrationJUnitTestRunner
 			System.setProperty("external-properties", resource.getPath());
 		}
 
-		System.setProperty("catalina.base", ".");
-
 		System.setProperty(
 			Context.INITIAL_CONTEXT_FACTORY,
 			"org.apache.naming.java.javaURLContextFactory");
 
+		super.initApplicationContext();
+
 		ServiceTestUtil.initServices();
 		ServiceTestUtil.initPermissions();
-
-		HotDeployUtil.registerListener(new HookHotDeployListener());
-
-		HotDeployUtil.setCapturePrematureEvents(false);
-
-		PortalLifecycleUtil.flushInits();
 
 		_initialized = true;
 	}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.polls.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see PollsChoice
  * @generated
  */
+@ProviderType
 public class PollsChoiceWrapper implements PollsChoice,
 	ModelWrapper<PollsChoice> {
 	public PollsChoiceWrapper(PollsChoice pollsChoice) {
@@ -259,11 +262,9 @@ public class PollsChoiceWrapper implements PollsChoice,
 	* Returns the user uuid of this polls choice.
 	*
 	* @return the user uuid of this polls choice
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _pollsChoice.getUserUuid();
 	}
 
@@ -578,6 +579,22 @@ public class PollsChoiceWrapper implements PollsChoice,
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _pollsChoice.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _pollsChoice.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_pollsChoice.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -626,14 +643,12 @@ public class PollsChoiceWrapper implements PollsChoice,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_pollsChoice.persist();
 	}
 
 	@Override
-	public int getVotesCount()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getVotesCount() {
 		return _pollsChoice.getVotesCount();
 	}
 
@@ -664,6 +679,7 @@ public class PollsChoiceWrapper implements PollsChoice,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public PollsChoice getWrappedPollsChoice() {
 		return _pollsChoice;
 	}
@@ -671,6 +687,16 @@ public class PollsChoiceWrapper implements PollsChoice,
 	@Override
 	public PollsChoice getWrappedModel() {
 		return _pollsChoice;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _pollsChoice.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _pollsChoice.isFinderCacheEnabled();
 	}
 
 	@Override

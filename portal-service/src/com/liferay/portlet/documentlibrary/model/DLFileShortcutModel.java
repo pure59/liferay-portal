@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,15 +14,20 @@
 
 package com.liferay.portlet.documentlibrary.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.StagedGroupedModel;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.model.WorkflowedModel;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
+import com.liferay.portlet.trash.model.TrashEntry;
 
 import java.io.Serializable;
 
@@ -41,8 +46,9 @@ import java.util.Date;
  * @see com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl
  * @generated
  */
+@ProviderType
 public interface DLFileShortcutModel extends BaseModel<DLFileShortcut>,
-	StagedGroupedModel, WorkflowedModel {
+	StagedGroupedModel, TrashedModel, WorkflowedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -146,10 +152,9 @@ public interface DLFileShortcutModel extends BaseModel<DLFileShortcut>,
 	 * Returns the user uuid of this document library file shortcut.
 	 *
 	 * @return the user uuid of this document library file shortcut
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getUserUuid() throws SystemException;
+	public String getUserUuid();
 
 	/**
 	 * Sets the user uuid of this document library file shortcut.
@@ -251,6 +256,21 @@ public interface DLFileShortcutModel extends BaseModel<DLFileShortcut>,
 	public void setToFileEntryId(long toFileEntryId);
 
 	/**
+	 * Returns the tree path of this document library file shortcut.
+	 *
+	 * @return the tree path of this document library file shortcut
+	 */
+	@AutoEscape
+	public String getTreePath();
+
+	/**
+	 * Sets the tree path of this document library file shortcut.
+	 *
+	 * @param treePath the tree path of this document library file shortcut
+	 */
+	public void setTreePath(String treePath);
+
+	/**
 	 * Returns the active of this document library file shortcut.
 	 *
 	 * @return the active of this document library file shortcut
@@ -307,10 +327,9 @@ public interface DLFileShortcutModel extends BaseModel<DLFileShortcut>,
 	 * Returns the status by user uuid of this document library file shortcut.
 	 *
 	 * @return the status by user uuid of this document library file shortcut
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getStatusByUserUuid() throws SystemException;
+	public String getStatusByUserUuid();
 
 	/**
 	 * Sets the status by user uuid of this document library file shortcut.
@@ -354,8 +373,55 @@ public interface DLFileShortcutModel extends BaseModel<DLFileShortcut>,
 	public void setStatusDate(Date statusDate);
 
 	/**
+	 * Returns the trash entry created when this document library file shortcut was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this document library file shortcut.
+	 *
+	 * @return the trash entry created when this document library file shortcut was moved to the Recycle Bin
+	 */
+	@Override
+	public TrashEntry getTrashEntry() throws PortalException;
+
+	/**
+	 * Returns the class primary key of the trash entry for this document library file shortcut.
+	 *
+	 * @return the class primary key of the trash entry for this document library file shortcut
+	 */
+	@Override
+	public long getTrashEntryClassPK();
+
+	/**
+	 * Returns the trash handler for this document library file shortcut.
+	 *
+	 * @return the trash handler for this document library file shortcut
+	 */
+	@Override
+	public TrashHandler getTrashHandler();
+
+	/**
+	 * Returns <code>true</code> if this document library file shortcut is in the Recycle Bin.
+	 *
+	 * @return <code>true</code> if this document library file shortcut is in the Recycle Bin; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isInTrash();
+
+	/**
+	 * Returns <code>true</code> if the parent of this document library file shortcut is in the Recycle Bin.
+	 *
+	 * @return <code>true</code> if the parent of this document library file shortcut is in the Recycle Bin; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isInTrashContainer();
+
+	@Override
+	public boolean isInTrashExplicitly();
+
+	@Override
+	public boolean isInTrashImplicitly();
+
+	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	 */
+	@Deprecated
 	@Override
 	public boolean getApproved();
 
@@ -406,14 +472,6 @@ public interface DLFileShortcutModel extends BaseModel<DLFileShortcut>,
 	 */
 	@Override
 	public boolean isIncomplete();
-
-	/**
-	 * Returns <code>true</code> if this document library file shortcut is in the Recycle Bin.
-	 *
-	 * @return <code>true</code> if this document library file shortcut is in the Recycle Bin; <code>false</code> otherwise
-	 */
-	@Override
-	public boolean isInTrash();
 
 	/**
 	 * Returns <code>true</code> if this document library file shortcut is pending.

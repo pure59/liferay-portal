@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.dynamicdatamapping.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see DDMStructureLink
  * @generated
  */
+@ProviderType
 public class DDMStructureLinkWrapper implements DDMStructureLink,
 	ModelWrapper<DDMStructureLink> {
 	public DDMStructureLinkWrapper(DDMStructureLink ddmStructureLink) {
@@ -299,15 +302,13 @@ public class DDMStructureLinkWrapper implements DDMStructureLink,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_ddmStructureLink.persist();
 	}
 
 	@Override
 	public com.liferay.portlet.dynamicdatamapping.model.DDMStructure getStructure()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddmStructureLink.getStructure();
 	}
 
@@ -334,6 +335,7 @@ public class DDMStructureLinkWrapper implements DDMStructureLink,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public DDMStructureLink getWrappedDDMStructureLink() {
 		return _ddmStructureLink;
 	}
@@ -341,6 +343,16 @@ public class DDMStructureLinkWrapper implements DDMStructureLink,
 	@Override
 	public DDMStructureLink getWrappedModel() {
 		return _ddmStructureLink;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _ddmStructureLink.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _ddmStructureLink.isFinderCacheEnabled();
 	}
 
 	@Override

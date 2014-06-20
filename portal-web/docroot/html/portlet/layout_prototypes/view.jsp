@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -24,9 +24,7 @@ portletURL.setParameter("struts_action", "/layout_prototypes/view");
 
 <liferay-ui:error exception="<%= RequiredLayoutPrototypeException.class %>" message="you-cannot-delete-page-templates-that-are-used-by-a-page" />
 
-<liferay-util:include page="/html/portlet/layout_prototypes/toolbar.jsp">
-	<liferay-util:param name="toolbarItem" value="view-all" />
-</liferay-util:include>
+<liferay-util:include page="/html/portlet/layout_prototypes/toolbar.jsp" />
 
 <aui:form action="<%= portletURL.toString() %>" method="get" name="fm">
 	<liferay-portlet:renderURLParams varImpl="portletURL" />
@@ -34,14 +32,15 @@ portletURL.setParameter("struts_action", "/layout_prototypes/view");
 	<aui:input name="redirect" type="hidden" value="<%= portletURL.toString() %>" />
 
 	<liferay-ui:search-container
+		emptyResultsMessage="no-page-templates-were-found"
 		headerNames="name"
-		searchContainer='<%= new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, portletURL, null, LanguageUtil.get(pageContext, "no-page-templates-were-found")) %>'
+		iteratorURL="<%= portletURL %>"
+		total="<%= LayoutPrototypeLocalServiceUtil.searchCount(company.getCompanyId(), null) %>"
 	>
 		<aui:input name="deleteLayoutPrototypesIds" type="hidden" />
 
 		<liferay-ui:search-container-results
 			results="<%= LayoutPrototypeLocalServiceUtil.search(company.getCompanyId(), null, searchContainer.getStart(), searchContainer.getEnd(), null) %>"
-			total="<%= LayoutPrototypeLocalServiceUtil.searchCount(company.getCompanyId(), null) %>"
 		/>
 
 		<liferay-ui:search-container-row
@@ -50,17 +49,16 @@ portletURL.setParameter("struts_action", "/layout_prototypes/view");
 			keyProperty="layoutPrototypeId"
 			modelVar="layoutPrototype"
 		>
-			<liferay-portlet:renderURL varImpl="rowURL">
-				<portlet:param name="struts_action" value="/layout_prototypes/edit_layout_prototype" />
-				<portlet:param name="redirect" value="<%= searchContainer.getIteratorURL().toString() %>" />
-				<portlet:param name="backURL" value="<%= searchContainer.getIteratorURL().toString() %>" />
-				<portlet:param name="layoutPrototypeId" value="<%= String.valueOf(layoutPrototype.getLayoutPrototypeId()) %>" />
-			</liferay-portlet:renderURL>
-
 			<liferay-ui:search-container-column-text
 				name="name"
 				orderable="<%= true %>"
 			>
+				<liferay-portlet:renderURL varImpl="rowURL">
+					<portlet:param name="struts_action" value="/layout_prototypes/edit_layout_prototype" />
+					<portlet:param name="redirect" value="<%= searchContainer.getIteratorURL().toString() %>" />
+					<portlet:param name="backURL" value="<%= searchContainer.getIteratorURL().toString() %>" />
+					<portlet:param name="layoutPrototypeId" value="<%= String.valueOf(layoutPrototype.getLayoutPrototypeId()) %>" />
+				</liferay-portlet:renderURL>
 
 				<aui:a href="<%= rowURL.toString() %>"><%= layoutPrototype.getName(locale) %></aui:a>
 
@@ -70,21 +68,26 @@ portletURL.setParameter("struts_action", "/layout_prototypes/view");
 
 				<c:if test="<%= mergeFailCount > PropsValues.LAYOUT_PROTOTYPE_MERGE_FAIL_THRESHOLD %>">
 					<liferay-ui:icon
-						image="../messages/alert"
-						message='<%= LanguageUtil.format(pageContext, "the-propagation-of-changes-from-the-x-has-been-disabled-temporarily-after-x-errors", new Object[] {mergeFailCount, "page-template"}) %>'
+						iconCssClass="icon-warning-sign"
+						message='<%= LanguageUtil.format(request, "the-propagation-of-changes-from-the-x-has-been-disabled-temporarily-after-x-errors", new Object[] {mergeFailCount, LanguageUtil.get(request, "page-template")}, false) %>'
 					/>
 				</c:if>
 			</liferay-ui:search-container-column-text>
 
 			<liferay-ui:search-container-column-text
-				href="<%= rowURL %>"
+				name="description"
+				value="<%= layoutPrototype.getDescription(locale) %>"
+			/>
+
+			<liferay-ui:search-container-column-text
 				name="active"
 			>
-				<%= LanguageUtil.get(pageContext, layoutPrototype.isActive()? "yes" : "no") %>
+				<%= LanguageUtil.get(request, layoutPrototype.isActive()? "yes" : "no") %>
 			</liferay-ui:search-container-column-text>
 
 			<liferay-ui:search-container-column-jsp
 				align="right"
+				cssClass="entry-action"
 				path="/html/portlet/layout_prototypes/layout_prototype_action.jsp"
 			/>
 		</liferay-ui:search-container-row>

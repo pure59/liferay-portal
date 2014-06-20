@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.shopping.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.model.PersistedModel;
 
 /**
@@ -25,6 +27,7 @@ import com.liferay.portal.model.PersistedModel;
  * @see com.liferay.portlet.shopping.model.impl.ShoppingItemModelImpl
  * @generated
  */
+@ProviderType
 public interface ShoppingItem extends ShoppingItemModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -36,8 +39,7 @@ public interface ShoppingItem extends ShoppingItemModel, PersistedModel {
 	public java.lang.String[] getFieldsQuantitiesArray();
 
 	public java.util.List<com.liferay.portlet.shopping.model.ShoppingItemPrice> getItemPrices()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public void setFieldsQuantitiesArray(
 		java.lang.String[] fieldsQuantitiesArray);

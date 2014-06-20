@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -32,15 +32,23 @@ public class SiteMembershipsControlPanelEntry extends BaseControlPanelEntry {
 			PermissionChecker permissionChecker, Group group, Portlet portlet)
 		throws Exception {
 
-		if (group.isCompany() || group.isUser() ||
-			!GroupPermissionUtil.contains(
-				permissionChecker, group.getGroupId(),
-				ActionKeys.ASSIGN_MEMBERS)) {
+		if (group.isCompany() || group.isLayoutSetPrototype() ||
+			!group.isManualMembership() || group.isUser()) {
 
 			return true;
 		}
 
-		if (!group.isManualMembership()) {
+		return false;
+	}
+
+	@Override
+	protected boolean hasPermissionImplicitlyGranted(
+			PermissionChecker permissionChecker, Group group, Portlet portlet)
+		throws Exception {
+
+		if (GroupPermissionUtil.contains(
+				permissionChecker, group, ActionKeys.ASSIGN_MEMBERS)) {
+
 			return true;
 		}
 

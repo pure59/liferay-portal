@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,20 +15,26 @@
 package com.liferay.portal.events;
 
 import com.liferay.portal.kernel.events.SimpleAction;
+import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.template.TemplateConstants;
+import com.liferay.portal.kernel.upgrade.util.UpgradeProcessUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Attribute;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.DocumentException;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.upgrade.UpgradeProcessUtil;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryTypeConstants;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructureConstants;
+import com.liferay.portlet.dynamicdatamapping.model.DDMTemplateConstants;
 import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
+import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.util.DDMXMLUtil;
 import com.liferay.util.ContentUtil;
 
@@ -47,7 +53,9 @@ public abstract class BaseDefaultDDMStructureAction extends SimpleAction {
 			ServiceContext serviceContext)
 		throws Exception {
 
-		List<Element> structureElements = getDDMStructures(fileName);
+		Locale locale = PortalUtil.getSiteDefaultLocale(groupId);
+
+		List<Element> structureElements = getDDMStructures(fileName, locale);
 
 		for (Element structureElement : structureElements) {
 			boolean dynamicStructure = GetterUtil.getBoolean(
@@ -77,12 +85,15 @@ public abstract class BaseDefaultDDMStructureAction extends SimpleAction {
 			String xsd = structureElementRootElement.asXML();
 
 			Map<Locale, String> nameMap = new HashMap<Locale, String>();
-
-			nameMap.put(LocaleUtil.getDefault(), name);
-
 			Map<Locale, String> descriptionMap = new HashMap<Locale, String>();
 
-			descriptionMap.put(LocaleUtil.getDefault(), description);
+			Locale[] locales = LanguageUtil.getAvailableLocales(groupId);
+
+			for (Locale curLocale : locales) {
+				nameMap.put(curLocale, LanguageUtil.get(curLocale, name));
+				descriptionMap.put(
+					curLocale, LanguageUtil.get(curLocale, description));
+			}
 
 			Attribute defaultLocaleAttribute =
 				structureElementRootElement.attribute("default-locale");
@@ -91,7 +102,7 @@ public abstract class BaseDefaultDDMStructureAction extends SimpleAction {
 				defaultLocaleAttribute.getValue());
 
 			xsd = DDMXMLUtil.updateXMLDefaultLocale(
-				xsd, ddmStructureDefaultLocale, LocaleUtil.getDefault());
+				xsd, ddmStructureDefaultLocale, locale);
 
 			if (name.equals(DLFileEntryTypeConstants.NAME_IG_IMAGE) &&
 				!UpgradeProcessUtil.isCreateIGImageDocumentType()) {
@@ -99,21 +110,36 @@ public abstract class BaseDefaultDDMStructureAction extends SimpleAction {
 				continue;
 			}
 
-			DDMStructureLocalServiceUtil.addStructure(
+			ddmStructure = DDMStructureLocalServiceUtil.addStructure(
 				userId, groupId,
 				DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID, classNameId,
 				ddmStructureKey, nameMap, descriptionMap, xsd, "xml",
 				DDMStructureConstants.TYPE_DEFAULT, serviceContext);
+
+			String templateFileName = structureElement.elementText("template");
+
+			if (Validator.isNotNull(templateFileName)) {
+				DDMTemplateLocalServiceUtil.addTemplate(
+					userId, groupId,
+					PortalUtil.getClassNameId(DDMStructure.class),
+					ddmStructure.getStructureId(), nameMap, null,
+					DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY,
+					DDMTemplateConstants.TEMPLATE_MODE_CREATE,
+					TemplateConstants.LANG_TYPE_FTL,
+					getContent(templateFileName), serviceContext);
+			}
 		}
 	}
 
-	protected List<Element> getDDMStructures(String fileName)
+	protected String getContent(String fileName) {
+		return ContentUtil.get(
+			"com/liferay/portal/events/dependencies/" + fileName);
+	}
+
+	protected List<Element> getDDMStructures(String fileName, Locale locale)
 		throws DocumentException {
 
-		String xml = ContentUtil.get(
-			"com/liferay/portal/events/dependencies/" + fileName);
-
-		Locale locale = LocaleUtil.getDefault();
+		String xml = getContent(fileName);
 
 		xml = StringUtil.replace(xml, "[$LOCALE_DEFAULT$]", locale.toString());
 
@@ -125,10 +151,10 @@ public abstract class BaseDefaultDDMStructureAction extends SimpleAction {
 	}
 
 	protected String getDynamicDDMStructureXSD(
-			String fileName, String dynamicDDMStructureName)
+			String fileName, String dynamicDDMStructureName, Locale locale)
 		throws DocumentException {
 
-		List<Element> structureElements = getDDMStructures(fileName);
+		List<Element> structureElements = getDDMStructures(fileName, locale);
 
 		for (Element structureElement : structureElements) {
 			boolean dynamicStructure = GetterUtil.getBoolean(

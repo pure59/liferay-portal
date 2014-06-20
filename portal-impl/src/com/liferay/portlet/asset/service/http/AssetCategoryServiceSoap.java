@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.asset.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -65,6 +67,7 @@ import java.util.Map;
  * @see com.liferay.portlet.asset.service.AssetCategoryServiceUtil
  * @generated
  */
+@ProviderType
 public class AssetCategoryServiceSoap {
 	public static com.liferay.portlet.asset.model.AssetCategorySoap addCategory(
 		long parentCategoryId, java.lang.String[] titleMapLanguageIds,
@@ -114,6 +117,7 @@ public class AssetCategoryServiceSoap {
 	* @deprecated As of 6.2.0, Replaced by {@link #deleteCategories(long[],
 	ServiceContext)}
 	*/
+	@Deprecated
 	public static void deleteCategories(long[] categoryIds)
 		throws RemoteException {
 		try {
@@ -185,6 +189,20 @@ public class AssetCategoryServiceSoap {
 		}
 	}
 
+	public static java.lang.String getCategoryPath(long categoryId)
+		throws RemoteException {
+		try {
+			java.lang.String returnValue = AssetCategoryServiceUtil.getCategoryPath(categoryId);
+
+			return returnValue;
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	public static com.liferay.portlet.asset.model.AssetCategorySoap[] getChildCategories(
 		long parentCategoryId) throws RemoteException {
 		try {
@@ -222,6 +240,7 @@ public class AssetCategoryServiceSoap {
 	* @deprecated As of 6.2.0, replaced by {@link #search(long[], String,
 	long[], int, int)}
 	*/
+	@Deprecated
 	public static java.lang.String getJSONSearch(long groupId,
 		java.lang.String name, long[] vocabularyIds, int start, int end)
 		throws RemoteException {
@@ -243,6 +262,7 @@ public class AssetCategoryServiceSoap {
 	#getVocabularyCategoriesDisplay(long, int, int,
 	OrderByComparator)}
 	*/
+	@Deprecated
 	public static java.lang.String getJSONVocabularyCategories(
 		long vocabularyId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator obc)
@@ -265,6 +285,7 @@ public class AssetCategoryServiceSoap {
 	#getVocabularyCategoriesDisplay(long, String, long, int, int,
 	OrderByComparator)}
 	*/
+	@Deprecated
 	public static java.lang.String getJSONVocabularyCategories(long groupId,
 		java.lang.String name, long vocabularyId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator obc)
@@ -405,6 +426,7 @@ public class AssetCategoryServiceSoap {
 	#getVocabularyRootCategories(long, long, int, int,
 	OrderByComparator)}
 	*/
+	@Deprecated
 	public static com.liferay.portlet.asset.model.AssetCategorySoap[] getVocabularyRootCategories(
 		long vocabularyId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator obc)
@@ -515,6 +537,38 @@ public class AssetCategoryServiceSoap {
 					name, vocabularyIds, start, end);
 
 			return returnValue.toString();
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.asset.model.AssetCategoryDisplay searchCategoriesDisplay(
+		long groupId, java.lang.String title, long vocabularyId, int start,
+		int end) throws RemoteException {
+		try {
+			com.liferay.portlet.asset.model.AssetCategoryDisplay returnValue = AssetCategoryServiceUtil.searchCategoriesDisplay(groupId,
+					title, vocabularyId, start, end);
+
+			return returnValue;
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.asset.model.AssetCategoryDisplay searchCategoriesDisplay(
+		long[] groupIds, java.lang.String title, long[] vocabularyIds,
+		int start, int end) throws RemoteException {
+		try {
+			com.liferay.portlet.asset.model.AssetCategoryDisplay returnValue = AssetCategoryServiceUtil.searchCategoriesDisplay(groupIds,
+					title, vocabularyIds, start, end);
+
+			return returnValue;
 		}
 		catch (Exception e) {
 			_log.error(e, e);

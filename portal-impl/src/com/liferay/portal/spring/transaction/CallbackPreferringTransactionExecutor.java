@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -50,7 +50,7 @@ public class CallbackPreferringTransactionExecutor
 			Object result =
 				callbackPreferringPlatformTransactionManager.execute(
 					transactionAttribute,
-					new CallbackPreferringTransactionCallback(
+					createTransactionCallback(
 						transactionAttribute, methodInvocation));
 
 			if (result instanceof ThrowableHolder) {
@@ -64,6 +64,14 @@ public class CallbackPreferringTransactionExecutor
 		catch (ThrowableHolderException the) {
 			throw the.getCause();
 		}
+	}
+
+	protected TransactionCallback<Object> createTransactionCallback(
+		TransactionAttribute transactionAttribute,
+		MethodInvocation methodInvocation) {
+
+		return new CallbackPreferringTransactionCallback(
+			transactionAttribute, methodInvocation);
 	}
 
 	protected static class ThrowableHolder {

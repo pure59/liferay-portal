@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -32,14 +32,14 @@ if (entry != null) {
 	BookmarksUtil.addPortletBreadcrumbEntries(entry, request, renderResponse);
 
 	if (!layout.isTypeControlPanel()) {
-		PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "edit"), currentURL);
+		PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "edit"), currentURL);
 	}
 }
 else {
 	BookmarksUtil.addPortletBreadcrumbEntries(folderId, request, renderResponse);
 
 	if (!layout.isTypeControlPanel()) {
-		PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "add-bookmark"), currentURL);
+		PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "add-bookmark"), currentURL);
 	}
 }
 
@@ -66,7 +66,7 @@ boolean showHeader = ParamUtil.getBoolean(request, "showHeader", true);
 		<liferay-ui:header
 			backURL="<%= backURL %>"
 			localizeTitle="<%= (entry == null) %>"
-			title='<%= (entry == null) ? "add-bookmark" : LanguageUtil.format(pageContext, "edit-x", entry.getName()) %>'
+			title='<%= (entry == null) ? "add-bookmark" : LanguageUtil.format(request, "edit-x", entry.getName(), false) %>'
 		/>
 	</c:if>
 
@@ -81,67 +81,62 @@ boolean showHeader = ParamUtil.getBoolean(request, "showHeader", true);
 
 	<aui:fieldset>
 		<c:if test="<%= ((entry != null) || (folderId <= 0) || Validator.isNotNull(referringPortletResource)) %>">
-			<aui:field-wrapper label="folder">
 
-					<%
-					String folderName = StringPool.BLANK;
+			<%
+			String folderName = StringPool.BLANK;
 
-					if (folderId > 0) {
-						BookmarksFolder folder = BookmarksFolderServiceUtil.getFolder(folderId);
+			if (folderId > 0) {
+				BookmarksFolder folder = BookmarksFolderServiceUtil.getFolder(folderId);
 
-						folderId = folder.getFolderId();
-						folderName = folder.getName();
-					}
-					%>
+				folderId = folder.getFolderId();
+				folderName = folder.getName();
+			}
+			%>
 
-					<portlet:renderURL var="viewFolderURL">
-						<portlet:param name="struts_action" value="/bookmarks/view" />
-						<portlet:param name="folderId" value="<%= String.valueOf(folderId) %>" />
-					</portlet:renderURL>
+			<div class="form-group">
+				<aui:input label="folder" name="folderName" type="resource" value="<%= folderName %>" />
 
-					<aui:a href="<%= viewFolderURL %>" id="folderName"><%= HtmlUtil.escape(folderName) %></aui:a>
+				<aui:button name="selectFolderButton" value="select" />
 
-					<aui:button name="selectFolderButton" value="select" />
-
-					<aui:script use="aui-base">
-						A.one('#<portlet:namespace />selectFolderButton').on(
-							'click',
-							function(event) {
-								Liferay.Util.selectEntity(
-									{
-										dialog: {
-											constrain: true,
-											modal: true,
-											width: 680
-										},
-										id: '<portlet:namespace />selectFolder',
-										title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "folder") %>',
-										uri: '<liferay-portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="struts_action" value="/bookmarks/select_folder" /></liferay-portlet:renderURL>'
+				<aui:script use="aui-base">
+					A.one('#<portlet:namespace />selectFolderButton').on(
+						'click',
+						function(event) {
+							Liferay.Util.selectEntity(
+								{
+									dialog: {
+										constrain: true,
+										modal: true,
+										width: 680
 									},
-									function(event) {
-										var folderData = {
-											idString: 'folderId',
-											idValue: event.folderid,
-											nameString: 'folderName',
-											nameValue: event.name
-										};
+									id: '<portlet:namespace />selectFolder',
+									title: '<liferay-ui:message arguments="folder" key="select-x" />',
+									uri: '<liferay-portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="struts_action" value="/bookmarks/select_folder" /></liferay-portlet:renderURL>'
+								},
+								function(event) {
+									var folderData = {
+										idString: 'folderId',
+										idValue: event.folderid,
+										nameString: 'folderName',
+										nameValue: event.name
+									};
 
-										Liferay.Util.selectFolder(folderData, '<liferay-portlet:renderURL portletName="<%= portletResource %>"><portlet:param name="struts_action" value="/bookmarks/view" /></liferay-portlet:renderURL>', '<portlet:namespace />');
-									}
-								);
-							}
-						);
-					</aui:script>
+									Liferay.Util.selectFolder(folderData, '<portlet:namespace />');
+								}
+							);
+						}
+					);
+				</aui:script>
 
-					<%
-					String taglibRemoveFolder = "Liferay.Util.removeFolderSelection('folderId', 'folderName', '" + renderResponse.getNamespace() + "');";
-					%>
+				<%
+				String taglibRemoveFolder = "Liferay.Util.removeFolderSelection('folderId', 'folderName', '" + renderResponse.getNamespace() + "');";
+				%>
 
-					<aui:button name="removeFolderButton" onClick="<%= taglibRemoveFolder %>" value="remove" />
-			</aui:field-wrapper>
+				<aui:button disabled="<%= (folderId <= 0) %>" name="removeFolderButton" onClick="<%= taglibRemoveFolder %>" value="remove" />
+			</div>
 		</c:if>
 
-		<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" name="name" />
+		<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) || windowState.equals(LiferayWindowState.POP_UP) %>" name="name" />
 
 		<aui:input name="url" />
 
@@ -188,8 +183,12 @@ boolean showHeader = ParamUtil.getBoolean(request, "showHeader", true);
 </aui:form>
 
 <aui:script>
+	function <portlet:namespace />getSuggestionsContent() {
+		return document.<portlet:namespace />fm.<portlet:namespace />name.value + ' ' + document.<portlet:namespace />fm.<portlet:namespace />description.value;
+	}
+
 	function <portlet:namespace />saveEntry() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = "<%= (entry == null) ? Constants.ADD : Constants.UPDATE %>";
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (entry == null) ? Constants.ADD : Constants.UPDATE %>';
 
 		submitForm(document.<portlet:namespace />fm);
 	}

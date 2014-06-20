@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.asset.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see AssetVocabulary
  * @generated
  */
+@ProviderType
 public class AssetVocabularyWrapper implements AssetVocabulary,
 	ModelWrapper<AssetVocabulary> {
 	public AssetVocabularyWrapper(AssetVocabulary assetVocabulary) {
@@ -266,11 +269,9 @@ public class AssetVocabularyWrapper implements AssetVocabulary,
 	* Returns the user uuid of this asset vocabulary.
 	*
 	* @return the user uuid of this asset vocabulary
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _assetVocabulary.getUserUuid();
 	}
 
@@ -725,6 +726,22 @@ public class AssetVocabularyWrapper implements AssetVocabulary,
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _assetVocabulary.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _assetVocabulary.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_assetVocabulary.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -773,20 +790,70 @@ public class AssetVocabularyWrapper implements AssetVocabulary,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_assetVocabulary.persist();
 	}
 
 	@Override
-	public java.util.List<com.liferay.portlet.asset.model.AssetCategory> getCategories()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.util.List<com.liferay.portlet.asset.model.AssetCategory> getCategories() {
 		return _assetVocabulary.getCategories();
 	}
 
 	@Override
+	public long[] getRequiredClassNameIds() {
+		return _assetVocabulary.getRequiredClassNameIds();
+	}
+
+	@Override
+	public long[] getSelectedClassNameIds() {
+		return _assetVocabulary.getSelectedClassNameIds();
+	}
+
+	@Override
+	public long[] getSelectedClassTypePKs() {
+		return _assetVocabulary.getSelectedClassTypePKs();
+	}
+
+	/**
+	* @deprecated As of 7.0.0, with no direct replacement
+	*/
+	@Deprecated
+	@Override
 	public com.liferay.portal.kernel.util.UnicodeProperties getSettingsProperties() {
 		return _assetVocabulary.getSettingsProperties();
+	}
+
+	@Override
+	public java.lang.String getUnambiguousTitle(
+		java.util.List<com.liferay.portlet.asset.model.AssetVocabulary> vocabularies,
+		long groupId, java.util.Locale locale)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _assetVocabulary.getUnambiguousTitle(vocabularies, groupId,
+			locale);
+	}
+
+	@Override
+	public boolean hasMoreThanOneCategorySelected(long[] categoryIds) {
+		return _assetVocabulary.hasMoreThanOneCategorySelected(categoryIds);
+	}
+
+	@Override
+	public boolean isAssociatedToClassNameId(long classNameId) {
+		return _assetVocabulary.isAssociatedToClassNameId(classNameId);
+	}
+
+	@Override
+	public boolean isAssociatedToClassNameIdAndClassTypePK(long classNameId,
+		long classTypePK) {
+		return _assetVocabulary.isAssociatedToClassNameIdAndClassTypePK(classNameId,
+			classTypePK);
+	}
+
+	@Override
+	public boolean isMissingRequiredCategory(long classNameId,
+		long classTypePK, long[] categoryIds) {
+		return _assetVocabulary.isMissingRequiredCategory(classNameId,
+			classTypePK, categoryIds);
 	}
 
 	@Override
@@ -794,11 +861,24 @@ public class AssetVocabularyWrapper implements AssetVocabulary,
 		return _assetVocabulary.isMultiValued();
 	}
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #isRequired(long, long)}
+	*/
+	@Deprecated
 	@Override
 	public boolean isRequired(long classNameId) {
 		return _assetVocabulary.isRequired(classNameId);
 	}
 
+	@Override
+	public boolean isRequired(long classNameId, long classTypePK) {
+		return _assetVocabulary.isRequired(classNameId, classTypePK);
+	}
+
+	/**
+	* @deprecated As of 7.0.0, with no direct replacement
+	*/
+	@Deprecated
 	@Override
 	public void setSettingsProperties(
 		com.liferay.portal.kernel.util.UnicodeProperties settingsProperties) {
@@ -833,6 +913,7 @@ public class AssetVocabularyWrapper implements AssetVocabulary,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public AssetVocabulary getWrappedAssetVocabulary() {
 		return _assetVocabulary;
 	}
@@ -840,6 +921,16 @@ public class AssetVocabularyWrapper implements AssetVocabulary,
 	@Override
 	public AssetVocabulary getWrappedModel() {
 		return _assetVocabulary;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _assetVocabulary.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _assetVocabulary.isFinderCacheEnabled();
 	}
 
 	@Override

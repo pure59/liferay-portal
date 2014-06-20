@@ -17,59 +17,6 @@
 		}
 	}
 
-	.lfr-page-layouts {
-		.lfr-layout-template {
-			height: 150px;
-			margin: 0 0 1em;
-			text-align: center;
-
-			label {
-				width: 65px;
-			}
-
-			img {
-				margin: 4px;
-
-				&.layout-selected {
-					background-color: #9F3;
-					border: 4px solid #9F3;
-					margin: 0px;
-				}
-			}
-
-			.field-choice {
-				display: block;
-				margin: 0 auto;
-				width: 100px;
-			}
-
-			.field-content {
-				margin-top: 0;
-			}
-
-			.field-element {
-				float: left;
-			}
-
-			.layout-template-entry {
-				cursor: pointer;
-				width: 100px;
-			}
-		}
-
-		.lfr-layout-template-column:before {
-			border-right-width: 0;
-		}
-
-		.lfr-layout-template-column-content {
-			padding: 0 2em 0 0;
-		}
-
-		.lfr-page-layouts-content {
-			padding-left: 1em;
-		}
-	}
-
 	.theme-entry {
 		cursor: pointer;
 		float: left;
@@ -78,10 +25,6 @@
 		padding: 0.3em;
 		text-align: center;
 		text-decoration: none;
-
-		&:hover label, &:hover {
-
-		}
 
 		&:hover {
 			&, & label {
@@ -143,38 +86,6 @@
 		border: 3px solid #369;
 	}
 
-	.lfr-header-row {
-		margin-bottom: 0.5em;
-
-		.icon-add, .icon-copy, .icon-delete, .icon-export, .icon-permissions, .icon-search {
-			background: url() no-repeat 0 0;
-		}
-
-		.icon-add {
-			background-image: url(@theme_image_path@/common/add.png);
-		}
-
-		.icon-copy {
-			background-image: url(@theme_image_path@/common/copy.png);
-		}
-
-		.icon-delete {
-			background-image: url(@theme_image_path@/common/delete.png);
-		}
-
-		.icon-export {
-			background-image: url(@theme_image_path@/common/export.png);
-		}
-
-		.icon-permissions {
-			background-image: url(@theme_image_path@/common/permissions.png);
-		}
-
-		.icon-search {
-			background-image: url(@theme_image_path@/common/search.png);
-		}
-	}
-
 	.button-holder.edit-toolbar {
 		margin: 0;
 	}
@@ -212,7 +123,7 @@
 	}
 
 	.layoutset-branch {
-		color: #FFFFFF;
+		color: #FFF;
 		display: inline-block;
 		font-weight: bold;
 		padding: 0.3em;
@@ -275,8 +186,26 @@
 
 	.organizations-msg-info {
 		background-color: #FEFEFE;
-		background-image: url(@theme_image_path@/common/organization_icon.png);
 		border-color: #BBB;
+	}
+
+	.organization-type {
+		font-size: 0.8em;
+	}
+
+	.subsites-count {
+		font-size: 0.85em;
+		margin-top: 0.3em;
+	}
+
+	.export-configuration-user-column {
+		text-align: center;
+		vertical-align: middle;
+		width: 30px;
+
+		.avatar {
+			width: 30px;
+		}
 	}
 
 	.process-list {
@@ -305,6 +234,29 @@
 
 			.toggler-header-expanded:after {
 				content: " «";
+			}
+
+			.background-task-status-in-progress {
+				float: left;
+				margin-right: 1em;
+			}
+
+			.progress {
+				margin-bottom: 0.3em;
+			}
+
+			.progress-current-item {
+				font-size: 0.7em;
+			}
+		}
+
+		.background-task-user-column {
+			text-align: center;
+			vertical-align: middle;
+			width: 30px;
+
+			.avatar {
+				width: 30px;
 			}
 		}
 	}
@@ -337,12 +289,8 @@
 	}
 }
 
-.lfr-page-locked .tree-icon {
-	background-image: url(@theme_image_path@/trees/page_locked.png);
-}
-
 .export-dialog-tree {
-	.comments-and-ratings {
+	.content-options {
 		margin-bottom: 1em;
 
 		legend {
@@ -432,7 +380,7 @@
 		display: inline;
 	}
 
-	ul.unstyled ul {
+	ul.list-unstyled ul {
 		list-style: none;
 	}
 }
@@ -447,7 +395,7 @@
 			margin-bottom: 1em;
 
 			legend {
-				border: 0;
+				border-width: 0;
 				display: block;
 				font-size: 1em;
 				font-weight: normal;
@@ -455,6 +403,10 @@
 				margin-bottom: 0.2em;
 				padding-top: 1em;
 			}
+		}
+
+		.relative-range {
+			width: 165px;
 		}
 
 		legend {
@@ -500,14 +452,6 @@
 
 .lfr-tree-controls-item {
 	padding: 0 0 6px 6px;
-}
-
-.lfr-tree-controls-expand {
-	background-image: url(@theme_image_path@/trees/expand_all.png);
-}
-
-.lfr-tree-controls-collapse {
-	background-image: url(@theme_image_path@/trees/collapse_all.png);
 }
 
 .ie6 {

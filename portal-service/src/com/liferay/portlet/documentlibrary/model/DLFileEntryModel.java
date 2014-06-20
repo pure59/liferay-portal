@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,15 +14,20 @@
 
 package com.liferay.portlet.documentlibrary.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.model.AttachedModel;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.StagedGroupedModel;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
+import com.liferay.portlet.trash.model.TrashEntry;
 
 import java.io.Serializable;
 
@@ -41,8 +46,9 @@ import java.util.Date;
  * @see com.liferay.portlet.documentlibrary.model.impl.DLFileEntryModelImpl
  * @generated
  */
+@ProviderType
 public interface DLFileEntryModel extends AttachedModel, BaseModel<DLFileEntry>,
-	StagedGroupedModel {
+	StagedGroupedModel, TrashedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -146,10 +152,9 @@ public interface DLFileEntryModel extends AttachedModel, BaseModel<DLFileEntry>,
 	 * Returns the user uuid of this document library file entry.
 	 *
 	 * @return the user uuid of this document library file entry
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getUserUuid() throws SystemException;
+	public String getUserUuid();
 
 	/**
 	 * Sets the user uuid of this document library file entry.
@@ -277,6 +282,21 @@ public interface DLFileEntryModel extends AttachedModel, BaseModel<DLFileEntry>,
 	 * @param folderId the folder ID of this document library file entry
 	 */
 	public void setFolderId(long folderId);
+
+	/**
+	 * Returns the tree path of this document library file entry.
+	 *
+	 * @return the tree path of this document library file entry
+	 */
+	@AutoEscape
+	public String getTreePath();
+
+	/**
+	 * Sets the tree path of this document library file entry.
+	 *
+	 * @param treePath the tree path of this document library file entry
+	 */
+	public void setTreePath(String treePath);
 
 	/**
 	 * Returns the name of this document library file entry.
@@ -501,6 +521,60 @@ public interface DLFileEntryModel extends AttachedModel, BaseModel<DLFileEntry>,
 	 * @param manualCheckInRequired the manual check in required of this document library file entry
 	 */
 	public void setManualCheckInRequired(boolean manualCheckInRequired);
+
+	/**
+	 * Returns the status of this document library file entry.
+	 *
+	 * @return the status of this document library file entry
+	 */
+	@Override
+	public int getStatus();
+
+	/**
+	 * Returns the trash entry created when this document library file entry was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this document library file entry.
+	 *
+	 * @return the trash entry created when this document library file entry was moved to the Recycle Bin
+	 */
+	@Override
+	public TrashEntry getTrashEntry() throws PortalException;
+
+	/**
+	 * Returns the class primary key of the trash entry for this document library file entry.
+	 *
+	 * @return the class primary key of the trash entry for this document library file entry
+	 */
+	@Override
+	public long getTrashEntryClassPK();
+
+	/**
+	 * Returns the trash handler for this document library file entry.
+	 *
+	 * @return the trash handler for this document library file entry
+	 */
+	@Override
+	public TrashHandler getTrashHandler();
+
+	/**
+	 * Returns <code>true</code> if this document library file entry is in the Recycle Bin.
+	 *
+	 * @return <code>true</code> if this document library file entry is in the Recycle Bin; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isInTrash();
+
+	/**
+	 * Returns <code>true</code> if the parent of this document library file entry is in the Recycle Bin.
+	 *
+	 * @return <code>true</code> if the parent of this document library file entry is in the Recycle Bin; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isInTrashContainer();
+
+	@Override
+	public boolean isInTrashExplicitly();
+
+	@Override
+	public boolean isInTrashImplicitly();
 
 	@Override
 	public boolean isNew();

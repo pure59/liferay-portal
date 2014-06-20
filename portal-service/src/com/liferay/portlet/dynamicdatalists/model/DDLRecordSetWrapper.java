@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.dynamicdatalists.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DDLRecordSet
  * @generated
  */
+@ProviderType
 public class DDLRecordSetWrapper implements DDLRecordSet,
 	ModelWrapper<DDLRecordSet> {
 	public DDLRecordSetWrapper(DDLRecordSet ddlRecordSet) {
@@ -280,11 +283,9 @@ public class DDLRecordSetWrapper implements DDLRecordSet,
 	* Returns the user uuid of this d d l record set.
 	*
 	* @return the user uuid of this d d l record set
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _ddlRecordSet.getUserUuid();
 	}
 
@@ -779,6 +780,22 @@ public class DDLRecordSetWrapper implements DDLRecordSet,
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _ddlRecordSet.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _ddlRecordSet.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_ddlRecordSet.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -827,36 +844,31 @@ public class DDLRecordSetWrapper implements DDLRecordSet,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_ddlRecordSet.persist();
 	}
 
 	@Override
 	public com.liferay.portlet.dynamicdatamapping.model.DDMStructure getDDMStructure()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecordSet.getDDMStructure();
 	}
 
 	@Override
 	public com.liferay.portlet.dynamicdatamapping.model.DDMStructure getDDMStructure(
 		long formDDMTemplateId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecordSet.getDDMStructure(formDDMTemplateId);
 	}
 
 	@Override
-	public java.util.List<com.liferay.portlet.dynamicdatalists.model.DDLRecord> getRecords()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.util.List<com.liferay.portlet.dynamicdatalists.model.DDLRecord> getRecords() {
 		return _ddlRecordSet.getRecords();
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.storage.Fields> getRecordsFieldsList()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecordSet.getRecordsFieldsList();
 	}
 
@@ -887,6 +899,7 @@ public class DDLRecordSetWrapper implements DDLRecordSet,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public DDLRecordSet getWrappedDDLRecordSet() {
 		return _ddlRecordSet;
 	}
@@ -894,6 +907,16 @@ public class DDLRecordSetWrapper implements DDLRecordSet,
 	@Override
 	public DDLRecordSet getWrappedModel() {
 		return _ddlRecordSet;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _ddlRecordSet.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _ddlRecordSet.isFinderCacheEnabled();
 	}
 
 	@Override

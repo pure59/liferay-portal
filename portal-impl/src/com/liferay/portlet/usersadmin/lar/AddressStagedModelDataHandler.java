@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,12 +14,15 @@
 
 package com.liferay.portlet.usersadmin.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Address;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.service.AddressLocalServiceUtil;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 
 /**
@@ -29,6 +32,22 @@ public class AddressStagedModelDataHandler
 	extends BaseStagedModelDataHandler<Address> {
 
 	public static final String[] CLASS_NAMES = {Address.class.getName()};
+
+	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException {
+
+		Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+		Address address =
+			AddressLocalServiceUtil.fetchAddressByUuidAndCompanyId(
+				uuid, group.getCompanyId());
+
+		if (address != null) {
+			AddressLocalServiceUtil.deleteAddress(address);
+		}
+	}
 
 	@Override
 	public String[] getClassNames() {
@@ -44,8 +63,8 @@ public class AddressStagedModelDataHandler
 			address);
 
 		portletDataContext.addClassedModel(
-			addressElement, ExportImportPathUtil.getModelPath(address), address,
-			UsersAdminPortletDataHandler.NAMESPACE);
+			addressElement, ExportImportPathUtil.getModelPath(address),
+			address);
 	}
 
 	@Override
@@ -56,7 +75,7 @@ public class AddressStagedModelDataHandler
 		long userId = portletDataContext.getUserId(address.getUserUuid());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			address, UsersAdminPortletDataHandler.NAMESPACE);
+			address);
 
 		Address existingAddress =
 			AddressLocalServiceUtil.fetchAddressByUuidAndCompanyId(
@@ -83,8 +102,7 @@ public class AddressStagedModelDataHandler
 				address.getTypeId(), address.getMailing(), address.isPrimary());
 		}
 
-		portletDataContext.importClassedModel(
-			address, importedAddress, UsersAdminPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(address, importedAddress);
 	}
 
 }

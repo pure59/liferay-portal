@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.PasswordPolicyServiceImpl
  * @generated
  */
+@ProviderType
 public class PasswordPolicyServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -62,6 +65,7 @@ public class PasswordPolicyServiceUtil {
 	int, int, int, int, String, boolean, int, boolean, long,
 	long, int, boolean, int, long, long, long, ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portal.model.PasswordPolicy addPasswordPolicy(
 		java.lang.String name, java.lang.String description,
 		boolean changeable, boolean changeRequired, long minAge,
@@ -71,8 +75,7 @@ public class PasswordPolicyServiceUtil {
 		boolean expireable, long maxAge, long warningTime, int graceLimit,
 		boolean lockout, int maxFailure, long lockoutDuration,
 		long resetFailureCount, long resetTicketMaxAge)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addPasswordPolicy(name, description, changeable,
 			changeRequired, minAge, checkSyntax, allowDictionaryWords,
@@ -92,8 +95,7 @@ public class PasswordPolicyServiceUtil {
 		int graceLimit, boolean lockout, int maxFailure, long lockoutDuration,
 		long resetFailureCount, long resetTicketMaxAge,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addPasswordPolicy(name, description, changeable,
 			changeRequired, minAge, checkSyntax, allowDictionaryWords,
@@ -104,8 +106,7 @@ public class PasswordPolicyServiceUtil {
 	}
 
 	public static void deletePasswordPolicy(long passwordPolicyId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deletePasswordPolicy(passwordPolicyId);
 	}
 
@@ -116,6 +117,7 @@ public class PasswordPolicyServiceUtil {
 	long, long, int, boolean, int, long, long, long,
 	ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portal.model.PasswordPolicy updatePasswordPolicy(
 		long passwordPolicyId, java.lang.String name,
 		java.lang.String description, boolean changeable,
@@ -125,8 +127,7 @@ public class PasswordPolicyServiceUtil {
 		boolean history, int historyCount, boolean expireable, long maxAge,
 		long warningTime, int graceLimit, boolean lockout, int maxFailure,
 		long lockoutDuration, long resetFailureCount, long resetTicketMaxAge)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updatePasswordPolicy(passwordPolicyId, name, description,
 			changeable, changeRequired, minAge, checkSyntax,
@@ -147,8 +148,7 @@ public class PasswordPolicyServiceUtil {
 		boolean lockout, int maxFailure, long lockoutDuration,
 		long resetFailureCount, long resetTicketMaxAge,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updatePasswordPolicy(passwordPolicyId, name, description,
 			changeable, changeRequired, minAge, checkSyntax,
@@ -173,6 +173,7 @@ public class PasswordPolicyServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(PasswordPolicyService service) {
 	}
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.journal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see JournalArticleImage
  * @generated
  */
+@ProviderType
 public class JournalArticleImageWrapper implements JournalArticleImage,
 	ModelWrapper<JournalArticleImage> {
 	public JournalArticleImageWrapper(JournalArticleImage journalArticleImage) {
@@ -402,8 +405,7 @@ public class JournalArticleImageWrapper implements JournalArticleImage,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_journalArticleImage.persist();
 	}
 
@@ -430,6 +432,7 @@ public class JournalArticleImageWrapper implements JournalArticleImage,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public JournalArticleImage getWrappedJournalArticleImage() {
 		return _journalArticleImage;
 	}
@@ -437,6 +440,16 @@ public class JournalArticleImageWrapper implements JournalArticleImage,
 	@Override
 	public JournalArticleImage getWrappedModel() {
 		return _journalArticleImage;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _journalArticleImage.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _journalArticleImage.isFinderCacheEnabled();
 	}
 
 	@Override

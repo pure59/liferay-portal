@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -28,6 +30,7 @@ import java.util.Map;
  * @see PasswordPolicyRel
  * @generated
  */
+@ProviderType
 public class PasswordPolicyRelWrapper implements PasswordPolicyRel,
 	ModelWrapper<PasswordPolicyRel> {
 	public PasswordPolicyRelWrapper(PasswordPolicyRel passwordPolicyRel) {
@@ -48,6 +51,7 @@ public class PasswordPolicyRelWrapper implements PasswordPolicyRel,
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("passwordPolicyRelId", getPasswordPolicyRelId());
 		attributes.put("passwordPolicyId", getPasswordPolicyId());
 		attributes.put("classNameId", getClassNameId());
@@ -58,6 +62,12 @@ public class PasswordPolicyRelWrapper implements PasswordPolicyRel,
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long passwordPolicyRelId = (Long)attributes.get("passwordPolicyRelId");
 
 		if (passwordPolicyRelId != null) {
@@ -101,6 +111,26 @@ public class PasswordPolicyRelWrapper implements PasswordPolicyRel,
 	@Override
 	public void setPrimaryKey(long primaryKey) {
 		_passwordPolicyRel.setPrimaryKey(primaryKey);
+	}
+
+	/**
+	* Returns the mvcc version of this password policy rel.
+	*
+	* @return the mvcc version of this password policy rel
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _passwordPolicyRel.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this password policy rel.
+	*
+	* @param mvccVersion the mvcc version of this password policy rel
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_passwordPolicyRel.setMvccVersion(mvccVersion);
 	}
 
 	/**
@@ -298,8 +328,7 @@ public class PasswordPolicyRelWrapper implements PasswordPolicyRel,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_passwordPolicyRel.persist();
 	}
 
@@ -326,6 +355,7 @@ public class PasswordPolicyRelWrapper implements PasswordPolicyRel,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public PasswordPolicyRel getWrappedPasswordPolicyRel() {
 		return _passwordPolicyRel;
 	}
@@ -333,6 +363,16 @@ public class PasswordPolicyRelWrapper implements PasswordPolicyRel,
 	@Override
 	public PasswordPolicyRel getWrappedModel() {
 		return _passwordPolicyRel;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _passwordPolicyRel.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _passwordPolicyRel.isFinderCacheEnabled();
 	}
 
 	@Override

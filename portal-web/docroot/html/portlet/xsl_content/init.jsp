@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,9 +18,7 @@
 
 <%@ page import="com.liferay.portlet.asset.NoSuchTagException" %><%@
 page import="com.liferay.portlet.asset.NoSuchTagPropertyException" %><%@
-page import="com.liferay.portlet.asset.model.AssetTag" %><%@
 page import="com.liferay.portlet.asset.model.AssetTagProperty" %><%@
-page import="com.liferay.portlet.asset.service.AssetTagLocalServiceUtil" %><%@
 page import="com.liferay.portlet.asset.service.AssetTagPropertyLocalServiceUtil" %><%@
 page import="com.liferay.portlet.xslcontent.util.XSLContentUtil" %>
 

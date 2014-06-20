@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -117,6 +117,10 @@ public class LayoutStagingImpl implements LayoutStaging {
 		UnicodeProperties typeSettingsProperties =
 			group.getTypeSettingsProperties();
 
+		if (typeSettingsProperties.isEmpty()) {
+			return false;
+		}
+
 		boolean branchingEnabled = false;
 
 		if (privateLayout) {
@@ -128,8 +132,8 @@ public class LayoutStagingImpl implements LayoutStaging {
 				typeSettingsProperties.getProperty("branchingPublic"));
 		}
 
-		if (group.isStaged() && branchingEnabled) {
-			if (!group.isStagedRemotely() && !isStagingGroup) {
+		if (branchingEnabled && group.isStaged()) {
+			if (!isStagingGroup && !group.isStagedRemotely()) {
 				return false;
 			}
 

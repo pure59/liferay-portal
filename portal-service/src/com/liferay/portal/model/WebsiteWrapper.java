@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see Website
  * @generated
  */
+@ProviderType
 public class WebsiteWrapper implements Website, ModelWrapper<Website> {
 	public WebsiteWrapper(Website website) {
 		_website = website;
@@ -49,6 +52,7 @@ public class WebsiteWrapper implements Website, ModelWrapper<Website> {
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
 		attributes.put("websiteId", getWebsiteId());
 		attributes.put("companyId", getCompanyId());
@@ -67,6 +71,12 @@ public class WebsiteWrapper implements Website, ModelWrapper<Website> {
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		String uuid = (String)attributes.get("uuid");
 
 		if (uuid != null) {
@@ -161,6 +171,26 @@ public class WebsiteWrapper implements Website, ModelWrapper<Website> {
 	}
 
 	/**
+	* Returns the mvcc version of this website.
+	*
+	* @return the mvcc version of this website
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _website.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this website.
+	*
+	* @param mvccVersion the mvcc version of this website
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_website.setMvccVersion(mvccVersion);
+	}
+
+	/**
 	* Returns the uuid of this website.
 	*
 	* @return the uuid of this website
@@ -244,11 +274,9 @@ public class WebsiteWrapper implements Website, ModelWrapper<Website> {
 	* Returns the user uuid of this website.
 	*
 	* @return the user uuid of this website
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _website.getUserUuid();
 	}
 
@@ -546,15 +574,13 @@ public class WebsiteWrapper implements Website, ModelWrapper<Website> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_website.persist();
 	}
 
 	@Override
 	public com.liferay.portal.model.ListType getType()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _website.getType();
 	}
 
@@ -585,6 +611,7 @@ public class WebsiteWrapper implements Website, ModelWrapper<Website> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public Website getWrappedWebsite() {
 		return _website;
 	}
@@ -592,6 +619,16 @@ public class WebsiteWrapper implements Website, ModelWrapper<Website> {
 	@Override
 	public Website getWrappedModel() {
 		return _website;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _website.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _website.isFinderCacheEnabled();
 	}
 
 	@Override

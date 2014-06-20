@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -76,6 +77,10 @@ public class JSONWebServiceActionsManagerUtil {
 		return _jsonWebServiceActionsManager;
 	}
 
+	public static JSONWebServiceNaming getJSONWebServiceNaming() {
+		return getJSONWebServiceActionsManager().getJSONWebServiceNaming();
+	}
+
 	public static void registerJSONWebServiceAction(
 		String contextPath, Class<?> actionClass, Method actionMethod,
 		String path, String method) {
@@ -92,6 +97,16 @@ public class JSONWebServiceActionsManagerUtil {
 			contextPath, actionObject, actionClass, actionMethod, path, method);
 	}
 
+	public static int registerServletContext(ServletContext servletContext) {
+		return getJSONWebServiceActionsManager().registerServletContext(
+			servletContext);
+	}
+
+	public static int registerServletContext(String contextPath) {
+		return getJSONWebServiceActionsManager().registerServletContext(
+			contextPath);
+	}
+
 	public static int unregisterJSONWebServiceActions(Object actionObject) {
 		return getJSONWebServiceActionsManager().
 			unregisterJSONWebServiceActions(actionObject);
@@ -100,6 +115,11 @@ public class JSONWebServiceActionsManagerUtil {
 	public static int unregisterJSONWebServiceActions(String contextPath) {
 		return getJSONWebServiceActionsManager().
 			unregisterJSONWebServiceActions(contextPath);
+	}
+
+	public static int unregisterServletContext(ServletContext servletContext) {
+		return getJSONWebServiceActionsManager().unregisterServletContext(
+			servletContext);
 	}
 
 	public void setJSONWebServiceActionsManager(

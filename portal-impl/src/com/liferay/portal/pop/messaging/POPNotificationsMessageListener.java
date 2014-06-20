@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.mail.Account;
 import com.liferay.portal.kernel.pop.MessageListener;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
@@ -29,8 +30,8 @@ import java.util.List;
 import javax.mail.Address;
 import javax.mail.Flags;
 import javax.mail.Folder;
-import javax.mail.Message.RecipientType;
 import javax.mail.Message;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
@@ -57,7 +58,7 @@ public class POPNotificationsMessageListener
 	}
 
 	protected String getEmailAddress(Address[] addresses) {
-		if ((addresses == null) || (addresses.length == 0)) {
+		if (ArrayUtil.isEmpty(addresses)) {
 			return StringPool.BLANK;
 		}
 
@@ -167,6 +168,10 @@ public class POPNotificationsMessageListener
 		initInboxFolder();
 
 		Message[] messages = _inboxFolder.getMessages();
+
+		if (ArrayUtil.isEmpty(messages)) {
+			return;
+		}
 
 		try {
 			notifyMessageListeners(messages);

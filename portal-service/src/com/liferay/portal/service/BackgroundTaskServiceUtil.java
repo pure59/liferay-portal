@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.BackgroundTaskServiceImpl
  * @generated
  */
+@ProviderType
 public class BackgroundTaskServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -56,6 +59,13 @@ public class BackgroundTaskServiceUtil {
 		getService().setBeanIdentifier(beanIdentifier);
 	}
 
+	public static int getBackgroundTasksCount(long groupId,
+		java.lang.String taskExecutorClassName, java.lang.String completed) {
+		return getService()
+				   .getBackgroundTasksCount(groupId, taskExecutorClassName,
+			completed);
+	}
+
 	public static java.lang.String getBackgroundTaskStatusJSON(
 		long backgroundTaskId) {
 		return getService().getBackgroundTaskStatusJSON(backgroundTaskId);
@@ -75,6 +85,7 @@ public class BackgroundTaskServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(BackgroundTaskService service) {
 	}
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,31 +21,30 @@ import com.liferay.portal.kernel.messaging.MessageBus;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.messaging.MessageListener;
 import com.liferay.portal.kernel.messaging.SynchronousDestination;
+import com.liferay.portal.kernel.messaging.proxy.MessagingProxy;
 import com.liferay.portal.kernel.nio.intraband.Datagram;
-import com.liferay.portal.kernel.nio.intraband.MockIntraband;
-import com.liferay.portal.kernel.nio.intraband.MockRegistrationReference;
 import com.liferay.portal.kernel.nio.intraband.RegistrationReference;
-import com.liferay.portal.kernel.process.ProcessExecutor;
+import com.liferay.portal.kernel.nio.intraband.test.MockIntraband;
+import com.liferay.portal.kernel.nio.intraband.test.MockRegistrationReference;
+import com.liferay.portal.kernel.process.ProcessLauncher;
 import com.liferay.portal.kernel.resiliency.mpi.MPIHelperUtil;
 import com.liferay.portal.kernel.resiliency.spi.MockSPI;
+import com.liferay.portal.kernel.resiliency.spi.MockSPIProvider;
 import com.liferay.portal.kernel.resiliency.spi.SPI;
 import com.liferay.portal.kernel.resiliency.spi.SPIConfiguration;
 import com.liferay.portal.kernel.test.CodeCoverageAssertor;
 import com.liferay.portal.kernel.test.NewClassLoaderJUnitTestRunner;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.util.ClassLoaderPool;
-import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.IOException;
-
-import java.lang.reflect.Field;
 
 import java.nio.ByteBuffer;
 
 import java.rmi.RemoteException;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -83,15 +82,7 @@ public class IntrabandBridgeDestinationTest {
 		_mockIntraband = new MockIntraband() {
 
 			@Override
-			public Datagram sendSyncDatagram(
-					RegistrationReference registrationReference,
-					Datagram datagram)
-				throws IOException {
-
-				if (_throwRuntimeException) {
-					throw new IOException("Unable to send");
-				}
-
+			protected Datagram processDatagram(Datagram datagram) {
 				ByteBuffer byteBuffer = datagram.getDataByteBuffer();
 
 				try {
@@ -107,7 +98,7 @@ public class IntrabandBridgeDestinationTest {
 						datagram, receivedMessageRoutingBag.toByteArray());
 				}
 				catch (ClassNotFoundException cnfe) {
-					throw new IOException(cnfe);
+					throw new RuntimeException(cnfe);
 				}
 			}
 
@@ -120,7 +111,7 @@ public class IntrabandBridgeDestinationTest {
 	@Test
 	public void testSendMessage() throws ClassNotFoundException {
 
-		// Automatically create message routing bag
+		// Local message
 
 		final AtomicBoolean throwRuntimeException = new AtomicBoolean();
 
@@ -143,6 +134,18 @@ public class IntrabandBridgeDestinationTest {
 		_baseDestination.register(messageListener);
 
 		Message message = new Message();
+
+		message.put(MessagingProxy.LOCAL_MESSAGE, Boolean.TRUE);
+
+		_intrabandBridgeDestination.send(message);
+
+		Assert.assertNull(message.get(MessageRoutingBag.MESSAGE_ROUTING_BAG));
+
+		Assert.assertSame(message, messageReference.get());
+
+		// Automatically create message routing bag
+
+		message = new Message();
 
 		_intrabandBridgeDestination.send(message);
 
@@ -245,7 +248,9 @@ public class IntrabandBridgeDestinationTest {
 
 		_installSPIs(mockSPI);
 
-		_throwRuntimeException = true;
+		IOException ioException = new IOException();
+
+		_mockIntraband.setIOException(ioException);
 
 		try {
 			MessageRoutingBag messageRoutingBag = _createMessageRoutingBag();
@@ -259,13 +264,10 @@ public class IntrabandBridgeDestinationTest {
 			Throwable throwable = re.getCause();
 
 			Assert.assertEquals(RuntimeException.class, throwable.getClass());
-
-			throwable = throwable.getCause();
-
-			Assert.assertEquals(IOException.class, throwable.getClass());
+			Assert.assertSame(ioException, throwable.getCause());
 		}
 		finally {
-			_throwRuntimeException = false;
+			_mockIntraband.setIOException(null);
 		}
 
 		// Is not SPI, with child SPI, not visited, able to send
@@ -297,7 +299,7 @@ public class IntrabandBridgeDestinationTest {
 		// Is SPI, without child SPI, downcast
 
 		ConcurrentMap<String, Object> attributes =
-			ProcessExecutor.ProcessContext.getAttributes();
+			ProcessLauncher.ProcessContext.getAttributes();
 
 		MockSPI mockSPI1 = _createMockSPI("SPIProvider", "SPI1");
 
@@ -317,7 +319,9 @@ public class IntrabandBridgeDestinationTest {
 
 		// Is SPI, without child SPI, upcast, unable to send
 
-		_throwRuntimeException = true;
+		IOException ioException = new IOException();
+
+		_mockIntraband.setIOException(ioException);
 
 		try {
 			messageRoutingBag = _createMessageRoutingBag();
@@ -331,13 +335,10 @@ public class IntrabandBridgeDestinationTest {
 			Throwable throwable = re.getCause();
 
 			Assert.assertEquals(RuntimeException.class, throwable.getClass());
-
-			throwable = throwable.getCause();
-
-			Assert.assertEquals(IOException.class, throwable.getClass());
+			Assert.assertSame(ioException, throwable.getCause());
 		}
 		finally {
-			_throwRuntimeException = false;
+			_mockIntraband.setIOException(null);
 		}
 
 		Assert.assertTrue(messageRoutingBag.isVisited(_toRoutingId(mockSPI1)));
@@ -388,6 +389,28 @@ public class IntrabandBridgeDestinationTest {
 		Assert.assertNull(message.get(_RECEIVE_KEY));
 	}
 
+	private static void _installSPIs(SPI... spis) throws Exception {
+		Map<String, Object> spiProviderContainers =
+			(Map<String, Object>)ReflectionTestUtil.getFieldValue(
+				MPIHelperUtil.class, "_spiProviderContainers");
+
+		for (SPI spi : spis) {
+			MPIHelperUtil.registerSPIProvider(
+				new MockSPIProvider(spi.getSPIProviderName()));
+
+			Object spiProviderContainer = spiProviderContainers.get(
+				spi.getSPIProviderName());
+
+			Map<String, SPI> spiMap =
+				(Map<String, SPI>)ReflectionTestUtil.getFieldValue(
+					spiProviderContainer, "_spis");
+
+			SPIConfiguration spiConfiguration = spi.getSPIConfiguration();
+
+			spiMap.put(spiConfiguration.getSPIId(), spi);
+		}
+	}
+
 	private MessageRoutingBag _createMessageRoutingBag() {
 		Message message = new Message();
 
@@ -408,25 +431,10 @@ public class IntrabandBridgeDestinationTest {
 		};
 
 		mockSPI.spiConfiguration = new SPIConfiguration(
-			spiId, null, -1, null, null, null);
+			spiId, null, -1, null, null, null, null);
 		mockSPI.spiProviderName = spiProviderName;
 
 		return mockSPI;
-	}
-
-	private void _installSPIs(SPI... spis) throws Exception {
-		Map<String, SPI> spisMap = new ConcurrentHashMap<String, SPI>();
-
-		for (SPI spi : spis) {
-			SPIConfiguration spiConfiguration = spi.getSPIConfiguration();
-
-			spisMap.put(spiConfiguration.getSPIId(), spi);
-		}
-
-		Field spisField = ReflectionUtil.getDeclaredField(
-			MPIHelperUtil.class, "_spis");
-
-		spisField.set(null, spisMap);
 	}
 
 	private String _toRoutingId(SPI spi) throws RemoteException {
@@ -448,6 +456,5 @@ public class IntrabandBridgeDestinationTest {
 	private MessageBus _messageBus;
 	private MockIntraband _mockIntraband;
 	private MockRegistrationReference _mockRegistrationReference;
-	private boolean _throwRuntimeException;
 
 }

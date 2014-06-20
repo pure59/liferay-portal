@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,6 +22,7 @@ import com.liferay.portal.configuration.easyconf.ClassLoaderComponentConfigurati
 import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.PropertiesUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
@@ -80,8 +81,7 @@ public class ConfigurationImpl
 	@Override
 	public void addProperties(Properties properties) {
 		try {
-			ComponentProperties componentProperties =
-				_componentConfiguration.getProperties();
+			ComponentProperties componentProperties = getComponentProperties();
 
 			ClassLoaderAggregateProperties classLoaderAggregateProperties =
 				(ClassLoaderAggregateProperties)
@@ -111,6 +111,8 @@ public class ConfigurationImpl
 				compositeConfiguration);
 
 			configurations.add(0, newConfiguration);
+
+			_properties = null;
 
 			clearCache();
 		}
@@ -254,6 +256,9 @@ public class ConfigurationImpl
 
 	@Override
 	public Properties getProperties() {
+		if (_properties != null) {
+			return _properties;
+		}
 
 		// For some strange reason, componentProperties.getProperties() returns
 		// values with spaces after commas. So a property setting of "xyz=1,2,3"
@@ -263,7 +268,7 @@ public class ConfigurationImpl
 		// method fixes the weird behavior by returning properties with the
 		// correct values.
 
-		Properties properties = new Properties();
+		_properties = new Properties();
 
 		ComponentProperties componentProperties = getComponentProperties();
 
@@ -276,10 +281,10 @@ public class ConfigurationImpl
 			String key = (String)entry.getKey();
 			String value = (String)entry.getValue();
 
-			properties.setProperty(key, value);
+			_properties.setProperty(key, value);
 		}
 
-		return properties;
+		return _properties;
 	}
 
 	@Override
@@ -292,8 +297,7 @@ public class ConfigurationImpl
 	@Override
 	public void removeProperties(Properties properties) {
 		try {
-			ComponentProperties componentProperties =
-				_componentConfiguration.getProperties();
+			ComponentProperties componentProperties = getComponentProperties();
 
 			ClassLoaderAggregateProperties classLoaderAggregateProperties =
 				(ClassLoaderAggregateProperties)
@@ -330,6 +334,8 @@ public class ConfigurationImpl
 						configuration);
 				}
 			}
+
+			_properties = null;
 
 			clearCache();
 		}
@@ -384,7 +390,7 @@ public class ConfigurationImpl
 
 		Object value = _nullValue;
 
-		if ((array != null) && (array.length > 0)) {
+		if (ArrayUtil.isNotEmpty(array)) {
 
 			// Commons Configuration parses an empty property into a String
 			// array with one String containing one space. It also leaves a
@@ -460,6 +466,7 @@ public class ConfigurationImpl
 
 	private ComponentConfiguration _componentConfiguration;
 	private Set<String> _printedSources = new HashSet<String>();
+	private Properties _properties;
 	private Map<String, Object> _values =
 		new ConcurrentHashMap<String, Object>();
 

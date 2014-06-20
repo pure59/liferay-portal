@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,31 +16,36 @@ package com.liferay.portlet.journal.lar;
 
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
-import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.lar.BaseWorkflowedStagedModelDataHandlerTestCase;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.StagedModel;
 import com.liferay.portal.service.CompanyLocalServiceUtil;
-import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
-import com.liferay.portal.test.TransactionalExecutionTestListener;
-import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.TestPropsValues;
+import com.liferay.portal.test.Sync;
+import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
+import com.liferay.portal.test.TransactionalTestRule;
+import com.liferay.portal.util.test.RandomTestUtil;
+import com.liferay.portal.util.test.ServiceContextTestUtil;
+import com.liferay.portal.util.test.TestPropsValues;
+import com.liferay.portlet.asset.model.AssetEntry;
+import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
 import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil;
-import com.liferay.portlet.dynamicdatamapping.util.DDMStructureTestUtil;
-import com.liferay.portlet.dynamicdatamapping.util.DDMTemplateTestUtil;
+import com.liferay.portlet.dynamicdatamapping.util.test.DDMStructureTestUtil;
+import com.liferay.portlet.dynamicdatamapping.util.test.DDMTemplateTestUtil;
 import com.liferay.portlet.journal.model.JournalArticle;
+import com.liferay.portlet.journal.model.JournalArticleConstants;
 import com.liferay.portlet.journal.model.JournalArticleResource;
 import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.journal.service.JournalArticleLocalServiceUtil;
+import com.liferay.portlet.journal.service.JournalArticleResourceLocalServiceUtil;
 import com.liferay.portlet.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.portlet.journal.service.persistence.JournalArticleResourceUtil;
-import com.liferay.portlet.journal.util.JournalTestUtil;
+import com.liferay.portlet.journal.util.test.JournalTestUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -57,14 +63,18 @@ import org.junit.runner.RunWith;
 @ExecutionTestListeners(
 	listeners = {
 		MainServletExecutionTestListener.class,
-		TransactionalExecutionTestListener.class
+		SynchronousDestinationExecutionTestListener.class
 	})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
+@Sync
 public class JournalArticleStagedModelDataHandlerTest
 	extends BaseWorkflowedStagedModelDataHandlerTestCase {
 
+	@ClassRule
+	public static TransactionalTestRule transactionalTestRule =
+		new TransactionalTestRule();
+
 	@Test
-	@Transactional
 	public void testCompanyScopeDependencies() throws Exception {
 		initExport();
 
@@ -113,7 +123,7 @@ public class JournalArticleStagedModelDataHandlerTest
 			dependentStagedModelsMap, DDMTemplate.class, ddmTemplate);
 
 		JournalFolder folder = JournalTestUtil.addFolder(
-			stagingGroup.getGroupId(), ServiceTestUtil.randomString());
+			stagingGroup.getGroupId(), RandomTestUtil.randomString());
 
 		addDependentStagedModel(
 			dependentStagedModelsMap, JournalFolder.class, folder);
@@ -142,7 +152,7 @@ public class JournalArticleStagedModelDataHandlerTest
 			dependentStagedModelsMap, DDMTemplate.class, ddmTemplate);
 
 		JournalFolder folder = JournalTestUtil.addFolder(
-			group.getGroupId(), ServiceTestUtil.randomString());
+			group.getGroupId(), RandomTestUtil.randomString());
 
 		addDependentStagedModel(
 			dependentStagedModelsMap, JournalFolder.class, folder);
@@ -176,7 +186,7 @@ public class JournalArticleStagedModelDataHandlerTest
 
 		return JournalTestUtil.addArticleWithXMLContent(
 			group.getGroupId(), folder.getFolderId(),
-			PortalUtil.getClassNameId(DDMStructure.class),
+			JournalArticleConstants.CLASSNAME_ID_DEFAULT,
 			DDMStructureTestUtil.getSampleStructuredContent(),
 			ddmStructure.getStructureKey(), ddmTemplate.getTemplateKey());
 	}
@@ -199,11 +209,26 @@ public class JournalArticleStagedModelDataHandlerTest
 		expiredArticle = JournalArticleLocalServiceUtil.expireArticle(
 			TestPropsValues.getUserId(), group.getGroupId(),
 			expiredArticle.getArticleId(), expiredArticle.getVersion(),
-			expiredArticle.getUrlTitle(), ServiceTestUtil.getServiceContext());
+			expiredArticle.getUrlTitle(),
+			ServiceContextTestUtil.getServiceContext());
 
 		stagedModels.add(expiredArticle);
 
 		return stagedModels;
+	}
+
+	@Override
+	protected AssetEntry fetchAssetEntry(StagedModel stagedModel, Group group)
+		throws Exception {
+
+		JournalArticle article = (JournalArticle)stagedModel;
+
+		JournalArticleResource articleResource =
+			JournalArticleResourceLocalServiceUtil.getArticleResource(
+				article.getResourcePrimKey());
+
+		return AssetEntryLocalServiceUtil.fetchEntry(
+			group.getGroupId(), articleResource.getUuid());
 	}
 
 	@Override
@@ -220,6 +245,11 @@ public class JournalArticleStagedModelDataHandlerTest
 	@Override
 	protected Class<? extends StagedModel> getStagedModelClass() {
 		return JournalArticle.class;
+	}
+
+	@Override
+	protected boolean isCommentableStagedModel() {
+		return true;
 	}
 
 	protected void validateCompanyDependenciesImport(
@@ -307,7 +337,7 @@ public class JournalArticleStagedModelDataHandlerTest
 
 	@Override
 	protected void validateImport(
-			StagedModel stagedModel,
+			StagedModel stagedModel, StagedModelAssets stagedModelAssets,
 			Map<String, List<StagedModel>> dependentStagedModelsMap,
 			Group group)
 		throws Exception {
@@ -320,8 +350,14 @@ public class JournalArticleStagedModelDataHandlerTest
 
 		Assert.assertNotNull(articleResource);
 
-		JournalArticleLocalServiceUtil.getLatestArticle(
-			articleResource.getResourcePrimKey(), article.getStatus(), false);
+		JournalArticle importedArticle =
+			JournalArticleLocalServiceUtil.getLatestArticle(
+				articleResource.getResourcePrimKey(), article.getStatus(),
+				false);
+
+		validateAssets(importedArticle, stagedModelAssets, group);
+
+		validateComments(article, importedArticle, group);
 
 		validateImport(dependentStagedModelsMap, group);
 	}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,20 +14,20 @@
 
 package com.liferay.portlet.dynamicdatamapping.storage;
 
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONSerializer;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
-import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.service.ServiceTestUtil;
-import com.liferay.portal.test.EnvironmentExecutionTestListener;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
-import com.liferay.portal.test.TransactionalExecutionTestListener;
+import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.TestPropsValues;
+import com.liferay.portal.util.test.ServiceContextTestUtil;
+import com.liferay.portal.util.test.TestPropsValues;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
-import com.liferay.portlet.documentlibrary.util.DLAppTestUtil;
+import com.liferay.portlet.documentlibrary.util.test.DLAppTestUtil;
 import com.liferay.portlet.dynamicdatalists.model.DDLRecordSet;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructureConstants;
@@ -48,13 +48,8 @@ import org.junit.runner.RunWith;
 /**
  * @author Marcellus Tavares
  */
-@ExecutionTestListeners(
-	listeners = {
-		EnvironmentExecutionTestListener.class,
-		TransactionalExecutionTestListener.class
-	})
+@ExecutionTestListeners(listeners = {MainServletExecutionTestListener.class})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
-@Transactional
 public class StorageAdapterTest extends BaseDDMServiceTestCase {
 
 	@Test
@@ -171,13 +166,13 @@ public class StorageAdapterTest extends BaseDDMServiceTestCase {
 
 		FileEntry file1 = DLAppTestUtil.addFileEntry(
 			TestPropsValues.getGroupId(),
-			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, true, "Test 1.txt");
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, "Test 1.txt");
 
 		String file1Value = getDocLibraryFieldValue(file1);
 
 		FileEntry file2 = DLAppTestUtil.addFileEntry(
 			TestPropsValues.getGroupId(),
-			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, true, "Test 2.txt");
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, "Test 2.txt");
 
 		String file2Value = getDocLibraryFieldValue(file2);
 
@@ -393,7 +388,7 @@ public class StorageAdapterTest extends BaseDDMServiceTestCase {
 
 		return storageAdapter.create(
 			TestPropsValues.getCompanyId(), ddmStructureId, fields,
-			ServiceTestUtil.getServiceContext(group.getGroupId()));
+			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
 	}
 
 	protected String getDocLibraryFieldValue(FileEntry fileEntry) {
@@ -415,11 +410,16 @@ public class StorageAdapterTest extends BaseDDMServiceTestCase {
 
 		// Expando
 
+		JSONSerializer jsonSerializer = JSONFactoryUtil.createJSONSerializer();
+
+		String expectedFieldsString = jsonSerializer.serializeDeep(fields);
+
 		long classPK = create(_expandoStorageAdapater, ddmStructureId, fields);
 
 		Fields actualFields = _expandoStorageAdapater.getFields(classPK);
 
-		Assert.assertEquals(fields, actualFields);
+		Assert.assertEquals(
+			expectedFieldsString, jsonSerializer.serializeDeep(actualFields));
 
 		// XML
 
@@ -427,7 +427,8 @@ public class StorageAdapterTest extends BaseDDMServiceTestCase {
 
 		actualFields = _xmlStorageAdapater.getFields(classPK);
 
-		Assert.assertEquals(fields, actualFields);
+		Assert.assertEquals(
+			expectedFieldsString, jsonSerializer.serializeDeep(actualFields));
 	}
 
 	private long _classNameId = PortalUtil.getClassNameId(DDLRecordSet.class);

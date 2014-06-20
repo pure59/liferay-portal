@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -77,14 +77,17 @@ public class DerbyDB extends BaseDB {
 		sb.append("create database ");
 		sb.append(databaseName);
 		sb.append(";\n");
-		sb.append("connect to ");
-		sb.append(databaseName);
-		sb.append(";\n");
-		sb.append(getCreateTablesContent(sqlDir, suffix));
-		sb.append("\n\n");
-		sb.append(readFile(sqlDir + "/indexes/indexes-derby.sql"));
-		sb.append("\n\n");
-		sb.append(readFile(sqlDir + "/sequences/sequences-derby.sql"));
+
+		if (population != BARE) {
+			sb.append("connect to ");
+			sb.append(databaseName);
+			sb.append(";\n");
+			sb.append(getCreateTablesContent(sqlDir, suffix));
+			sb.append("\n\n");
+			sb.append(readFile(sqlDir + "/indexes/indexes-derby.sql"));
+			sb.append("\n\n");
+			sb.append(readFile(sqlDir + "/sequences/sequences-derby.sql"));
+		}
 
 		return sb.toString();
 	}

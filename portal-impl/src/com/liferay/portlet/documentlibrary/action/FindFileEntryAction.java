@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -47,6 +47,9 @@ public class FindFileEntryAction extends FindFolderAction {
 
 		if (rootPortletId.equals(PortletKeys.DOCUMENT_LIBRARY_DISPLAY)) {
 			return "/document_library_display/view_file_entry";
+		}
+		else if (rootPortletId.equals(PortletKeys.MEDIA_GALLERY_DISPLAY)) {
+			return "/image_gallery_display/view_image";
 		}
 
 		return "/document_library/view_file_entry";

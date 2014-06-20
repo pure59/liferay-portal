@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -39,16 +39,14 @@ import com.liferay.portal.model.ModelHintsUtil;
 import com.liferay.portal.model.ServiceComponent;
 import com.liferay.portal.service.base.ServiceComponentLocalServiceBaseImpl;
 import com.liferay.portal.tools.servicebuilder.Entity;
+import com.liferay.portal.util.PropsValues;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import java.lang.reflect.Field;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
-import java.security.ProtectionDomain;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,8 +61,7 @@ public class ServiceComponentLocalServiceImpl
 
 	@Override
 	public void destroyServiceComponent(
-			ServletContext servletContext, ClassLoader classLoader)
-		throws SystemException {
+		ServletContext servletContext, ClassLoader classLoader) {
 
 		try {
 			clearCacheRegistry(servletContext);
@@ -79,7 +76,7 @@ public class ServiceComponentLocalServiceImpl
 			ServletContext servletContext, ClassLoader classLoader,
 			String buildNamespace, long buildNumber, long buildDate,
 			boolean buildAutoUpgrade)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		try {
 			ModelHintsUtil.read(
@@ -195,32 +192,14 @@ public class ServiceComponentLocalServiceImpl
 			final String indexesSQL)
 		throws Exception {
 
-		ProtectionDomain protectionDomain = new ProtectionDomain(
-			null, null, classLoader, null);
-
-		AccessControlContext accessControlContext = new AccessControlContext(
-			new ProtectionDomain[] {protectionDomain});
-
-		AccessController.doPrivileged(
-			new PrivilegedExceptionAction<Void>() {
-
-				@Override
-				public Void run() throws Exception {
-					doUpgradeDB(
-						classLoader, buildNamespace, buildNumber,
-						buildAutoUpgrade, previousServiceComponent, tablesSQL,
-						sequencesSQL, indexesSQL);
-
-					return null;
-				}
-
-			},
-			accessControlContext
-		);
+		_pacl.doUpgradeDB(
+			new DoUpgradeDBPrivilegedExceptionAction(
+				classLoader, buildNamespace, buildNumber, buildAutoUpgrade,
+				previousServiceComponent, tablesSQL, sequencesSQL, indexesSQL));
 	}
 
 	@Override
-	public void verifyDB() throws SystemException {
+	public void verifyDB() {
 		List<ServiceComponent> serviceComponents =
 			serviceComponentPersistence.findAll();
 
@@ -239,6 +218,58 @@ public class ServiceComponentLocalServiceImpl
 				_log.error(e, e);
 			}
 		}
+	}
+
+	public class DoUpgradeDBPrivilegedExceptionAction
+		implements PrivilegedExceptionAction<Void> {
+
+		public DoUpgradeDBPrivilegedExceptionAction(
+			ClassLoader classLoader, String buildNamespace, long buildNumber,
+			boolean buildAutoUpgrade, ServiceComponent previousServiceComponent,
+			String tablesSQL, String sequencesSQL, String indexesSQL) {
+
+			_classLoader = classLoader;
+			_buildNamespace = buildNamespace;
+			_buildNumber = buildNumber;
+			_buildAutoUpgrade = buildAutoUpgrade;
+			_previousServiceComponent = previousServiceComponent;
+			_tablesSQL = tablesSQL;
+			_sequencesSQL = sequencesSQL;
+			_indexesSQL = indexesSQL;
+		}
+
+		public ClassLoader getClassLoader() {
+			return _classLoader;
+		}
+
+		@Override
+		public Void run() throws Exception {
+			doUpgradeDB(
+				_classLoader, _buildNamespace, _buildNumber, _buildAutoUpgrade,
+				_previousServiceComponent, _tablesSQL, _sequencesSQL,
+				_indexesSQL);
+
+			return null;
+		}
+
+		private boolean _buildAutoUpgrade;
+		private String _buildNamespace;
+		private long _buildNumber;
+		private ClassLoader _classLoader;
+		private String _indexesSQL;
+		private ServiceComponent _previousServiceComponent;
+		private String _sequencesSQL;
+		private String _tablesSQL;
+
+	}
+
+	public interface PACL {
+
+		public void doUpgradeDB(
+				DoUpgradeDBPrivilegedExceptionAction
+					doUpgradeDBPrivilegedExceptionAction)
+			throws Exception;
+
 	}
 
 	protected void clearCacheRegistry(ServletContext servletContext)
@@ -265,8 +296,10 @@ public class ServiceComponentLocalServiceImpl
 
 		CacheRegistryUtil.clear();
 
-		EntityCacheUtil.clearCache();
-		FinderCacheUtil.clearCache();
+		if (PropsValues.CACHE_CLEAR_ON_PLUGIN_UNDEPLOY) {
+			EntityCacheUtil.clearCache();
+			FinderCacheUtil.clearCache();
+		}
 	}
 
 	protected void doUpgradeDB(
@@ -313,7 +346,9 @@ public class ServiceComponentLocalServiceImpl
 				db.runSQLTemplateString(sequencesSQL, true, false);
 			}
 
-			if (!indexesSQL.equals(previousServiceComponent.getIndexesSQL())) {
+			if (!indexesSQL.equals(previousServiceComponent.getIndexesSQL()) ||
+				!tablesSQL.equals(previousServiceComponent.getTablesSQL())) {
+
 				if (_log.isInfoEnabled()) {
 					_log.info("Upgrading database with indexes.sql");
 				}
@@ -401,9 +436,7 @@ public class ServiceComponentLocalServiceImpl
 		}
 	}
 
-	protected void removeOldServiceComponents(String buildNamespace)
-		throws SystemException {
-
+	protected void removeOldServiceComponents(String buildNamespace) {
 		int serviceComponentsCount =
 			serviceComponentPersistence.countByBuildNamespace(buildNamespace);
 
@@ -478,5 +511,20 @@ public class ServiceComponentLocalServiceImpl
 
 	private static Log _log = LogFactoryUtil.getLog(
 		ServiceComponentLocalServiceImpl.class);
+
+	private static PACL _pacl = new NoPACL();
+
+	private static class NoPACL implements PACL {
+
+		@Override
+		public void doUpgradeDB(
+				DoUpgradeDBPrivilegedExceptionAction
+					doUpgradeDBPrivilegedExceptionAction)
+			throws Exception {
+
+			doUpgradeDBPrivilegedExceptionAction.run();
+		}
+
+	}
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,16 +15,17 @@
 package com.liferay.portlet.shopping.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.service.UserLocalServiceUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
@@ -271,6 +272,9 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		attributes.put("largeImageId", getLargeImageId());
 		attributes.put("largeImageURL", getLargeImageURL());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
@@ -482,8 +486,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getItemId() {
 		return _itemId;
 	}
@@ -495,8 +499,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_itemId = itemId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -518,8 +522,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -541,8 +545,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -553,17 +557,23 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -578,8 +588,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -589,8 +599,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -600,8 +610,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_modifiedDate = modifiedDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCategoryId() {
 		return _categoryId;
 	}
@@ -623,8 +633,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		return _originalCategoryId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getSku() {
 		if (_sku == null) {
 			return StringPool.BLANK;
@@ -649,8 +659,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		return GetterUtil.getString(_originalSku);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -665,8 +675,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_name = name;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -681,8 +691,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_description = description;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getProperties() {
 		if (_properties == null) {
 			return StringPool.BLANK;
@@ -697,8 +707,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_properties = properties;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getFields() {
 		return _fields;
 	}
@@ -713,8 +723,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_fields = fields;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getFieldsQuantities() {
 		if (_fieldsQuantities == null) {
 			return StringPool.BLANK;
@@ -729,8 +739,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_fieldsQuantities = fieldsQuantities;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getMinQuantity() {
 		return _minQuantity;
 	}
@@ -740,8 +750,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_minQuantity = minQuantity;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getMaxQuantity() {
 		return _maxQuantity;
 	}
@@ -751,8 +761,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_maxQuantity = maxQuantity;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public double getPrice() {
 		return _price;
 	}
@@ -762,8 +772,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_price = price;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public double getDiscount() {
 		return _discount;
 	}
@@ -773,8 +783,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_discount = discount;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getTaxable() {
 		return _taxable;
 	}
@@ -789,8 +799,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_taxable = taxable;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public double getShipping() {
 		return _shipping;
 	}
@@ -800,8 +810,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_shipping = shipping;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getUseShippingFormula() {
 		return _useShippingFormula;
 	}
@@ -816,8 +826,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_useShippingFormula = useShippingFormula;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getRequiresShipping() {
 		return _requiresShipping;
 	}
@@ -832,8 +842,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_requiresShipping = requiresShipping;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getStockQuantity() {
 		return _stockQuantity;
 	}
@@ -843,8 +853,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_stockQuantity = stockQuantity;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getFeatured() {
 		return _featured;
 	}
@@ -859,8 +869,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_featured = featured;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getSale() {
 		return _sale;
 	}
@@ -875,8 +885,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_sale = sale;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getSmallImage() {
 		return _smallImage;
 	}
@@ -891,8 +901,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_smallImage = smallImage;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getSmallImageId() {
 		return _smallImageId;
 	}
@@ -914,8 +924,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		return _originalSmallImageId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getSmallImageURL() {
 		if (_smallImageURL == null) {
 			return StringPool.BLANK;
@@ -930,8 +940,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_smallImageURL = smallImageURL;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getMediumImage() {
 		return _mediumImage;
 	}
@@ -946,8 +956,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_mediumImage = mediumImage;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getMediumImageId() {
 		return _mediumImageId;
 	}
@@ -969,8 +979,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		return _originalMediumImageId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getMediumImageURL() {
 		if (_mediumImageURL == null) {
 			return StringPool.BLANK;
@@ -985,8 +995,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_mediumImageURL = mediumImageURL;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getLargeImage() {
 		return _largeImage;
 	}
@@ -1001,8 +1011,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		_largeImage = largeImage;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getLargeImageId() {
 		return _largeImageId;
 	}
@@ -1024,8 +1034,8 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 		return _originalLargeImageId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getLargeImageURL() {
 		if (_largeImageURL == null) {
 			return StringPool.BLANK;
@@ -1157,6 +1167,16 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 	@Override
 	public int hashCode() {
 		return (int)getPrimaryKey();
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
 	}
 
 	@Override
@@ -1574,7 +1594,6 @@ public class ShoppingItemModelImpl extends BaseModelImpl<ShoppingItem>
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;

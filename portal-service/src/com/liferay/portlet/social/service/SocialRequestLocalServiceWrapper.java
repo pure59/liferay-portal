@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.social.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see SocialRequestLocalService
  * @generated
  */
+@ProviderType
 public class SocialRequestLocalServiceWrapper
 	implements SocialRequestLocalService,
 		ServiceWrapper<SocialRequestLocalService> {
@@ -36,12 +39,10 @@ public class SocialRequestLocalServiceWrapper
 	*
 	* @param socialRequest the social request
 	* @return the social request that was added
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest addSocialRequest(
-		com.liferay.portlet.social.model.SocialRequest socialRequest)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.social.model.SocialRequest socialRequest) {
 		return _socialRequestLocalService.addSocialRequest(socialRequest);
 	}
 
@@ -63,13 +64,11 @@ public class SocialRequestLocalServiceWrapper
 	* @param requestId the primary key of the social request
 	* @return the social request that was removed
 	* @throws PortalException if a social request with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest deleteSocialRequest(
 		long requestId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialRequestLocalService.deleteSocialRequest(requestId);
 	}
 
@@ -78,12 +77,10 @@ public class SocialRequestLocalServiceWrapper
 	*
 	* @param socialRequest the social request
 	* @return the social request that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest deleteSocialRequest(
-		com.liferay.portlet.social.model.SocialRequest socialRequest)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.social.model.SocialRequest socialRequest) {
 		return _socialRequestLocalService.deleteSocialRequest(socialRequest);
 	}
 
@@ -97,13 +94,11 @@ public class SocialRequestLocalServiceWrapper
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _socialRequestLocalService.dynamicQuery(dynamicQuery);
 	}
 
@@ -118,13 +113,12 @@ public class SocialRequestLocalServiceWrapper
 	* @param start the lower bound of the range of model instances
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @return the range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		int end) {
 		return _socialRequestLocalService.dynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -140,15 +134,13 @@ public class SocialRequestLocalServiceWrapper
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return _socialRequestLocalService.dynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -158,12 +150,10 @@ public class SocialRequestLocalServiceWrapper
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public long dynamicQueryCount(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _socialRequestLocalService.dynamicQueryCount(dynamicQuery);
 	}
 
@@ -173,21 +163,18 @@ public class SocialRequestLocalServiceWrapper
 	* @param dynamicQuery the dynamic query
 	* @param projection the projection to apply to the query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public long dynamicQueryCount(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
-		com.liferay.portal.kernel.dao.orm.Projection projection)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.Projection projection) {
 		return _socialRequestLocalService.dynamicQueryCount(dynamicQuery,
 			projection);
 	}
 
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest fetchSocialRequest(
-		long requestId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long requestId) {
 		return _socialRequestLocalService.fetchSocialRequest(requestId);
 	}
 
@@ -197,12 +184,10 @@ public class SocialRequestLocalServiceWrapper
 	* @param uuid the social request's UUID
 	* @param companyId the primary key of the company
 	* @return the matching social request, or <code>null</code> if a matching social request could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest fetchSocialRequestByUuidAndCompanyId(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, long companyId) {
 		return _socialRequestLocalService.fetchSocialRequestByUuidAndCompanyId(uuid,
 			companyId);
 	}
@@ -213,12 +198,10 @@ public class SocialRequestLocalServiceWrapper
 	* @param uuid the social request's UUID
 	* @param groupId the primary key of the group
 	* @return the matching social request, or <code>null</code> if a matching social request could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest fetchSocialRequestByUuidAndGroupId(
-		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, long groupId) {
 		return _socialRequestLocalService.fetchSocialRequestByUuidAndGroupId(uuid,
 			groupId);
 	}
@@ -229,21 +212,33 @@ public class SocialRequestLocalServiceWrapper
 	* @param requestId the primary key of the social request
 	* @return the social request
 	* @throws PortalException if a social request with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest getSocialRequest(
 		long requestId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialRequestLocalService.getSocialRequest(requestId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
+		return _socialRequestLocalService.getActionableDynamicQuery();
+	}
+
+	/**
+	* @throws PortalException
+	*/
+	@Override
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _socialRequestLocalService.deletePersistedModel(persistedModel);
 	}
 
 	@Override
 	public com.liferay.portal.model.PersistedModel getPersistedModel(
 		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialRequestLocalService.getPersistedModel(primaryKeyObj);
 	}
 
@@ -254,13 +249,11 @@ public class SocialRequestLocalServiceWrapper
 	* @param companyId the primary key of the company
 	* @return the matching social request
 	* @throws PortalException if a matching social request could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest getSocialRequestByUuidAndCompanyId(
 		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialRequestLocalService.getSocialRequestByUuidAndCompanyId(uuid,
 			companyId);
 	}
@@ -272,13 +265,11 @@ public class SocialRequestLocalServiceWrapper
 	* @param groupId the primary key of the group
 	* @return the matching social request
 	* @throws PortalException if a matching social request could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest getSocialRequestByUuidAndGroupId(
 		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialRequestLocalService.getSocialRequestByUuidAndGroupId(uuid,
 			groupId);
 	}
@@ -293,12 +284,10 @@ public class SocialRequestLocalServiceWrapper
 	* @param start the lower bound of the range of social requests
 	* @param end the upper bound of the range of social requests (not inclusive)
 	* @return the range of social requests
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public java.util.List<com.liferay.portlet.social.model.SocialRequest> getSocialRequests(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return _socialRequestLocalService.getSocialRequests(start, end);
 	}
 
@@ -306,11 +295,9 @@ public class SocialRequestLocalServiceWrapper
 	* Returns the number of social requests.
 	*
 	* @return the number of social requests
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public int getSocialRequestsCount()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getSocialRequestsCount() {
 		return _socialRequestLocalService.getSocialRequestsCount();
 	}
 
@@ -319,12 +306,10 @@ public class SocialRequestLocalServiceWrapper
 	*
 	* @param socialRequest the social request
 	* @return the social request that was updated
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest updateSocialRequest(
-		com.liferay.portlet.social.model.SocialRequest socialRequest)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.social.model.SocialRequest socialRequest) {
 		return _socialRequestLocalService.updateSocialRequest(socialRequest);
 	}
 
@@ -370,14 +355,12 @@ public class SocialRequestLocalServiceWrapper
 	* @throws PortalException if the users could not be found, if the users
 	were not from the same company, or if either of the users was the
 	default user
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest addRequest(
 		long userId, long groupId, java.lang.String className, long classPK,
 		int type, java.lang.String extraData, long receiverUserId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialRequestLocalService.addRequest(userId, groupId,
 			className, classPK, type, extraData, receiverUserId);
 	}
@@ -386,11 +369,9 @@ public class SocialRequestLocalServiceWrapper
 	* Removes all the social requests for the receiving user.
 	*
 	* @param receiverUserId the primary key of the receiving user
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public void deleteReceiverUserRequests(long receiverUserId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void deleteReceiverUserRequests(long receiverUserId) {
 		_socialRequestLocalService.deleteReceiverUserRequests(receiverUserId);
 	}
 
@@ -400,12 +381,10 @@ public class SocialRequestLocalServiceWrapper
 	*
 	* @param requestId the primary key of the social request
 	* @throws PortalException if the social request could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public void deleteRequest(long requestId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_socialRequestLocalService.deleteRequest(requestId);
 	}
 
@@ -413,24 +392,25 @@ public class SocialRequestLocalServiceWrapper
 	* Removes the social request from the database.
 	*
 	* @param request the social request to be removed
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public void deleteRequest(
-		com.liferay.portlet.social.model.SocialRequest request)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.social.model.SocialRequest request) {
 		_socialRequestLocalService.deleteRequest(request);
+	}
+
+	@Override
+	public void deleteRequests(long className, long classPK) {
+		_socialRequestLocalService.deleteRequests(className, classPK);
 	}
 
 	/**
 	* Removes all the social requests for the requesting user.
 	*
 	* @param userId the primary key of the requesting user
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public void deleteUserRequests(long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void deleteUserRequests(long userId) {
 		_socialRequestLocalService.deleteUserRequests(userId);
 	}
 
@@ -451,12 +431,10 @@ public class SocialRequestLocalServiceWrapper
 	* @param start the lower bound of the range of results
 	* @param end the upper bound of the range of results (not inclusive)
 	* @return the range of matching social requests
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public java.util.List<com.liferay.portlet.social.model.SocialRequest> getReceiverUserRequests(
-		long receiverUserId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long receiverUserId, int start, int end) {
 		return _socialRequestLocalService.getReceiverUserRequests(receiverUserId,
 			start, end);
 	}
@@ -480,12 +458,10 @@ public class SocialRequestLocalServiceWrapper
 	* @param start the lower bound of the range of results
 	* @param end the upper bound of the range of results (not inclusive)
 	* @return the range of matching social requests
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public java.util.List<com.liferay.portlet.social.model.SocialRequest> getReceiverUserRequests(
-		long receiverUserId, int status, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long receiverUserId, int status, int start, int end) {
 		return _socialRequestLocalService.getReceiverUserRequests(receiverUserId,
 			status, start, end);
 	}
@@ -495,11 +471,9 @@ public class SocialRequestLocalServiceWrapper
 	*
 	* @param receiverUserId the primary key of the receiving user
 	* @return the number of matching social requests
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public int getReceiverUserRequestsCount(long receiverUserId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getReceiverUserRequestsCount(long receiverUserId) {
 		return _socialRequestLocalService.getReceiverUserRequestsCount(receiverUserId);
 	}
 
@@ -510,11 +484,9 @@ public class SocialRequestLocalServiceWrapper
 	* @param receiverUserId the primary key of the receiving user
 	* @param status the social request's status
 	* @return the number of matching social requests
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public int getReceiverUserRequestsCount(long receiverUserId, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getReceiverUserRequestsCount(long receiverUserId, int status) {
 		return _socialRequestLocalService.getReceiverUserRequestsCount(receiverUserId,
 			status);
 	}
@@ -536,12 +508,10 @@ public class SocialRequestLocalServiceWrapper
 	* @param start the lower bound of the range of results
 	* @param end the upper bound of the range of results (not inclusive)
 	* @return the range of matching social requests
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public java.util.List<com.liferay.portlet.social.model.SocialRequest> getUserRequests(
-		long userId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long userId, int start, int end) {
 		return _socialRequestLocalService.getUserRequests(userId, start, end);
 	}
 
@@ -564,12 +534,10 @@ public class SocialRequestLocalServiceWrapper
 	* @param start the lower bound of the range of results
 	* @param end the upper bound of the range of results (not inclusive)
 	* @return the range of matching social requests
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public java.util.List<com.liferay.portlet.social.model.SocialRequest> getUserRequests(
-		long userId, int status, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long userId, int status, int start, int end) {
 		return _socialRequestLocalService.getUserRequests(userId, status,
 			start, end);
 	}
@@ -579,11 +547,9 @@ public class SocialRequestLocalServiceWrapper
 	*
 	* @param userId the primary key of the requesting user
 	* @return the number of matching social requests
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public int getUserRequestsCount(long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getUserRequestsCount(long userId) {
 		return _socialRequestLocalService.getUserRequestsCount(userId);
 	}
 
@@ -594,11 +560,9 @@ public class SocialRequestLocalServiceWrapper
 	* @param userId the primary key of the requesting user
 	* @param status the social request's status
 	* @return the number of matching social request
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public int getUserRequestsCount(long userId, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getUserRequestsCount(long userId, int status) {
 		return _socialRequestLocalService.getUserRequestsCount(userId, status);
 	}
 
@@ -615,12 +579,10 @@ public class SocialRequestLocalServiceWrapper
 	* @param status the social request's status
 	* @return <code>true</code> if the request exists; <code>false</code>
 	otherwise
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public boolean hasRequest(long userId, java.lang.String className,
-		long classPK, int type, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long classPK, int type, int status) {
 		return _socialRequestLocalService.hasRequest(userId, className,
 			classPK, type, status);
 	}
@@ -639,12 +601,10 @@ public class SocialRequestLocalServiceWrapper
 	* @param status the social request's status
 	* @return <code>true</code> if the social request exists;
 	<code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public boolean hasRequest(long userId, java.lang.String className,
-		long classPK, int type, long receiverUserId, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long classPK, int type, long receiverUserId, int status) {
 		return _socialRequestLocalService.hasRequest(userId, className,
 			classPK, type, receiverUserId, status);
 	}
@@ -670,14 +630,12 @@ public class SocialRequestLocalServiceWrapper
 	* @param themeDisplay the theme display
 	* @return the updated social request
 	* @throws PortalException if the social request could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialRequest updateRequest(
 		long requestId, int status,
 		com.liferay.portal.theme.ThemeDisplay themeDisplay)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialRequestLocalService.updateRequest(requestId, status,
 			themeDisplay);
 	}
@@ -685,6 +643,7 @@ public class SocialRequestLocalServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public SocialRequestLocalService getWrappedSocialRequestLocalService() {
 		return _socialRequestLocalService;
 	}
@@ -692,6 +651,7 @@ public class SocialRequestLocalServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedSocialRequestLocalService(
 		SocialRequestLocalService socialRequestLocalService) {
 		_socialRequestLocalService = socialRequestLocalService;

@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -36,25 +36,6 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 		title='<%= (userGroup == null) ? "new-user-group" : userGroup.getName() %>'
 	/>
 
-	<aui:nav-bar>
-		<aui:nav>
-			<portlet:renderURL var="viewUserGroupsURL">
-				<portlet:param name="struts_action" value="/user_groups_admin/view" />
-			</portlet:renderURL>
-
-			<aui:nav-item href="<%= viewUserGroupsURL %>" label="view-all" />
-
-			<c:if test="<%= PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_USER_GROUP) %>">
-				<portlet:renderURL var="addUsergroupURL">
-					<portlet:param name="struts_action" value="/user_groups_admin/edit_user_group" />
-					<portlet:param name="redirect" value="<%= viewUserGroupsURL %>" />
-				</portlet:renderURL>
-
-				<aui:nav-item href="<%= addUsergroupURL %>" iconClass="icon-plus" label="add" selected="<%= (userGroup == null) %>" />
-			</c:if>
-		</aui:nav>
-	</aui:nav-bar>
-
 	<liferay-ui:error exception="<%= DuplicateUserGroupException.class %>" message="please-enter-a-unique-name" />
 	<liferay-ui:error exception="<%= RequiredUserGroupException.class %>" message="this-is-a-required-user-group" />
 	<liferay-ui:error exception="<%= UserGroupNameException.class %>" message="please-enter-a-valid-name" />
@@ -62,12 +43,6 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 	<aui:model-context bean="<%= userGroup %>" model="<%= UserGroup.class %>" />
 
 	<aui:fieldset>
-		<c:if test="<%= userGroup != null %>">
-			<aui:field-wrapper label="old-name">
-				<%= HtmlUtil.escape(userGroup.getName()) %>
-			</aui:field-wrapper>
-		</c:if>
-
 		<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" label='<%= (userGroup != null) ? "new-name" : "name" %>' name="name" />
 
 		<aui:input name="description" />
@@ -82,61 +57,61 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 		</liferay-ui:custom-attributes-available>
 
 	</aui:fieldset>
-	<aui:fieldset helpMessage="user-group-site-help" label="user-group-site">
 
-		<%
-		Group userGroupGroup = null;
+	<%
+	Group userGroupGroup = null;
 
-		if (userGroup != null) {
-			userGroupGroup = userGroup.getGroup();
-		}
+	if (userGroup != null) {
+		userGroupGroup = userGroup.getGroup();
+	}
 
-		LayoutSet privateLayoutSet = null;
-		LayoutSetPrototype privateLayoutSetPrototype = null;
-		boolean privateLayoutSetPrototypeLinkEnabled = true;
+	LayoutSet privateLayoutSet = null;
+	LayoutSetPrototype privateLayoutSetPrototype = null;
+	boolean privateLayoutSetPrototypeLinkEnabled = true;
 
-		LayoutSet publicLayoutSet = null;
-		LayoutSetPrototype publicLayoutSetPrototype = null;
-		boolean publicLayoutSetPrototypeLinkEnabled = true;
+	LayoutSet publicLayoutSet = null;
+	LayoutSetPrototype publicLayoutSetPrototype = null;
+	boolean publicLayoutSetPrototypeLinkEnabled = true;
 
-		if (userGroupGroup != null) {
-			try {
-				LayoutLocalServiceUtil.getLayouts(userGroupGroup.getGroupId(), false, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
+	if (userGroupGroup != null) {
+		try {
+			LayoutLocalServiceUtil.getLayouts(userGroupGroup.getGroupId(), false, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
 
-				privateLayoutSet = LayoutSetLocalServiceUtil.getLayoutSet(userGroupGroup.getGroupId(), true);
+			privateLayoutSet = LayoutSetLocalServiceUtil.getLayoutSet(userGroupGroup.getGroupId(), true);
 
-				privateLayoutSetPrototypeLinkEnabled = privateLayoutSet.isLayoutSetPrototypeLinkEnabled();
+			privateLayoutSetPrototypeLinkEnabled = privateLayoutSet.isLayoutSetPrototypeLinkEnabled();
 
-				String layoutSetPrototypeUuid = privateLayoutSet.getLayoutSetPrototypeUuid();
+			String layoutSetPrototypeUuid = privateLayoutSet.getLayoutSetPrototypeUuid();
 
-				if (Validator.isNotNull(layoutSetPrototypeUuid)) {
-					privateLayoutSetPrototype = LayoutSetPrototypeLocalServiceUtil.getLayoutSetPrototypeByUuidAndCompanyId(layoutSetPrototypeUuid, company.getCompanyId());
-				}
-			}
-			catch (Exception e) {
-			}
-
-			try {
-				LayoutLocalServiceUtil.getLayouts(userGroupGroup.getGroupId(), true, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
-
-				publicLayoutSet = LayoutSetLocalServiceUtil.getLayoutSet(userGroupGroup.getGroupId(), false);
-
-				publicLayoutSetPrototypeLinkEnabled = publicLayoutSet.isLayoutSetPrototypeLinkEnabled();
-
-				String layoutSetPrototypeUuid = publicLayoutSet.getLayoutSetPrototypeUuid();
-
-				if (Validator.isNotNull(layoutSetPrototypeUuid)) {
-					publicLayoutSetPrototype = LayoutSetPrototypeLocalServiceUtil.getLayoutSetPrototypeByUuidAndCompanyId(layoutSetPrototypeUuid, company.getCompanyId());
-				}
-			}
-			catch (Exception e) {
+			if (Validator.isNotNull(layoutSetPrototypeUuid)) {
+				privateLayoutSetPrototype = LayoutSetPrototypeLocalServiceUtil.getLayoutSetPrototypeByUuidAndCompanyId(layoutSetPrototypeUuid, company.getCompanyId());
 			}
 		}
+		catch (Exception e) {
+		}
 
-		List<LayoutSetPrototype> layoutSetPrototypes = LayoutSetPrototypeServiceUtil.search(company.getCompanyId(), Boolean.TRUE, null);
-		%>
+		try {
+			LayoutLocalServiceUtil.getLayouts(userGroupGroup.getGroupId(), true, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
 
-		<c:if test="<%= (userGroupGroup != null) || !layoutSetPrototypes.isEmpty() %>">
+			publicLayoutSet = LayoutSetLocalServiceUtil.getLayoutSet(userGroupGroup.getGroupId(), false);
+
+			publicLayoutSetPrototypeLinkEnabled = publicLayoutSet.isLayoutSetPrototypeLinkEnabled();
+
+			String layoutSetPrototypeUuid = publicLayoutSet.getLayoutSetPrototypeUuid();
+
+			if (Validator.isNotNull(layoutSetPrototypeUuid)) {
+				publicLayoutSetPrototype = LayoutSetPrototypeLocalServiceUtil.getLayoutSetPrototypeByUuidAndCompanyId(layoutSetPrototypeUuid, company.getCompanyId());
+			}
+		}
+		catch (Exception e) {
+		}
+	}
+
+	List<LayoutSetPrototype> layoutSetPrototypes = LayoutSetPrototypeServiceUtil.search(company.getCompanyId(), Boolean.TRUE, null);
+	%>
+
+	<c:if test="<%= (userGroupGroup != null) || !layoutSetPrototypes.isEmpty() %>">
+		<aui:fieldset helpMessage="user-group-site-help" label="user-group-site">
 
 			<%
 			boolean hasUnlinkLayoutSetPrototypePermission = PortalPermissionUtil.contains(permissionChecker, ActionKeys.UNLINK_LAYOUT_SET_PROTOTYPE);
@@ -151,7 +126,7 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 						for (LayoutSetPrototype layoutSetPrototype : layoutSetPrototypes) {
 						%>
 
-							<aui:option value="<%= layoutSetPrototype.getLayoutSetPrototypeId() %>"><%= HtmlUtil.escape(layoutSetPrototype.getName(user.getLanguageId())) %></aui:option>
+							<aui:option value="<%= layoutSetPrototype.getLayoutSetPrototypeId() %>"><%= HtmlUtil.escape(layoutSetPrototype.getName(locale)) %></aui:option>
 
 						<%
 						}
@@ -174,17 +149,16 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 					<aui:field-wrapper label="public-pages">
 						<c:choose>
 							<c:when test="<%= userGroupGroup != null %>">
-
-								<liferay-portlet:actionURL portletName="<%= PortletKeys.SITE_REDIRECTOR %>" var="publicPagesURL">
-									<portlet:param name="struts_action" value="/MY_SITES/view" />
-									<portlet:param name="groupId" value="<%= String.valueOf(userGroupGroup.getGroupId()) %>" />
-									<portlet:param name="publicLayout" value="<%= Boolean.TRUE.toString() %>" />
-								</liferay-portlet:actionURL>
-
 								<c:choose>
 									<c:when test="<%= userGroupGroup.getPublicLayoutsPageCount() > 0 %>">
+										<liferay-portlet:actionURL portletName="<%= PortletKeys.SITE_REDIRECTOR %>" var="publicPagesURL">
+											<portlet:param name="struts_action" value="/MY_SITES/view" />
+											<portlet:param name="groupId" value="<%= String.valueOf(userGroupGroup.getGroupId()) %>" />
+											<portlet:param name="publicLayout" value="<%= Boolean.TRUE.toString() %>" />
+										</liferay-portlet:actionURL>
+
 										<liferay-ui:icon
-											image="view"
+											iconCssClass="icon-search"
 											label="<%= true %>"
 											message="open-pages"
 											method="get"
@@ -199,10 +173,10 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 
 								<c:choose>
 									<c:when test="<%= (publicLayoutSetPrototype != null) && hasUnlinkLayoutSetPrototypePermission %>">
-										<aui:input label='<%= LanguageUtil.format(pageContext, "enable-propagation-of-changes-from-the-site-template-x", HtmlUtil.escape(publicLayoutSetPrototype.getName(user.getLanguageId()))) %>' name="publicLayoutSetPrototypeLinkEnabled" type="checkbox" value="<%= publicLayoutSetPrototypeLinkEnabled %>" />
+										<aui:input label='<%= LanguageUtil.format(request, "enable-propagation-of-changes-from-the-site-template-x", HtmlUtil.escape(publicLayoutSetPrototype.getName(locale)), false) %>' name="publicLayoutSetPrototypeLinkEnabled" type="checkbox" value="<%= publicLayoutSetPrototypeLinkEnabled %>" />
 									</c:when>
 									<c:when test="<%= publicLayoutSetPrototype != null %>">
-										<liferay-ui:message arguments="<%= new Object[] {HtmlUtil.escape(publicLayoutSetPrototype.getName(locale))} %>" key="these-pages-are-linked-to-site-template-x" />
+										<liferay-ui:message arguments="<%= new Object[] {HtmlUtil.escape(publicLayoutSetPrototype.getName(locale))} %>" key="these-pages-are-linked-to-site-template-x" translateArguments="<%= false %>" />
 
 										<aui:input name="layoutSetPrototypeLinkEnabled" type="hidden" value="<%= true %>" />
 									</c:when>
@@ -222,7 +196,7 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 						for (LayoutSetPrototype layoutSetPrototype : layoutSetPrototypes) {
 						%>
 
-							<aui:option value="<%= layoutSetPrototype.getLayoutSetPrototypeId() %>"><%= HtmlUtil.escape(layoutSetPrototype.getName(user.getLanguageId())) %></aui:option>
+							<aui:option value="<%= layoutSetPrototype.getLayoutSetPrototypeId() %>"><%= HtmlUtil.escape(layoutSetPrototype.getName(locale)) %></aui:option>
 
 						<%
 						}
@@ -245,16 +219,16 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 					<aui:field-wrapper label="private-pages">
 						<c:choose>
 							<c:when test="<%= userGroupGroup != null %>">
-								<liferay-portlet:actionURL portletName="<%= PortletKeys.SITE_REDIRECTOR %>" var="privatePagesURL">
-									<portlet:param name="struts_action" value="/MY_SITES/view" />
-									<portlet:param name="groupId" value="<%= String.valueOf(userGroupGroup.getGroupId()) %>" />
-									<portlet:param name="privateLayout" value="<%= Boolean.TRUE.toString() %>" />
-								</liferay-portlet:actionURL>
-
 								<c:choose>
 									<c:when test="<%= userGroupGroup.getPrivateLayoutsPageCount() > 0 %>">
+										<liferay-portlet:actionURL portletName="<%= PortletKeys.SITE_REDIRECTOR %>" var="privatePagesURL">
+											<portlet:param name="struts_action" value="/MY_SITES/view" />
+											<portlet:param name="groupId" value="<%= String.valueOf(userGroupGroup.getGroupId()) %>" />
+											<portlet:param name="privateLayout" value="<%= Boolean.TRUE.toString() %>" />
+										</liferay-portlet:actionURL>
+
 										<liferay-ui:icon
-											image="view"
+											iconCssClass="icon-search"
 											label="<%= true %>"
 											message="open-pages"
 											method="get"
@@ -269,10 +243,10 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 
 								<c:choose>
 									<c:when test="<%= (privateLayoutSetPrototype != null) && hasUnlinkLayoutSetPrototypePermission %>">
-										<aui:input label='<%= LanguageUtil.format(pageContext, "enable-propagation-of-changes-from-the-site-template-x", HtmlUtil.escape(privateLayoutSetPrototype.getName(user.getLanguageId()))) %>' name="privateLayoutSetPrototypeLinkEnabled" type="checkbox" value="<%= privateLayoutSetPrototypeLinkEnabled %>" />
+										<aui:input label='<%= LanguageUtil.format(request, "enable-propagation-of-changes-from-the-site-template-x", HtmlUtil.escape(privateLayoutSetPrototype.getName(locale)), false) %>' name="privateLayoutSetPrototypeLinkEnabled" type="checkbox" value="<%= privateLayoutSetPrototypeLinkEnabled %>" />
 									</c:when>
 									<c:when test="<%= privateLayoutSetPrototype != null %>">
-										<liferay-ui:message arguments="<%= new Object[] {HtmlUtil.escape(privateLayoutSetPrototype.getName(locale))} %>" key="these-pages-are-linked-to-site-template-x" />
+										<liferay-ui:message arguments="<%= new Object[] {HtmlUtil.escape(privateLayoutSetPrototype.getName(locale))} %>" key="these-pages-are-linked-to-site-template-x" translateArguments="<%= false %>" />
 
 										<aui:input name="layoutSetPrototypeLinkEnabled" type="hidden" value="<%= true %>" />
 									</c:when>
@@ -282,8 +256,8 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 					</aui:field-wrapper>
 				</c:otherwise>
 			</c:choose>
-		</c:if>
-	</aui:fieldset>
+		</aui:fieldset>
+	</c:if>
 
 	<aui:button-row>
 		<aui:button type="submit" />
@@ -298,9 +272,9 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 	}
 
 	function <portlet:namespace />saveUserGroup() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = "<%= (userGroup == null) ? Constants.ADD : Constants.UPDATE %>";
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (userGroup == null) ? Constants.ADD : Constants.UPDATE %>';
 
-		submitForm(document.<portlet:namespace />fm, "<portlet:actionURL><portlet:param name="struts_action" value="/users_admin/edit_user_group" /></portlet:actionURL>");
+		submitForm(document.<portlet:namespace />fm, '<portlet:actionURL><portlet:param name="struts_action" value="/users_admin/edit_user_group" /></portlet:actionURL>');
 	}
 
 	Liferay.Util.toggleSelectBox('<portlet:namespace />publicLayoutSetPrototypeId', <portlet:namespace />isVisible, '<portlet:namespace />publicLayoutSetPrototypeIdOptions');
@@ -310,9 +284,9 @@ long userGroupId = BeanParamUtil.getLong(userGroup, request, "userGroupId");
 <%
 if (userGroup != null) {
 	PortalUtil.addPortletBreadcrumbEntry(request, userGroup.getName(), null);
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "edit"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "edit"), currentURL);
 }
 else {
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "add-user-group"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "add-user-group"), currentURL);
 }
 %>

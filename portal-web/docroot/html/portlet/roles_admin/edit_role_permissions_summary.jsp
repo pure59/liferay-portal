@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,6 +19,9 @@
 <h3><liferay-ui:message key="summary" /></h3>
 
 <%
+String redirect = ParamUtil.getString(request, "redirect");
+String backURL = ParamUtil.getString(request, "backURL", redirect);
+
 Role role = (Role)request.getAttribute("edit_role_permissions.jsp-role");
 
 PortletURL permissionsAllURL = liferayPortletResponse.createRenderURL();
@@ -26,6 +29,7 @@ PortletURL permissionsAllURL = liferayPortletResponse.createRenderURL();
 permissionsAllURL.setParameter("struts_action", "/roles_admin/edit_role_permissions");
 permissionsAllURL.setParameter(Constants.CMD, Constants.VIEW);
 permissionsAllURL.setParameter("tabs1", "roles");
+permissionsAllURL.setParameter("backURL", backURL);
 permissionsAllURL.setParameter("roleId", String.valueOf(role.getRoleId()));
 
 List<String> headerNames = new ArrayList<String>();
@@ -59,7 +63,7 @@ for (int i = 0; i < permissions.size(); i++) {
 	String curModelName = null;
 	String curModelLabel = null;
 	String actionId = permission.getActionId();
-	String actionLabel = _getActionLabel(pageContext, themeDisplay, resource.getName(), actionId);
+	String actionLabel = _getActionLabel(request, themeDisplay, resource.getName(), actionId);
 
 	if (PortletLocalServiceUtil.hasPortlet(company.getCompanyId(), resource.getName())) {
 		curPortletName = resource.getName();
@@ -68,7 +72,7 @@ for (int i = 0; i < permissions.size(); i++) {
 	}
 	else {
 		curModelName = resource.getName();
-		curModelLabel = ResourceActionsUtil.getModelResource(pageContext, curModelName);
+		curModelLabel = ResourceActionsUtil.getModelResource(request, curModelName);
 
 		List portletResources = ResourceActionsUtil.getModelPortletResources(curModelName);
 
@@ -160,7 +164,16 @@ for (int i = 0; i < results.size(); i++) {
 		continue;
 	}
 
-	ResourceURL editPermissionsURL = liferayPortletResponse.createResourceURL();
+	ResourceURL editPermissionsResourceURL = liferayPortletResponse.createResourceURL();
+
+	editPermissionsResourceURL.setParameter("struts_action", "/roles_admin/edit_role_permissions");
+	editPermissionsResourceURL.setParameter(Constants.CMD, Constants.EDIT);
+	editPermissionsResourceURL.setParameter("tabs1", "roles");
+	editPermissionsResourceURL.setParameter("roleId", String.valueOf(role.getRoleId()));
+	editPermissionsResourceURL.setParameter("redirect", permissionsAllURL.toString());
+	editPermissionsResourceURL.setParameter("portletResource", curPortletName);
+
+	PortletURL editPermissionsURL = liferayPortletResponse.createRenderURL();
 
 	editPermissionsURL.setParameter("struts_action", "/roles_admin/edit_role_permissions");
 	editPermissionsURL.setParameter(Constants.CMD, Constants.EDIT);
@@ -169,9 +182,13 @@ for (int i = 0; i < results.size(); i++) {
 	editPermissionsURL.setParameter("redirect", permissionsAllURL.toString());
 	editPermissionsURL.setParameter("portletResource", curPortletName);
 
-	StringBundler sb = new StringBundler();
+	StringBundler sb = new StringBundler(17);
 
-	sb.append("<a class=\"permission-navigation-link\" href=\"");
+	sb.append("<a class=\"permission-navigation-link\" data-resource-href=\"");
+	sb.append(editPermissionsResourceURL);
+	sb.append(StringPool.POUND);
+	sb.append(_getResourceHtmlId(curResource));
+	sb.append("\" href=\"");
 	sb.append(editPermissionsURL);
 	sb.append(StringPool.POUND);
 	sb.append(_getResourceHtmlId(curResource));
@@ -192,7 +209,7 @@ for (int i = 0; i < results.size(); i++) {
 	row.addText(sb.toString());
 
 	if (scope == ResourceConstants.SCOPE_COMPANY) {
-		row.addText(LanguageUtil.get(pageContext, _isShowScope(role, curResource, curPortletName)? "all-sites" : StringPool.BLANK));
+		row.addText(LanguageUtil.get(request, _isShowScope(role, curResource, curPortletName)? "all-sites" : StringPool.BLANK));
 	}
 	else if (scope == ResourceConstants.SCOPE_GROUP_TEMPLATE) {
 	}
@@ -215,7 +232,7 @@ for (int i = 0; i < results.size(); i++) {
 
 	// Action
 
-	row.addJSP("right", SearchEntry.DEFAULT_VALIGN, "/html/portlet/roles_admin/permission_action.jsp");
+	row.addJSP("/html/portlet/roles_admin/permission_action.jsp", "entry-action");
 
 	resultRows.add(row);
 }

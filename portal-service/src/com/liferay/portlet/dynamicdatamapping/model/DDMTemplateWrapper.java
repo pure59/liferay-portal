@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.dynamicdatamapping.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DDMTemplate
  * @generated
  */
+@ProviderType
 public class DDMTemplateWrapper implements DDMTemplate,
 	ModelWrapper<DDMTemplate> {
 	public DDMTemplateWrapper(DDMTemplate ddmTemplate) {
@@ -329,11 +332,9 @@ public class DDMTemplateWrapper implements DDMTemplate,
 	* Returns the user uuid of this d d m template.
 	*
 	* @return the user uuid of this d d m template
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _ddmTemplate.getUserUuid();
 	}
 
@@ -1003,6 +1004,22 @@ public class DDMTemplateWrapper implements DDMTemplate,
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _ddmTemplate.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _ddmTemplate.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_ddmTemplate.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -1051,20 +1068,13 @@ public class DDMTemplateWrapper implements DDMTemplate,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_ddmTemplate.persist();
 	}
 
 	@Override
-	public java.lang.String getDefaultLanguageId() {
-		return _ddmTemplate.getDefaultLanguageId();
-	}
-
-	@Override
 	public java.lang.String getSmallImageType()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddmTemplate.getSmallImageType();
 	}
 
@@ -1116,6 +1126,7 @@ public class DDMTemplateWrapper implements DDMTemplate,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public DDMTemplate getWrappedDDMTemplate() {
 		return _ddmTemplate;
 	}
@@ -1123,6 +1134,16 @@ public class DDMTemplateWrapper implements DDMTemplate,
 	@Override
 	public DDMTemplate getWrappedModel() {
 		return _ddmTemplate;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _ddmTemplate.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _ddmTemplate.isFinderCacheEnabled();
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,13 +19,27 @@ package com.liferay.portal.kernel.search;
  */
 public interface SpellCheckIndexWriter {
 
-	public void clearDictionaryIndexes(SearchContext searchContext)
+	public void clearQuerySuggestionDictionaryIndexes(
+			SearchContext searchContext)
 		throws SearchException;
 
-	public void indexDictionaries(SearchContext searchContext)
+	public void clearSpellCheckerDictionaryIndexes(SearchContext searchContext)
 		throws SearchException;
 
-	public void indexDictionary(SearchContext searchContext)
+	public void indexKeyword(
+			SearchContext searchContext, float weight, String keywordType)
+		throws SearchException;
+
+	public void indexQuerySuggestionDictionaries(SearchContext searchContext)
+		throws SearchException;
+
+	public void indexQuerySuggestionDictionary(SearchContext searchContext)
+		throws SearchException;
+
+	public void indexSpellCheckerDictionaries(SearchContext searchContext)
+		throws SearchException;
+
+	public void indexSpellCheckerDictionary(SearchContext searchContext)
 		throws SearchException;
 
 }

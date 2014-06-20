@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,14 +21,13 @@ import com.liferay.portal.kernel.process.ProcessCallable;
 import com.liferay.portal.kernel.process.ProcessException;
 import com.liferay.portal.kernel.process.ProcessExecutor;
 import com.liferay.portal.kernel.scheduler.SchedulerEngineHelperUtil;
-import com.liferay.portal.kernel.scheduler.SchedulerException;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
-import com.liferay.portal.test.EnvironmentExecutionTestListener;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
+import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.util.InitUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.util.PwdGenerator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,13 +44,13 @@ import org.junit.runner.RunWith;
 /**
  * @author Shuyang Zhou
  */
-@ExecutionTestListeners(listeners = {EnvironmentExecutionTestListener.class})
+@ExecutionTestListeners(listeners = {MainServletExecutionTestListener.class})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
 public class CounterLocalServiceTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		_COUNTER_NAME = PwdGenerator.getPassword();
+		_COUNTER_NAME = StringUtil.randomString();
 
 		CounterLocalServiceUtil.reset(_COUNTER_NAME);
 
@@ -80,7 +79,7 @@ public class CounterLocalServiceTest {
 					"Increment Process-" + i, _COUNTER_NAME, _INCREMENT_COUNT);
 
 			Future<Long[]> futures = ProcessExecutor.execute(
-				classPath, jvmArguments, processCallable);
+				classPath, classPath, jvmArguments, processCallable);
 
 			futuresList.add(futures);
 		}
@@ -124,10 +123,11 @@ public class CounterLocalServiceTest {
 		@Override
 		public Long[] call() throws ProcessException {
 			System.setProperty("catalina.base", ".");
+			System.setProperty("external-properties", "portal-test.properties");
 
 			PropsUtil.set(PropsValues.COUNTER_INCREMENT + _COUNTER_NAME, "1");
 
-			InitUtil.initWithSpring();
+			InitUtil.initWithSpringAndModuleFramework();
 
 			List<Long> ids = new ArrayList<Long>();
 
@@ -142,9 +142,11 @@ public class CounterLocalServiceTest {
 			finally {
 				try {
 					SchedulerEngineHelperUtil.shutdown();
+
+					InitUtil.stopModuleFramework();
 				}
-				catch (SchedulerException se) {
-					throw new ProcessException(se);
+				catch (Exception e) {
+					throw new ProcessException(e);
 				}
 			}
 

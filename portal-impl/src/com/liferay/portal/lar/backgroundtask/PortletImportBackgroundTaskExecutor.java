@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,7 +16,9 @@ package com.liferay.portal.lar.backgroundtask;
 
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskResult;
 import com.liferay.portal.kernel.backgroundtask.BaseBackgroundTaskExecutor;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.model.BackgroundTask;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
@@ -62,6 +64,14 @@ public class PortletImportBackgroundTaskExecutor
 		}
 
 		return BackgroundTaskResult.SUCCESS;
+	}
+
+	@Override
+	public String handleException(BackgroundTask backgroundTask, Exception e) {
+		JSONObject jsonObject = StagingUtil.getExceptionMessagesJSONObject(
+			getLocale(backgroundTask), e, backgroundTask.getTaskContextMap());
+
+		return jsonObject.toString();
 	}
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,6 +18,7 @@ import com.liferay.portal.cache.ehcache.EhcacheStreamBootstrapCacheLoader;
 import com.liferay.portal.jericho.CachedLoggerProvider;
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.cluster.ClusterExecutorUtil;
+import com.liferay.portal.kernel.cluster.ClusterMasterExecutorUtil;
 import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.events.SimpleAction;
 import com.liferay.portal.kernel.log.Log;
@@ -28,28 +29,32 @@ import com.liferay.portal.kernel.messaging.sender.MessageSender;
 import com.liferay.portal.kernel.messaging.sender.SynchronousMessageSender;
 import com.liferay.portal.kernel.nio.intraband.Intraband;
 import com.liferay.portal.kernel.nio.intraband.SystemDataType;
-import com.liferay.portal.kernel.nio.intraband.cache.PortalCacheDatagramReceiveHandler;
 import com.liferay.portal.kernel.nio.intraband.mailbox.MailboxDatagramReceiveHandler;
 import com.liferay.portal.kernel.nio.intraband.messaging.MessageDatagramReceiveHandler;
+import com.liferay.portal.kernel.nio.intraband.proxy.IntrabandProxyDatagramReceiveHandler;
 import com.liferay.portal.kernel.nio.intraband.rpc.RPCDatagramReceiveHandler;
 import com.liferay.portal.kernel.resiliency.mpi.MPIHelperUtil;
+import com.liferay.portal.kernel.resiliency.spi.SPIUtil;
 import com.liferay.portal.kernel.resiliency.spi.agent.annotation.Direction;
 import com.liferay.portal.kernel.resiliency.spi.agent.annotation.DistributedRegistry;
 import com.liferay.portal.kernel.resiliency.spi.agent.annotation.MatchType;
 import com.liferay.portal.kernel.scheduler.SchedulerEngineHelperUtil;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
-import com.liferay.portal.kernel.servlet.JspFactorySwapper;
 import com.liferay.portal.kernel.template.TemplateManagerUtil;
 import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.plugin.PluginPackageIndexer;
+import com.liferay.portal.security.lang.DoPrivilegedUtil;
 import com.liferay.portal.service.BackgroundTaskLocalServiceUtil;
 import com.liferay.portal.service.LockLocalServiceUtil;
 import com.liferay.portal.tools.DBUpgrader;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.messageboards.util.MBMessageIndexer;
+import com.liferay.taglib.servlet.JspFactorySwapper;
 
 import javax.portlet.MimeResponse;
 import javax.portlet.PortletRequest;
+
+import org.apache.struts.taglib.tiles.ComponentConstants;
 
 /**
  * @author Brian Wing Shun Chan
@@ -80,6 +85,9 @@ public class StartupAction extends SimpleAction {
 		// Portal resiliency
 
 		DistributedRegistry.registerDistributed(
+			ComponentConstants.COMPONENT_CONTEXT, Direction.DUPLEX,
+			MatchType.POSTFIX);
+		DistributedRegistry.registerDistributed(
 			MimeResponse.MARKUP_HEAD_ELEMENT, Direction.DUPLEX,
 			MatchType.EXACT);
 		DistributedRegistry.registerDistributed(
@@ -100,26 +108,11 @@ public class StartupAction extends SimpleAction {
 			new MessageDatagramReceiveHandler(messageBus));
 
 		intraband.registerDatagramReceiveHandler(
-			SystemDataType.PORTAL_CACHE.getValue(),
-			new PortalCacheDatagramReceiveHandler());
+			SystemDataType.PROXY.getValue(),
+			new IntrabandProxyDatagramReceiveHandler());
+
 		intraband.registerDatagramReceiveHandler(
 			SystemDataType.RPC.getValue(), new RPCDatagramReceiveHandler());
-
-		// Clear locks
-
-		if (_log.isDebugEnabled()) {
-			_log.debug("Clear locks");
-		}
-
-		try {
-			LockLocalServiceUtil.clear();
-		}
-		catch (Exception e) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"Unable to clear locks because Lock table does not exist");
-			}
-		}
 
 		// Shutdown hook
 
@@ -152,6 +145,22 @@ public class StartupAction extends SimpleAction {
 
 		DBUpgrader.upgrade();
 
+		// Clear locks
+
+		if (_log.isDebugEnabled()) {
+			_log.debug("Clear locks");
+		}
+
+		try {
+			LockLocalServiceUtil.clear();
+		}
+		catch (Exception e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Unable to clear locks because Lock table does not exist");
+			}
+		}
+
 		// Messaging
 
 		if (_log.isDebugEnabled()) {
@@ -166,11 +175,17 @@ public class StartupAction extends SimpleAction {
 				SynchronousMessageSender.class.getName());
 
 		MessageBusUtil.init(
-			messageBus, messageSender, synchronousMessageSender);
+			DoPrivilegedUtil.wrap(messageBus),
+			DoPrivilegedUtil.wrap(messageSender),
+			DoPrivilegedUtil.wrap(synchronousMessageSender));
 
 		// Cluster executor
 
 		ClusterExecutorUtil.initialize();
+
+		if (!SPIUtil.isSPI()) {
+			ClusterMasterExecutorUtil.initialize();
+		}
 
 		// Ehache bootstrap
 
@@ -192,13 +207,15 @@ public class StartupAction extends SimpleAction {
 
 		DBUpgrader.verify();
 
+		// Background tasks
+
+		if (!ClusterMasterExecutorUtil.isEnabled()) {
+			BackgroundTaskLocalServiceUtil.cleanUpBackgroundTasks();
+		}
+
 		// Liferay JspFactory
 
 		JspFactorySwapper.swap();
-
-		// Background tasks
-
-		BackgroundTaskLocalServiceUtil.cleanUpBackgroundTasks();
 
 		// Jericho
 

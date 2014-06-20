@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -57,13 +57,13 @@ public class RMISignatureTest {
 
 		Method[] methods = rmiClass.getDeclaredMethods();
 
-		Method:
+		method:
 		for (Method method : methods) {
 			Class<?>[] exceptionTypes = method.getExceptionTypes();
 
 			for (Class<?> exceptionType : exceptionTypes) {
 				if (RemoteException.class.isAssignableFrom(exceptionType)) {
-					continue Method;
+					continue method;
 				}
 			}
 

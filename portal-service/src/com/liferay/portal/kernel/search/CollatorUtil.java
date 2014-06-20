@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -23,10 +23,10 @@ import java.util.Map;
 public class CollatorUtil {
 
 	public static String collate(
-			Map<String, List<String>> suggestions, List<String> tokens)
+			Map<String, List<String>> suggestions, List<String> keywords)
 		throws SearchException {
 
-		return _getCollator().collate(suggestions, tokens);
+		return _getCollator().collate(suggestions, keywords);
 	}
 
 	public void setCollator(Collator collator) {

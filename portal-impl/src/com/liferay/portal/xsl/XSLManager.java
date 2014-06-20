@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,7 +19,6 @@ import com.liferay.portal.kernel.template.Template;
 import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.template.TemplateResource;
 import com.liferay.portal.template.BaseTemplateManager;
-import com.liferay.portal.template.TemplateContextHelper;
 
 import java.util.Map;
 
@@ -31,18 +30,18 @@ public class XSLManager extends BaseTemplateManager {
 
 	@Override
 	public void destroy() {
-		if (_templateContextHelper == null) {
+		if (templateContextHelper == null) {
 			return;
 		}
 
-		_templateContextHelper.removeAllHelperUtilities();
+		templateContextHelper.removeAllHelperUtilities();
 
-		_templateContextHelper = null;
+		templateContextHelper = null;
 	}
 
 	@Override
 	public void destroy(ClassLoader classLoader) {
-		_templateContextHelper.removeHelperUtilities(classLoader);
+		templateContextHelper.removeHelperUtilities(classLoader);
 	}
 
 	@Override
@@ -54,30 +53,17 @@ public class XSLManager extends BaseTemplateManager {
 	public void init() {
 	}
 
-	public void setTemplateContextHelper(
-		TemplateContextHelper templateContextHelper) {
-
-		_templateContextHelper = templateContextHelper;
-	}
-
 	@Override
 	protected Template doGetTemplate(
 		TemplateResource templateResource,
 		TemplateResource errorTemplateResource, boolean restricted,
-		Map<String, Object> helperUtilities) {
+		Map<String, Object> helperUtilities, boolean privileged) {
 
 		XSLTemplateResource xslTemplateResource =
 			(XSLTemplateResource)templateResource;
 
 		return new XSLTemplate(
-			xslTemplateResource, errorTemplateResource, _templateContextHelper);
+			xslTemplateResource, errorTemplateResource, templateContextHelper);
 	}
-
-	@Override
-	protected TemplateContextHelper getTemplateContextHelper() {
-		return _templateContextHelper;
-	}
-
-	private TemplateContextHelper _templateContextHelper;
 
 }

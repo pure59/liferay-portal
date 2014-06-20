@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,7 @@
 package com.liferay.portal.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.DateUtil;
@@ -28,7 +28,9 @@ import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.Phone;
 import com.liferay.portal.model.PhoneModel;
 import com.liferay.portal.model.PhoneSoap;
+import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -66,6 +68,7 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 	 */
 	public static final String TABLE_NAME = "Phone";
 	public static final Object[][] TABLE_COLUMNS = {
+			{ "mvccVersion", Types.BIGINT },
 			{ "uuid_", Types.VARCHAR },
 			{ "phoneId", Types.BIGINT },
 			{ "companyId", Types.BIGINT },
@@ -80,7 +83,7 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 			{ "typeId", Types.INTEGER },
 			{ "primary_", Types.BOOLEAN }
 		};
-	public static final String TABLE_SQL_CREATE = "create table Phone (uuid_ VARCHAR(75) null,phoneId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,number_ VARCHAR(75) null,extension VARCHAR(75) null,typeId INTEGER,primary_ BOOLEAN)";
+	public static final String TABLE_SQL_CREATE = "create table Phone (mvccVersion LONG default 0,uuid_ VARCHAR(75) null,phoneId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,number_ VARCHAR(75) null,extension VARCHAR(75) null,typeId INTEGER,primary_ BOOLEAN)";
 	public static final String TABLE_SQL_DROP = "drop table Phone";
 	public static final String ORDER_BY_JPQL = " ORDER BY phone.createDate ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY Phone.createDate ASC";
@@ -117,6 +120,7 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 
 		Phone model = new PhoneImpl();
 
+		model.setMvccVersion(soapModel.getMvccVersion());
 		model.setUuid(soapModel.getUuid());
 		model.setPhoneId(soapModel.getPhoneId());
 		model.setCompanyId(soapModel.getCompanyId());
@@ -194,6 +198,7 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
 		attributes.put("phoneId", getPhoneId());
 		attributes.put("companyId", getCompanyId());
@@ -208,11 +213,20 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		attributes.put("typeId", getTypeId());
 		attributes.put("primary", getPrimary());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		String uuid = (String)attributes.get("uuid");
 
 		if (uuid != null) {
@@ -292,8 +306,19 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -316,8 +341,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getPhoneId() {
 		return _phoneId;
 	}
@@ -327,8 +352,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		_phoneId = phoneId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -350,8 +375,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -370,21 +395,27 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
 	public long getOriginalUserId() {
 		return _originalUserId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -399,8 +430,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -412,8 +443,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -443,8 +474,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		setClassNameId(classNameId);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassNameId() {
 		return _classNameId;
 	}
@@ -466,8 +497,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		return _originalClassNameId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassPK() {
 		return _classPK;
 	}
@@ -489,8 +520,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		return _originalClassPK;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getNumber() {
 		if (_number == null) {
 			return StringPool.BLANK;
@@ -505,8 +536,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		_number = number;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getExtension() {
 		if (_extension == null) {
 			return StringPool.BLANK;
@@ -521,8 +552,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		_extension = extension;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getTypeId() {
 		return _typeId;
 	}
@@ -532,8 +563,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 		_typeId = typeId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getPrimary() {
 		return _primary;
 	}
@@ -597,6 +628,7 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 	public Object clone() {
 		PhoneImpl phoneImpl = new PhoneImpl();
 
+		phoneImpl.setMvccVersion(getMvccVersion());
 		phoneImpl.setUuid(getUuid());
 		phoneImpl.setPhoneId(getPhoneId());
 		phoneImpl.setCompanyId(getCompanyId());
@@ -657,6 +689,16 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 	}
 
 	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
+	}
+
+	@Override
 	public void resetOriginalValues() {
 		PhoneModelImpl phoneModelImpl = this;
 
@@ -688,6 +730,8 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 	@Override
 	public CacheModel<Phone> toCacheModel() {
 		PhoneCacheModel phoneCacheModel = new PhoneCacheModel();
+
+		phoneCacheModel.mvccVersion = getMvccVersion();
 
 		phoneCacheModel.uuid = getUuid();
 
@@ -758,9 +802,11 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(27);
+		StringBundler sb = new StringBundler(29);
 
-		sb.append("{uuid=");
+		sb.append("{mvccVersion=");
+		sb.append(getMvccVersion());
+		sb.append(", uuid=");
 		sb.append(getUuid());
 		sb.append(", phoneId=");
 		sb.append(getPhoneId());
@@ -793,12 +839,16 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(43);
+		StringBundler sb = new StringBundler(46);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.model.Phone");
 		sb.append("</model-name>");
 
+		sb.append(
+			"<column><column-name>mvccVersion</column-name><column-value><![CDATA[");
+		sb.append(getMvccVersion());
+		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>uuid</column-name><column-value><![CDATA[");
 		sb.append(getUuid());
@@ -859,6 +909,7 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 
 	private static ClassLoader _classLoader = Phone.class.getClassLoader();
 	private static Class<?>[] _escapedModelInterfaces = new Class[] { Phone.class };
+	private long _mvccVersion;
 	private String _uuid;
 	private String _originalUuid;
 	private long _phoneId;
@@ -866,7 +917,6 @@ public class PhoneModelImpl extends BaseModelImpl<Phone> implements PhoneModel {
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private long _originalUserId;
 	private boolean _setOriginalUserId;
 	private String _userName;

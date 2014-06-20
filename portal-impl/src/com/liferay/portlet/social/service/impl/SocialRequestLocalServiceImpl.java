@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,10 +15,8 @@
 package com.liferay.portlet.social.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.social.RequestUserIdException;
 import com.liferay.portlet.social.model.SocialRequest;
 import com.liferay.portlet.social.model.SocialRequestConstants;
@@ -57,16 +55,15 @@ public class SocialRequestLocalServiceImpl
 	 * @throws PortalException if the users could not be found, if the users
 	 *         were not from the same company, or if either of the users was the
 	 *         default user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public SocialRequest addRequest(
 			long userId, long groupId, String className, long classPK, int type,
 			String extraData, long receiverUserId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(userId);
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 		User receiverUser = userPersistence.findByPrimaryKey(receiverUserId);
 		long now = System.currentTimeMillis();
 
@@ -108,12 +105,9 @@ public class SocialRequestLocalServiceImpl
 	 * Removes all the social requests for the receiving user.
 	 *
 	 * @param  receiverUserId the primary key of the receiving user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public void deleteReceiverUserRequests(long receiverUserId)
-		throws SystemException {
-
+	public void deleteReceiverUserRequests(long receiverUserId) {
 		List<SocialRequest> requests =
 			socialRequestPersistence.findByReceiverUserId(receiverUserId);
 
@@ -128,12 +122,9 @@ public class SocialRequestLocalServiceImpl
 	 *
 	 * @param  requestId the primary key of the social request
 	 * @throws PortalException if the social request could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public void deleteRequest(long requestId)
-		throws PortalException, SystemException {
-
+	public void deleteRequest(long requestId) throws PortalException {
 		SocialRequest request = socialRequestPersistence.findByPrimaryKey(
 			requestId);
 
@@ -144,21 +135,29 @@ public class SocialRequestLocalServiceImpl
 	 * Removes the social request from the database.
 	 *
 	 * @param  request the social request to be removed
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public void deleteRequest(SocialRequest request) throws SystemException {
+	public void deleteRequest(SocialRequest request) {
 		socialRequestPersistence.remove(request);
+	}
+
+	@Override
+	public void deleteRequests(long className, long classPK) {
+		List<SocialRequest> requests = socialRequestPersistence.findByC_C(
+			className, classPK);
+
+		for (SocialRequest request : requests) {
+			deleteRequest(request);
+		}
 	}
 
 	/**
 	 * Removes all the social requests for the requesting user.
 	 *
 	 * @param  userId the primary key of the requesting user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public void deleteUserRequests(long userId) throws SystemException {
+	public void deleteUserRequests(long userId) {
 		List<SocialRequest> requests = socialRequestPersistence.findByUserId(
 			userId);
 
@@ -184,12 +183,10 @@ public class SocialRequestLocalServiceImpl
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching social requests
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public List<SocialRequest> getReceiverUserRequests(
-			long receiverUserId, int start, int end)
-		throws SystemException {
+		long receiverUserId, int start, int end) {
 
 		return socialRequestPersistence.findByReceiverUserId(
 			receiverUserId, start, end);
@@ -214,12 +211,10 @@ public class SocialRequestLocalServiceImpl
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching social requests
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public List<SocialRequest> getReceiverUserRequests(
-			long receiverUserId, int status, int start, int end)
-		throws SystemException {
+		long receiverUserId, int status, int start, int end) {
 
 		return socialRequestPersistence.findByR_S(
 			receiverUserId, status, start, end);
@@ -230,12 +225,9 @@ public class SocialRequestLocalServiceImpl
 	 *
 	 * @param  receiverUserId the primary key of the receiving user
 	 * @return the number of matching social requests
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public int getReceiverUserRequestsCount(long receiverUserId)
-		throws SystemException {
-
+	public int getReceiverUserRequestsCount(long receiverUserId) {
 		return socialRequestPersistence.countByReceiverUserId(receiverUserId);
 	}
 
@@ -246,12 +238,9 @@ public class SocialRequestLocalServiceImpl
 	 * @param  receiverUserId the primary key of the receiving user
 	 * @param  status the social request's status
 	 * @return the number of matching social requests
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public int getReceiverUserRequestsCount(long receiverUserId, int status)
-		throws SystemException {
-
+	public int getReceiverUserRequestsCount(long receiverUserId, int status) {
 		return socialRequestPersistence.countByR_S(receiverUserId, status);
 	}
 
@@ -272,11 +261,10 @@ public class SocialRequestLocalServiceImpl
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching social requests
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public List<SocialRequest> getUserRequests(long userId, int start, int end)
-		throws SystemException {
+	public List<SocialRequest> getUserRequests(
+		long userId, int start, int end) {
 
 		return socialRequestPersistence.findByUserId(userId, start, end);
 	}
@@ -300,12 +288,10 @@ public class SocialRequestLocalServiceImpl
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching social requests
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public List<SocialRequest> getUserRequests(
-			long userId, int status, int start, int end)
-		throws SystemException {
+		long userId, int status, int start, int end) {
 
 		return socialRequestPersistence.findByU_S(userId, status, start, end);
 	}
@@ -315,10 +301,9 @@ public class SocialRequestLocalServiceImpl
 	 *
 	 * @param  userId the primary key of the requesting user
 	 * @return the number of matching social requests
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public int getUserRequestsCount(long userId) throws SystemException {
+	public int getUserRequestsCount(long userId) {
 		return socialRequestPersistence.countByUserId(userId);
 	}
 
@@ -329,12 +314,9 @@ public class SocialRequestLocalServiceImpl
 	 * @param  userId the primary key of the requesting user
 	 * @param  status the social request's status
 	 * @return the number of matching social request
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public int getUserRequestsCount(long userId, int status)
-		throws SystemException {
-
+	public int getUserRequestsCount(long userId, int status) {
 		return socialRequestPersistence.countByU_S(userId, status);
 	}
 
@@ -351,14 +333,12 @@ public class SocialRequestLocalServiceImpl
 	 * @param  status the social request's status
 	 * @return <code>true</code> if the request exists; <code>false</code>
 	 *         otherwise
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public boolean hasRequest(
-			long userId, String className, long classPK, int type, int status)
-		throws SystemException {
+		long userId, String className, long classPK, int type, int status) {
 
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 
 		if (socialRequestPersistence.countByU_C_C_T_S(
 				userId, classNameId, classPK, type, status) <= 0) {
@@ -384,15 +364,13 @@ public class SocialRequestLocalServiceImpl
 	 * @param  status the social request's status
 	 * @return <code>true</code> if the social request exists;
 	 *         <code>false</code> otherwise
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public boolean hasRequest(
-			long userId, String className, long classPK, int type,
-			long receiverUserId, int status)
-		throws SystemException {
+		long userId, String className, long classPK, int type,
+		long receiverUserId, int status) {
 
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 
 		SocialRequest socialRequest = socialRequestPersistence.fetchByU_C_C_T_R(
 			userId, classNameId, classPK, type, receiverUserId);
@@ -426,12 +404,11 @@ public class SocialRequestLocalServiceImpl
 	 * @param  themeDisplay the theme display
 	 * @return the updated social request
 	 * @throws PortalException if the social request could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public SocialRequest updateRequest(
 			long requestId, int status, ThemeDisplay themeDisplay)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		SocialRequest request = socialRequestPersistence.findByPrimaryKey(
 			requestId);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -75,11 +75,14 @@ public class InformixDB extends BaseDB {
 		sb.append("END IF\n");
 		sb.append("end procedure;\n");
 		sb.append("\n\n");
-		sb.append(getCreateTablesContent(sqlDir, suffix));
-		sb.append("\n\n");
-		sb.append(readFile(sqlDir + "/indexes/indexes-informix.sql"));
-		sb.append("\n\n");
-		sb.append(readFile(sqlDir + "/sequences/sequences-informix.sql"));
+
+		if (population != BARE) {
+			sb.append(getCreateTablesContent(sqlDir, suffix));
+			sb.append("\n\n");
+			sb.append(readFile(sqlDir + "/indexes/indexes-informix.sql"));
+			sb.append("\n\n");
+			sb.append(readFile(sqlDir + "/sequences/sequences-informix.sql"));
+		}
 
 		return sb.toString();
 	}

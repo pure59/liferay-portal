@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -160,7 +160,7 @@ public class Validator {
 	 *         instance, or both <code>null</code>; <code>false</code> otherwise
 	 */
 	public static boolean equals(Object obj1, Object obj2) {
-		if ((obj1 == null) && (obj2 == null)) {
+		if (obj1 == obj2) {
 			return true;
 		}
 		else if ((obj1 == null) || (obj2 == null)) {
@@ -461,6 +461,10 @@ public class Validator {
 		return false;
 	}
 
+	public static boolean isBoolean(String value) {
+		return ArrayUtil.contains(_BOOLEANS, value);
+	}
+
 	/**
 	 * Returns <code>true</code> if the character is an upper or lower case
 	 * English letter.
@@ -501,6 +505,26 @@ public class Validator {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Returns <code>true</code> if the string contains content. The only
+	 * requirement is that it contain content that is not whitespace.
+	 *
+	 * @param  s the string to check
+	 * @return <code>true</code> if the string contains content;
+	 *         <code>false</code> otherwise
+	 */
+	public static boolean isContent(String s) {
+		if (isNotNull(
+				StringUtil.replace(
+					s, new String[] {StringPool.NEW_LINE, StringPool.TAB},
+					new String[] {StringPool.BLANK, StringPool.BLANK}))) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -601,7 +625,7 @@ public class Validator {
 					return false;
 				}
 
-				if (!isChar(c) && !isDigit(c) && (c != CharPool.DASH)) {
+				if (!Character.isLetterOrDigit(c) && (c != CharPool.DASH)) {
 					return false;
 				}
 			}
@@ -1008,21 +1032,18 @@ public class Validator {
 	}
 
 	/**
-	 * Returns <code>true</code> if the array is not <code>null</code>, meaning
-	 * it is neither a <code>null</code> reference or empty.
-	 *
-	 * @param  array the array to check
-	 * @return <code>true</code> if the array is not <code>null</code>;
-	 *         <code>false</code> otherwise
+	 * @deprecated As of 6.2.0, replaced by {@link
+	 *             ArrayUtil#isNotEmpty(Object[])}
 	 */
+	@Deprecated
 	public static boolean isNotNull(Object[] array) {
-		return !isNull(array);
+		return ArrayUtil.isNotEmpty(array);
 	}
 
 	/**
 	 * Returns <code>true</code> if the string is not <code>null</code>, meaning
 	 * it is not a <code>null</code> reference, nothing but spaces, or the
-	 * string "<code>null</code>".
+	 * string "<code>null</code>", with zero or more leading or trailing spaces.
 	 *
 	 * @param  s the string to check
 	 * @return <code>true</code> if the string is not <code>null</code>;
@@ -1074,26 +1095,17 @@ public class Validator {
 	}
 
 	/**
-	 * Returns <code>true</code> if the array is <code>null</code>, meaning it
-	 * is either a <code>null</code> reference or empty.
-	 *
-	 * @param  array the array to check
-	 * @return <code>true</code> if the array is <code>null</code>;
-	 *         <code>false</code> otherwise
+	 * @deprecated As of 6.2.0, replaced by {@link ArrayUtil#isEmpty(Object[])}
 	 */
+	@Deprecated
 	public static boolean isNull(Object[] array) {
-		if ((array == null) || (array.length == 0)) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		return ArrayUtil.isEmpty(array);
 	}
 
 	/**
 	 * Returns <code>true</code> if the string is <code>null</code>, meaning it
 	 * is a <code>null</code> reference, nothing but spaces, or the string
-	 * "<code>null</code>".
+	 * "<code>null</code>", with zero or more leading or trailing spaces.
 	 *
 	 * @param  s the string to check
 	 * @return <code>true</code> if the string is <code>null</code>;
@@ -1315,13 +1327,18 @@ public class Validator {
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean isXml(String s) {
-		if (s.startsWith(_XML_BEGIN) || s.startsWith(_XML_EMPTY)) {
+		if (isNull(s)) {
+			return false;
+		}
+		else if (s.startsWith(_XML_BEGIN) || s.startsWith(_XML_EMPTY)) {
 			return true;
 		}
 		else {
 			return false;
 		}
 	}
+
+	private static final String[] _BOOLEANS = {"false", "on", "off", "true"};
 
 	private static final int _CHAR_LOWER_CASE_BEGIN = 97;
 
@@ -1350,7 +1367,7 @@ public class Validator {
 
 	private static Pattern _emailAddressPattern = Pattern.compile(
 		"[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@" +
-		"(?:[\\w](?:[\\w-]*[\\w])?\\.)+[\\w](?:[\\w-]*[\\w])?");
+		"(?:[a-zA-Z0-9](?:-*[a-zA-Z0-9])?\\.*)+");
 	private static Pattern _ipv4AddressPattern = Pattern.compile(
 		"^" +
 		"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +

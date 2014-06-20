@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -34,7 +34,7 @@ else {
 
 	folderIds.add(new Long(searchFolderIds));
 
-	BookmarksFolderServiceUtil.getSubfolderIds(folderIds, scopeGroupId, searchFolderIds);
+	BookmarksFolderServiceUtil.getSubfolderIds(folderIds, scopeGroupId, searchFolderIds, true);
 
 	folderIdsArray = StringUtil.split(StringUtil.merge(folderIds), 0L);
 }
@@ -45,7 +45,7 @@ if (searchFolderId > 0) {
 	BookmarksUtil.addPortletBreadcrumbEntries(searchFolderId, request, renderResponse);
 }
 
-PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "search") + ": " + keywords, currentURL);
+PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "search") + ": " + keywords, currentURL);
 %>
 
 <liferay-portlet:renderURL varImpl="searchURL">
@@ -76,7 +76,7 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "sea
 	%>
 
 	<liferay-ui:search-container
-		emptyResultsMessage='<%= LanguageUtil.format(pageContext, "no-entries-were-found-that-matched-the-keywords-x", "<strong>" + HtmlUtil.escape(keywords) + "</strong>") %>'
+		emptyResultsMessage='<%= LanguageUtil.format(request, "no-entries-were-found-that-matched-the-keywords-x", "<strong>" + HtmlUtil.escape(keywords) + "</strong>", false) %>'
 		iteratorURL="<%= portletURL %>"
 	>
 
@@ -92,11 +92,12 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "sea
 		searchContext.setStart(searchContainer.getStart());
 
 		Hits hits = indexer.search(searchContext);
+
+		searchContainer.setTotal(hits.getLength());
 		%>
 
 		<liferay-ui:search-container-results
 			results="<%= BookmarksUtil.getEntries(hits) %>"
-			total="<%= hits.getLength() %>"
 		/>
 
 		<liferay-ui:search-container-row
@@ -121,8 +122,15 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "sea
 						name="entry"
 						title="<%= entry.getDescription() %>"
 					>
+
+						<%
+						AssetRendererFactory assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(BookmarksEntry.class.getName());
+
+						AssetRenderer assetRenderer = assetRendererFactory.getAssetRenderer(entry.getEntryId());
+						%>
+
 						<liferay-ui:icon
-							image="../ratings/star_hover"
+							iconCssClass="<%= assetRenderer.getIconCssClass() %>"
 							label="<%= true %>"
 							message="<%= entry.getName() %>"
 							target="_blank"
@@ -148,6 +156,7 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "sea
 
 					<c:if test='<%= ArrayUtil.contains(entryColumns, "action") %>'>
 						<liferay-ui:search-container-column-jsp
+							cssClass="entry-action"
 							path="/html/portlet/bookmarks/entry_action.jsp"
 						/>
 					</c:if>
@@ -170,10 +179,17 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "sea
 						name="entry"
 						title="<%= folder.getDescription() %>"
 					>
+
+						<%
+						AssetRendererFactory assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(BookmarksFolder.class.getName());
+
+						AssetRenderer assetRenderer = assetRendererFactory.getAssetRenderer(folder.getFolderId());
+						%>
+
 						<liferay-ui:icon
-							image='<%= (BookmarksFolderLocalServiceUtil.getFoldersAndEntriesCount(folder.getGroupId(), folder.getFolderId(), WorkflowConstants.STATUS_ANY) > 0) ? "folder_full_document" : "folder_empty" %>'
+							iconCssClass="<%= assetRenderer.getIconCssClass() %>"
 							label="<%= true %>"
-							message="<%= folder.getName() %>"
+							message="<%= HtmlUtil.escape(folder.getName()) %>"
 							url="<%= rowURL %>"
 						/>
 					</liferay-ui:search-container-column-text>
@@ -194,6 +210,7 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "sea
 
 					<c:if test='<%= ArrayUtil.contains(folderColumns, "action") %>'>
 						<liferay-ui:search-container-column-jsp
+							cssClass="entry-action"
 							path="/html/portlet/bookmarks/folder_action.jsp"
 						/>
 					</c:if>
@@ -201,13 +218,9 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "sea
 			</c:choose>
 		</liferay-ui:search-container-row>
 
-		<span class="form-search">
-			<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" inlineField="<%= true %>" label="" name="keywords" size="30" title="search-bookmarks" type="text" value="<%= keywords %>" />
-
-			<aui:button type="submit" value="search" />
-		</span>
-
-		<br /><br />
+		<div class="form-search">
+			<liferay-ui:input-search autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" placeholder='<%= LanguageUtil.get(locale, "keywords") %>' title='<%= LanguageUtil.get(locale, "search-categories") %>' />
+		</div>
 
 		<liferay-ui:search-iterator type="more" />
 	</liferay-ui:search-container>

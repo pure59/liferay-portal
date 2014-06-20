@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,9 @@
 
 package com.liferay.portlet.ratings.model;
 
+import aQute.bnd.annotation.ProviderType;
+
+import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
 
@@ -30,6 +33,7 @@ import java.util.Map;
  * @see RatingsEntry
  * @generated
  */
+@ProviderType
 public class RatingsEntryWrapper implements RatingsEntry,
 	ModelWrapper<RatingsEntry> {
 	public RatingsEntryWrapper(RatingsEntry ratingsEntry) {
@@ -50,6 +54,7 @@ public class RatingsEntryWrapper implements RatingsEntry,
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("uuid", getUuid());
 		attributes.put("entryId", getEntryId());
 		attributes.put("companyId", getCompanyId());
 		attributes.put("userId", getUserId());
@@ -65,6 +70,12 @@ public class RatingsEntryWrapper implements RatingsEntry,
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		String uuid = (String)attributes.get("uuid");
+
+		if (uuid != null) {
+			setUuid(uuid);
+		}
+
 		Long entryId = (Long)attributes.get("entryId");
 
 		if (entryId != null) {
@@ -141,6 +152,26 @@ public class RatingsEntryWrapper implements RatingsEntry,
 	}
 
 	/**
+	* Returns the uuid of this ratings entry.
+	*
+	* @return the uuid of this ratings entry
+	*/
+	@Override
+	public java.lang.String getUuid() {
+		return _ratingsEntry.getUuid();
+	}
+
+	/**
+	* Sets the uuid of this ratings entry.
+	*
+	* @param uuid the uuid of this ratings entry
+	*/
+	@Override
+	public void setUuid(java.lang.String uuid) {
+		_ratingsEntry.setUuid(uuid);
+	}
+
+	/**
 	* Returns the entry ID of this ratings entry.
 	*
 	* @return the entry ID of this ratings entry
@@ -204,11 +235,9 @@ public class RatingsEntryWrapper implements RatingsEntry,
 	* Returns the user uuid of this ratings entry.
 	*
 	* @return the user uuid of this ratings entry
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _ratingsEntry.getUserUuid();
 	}
 
@@ -457,8 +486,7 @@ public class RatingsEntryWrapper implements RatingsEntry,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_ratingsEntry.persist();
 	}
 
@@ -481,9 +509,15 @@ public class RatingsEntryWrapper implements RatingsEntry,
 		return false;
 	}
 
+	@Override
+	public StagedModelType getStagedModelType() {
+		return _ratingsEntry.getStagedModelType();
+	}
+
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public RatingsEntry getWrappedRatingsEntry() {
 		return _ratingsEntry;
 	}
@@ -491,6 +525,16 @@ public class RatingsEntryWrapper implements RatingsEntry,
 	@Override
 	public RatingsEntry getWrappedModel() {
 		return _ratingsEntry;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _ratingsEntry.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _ratingsEntry.isFinderCacheEnabled();
 	}
 
 	@Override

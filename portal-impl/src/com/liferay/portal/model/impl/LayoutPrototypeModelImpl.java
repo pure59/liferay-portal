@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,7 +16,7 @@ package com.liferay.portal.model.impl;
 
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -30,7 +30,9 @@ import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.LayoutPrototype;
 import com.liferay.portal.model.LayoutPrototypeModel;
 import com.liferay.portal.model.LayoutPrototypeSoap;
+import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -46,6 +48,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The base model implementation for the LayoutPrototype service. Represents a row in the &quot;LayoutPrototype&quot; database table, with each column mapped to a property of this class.
@@ -70,6 +74,7 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 	 */
 	public static final String TABLE_NAME = "LayoutPrototype";
 	public static final Object[][] TABLE_COLUMNS = {
+			{ "mvccVersion", Types.BIGINT },
 			{ "uuid_", Types.VARCHAR },
 			{ "layoutPrototypeId", Types.BIGINT },
 			{ "companyId", Types.BIGINT },
@@ -82,7 +87,7 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 			{ "settings_", Types.VARCHAR },
 			{ "active_", Types.BOOLEAN }
 		};
-	public static final String TABLE_SQL_CREATE = "create table LayoutPrototype (uuid_ VARCHAR(75) null,layoutPrototypeId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,name STRING null,description STRING null,settings_ STRING null,active_ BOOLEAN)";
+	public static final String TABLE_SQL_CREATE = "create table LayoutPrototype (mvccVersion LONG default 0,uuid_ VARCHAR(75) null,layoutPrototypeId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,name STRING null,description STRING null,settings_ STRING null,active_ BOOLEAN)";
 	public static final String TABLE_SQL_DROP = "drop table LayoutPrototype";
 	public static final String ORDER_BY_JPQL = " ORDER BY layoutPrototype.layoutPrototypeId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY LayoutPrototype.layoutPrototypeId ASC";
@@ -116,6 +121,7 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 
 		LayoutPrototype model = new LayoutPrototypeImpl();
 
+		model.setMvccVersion(soapModel.getMvccVersion());
 		model.setUuid(soapModel.getUuid());
 		model.setLayoutPrototypeId(soapModel.getLayoutPrototypeId());
 		model.setCompanyId(soapModel.getCompanyId());
@@ -192,6 +198,7 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
 		attributes.put("layoutPrototypeId", getLayoutPrototypeId());
 		attributes.put("companyId", getCompanyId());
@@ -204,11 +211,20 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 		attributes.put("settings", getSettings());
 		attributes.put("active", getActive());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		String uuid = (String)attributes.get("uuid");
 
 		if (uuid != null) {
@@ -276,8 +292,19 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -300,8 +327,8 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getLayoutPrototypeId() {
 		return _layoutPrototypeId;
 	}
@@ -311,8 +338,8 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 		_layoutPrototypeId = layoutPrototypeId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -334,8 +361,8 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -346,17 +373,23 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -371,8 +404,8 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -382,8 +415,8 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -393,8 +426,8 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 		_modifiedDate = modifiedDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -492,8 +525,8 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 				LocaleUtil.toLanguageId(defaultLocale)));
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -504,12 +537,99 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 	}
 
 	@Override
+	public String getDescription(Locale locale) {
+		String languageId = LocaleUtil.toLanguageId(locale);
+
+		return getDescription(languageId);
+	}
+
+	@Override
+	public String getDescription(Locale locale, boolean useDefault) {
+		String languageId = LocaleUtil.toLanguageId(locale);
+
+		return getDescription(languageId, useDefault);
+	}
+
+	@Override
+	public String getDescription(String languageId) {
+		return LocalizationUtil.getLocalization(getDescription(), languageId);
+	}
+
+	@Override
+	public String getDescription(String languageId, boolean useDefault) {
+		return LocalizationUtil.getLocalization(getDescription(), languageId,
+			useDefault);
+	}
+
+	@Override
+	public String getDescriptionCurrentLanguageId() {
+		return _descriptionCurrentLanguageId;
+	}
+
+	@JSON
+	@Override
+	public String getDescriptionCurrentValue() {
+		Locale locale = getLocale(_descriptionCurrentLanguageId);
+
+		return getDescription(locale);
+	}
+
+	@Override
+	public Map<Locale, String> getDescriptionMap() {
+		return LocalizationUtil.getLocalizationMap(getDescription());
+	}
+
+	@Override
 	public void setDescription(String description) {
 		_description = description;
 	}
 
 	@Override
+	public void setDescription(String description, Locale locale) {
+		setDescription(description, locale, LocaleUtil.getDefault());
+	}
+
+	@Override
+	public void setDescription(String description, Locale locale,
+		Locale defaultLocale) {
+		String languageId = LocaleUtil.toLanguageId(locale);
+		String defaultLanguageId = LocaleUtil.toLanguageId(defaultLocale);
+
+		if (Validator.isNotNull(description)) {
+			setDescription(LocalizationUtil.updateLocalization(
+					getDescription(), "Description", description, languageId,
+					defaultLanguageId));
+		}
+		else {
+			setDescription(LocalizationUtil.removeLocalization(
+					getDescription(), "Description", languageId));
+		}
+	}
+
+	@Override
+	public void setDescriptionCurrentLanguageId(String languageId) {
+		_descriptionCurrentLanguageId = languageId;
+	}
+
+	@Override
+	public void setDescriptionMap(Map<Locale, String> descriptionMap) {
+		setDescriptionMap(descriptionMap, LocaleUtil.getDefault());
+	}
+
+	@Override
+	public void setDescriptionMap(Map<Locale, String> descriptionMap,
+		Locale defaultLocale) {
+		if (descriptionMap == null) {
+			return;
+		}
+
+		setDescription(LocalizationUtil.updateLocalization(descriptionMap,
+				getDescription(), "Description",
+				LocaleUtil.toLanguageId(defaultLocale)));
+	}
+
 	@JSON
+	@Override
 	public String getSettings() {
 		if (_settings == null) {
 			return StringPool.BLANK;
@@ -524,8 +644,8 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 		_settings = settings;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getActive() {
 		return _active;
 	}
@@ -576,11 +696,85 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 	}
 
 	@Override
+	public String[] getAvailableLanguageIds() {
+		Set<String> availableLanguageIds = new TreeSet<String>();
+
+		Map<Locale, String> nameMap = getNameMap();
+
+		for (Map.Entry<Locale, String> entry : nameMap.entrySet()) {
+			Locale locale = entry.getKey();
+			String value = entry.getValue();
+
+			if (Validator.isNotNull(value)) {
+				availableLanguageIds.add(LocaleUtil.toLanguageId(locale));
+			}
+		}
+
+		Map<Locale, String> descriptionMap = getDescriptionMap();
+
+		for (Map.Entry<Locale, String> entry : descriptionMap.entrySet()) {
+			Locale locale = entry.getKey();
+			String value = entry.getValue();
+
+			if (Validator.isNotNull(value)) {
+				availableLanguageIds.add(LocaleUtil.toLanguageId(locale));
+			}
+		}
+
+		return availableLanguageIds.toArray(new String[availableLanguageIds.size()]);
+	}
+
+	@Override
+	public String getDefaultLanguageId() {
+		String xml = getName();
+
+		if (xml == null) {
+			return StringPool.BLANK;
+		}
+
+		Locale defaultLocale = LocaleUtil.getDefault();
+
+		return LocalizationUtil.getDefaultLanguageId(xml, defaultLocale);
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport() throws LocaleException {
+		Locale defaultLocale = LocaleUtil.fromLanguageId(getDefaultLanguageId());
+
+		Locale[] availableLocales = LocaleUtil.fromLanguageIds(getAvailableLanguageIds());
+
+		Locale defaultImportLocale = LocalizationUtil.getDefaultImportLocale(LayoutPrototype.class.getName(),
+				getPrimaryKey(), defaultLocale, availableLocales);
+
+		prepareLocalizedFieldsForImport(defaultImportLocale);
+	}
+
+	@Override
 	@SuppressWarnings("unused")
 	public void prepareLocalizedFieldsForImport(Locale defaultImportLocale)
 		throws LocaleException {
-		setName(getName(defaultImportLocale), defaultImportLocale,
-			defaultImportLocale);
+		Locale defaultLocale = LocaleUtil.getDefault();
+
+		String modelDefaultLanguageId = getDefaultLanguageId();
+
+		String name = getName(defaultLocale);
+
+		if (Validator.isNull(name)) {
+			setName(getName(modelDefaultLanguageId), defaultLocale);
+		}
+		else {
+			setName(getName(defaultLocale), defaultLocale, defaultLocale);
+		}
+
+		String description = getDescription(defaultLocale);
+
+		if (Validator.isNull(description)) {
+			setDescription(getDescription(modelDefaultLanguageId), defaultLocale);
+		}
+		else {
+			setDescription(getDescription(defaultLocale), defaultLocale,
+				defaultLocale);
+		}
 	}
 
 	@Override
@@ -597,6 +791,7 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 	public Object clone() {
 		LayoutPrototypeImpl layoutPrototypeImpl = new LayoutPrototypeImpl();
 
+		layoutPrototypeImpl.setMvccVersion(getMvccVersion());
 		layoutPrototypeImpl.setUuid(getUuid());
 		layoutPrototypeImpl.setLayoutPrototypeId(getLayoutPrototypeId());
 		layoutPrototypeImpl.setCompanyId(getCompanyId());
@@ -657,6 +852,16 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 	}
 
 	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
+	}
+
+	@Override
 	public void resetOriginalValues() {
 		LayoutPrototypeModelImpl layoutPrototypeModelImpl = this;
 
@@ -676,6 +881,8 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 	@Override
 	public CacheModel<LayoutPrototype> toCacheModel() {
 		LayoutPrototypeCacheModel layoutPrototypeCacheModel = new LayoutPrototypeCacheModel();
+
+		layoutPrototypeCacheModel.mvccVersion = getMvccVersion();
 
 		layoutPrototypeCacheModel.uuid = getUuid();
 
@@ -748,9 +955,11 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(23);
+		StringBundler sb = new StringBundler(25);
 
-		sb.append("{uuid=");
+		sb.append("{mvccVersion=");
+		sb.append(getMvccVersion());
+		sb.append(", uuid=");
 		sb.append(getUuid());
 		sb.append(", layoutPrototypeId=");
 		sb.append(getLayoutPrototypeId());
@@ -779,12 +988,16 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(37);
+		StringBundler sb = new StringBundler(40);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.model.LayoutPrototype");
 		sb.append("</model-name>");
 
+		sb.append(
+			"<column><column-name>mvccVersion</column-name><column-value><![CDATA[");
+		sb.append(getMvccVersion());
+		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>uuid</column-name><column-value><![CDATA[");
 		sb.append(getUuid());
@@ -839,6 +1052,7 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 	private static Class<?>[] _escapedModelInterfaces = new Class[] {
 			LayoutPrototype.class
 		};
+	private long _mvccVersion;
 	private String _uuid;
 	private String _originalUuid;
 	private long _layoutPrototypeId;
@@ -846,13 +1060,13 @@ public class LayoutPrototypeModelImpl extends BaseModelImpl<LayoutPrototype>
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
 	private String _name;
 	private String _nameCurrentLanguageId;
 	private String _description;
+	private String _descriptionCurrentLanguageId;
 	private String _settings;
 	private boolean _active;
 	private boolean _originalActive;

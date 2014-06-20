@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,7 +18,6 @@
 
 <%
 String redirect = ParamUtil.getString(request, "redirect");
-String backURL = ParamUtil.getString(request, "backURL");
 
 String portletResource = ParamUtil.getString(request, "portletResource");
 
@@ -48,7 +47,7 @@ if (ddmStructureId > 0) {
 %>
 
 <liferay-ui:header
-	backURL="<%= backURL %>"
+	backURL="<%= redirect %>"
 	localizeTitle="<%= (recordSet == null) %>"
 	title='<%= (recordSet == null) ? "new-list" : recordSet.getName(locale) %>'
 />
@@ -60,7 +59,6 @@ if (ddmStructureId > 0) {
 <aui:form action="<%= editRecordSetURL %>" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveRecordSet();" %>'>
 	<aui:input name="<%= Constants.CMD %>" type="hidden" />
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
-	<aui:input name="backURL" type="hidden" value="<%= backURL %>" />
 	<aui:input name="portletResource" type="hidden" value="<%= portletResource %>" />
 	<aui:input name="groupId" type="hidden" value="<%= groupId %>" />
 	<aui:input name="recordSetId" type="hidden" value="<%= recordSetId %>" />
@@ -77,22 +75,27 @@ if (ddmStructureId > 0) {
 	<aui:model-context bean="<%= recordSet %>" model="<%= DDLRecordSet.class %>" />
 
 	<aui:fieldset>
+		<c:if test="<%= (recordSet != null) && (DDMStorageLinkLocalServiceUtil.getStructureStorageLinksCount(recordSet.getDDMStructureId()) > 0) %>">
+			<div class="alert alert-warning">
+				<liferay-ui:message key="updating-the-data-definition-may-cause-data-loss" />
+			</div>
+		</c:if>
+
 		<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" name="name" />
 
 		<aui:input name="description" />
 
-		<aui:field-wrapper label="data-definition" required="<%= true %>">
-			<span id="<portlet:namespace />ddmStructureNameDisplay">
-				<%= ddmStructureName %>
-			</span>
+		<div class="form-group">
+			<aui:input label="data-definition" name="ddmStructureNameDisplay" required="<%= true %>" type="resource"  value="<%= ddmStructureName %>" />
 
 			<liferay-ui:icon
-				image="add"
+				iconCssClass="icon-search"
 				label="<%= true %>"
+				linkCssClass="btn btn-default"
 				message="select"
 				url='<%= "javascript:" + renderResponse.getNamespace() + "openDDMStructureSelector();" %>'
 			/>
-		</aui:field-wrapper>
+		</div>
 
 		<c:if test="<%= WorkflowEngineManagerUtil.isDeployed() && (WorkflowHandlerRegistryUtil.getWorkflowHandler(DDLRecord.class.getName()) != null) %>">
 			<aui:select label="workflow" name="workflowDefinition">
@@ -107,7 +110,7 @@ if (ddmStructureId > 0) {
 				}
 				%>
 
-				<aui:option><%= LanguageUtil.get(pageContext, "no-workflow") %></aui:option>
+				<aui:option><%= LanguageUtil.get(request, "no-workflow") %></aui:option>
 
 				<%
 				List<WorkflowDefinition> workflowDefinitions = WorkflowDefinitionManagerUtil.getActiveWorkflowDefinitions(company.getCompanyId(), 0, 100, null);
@@ -120,13 +123,21 @@ if (ddmStructureId > 0) {
 					}
 				%>
 
-					<aui:option label='<%= workflowDefinition.getName() + " (" + LanguageUtil.format(locale, "version-x", workflowDefinition.getVersion()) + ")" %>' selected="<%= selected %>" value="<%= workflowDefinition.getName() + StringPool.AT + workflowDefinition.getVersion() %>" />
+					<aui:option label='<%= workflowDefinition.getName() + " (" + LanguageUtil.format(locale, "version-x", workflowDefinition.getVersion(), false) + ")" %>' selected="<%= selected %>" value="<%= workflowDefinition.getName() + StringPool.AT + workflowDefinition.getVersion() %>" />
 
 				<%
 				}
 				%>
 
 			</aui:select>
+		</c:if>
+
+		<c:if test="<%= recordSet == null %>">
+			<aui:field-wrapper label="permissions">
+				<liferay-ui:input-permissions
+					modelName="<%= DDLRecordSet.class.getName() %>"
+				/>
+			</aui:field-wrapper>
 		</c:if>
 
 		<aui:button-row>
@@ -155,21 +166,24 @@ if (ddmStructureId > 0) {
 
 				refererPortletName: '<%= portlet.getPortletName() %>',
 				refererWebDAVToken: '<%= portlet.getWebDAVStorageToken() %>',
+				showAncestorScopes: true,
 				struts_action: '/dynamic_data_mapping/select_structure',
-				title: '<%= UnicodeLanguageUtil.get(pageContext, "data-definitions") %>'
+				title: '<%= UnicodeLanguageUtil.get(request, "data-definitions") %>'
 			},
 			function(event) {
 				var A = AUI();
 
+				var name = A.Lang.String.unescapeEntities(event.name);
+
 				A.one('#<portlet:namespace />ddmStructureId').val(event.ddmstructureid);
 
-				A.one('#<portlet:namespace />ddmStructureNameDisplay').setContent(event.name);
+				A.one('#<portlet:namespace />ddmStructureNameDisplay').val(name);
 			}
 		);
 	}
 
 	function <portlet:namespace />saveRecordSet() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = "<%= (recordSet == null) ? Constants.ADD : Constants.UPDATE %>";
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (recordSet == null) ? Constants.ADD : Constants.UPDATE %>';
 
 		submitForm(document.<portlet:namespace />fm);
 	}
@@ -183,9 +197,9 @@ if (recordSet != null) {
 	portletURL.setParameter("recordSetId", String.valueOf(recordSet.getRecordSetId()));
 
 	PortalUtil.addPortletBreadcrumbEntry(request, recordSet.getName(locale), portletURL.toString());
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "edit"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "edit"), currentURL);
 }
 else {
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "add-list"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "add-list"), currentURL);
 }
 %>

@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,18 +19,20 @@ MDRRuleGroup mdrRuleGroup = MDRRuleGroupLocalServiceUtil.fetchRuleGroup(mdrRuleG
 %>
 
 <liferay-ui:search-container-column-text
+	cssClass="mobile-device-rule"
 	href="<%= rowURL %>"
 	name="name"
 >
 
-	<%= mdrRuleGroup.getName(locale) %>
+	<%= HtmlUtil.escape(mdrRuleGroup.getName(locale)) %>
 
 	<c:if test="<%= Validator.isNotNull(mdrRuleGroup.getDescription(locale)) %>">
-		<liferay-ui:icon-help message="<%= mdrRuleGroup.getDescription(locale) %>" />
+		<liferay-ui:icon-help message="<%= HtmlUtil.escape(mdrRuleGroup.getDescription(locale)) %>" />
 	</c:if>
 </liferay-ui:search-container-column-text>
 
 <liferay-ui:search-container-column-text
+	cssClass="mobile-device-rule"
 	href="<%= rowURL %>"
 	name="actions"
 >
@@ -43,7 +45,7 @@ MDRRuleGroup mdrRuleGroup = MDRRuleGroupLocalServiceUtil.fetchRuleGroup(mdrRuleG
 	for (int i = 0; i < mdrActions.size(); i++) {
 		MDRAction mdrAction = mdrActions.get(i);
 
-		sb.append(mdrAction.getName(locale));
+		sb.append(HtmlUtil.escape(mdrAction.getName(locale)));
 
 		if (i < (mdrActions.size() -1)) {
 			sb.append(", ");
@@ -57,6 +59,7 @@ MDRRuleGroup mdrRuleGroup = MDRRuleGroupLocalServiceUtil.fetchRuleGroup(mdrRuleG
 
 <c:if test="<%= MDRRuleGroupInstanceServiceUtil.getRuleGroupInstancesCount(className, classPK) > 1 %>">
 	<liferay-ui:search-container-column-text
+		cssClass="mobile-device-rule"
 		href="<%= rowURL %>"
 		property="priority"
 	/>
@@ -64,5 +67,6 @@ MDRRuleGroup mdrRuleGroup = MDRRuleGroupLocalServiceUtil.fetchRuleGroup(mdrRuleG
 
 <liferay-ui:search-container-column-jsp
 	align="right"
+	cssClass="entry-action"
 	path="/html/portlet/layouts_admin/layout/mobile_device_rules_rule_group_instance_action.jsp"
 />

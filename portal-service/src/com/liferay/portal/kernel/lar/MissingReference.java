@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,8 +14,12 @@
 
 package com.liferay.portal.kernel.lar;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.xml.Element;
+
+import java.io.Serializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,10 +28,12 @@ import java.util.Set;
 /**
  * @author Zsolt Berentey
  */
-public class MissingReference {
+@ProviderType
+public class MissingReference implements Serializable {
 
 	public MissingReference(Element element) {
 		_className = element.attributeValue("class-name");
+		_classPK = element.attributeValue("class-pk");
 		_displayName = GetterUtil.getString(
 			element.attributeValue("display-name"));
 		_referrerClassName = element.attributeValue("referrer-class-name");
@@ -53,8 +59,16 @@ public class MissingReference {
 		return _className;
 	}
 
+	public String getClassPK() {
+		return _classPK;
+	}
+
 	public String getDisplayName() {
 		return _displayName;
+	}
+
+	public long getGroupId() {
+		return _groupId;
 	}
 
 	public String getReferrerClassName() {
@@ -73,8 +87,14 @@ public class MissingReference {
 		return _type;
 	}
 
+	public void setGroupId(long groupId) {
+		_groupId = groupId;
+	}
+
 	private String _className;
+	private String _classPK;
 	private String _displayName;
+	private long _groupId;
 	private String _referrerClassName;
 	private Map<String, String> _referrers = new HashMap<String, String>();
 	private String _type;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
@@ -96,7 +97,9 @@ public class BlogsEntryAssetRenderer
 	}
 
 	@Override
-	public String getSummary(Locale locale) {
+	public String getSummary(
+		PortletRequest portletRequest, PortletResponse portletResponse) {
+
 		String summary = _entry.getDescription();
 
 		if (Validator.isNull(summary)) {
@@ -155,8 +158,10 @@ public class BlogsEntryAssetRenderer
 			WindowState windowState)
 		throws Exception {
 
-		PortletURL portletURL = liferayPortletResponse.createLiferayPortletURL(
-			PortletKeys.BLOGS, PortletRequest.RENDER_PHASE);
+		AssetRendererFactory assetRendererFactory = getAssetRendererFactory();
+
+		PortletURL portletURL = assetRendererFactory.getURLView(
+			liferayPortletResponse, windowState);
 
 		portletURL.setParameter("struts_action", "/blogs/view_entry");
 		portletURL.setParameter("entryId", String.valueOf(_entry.getEntryId()));

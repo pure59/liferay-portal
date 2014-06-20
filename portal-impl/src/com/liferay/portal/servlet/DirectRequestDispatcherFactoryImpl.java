@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -60,6 +60,13 @@ public class DirectRequestDispatcherFactoryImpl
 		}
 
 		return getRequestDispatcher(servletContext, path);
+	}
+
+	public interface PACL {
+
+		public RequestDispatcher getRequestDispatcher(
+			ServletContext servletContext, RequestDispatcher requestDispatcher);
+
 	}
 
 	protected RequestDispatcher doGetRequestDispatcher(
@@ -131,13 +138,6 @@ public class DirectRequestDispatcherFactoryImpl
 
 			return requestDispatcher;
 		}
-
-	}
-
-	public static interface PACL {
-
-		public RequestDispatcher getRequestDispatcher(
-			ServletContext servletContext, RequestDispatcher requestDispatcher);
 
 	}
 

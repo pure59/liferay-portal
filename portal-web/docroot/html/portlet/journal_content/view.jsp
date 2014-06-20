@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -31,20 +31,20 @@ boolean expired = true;
 
 <c:choose>
 	<c:when test="<%= article == null %>">
+
+		<%
+		renderRequest.setAttribute(WebKeys.PORTLET_CONFIGURATOR_VISIBILITY, Boolean.TRUE);
+		%>
+
 		<c:choose>
 			<c:when test="<%= Validator.isNull(articleId) %>">
-
-				<%
-				renderRequest.setAttribute(WebKeys.PORTLET_CONFIGURATOR_VISIBILITY, Boolean.TRUE);
-				%>
-
 				<div class="alert alert-info">
 					<liferay-ui:message key="select-existing-web-content-or-add-some-web-content-to-be-displayed-in-this-portlet" />
 				</div>
 			</c:when>
 			<c:otherwise>
-				<div class="alert alert-error">
-					<%= LanguageUtil.get(pageContext, "the-selected-web-content-no-longer-exists") %>
+				<div class="alert alert-danger">
+					<%= LanguageUtil.get(request, "the-selected-web-content-no-longer-exists") %>
 				</div>
 			</c:otherwise>
 		</c:choose>
@@ -62,7 +62,7 @@ boolean expired = true;
 				renderRequest.setAttribute(WebKeys.PORTLET_CONFIGURATOR_VISIBILITY, Boolean.TRUE);
 				%>
 
-				<div class="alert alert-error">
+				<div class="alert alert-danger">
 					<liferay-ui:message key="you-do-not-have-the-roles-required-to-access-this-web-content-entry" />
 				</div>
 			</c:when>
@@ -104,15 +104,6 @@ boolean expired = true;
 								<c:if test="<%= enablePrint %>">
 									<c:choose>
 										<c:when test="<%= print %>">
-											<div class="print-action">
-												<liferay-ui:icon
-													image="print"
-													label="<%= true %>"
-													message='<%= LanguageUtil.format(pageContext, "print-x-x", new Object[] {"hide-accessible", articleDisplay.getTitle()}) %>'
-													url="javascript:print();"
-												/>
-											</div>
-
 											<aui:script>
 												print();
 											</aui:script>
@@ -125,22 +116,23 @@ boolean expired = true;
 											printPageURL.setParameter("struts_action", "/journal_content/view");
 											printPageURL.setParameter("groupId", String.valueOf(articleDisplay.getGroupId()));
 											printPageURL.setParameter("articleId", articleDisplay.getArticleId());
+											printPageURL.setParameter("page", String.valueOf(articleDisplay.getCurrentPage()));
 											printPageURL.setParameter("viewMode", Constants.PRINT);
 											printPageURL.setWindowState(LiferayWindowState.POP_UP);
 											%>
 
 											<div class="print-action">
 												<liferay-ui:icon
-													image="print"
+													iconCssClass="icon-print"
 													label="<%= true %>"
-													message='<%= LanguageUtil.format(pageContext, "print-x-x", new Object[] {"hide-accessible", articleDisplay.getTitle()}) %>'
+													message='<%= LanguageUtil.format(request, "print-x-x", new Object[] {"hide-accessible", HtmlUtil.escape(articleDisplay.getTitle())}, false) %>'
 													url='<%= "javascript:" + renderResponse.getNamespace() + "printPage();" %>'
 												/>
 											</div>
 
 											<aui:script>
 												function <portlet:namespace />printPage() {
-													window.open('<%= printPageURL %>', '', "directories=0,height=480,left=80,location=1,menubar=1,resizable=1,scrollbars=yes,status=0,toolbar=0,top=180,width=640");
+													window.open('<%= printPageURL %>', '', 'directories=0,height=480,left=80,location=1,menubar=1,resizable=1,scrollbars=yes,status=0,toolbar=0,top=180,width=640');
 												}
 											</aui:script>
 										</c:otherwise>
@@ -167,9 +159,9 @@ boolean expired = true;
 											%>
 
 												<liferay-ui:icon
-													image='<%= "../file_system/small/" + extension %>'
+													image='<%= "../file_system/small/" + HtmlUtil.escapeAttribute(extension) %>'
 													label="<%= true %>"
-													message='<%= LanguageUtil.format(pageContext, "x-convert-x-to-x", new Object[] {"hide-accessible", articleDisplay.getTitle(), extension.toUpperCase()}) %>'
+													message='<%= LanguageUtil.format(request, "x-convert-x-to-x", new Object[] {"hide-accessible", HtmlUtil.escape(articleDisplay.getTitle()), StringUtil.toUpperCase(HtmlUtil.escape(extension))}) %>'
 													method="get"
 													url="<%= exportArticleURL.toString() %>"
 												/>
@@ -194,7 +186,7 @@ boolean expired = true;
 										</c:if>
 
 										<div class="locale-actions">
-											<liferay-ui:language displayStyle="<%= 0 %>" languageIds="<%= availableLocales %>" />
+											<liferay-ui:language displayStyle="<%= 0 %>" formAction="<%= currentURL %>" languageId="<%= LanguageUtil.getLanguageId(request) %>" languageIds="<%= availableLocales %>" />
 										</div>
 									</c:if>
 								</c:if>
@@ -237,7 +229,7 @@ boolean expired = true;
 								%>
 
 									<div class="alert alert-block">
-										<%= LanguageUtil.format(pageContext, "x-is-expired", title) %>
+										<%= LanguageUtil.format(request, "x-is-expired", HtmlUtil.escape(title)) %>
 									</div>
 
 								<%
@@ -251,19 +243,20 @@ boolean expired = true;
 												<portlet:param name="struts_action" value="/journal/edit_article" />
 												<portlet:param name="redirect" value="<%= currentURL %>" />
 												<portlet:param name="groupId" value="<%= String.valueOf(article.getGroupId()) %>" />
+												<portlet:param name="folderId" value="<%= String.valueOf(article.getFolderId()) %>" />
 												<portlet:param name="articleId" value="<%= article.getArticleId() %>" />
 												<portlet:param name="version" value="<%= String.valueOf(article.getVersion()) %>" />
 											</liferay-portlet:renderURL>
 
 											<div class="alert alert-block">
 												<a href="<%= editURL %>">
-													<%= LanguageUtil.format(pageContext, "x-is-not-approved", HtmlUtil.escape(title)) %>
+													<%= LanguageUtil.format(request, "x-is-not-approved", HtmlUtil.escape(title)) %>
 												</a>
 											</div>
 										</c:when>
 										<c:otherwise>
 											<div class="alert alert-block">
-												<%= LanguageUtil.format(pageContext, "x-is-not-approved", HtmlUtil.escape(title)) %>
+												<%= LanguageUtil.format(request, "x-is-not-approved", HtmlUtil.escape(title)) %>
 											</div>
 										</c:otherwise>
 									</c:choose>
@@ -295,59 +288,79 @@ catch (NoSuchArticleException nsae) {
 DDMTemplate ddmTemplate = null;
 
 if ((articleDisplay != null) && Validator.isNotNull(articleDisplay.getDDMTemplateKey())) {
-	ddmTemplate = DDMTemplateLocalServiceUtil.fetchTemplate(articleDisplay.getGroupId(), PortalUtil.getClassNameId(DDMStructure.class), articleDisplay.getDDMTemplateKey());
+	ddmTemplate = DDMTemplateLocalServiceUtil.fetchTemplate(articleDisplay.getGroupId(), PortalUtil.getClassNameId(DDMStructure.class), articleDisplay.getDDMTemplateKey(), true);
 }
 
 boolean showEditArticleIcon = (latestArticle != null) && JournalArticlePermission.contains(permissionChecker, latestArticle.getGroupId(), latestArticle.getArticleId(), ActionKeys.UPDATE);
-boolean showEditTemplateIcon = (ddmTemplate != null) && DDMTemplatePermission.contains(permissionChecker, ddmTemplate, ActionKeys.UPDATE);
+boolean showEditTemplateIcon = (ddmTemplate != null) && DDMTemplatePermission.contains(permissionChecker, scopeGroupId, ddmTemplate, portletDisplay.getId(), ActionKeys.UPDATE);
 boolean showSelectArticleIcon = PortletPermissionUtil.contains(permissionChecker, layout, portletDisplay.getId(), ActionKeys.CONFIGURATION);
 boolean showAddArticleIcon = showSelectArticleIcon && JournalPermission.contains(permissionChecker, scopeGroupId, ActionKeys.ADD_ARTICLE);
 boolean showIconsActions = themeDisplay.isSignedIn() && !layout.isLayoutPrototypeLinkActive() && (showEditArticleIcon || showEditTemplateIcon || showSelectArticleIcon || showAddArticleIcon);
 %>
 
 <c:if test="<%= showIconsActions && !print && hasViewPermission %>">
-	<div class="lfr-meta-actions icons-container">
+	<div class="icons-container lfr-meta-actions">
 		<div class="lfr-icon-actions">
+
+			<%
+			PortletURL redirectURL = liferayPortletResponse.createRenderURL();
+
+			redirectURL.setParameter("struts_action", "/journal_content/add_asset_redirect");
+			redirectURL.setParameter("referringPortletResource", portletDisplay.getId());
+			redirectURL.setWindowState(LiferayWindowState.POP_UP);
+			%>
+
 			<c:if test="<%= showEditArticleIcon %>">
-				<liferay-portlet:renderURL portletName="<%= PortletKeys.JOURNAL %>" var="editURL" windowState="<%= WindowState.MAXIMIZED.toString() %>">
+				<liferay-portlet:renderURL portletName="<%= PortletKeys.JOURNAL %>" var="editArticleURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
 					<portlet:param name="struts_action" value="/journal/edit_article" />
-					<portlet:param name="redirect" value="<%= currentURL %>" />
+					<portlet:param name="redirect" value="<%= redirectURL.toString() %>" />
 					<portlet:param name="groupId" value="<%= String.valueOf(latestArticle.getGroupId()) %>" />
+					<portlet:param name="folderId" value="<%= String.valueOf(latestArticle.getFolderId()) %>" />
 					<portlet:param name="articleId" value="<%= latestArticle.getArticleId() %>" />
 					<portlet:param name="version" value="<%= String.valueOf(latestArticle.getVersion()) %>" />
+					<portlet:param name="showHeader" value="<%= Boolean.FALSE.toString() %>" />
 				</liferay-portlet:renderURL>
 
+				<%
+				String taglibEditArticleURL = "javascript:Liferay.Util.openWindow({id: '_" + HtmlUtil.escapeJS(portletDisplay.getId()) + "_editAsset', title: '" + HtmlUtil.escapeJS(HtmlUtil.escape(latestArticle.getTitle(locale))) + "', uri:'" + HtmlUtil.escapeJS(editArticleURL.toString()) + "'});";
+				%>
+
 				<liferay-ui:icon
-					cssClass="lfr-icon-action lfr-icon-action-edit"
-					image="edit"
+					cssClass="lfr-icon-action"
+					iconCssClass="icon-pencil"
 					label="<%= true %>"
 					message="edit"
-					url="<%= editURL %>"
+					url="<%= taglibEditArticleURL %>"
 				/>
 			</c:if>
 
 			<c:if test="<%= showEditTemplateIcon %>">
-				<liferay-portlet:renderURL portletName="<%= PortletKeys.DYNAMIC_DATA_MAPPING %>" var="editTemplateURL" windowState="<%= WindowState.MAXIMIZED.toString() %>">
+				<liferay-portlet:renderURL portletName="<%= PortletKeys.DYNAMIC_DATA_MAPPING %>" var="editTemplateURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
 					<portlet:param name="struts_action" value="/dynamic_data_mapping/edit_template" />
-					<portlet:param name="redirect" value="<%= currentURL %>" />
-					<portlet:param name="refererPortletName" value="<%= PortletKeys.JOURNAL %>" />
+					<portlet:param name="redirect" value="<%= redirectURL.toString() %>" />
+					<portlet:param name="showBackURL" value="<%= Boolean.FALSE.toString() %>" />
+					<portlet:param name="refererPortletName" value="<%= PortletKeys.JOURNAL_CONTENT %>" />
 					<portlet:param name="groupId" value="<%= String.valueOf(ddmTemplate.getGroupId()) %>" />
 					<portlet:param name="templateId" value="<%= String.valueOf(ddmTemplate.getTemplateId()) %>" />
 				</liferay-portlet:renderURL>
 
+				<%
+				String taglibEditTemplateURL = "javascript:Liferay.Util.openWindow({id: '_" + HtmlUtil.escapeJS(portletDisplay.getId()) + "_editAsset', title: '" + HtmlUtil.escapeJS(HtmlUtil.escape(ddmTemplate.getName(locale))) + "', uri:'" + HtmlUtil.escapeJS(editTemplateURL.toString()) + "'});";
+				%>
+
 				<liferay-ui:icon
-					cssClass="lfr-icon-action lfr-icon-action-edit-template"
-					image="../file_system/small/xml"
+					cssClass="lfr-icon-action"
+					iconCssClass="icon-edit"
 					label="<%= true %>"
 					message="edit-template"
-					url="<%= editTemplateURL %>"
+					url="<%= taglibEditTemplateURL %>"
 				/>
 			</c:if>
 
 			<c:if test="<%= showSelectArticleIcon %>">
 				<liferay-ui:icon
-					cssClass="lfr-icon-action lfr-icon-action-configuration"
-					image="configuration"
+					cssClass="lfr-icon-action"
+					iconCssClass="icon-cog"
 					label="<%= true %>"
 					message="select-web-content"
 					method="get"
@@ -357,20 +370,48 @@ boolean showIconsActions = themeDisplay.isSignedIn() && !layout.isLayoutPrototyp
 			</c:if>
 
 			<c:if test="<%= showAddArticleIcon %>">
-				<liferay-portlet:renderURL portletName="<%= PortletKeys.JOURNAL %>" var="addArticleURL" windowState="<%= WindowState.MAXIMIZED.toString() %>">
-					<portlet:param name="struts_action" value="/journal/edit_article" />
-					<portlet:param name="redirect" value="<%= currentURL %>" />
-					<portlet:param name="portletResource" value="<%= portletDisplay.getId() %>" />
-					<portlet:param name="groupId" value="<%= String.valueOf(scopeGroupId) %>" />
-				</liferay-portlet:renderURL>
-
-				<liferay-ui:icon
+				<liferay-ui:icon-menu
 					cssClass="lfr-icon-action lfr-icon-action-add"
-					image="add_article"
-					label="<%= true %>"
+					direction="down"
+					icon="../aui/plus"
 					message="add"
-					url="<%= addArticleURL %>"
-				/>
+					showArrow="<%= false %>"
+					showWhenSingleIcon="<%= true %>"
+				>
+					<liferay-portlet:renderURL portletName="<%= PortletKeys.JOURNAL %>" varImpl="addArticleURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+						<portlet:param name="struts_action" value="/journal/edit_article" />
+						<portlet:param name="redirect" value="<%= redirectURL.toString() %>" />
+						<portlet:param name="portletResource" value="<%= portletDisplay.getId() %>" />
+						<portlet:param name="groupId" value="<%= String.valueOf(scopeGroupId) %>" />
+						<portlet:param name="showHeader" value="<%= Boolean.FALSE.toString() %>" />
+					</liferay-portlet:renderURL>
+
+					<%
+					List<DDMStructure> ddmStructures = DDMStructureServiceUtil.getStructures(PortalUtil.getCurrentAndAncestorSiteGroupIds(scopeGroupId), PortalUtil.getClassNameId(JournalArticle.class));
+
+					for (DDMStructure ddmStructure : ddmStructures) {
+						addArticleURL.setParameter("ddmStructureId", String.valueOf(ddmStructure.getStructureId()));
+					%>
+
+						<%
+						AssetRendererFactory assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(JournalArticle.class.getName());
+
+						String taglibAddArticleURL = "javascript:Liferay.Util.openWindow({id: '_" + HtmlUtil.escapeJS(portletDisplay.getId()) + "_editAsset', title: '" + HtmlUtil.escapeJS(LanguageUtil.format(locale, "new-x", ddmStructure.getName(locale))) + "', uri:'" + HtmlUtil.escapeJS(addArticleURL.toString()) + "'});";
+						%>
+
+						<liferay-ui:icon
+							cssClass="lfr-icon-action lfr-icon-action-add"
+							iconCssClass="<%= assetRendererFactory.getIconCssClass() %>"
+							label="<%= true %>"
+							message="<%= ddmStructure.getName(locale) %>"
+							url="<%= taglibAddArticleURL %>"
+						/>
+
+					<%
+					}
+					%>
+
+				</liferay-ui:icon-menu>
 			</c:if>
 		</div>
 	</div>
@@ -418,7 +459,6 @@ boolean showIconsActions = themeDisplay.isSignedIn() && !layout.isLayoutPrototyp
 			hideControls="<%= print %>"
 			ratingsEnabled="<%= enableCommentRatings && !print %>"
 			redirect="<%= currentURL %>"
-			subject="<%= articleDisplay.getTitle() %>"
 			userId="<%= articleDisplay.getUserId() %>"
 		/>
 	</c:if>

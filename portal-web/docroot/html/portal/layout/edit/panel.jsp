@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,6 +17,8 @@
 <%@ include file="/html/portal/layout/edit/init.jsp" %>
 
 <%
+String idPrefix = ParamUtil.getString(request, "idPrefix");
+
 String description = StringPool.BLANK;
 String panelSelectedPortlets = StringPool.BLANK;
 
@@ -28,22 +30,22 @@ if (selLayout != null) {
 }
 %>
 
-<aui:input cssClass="layout-description" label="description" name="TypeSettingsProperties--description--" type="textarea" value="<%= description %>" wrap="soft" />
+<aui:input cssClass="layout-description" id="descriptionPanel" label="description" name="TypeSettingsProperties--description--" type="textarea" value="<%= description %>" wrap="soft" />
 
 <div class="alert alert-info">
 	<liferay-ui:message key="select-the-applications-that-will-be-available-in-the-panel" />
 </div>
 
-<aui:input id="panelSelectedPortlets" name="TypeSettingsProperties--panelSelectedPortlets--" type="hidden" value="<%= panelSelectedPortlets %>" />
+<aui:input id='<%= HtmlUtil.escapeAttribute(idPrefix) + "panelSelectedPortlets" %>' name="TypeSettingsProperties--panelSelectedPortlets--" type="hidden" value="<%= panelSelectedPortlets %>" />
 
-<div class="lfr-tree-loading" id="<portlet:namespace />selectPortletsTreeLoading">
+<div class="lfr-tree-loading" id='<portlet:namespace /><%= HtmlUtil.escapeAttribute(idPrefix) + "selectPortletsTreeLoading" %>'>
 	<span class="icon icon-loading lfr-tree-loading-icon"></span>
 </div>
 
-<div id="<portlet:namespace />selectPortletsTree" style="margin: 4px;"></div>
+<div id='<portlet:namespace /><%= HtmlUtil.escapeAttribute(idPrefix) + "selectPortletsTree" %>' style="margin: 4px;"></div>
 
 <aui:script use="aui-tree-view">
-	var panelSelectedPortletsEl = A.one('#<portlet:namespace />panelSelectedPortlets');
+	var panelSelectedPortletsEl = A.one('#<portlet:namespace /><%= HtmlUtil.escapeJS(idPrefix) %>panelSelectedPortlets');
 
 	var selectedPortlets = A.Array.hash(panelSelectedPortletsEl.val().split(','));
 
@@ -53,7 +55,7 @@ if (selLayout != null) {
 
 			A.each(
 				json.children.list,
-				function(item, index, collection) {
+				function(item, index) {
 					var childPortlets = [];
 					var total = 0;
 
@@ -113,7 +115,7 @@ if (selLayout != null) {
 		portletLister.setIncludeInstanceablePortlets(false);
 		portletLister.setIteratePortlets(true);
 		portletLister.setLayoutTypePortlet(layoutTypePortlet);
-		portletLister.setRootNodeName(LanguageUtil.get(pageContext, "application"));
+		portletLister.setRootNodeName(LanguageUtil.get(request, "application"));
 		portletLister.setServletContext(application);
 		portletLister.setThemeDisplay(themeDisplay);
 		portletLister.setUser(user);
@@ -123,26 +125,25 @@ if (selLayout != null) {
 
 		var portletList = <%= portletsJSON %>.serializable.list.list[0];
 
-		var rootNode = new A.TreeNodeTask(
-			{
-				alwaysShowHitArea: true,
-				children: TreeUtil.formatJSONResults(portletList),
-				draggable: false,
-				expanded: true,
-				id: '<portlet:namespace />selectPortletsRootNode',
-				label: portletList.name,
-				leaf: false
-			}
-		);
+		var rootNode = {
+			alwaysShowHitArea: true,
+			children: TreeUtil.formatJSONResults(portletList),
+			draggable: false,
+			expanded: true,
+			id: '<portlet:namespace /><%= HtmlUtil.escapeJS(idPrefix) %>selectPortletsRootNode',
+			label: portletList.name,
+			leaf: false,
+			type: 'task'
+		};
 
 		var treeview = new A.TreeView(
 			{
 				after: {
 					render: function() {
-						A.one('#<portlet:namespace />selectPortletsTreeLoading').hide();
+						A.one('#<portlet:namespace /><%= HtmlUtil.escapeJS(idPrefix) %>selectPortletsTreeLoading').hide();
 					}
 				},
-				boundingBox: '#<portlet:namespace />selectPortletsTree',
+				boundingBox: '#<portlet:namespace /><%= HtmlUtil.escapeJS(idPrefix) %>selectPortletsTree',
 				children: [rootNode],
 				type: 'file'
 			}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.documentlibrary.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -62,6 +64,7 @@ import java.rmi.RemoteException;
  * @see com.liferay.portlet.documentlibrary.service.DLFileEntryServiceUtil
  * @generated
  */
+@ProviderType
 public class DLFileEntryServiceSoap {
 	public static com.liferay.portlet.documentlibrary.model.DLFileVersionSoap cancelCheckOut(
 		long fileEntryId) throws RemoteException {
@@ -96,6 +99,7 @@ public class DLFileEntryServiceSoap {
 	* @deprecated As of 6.2.0, replaced by {@link #checkInFileEntry(long,
 	String, ServiceContext)}
 	*/
+	@Deprecated
 	public static void checkInFileEntry(long fileEntryId,
 		java.lang.String lockUuid) throws RemoteException {
 		try {
@@ -127,6 +131,7 @@ public class DLFileEntryServiceSoap {
 	* @deprecated As of 6.2.0, replaced by {@link #checkOutFileEntry(long,
 	ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portlet.documentlibrary.model.DLFileEntrySoap checkOutFileEntry(
 		long fileEntryId) throws RemoteException {
 		try {
@@ -162,6 +167,7 @@ public class DLFileEntryServiceSoap {
 	* @deprecated As of 6.2.0, replaced by {@link #checkOutFileEntry(long,
 	String, long, ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portlet.documentlibrary.model.DLFileEntrySoap checkOutFileEntry(
 		long fileEntryId, java.lang.String owner, long expirationTime)
 		throws RemoteException {
@@ -473,6 +479,26 @@ public class DLFileEntryServiceSoap {
 	}
 
 	public static com.liferay.portlet.documentlibrary.model.DLFileEntrySoap[] getGroupFileEntries(
+		long groupId, long userId, long repositoryId, long rootFolderId,
+		java.lang.String[] mimeTypes, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator obc)
+		throws RemoteException {
+		try {
+			java.util.List<com.liferay.portlet.documentlibrary.model.DLFileEntry> returnValue =
+				DLFileEntryServiceUtil.getGroupFileEntries(groupId, userId,
+					repositoryId, rootFolderId, mimeTypes, status, start, end,
+					obc);
+
+			return com.liferay.portlet.documentlibrary.model.DLFileEntrySoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.documentlibrary.model.DLFileEntrySoap[] getGroupFileEntries(
 		long groupId, long userId, long rootFolderId,
 		java.lang.String[] mimeTypes, int status, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator obc)
@@ -496,6 +522,22 @@ public class DLFileEntryServiceSoap {
 		try {
 			int returnValue = DLFileEntryServiceUtil.getGroupFileEntriesCount(groupId,
 					userId, rootFolderId);
+
+			return returnValue;
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static int getGroupFileEntriesCount(long groupId, long userId,
+		long repositoryId, long rootFolderId, java.lang.String[] mimeTypes,
+		int status) throws RemoteException {
+		try {
+			int returnValue = DLFileEntryServiceUtil.getGroupFileEntriesCount(groupId,
+					userId, repositoryId, rootFolderId, mimeTypes, status);
 
 			return returnValue;
 		}

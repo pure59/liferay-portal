@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -60,6 +62,7 @@ import java.rmi.RemoteException;
  * @see com.liferay.portal.service.ResourcePermissionServiceUtil
  * @generated
  */
+@ProviderType
 public class ResourcePermissionServiceSoap {
 	/**
 	* Grants the role permission at the scope to perform the action on
@@ -100,7 +103,6 @@ public class ResourcePermissionServiceSoap {
 	resource permissions, or if scope was set to individual scope or
 	if a role with the primary key or a resource action with the name
 	and action ID could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addResourcePermission(long groupId, long companyId,
 		java.lang.String name, int scope, java.lang.String primKey,
@@ -138,7 +140,6 @@ public class ResourcePermissionServiceSoap {
 	* @throws PortalException if the user did not have permission to remove
 	resource permissions, or if a role with the primary key or a
 	resource action with the name and action ID could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeResourcePermission(long groupId, long companyId,
 		java.lang.String name, int scope, java.lang.String primKey,
@@ -170,7 +171,6 @@ public class ResourcePermissionServiceSoap {
 	* @throws PortalException if the user did not have permission to remove
 	resource permissions, or if a role with the primary key or a
 	resource action with the name and action ID could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeResourcePermissions(long groupId, long companyId,
 		java.lang.String name, int scope, long roleId, java.lang.String actionId)
@@ -212,7 +212,6 @@ public class ResourcePermissionServiceSoap {
 	* @throws PortalException if the user did not have permission to set
 	resource permissions, or if a role with the primary key or a
 	resource action with the name and action ID could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void setIndividualResourcePermissions(long groupId,
 		long companyId, java.lang.String name, java.lang.String primKey,

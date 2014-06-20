@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -59,7 +59,7 @@ public class AutoDeployDir {
 		}
 
 		if (duplicateApplicableAutoDeployListenerClassNames.size() > 1) {
-			StringBundler sb = new StringBundler();
+			StringBundler sb = new StringBundler(5);
 
 			sb.append("The auto deploy listeners ");
 			sb.append(
@@ -123,7 +123,9 @@ public class AutoDeployDir {
 			}
 		}
 
-		if (_interval > 0) {
+		if ((_interval > 0) &&
+			((_autoDeployScanner == null) || !_autoDeployScanner.isAlive())) {
+
 			try {
 				Thread currentThread = Thread.currentThread();
 
@@ -242,7 +244,9 @@ public class AutoDeployDir {
 			boolean blacklistedFileExists = false;
 
 			for (File file : files) {
-				if (blacklistedFileName.equalsIgnoreCase(file.getName())) {
+				if (StringUtil.equalsIgnoreCase(
+						blacklistedFileName, file.getName())) {
+
 					blacklistedFileExists = true;
 				}
 			}
@@ -261,7 +265,7 @@ public class AutoDeployDir {
 		for (File file : files) {
 			String fileName = file.getName();
 
-			fileName = fileName.toLowerCase();
+			fileName = StringUtil.toLowerCase(fileName);
 
 			if (file.isFile() &&
 				(fileName.endsWith(".jar") || fileName.endsWith(".lpkg") ||
@@ -275,8 +279,9 @@ public class AutoDeployDir {
 
 	private static Log _log = LogFactoryUtil.getLog(AutoDeployDir.class);
 
+	private static AutoDeployScanner _autoDeployScanner;
+
 	private List<AutoDeployListener> _autoDeployListeners;
-	private AutoDeployScanner _autoDeployScanner;
 	private Map<String, Long> _blacklistFileTimestamps;
 	private File _deployDir;
 	private File _destDir;

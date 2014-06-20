@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,42 +14,44 @@
  */
 --%>
 
-<%@ include file="/html/taglib/init.jsp" %>
-
-<%@ page import="com.liferay.portlet.dynamicdatamapping.model.DDMTemplate" %>
-<%@ page import="com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil" %>
-<%@ page import="com.liferay.portlet.dynamicdatamapping.service.permission.DDMTemplatePermission" %>
-<%@ page import="com.liferay.portlet.portletdisplaytemplate.util.PortletDisplayTemplate" %>
-<%@ page import="com.liferay.portlet.portletdisplaytemplate.util.PortletDisplayTemplateUtil" %>
+<%@ include file="/html/taglib/ui/ddm_template_selector/init.jsp" %>
 
 <%
 long classNameId = GetterUtil.getLong((String)request.getAttribute("liferay-ui:ddm-template-select:classNameId"));
+String displayStyle = (String)request.getAttribute("liferay-ui:ddm-template-select:displayStyle");
+long displayStyleGroupId = GetterUtil.getLong((String)request.getAttribute("liferay-ui:ddm-template-select:displayStyleGroupId"));
 List<String> displayStyles = (List<String>)request.getAttribute("liferay-ui:ddm-template-select:displayStyles");
-String icon = GetterUtil.getString((String)request.getAttribute("liferay-ui:ddm-template-select:icon"), "configuration");
+String icon = GetterUtil.getString((String)request.getAttribute("liferay-ui:ddm-template-select:icon"), "icon-cog");
 String label = (String)request.getAttribute("liferay-ui:ddm-template-select:label");
-String preferenceName = (String)request.getAttribute("liferay-ui:ddm-template-select:preferenceName");
-String preferenceValue = (String)request.getAttribute("liferay-ui:ddm-template-select:preferenceValue");
 String refreshURL = (String)request.getAttribute("liferay-ui:ddm-template-select:refreshURL");
 boolean showEmptyOption = GetterUtil.getBoolean((String)request.getAttribute("liferay-ui:ddm-template-select:showEmptyOption"));
 
 long ddmTemplateGroupId = PortletDisplayTemplateUtil.getDDMTemplateGroupId(themeDisplay.getScopeGroupId());
 
 Group ddmTemplateGroup = GroupLocalServiceUtil.getGroup(ddmTemplateGroupId);
+
+DDMTemplate ddmTemplate = null;
+
+if (displayStyle.startsWith(PortletDisplayTemplate.DISPLAY_STYLE_PREFIX)) {
+	ddmTemplate = PortletDisplayTemplateUtil.fetchDDMTemplate(displayStyleGroupId, displayStyle);
+}
 %>
 
-<aui:select id="displayStyle" inlineField="<%= true %>" label="<%= label %>" name='<%= "preferences--" + preferenceName + "--" %>'>
+<aui:input id="displayStyleGroupId" name="preferences--displayStyleGroupId--" type="hidden" value="<%= String.valueOf(displayStyleGroupId) %>" />
+
+<aui:select id="displayStyle" inlineField="<%= true %>" label="<%= label %>" name="preferences--displayStyle--">
 	<c:if test="<%= showEmptyOption %>">
-		<aui:option label="default" selected="<%= Validator.isNull(preferenceValue) %>" />
+		<aui:option label="default" selected="<%= Validator.isNull(displayStyle) %>" />
 	</c:if>
 
 	<c:if test="<%= (displayStyles != null) && !displayStyles.isEmpty() %>">
 		<optgroup label="<liferay-ui:message key="default" />">
 
 			<%
-			for (String displayStyle : displayStyles) {
+			for (String curDisplayStyle : displayStyles) {
 			%>
 
-				<aui:option label="<%= HtmlUtil.escape(displayStyle) %>" selected="<%= preferenceValue.equals(displayStyle) %>" />
+				<aui:option label="<%= HtmlUtil.escape(curDisplayStyle) %>" selected="<%= displayStyle.equals(curDisplayStyle) %>" />
 
 			<%
 			}
@@ -59,67 +61,29 @@ Group ddmTemplateGroup = GroupLocalServiceUtil.getGroup(ddmTemplateGroupId);
 	</c:if>
 
 	<%
-	DDMTemplate ddmTemplate = null;
+	for (DDMTemplate curDDMTemplate : DDMTemplateLocalServiceUtil.getTemplates(PortalUtil.getCurrentAndAncestorSiteGroupIds(scopeGroupId), classNameId, 0L)) {
+		Map<String,Object> data = new HashMap<String,Object>();
 
-	if (preferenceValue.startsWith(PortletDisplayTemplate.DISPLAY_STYLE_PREFIX)) {
-		ddmTemplate = PortletDisplayTemplateUtil.fetchDDMTemplate(ddmTemplateGroupId, preferenceValue);
-	}
+		data.put("displaystylegroupid", curDDMTemplate.getGroupId());
 
-	List<DDMTemplate> companyPortletDDMTemplates = DDMTemplateLocalServiceUtil.getTemplates(themeDisplay.getCompanyGroupId(), classNameId, 0);
-	%>
-
-	<c:if test="<%= (companyPortletDDMTemplates != null) && !companyPortletDDMTemplates.isEmpty() %>">
-		<optgroup label="<liferay-ui:message key="global" />">
-
-			<%
-			for (DDMTemplate companyPortletDDMTemplate : companyPortletDDMTemplates) {
-				if (!DDMTemplatePermission.contains(permissionChecker, companyPortletDDMTemplate, ActionKeys.VIEW)) {
-					continue;
-				}
-			%>
-
-				<aui:option label="<%= HtmlUtil.escape(companyPortletDDMTemplate.getName(locale)) %>" selected="<%= (ddmTemplate != null) && (companyPortletDDMTemplate.getTemplateId() == ddmTemplate.getTemplateId()) %>" value="<%= PortletDisplayTemplate.DISPLAY_STYLE_PREFIX + companyPortletDDMTemplate.getUuid() %>" />
-
-			<%
-			}
-			%>
-
-		</optgroup>
-	</c:if>
-
-	<%
-	List<DDMTemplate> groupPortletDDMTemplates = null;
-
-	if (ddmTemplateGroupId != themeDisplay.getCompanyGroupId()) {
-		groupPortletDDMTemplates = DDMTemplateLocalServiceUtil.getTemplates(ddmTemplateGroupId, classNameId, 0);
-	}
-	%>
-
-	<c:if test="<%= (groupPortletDDMTemplates != null) && !groupPortletDDMTemplates.isEmpty() %>">
-		<optgroup label="<%= HtmlUtil.escape(ddmTemplateGroup.getDescriptiveName(locale)) %>">
-
-		<%
-		for (DDMTemplate groupPortletDDMTemplate : groupPortletDDMTemplates) {
-			if (!DDMTemplatePermission.contains(permissionChecker, groupPortletDDMTemplate, ActionKeys.VIEW)) {
-				continue;
-			}
-		%>
-
-			<aui:option label="<%= HtmlUtil.escape(groupPortletDDMTemplate.getName(locale)) %>" selected="<%= (ddmTemplate != null) && (groupPortletDDMTemplate.getTemplateId() == ddmTemplate.getTemplateId()) %>" value="<%= PortletDisplayTemplate.DISPLAY_STYLE_PREFIX + groupPortletDDMTemplate.getUuid() %>" />
-
-		<%
+		if (!DDMTemplatePermission.contains(permissionChecker, scopeGroupId, curDDMTemplate, PortletKeys.PORTLET_DISPLAY_TEMPLATES, ActionKeys.VIEW)) {
+			continue;
 		}
-		%>
+	%>
 
-		</optgroup>
-	</c:if>
+		<aui:option data="<%= data %>" label="<%= HtmlUtil.escape(curDDMTemplate.getName(locale)) %>" selected="<%= (ddmTemplate != null) && (curDDMTemplate.getTemplateId() == ddmTemplate.getTemplateId()) %>" value="<%= PortletDisplayTemplate.DISPLAY_STYLE_PREFIX + curDDMTemplate.getUuid() %>" />
+
+	<%
+	}
+	%>
+
 </aui:select>
 
 <liferay-ui:icon
+	iconCssClass="<%= icon %>"
 	id="selectDDMTemplate"
-	image="<%= icon %>"
 	label="<%= true %>"
-	message='<%= LanguageUtil.format(pageContext, "manage-display-templates-for-x", HtmlUtil.escape(ddmTemplateGroup.getDescriptiveName(locale)), false) %>'
+	message='<%= LanguageUtil.format(request, "manage-display-templates-for-x", HtmlUtil.escape(ddmTemplateGroup.getDescriptiveName(locale)), false) %>'
 	url="javascript:;"
 />
 
@@ -141,12 +105,12 @@ Group ddmTemplateGroup = GroupLocalServiceUtil.getGroup(ddmTemplateGroupId);
 						basePortletURL: '<%= basePortletURL %>',
 						classNameId: '<%= classNameId %>',
 						dialog: {
-							width: 820
+							width: 1024
 						},
 						groupId: <%= ddmTemplateGroupId %>,
 						refererPortletName: '<%= PortletKeys.PORTLET_DISPLAY_TEMPLATES %>',
 						struts_action: '/dynamic_data_mapping/view_template',
-						title: '<%= UnicodeLanguageUtil.get(pageContext, "application-display-templates") %>'
+						title: '<%= UnicodeLanguageUtil.get(request, "application-display-templates") %>'
 					},
 					function(event) {
 						if (!event.newVal) {
@@ -157,4 +121,25 @@ Group ddmTemplateGroup = GroupLocalServiceUtil.getGroup(ddmTemplateGroupId);
 			}
 		);
 	}
+
+	var displayStyleGroupIdInput = A.one('#<portlet:namespace />displayStyleGroupId');
+
+	var displayStyleSelect = A.one('#<portlet:namespace />displayStyle');
+
+	displayStyleSelect.on(
+		'change',
+		function(event) {
+			var selectedIndex = event.currentTarget.get('selectedIndex');
+
+			if (selectedIndex >= 0) {
+				var selectedOption = event.currentTarget.get('options').item(selectedIndex);
+
+				var displayStyleGroupId = selectedOption.attr('data-displaystylegroupid');
+
+				if (displayStyleGroupId) {
+					displayStyleGroupIdInput.attr('value', displayStyleGroupId);
+				}
+			}
+		}
+	);
 </aui:script>

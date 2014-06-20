@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -35,7 +35,7 @@ public class OSDetector {
 		if (Validator.isNull(_bitMode)) {
 			String arch = System.getProperty("os.arch");
 
-			arch = arch.toLowerCase();
+			arch = StringUtil.toLowerCase(arch);
 
 			if (arch.equals("amd64") || arch.equals("x86_64")) {
 				_bitMode = "64";
@@ -57,7 +57,7 @@ public class OSDetector {
 
 		String osName = System.getProperty("os.name");
 
-		osName = osName.toLowerCase();
+		osName = StringUtil.toLowerCase(osName);
 
 		if (osName.equals("aix")) {
 			_aix = Boolean.TRUE;
@@ -76,7 +76,7 @@ public class OSDetector {
 
 		String osName = System.getProperty("os.name");
 
-		osName = osName.toLowerCase();
+		osName = StringUtil.toLowerCase(osName);
 
 		if (osName.contains("darwin") || osName.contains("mac")) {
 			_apple = Boolean.TRUE;
@@ -95,7 +95,7 @@ public class OSDetector {
 
 		String osName = System.getProperty("os.name");
 
-		osName = osName.toLowerCase();
+		osName = StringUtil.toLowerCase(osName);
 
 		if (osName.contains("linux")) {
 			_linux = Boolean.TRUE;

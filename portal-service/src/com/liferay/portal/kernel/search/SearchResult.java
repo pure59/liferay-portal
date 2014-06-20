@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -40,6 +40,10 @@ public class SearchResult {
 
 	public void addMBMessage(MBMessage mbMessage) {
 		_mbMessages.add(mbMessage);
+	}
+
+	public void addVersion(String version) {
+		_versions.add(version);
 	}
 
 	@Override
@@ -83,6 +87,10 @@ public class SearchResult {
 		return _summary;
 	}
 
+	public List<String> getVersions() {
+		return _versions;
+	}
+
 	public void setClassName(String className) {
 		_className = className;
 	}
@@ -104,5 +112,6 @@ public class SearchResult {
 	private List<Tuple> _fileEntryTuples = new ArrayList<Tuple>();
 	private List<MBMessage> _mbMessages = new ArrayList<MBMessage>();
 	private Summary _summary;
+	private List<String> _versions = new ArrayList<String>();
 
 }

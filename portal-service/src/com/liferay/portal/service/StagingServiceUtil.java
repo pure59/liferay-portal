@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.StagingServiceImpl
  * @generated
  */
+@ProviderType
 public class StagingServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -57,32 +60,37 @@ public class StagingServiceUtil {
 	}
 
 	public static void cleanUpStagingRequest(long stagingRequestId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().cleanUpStagingRequest(stagingRequestId);
 	}
 
 	public static long createStagingRequest(long groupId,
 		java.lang.String checksum)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().createStagingRequest(groupId, checksum);
 	}
 
 	public static void publishStagingRequest(long stagingRequestId,
 		boolean privateLayout,
 		java.util.Map<java.lang.String, java.lang.String[]> parameterMap)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService()
 			.publishStagingRequest(stagingRequestId, privateLayout, parameterMap);
 	}
 
 	public static void updateStagingRequest(long stagingRequestId,
 		java.lang.String fileName, byte[] bytes)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().updateStagingRequest(stagingRequestId, fileName, bytes);
+	}
+
+	public static com.liferay.portal.kernel.lar.MissingReferences validateStagingRequest(
+		long stagingRequestId, boolean privateLayout,
+		java.util.Map<java.lang.String, java.lang.String[]> parameterMap)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .validateStagingRequest(stagingRequestId, privateLayout,
+			parameterMap);
 	}
 
 	public static StagingService getService() {
@@ -99,6 +107,7 @@ public class StagingServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(StagingService service) {
 	}
 

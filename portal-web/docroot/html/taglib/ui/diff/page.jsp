@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,10 +14,7 @@
  */
 --%>
 
-<%@ include file="/html/taglib/init.jsp" %>
-
-<%@ page import="com.liferay.portal.kernel.util.Diff" %>
-<%@ page import="com.liferay.portal.kernel.util.DiffResult" %>
+<%@ include file="/html/taglib/ui/diff/init.jsp" %>
 
 <%
 String sourceName = (String)request.getAttribute("liferay-ui:diff:sourceName");
@@ -99,7 +96,7 @@ List<DiffResult> targetResults = diffResults[1];
 		</table>
 	</c:when>
 	<c:otherwise>
-		<%= LanguageUtil.format(pageContext, "there-are-no-differences-between-x-and-x", new Object[] {sourceName, targetName}) %>
+		<%= LanguageUtil.format(request, "there-are-no-differences-between-x-and-x", new Object[] {sourceName, targetName}, false) %>
 	</c:otherwise>
 </c:choose>
 

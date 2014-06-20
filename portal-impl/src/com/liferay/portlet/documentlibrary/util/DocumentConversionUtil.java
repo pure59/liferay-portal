@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -87,11 +87,11 @@ public class DocumentConversionUtil {
 	public static boolean isComparableVersion(String extension) {
 		boolean enabled = false;
 
-		String dotExtension = StringPool.PERIOD + extension;
+		String periodAndExtension = StringPool.PERIOD.concat(extension);
 
 		for (int i = 0; i < _COMPARABLE_FILE_EXTENSIONS.length; i++) {
 			if (StringPool.STAR.equals(_COMPARABLE_FILE_EXTENSIONS[i]) ||
-				dotExtension.equals(_COMPARABLE_FILE_EXTENSIONS[i])) {
+				periodAndExtension.equals(_COMPARABLE_FILE_EXTENSIONS[i])) {
 
 				enabled = true;
 
@@ -269,7 +269,7 @@ public class DocumentConversionUtil {
 		return conversions;
 	}
 
-	private DocumentConverter _getDocumentConverter() throws SystemException {
+	private DocumentConverter _getDocumentConverter() {
 		if ((_openOfficeConnection != null) && (_documentConverter != null)) {
 			return _documentConverter;
 		}
@@ -371,9 +371,7 @@ public class DocumentConversionUtil {
 		}
 	}
 
-	private void _validate(String targetExtension, String id)
-		throws SystemException {
-
+	private void _validate(String targetExtension, String id) {
 		if (!Validator.isFileExtension(targetExtension)) {
 			throw new SystemException("Invalid extension: " + targetExtension);
 		}

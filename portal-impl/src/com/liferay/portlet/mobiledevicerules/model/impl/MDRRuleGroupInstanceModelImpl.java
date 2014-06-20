@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,7 @@
 package com.liferay.portlet.mobiledevicerules.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -24,8 +24,10 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -208,6 +210,9 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		attributes.put("ruleGroupId", getRuleGroupId());
 		attributes.put("priority", getPriority());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
@@ -286,8 +291,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -310,8 +315,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getRuleGroupInstanceId() {
 		return _ruleGroupInstanceId;
 	}
@@ -321,8 +326,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		_ruleGroupInstanceId = ruleGroupInstanceId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -344,8 +349,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -367,8 +372,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -379,17 +384,23 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -404,8 +415,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -415,8 +426,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -446,8 +457,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		setClassNameId(classNameId);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassNameId() {
 		return _classNameId;
 	}
@@ -469,8 +480,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		return _originalClassNameId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassPK() {
 		return _classPK;
 	}
@@ -492,8 +503,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		return _originalClassPK;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getRuleGroupId() {
 		return _ruleGroupId;
 	}
@@ -515,8 +526,8 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 		return _originalRuleGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getPriority() {
 		return _priority;
 	}
@@ -621,6 +632,16 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 	@Override
 	public int hashCode() {
 		return (int)getPrimaryKey();
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
 	}
 
 	@Override
@@ -819,7 +840,6 @@ public class MDRRuleGroupInstanceModelImpl extends BaseModelImpl<MDRRuleGroupIns
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;

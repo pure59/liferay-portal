@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,10 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -40,8 +41,9 @@ import java.util.Map;
  * @see com.liferay.portal.model.impl.LayoutRevisionModelImpl
  * @generated
  */
+@ProviderType
 public interface LayoutRevisionModel extends BaseModel<LayoutRevision>,
-	GroupedModel, WorkflowedModel {
+	GroupedModel, LocalizedModel, MVCCModel, WorkflowedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -61,6 +63,22 @@ public interface LayoutRevisionModel extends BaseModel<LayoutRevision>,
 	 * @param primaryKey the primary key of this layout revision
 	 */
 	public void setPrimaryKey(long primaryKey);
+
+	/**
+	 * Returns the mvcc version of this layout revision.
+	 *
+	 * @return the mvcc version of this layout revision
+	 */
+	@Override
+	public long getMvccVersion();
+
+	/**
+	 * Sets the mvcc version of this layout revision.
+	 *
+	 * @param mvccVersion the mvcc version of this layout revision
+	 */
+	@Override
+	public void setMvccVersion(long mvccVersion);
 
 	/**
 	 * Returns the layout revision ID of this layout revision.
@@ -128,10 +146,9 @@ public interface LayoutRevisionModel extends BaseModel<LayoutRevision>,
 	 * Returns the user uuid of this layout revision.
 	 *
 	 * @return the user uuid of this layout revision
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getUserUuid() throws SystemException;
+	public String getUserUuid();
 
 	/**
 	 * Sets the user uuid of this layout revision.
@@ -823,27 +840,6 @@ public interface LayoutRevisionModel extends BaseModel<LayoutRevision>,
 	public void setTypeSettings(String typeSettings);
 
 	/**
-	 * Returns the icon image of this layout revision.
-	 *
-	 * @return the icon image of this layout revision
-	 */
-	public boolean getIconImage();
-
-	/**
-	 * Returns <code>true</code> if this layout revision is icon image.
-	 *
-	 * @return <code>true</code> if this layout revision is icon image; <code>false</code> otherwise
-	 */
-	public boolean isIconImage();
-
-	/**
-	 * Sets whether this layout revision is icon image.
-	 *
-	 * @param iconImage the icon image of this layout revision
-	 */
-	public void setIconImage(boolean iconImage);
-
-	/**
 	 * Returns the icon image ID of this layout revision.
 	 *
 	 * @return the icon image ID of this layout revision
@@ -968,10 +964,9 @@ public interface LayoutRevisionModel extends BaseModel<LayoutRevision>,
 	 * Returns the status by user uuid of this layout revision.
 	 *
 	 * @return the status by user uuid of this layout revision
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getStatusByUserUuid() throws SystemException;
+	public String getStatusByUserUuid();
 
 	/**
 	 * Sets the status by user uuid of this layout revision.
@@ -1017,6 +1012,7 @@ public interface LayoutRevisionModel extends BaseModel<LayoutRevision>,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	 */
+	@Deprecated
 	@Override
 	public boolean getApproved();
 
@@ -1069,14 +1065,6 @@ public interface LayoutRevisionModel extends BaseModel<LayoutRevision>,
 	public boolean isIncomplete();
 
 	/**
-	 * Returns <code>true</code> if this layout revision is in the Recycle Bin.
-	 *
-	 * @return <code>true</code> if this layout revision is in the Recycle Bin; <code>false</code> otherwise
-	 */
-	@Override
-	public boolean isInTrash();
-
-	/**
 	 * Returns <code>true</code> if this layout revision is pending.
 	 *
 	 * @return <code>true</code> if this layout revision is pending; <code>false</code> otherwise
@@ -1125,6 +1113,16 @@ public interface LayoutRevisionModel extends BaseModel<LayoutRevision>,
 	@Override
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext);
 
+	@Override
+	public String[] getAvailableLanguageIds();
+
+	@Override
+	public String getDefaultLanguageId();
+
+	@Override
+	public void prepareLocalizedFieldsForImport() throws LocaleException;
+
+	@Override
 	public void prepareLocalizedFieldsForImport(Locale defaultImportLocale)
 		throws LocaleException;
 

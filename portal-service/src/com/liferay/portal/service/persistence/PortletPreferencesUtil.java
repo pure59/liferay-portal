@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,10 @@
 
 package com.liferay.portal.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.model.PortletPreferences;
@@ -36,6 +37,7 @@ import java.util.List;
  * @see PortletPreferencesPersistenceImpl
  * @generated
  */
+@ProviderType
 public class PortletPreferencesUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -60,8 +62,7 @@ public class PortletPreferencesUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#countWithDynamicQuery(DynamicQuery)
 	 */
-	public long countWithDynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
 	}
 
@@ -69,7 +70,7 @@ public class PortletPreferencesUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery)
 	 */
 	public static List<PortletPreferences> findWithDynamicQuery(
-		DynamicQuery dynamicQuery) throws SystemException {
+		DynamicQuery dynamicQuery) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -77,8 +78,7 @@ public class PortletPreferencesUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery, int, int)
 	 */
 	public static List<PortletPreferences> findWithDynamicQuery(
-		DynamicQuery dynamicQuery, int start, int end)
-		throws SystemException {
+		DynamicQuery dynamicQuery, int start, int end) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -87,7 +87,7 @@ public class PortletPreferencesUtil {
 	 */
 	public static List<PortletPreferences> findWithDynamicQuery(
 		DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
+		OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findWithDynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
@@ -97,7 +97,7 @@ public class PortletPreferencesUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel)
 	 */
 	public static PortletPreferences update(
-		PortletPreferences portletPreferences) throws SystemException {
+		PortletPreferences portletPreferences) {
 		return getPersistence().update(portletPreferences);
 	}
 
@@ -105,8 +105,7 @@ public class PortletPreferencesUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel, ServiceContext)
 	 */
 	public static PortletPreferences update(
-		PortletPreferences portletPreferences, ServiceContext serviceContext)
-		throws SystemException {
+		PortletPreferences portletPreferences, ServiceContext serviceContext) {
 		return getPersistence().update(portletPreferences, serviceContext);
 	}
 
@@ -115,10 +114,9 @@ public class PortletPreferencesUtil {
 	*
 	* @param plid the plid
 	* @return the matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByPlid(
-		long plid) throws com.liferay.portal.kernel.exception.SystemException {
+		long plid) {
 		return getPersistence().findByPlid(plid);
 	}
 
@@ -133,11 +131,9 @@ public class PortletPreferencesUtil {
 	* @param start the lower bound of the range of portlet preferenceses
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @return the range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByPlid(
-		long plid, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long plid, int start, int end) {
 		return getPersistence().findByPlid(plid, start, end);
 	}
 
@@ -153,12 +149,10 @@ public class PortletPreferencesUtil {
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByPlid(
 		long plid, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findByPlid(plid, start, end, orderByComparator);
 	}
 
@@ -169,13 +163,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByPlid_First(
 		long plid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence().findByPlid_First(plid, orderByComparator);
 	}
 
@@ -185,12 +177,10 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByPlid_First(
 		long plid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByPlid_First(plid, orderByComparator);
 	}
 
@@ -201,13 +191,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByPlid_Last(
 		long plid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence().findByPlid_Last(plid, orderByComparator);
 	}
 
@@ -217,12 +205,10 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByPlid_Last(
 		long plid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByPlid_Last(plid, orderByComparator);
 	}
 
@@ -234,13 +220,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a portlet preferences with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences[] findByPlid_PrevAndNext(
 		long portletPreferencesId, long plid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByPlid_PrevAndNext(portletPreferencesId, plid,
 			orderByComparator);
@@ -250,10 +234,8 @@ public class PortletPreferencesUtil {
 	* Removes all the portlet preferenceses where plid = &#63; from the database.
 	*
 	* @param plid the plid
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByPlid(long plid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByPlid(long plid) {
 		getPersistence().removeByPlid(plid);
 	}
 
@@ -262,10 +244,8 @@ public class PortletPreferencesUtil {
 	*
 	* @param plid the plid
 	* @return the number of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByPlid(long plid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByPlid(long plid) {
 		return getPersistence().countByPlid(plid);
 	}
 
@@ -274,11 +254,9 @@ public class PortletPreferencesUtil {
 	*
 	* @param portletId the portlet ID
 	* @return the matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByPortletId(
-		java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String portletId) {
 		return getPersistence().findByPortletId(portletId);
 	}
 
@@ -293,11 +271,9 @@ public class PortletPreferencesUtil {
 	* @param start the lower bound of the range of portlet preferenceses
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @return the range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByPortletId(
-		java.lang.String portletId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String portletId, int start, int end) {
 		return getPersistence().findByPortletId(portletId, start, end);
 	}
 
@@ -313,12 +289,10 @@ public class PortletPreferencesUtil {
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByPortletId(
 		java.lang.String portletId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByPortletId(portletId, start, end, orderByComparator);
 	}
@@ -330,13 +304,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByPortletId_First(
 		java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByPortletId_First(portletId, orderByComparator);
 	}
@@ -347,12 +319,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByPortletId_First(
 		java.lang.String portletId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByPortletId_First(portletId, orderByComparator);
 	}
@@ -364,13 +334,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByPortletId_Last(
 		java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByPortletId_Last(portletId, orderByComparator);
 	}
@@ -381,12 +349,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByPortletId_Last(
 		java.lang.String portletId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByPortletId_Last(portletId, orderByComparator);
 	}
@@ -399,13 +365,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a portlet preferences with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences[] findByPortletId_PrevAndNext(
 		long portletPreferencesId, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByPortletId_PrevAndNext(portletPreferencesId,
 			portletId, orderByComparator);
@@ -415,10 +379,8 @@ public class PortletPreferencesUtil {
 	* Removes all the portlet preferenceses where portletId = &#63; from the database.
 	*
 	* @param portletId the portlet ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByPortletId(java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByPortletId(java.lang.String portletId) {
 		getPersistence().removeByPortletId(portletId);
 	}
 
@@ -427,10 +389,8 @@ public class PortletPreferencesUtil {
 	*
 	* @param portletId the portlet ID
 	* @return the number of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByPortletId(java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByPortletId(java.lang.String portletId) {
 		return getPersistence().countByPortletId(portletId);
 	}
 
@@ -440,11 +400,9 @@ public class PortletPreferencesUtil {
 	* @param ownerType the owner type
 	* @param portletId the portlet ID
 	* @return the matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_P(
-		int ownerType, java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int ownerType, java.lang.String portletId) {
 		return getPersistence().findByO_P(ownerType, portletId);
 	}
 
@@ -460,11 +418,9 @@ public class PortletPreferencesUtil {
 	* @param start the lower bound of the range of portlet preferenceses
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @return the range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_P(
-		int ownerType, java.lang.String portletId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int ownerType, java.lang.String portletId, int start, int end) {
 		return getPersistence().findByO_P(ownerType, portletId, start, end);
 	}
 
@@ -481,12 +437,10 @@ public class PortletPreferencesUtil {
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_P(
 		int ownerType, java.lang.String portletId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByO_P(ownerType, portletId, start, end,
 			orderByComparator);
@@ -500,13 +454,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByO_P_First(
 		int ownerType, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_P_First(ownerType, portletId, orderByComparator);
 	}
@@ -518,12 +470,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByO_P_First(
 		int ownerType, java.lang.String portletId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByO_P_First(ownerType, portletId, orderByComparator);
 	}
@@ -536,13 +486,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByO_P_Last(
 		int ownerType, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_P_Last(ownerType, portletId, orderByComparator);
 	}
@@ -554,12 +502,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByO_P_Last(
 		int ownerType, java.lang.String portletId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByO_P_Last(ownerType, portletId, orderByComparator);
 	}
@@ -573,13 +519,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a portlet preferences with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences[] findByO_P_PrevAndNext(
 		long portletPreferencesId, int ownerType, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_P_PrevAndNext(portletPreferencesId, ownerType,
 			portletId, orderByComparator);
@@ -590,10 +534,8 @@ public class PortletPreferencesUtil {
 	*
 	* @param ownerType the owner type
 	* @param portletId the portlet ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByO_P(int ownerType, java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByO_P(int ownerType, java.lang.String portletId) {
 		getPersistence().removeByO_P(ownerType, portletId);
 	}
 
@@ -603,10 +545,8 @@ public class PortletPreferencesUtil {
 	* @param ownerType the owner type
 	* @param portletId the portlet ID
 	* @return the number of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByO_P(int ownerType, java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByO_P(int ownerType, java.lang.String portletId) {
 		return getPersistence().countByO_P(ownerType, portletId);
 	}
 
@@ -616,11 +556,9 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param portletId the portlet ID
 	* @return the matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByP_P(
-		long plid, java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long plid, java.lang.String portletId) {
 		return getPersistence().findByP_P(plid, portletId);
 	}
 
@@ -636,11 +574,9 @@ public class PortletPreferencesUtil {
 	* @param start the lower bound of the range of portlet preferenceses
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @return the range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByP_P(
-		long plid, java.lang.String portletId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long plid, java.lang.String portletId, int start, int end) {
 		return getPersistence().findByP_P(plid, portletId, start, end);
 	}
 
@@ -657,12 +593,10 @@ public class PortletPreferencesUtil {
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByP_P(
 		long plid, java.lang.String portletId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByP_P(plid, portletId, start, end, orderByComparator);
 	}
@@ -675,13 +609,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByP_P_First(
 		long plid, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByP_P_First(plid, portletId, orderByComparator);
 	}
@@ -693,12 +625,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByP_P_First(
 		long plid, java.lang.String portletId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByP_P_First(plid, portletId, orderByComparator);
 	}
@@ -711,13 +641,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByP_P_Last(
 		long plid, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByP_P_Last(plid, portletId, orderByComparator);
 	}
@@ -729,12 +657,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByP_P_Last(
 		long plid, java.lang.String portletId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByP_P_Last(plid, portletId, orderByComparator);
 	}
@@ -748,13 +674,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a portlet preferences with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences[] findByP_P_PrevAndNext(
 		long portletPreferencesId, long plid, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByP_P_PrevAndNext(portletPreferencesId, plid,
 			portletId, orderByComparator);
@@ -765,10 +689,8 @@ public class PortletPreferencesUtil {
 	*
 	* @param plid the plid
 	* @param portletId the portlet ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByP_P(long plid, java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByP_P(long plid, java.lang.String portletId) {
 		getPersistence().removeByP_P(plid, portletId);
 	}
 
@@ -778,10 +700,8 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param portletId the portlet ID
 	* @return the number of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByP_P(long plid, java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByP_P(long plid, java.lang.String portletId) {
 		return getPersistence().countByP_P(plid, portletId);
 	}
 
@@ -792,11 +712,9 @@ public class PortletPreferencesUtil {
 	* @param ownerType the owner type
 	* @param plid the plid
 	* @return the matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_O_P(
-		long ownerId, int ownerType, long plid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long ownerId, int ownerType, long plid) {
 		return getPersistence().findByO_O_P(ownerId, ownerType, plid);
 	}
 
@@ -813,11 +731,9 @@ public class PortletPreferencesUtil {
 	* @param start the lower bound of the range of portlet preferenceses
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @return the range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_O_P(
-		long ownerId, int ownerType, long plid, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long ownerId, int ownerType, long plid, int start, int end) {
 		return getPersistence().findByO_O_P(ownerId, ownerType, plid, start, end);
 	}
 
@@ -835,12 +751,10 @@ public class PortletPreferencesUtil {
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_O_P(
 		long ownerId, int ownerType, long plid, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByO_O_P(ownerId, ownerType, plid, start, end,
 			orderByComparator);
@@ -855,13 +769,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByO_O_P_First(
 		long ownerId, int ownerType, long plid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_O_P_First(ownerId, ownerType, plid,
 			orderByComparator);
@@ -875,12 +787,10 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByO_O_P_First(
 		long ownerId, int ownerType, long plid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByO_O_P_First(ownerId, ownerType, plid,
 			orderByComparator);
@@ -895,13 +805,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByO_O_P_Last(
 		long ownerId, int ownerType, long plid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_O_P_Last(ownerId, ownerType, plid, orderByComparator);
 	}
@@ -914,12 +822,10 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByO_O_P_Last(
 		long ownerId, int ownerType, long plid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByO_O_P_Last(ownerId, ownerType, plid,
 			orderByComparator);
@@ -935,13 +841,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a portlet preferences with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences[] findByO_O_P_PrevAndNext(
 		long portletPreferencesId, long ownerId, int ownerType, long plid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_O_P_PrevAndNext(portletPreferencesId, ownerId,
 			ownerType, plid, orderByComparator);
@@ -953,10 +857,8 @@ public class PortletPreferencesUtil {
 	* @param ownerId the owner ID
 	* @param ownerType the owner type
 	* @param plid the plid
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByO_O_P(long ownerId, int ownerType, long plid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByO_O_P(long ownerId, int ownerType, long plid) {
 		getPersistence().removeByO_O_P(ownerId, ownerType, plid);
 	}
 
@@ -967,10 +869,8 @@ public class PortletPreferencesUtil {
 	* @param ownerType the owner type
 	* @param plid the plid
 	* @return the number of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByO_O_P(long ownerId, int ownerType, long plid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByO_O_P(long ownerId, int ownerType, long plid) {
 		return getPersistence().countByO_O_P(ownerId, ownerType, plid);
 	}
 
@@ -981,11 +881,9 @@ public class PortletPreferencesUtil {
 	* @param ownerType the owner type
 	* @param portletId the portlet ID
 	* @return the matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_O_PI(
-		long ownerId, int ownerType, java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long ownerId, int ownerType, java.lang.String portletId) {
 		return getPersistence().findByO_O_PI(ownerId, ownerType, portletId);
 	}
 
@@ -1002,11 +900,10 @@ public class PortletPreferencesUtil {
 	* @param start the lower bound of the range of portlet preferenceses
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @return the range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_O_PI(
 		long ownerId, int ownerType, java.lang.String portletId, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		int end) {
 		return getPersistence()
 				   .findByO_O_PI(ownerId, ownerType, portletId, start, end);
 	}
@@ -1025,13 +922,11 @@ public class PortletPreferencesUtil {
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_O_PI(
 		long ownerId, int ownerType, java.lang.String portletId, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByO_O_PI(ownerId, ownerType, portletId, start, end,
 			orderByComparator);
@@ -1046,13 +941,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByO_O_PI_First(
 		long ownerId, int ownerType, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_O_PI_First(ownerId, ownerType, portletId,
 			orderByComparator);
@@ -1066,12 +959,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByO_O_PI_First(
 		long ownerId, int ownerType, java.lang.String portletId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByO_O_PI_First(ownerId, ownerType, portletId,
 			orderByComparator);
@@ -1086,13 +977,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByO_O_PI_Last(
 		long ownerId, int ownerType, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_O_PI_Last(ownerId, ownerType, portletId,
 			orderByComparator);
@@ -1106,12 +995,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByO_O_PI_Last(
 		long ownerId, int ownerType, java.lang.String portletId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByO_O_PI_Last(ownerId, ownerType, portletId,
 			orderByComparator);
@@ -1127,14 +1014,12 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a portlet preferences with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences[] findByO_O_PI_PrevAndNext(
 		long portletPreferencesId, long ownerId, int ownerType,
 		java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_O_PI_PrevAndNext(portletPreferencesId, ownerId,
 			ownerType, portletId, orderByComparator);
@@ -1146,11 +1031,9 @@ public class PortletPreferencesUtil {
 	* @param ownerId the owner ID
 	* @param ownerType the owner type
 	* @param portletId the portlet ID
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeByO_O_PI(long ownerId, int ownerType,
-		java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String portletId) {
 		getPersistence().removeByO_O_PI(ownerId, ownerType, portletId);
 	}
 
@@ -1161,11 +1044,9 @@ public class PortletPreferencesUtil {
 	* @param ownerType the owner type
 	* @param portletId the portlet ID
 	* @return the number of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static int countByO_O_PI(long ownerId, int ownerType,
-		java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String portletId) {
 		return getPersistence().countByO_O_PI(ownerId, ownerType, portletId);
 	}
 
@@ -1176,11 +1057,9 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param portletId the portlet ID
 	* @return the matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_P_P(
-		int ownerType, long plid, java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int ownerType, long plid, java.lang.String portletId) {
 		return getPersistence().findByO_P_P(ownerType, plid, portletId);
 	}
 
@@ -1197,11 +1076,9 @@ public class PortletPreferencesUtil {
 	* @param start the lower bound of the range of portlet preferenceses
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @return the range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_P_P(
-		int ownerType, long plid, java.lang.String portletId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int ownerType, long plid, java.lang.String portletId, int start, int end) {
 		return getPersistence()
 				   .findByO_P_P(ownerType, plid, portletId, start, end);
 	}
@@ -1220,13 +1097,11 @@ public class PortletPreferencesUtil {
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByO_P_P(
 		int ownerType, long plid, java.lang.String portletId, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByO_P_P(ownerType, plid, portletId, start, end,
 			orderByComparator);
@@ -1241,13 +1116,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByO_P_P_First(
 		int ownerType, long plid, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_P_P_First(ownerType, plid, portletId,
 			orderByComparator);
@@ -1261,12 +1134,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByO_P_P_First(
 		int ownerType, long plid, java.lang.String portletId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByO_P_P_First(ownerType, plid, portletId,
 			orderByComparator);
@@ -1281,13 +1152,11 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByO_P_P_Last(
 		int ownerType, long plid, java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_P_P_Last(ownerType, plid, portletId,
 			orderByComparator);
@@ -1301,12 +1170,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByO_P_P_Last(
 		int ownerType, long plid, java.lang.String portletId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByO_P_P_Last(ownerType, plid, portletId,
 			orderByComparator);
@@ -1322,14 +1189,12 @@ public class PortletPreferencesUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a portlet preferences with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences[] findByO_P_P_PrevAndNext(
 		long portletPreferencesId, int ownerType, long plid,
 		java.lang.String portletId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_P_P_PrevAndNext(portletPreferencesId, ownerType,
 			plid, portletId, orderByComparator);
@@ -1341,11 +1206,9 @@ public class PortletPreferencesUtil {
 	* @param ownerType the owner type
 	* @param plid the plid
 	* @param portletId the portlet ID
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeByO_P_P(int ownerType, long plid,
-		java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String portletId) {
 		getPersistence().removeByO_P_P(ownerType, plid, portletId);
 	}
 
@@ -1356,11 +1219,9 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param portletId the portlet ID
 	* @return the number of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static int countByO_P_P(int ownerType, long plid,
-		java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String portletId) {
 		return getPersistence().countByO_P_P(ownerType, plid, portletId);
 	}
 
@@ -1373,12 +1234,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @return the matching portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByO_O_P_P(
 		long ownerId, int ownerType, long plid, java.lang.String portletId)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .findByO_O_P_P(ownerId, ownerType, plid, portletId);
 	}
@@ -1391,11 +1250,9 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param portletId the portlet ID
 	* @return the matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByO_O_P_P(
-		long ownerId, int ownerType, long plid, java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long ownerId, int ownerType, long plid, java.lang.String portletId) {
 		return getPersistence()
 				   .fetchByO_O_P_P(ownerId, ownerType, plid, portletId);
 	}
@@ -1409,12 +1266,10 @@ public class PortletPreferencesUtil {
 	* @param portletId the portlet ID
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching portlet preferences, or <code>null</code> if a matching portlet preferences could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByO_O_P_P(
 		long ownerId, int ownerType, long plid, java.lang.String portletId,
-		boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByO_O_P_P(ownerId, ownerType, plid, portletId,
 			retrieveFromCache);
@@ -1428,12 +1283,10 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param portletId the portlet ID
 	* @return the portlet preferences that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences removeByO_O_P_P(
 		long ownerId, int ownerType, long plid, java.lang.String portletId)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence()
 				   .removeByO_O_P_P(ownerId, ownerType, plid, portletId);
 	}
@@ -1446,11 +1299,9 @@ public class PortletPreferencesUtil {
 	* @param plid the plid
 	* @param portletId the portlet ID
 	* @return the number of matching portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static int countByO_O_P_P(long ownerId, int ownerType, long plid,
-		java.lang.String portletId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String portletId) {
 		return getPersistence()
 				   .countByO_O_P_P(ownerId, ownerType, plid, portletId);
 	}
@@ -1492,18 +1343,15 @@ public class PortletPreferencesUtil {
 	* @param portletPreferencesId the primary key of the portlet preferences
 	* @return the portlet preferences that was removed
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a portlet preferences with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences remove(
 		long portletPreferencesId)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence().remove(portletPreferencesId);
 	}
 
 	public static com.liferay.portal.model.PortletPreferences updateImpl(
-		com.liferay.portal.model.PortletPreferences portletPreferences)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.PortletPreferences portletPreferences) {
 		return getPersistence().updateImpl(portletPreferences);
 	}
 
@@ -1513,12 +1361,10 @@ public class PortletPreferencesUtil {
 	* @param portletPreferencesId the primary key of the portlet preferences
 	* @return the portlet preferences
 	* @throws com.liferay.portal.NoSuchPortletPreferencesException if a portlet preferences with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences findByPrimaryKey(
 		long portletPreferencesId)
-		throws com.liferay.portal.NoSuchPortletPreferencesException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchPortletPreferencesException {
 		return getPersistence().findByPrimaryKey(portletPreferencesId);
 	}
 
@@ -1527,22 +1373,23 @@ public class PortletPreferencesUtil {
 	*
 	* @param portletPreferencesId the primary key of the portlet preferences
 	* @return the portlet preferences, or <code>null</code> if a portlet preferences with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.PortletPreferences fetchByPrimaryKey(
-		long portletPreferencesId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long portletPreferencesId) {
 		return getPersistence().fetchByPrimaryKey(portletPreferencesId);
+	}
+
+	public static java.util.Map<java.io.Serializable, com.liferay.portal.model.PortletPreferences> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys) {
+		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
 	* Returns all the portlet preferenceses.
 	*
 	* @return the portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static java.util.List<com.liferay.portal.model.PortletPreferences> findAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static java.util.List<com.liferay.portal.model.PortletPreferences> findAll() {
 		return getPersistence().findAll();
 	}
 
@@ -1556,11 +1403,9 @@ public class PortletPreferencesUtil {
 	* @param start the lower bound of the range of portlet preferenceses
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @return the range of portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findAll(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return getPersistence().findAll(start, end);
 	}
 
@@ -1575,22 +1420,17 @@ public class PortletPreferencesUtil {
 	* @param end the upper bound of the range of portlet preferenceses (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findAll(
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findAll(start, end, orderByComparator);
 	}
 
 	/**
 	* Removes all the portlet preferenceses from the database.
-	*
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeAll() {
 		getPersistence().removeAll();
 	}
 
@@ -1598,10 +1438,8 @@ public class PortletPreferencesUtil {
 	* Returns the number of portlet preferenceses.
 	*
 	* @return the number of portlet preferenceses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countAll() {
 		return getPersistence().countAll();
 	}
 
@@ -1619,6 +1457,7 @@ public class PortletPreferencesUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setPersistence(PortletPreferencesPersistence persistence) {
 	}
 

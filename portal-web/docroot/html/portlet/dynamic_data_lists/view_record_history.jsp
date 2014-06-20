@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,7 +17,7 @@
 <%@ include file="/html/portlet/dynamic_data_lists/init.jsp" %>
 
 <%
-String backURL = ParamUtil.getString(request, "backURL");
+String redirect = ParamUtil.getString(request, "redirect");
 
 DDLRecord record = (DDLRecord)request.getAttribute(WebKeys.DYNAMIC_DATA_LISTS_RECORD);
 
@@ -30,13 +30,13 @@ long formDDMTemplateId = ParamUtil.getLong(request, "formDDMTemplateId");
 PortletURL portletURL = renderResponse.createRenderURL();
 
 portletURL.setParameter("struts_action", "/dynamic_data_lists/view_record_history");
-portletURL.setParameter("backURL", backURL);
+portletURL.setParameter("redirect", redirect);
 portletURL.setParameter("recordId", String.valueOf(record.getRecordId()));
 %>
 
 <liferay-ui:header
-	backURL="<%= backURL %>"
-	title='<%= LanguageUtil.format(pageContext, "x-history", ddmStructure.getName(locale)) %>'
+	backURL="<%= redirect %>"
+	title='<%= LanguageUtil.format(request, "x-history", ddmStructure.getName(locale), false) %>'
 />
 
 <aui:form action="<%= portletURL.toString() %>" method="post" name="fm">
@@ -89,7 +89,7 @@ portletURL.setParameter("recordId", String.valueOf(record.getRecordId()));
 
 		// Status
 
-		row.addText(WorkflowConstants.getStatusLabel(recordVersion.getStatus()), rowURL);
+		row.addStatus(recordVersion.getStatus(), recordVersion.getStatusByUserId(), recordVersion.getStatusDate(), rowURL);
 
 		// Author
 
@@ -97,7 +97,7 @@ portletURL.setParameter("recordId", String.valueOf(record.getRecordId()));
 
 		// Action
 
-		row.addJSP("right", SearchEntry.DEFAULT_VALIGN, "/html/portlet/dynamic_data_lists/record_version_action.jsp");
+		row.addJSP("/html/portlet/dynamic_data_lists/record_version_action.jsp", "entry-action");
 
 		// Add result row
 

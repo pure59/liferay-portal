@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -37,7 +37,10 @@ public class MessagingHotDeployListener extends BaseHotDeployListener {
 		}
 		catch (Throwable t) {
 			throwHotDeployException(
-				hotDeployEvent, "Error sending deploy message for ", t);
+				hotDeployEvent,
+				"Error sending deploy message for " +
+					hotDeployEvent.getServletContextName(),
+				t);
 		}
 	}
 
@@ -50,7 +53,10 @@ public class MessagingHotDeployListener extends BaseHotDeployListener {
 		}
 		catch (Throwable t) {
 			throwHotDeployException(
-				hotDeployEvent, "Error sending undeploy message for ", t);
+				hotDeployEvent,
+				"Error sending undeploy message for " +
+					hotDeployEvent.getServletContextName(),
+				t);
 		}
 	}
 

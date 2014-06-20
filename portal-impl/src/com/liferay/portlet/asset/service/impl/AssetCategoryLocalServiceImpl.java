@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,8 +15,19 @@
 package com.liferay.portlet.asset.service.impl;
 
 import com.liferay.portal.kernel.cache.ThreadLocalCachable;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.search.BaseModelSearchResult;
+import com.liferay.portal.kernel.search.Field;
+import com.liferay.portal.kernel.search.Hits;
+import com.liferay.portal.kernel.search.Indexable;
+import com.liferay.portal.kernel.search.IndexableType;
+import com.liferay.portal.kernel.search.Indexer;
+import com.liferay.portal.kernel.search.IndexerRegistryUtil;
+import com.liferay.portal.kernel.search.QueryConfig;
+import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.search.SearchException;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackRegistryUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -29,9 +40,9 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelHintsUtil;
 import com.liferay.portal.model.ResourceConstants;
+import com.liferay.portal.model.SystemEventConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.asset.AssetCategoryNameException;
 import com.liferay.portlet.asset.DuplicateCategoryException;
 import com.liferay.portlet.asset.model.AssetCategory;
@@ -39,6 +50,10 @@ import com.liferay.portlet.asset.model.AssetCategoryConstants;
 import com.liferay.portlet.asset.model.AssetCategoryProperty;
 import com.liferay.portlet.asset.model.AssetEntry;
 import com.liferay.portlet.asset.service.base.AssetCategoryLocalServiceBaseImpl;
+import com.liferay.portlet.asset.util.AssetCategoryUtil;
+import com.liferay.portlet.asset.util.comparator.AssetCategoryLeftCategoryIdComparator;
+
+import java.io.Serializable;
 
 import java.util.Collections;
 import java.util.Date;
@@ -61,19 +76,20 @@ import java.util.concurrent.Callable;
 public class AssetCategoryLocalServiceImpl
 	extends AssetCategoryLocalServiceBaseImpl {
 
+	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public AssetCategory addCategory(
 			long userId, long parentCategoryId, Map<Locale, String> titleMap,
 			Map<Locale, String> descriptionMap, long vocabularyId,
 			String[] categoryProperties, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		// Category
 
 		User user = userPersistence.findByPrimaryKey(userId);
 		long groupId = serviceContext.getScopeGroupId();
 
-		String name = titleMap.get(LocaleUtil.getDefault());
+		String name = titleMap.get(LocaleUtil.getSiteDefault());
 
 		name = ModelHintsUtil.trimString(
 			AssetCategory.class.getName(), "name", name);
@@ -130,7 +146,13 @@ public class AssetCategoryLocalServiceImpl
 
 		for (int i = 0; i < categoryProperties.length; i++) {
 			String[] categoryProperty = StringUtil.split(
-				categoryProperties[i], CharPool.COLON);
+				categoryProperties[i],
+				AssetCategoryConstants.PROPERTY_KEY_VALUE_SEPARATOR);
+
+			if (categoryProperty.length <= 1) {
+				categoryProperty = StringUtil.split(
+					categoryProperties[i], CharPool.COLON);
+			}
 
 			String key = StringPool.BLANK;
 			String value = StringPool.BLANK;
@@ -153,11 +175,11 @@ public class AssetCategoryLocalServiceImpl
 	public AssetCategory addCategory(
 			long userId, String title, long vocabularyId,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		Map<Locale, String> titleMap = new HashMap<Locale, String>();
 
-		Locale locale = LocaleUtil.getDefault();
+		Locale locale = LocaleUtil.getSiteDefault();
 
 		titleMap.put(locale, title);
 
@@ -165,7 +187,7 @@ public class AssetCategoryLocalServiceImpl
 
 		descriptionMap.put(locale, StringPool.BLANK);
 
-		return addCategory(
+		return assetCategoryLocalService.addCategory(
 			userId, AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID, titleMap,
 			descriptionMap, vocabularyId, null, serviceContext);
 	}
@@ -174,7 +196,7 @@ public class AssetCategoryLocalServiceImpl
 	public void addCategoryResources(
 			AssetCategory category, boolean addGroupPermissions,
 			boolean addGuestPermissions)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		resourceLocalService.addResources(
 			category.getCompanyId(), category.getGroupId(),
@@ -187,7 +209,7 @@ public class AssetCategoryLocalServiceImpl
 	public void addCategoryResources(
 			AssetCategory category, String[] groupPermissions,
 			String[] guestPermissions)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		resourceLocalService.addModelResources(
 			category.getCompanyId(), category.getGroupId(),
@@ -196,389 +218,18 @@ public class AssetCategoryLocalServiceImpl
 	}
 
 	@Override
-	public void deleteCategory(AssetCategory category)
-		throws PortalException, SystemException {
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
+	public AssetCategory deleteCategory(AssetCategory category)
+		throws PortalException {
 
-		deleteCategory(category, false);
+		return assetCategoryLocalService.deleteCategory(category, false);
 	}
 
+	@Indexable(type = IndexableType.DELETE)
 	@Override
-	public void deleteCategory(long categoryId)
-		throws PortalException, SystemException {
-
-		AssetCategory category = assetCategoryPersistence.findByPrimaryKey(
-			categoryId);
-
-		deleteCategory(category);
-	}
-
-	@Override
-	public void deleteVocabularyCategories(long vocabularyId)
-		throws PortalException, SystemException {
-
-		List<AssetCategory> categories =
-			assetCategoryPersistence.findByVocabularyId(vocabularyId);
-
-		for (AssetCategory category : categories) {
-			if (category.getParentCategoryId() ==
-					AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
-
-				deleteCategory(category.getCategoryId());
-			}
-		}
-	}
-
-	@Override
-	public AssetCategory fetchCategory(long categoryId) throws SystemException {
-		return assetCategoryPersistence.fetchByPrimaryKey(categoryId);
-	}
-
-	@Override
-	public List<AssetCategory> getCategories() throws SystemException {
-		return assetCategoryPersistence.findAll();
-	}
-
-	@Override
-	@ThreadLocalCachable
-	public List<AssetCategory> getCategories(long classNameId, long classPK)
-		throws SystemException {
-
-		AssetEntry entry = assetEntryPersistence.fetchByC_C(
-			classNameId, classPK);
-
-		if (entry == null) {
-			return Collections.emptyList();
-		}
-
-		return assetEntryPersistence.getAssetCategories(entry.getEntryId());
-	}
-
-	@Override
-	public List<AssetCategory> getCategories(String className, long classPK)
-		throws SystemException {
-
-		long classNameId = PortalUtil.getClassNameId(className);
-
-		return getCategories(classNameId, classPK);
-	}
-
-	@Override
-	public AssetCategory getCategory(long categoryId)
-		throws PortalException, SystemException {
-
-		return assetCategoryPersistence.findByPrimaryKey(categoryId);
-	}
-
-	@Override
-	public AssetCategory getCategory(String uuid, long groupId)
-		throws PortalException, SystemException {
-
-		return assetCategoryPersistence.findByUUID_G(uuid, groupId);
-	}
-
-	@Override
-	public long[] getCategoryIds(String className, long classPK)
-		throws SystemException {
-
-		return getCategoryIds(getCategories(className, classPK));
-	}
-
-	@Override
-	public String[] getCategoryNames() throws SystemException {
-		return getCategoryNames(getCategories());
-	}
-
-	@Override
-	public String[] getCategoryNames(long classNameId, long classPK)
-		throws SystemException {
-
-		return getCategoryNames(getCategories(classNameId, classPK));
-	}
-
-	@Override
-	public String[] getCategoryNames(String className, long classPK)
-		throws SystemException {
-
-		return getCategoryNames(getCategories(className, classPK));
-	}
-
-	@Override
-	public List<AssetCategory> getChildCategories(long parentCategoryId)
-		throws SystemException {
-
-		return assetCategoryPersistence.findByParentCategoryId(
-			parentCategoryId);
-	}
-
-	@Override
-	public List<AssetCategory> getChildCategories(
-			long parentCategoryId, int start, int end, OrderByComparator obc)
-		throws SystemException {
-
-		return assetCategoryPersistence.findByParentCategoryId(
-			parentCategoryId, start, end, obc);
-	}
-
-	@Override
-	public int getChildCategoriesCount(long parentCategoryId)
-		throws SystemException {
-
-		return assetCategoryPersistence.countByParentCategoryId(
-			parentCategoryId);
-	}
-
-	@Override
-	public List<AssetCategory> getEntryCategories(long entryId)
-		throws SystemException {
-
-		return assetEntryPersistence.getAssetCategories(entryId);
-	}
-
-	@Override
-	public List<Long> getSubcategoryIds(long parentCategoryId)
-		throws SystemException {
-
-		return assetCategoryFinder.findByG_L(parentCategoryId);
-	}
-
-	@Override
-	public List<AssetCategory> getVocabularyCategories(
-			long vocabularyId, int start, int end, OrderByComparator obc)
-		throws SystemException {
-
-		return assetCategoryPersistence.findByVocabularyId(
-			vocabularyId, start, end, obc);
-	}
-
-	@Override
-	public List<AssetCategory> getVocabularyCategories(
-			long parentCategoryId, long vocabularyId, int start, int end,
-			OrderByComparator obc)
-		throws SystemException {
-
-		return assetCategoryPersistence.findByP_V(
-			parentCategoryId, vocabularyId, start, end, obc);
-	}
-
-	@Override
-	public int getVocabularyCategoriesCount(long vocabularyId)
-		throws SystemException {
-
-		return assetCategoryPersistence.countByVocabularyId(vocabularyId);
-	}
-
-	@Override
-	public List<AssetCategory> getVocabularyRootCategories(
-			long vocabularyId, int start, int end, OrderByComparator obc)
-		throws SystemException {
-
-		return getVocabularyCategories(
-			AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID, vocabularyId,
-			start, end, obc);
-	}
-
-	@Override
-	public int getVocabularyRootCategoriesCount(long vocabularyId)
-		throws SystemException {
-
-		return assetCategoryPersistence.countByP_V(
-			AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID, vocabularyId);
-	}
-
-	@Override
-	public void mergeCategories(long fromCategoryId, long toCategoryId)
-		throws PortalException, SystemException {
-
-		List<AssetEntry> entries = assetCategoryPersistence.getAssetEntries(
-			fromCategoryId);
-
-		assetCategoryPersistence.addAssetEntries(toCategoryId, entries);
-
-		List<AssetCategoryProperty> categoryProperties =
-			assetCategoryPropertyPersistence.findByCategoryId(fromCategoryId);
-
-		for (AssetCategoryProperty fromCategoryProperty : categoryProperties) {
-			AssetCategoryProperty toCategoryProperty =
-				assetCategoryPropertyPersistence.fetchByCA_K(
-					toCategoryId, fromCategoryProperty.getKey());
-
-			if (toCategoryProperty == null) {
-				fromCategoryProperty.setCategoryId(toCategoryId);
-
-				assetCategoryPropertyPersistence.update(fromCategoryProperty);
-			}
-		}
-
-		deleteCategory(fromCategoryId);
-	}
-
-	@Override
-	public AssetCategory moveCategory(
-			long categoryId, long parentCategoryId, long vocabularyId,
-			ServiceContext serviceContext)
-		throws PortalException, SystemException {
-
-		AssetCategory category = assetCategoryPersistence.findByPrimaryKey(
-			categoryId);
-
-		validate(
-			categoryId, parentCategoryId, category.getName(), vocabularyId);
-
-		if (parentCategoryId > 0) {
-			assetCategoryPersistence.findByPrimaryKey(parentCategoryId);
-		}
-
-		if (vocabularyId != category.getVocabularyId()) {
-			assetVocabularyPersistence.findByPrimaryKey(vocabularyId);
-
-			category.setVocabularyId(vocabularyId);
-
-			updateChildrenVocabularyId(category, vocabularyId);
-		}
-
-		category.setModifiedDate(new Date());
-		category.setParentCategoryId(parentCategoryId);
-
-		assetCategoryPersistence.update(category);
-
-		return category;
-	}
-
-	@Override
-	public void rebuildTree(long groupId, boolean force)
-		throws SystemException {
-
-		assetCategoryPersistence.rebuildTree(groupId, force);
-	}
-
-	@Override
-	public List<AssetCategory> search(
-			long groupId, String name, String[] categoryProperties, int start,
-			int end)
-		throws SystemException {
-
-		return assetCategoryFinder.findByG_N_P(
-			groupId, name, categoryProperties, start, end);
-	}
-
-	@Override
-	public AssetCategory updateCategory(
-			long userId, long categoryId, long parentCategoryId,
-			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
-			long vocabularyId, String[] categoryProperties,
-			ServiceContext serviceContext)
-		throws PortalException, SystemException {
-
-		// Category
-
-		String name = titleMap.get(LocaleUtil.getDefault());
-
-		name = ModelHintsUtil.trimString(
-			AssetCategory.class.getName(), "name", name);
-
-		if (categoryProperties == null) {
-			categoryProperties = new String[0];
-		}
-
-		validate(categoryId, parentCategoryId, name, vocabularyId);
-
-		if (parentCategoryId > 0) {
-			assetCategoryPersistence.findByPrimaryKey(parentCategoryId);
-		}
-
-		AssetCategory category = assetCategoryPersistence.findByPrimaryKey(
-			categoryId);
-
-		String oldName = category.getName();
-
-		if (vocabularyId != category.getVocabularyId()) {
-			assetVocabularyPersistence.findByPrimaryKey(vocabularyId);
-
-			parentCategoryId =
-				AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID;
-
-			category.setVocabularyId(vocabularyId);
-
-			updateChildrenVocabularyId(category, vocabularyId);
-		}
-
-		category.setModifiedDate(new Date());
-		category.setParentCategoryId(parentCategoryId);
-		category.setName(name);
-		category.setTitleMap(titleMap);
-		category.setDescriptionMap(descriptionMap);
-
-		assetCategoryPersistence.update(category);
-
-		// Properties
-
-		List<AssetCategoryProperty> oldCategoryProperties =
-			assetCategoryPropertyPersistence.findByCategoryId(categoryId);
-
-		for (int i = 0; i < categoryProperties.length; i++) {
-			String[] categoryProperty = StringUtil.split(
-				categoryProperties[i], CharPool.COLON);
-
-			String key = StringPool.BLANK;
-
-			if (categoryProperty.length > 0) {
-				key = GetterUtil.getString(categoryProperty[0]);
-			}
-
-			String value = StringPool.BLANK;
-
-			if (categoryProperty.length > 1) {
-				value = GetterUtil.getString(categoryProperty[1]);
-			}
-
-			if (Validator.isNotNull(key)) {
-				boolean addCategoryProperty = true;
-
-				Iterator<AssetCategoryProperty> iterator =
-					oldCategoryProperties.iterator();
-
-				while (iterator.hasNext()) {
-					AssetCategoryProperty oldCategoryProperty = iterator.next();
-
-					if ((userId == oldCategoryProperty.getUserId()) &&
-						(categoryId == oldCategoryProperty.getCategoryId()) &&
-						key.equals(oldCategoryProperty.getKey()) &&
-						value.equals(oldCategoryProperty.getValue())) {
-
-						addCategoryProperty = false;
-
-						iterator.remove();
-
-						break;
-					}
-				}
-
-				if (addCategoryProperty) {
-					assetCategoryPropertyLocalService.addCategoryProperty(
-						userId, categoryId, key, value);
-				}
-			}
-		}
-
-		for (AssetCategoryProperty categoryProperty : oldCategoryProperties) {
-			assetCategoryPropertyLocalService.deleteAssetCategoryProperty(
-				categoryProperty);
-		}
-
-		// Indexer
-
-		if (!oldName.equals(name)) {
-			List<AssetEntry> entries = assetCategoryPersistence.getAssetEntries(
-				category.getCategoryId());
-
-			assetEntryLocalService.reindex(entries);
-		}
-
-		return category;
-	}
-
-	protected void deleteCategory(AssetCategory category, boolean childCategory)
-		throws PortalException, SystemException {
+	public AssetCategory deleteCategory(
+			AssetCategory category, boolean childCategory)
+		throws PortalException {
 
 		// Categories
 
@@ -629,6 +280,432 @@ public class AssetCategoryLocalServiceImpl
 		// Indexer
 
 		assetEntryLocalService.reindex(entries);
+
+		return category;
+	}
+
+	@Override
+	public AssetCategory deleteCategory(long categoryId)
+		throws PortalException {
+
+		AssetCategory category = assetCategoryPersistence.findByPrimaryKey(
+			categoryId);
+
+		return assetCategoryLocalService.deleteCategory(category);
+	}
+
+	@Override
+	public void deleteVocabularyCategories(long vocabularyId)
+		throws PortalException {
+
+		List<AssetCategory> categories =
+			assetCategoryPersistence.findByP_V(
+				AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID, vocabularyId,
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				new AssetCategoryLeftCategoryIdComparator(false));
+
+		for (AssetCategory category : categories) {
+			assetCategoryLocalService.deleteCategory(category);
+		}
+	}
+
+	@Override
+	public AssetCategory fetchCategory(long categoryId) {
+		return assetCategoryPersistence.fetchByPrimaryKey(categoryId);
+	}
+
+	@Override
+	public List<AssetCategory> getCategories() {
+		return assetCategoryPersistence.findAll();
+	}
+
+	@Override
+	@ThreadLocalCachable
+	public List<AssetCategory> getCategories(long classNameId, long classPK) {
+		AssetEntry entry = assetEntryPersistence.fetchByC_C(
+			classNameId, classPK);
+
+		if (entry == null) {
+			return Collections.emptyList();
+		}
+
+		return assetEntryPersistence.getAssetCategories(entry.getEntryId());
+	}
+
+	@Override
+	public List<AssetCategory> getCategories(String className, long classPK) {
+		long classNameId = classNameLocalService.getClassNameId(className);
+
+		return getCategories(classNameId, classPK);
+	}
+
+	@Override
+	public AssetCategory getCategory(long categoryId) throws PortalException {
+		return assetCategoryPersistence.findByPrimaryKey(categoryId);
+	}
+
+	@Override
+	public AssetCategory getCategory(String uuid, long groupId)
+		throws PortalException {
+
+		return assetCategoryPersistence.findByUUID_G(uuid, groupId);
+	}
+
+	@Override
+	public long[] getCategoryIds(String className, long classPK) {
+		return getCategoryIds(getCategories(className, classPK));
+	}
+
+	@Override
+	public String[] getCategoryNames() {
+		return getCategoryNames(getCategories());
+	}
+
+	@Override
+	public String[] getCategoryNames(long classNameId, long classPK) {
+		return getCategoryNames(getCategories(classNameId, classPK));
+	}
+
+	@Override
+	public String[] getCategoryNames(String className, long classPK) {
+		return getCategoryNames(getCategories(className, classPK));
+	}
+
+	@Override
+	public List<AssetCategory> getChildCategories(long parentCategoryId) {
+		return assetCategoryPersistence.findByParentCategoryId(
+			parentCategoryId);
+	}
+
+	@Override
+	public List<AssetCategory> getChildCategories(
+		long parentCategoryId, int start, int end, OrderByComparator obc) {
+
+		return assetCategoryPersistence.findByParentCategoryId(
+			parentCategoryId, start, end, obc);
+	}
+
+	@Override
+	public int getChildCategoriesCount(long parentCategoryId) {
+		return assetCategoryPersistence.countByParentCategoryId(
+			parentCategoryId);
+	}
+
+	@Override
+	public List<AssetCategory> getEntryCategories(long entryId) {
+		return assetEntryPersistence.getAssetCategories(entryId);
+	}
+
+	@Override
+	public List<Long> getSubcategoryIds(long parentCategoryId) {
+		AssetCategory parentAssetCategory =
+			assetCategoryPersistence.fetchByPrimaryKey(parentCategoryId);
+
+		if (parentAssetCategory == null) {
+			return Collections.emptyList();
+		}
+
+		return ListUtil.toList(
+			assetCategoryPersistence.getDescendants(parentAssetCategory),
+			AssetCategory.CATEGORY_ID_ACCESSOR);
+	}
+
+	@Override
+	public List<AssetCategory> getVocabularyCategories(
+		long vocabularyId, int start, int end, OrderByComparator obc) {
+
+		return assetCategoryPersistence.findByVocabularyId(
+			vocabularyId, start, end, obc);
+	}
+
+	@Override
+	public List<AssetCategory> getVocabularyCategories(
+		long parentCategoryId, long vocabularyId, int start, int end,
+		OrderByComparator obc) {
+
+		return assetCategoryPersistence.findByP_V(
+			parentCategoryId, vocabularyId, start, end, obc);
+	}
+
+	@Override
+	public int getVocabularyCategoriesCount(long vocabularyId) {
+		return assetCategoryPersistence.countByVocabularyId(vocabularyId);
+	}
+
+	@Override
+	public List<AssetCategory> getVocabularyRootCategories(
+		long vocabularyId, int start, int end, OrderByComparator obc) {
+
+		return getVocabularyCategories(
+			AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID, vocabularyId,
+			start, end, obc);
+	}
+
+	@Override
+	public int getVocabularyRootCategoriesCount(long vocabularyId) {
+		return assetCategoryPersistence.countByP_V(
+			AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID, vocabularyId);
+	}
+
+	@Indexable(type = IndexableType.REINDEX)
+	@Override
+	public AssetCategory mergeCategories(long fromCategoryId, long toCategoryId)
+		throws PortalException {
+
+		List<AssetEntry> entries = assetCategoryPersistence.getAssetEntries(
+			fromCategoryId);
+
+		assetCategoryPersistence.addAssetEntries(toCategoryId, entries);
+
+		List<AssetCategoryProperty> categoryProperties =
+			assetCategoryPropertyPersistence.findByCategoryId(fromCategoryId);
+
+		for (AssetCategoryProperty fromCategoryProperty : categoryProperties) {
+			AssetCategoryProperty toCategoryProperty =
+				assetCategoryPropertyPersistence.fetchByCA_K(
+					toCategoryId, fromCategoryProperty.getKey());
+
+			if (toCategoryProperty == null) {
+				fromCategoryProperty.setCategoryId(toCategoryId);
+
+				assetCategoryPropertyPersistence.update(fromCategoryProperty);
+			}
+		}
+
+		assetCategoryLocalService.deleteCategory(fromCategoryId);
+
+		return getCategory(toCategoryId);
+	}
+
+	@Indexable(type = IndexableType.REINDEX)
+	@Override
+	public AssetCategory moveCategory(
+			long categoryId, long parentCategoryId, long vocabularyId,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		AssetCategory category = assetCategoryPersistence.findByPrimaryKey(
+			categoryId);
+
+		validate(
+			categoryId, parentCategoryId, category.getName(), vocabularyId);
+
+		if (parentCategoryId > 0) {
+			assetCategoryPersistence.findByPrimaryKey(parentCategoryId);
+		}
+
+		if (vocabularyId != category.getVocabularyId()) {
+			assetVocabularyPersistence.findByPrimaryKey(vocabularyId);
+
+			category.setVocabularyId(vocabularyId);
+
+			updateChildrenVocabularyId(category, vocabularyId);
+		}
+
+		category.setModifiedDate(new Date());
+		category.setParentCategoryId(parentCategoryId);
+
+		assetCategoryPersistence.update(category);
+
+		return category;
+	}
+
+	@Override
+	public void rebuildTree(long groupId, boolean force) {
+		assetCategoryPersistence.rebuildTree(groupId, force);
+	}
+
+	@Override
+	public List<AssetCategory> search(
+		long groupId, String name, String[] categoryProperties, int start,
+		int end) {
+
+		return assetCategoryFinder.findByG_N_P(
+			groupId, name, categoryProperties, start, end);
+	}
+
+	@Override
+	public BaseModelSearchResult<AssetCategory> searchCategories(
+			long companyId, long groupIds, String title, long vocabularyId,
+			int start, int end)
+		throws PortalException {
+
+		return searchCategories(
+			companyId, new long[] {groupIds}, title, new long[] {vocabularyId},
+			start, end);
+	}
+
+	@Override
+	public BaseModelSearchResult<AssetCategory> searchCategories(
+			long companyId, long[] groupIds, String title, long[] vocabularyIds,
+			int start, int end)
+		throws PortalException {
+
+		SearchContext searchContext = buildSearchContext(
+			companyId, groupIds, title, vocabularyIds, start, end);
+
+		return searchCategories(searchContext);
+	}
+
+	@Indexable(type = IndexableType.REINDEX)
+	@Override
+	public AssetCategory updateCategory(
+			long userId, long categoryId, long parentCategoryId,
+			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
+			long vocabularyId, String[] categoryProperties,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		// Category
+
+		String name = titleMap.get(LocaleUtil.getSiteDefault());
+
+		name = ModelHintsUtil.trimString(
+			AssetCategory.class.getName(), "name", name);
+
+		if (categoryProperties == null) {
+			categoryProperties = new String[0];
+		}
+
+		validate(categoryId, parentCategoryId, name, vocabularyId);
+
+		if (parentCategoryId > 0) {
+			assetCategoryPersistence.findByPrimaryKey(parentCategoryId);
+		}
+
+		AssetCategory category = assetCategoryPersistence.findByPrimaryKey(
+			categoryId);
+
+		String oldName = category.getName();
+
+		if (vocabularyId != category.getVocabularyId()) {
+			assetVocabularyPersistence.findByPrimaryKey(vocabularyId);
+
+			parentCategoryId =
+				AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID;
+
+			category.setVocabularyId(vocabularyId);
+
+			updateChildrenVocabularyId(category, vocabularyId);
+		}
+
+		category.setModifiedDate(new Date());
+		category.setParentCategoryId(parentCategoryId);
+		category.setName(name);
+		category.setTitleMap(titleMap);
+		category.setDescriptionMap(descriptionMap);
+
+		assetCategoryPersistence.update(category);
+
+		// Properties
+
+		List<AssetCategoryProperty> oldCategoryProperties =
+			assetCategoryPropertyPersistence.findByCategoryId(categoryId);
+
+		oldCategoryProperties = ListUtil.copy(oldCategoryProperties);
+
+		for (int i = 0; i < categoryProperties.length; i++) {
+			String[] categoryProperty = StringUtil.split(
+				categoryProperties[i],
+				AssetCategoryConstants.PROPERTY_KEY_VALUE_SEPARATOR);
+
+			if (categoryProperty.length <= 1) {
+				categoryProperty = StringUtil.split(
+					categoryProperties[i], CharPool.COLON);
+			}
+
+			String key = StringPool.BLANK;
+
+			if (categoryProperty.length > 0) {
+				key = GetterUtil.getString(categoryProperty[0]);
+			}
+
+			String value = StringPool.BLANK;
+
+			if (categoryProperty.length > 1) {
+				value = GetterUtil.getString(categoryProperty[1]);
+			}
+
+			if (Validator.isNotNull(key)) {
+				boolean addCategoryProperty = true;
+
+				AssetCategoryProperty oldCategoryProperty = null;
+
+				Iterator<AssetCategoryProperty> iterator =
+					oldCategoryProperties.iterator();
+
+				while (iterator.hasNext()) {
+					oldCategoryProperty = iterator.next();
+
+					if ((categoryId == oldCategoryProperty.getCategoryId()) &&
+						key.equals(oldCategoryProperty.getKey())) {
+
+						addCategoryProperty = false;
+
+						if (!value.equals(oldCategoryProperty.getValue())) {
+							assetCategoryPropertyLocalService.
+								updateCategoryProperty(
+									userId,
+									oldCategoryProperty.getCategoryPropertyId(),
+									key, value);
+						}
+
+						iterator.remove();
+
+						break;
+					}
+				}
+
+				if (addCategoryProperty) {
+					assetCategoryPropertyLocalService.addCategoryProperty(
+						userId, categoryId, key, value);
+				}
+			}
+		}
+
+		for (AssetCategoryProperty categoryProperty : oldCategoryProperties) {
+			assetCategoryPropertyLocalService.deleteAssetCategoryProperty(
+				categoryProperty);
+		}
+
+		// Indexer
+
+		if (!oldName.equals(name)) {
+			List<AssetEntry> entries = assetCategoryPersistence.getAssetEntries(
+				category.getCategoryId());
+
+			assetEntryLocalService.reindex(entries);
+		}
+
+		return category;
+	}
+
+	protected SearchContext buildSearchContext(
+		long companyId, long[] groupIds, String title, long[] vocabularyIds,
+		int start, int end) {
+
+		SearchContext searchContext = new SearchContext();
+
+		Map<String, Serializable> attributes =
+			new HashMap<String, Serializable>();
+
+		attributes.put(Field.ASSET_VOCABULARY_IDS, vocabularyIds);
+		attributes.put(Field.TITLE, title);
+
+		searchContext.setAttributes(attributes);
+
+		searchContext.setCompanyId(companyId);
+		searchContext.setEnd(end);
+		searchContext.setGroupIds(groupIds);
+		searchContext.setKeywords(title);
+		searchContext.setStart(start);
+
+		QueryConfig queryConfig = searchContext.getQueryConfig();
+
+		queryConfig.setHighlightEnabled(false);
+		queryConfig.setScoreEnabled(false);
+
+		return searchContext;
 	}
 
 	protected long[] getCategoryIds(List<AssetCategory> categories) {
@@ -642,9 +719,31 @@ public class AssetCategoryLocalServiceImpl
 			ListUtil.toString(categories, AssetCategory.NAME_ACCESSOR));
 	}
 
+	protected BaseModelSearchResult<AssetCategory> searchCategories(
+			SearchContext searchContext)
+		throws PortalException {
+
+		Indexer indexer = IndexerRegistryUtil.nullSafeGetIndexer(
+			AssetCategory.class);
+
+		for (int i = 0; i < 10; i++) {
+			Hits hits = indexer.search(searchContext);
+
+			List<AssetCategory> categories = AssetCategoryUtil.getCategories(
+				hits);
+
+			if (categories != null) {
+				return new BaseModelSearchResult<AssetCategory>(
+					categories, hits.getLength());
+			}
+		}
+
+		throw new SearchException(
+			"Unable to fix the search index after 10 attempts");
+	}
+
 	protected void updateChildrenVocabularyId(
-			AssetCategory category, long vocabularyId)
-		throws SystemException {
+		AssetCategory category, long vocabularyId) {
 
 		List<AssetCategory> childrenCategories =
 			assetCategoryPersistence.findByParentCategoryId(
@@ -665,7 +764,7 @@ public class AssetCategoryLocalServiceImpl
 	protected void validate(
 			long categoryId, long parentCategoryId, String name,
 			long vocabularyId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (Validator.isNull(name)) {
 			throw new AssetCategoryNameException();

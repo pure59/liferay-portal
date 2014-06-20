@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -126,9 +126,8 @@ public class MediaWikiImporter implements WikiImporter {
 	}
 
 	protected long getUserId(
-			long userId, WikiNode node, String author,
-			Map<String, String> usersMap)
-		throws SystemException {
+		long userId, WikiNode node, String author,
+		Map<String, String> usersMap) {
 
 		User user = null;
 
@@ -140,7 +139,7 @@ public class MediaWikiImporter implements WikiImporter {
 		}
 		else {
 			user = UserLocalServiceUtil.fetchUserByScreenName(
-				node.getCompanyId(), author.toLowerCase());
+				node.getCompanyId(), StringUtil.toLowerCase(author));
 		}
 
 		if (user != null) {
@@ -258,7 +257,6 @@ public class MediaWikiImporter implements WikiImporter {
 					WikiPageLocalServiceUtil.movePage(
 						userId, node.getNodeId(), frontPageTitle,
 						WikiPageConstants.FRONT_PAGE, false, serviceContext);
-
 				}
 			}
 			catch (Exception e) {
@@ -273,9 +271,7 @@ public class MediaWikiImporter implements WikiImporter {
 					_log.warn(sb.toString(), e);
 				}
 			}
-
 		}
-
 	}
 
 	protected String normalize(String categoryName, int length) {
@@ -359,7 +355,8 @@ public class MediaWikiImporter implements WikiImporter {
 					continue;
 				}
 
-				String fileName = paths[paths.length - 1].toLowerCase();
+				String fileName = StringUtil.toLowerCase(
+					paths[paths.length - 1]);
 
 				ObjectValuePair<String, InputStream> inputStreamOVP =
 					new ObjectValuePair<String, InputStream>(
@@ -559,7 +556,7 @@ public class MediaWikiImporter implements WikiImporter {
 
 	protected String[] readAssetTagNames(
 			long userId, WikiNode node, String content)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		Matcher matcher = _categoriesPattern.matcher(content);
 

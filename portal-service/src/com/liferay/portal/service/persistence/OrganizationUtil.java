@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,10 @@
 
 package com.liferay.portal.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.model.Organization;
@@ -36,6 +37,7 @@ import java.util.List;
  * @see OrganizationPersistenceImpl
  * @generated
  */
+@ProviderType
 public class OrganizationUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -60,8 +62,7 @@ public class OrganizationUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#countWithDynamicQuery(DynamicQuery)
 	 */
-	public long countWithDynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
 	}
 
@@ -69,7 +70,7 @@ public class OrganizationUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery)
 	 */
 	public static List<Organization> findWithDynamicQuery(
-		DynamicQuery dynamicQuery) throws SystemException {
+		DynamicQuery dynamicQuery) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -77,8 +78,7 @@ public class OrganizationUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery, int, int)
 	 */
 	public static List<Organization> findWithDynamicQuery(
-		DynamicQuery dynamicQuery, int start, int end)
-		throws SystemException {
+		DynamicQuery dynamicQuery, int start, int end) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -87,7 +87,7 @@ public class OrganizationUtil {
 	 */
 	public static List<Organization> findWithDynamicQuery(
 		DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
+		OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findWithDynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
@@ -96,8 +96,7 @@ public class OrganizationUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel)
 	 */
-	public static Organization update(Organization organization)
-		throws SystemException {
+	public static Organization update(Organization organization) {
 		return getPersistence().update(organization);
 	}
 
@@ -105,7 +104,7 @@ public class OrganizationUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel, ServiceContext)
 	 */
 	public static Organization update(Organization organization,
-		ServiceContext serviceContext) throws SystemException {
+		ServiceContext serviceContext) {
 		return getPersistence().update(organization, serviceContext);
 	}
 
@@ -114,11 +113,9 @@ public class OrganizationUtil {
 	*
 	* @param uuid the uuid
 	* @return the matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByUuid(
-		java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid) {
 		return getPersistence().findByUuid(uuid);
 	}
 
@@ -133,11 +130,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByUuid(
-		java.lang.String uuid, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, int start, int end) {
 		return getPersistence().findByUuid(uuid, start, end);
 	}
 
@@ -153,12 +148,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByUuid(
 		java.lang.String uuid, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findByUuid(uuid, start, end, orderByComparator);
 	}
 
@@ -169,13 +162,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByUuid_First(
 		java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence().findByUuid_First(uuid, orderByComparator);
 	}
 
@@ -185,12 +176,10 @@ public class OrganizationUtil {
 	* @param uuid the uuid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByUuid_First(
 		java.lang.String uuid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByUuid_First(uuid, orderByComparator);
 	}
 
@@ -201,13 +190,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByUuid_Last(
 		java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence().findByUuid_Last(uuid, orderByComparator);
 	}
 
@@ -217,12 +204,10 @@ public class OrganizationUtil {
 	* @param uuid the uuid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByUuid_Last(
 		java.lang.String uuid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByUuid_Last(uuid, orderByComparator);
 	}
 
@@ -234,13 +219,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization[] findByUuid_PrevAndNext(
 		long organizationId, java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByUuid_PrevAndNext(organizationId, uuid,
 			orderByComparator);
@@ -251,11 +234,9 @@ public class OrganizationUtil {
 	*
 	* @param uuid the uuid
 	* @return the matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByUuid(
-		java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid) {
 		return getPersistence().filterFindByUuid(uuid);
 	}
 
@@ -270,11 +251,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByUuid(
-		java.lang.String uuid, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, int start, int end) {
 		return getPersistence().filterFindByUuid(uuid, start, end);
 	}
 
@@ -290,12 +269,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByUuid(
 		java.lang.String uuid, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .filterFindByUuid(uuid, start, end, orderByComparator);
 	}
@@ -308,13 +285,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization[] filterFindByUuid_PrevAndNext(
 		long organizationId, java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .filterFindByUuid_PrevAndNext(organizationId, uuid,
 			orderByComparator);
@@ -324,10 +299,8 @@ public class OrganizationUtil {
 	* Removes all the organizations where uuid = &#63; from the database.
 	*
 	* @param uuid the uuid
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByUuid(java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByUuid(java.lang.String uuid) {
 		getPersistence().removeByUuid(uuid);
 	}
 
@@ -336,10 +309,8 @@ public class OrganizationUtil {
 	*
 	* @param uuid the uuid
 	* @return the number of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByUuid(java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByUuid(java.lang.String uuid) {
 		return getPersistence().countByUuid(uuid);
 	}
 
@@ -348,10 +319,8 @@ public class OrganizationUtil {
 	*
 	* @param uuid the uuid
 	* @return the number of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int filterCountByUuid(java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int filterCountByUuid(java.lang.String uuid) {
 		return getPersistence().filterCountByUuid(uuid);
 	}
 
@@ -361,11 +330,9 @@ public class OrganizationUtil {
 	* @param uuid the uuid
 	* @param companyId the company ID
 	* @return the matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByUuid_C(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, long companyId) {
 		return getPersistence().findByUuid_C(uuid, companyId);
 	}
 
@@ -381,11 +348,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByUuid_C(
-		java.lang.String uuid, long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, long companyId, int start, int end) {
 		return getPersistence().findByUuid_C(uuid, companyId, start, end);
 	}
 
@@ -402,12 +367,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByUuid_C(
 		java.lang.String uuid, long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByUuid_C(uuid, companyId, start, end, orderByComparator);
 	}
@@ -420,13 +383,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByUuid_C_First(
 		java.lang.String uuid, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByUuid_C_First(uuid, companyId, orderByComparator);
 	}
@@ -438,12 +399,10 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByUuid_C_First(
 		java.lang.String uuid, long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByUuid_C_First(uuid, companyId, orderByComparator);
 	}
@@ -456,13 +415,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByUuid_C_Last(
 		java.lang.String uuid, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByUuid_C_Last(uuid, companyId, orderByComparator);
 	}
@@ -474,12 +431,10 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByUuid_C_Last(
 		java.lang.String uuid, long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByUuid_C_Last(uuid, companyId, orderByComparator);
 	}
@@ -493,13 +448,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization[] findByUuid_C_PrevAndNext(
 		long organizationId, java.lang.String uuid, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByUuid_C_PrevAndNext(organizationId, uuid, companyId,
 			orderByComparator);
@@ -511,11 +464,9 @@ public class OrganizationUtil {
 	* @param uuid the uuid
 	* @param companyId the company ID
 	* @return the matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByUuid_C(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, long companyId) {
 		return getPersistence().filterFindByUuid_C(uuid, companyId);
 	}
 
@@ -531,11 +482,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByUuid_C(
-		java.lang.String uuid, long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, long companyId, int start, int end) {
 		return getPersistence().filterFindByUuid_C(uuid, companyId, start, end);
 	}
 
@@ -552,12 +501,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByUuid_C(
 		java.lang.String uuid, long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .filterFindByUuid_C(uuid, companyId, start, end,
 			orderByComparator);
@@ -572,13 +519,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization[] filterFindByUuid_C_PrevAndNext(
 		long organizationId, java.lang.String uuid, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .filterFindByUuid_C_PrevAndNext(organizationId, uuid,
 			companyId, orderByComparator);
@@ -589,10 +534,8 @@ public class OrganizationUtil {
 	*
 	* @param uuid the uuid
 	* @param companyId the company ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByUuid_C(java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByUuid_C(java.lang.String uuid, long companyId) {
 		getPersistence().removeByUuid_C(uuid, companyId);
 	}
 
@@ -602,10 +545,8 @@ public class OrganizationUtil {
 	* @param uuid the uuid
 	* @param companyId the company ID
 	* @return the number of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByUuid_C(java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByUuid_C(java.lang.String uuid, long companyId) {
 		return getPersistence().countByUuid_C(uuid, companyId);
 	}
 
@@ -615,10 +556,8 @@ public class OrganizationUtil {
 	* @param uuid the uuid
 	* @param companyId the company ID
 	* @return the number of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int filterCountByUuid_C(java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int filterCountByUuid_C(java.lang.String uuid, long companyId) {
 		return getPersistence().filterCountByUuid_C(uuid, companyId);
 	}
 
@@ -627,11 +566,9 @@ public class OrganizationUtil {
 	*
 	* @param companyId the company ID
 	* @return the matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByCompanyId(
-		long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId) {
 		return getPersistence().findByCompanyId(companyId);
 	}
 
@@ -646,11 +583,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByCompanyId(
-		long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, int start, int end) {
 		return getPersistence().findByCompanyId(companyId, start, end);
 	}
 
@@ -666,12 +601,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByCompanyId(
 		long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByCompanyId(companyId, start, end, orderByComparator);
 	}
@@ -683,13 +616,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByCompanyId_First(
 		long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByCompanyId_First(companyId, orderByComparator);
 	}
@@ -700,12 +631,10 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByCompanyId_First(
 		long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByCompanyId_First(companyId, orderByComparator);
 	}
@@ -717,13 +646,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByCompanyId_Last(
 		long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByCompanyId_Last(companyId, orderByComparator);
 	}
@@ -734,12 +661,10 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByCompanyId_Last(
 		long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByCompanyId_Last(companyId, orderByComparator);
 	}
@@ -752,13 +677,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization[] findByCompanyId_PrevAndNext(
 		long organizationId, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByCompanyId_PrevAndNext(organizationId, companyId,
 			orderByComparator);
@@ -769,11 +692,9 @@ public class OrganizationUtil {
 	*
 	* @param companyId the company ID
 	* @return the matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByCompanyId(
-		long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId) {
 		return getPersistence().filterFindByCompanyId(companyId);
 	}
 
@@ -788,11 +709,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByCompanyId(
-		long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, int start, int end) {
 		return getPersistence().filterFindByCompanyId(companyId, start, end);
 	}
 
@@ -808,12 +727,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByCompanyId(
 		long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .filterFindByCompanyId(companyId, start, end,
 			orderByComparator);
@@ -827,13 +744,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization[] filterFindByCompanyId_PrevAndNext(
 		long organizationId, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .filterFindByCompanyId_PrevAndNext(organizationId,
 			companyId, orderByComparator);
@@ -843,10 +758,8 @@ public class OrganizationUtil {
 	* Removes all the organizations where companyId = &#63; from the database.
 	*
 	* @param companyId the company ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByCompanyId(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByCompanyId(long companyId) {
 		getPersistence().removeByCompanyId(companyId);
 	}
 
@@ -855,10 +768,8 @@ public class OrganizationUtil {
 	*
 	* @param companyId the company ID
 	* @return the number of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByCompanyId(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByCompanyId(long companyId) {
 		return getPersistence().countByCompanyId(companyId);
 	}
 
@@ -867,10 +778,8 @@ public class OrganizationUtil {
 	*
 	* @param companyId the company ID
 	* @return the number of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int filterCountByCompanyId(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int filterCountByCompanyId(long companyId) {
 		return getPersistence().filterCountByCompanyId(companyId);
 	}
 
@@ -879,11 +788,9 @@ public class OrganizationUtil {
 	*
 	* @param companyId the company ID
 	* @return the matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByLocations(
-		long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId) {
 		return getPersistence().findByLocations(companyId);
 	}
 
@@ -898,11 +805,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByLocations(
-		long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, int start, int end) {
 		return getPersistence().findByLocations(companyId, start, end);
 	}
 
@@ -918,12 +823,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByLocations(
 		long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByLocations(companyId, start, end, orderByComparator);
 	}
@@ -935,13 +838,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByLocations_First(
 		long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByLocations_First(companyId, orderByComparator);
 	}
@@ -952,12 +853,10 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByLocations_First(
 		long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByLocations_First(companyId, orderByComparator);
 	}
@@ -969,13 +868,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByLocations_Last(
 		long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByLocations_Last(companyId, orderByComparator);
 	}
@@ -986,12 +883,10 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByLocations_Last(
 		long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByLocations_Last(companyId, orderByComparator);
 	}
@@ -1004,13 +899,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization[] findByLocations_PrevAndNext(
 		long organizationId, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByLocations_PrevAndNext(organizationId, companyId,
 			orderByComparator);
@@ -1021,11 +914,9 @@ public class OrganizationUtil {
 	*
 	* @param companyId the company ID
 	* @return the matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByLocations(
-		long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId) {
 		return getPersistence().filterFindByLocations(companyId);
 	}
 
@@ -1040,11 +931,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByLocations(
-		long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, int start, int end) {
 		return getPersistence().filterFindByLocations(companyId, start, end);
 	}
 
@@ -1060,12 +949,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByLocations(
 		long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .filterFindByLocations(companyId, start, end,
 			orderByComparator);
@@ -1079,13 +966,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization[] filterFindByLocations_PrevAndNext(
 		long organizationId, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .filterFindByLocations_PrevAndNext(organizationId,
 			companyId, orderByComparator);
@@ -1095,10 +980,8 @@ public class OrganizationUtil {
 	* Removes all the organizations where companyId = &#63; from the database.
 	*
 	* @param companyId the company ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByLocations(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByLocations(long companyId) {
 		getPersistence().removeByLocations(companyId);
 	}
 
@@ -1107,10 +990,8 @@ public class OrganizationUtil {
 	*
 	* @param companyId the company ID
 	* @return the number of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByLocations(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByLocations(long companyId) {
 		return getPersistence().countByLocations(companyId);
 	}
 
@@ -1119,10 +1000,8 @@ public class OrganizationUtil {
 	*
 	* @param companyId the company ID
 	* @return the number of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int filterCountByLocations(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int filterCountByLocations(long companyId) {
 		return getPersistence().filterCountByLocations(companyId);
 	}
 
@@ -1132,11 +1011,9 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param parentOrganizationId the parent organization ID
 	* @return the matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByC_P(
-		long companyId, long parentOrganizationId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, long parentOrganizationId) {
 		return getPersistence().findByC_P(companyId, parentOrganizationId);
 	}
 
@@ -1152,11 +1029,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByC_P(
-		long companyId, long parentOrganizationId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, long parentOrganizationId, int start, int end) {
 		return getPersistence()
 				   .findByC_P(companyId, parentOrganizationId, start, end);
 	}
@@ -1174,12 +1049,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findByC_P(
 		long companyId, long parentOrganizationId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByC_P(companyId, parentOrganizationId, start, end,
 			orderByComparator);
@@ -1193,13 +1066,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByC_P_First(
 		long companyId, long parentOrganizationId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByC_P_First(companyId, parentOrganizationId,
 			orderByComparator);
@@ -1212,12 +1083,10 @@ public class OrganizationUtil {
 	* @param parentOrganizationId the parent organization ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByC_P_First(
 		long companyId, long parentOrganizationId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByC_P_First(companyId, parentOrganizationId,
 			orderByComparator);
@@ -1231,13 +1100,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByC_P_Last(
 		long companyId, long parentOrganizationId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByC_P_Last(companyId, parentOrganizationId,
 			orderByComparator);
@@ -1250,12 +1117,10 @@ public class OrganizationUtil {
 	* @param parentOrganizationId the parent organization ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByC_P_Last(
 		long companyId, long parentOrganizationId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByC_P_Last(companyId, parentOrganizationId,
 			orderByComparator);
@@ -1270,13 +1135,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization[] findByC_P_PrevAndNext(
 		long organizationId, long companyId, long parentOrganizationId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .findByC_P_PrevAndNext(organizationId, companyId,
 			parentOrganizationId, orderByComparator);
@@ -1288,11 +1151,9 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param parentOrganizationId the parent organization ID
 	* @return the matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByC_P(
-		long companyId, long parentOrganizationId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, long parentOrganizationId) {
 		return getPersistence().filterFindByC_P(companyId, parentOrganizationId);
 	}
 
@@ -1308,11 +1169,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByC_P(
-		long companyId, long parentOrganizationId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, long parentOrganizationId, int start, int end) {
 		return getPersistence()
 				   .filterFindByC_P(companyId, parentOrganizationId, start, end);
 	}
@@ -1330,12 +1189,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> filterFindByC_P(
 		long companyId, long parentOrganizationId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .filterFindByC_P(companyId, parentOrganizationId, start,
 			end, orderByComparator);
@@ -1350,13 +1207,11 @@ public class OrganizationUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization[] filterFindByC_P_PrevAndNext(
 		long organizationId, long companyId, long parentOrganizationId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence()
 				   .filterFindByC_P_PrevAndNext(organizationId, companyId,
 			parentOrganizationId, orderByComparator);
@@ -1367,10 +1222,8 @@ public class OrganizationUtil {
 	*
 	* @param companyId the company ID
 	* @param parentOrganizationId the parent organization ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByC_P(long companyId, long parentOrganizationId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByC_P(long companyId, long parentOrganizationId) {
 		getPersistence().removeByC_P(companyId, parentOrganizationId);
 	}
 
@@ -1380,10 +1233,8 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param parentOrganizationId the parent organization ID
 	* @return the number of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_P(long companyId, long parentOrganizationId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_P(long companyId, long parentOrganizationId) {
 		return getPersistence().countByC_P(companyId, parentOrganizationId);
 	}
 
@@ -1393,11 +1244,246 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param parentOrganizationId the parent organization ID
 	* @return the number of matching organizations that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int filterCountByC_P(long companyId, long parentOrganizationId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int filterCountByC_P(long companyId, long parentOrganizationId) {
 		return getPersistence().filterCountByC_P(companyId, parentOrganizationId);
+	}
+
+	/**
+	* Returns all the organizations where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @return the matching organizations
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> findByC_T(
+		long companyId, java.lang.String treePath) {
+		return getPersistence().findByC_T(companyId, treePath);
+	}
+
+	/**
+	* Returns a range of all the organizations where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.OrganizationModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param start the lower bound of the range of organizations
+	* @param end the upper bound of the range of organizations (not inclusive)
+	* @return the range of matching organizations
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> findByC_T(
+		long companyId, java.lang.String treePath, int start, int end) {
+		return getPersistence().findByC_T(companyId, treePath, start, end);
+	}
+
+	/**
+	* Returns an ordered range of all the organizations where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.OrganizationModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param start the lower bound of the range of organizations
+	* @param end the upper bound of the range of organizations (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @return the ordered range of matching organizations
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> findByC_T(
+		long companyId, java.lang.String treePath, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .findByC_T(companyId, treePath, start, end, orderByComparator);
+	}
+
+	/**
+	* Returns the first organization in the ordered set where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching organization
+	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
+	*/
+	public static com.liferay.portal.model.Organization findByC_T_First(
+		long companyId, java.lang.String treePath,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.NoSuchOrganizationException {
+		return getPersistence()
+				   .findByC_T_First(companyId, treePath, orderByComparator);
+	}
+
+	/**
+	* Returns the first organization in the ordered set where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching organization, or <code>null</code> if a matching organization could not be found
+	*/
+	public static com.liferay.portal.model.Organization fetchByC_T_First(
+		long companyId, java.lang.String treePath,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .fetchByC_T_First(companyId, treePath, orderByComparator);
+	}
+
+	/**
+	* Returns the last organization in the ordered set where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching organization
+	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
+	*/
+	public static com.liferay.portal.model.Organization findByC_T_Last(
+		long companyId, java.lang.String treePath,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.NoSuchOrganizationException {
+		return getPersistence()
+				   .findByC_T_Last(companyId, treePath, orderByComparator);
+	}
+
+	/**
+	* Returns the last organization in the ordered set where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching organization, or <code>null</code> if a matching organization could not be found
+	*/
+	public static com.liferay.portal.model.Organization fetchByC_T_Last(
+		long companyId, java.lang.String treePath,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .fetchByC_T_Last(companyId, treePath, orderByComparator);
+	}
+
+	/**
+	* Returns the organizations before and after the current organization in the ordered set where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* @param organizationId the primary key of the current organization
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the previous, current, and next organization
+	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
+	*/
+	public static com.liferay.portal.model.Organization[] findByC_T_PrevAndNext(
+		long organizationId, long companyId, java.lang.String treePath,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.NoSuchOrganizationException {
+		return getPersistence()
+				   .findByC_T_PrevAndNext(organizationId, companyId, treePath,
+			orderByComparator);
+	}
+
+	/**
+	* Returns all the organizations that the user has permission to view where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @return the matching organizations that the user has permission to view
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> filterFindByC_T(
+		long companyId, java.lang.String treePath) {
+		return getPersistence().filterFindByC_T(companyId, treePath);
+	}
+
+	/**
+	* Returns a range of all the organizations that the user has permission to view where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.OrganizationModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param start the lower bound of the range of organizations
+	* @param end the upper bound of the range of organizations (not inclusive)
+	* @return the range of matching organizations that the user has permission to view
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> filterFindByC_T(
+		long companyId, java.lang.String treePath, int start, int end) {
+		return getPersistence().filterFindByC_T(companyId, treePath, start, end);
+	}
+
+	/**
+	* Returns an ordered range of all the organizations that the user has permissions to view where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.OrganizationModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param start the lower bound of the range of organizations
+	* @param end the upper bound of the range of organizations (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @return the ordered range of matching organizations that the user has permission to view
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> filterFindByC_T(
+		long companyId, java.lang.String treePath, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .filterFindByC_T(companyId, treePath, start, end,
+			orderByComparator);
+	}
+
+	/**
+	* Returns the organizations before and after the current organization in the ordered set of organizations that the user has permission to view where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* @param organizationId the primary key of the current organization
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the previous, current, and next organization
+	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
+	*/
+	public static com.liferay.portal.model.Organization[] filterFindByC_T_PrevAndNext(
+		long organizationId, long companyId, java.lang.String treePath,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.NoSuchOrganizationException {
+		return getPersistence()
+				   .filterFindByC_T_PrevAndNext(organizationId, companyId,
+			treePath, orderByComparator);
+	}
+
+	/**
+	* Removes all the organizations where companyId = &#63; and treePath LIKE &#63; from the database.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	*/
+	public static void removeByC_T(long companyId, java.lang.String treePath) {
+		getPersistence().removeByC_T(companyId, treePath);
+	}
+
+	/**
+	* Returns the number of organizations where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @return the number of matching organizations
+	*/
+	public static int countByC_T(long companyId, java.lang.String treePath) {
+		return getPersistence().countByC_T(companyId, treePath);
+	}
+
+	/**
+	* Returns the number of organizations that the user has permission to view where companyId = &#63; and treePath LIKE &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @return the number of matching organizations that the user has permission to view
+	*/
+	public static int filterCountByC_T(long companyId, java.lang.String treePath) {
+		return getPersistence().filterCountByC_T(companyId, treePath);
 	}
 
 	/**
@@ -1407,12 +1493,10 @@ public class OrganizationUtil {
 	* @param name the name
 	* @return the matching organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByC_N(
 		long companyId, java.lang.String name)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence().findByC_N(companyId, name);
 	}
 
@@ -1422,11 +1506,9 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param name the name
 	* @return the matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByC_N(
-		long companyId, java.lang.String name)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, java.lang.String name) {
 		return getPersistence().fetchByC_N(companyId, name);
 	}
 
@@ -1437,11 +1519,9 @@ public class OrganizationUtil {
 	* @param name the name
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching organization, or <code>null</code> if a matching organization could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByC_N(
-		long companyId, java.lang.String name, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, java.lang.String name, boolean retrieveFromCache) {
 		return getPersistence().fetchByC_N(companyId, name, retrieveFromCache);
 	}
 
@@ -1451,12 +1531,10 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param name the name
 	* @return the organization that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization removeByC_N(
 		long companyId, java.lang.String name)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence().removeByC_N(companyId, name);
 	}
 
@@ -1466,11 +1544,244 @@ public class OrganizationUtil {
 	* @param companyId the company ID
 	* @param name the name
 	* @return the number of matching organizations
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByC_N(long companyId, java.lang.String name)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByC_N(long companyId, java.lang.String name) {
 		return getPersistence().countByC_N(companyId, name);
+	}
+
+	/**
+	* Returns all the organizations where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @return the matching organizations
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> findByO_C_P(
+		long organizationId, long companyId, long parentOrganizationId) {
+		return getPersistence()
+				   .findByO_C_P(organizationId, companyId, parentOrganizationId);
+	}
+
+	/**
+	* Returns a range of all the organizations where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.OrganizationModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @param start the lower bound of the range of organizations
+	* @param end the upper bound of the range of organizations (not inclusive)
+	* @return the range of matching organizations
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> findByO_C_P(
+		long organizationId, long companyId, long parentOrganizationId,
+		int start, int end) {
+		return getPersistence()
+				   .findByO_C_P(organizationId, companyId,
+			parentOrganizationId, start, end);
+	}
+
+	/**
+	* Returns an ordered range of all the organizations where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.OrganizationModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @param start the lower bound of the range of organizations
+	* @param end the upper bound of the range of organizations (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @return the ordered range of matching organizations
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> findByO_C_P(
+		long organizationId, long companyId, long parentOrganizationId,
+		int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .findByO_C_P(organizationId, companyId,
+			parentOrganizationId, start, end, orderByComparator);
+	}
+
+	/**
+	* Returns the first organization in the ordered set where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching organization
+	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
+	*/
+	public static com.liferay.portal.model.Organization findByO_C_P_First(
+		long organizationId, long companyId, long parentOrganizationId,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.NoSuchOrganizationException {
+		return getPersistence()
+				   .findByO_C_P_First(organizationId, companyId,
+			parentOrganizationId, orderByComparator);
+	}
+
+	/**
+	* Returns the first organization in the ordered set where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching organization, or <code>null</code> if a matching organization could not be found
+	*/
+	public static com.liferay.portal.model.Organization fetchByO_C_P_First(
+		long organizationId, long companyId, long parentOrganizationId,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .fetchByO_C_P_First(organizationId, companyId,
+			parentOrganizationId, orderByComparator);
+	}
+
+	/**
+	* Returns the last organization in the ordered set where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching organization
+	* @throws com.liferay.portal.NoSuchOrganizationException if a matching organization could not be found
+	*/
+	public static com.liferay.portal.model.Organization findByO_C_P_Last(
+		long organizationId, long companyId, long parentOrganizationId,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.NoSuchOrganizationException {
+		return getPersistence()
+				   .findByO_C_P_Last(organizationId, companyId,
+			parentOrganizationId, orderByComparator);
+	}
+
+	/**
+	* Returns the last organization in the ordered set where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching organization, or <code>null</code> if a matching organization could not be found
+	*/
+	public static com.liferay.portal.model.Organization fetchByO_C_P_Last(
+		long organizationId, long companyId, long parentOrganizationId,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .fetchByO_C_P_Last(organizationId, companyId,
+			parentOrganizationId, orderByComparator);
+	}
+
+	/**
+	* Returns all the organizations that the user has permission to view where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @return the matching organizations that the user has permission to view
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> filterFindByO_C_P(
+		long organizationId, long companyId, long parentOrganizationId) {
+		return getPersistence()
+				   .filterFindByO_C_P(organizationId, companyId,
+			parentOrganizationId);
+	}
+
+	/**
+	* Returns a range of all the organizations that the user has permission to view where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.OrganizationModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @param start the lower bound of the range of organizations
+	* @param end the upper bound of the range of organizations (not inclusive)
+	* @return the range of matching organizations that the user has permission to view
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> filterFindByO_C_P(
+		long organizationId, long companyId, long parentOrganizationId,
+		int start, int end) {
+		return getPersistence()
+				   .filterFindByO_C_P(organizationId, companyId,
+			parentOrganizationId, start, end);
+	}
+
+	/**
+	* Returns an ordered range of all the organizations that the user has permissions to view where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portal.model.impl.OrganizationModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @param start the lower bound of the range of organizations
+	* @param end the upper bound of the range of organizations (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @return the ordered range of matching organizations that the user has permission to view
+	*/
+	public static java.util.List<com.liferay.portal.model.Organization> filterFindByO_C_P(
+		long organizationId, long companyId, long parentOrganizationId,
+		int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return getPersistence()
+				   .filterFindByO_C_P(organizationId, companyId,
+			parentOrganizationId, start, end, orderByComparator);
+	}
+
+	/**
+	* Removes all the organizations where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63; from the database.
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	*/
+	public static void removeByO_C_P(long organizationId, long companyId,
+		long parentOrganizationId) {
+		getPersistence()
+			.removeByO_C_P(organizationId, companyId, parentOrganizationId);
+	}
+
+	/**
+	* Returns the number of organizations where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @return the number of matching organizations
+	*/
+	public static int countByO_C_P(long organizationId, long companyId,
+		long parentOrganizationId) {
+		return getPersistence()
+				   .countByO_C_P(organizationId, companyId, parentOrganizationId);
+	}
+
+	/**
+	* Returns the number of organizations that the user has permission to view where organizationId &gt; &#63; and companyId = &#63; and parentOrganizationId = &#63;.
+	*
+	* @param organizationId the organization ID
+	* @param companyId the company ID
+	* @param parentOrganizationId the parent organization ID
+	* @return the number of matching organizations that the user has permission to view
+	*/
+	public static int filterCountByO_C_P(long organizationId, long companyId,
+		long parentOrganizationId) {
+		return getPersistence()
+				   .filterCountByO_C_P(organizationId, companyId,
+			parentOrganizationId);
 	}
 
 	/**
@@ -1510,18 +1821,15 @@ public class OrganizationUtil {
 	* @param organizationId the primary key of the organization
 	* @return the organization that was removed
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization remove(
 		long organizationId)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence().remove(organizationId);
 	}
 
 	public static com.liferay.portal.model.Organization updateImpl(
-		com.liferay.portal.model.Organization organization)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.Organization organization) {
 		return getPersistence().updateImpl(organization);
 	}
 
@@ -1531,12 +1839,10 @@ public class OrganizationUtil {
 	* @param organizationId the primary key of the organization
 	* @return the organization
 	* @throws com.liferay.portal.NoSuchOrganizationException if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization findByPrimaryKey(
 		long organizationId)
-		throws com.liferay.portal.NoSuchOrganizationException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.NoSuchOrganizationException {
 		return getPersistence().findByPrimaryKey(organizationId);
 	}
 
@@ -1545,22 +1851,23 @@ public class OrganizationUtil {
 	*
 	* @param organizationId the primary key of the organization
 	* @return the organization, or <code>null</code> if a organization with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization fetchByPrimaryKey(
-		long organizationId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long organizationId) {
 		return getPersistence().fetchByPrimaryKey(organizationId);
+	}
+
+	public static java.util.Map<java.io.Serializable, com.liferay.portal.model.Organization> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys) {
+		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
 	* Returns all the organizations.
 	*
 	* @return the organizations
-	* @throws SystemException if a system exception occurred
 	*/
-	public static java.util.List<com.liferay.portal.model.Organization> findAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static java.util.List<com.liferay.portal.model.Organization> findAll() {
 		return getPersistence().findAll();
 	}
 
@@ -1574,11 +1881,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findAll(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return getPersistence().findAll(start, end);
 	}
 
@@ -1593,22 +1898,17 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of organizations
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> findAll(
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findAll(start, end, orderByComparator);
 	}
 
 	/**
 	* Removes all the organizations from the database.
-	*
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeAll() {
 		getPersistence().removeAll();
 	}
 
@@ -1616,11 +1916,19 @@ public class OrganizationUtil {
 	* Returns the number of organizations.
 	*
 	* @return the number of organizations
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countAll() {
 		return getPersistence().countAll();
+	}
+
+	/**
+	* Returns the primaryKeys of groups associated with the organization.
+	*
+	* @param pk the primary key of the organization
+	* @return long[] of the primaryKeys of groups associated with the organization
+	*/
+	public static long[] getGroupPrimaryKeys(long pk) {
+		return getPersistence().getGroupPrimaryKeys(pk);
 	}
 
 	/**
@@ -1628,10 +1936,9 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @return the groups associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Group> getGroups(
-		long pk) throws com.liferay.portal.kernel.exception.SystemException {
+		long pk) {
 		return getPersistence().getGroups(pk);
 	}
 
@@ -1646,11 +1953,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of groups associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Group> getGroups(
-		long pk, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long pk, int start, int end) {
 		return getPersistence().getGroups(pk, start, end);
 	}
 
@@ -1666,12 +1971,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of groups associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Group> getGroups(
 		long pk, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().getGroups(pk, start, end, orderByComparator);
 	}
 
@@ -1680,10 +1983,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @return the number of groups associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int getGroupsSize(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getGroupsSize(long pk) {
 		return getPersistence().getGroupsSize(pk);
 	}
 
@@ -1693,10 +1994,8 @@ public class OrganizationUtil {
 	* @param pk the primary key of the organization
 	* @param groupPK the primary key of the group
 	* @return <code>true</code> if the group is associated with the organization; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsGroup(long pk, long groupPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsGroup(long pk, long groupPK) {
 		return getPersistence().containsGroup(pk, groupPK);
 	}
 
@@ -1705,10 +2004,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization to check for associations with groups
 	* @return <code>true</code> if the organization has any groups associated with it; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsGroups(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsGroups(long pk) {
 		return getPersistence().containsGroups(pk);
 	}
 
@@ -1717,10 +2014,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param groupPK the primary key of the group
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addGroup(long pk, long groupPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addGroup(long pk, long groupPK) {
 		getPersistence().addGroup(pk, groupPK);
 	}
 
@@ -1729,10 +2024,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param group the group
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addGroup(long pk, com.liferay.portal.model.Group group)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addGroup(long pk, com.liferay.portal.model.Group group) {
 		getPersistence().addGroup(pk, group);
 	}
 
@@ -1741,10 +2034,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param groupPKs the primary keys of the groups
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addGroups(long pk, long[] groupPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addGroups(long pk, long[] groupPKs) {
 		getPersistence().addGroups(pk, groupPKs);
 	}
 
@@ -1753,11 +2044,9 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param groups the groups
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addGroups(long pk,
-		java.util.List<com.liferay.portal.model.Group> groups)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Group> groups) {
 		getPersistence().addGroups(pk, groups);
 	}
 
@@ -1765,10 +2054,8 @@ public class OrganizationUtil {
 	* Clears all associations between the organization and its groups. Also notifies the appropriate model listeners and clears the mapping table finder cache.
 	*
 	* @param pk the primary key of the organization to clear the associated groups from
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void clearGroups(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void clearGroups(long pk) {
 		getPersistence().clearGroups(pk);
 	}
 
@@ -1777,10 +2064,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param groupPK the primary key of the group
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeGroup(long pk, long groupPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeGroup(long pk, long groupPK) {
 		getPersistence().removeGroup(pk, groupPK);
 	}
 
@@ -1789,10 +2074,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param group the group
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeGroup(long pk, com.liferay.portal.model.Group group)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeGroup(long pk, com.liferay.portal.model.Group group) {
 		getPersistence().removeGroup(pk, group);
 	}
 
@@ -1801,10 +2084,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param groupPKs the primary keys of the groups
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeGroups(long pk, long[] groupPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeGroups(long pk, long[] groupPKs) {
 		getPersistence().removeGroups(pk, groupPKs);
 	}
 
@@ -1813,11 +2094,9 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param groups the groups
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeGroups(long pk,
-		java.util.List<com.liferay.portal.model.Group> groups)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Group> groups) {
 		getPersistence().removeGroups(pk, groups);
 	}
 
@@ -1826,10 +2105,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param groupPKs the primary keys of the groups to be associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void setGroups(long pk, long[] groupPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void setGroups(long pk, long[] groupPKs) {
 		getPersistence().setGroups(pk, groupPKs);
 	}
 
@@ -1838,12 +2115,20 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param groups the groups to be associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void setGroups(long pk,
-		java.util.List<com.liferay.portal.model.Group> groups)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.Group> groups) {
 		getPersistence().setGroups(pk, groups);
+	}
+
+	/**
+	* Returns the primaryKeys of users associated with the organization.
+	*
+	* @param pk the primary key of the organization
+	* @return long[] of the primaryKeys of users associated with the organization
+	*/
+	public static long[] getUserPrimaryKeys(long pk) {
+		return getPersistence().getUserPrimaryKeys(pk);
 	}
 
 	/**
@@ -1851,10 +2136,9 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @return the users associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> getUsers(
-		long pk) throws com.liferay.portal.kernel.exception.SystemException {
+		long pk) {
 		return getPersistence().getUsers(pk);
 	}
 
@@ -1869,11 +2153,9 @@ public class OrganizationUtil {
 	* @param start the lower bound of the range of organizations
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @return the range of users associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> getUsers(
-		long pk, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long pk, int start, int end) {
 		return getPersistence().getUsers(pk, start, end);
 	}
 
@@ -1889,12 +2171,10 @@ public class OrganizationUtil {
 	* @param end the upper bound of the range of organizations (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of users associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.User> getUsers(
 		long pk, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().getUsers(pk, start, end, orderByComparator);
 	}
 
@@ -1903,10 +2183,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @return the number of users associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int getUsersSize(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getUsersSize(long pk) {
 		return getPersistence().getUsersSize(pk);
 	}
 
@@ -1916,10 +2194,8 @@ public class OrganizationUtil {
 	* @param pk the primary key of the organization
 	* @param userPK the primary key of the user
 	* @return <code>true</code> if the user is associated with the organization; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsUser(long pk, long userPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsUser(long pk, long userPK) {
 		return getPersistence().containsUser(pk, userPK);
 	}
 
@@ -1928,10 +2204,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization to check for associations with users
 	* @return <code>true</code> if the organization has any users associated with it; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsUsers(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsUsers(long pk) {
 		return getPersistence().containsUsers(pk);
 	}
 
@@ -1940,10 +2214,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param userPK the primary key of the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addUser(long pk, long userPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addUser(long pk, long userPK) {
 		getPersistence().addUser(pk, userPK);
 	}
 
@@ -1952,10 +2224,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param user the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addUser(long pk, com.liferay.portal.model.User user)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addUser(long pk, com.liferay.portal.model.User user) {
 		getPersistence().addUser(pk, user);
 	}
 
@@ -1964,10 +2234,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param userPKs the primary keys of the users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addUsers(long pk, long[] userPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addUsers(long pk, long[] userPKs) {
 		getPersistence().addUsers(pk, userPKs);
 	}
 
@@ -1976,11 +2244,9 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param users the users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addUsers(long pk,
-		java.util.List<com.liferay.portal.model.User> users)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.User> users) {
 		getPersistence().addUsers(pk, users);
 	}
 
@@ -1988,10 +2254,8 @@ public class OrganizationUtil {
 	* Clears all associations between the organization and its users. Also notifies the appropriate model listeners and clears the mapping table finder cache.
 	*
 	* @param pk the primary key of the organization to clear the associated users from
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void clearUsers(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void clearUsers(long pk) {
 		getPersistence().clearUsers(pk);
 	}
 
@@ -2000,10 +2264,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param userPK the primary key of the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeUser(long pk, long userPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeUser(long pk, long userPK) {
 		getPersistence().removeUser(pk, userPK);
 	}
 
@@ -2012,10 +2274,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param user the user
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeUser(long pk, com.liferay.portal.model.User user)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeUser(long pk, com.liferay.portal.model.User user) {
 		getPersistence().removeUser(pk, user);
 	}
 
@@ -2024,10 +2284,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param userPKs the primary keys of the users
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeUsers(long pk, long[] userPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeUsers(long pk, long[] userPKs) {
 		getPersistence().removeUsers(pk, userPKs);
 	}
 
@@ -2036,11 +2294,9 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param users the users
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeUsers(long pk,
-		java.util.List<com.liferay.portal.model.User> users)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.User> users) {
 		getPersistence().removeUsers(pk, users);
 	}
 
@@ -2049,10 +2305,8 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param userPKs the primary keys of the users to be associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void setUsers(long pk, long[] userPKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void setUsers(long pk, long[] userPKs) {
 		getPersistence().setUsers(pk, userPKs);
 	}
 
@@ -2061,11 +2315,9 @@ public class OrganizationUtil {
 	*
 	* @param pk the primary key of the organization
 	* @param users the users to be associated with the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void setUsers(long pk,
-		java.util.List<com.liferay.portal.model.User> users)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portal.model.User> users) {
 		getPersistence().setUsers(pk, users);
 	}
 
@@ -2083,6 +2335,7 @@ public class OrganizationUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setPersistence(OrganizationPersistence persistence) {
 	}
 

@@ -19,23 +19,33 @@
 	<td></td>
 </tr>
 <tr>
+	<td>PORTLET_TITLE</td>
+	<td>//h2[@id='cpPortletTitle']/span[@class='portlet-title-text']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>WIKI_NODE_TITLE</td>
+	<td>//h3[@class='header-title']/span</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ADD_WIKI_BUTTON</td>
-	<td>//button[@id='_154_addNodeButton']</td>
+	<td>//a[contains(@id,'addNodeButton')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PERMISSIONS_BUTTON</td>
-	<td>//button[@id='_154_permissionsButton']</td>
+	<td>//a[contains(@id,'permissionsButton')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SUCCESS_MESSAGE</td>
-	<td>//div[@class='alert alert-success']</td>
+	<td>//div[contains(@class,'alert') and contains(@class,'alert-success')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SUCCESS_MESSAGE_RECYCLE_BIN</td>
-	<td>//form[@id='_154_undoForm']</td>
+	<td>//form[@id='_182_undoForm']</td>
 	<td></td>
 </tr>
 <tr>
@@ -44,6 +54,11 @@
 	<td></td>
 </tr>
 <!--WIKI_NODE_TABLE-->
+<tr>
+	<td>WIKI_NODE_TABLE</td>
+	<td>//div[@id='_154_ocerSearchContainer']//table</td>
+	<td></td>
+</tr>
 <tr>
 	<td>WIKI_NODE_TABLE_WIKI</td>
 	<td>//tr[contains(.,'${key_wikiNodeName}')]/td[1]/a</td>
@@ -56,7 +71,7 @@
 </tr>
 <tr>
 	<td>WIKI_NODE_TABLE_ACTIONS</td>
-	<td>//tr[contains(.,'${key_wikiNodeName}')]/td[4]/div/a[@title='Actions']</td>
+	<td>//tr[contains(.,'${key_wikiNodeName}')]/td[4]/div/a</td>
 	<td></td>
 </tr>
 <tr>

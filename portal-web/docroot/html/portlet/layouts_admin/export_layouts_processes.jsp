@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,7 +22,7 @@ long groupId = ParamUtil.getLong(request, "groupId");
 PortletURL portletURL = liferayPortletResponse.createRenderURL();
 
 portletURL.setParameter("struts_action", "/layouts_admin/export_layouts");
-portletURL.setParameter("tabs2", "all-export-processes");
+portletURL.setParameter("tabs2", "current-and-previous");
 portletURL.setParameter("groupId", String.valueOf(groupId));
 
 String orderByCol = ParamUtil.getString(request, "orderByCol");
@@ -37,7 +37,7 @@ else {
 	orderByType = portalPreferences.getValue(PortletKeys.BACKGROUND_TASK, "entries-order-by-type", "desc");
 }
 
-OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderByComparator(orderByCol, orderByType);
+OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBackgroundTaskOrderByComparator(orderByCol, orderByType);
 %>
 
 <liferay-ui:search-container
@@ -58,9 +58,16 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 		modelVar="backgroundTask"
 	>
 		<liferay-ui:search-container-column-text
-			name="user-name"
-			value="<%= backgroundTask.getUserName() %>"
-		/>
+			cssClass="background-task-user-column"
+			name="user"
+		>
+			<liferay-ui:user-display
+				displayStyle="3"
+				showUserDetails="<%= false %>"
+				showUserName="<%= false %>"
+				userId="<%= backgroundTask.getUserId() %>"
+			/>
+		</liferay-ui:search-container-column-text>
 
 		<liferay-ui:search-container-column-jsp
 			cssClass="background-task-status-column"
@@ -95,12 +102,6 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 					for (FileEntry fileEntry : attachmentsFileEntries) {
 					%>
 
-						<portlet:actionURL var="attachmentURL" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>">
-							<portlet:param name="struts_action" value="/group_pages/get_background_task_attachment" />
-							<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />
-							<portlet:param name="attachment" value="<%= fileEntry.getTitle() %>" />
-						</portlet:actionURL>
-
 						<%
 						StringBundler sb = new StringBundler(4);
 
@@ -111,10 +112,10 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 						%>
 
 						<liferay-ui:icon
-							image="download"
+							iconCssClass="icon-download"
 							label="<%= true %>"
 							message="<%= sb.toString() %>"
-							url="<%= attachmentURL %>"
+							url="<%= PortletFileRepositoryUtil.getDownloadPortletFileEntryURL(themeDisplay, fileEntry, StringPool.BLANK) %>"
 						/>
 
 					<%
@@ -129,9 +130,9 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 					%>
 
 					<liferay-ui:icon
-						image="download"
+						iconCssClass="icon-download"
 						label="<%= true %>"
-						message='<%= MapUtil.getString(taskContextMap, "fileName") %>'
+						message='<%= HtmlUtil.escape(MapUtil.getString(taskContextMap, "fileName")) %>'
 					/>
 				</c:otherwise>
 			</c:choose>
@@ -140,24 +141,45 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 
 		<liferay-ui:search-container-column-text>
 			<c:if test="<%= !backgroundTask.isInProgress() %>">
-				<portlet:actionURL var="deleteBackgroundTaskURL">
-					<portlet:param name="struts_action" value="/group_pages/delete_background_task" />
-					<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
-					<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />
-				</portlet:actionURL>
+				<liferay-ui:icon-menu icon="<%= StringPool.BLANK %>" message="<%= StringPool.BLANK %>">
+					<portlet:actionURL var="relaunchURL">
+						<portlet:param name="struts_action" value="/group_pages/edit_export_configuration" />
+						<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.RELAUNCH %>" />
+						<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
+						<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />
+					</portlet:actionURL>
 
-				<%
-				Date completionDate = backgroundTask.getCompletionDate();
-				%>
+					<liferay-ui:icon iconCssClass="icon-repeat" message="relaunch" url="<%= relaunchURL %>" />
 
-				<liferay-ui:icon-delete
-					label="true"
-					message='<%= ((completionDate != null) && completionDate.before(new Date())) ? "clear" : "cancel" %>'
-					url="<%= deleteBackgroundTaskURL %>"
-				/>
+					<portlet:actionURL var="deleteBackgroundTaskURL">
+						<portlet:param name="struts_action" value="/group_pages/delete_background_task" />
+						<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
+						<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />
+					</portlet:actionURL>
+
+					<%
+					Date completionDate = backgroundTask.getCompletionDate();
+					%>
+
+					<liferay-ui:icon-delete
+						label="true"
+						message='<%= ((completionDate != null) && completionDate.before(new Date())) ? "clear" : "cancel" %>'
+						url="<%= deleteBackgroundTaskURL %>"
+					/>
+				</liferay-ui:icon-menu>
 			</c:if>
 		</liferay-ui:search-container-column-text>
 	</liferay-ui:search-container-row>
 
 	<liferay-ui:search-iterator />
 </liferay-ui:search-container>
+
+<%
+int incompleteBackgroundTaskCount = BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(groupId, LayoutExportBackgroundTaskExecutor.class.getName(), false);
+%>
+
+<div class="hide incomplete-process-message">
+	<liferay-util:include page="/html/portlet/layouts_admin/incomplete_processes_message.jsp">
+		<liferay-util:param name="incompleteBackgroundTaskCount" value="<%= String.valueOf(incompleteBackgroundTaskCount) %>" />
+	</liferay-util:include>
+</div>

@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -50,9 +50,8 @@
 
 			searchContainer.setTotal(total);
 
-			if (searchContainer.isRecalculateCur()) {
-				assetEntryQuery = new AssetEntryQuery(MBMessage.class.getName(), searchContainer);
-			}
+			assetEntryQuery.setEnd(searchContainer.getEnd());
+			assetEntryQuery.setStart(searchContainer.getStart());
 
 			results = AssetEntryServiceUtil.getEntries(assetEntryQuery);
 		}
@@ -84,8 +83,7 @@
 			results = MBThreadServiceUtil.getGroupThreads(scopeGroupId, groupThreadsUserId, calendar.getTime(), WorkflowConstants.STATUS_APPROVED, searchContainer.getStart(), searchContainer.getEnd());
 		}
 
-		pageContext.setAttribute("results", results);
-		pageContext.setAttribute("total", total);
+		searchContainer.setResults(results);
 		%>
 
 	</liferay-ui:search-container-results>
@@ -115,7 +113,6 @@
 		message = message.toEscapedModel();
 
 		row.setBold(!MBThreadFlagLocalServiceUtil.hasThreadFlag(themeDisplay.getUserId(), thread));
-		row.setObject(new Object[] {message, threadSubscriptionClassPKs});
 		row.setRestricted(!MBMessagePermission.contains(permissionChecker, message, ActionKeys.VIEW));
 		%>
 

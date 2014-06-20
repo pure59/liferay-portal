@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,8 +18,10 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.pop.MessageListener;
 import com.liferay.portal.kernel.pop.MessageListenerException;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -98,7 +100,7 @@ public class MessageListenerImpl implements MessageListener {
 				PropsKeys.MAIL_SESSION_MAIL_POP3_USER,
 				PropsValues.MAIL_SESSION_MAIL_POP3_USER);
 
-			if (from.equalsIgnoreCase(pop3User)) {
+			if (StringUtil.equalsIgnoreCase(from, pop3User)) {
 				return false;
 			}
 
@@ -123,13 +125,11 @@ public class MessageListenerImpl implements MessageListener {
 		List<ObjectValuePair<String, InputStream>> inputStreamOVPs = null;
 
 		try {
-			StopWatch stopWatch = null;
+			StopWatch stopWatch = new StopWatch();
+
+			stopWatch.start();
 
 			if (_log.isDebugEnabled()) {
-				stopWatch = new StopWatch();
-
-				stopWatch.start();
-
 				_log.debug("Deliver message from " + from + " to " + recipient);
 			}
 
@@ -199,7 +199,7 @@ public class MessageListenerImpl implements MessageListener {
 				_log.debug("Parent message " + parentMessage);
 			}
 
-			String subject = MBUtil.getSubjectWithoutMessageId(message);
+			String subject = MBUtil.getSubjectForEmail(message);
 
 			MBMailMessage mbMailMessage = new MBMailMessage();
 
@@ -211,11 +211,12 @@ public class MessageListenerImpl implements MessageListener {
 
 			ServiceContext serviceContext = new ServiceContext();
 
-			serviceContext.setAddGroupPermissions(true);
-			serviceContext.setAddGuestPermissions(true);
+			serviceContext.setAttribute("propagatePermissions", Boolean.TRUE);
 			serviceContext.setLayoutFullURL(
 				PortalUtil.getLayoutFullURL(
-					groupId, PortletKeys.MESSAGE_BOARDS));
+					groupId, PortletKeys.MESSAGE_BOARDS,
+					StringUtil.equalsIgnoreCase(
+						Http.HTTPS, PropsValues.WEB_SERVER_PROTOCOL)));
 			serviceContext.setScopeGroupId(groupId);
 
 			if (parentMessage == null) {
@@ -364,19 +365,19 @@ public class MessageListenerImpl implements MessageListener {
 	protected boolean isAutoReply(Message message) throws MessagingException {
 		String[] autoReply = message.getHeader("X-Autoreply");
 
-		if ((autoReply != null) && (autoReply.length > 0)) {
+		if (ArrayUtil.isNotEmpty(autoReply)) {
 			return true;
 		}
 
 		String[] autoReplyFrom = message.getHeader("X-Autoreply-From");
 
-		if ((autoReplyFrom != null) && (autoReplyFrom.length > 0)) {
+		if (ArrayUtil.isNotEmpty(autoReplyFrom)) {
 			return true;
 		}
 
 		String[] mailAutoReply = message.getHeader("X-Mail-Autoreply");
 
-		if ((mailAutoReply != null) && (mailAutoReply.length > 0)) {
+		if (ArrayUtil.isNotEmpty(mailAutoReply)) {
 			return true;
 		}
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,16 +15,17 @@
 package com.liferay.portlet.shopping.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.service.UserLocalServiceUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
@@ -195,6 +196,9 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
@@ -261,8 +265,8 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCategoryId() {
 		return _categoryId;
 	}
@@ -272,8 +276,8 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 		_categoryId = categoryId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -295,8 +299,8 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -306,8 +310,8 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 		_companyId = companyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -318,17 +322,23 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -343,8 +353,8 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -354,8 +364,8 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -365,8 +375,8 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 		_modifiedDate = modifiedDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getParentCategoryId() {
 		return _parentCategoryId;
 	}
@@ -388,8 +398,8 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 		return _originalParentCategoryId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -406,8 +416,8 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 		_name = name;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -521,6 +531,16 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 	@Override
 	public int hashCode() {
 		return (int)getPrimaryKey();
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
 	}
 
 	@Override
@@ -690,7 +710,6 @@ public class ShoppingCategoryModelImpl extends BaseModelImpl<ShoppingCategory>
 	private boolean _setOriginalGroupId;
 	private long _companyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.social.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see SocialActivity
  * @generated
  */
+@ProviderType
 public class SocialActivityWrapper implements SocialActivity,
 	ModelWrapper<SocialActivity> {
 	public SocialActivityWrapper(SocialActivity socialActivity) {
@@ -258,11 +261,9 @@ public class SocialActivityWrapper implements SocialActivity,
 	* Returns the user uuid of this social activity.
 	*
 	* @return the user uuid of this social activity
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _socialActivity.getUserUuid();
 	}
 
@@ -495,11 +496,9 @@ public class SocialActivityWrapper implements SocialActivity,
 	* Returns the receiver user uuid of this social activity.
 	*
 	* @return the receiver user uuid of this social activity
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getReceiverUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getReceiverUserUuid() {
 		return _socialActivity.getReceiverUserUuid();
 	}
 
@@ -613,14 +612,12 @@ public class SocialActivityWrapper implements SocialActivity,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_socialActivity.persist();
 	}
 
 	@Override
-	public com.liferay.portlet.asset.model.AssetEntry getAssetEntry()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public com.liferay.portlet.asset.model.AssetEntry getAssetEntry() {
 		return _socialActivity.getAssetEntry();
 	}
 
@@ -628,6 +625,13 @@ public class SocialActivityWrapper implements SocialActivity,
 	public java.lang.String getExtraDataValue(java.lang.String key)
 		throws com.liferay.portal.kernel.json.JSONException {
 		return _socialActivity.getExtraDataValue(key);
+	}
+
+	@Override
+	public java.lang.String getExtraDataValue(java.lang.String key,
+		java.util.Locale locale)
+		throws com.liferay.portal.kernel.json.JSONException {
+		return _socialActivity.getExtraDataValue(key, locale);
 	}
 
 	@Override
@@ -639,6 +643,12 @@ public class SocialActivityWrapper implements SocialActivity,
 	public void setAssetEntry(
 		com.liferay.portlet.asset.model.AssetEntry assetEntry) {
 		_socialActivity.setAssetEntry(assetEntry);
+	}
+
+	@Override
+	public void setExtraDataValue(java.lang.String key, java.lang.String value)
+		throws com.liferay.portal.kernel.json.JSONException {
+		_socialActivity.setExtraDataValue(key, value);
 	}
 
 	@Override
@@ -664,6 +674,7 @@ public class SocialActivityWrapper implements SocialActivity,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public SocialActivity getWrappedSocialActivity() {
 		return _socialActivity;
 	}
@@ -671,6 +682,16 @@ public class SocialActivityWrapper implements SocialActivity,
 	@Override
 	public SocialActivity getWrappedModel() {
 		return _socialActivity;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _socialActivity.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _socialActivity.isFinderCacheEnabled();
 	}
 
 	@Override

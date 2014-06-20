@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -26,14 +26,13 @@ import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.service.PortletLocalServiceUtil;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.bookmarks.model.BookmarksEntry;
 import com.liferay.portlet.bookmarks.model.BookmarksFolder;
 import com.liferay.portlet.bookmarks.model.BookmarksFolderConstants;
 import com.liferay.portlet.bookmarks.service.BookmarksEntryLocalServiceUtil;
 import com.liferay.portlet.bookmarks.service.BookmarksFolderLocalServiceUtil;
 import com.liferay.portlet.bookmarks.service.permission.BookmarksPermission;
-import com.liferay.portlet.bookmarks.service.persistence.BookmarksEntryExportActionableDynamicQuery;
-import com.liferay.portlet.bookmarks.service.persistence.BookmarksFolderExportActionableDynamicQuery;
 
 import java.util.List;
 import java.util.Map;
@@ -62,7 +61,8 @@ public class BookmarksPortletDataHandler extends BasePortletDataHandler {
 				NAMESPACE, "entries", true, false, null,
 				BookmarksEntry.class.getName()));
 		setImportControls(getExportControls());
-		setPublishToLiveByDefault(true);
+		setPublishToLiveByDefault(
+			PropsValues.BOOKMARKS_PUBLISH_TO_LIVE_BY_DEFAULT);
 	}
 
 	@Override
@@ -99,20 +99,21 @@ public class BookmarksPortletDataHandler extends BasePortletDataHandler {
 			return getExportDataRootElementString(rootElement);
 		}
 
-		portletDataContext.addPermissions(
-			BookmarksPermission.RESOURCE_NAME,
-			portletDataContext.getScopeGroupId());
+		portletDataContext.addPortletPermissions(
+			BookmarksPermission.RESOURCE_NAME);
 
 		rootElement.addAttribute(
 			"group-id", String.valueOf(portletDataContext.getScopeGroupId()));
 
 		ActionableDynamicQuery folderActionableDynamicQuery =
-			new BookmarksFolderExportActionableDynamicQuery(portletDataContext);
+			BookmarksFolderLocalServiceUtil.getExportActionableDynamicQuery(
+				portletDataContext);
 
 		folderActionableDynamicQuery.performActions();
 
 		ActionableDynamicQuery entryActionableDynamicQuery =
-			new BookmarksEntryExportActionableDynamicQuery(portletDataContext);
+			BookmarksEntryLocalServiceUtil.getExportActionableDynamicQuery(
+				portletDataContext);
 
 		entryActionableDynamicQuery.performActions();
 
@@ -129,10 +130,8 @@ public class BookmarksPortletDataHandler extends BasePortletDataHandler {
 			return null;
 		}
 
-		portletDataContext.importPermissions(
-			BookmarksPermission.RESOURCE_NAME,
-			portletDataContext.getSourceGroupId(),
-			portletDataContext.getScopeGroupId());
+		portletDataContext.importPortletPermissions(
+			BookmarksPermission.RESOURCE_NAME);
 
 		Element foldersElement = portletDataContext.getImportDataGroupElement(
 			BookmarksFolder.class);
@@ -164,12 +163,14 @@ public class BookmarksPortletDataHandler extends BasePortletDataHandler {
 		throws Exception {
 
 		ActionableDynamicQuery entryExportActionableDynamicQuery =
-			new BookmarksEntryExportActionableDynamicQuery(portletDataContext);
+			BookmarksEntryLocalServiceUtil.getExportActionableDynamicQuery(
+				portletDataContext);
 
 		entryExportActionableDynamicQuery.performCount();
 
 		ActionableDynamicQuery folderExportActionableDynamicQuery =
-			new BookmarksFolderExportActionableDynamicQuery(portletDataContext);
+			BookmarksFolderLocalServiceUtil.getExportActionableDynamicQuery(
+				portletDataContext);
 
 		folderExportActionableDynamicQuery.performCount();
 	}
@@ -177,7 +178,7 @@ public class BookmarksPortletDataHandler extends BasePortletDataHandler {
 	@Override
 	protected PortletPreferences doProcessExportPortletPreferences(
 			PortletDataContext portletDataContext, String portletId,
-			PortletPreferences portletPreferences, Element rootElement)
+			PortletPreferences portletPreferences)
 		throws Exception {
 
 		long rootFolderId = GetterUtil.getLong(
@@ -191,7 +192,7 @@ public class BookmarksPortletDataHandler extends BasePortletDataHandler {
 				portletDataContext.getCompanyId(), portletId);
 
 			portletDataContext.addReferenceElement(
-				portlet, rootElement, folder, BookmarksFolder.class,
+				portlet, portletDataContext.getExportDataRootElement(), folder,
 				PortletDataContext.REFERENCE_TYPE_DEPENDENCY,
 				!portletDataContext.getBooleanParameter(NAMESPACE, "entries"));
 		}

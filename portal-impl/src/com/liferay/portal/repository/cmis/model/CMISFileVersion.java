@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,6 @@
 package com.liferay.portal.repository.cmis.model;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -70,7 +69,7 @@ public class CMISFileVersion extends CMISModel implements FileVersion {
 			_cmisRepository, _uuid, _fileVersionId, _document);
 
 		cmisFileVersion.setCompanyId(getCompanyId());
-		setFileVersionId(getFileVersionId());
+		cmisFileVersion.setFileVersionId(getFileVersionId());
 		cmisFileVersion.setGroupId(getGroupId());
 
 		try {
@@ -138,7 +137,7 @@ public class CMISFileVersion extends CMISModel implements FileVersion {
 	}
 
 	@Override
-	public FileEntry getFileEntry() throws PortalException, SystemException {
+	public FileEntry getFileEntry() throws PortalException {
 		Document document = null;
 
 		try {
@@ -335,16 +334,6 @@ public class CMISFileVersion extends CMISModel implements FileVersion {
 
 	@Override
 	public boolean isExpired() {
-		return false;
-	}
-
-	@Override
-	public boolean isInTrash() {
-		return false;
-	}
-
-	@Override
-	public boolean isInTrashContainer() {
 		return false;
 	}
 

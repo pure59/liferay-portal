@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -58,6 +58,19 @@ public class UpgradeBlogs extends BaseUpgradePortletPreferences {
 		}
 	}
 
+	protected void upgradeDisplayStyle(PortletPreferences portletPreferences)
+		throws Exception {
+
+		String pageDisplayStyle = GetterUtil.getString(
+			portletPreferences.getValue("pageDisplayStyle", null));
+
+		if (Validator.isNotNull(pageDisplayStyle)) {
+			portletPreferences.setValue("displayStyle", pageDisplayStyle);
+		}
+
+		portletPreferences.reset("pageDisplayStyle");
+	}
+
 	@Override
 	protected String upgradePreferences(
 			long companyId, long ownerId, int ownerType, long plid,
@@ -67,6 +80,15 @@ public class UpgradeBlogs extends BaseUpgradePortletPreferences {
 		PortletPreferences portletPreferences =
 			PortletPreferencesFactoryUtil.fromXML(
 				companyId, ownerId, ownerType, plid, portletId, xml);
+
+		upgradeDisplayStyle(portletPreferences);
+		upgradeRss(portletPreferences);
+
+		return PortletPreferencesFactoryUtil.toXML(portletPreferences);
+	}
+
+	protected void upgradeRss(PortletPreferences portletPreferences)
+		throws Exception {
 
 		String rssFormat = GetterUtil.getString(
 			portletPreferences.getValue("rssFormat", null));
@@ -82,8 +104,6 @@ public class UpgradeBlogs extends BaseUpgradePortletPreferences {
 		}
 
 		portletPreferences.reset("rssFormat");
-
-		return PortletPreferencesFactoryUtil.toXML(portletPreferences);
 	}
 
 }

@@ -6,20 +6,31 @@ AUI.add(
 		var LogoEditor = A.Component.create(
 			{
 				ATTRS: {
-					maxFileSize: {
+					aspectRatio: {
+						validator: Lang.isNumber,
 						value: null
 					},
 
+					maxFileSize: {
+						validator: Lang.isNumber
+					},
+
+					preserveRatio: {
+						value: false
+					},
+
 					previewURL: {
+						validator: Lang.isString,
 						value: null
 					},
 
 					uploadURL: {
+						validator: Lang.isString,
 						value: null
 					}
 				},
 
-				AUGMENTS: [Liferay.PortletBase],
+				AUGMENTS: [Liferay.PortletBase, Liferay.StorageFormatter],
 
 				EXTENDS: A.Base,
 
@@ -46,6 +57,17 @@ AUI.add(
 					bindUI: function() {
 						var instance = this;
 
+						instance.publish(
+							{
+								uploadComplete: {
+									defaultFn: A.rbind('_defUploadCompleteFn', instance)
+								},
+								uploadStart: {
+									defaultFn: A.rbind('_defUploadStartFn', instance)
+								}
+							}
+						);
+
 						instance._fileNameNode.on('change', instance._onFileNameChange, instance);
 						instance._formNode.on('submit', instance._onSubmit, instance);
 						instance._portraitPreviewImg.on('load', instance._onImageLoad, instance);
@@ -59,6 +81,79 @@ AUI.add(
 						if (imageCropper) {
 							imageCropper.destroy();
 						}
+					},
+
+					resize: function() {
+						var instance = this;
+
+						var portraitPreviewImg = instance._portraitPreviewImg;
+
+						if (portraitPreviewImg) {
+							instance._setCropBackgroundSize(portraitPreviewImg.width(), portraitPreviewImg.height());
+						}
+					},
+
+					_defUploadCompleteFn: function(event, id, obj) {
+						var instance = this;
+
+						var responseText = obj.responseText;
+
+						try {
+							responseText = A.JSON.parse(responseText);
+						}
+						catch (err) {
+						}
+
+						var portraitPreviewImg = instance._portraitPreviewImg;
+
+						if (Lang.isObject(responseText)) {
+							if (responseText.errorMessage) {
+								var messageNode = instance._getMessageNode(responseText.errorMessage, 'alert alert-danger');
+
+								instance._formNode.prepend(messageNode);
+							}
+
+							if (responseText.tempImageFileName) {
+								var previewURL = instance.get('previewURL');
+
+								previewURL = Liferay.Util.addParams(instance.get('namespace') + 'tempImageFileName=' + responseText.tempImageFileName, previewURL);
+								previewURL = Liferay.Util.addParams('t=' + Lang.now(), previewURL);
+
+								portraitPreviewImg.attr('src', previewURL);
+
+								instance.one('#previewURL').val(previewURL);
+								instance.one('#tempImageFileName').val(responseText.tempImageFileName);
+							}
+						}
+
+						portraitPreviewImg.removeClass('loading');
+					},
+
+					_defUploadStartFn: function(event, id, obj) {
+						var instance = this;
+
+						instance._getMessageNode().remove();
+
+						Liferay.Util.toggleDisabled(instance._submitButton, true);
+					},
+
+					_getImgNaturalSize: function(img) {
+						var imageHeight = img.get('naturalHeight');
+						var imageWidth = img.get('naturalWidth');
+
+						if (Lang.isUndefined(imageHeight) || Lang.isUndefined(imageWidth)) {
+							var tmp = new Image();
+
+							tmp.src = img.attr('src');
+
+							imageHeight = tmp.height;
+							imageWidth = tmp.width;
+						}
+
+						return {
+							height: imageHeight,
+							width: imageWidth
+						};
 					},
 
 					_getMessageNode: function(message, cssClass) {
@@ -77,7 +172,7 @@ AUI.add(
 						}
 
 						if (cssClass) {
-							messageNode.removeClass('alert-error').removeClass('alert-success');
+							messageNode.removeClass('alert-danger').removeClass('alert-success');
 
 							messageNode.addClass(cssClass);
 						}
@@ -88,32 +183,36 @@ AUI.add(
 					_onFileNameChange: function(event) {
 						var instance = this;
 
-						var uploadURL = instance.get('uploadURL');
+						var formValidator = Liferay.Form.get(instance._formNode.attr('id')).formValidator;
 
-						var imageCropper = instance._imageCropper;
-						var portraitPreviewImg = instance._portraitPreviewImg;
+						formValidator.validateField(instance._fileNameNode);
 
-						portraitPreviewImg.addClass('loading');
+						if (!formValidator.hasErrors()) {
+							var imageCropper = instance._imageCropper;
+							var portraitPreviewImg = instance._portraitPreviewImg;
 
-						portraitPreviewImg.attr('src', themeDisplay.getPathThemeImages() + '/spacer.png');
+							portraitPreviewImg.addClass('loading');
 
-						if (imageCropper) {
-							imageCropper.disable();
-						}
+							portraitPreviewImg.attr('src', themeDisplay.getPathThemeImages() + '/spacer.png');
 
-						A.io.request(
-							uploadURL,
-							{
-								form: {
-									id: instance.ns('fm'),
-									upload: true
-								},
-								on: {
-									complete: A.bind('_onUploadComplete', instance),
-									start: A.bind('_onUploadStart', instance)
-								}
+							if (imageCropper) {
+								imageCropper.disable();
 							}
-						);
+
+							A.io.request(
+								instance.get('uploadURL'),
+								{
+									form: {
+										id: instance.ns('fm'),
+										upload: true
+									},
+									on: {
+										complete: A.bind('fire', instance, 'uploadComplete'),
+										start: A.bind('fire', instance, 'uploadStart')
+									}
+								}
+							);
+						}
 					},
 
 					_onImageLoad: function(event) {
@@ -123,15 +222,28 @@ AUI.add(
 						var portraitPreviewImg = instance._portraitPreviewImg;
 
 						if (portraitPreviewImg.attr('src').indexOf('spacer.png') == -1) {
-							var cropHeight = portraitPreviewImg.height();
-							var cropWidth = portraitPreviewImg.width();
+							var aspectRatio = instance.get('aspectRatio');
 
-							if (cropHeight > 50) {
-								cropHeight *= 0.3;
-							}
+							var portraitPreviewImgHeight = portraitPreviewImg.height();
+							var portraitPreviewImgWidth = portraitPreviewImg.width();
 
-							if (cropWidth > 50) {
-								cropHeight *= 0.3;
+							var cropHeight = portraitPreviewImgHeight;
+							var cropWidth = portraitPreviewImgWidth;
+
+							if (aspectRatio !== null) {
+								if (cropHeight < cropWidth) {
+									cropWidth = cropHeight;
+								}
+								else {
+									cropHeight = cropWidth;
+								}
+
+								if (aspectRatio > 1) {
+									cropHeight = cropWidth / aspectRatio;
+								}
+								else {
+									cropWidth = cropHeight * aspectRatio;
+								}
 							}
 
 							if (imageCropper) {
@@ -153,12 +265,16 @@ AUI.add(
 									{
 										cropHeight: cropHeight,
 										cropWidth: cropWidth,
+										preserveRatio: instance.get('preserveRatio'),
 										srcNode: portraitPreviewImg
 									}
 								).render();
 
+								instance._imageCrop = A.one('.image-cropper-crop');
 								instance._imageCropper = imageCropper;
 							}
+
+							instance._setCropBackgroundSize(portraitPreviewImgWidth, portraitPreviewImgHeight);
 
 							Liferay.Util.toggleDisabled(instance._submitButton, false);
 						}
@@ -168,59 +284,33 @@ AUI.add(
 						var instance = this;
 
 						var imageCropper = instance._imageCropper;
-
-						if (imageCropper) {
-							instance._cropRegionNode.val(A.JSON.stringify(imageCropper.get('region')));
-						}
-					},
-
-					_onUploadComplete: function(event, id, obj) {
-						var instance = this;
-
-						var responseText = obj.responseText;
-
-						var exception;
-
-						if (responseText.indexOf('FileSizeException') > -1) {
-							exception = 'FileSizeException';
-						}
-						else if (responseText.indexOf('TypeException') > -1) {
-							exception = 'TypeException';
-						}
-
-						if (exception) {
-							if (exception == 'FileSizeException') {
-								message = Lang.sub(
-									Liferay.Language.get('upload-images-no-larger-than-x-k'),
-									[instance.get('maxFileSize')]
-								);
-							}
-							else {
-								message = Liferay.Language.get('please-enter-a-file-with-a-valid-file-type');
-							}
-
-							var messageNode = instance._getMessageNode(message, 'aui-alert aui-alert-error');
-
-							instance._formNode.prepend(messageNode);
-						}
-
-						var previewURL = instance.get('previewURL');
-
-						previewURL = Liferay.Util.addParams('t=' + Lang.now(), previewURL);
-
 						var portraitPreviewImg = instance._portraitPreviewImg;
 
-						portraitPreviewImg.attr('src', previewURL);
+						if (imageCropper && portraitPreviewImg) {
+							var region = imageCropper.get('region');
 
-						portraitPreviewImg.removeClass('loading');
+							var naturalSize = instance._getImgNaturalSize(portraitPreviewImg);
+
+							var scaleX = naturalSize.width / portraitPreviewImg.width();
+							var scaleY = naturalSize.height / portraitPreviewImg.height();
+
+							var cropRegion = {
+								height: region.height * scaleY,
+								x: region.x * scaleX,
+								y: region.y * scaleY,
+								width: region.width * scaleX
+							};
+
+							instance._cropRegionNode.val(A.JSON.stringify(cropRegion));
+						}
 					},
 
-					_onUploadStart: function(event, id, obj) {
+					_setCropBackgroundSize: function(width, height) {
 						var instance = this;
 
-						instance._getMessageNode().remove();
-
-						Liferay.Util.toggleDisabled(instance._submitButton, true);
+						if (instance._imageCrop) {
+							instance._imageCrop.setStyle('backgroundSize', width + 'px ' + height + 'px');
+						}
 					}
 				}
 			}
@@ -230,6 +320,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-image-cropper', 'aui-io-request', 'liferay-portlet-base']
+		requires: ['aui-image-cropper', 'aui-io-request', 'liferay-portlet-base', 'liferay-storage-formatter']
 	}
 );

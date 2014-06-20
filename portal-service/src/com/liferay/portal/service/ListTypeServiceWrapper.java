@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link ListTypeService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see ListTypeService
  * @generated
  */
+@ProviderType
 public class ListTypeServiceWrapper implements ListTypeService,
 	ServiceWrapper<ListTypeService> {
 	public ListTypeServiceWrapper(ListTypeService listTypeService) {
@@ -49,35 +52,32 @@ public class ListTypeServiceWrapper implements ListTypeService,
 
 	@Override
 	public com.liferay.portal.model.ListType getListType(int listTypeId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _listTypeService.getListType(listTypeId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.ListType> getListTypes(
-		java.lang.String type)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String type) {
 		return _listTypeService.getListTypes(type);
 	}
 
 	@Override
 	public void validate(int listTypeId, long classNameId, java.lang.String type)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_listTypeService.validate(listTypeId, classNameId, type);
 	}
 
 	@Override
 	public void validate(int listTypeId, java.lang.String type)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_listTypeService.validate(listTypeId, type);
 	}
 
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public ListTypeService getWrappedListTypeService() {
 		return _listTypeService;
 	}
@@ -85,6 +85,7 @@ public class ListTypeServiceWrapper implements ListTypeService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedListTypeService(ListTypeService listTypeService) {
 		_listTypeService = listTypeService;
 	}

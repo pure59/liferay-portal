@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -31,6 +31,19 @@ public class MDRRuleGroupStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {MDRRuleGroup.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+		String uuid, long groupId, String className, String extraData) {
+
+		MDRRuleGroup ruleGroup =
+			MDRRuleGroupLocalServiceUtil.fetchMDRRuleGroupByUuidAndGroupId(
+				uuid, groupId);
+
+		if (ruleGroup != null) {
+			MDRRuleGroupLocalServiceUtil.deleteRuleGroup(ruleGroup);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -50,7 +63,7 @@ public class MDRRuleGroupStagedModelDataHandler
 
 		portletDataContext.addClassedModel(
 			ruleGroupElement, ExportImportPathUtil.getModelPath(ruleGroup),
-			ruleGroup, MDRPortletDataHandler.NAMESPACE);
+			ruleGroup);
 	}
 
 	@Override
@@ -61,7 +74,7 @@ public class MDRRuleGroupStagedModelDataHandler
 		long userId = portletDataContext.getUserId(ruleGroup.getUserUuid());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			ruleGroup, MDRPortletDataHandler.NAMESPACE);
+			ruleGroup);
 
 		serviceContext.setUserId(userId);
 
@@ -94,8 +107,7 @@ public class MDRRuleGroupStagedModelDataHandler
 				ruleGroup.getDescriptionMap(), serviceContext);
 		}
 
-		portletDataContext.importClassedModel(
-			ruleGroup, importedRuleGroup, MDRPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(ruleGroup, importedRuleGroup);
 	}
 
 }

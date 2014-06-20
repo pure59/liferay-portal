@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -55,7 +55,7 @@ for (long defaultTeamId : defaultTeamIds) {
 
 <liferay-util:buffer var="removeRoleIcon">
 	<liferay-ui:icon
-		image="unlink"
+		iconCssClass="icon-unlink"
 		label="<%= true %>"
 		message="remove"
 	/>
@@ -63,6 +63,8 @@ for (long defaultTeamId : defaultTeamIds) {
 
 <aui:input name="siteRolesRoleIds" type="hidden" value="<%= ListUtil.toString(defaultSiteRoles, Role.ROLE_ID_ACCESSOR) %>" />
 <aui:input name="teamsTeamIds" type="hidden" value="<%= ListUtil.toString(defaultTeams, TeamImpl.TEAM_ID_ACCESSOR) %>" />
+
+<h3><liferay-ui:message key="default-user-associations" /></h3>
 
 <h3><liferay-ui:message key="site-roles" /> <liferay-ui:icon-help message="default-site-roles-assignment-help" /></h3>
 
@@ -83,8 +85,13 @@ for (long defaultTeamId : defaultTeamIds) {
 
 		<liferay-ui:search-container-column-text
 			name="title"
-			value="<%= HtmlUtil.escape(role.getTitle(locale)) %>"
-		/>
+		>
+			<liferay-ui:icon
+				iconCssClass="<%= RolesAdminUtil.getIconCssClass(role) %>"
+				label="<%= true %>"
+				message="<%= HtmlUtil.escape(role.getTitle(locale)) %>"
+			/>
+		</liferay-ui:search-container-column-text>
 
 		<liferay-ui:search-container-column-text>
 			<a class="modify-link" data-rowId="<%= role.getRoleId() %>" href="javascript:;"><%= removeRoleIcon %></a>
@@ -96,9 +103,10 @@ for (long defaultTeamId : defaultTeamIds) {
 
 <liferay-ui:icon
 	cssClass="modify-link"
+	iconCssClass="icon-search"
 	id="selectSiteRoleLink"
-	image="add"
 	label="<%= true %>"
+	linkCssClass="btn btn-default"
 	message="select"
 	url="javascript:;"
 />
@@ -136,23 +144,36 @@ for (long defaultTeamId : defaultTeamIds) {
 
 <liferay-ui:icon
 	cssClass="modify-link"
+	iconCssClass="icon-search"
 	id="selectTeamLink"
-	image="add"
 	label="<%= true %>"
+	linkCssClass="btn btn-default"
 	message="select"
 	url="javascript:;"
 />
 
 <aui:script use="liferay-search-container">
+	var Util = Liferay.Util;
+
 	var searchContainer = Liferay.SearchContainer.get('<portlet:namespace />siteRolesSearchContainer');
 
-	searchContainer.get('contentBox').delegate(
+	var searchContainerContentBox = searchContainer.get('contentBox');
+
+	searchContainerContentBox.delegate(
 		'click',
 		function(event) {
 			var link = event.currentTarget;
 			var tr = link.ancestor('tr');
 
 			var rowId = link.getAttribute('data-rowId');
+
+			var selectSiteRole = Util.getWindow('<portlet:namespace />selectSiteRole');
+
+			if (selectSiteRole) {
+				var selectButton = selectSiteRole.iframe.node.get('contentWindow.document').one('.selector-button[data-roleid="' + rowId + '"]');
+
+				Util.toggleDisabled(selectButton, false);
+			}
 
 			searchContainer.deleteRow(tr, rowId);
 
@@ -160,12 +181,31 @@ for (long defaultTeamId : defaultTeamIds) {
 		},
 		'.modify-link'
 	);
+
+	Liferay.on(
+		'<portlet:namespace />syncSiteRoles',
+		function(event) {
+			event.selectors.each(
+				function(item, index, collection) {
+					var modifyLink = searchContainerContentBox.one('.modify-link[data-rowid="' + item.attr('data-roleid') + '"]');
+
+					if (!modifyLink) {
+						Util.toggleDisabled(item, false);
+					}
+				}
+			);
+		}
+	);
 </aui:script>
 
 <aui:script use="liferay-search-container">
+	var Util = Liferay.Util;
+
 	var searchContainer = Liferay.SearchContainer.get('<portlet:namespace />teamsSearchContainer');
 
-	searchContainer.get('contentBox').delegate(
+	var searchContainerContentBox = searchContainer.get('contentBox');
+
+	searchContainerContentBox.delegate(
 		'click',
 		function(event) {
 			var link = event.currentTarget;
@@ -173,18 +213,36 @@ for (long defaultTeamId : defaultTeamIds) {
 
 			var rowId = link.getAttribute('data-rowId');
 
+			var selectTeam = Util.getWindow('<portlet:namespace />selectTeam');
+
+			if (selectTeam) {
+				var selectButton = selectTeam.iframe.node.get('contentWindow.document').one('.selector-button[data-teamid="' + rowId + '"]');
+
+				Util.toggleDisabled(selectButton, false);
+			}
+
 			searchContainer.deleteRow(tr, rowId);
 
 			<portlet:namespace />deleteTeam(rowId);
 		},
 		'.modify-link'
 	);
-</aui:script>
 
-<portlet:renderURL var="selectTeamURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
-	<portlet:param name="struts_action" value="/sites_admin/select_team" />
-	<portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" />
-</portlet:renderURL>
+	Liferay.on(
+		'<portlet:namespace />enableRemovedTeams',
+		function(event) {
+			event.selectors.each(
+				function(item, index, collection) {
+					var modifyLink = searchContainerContentBox.one('.modify-link[data-rowid="' + item.attr('data-teamid') + '"]');
+
+					if (!modifyLink) {
+						Util.toggleDisabled(item, false);
+					}
+				}
+			);
+		}
+	);
+</aui:script>
 
 <aui:script use="liferay-search-container,escape">
 	A.one('#<portlet:namespace />selectSiteRoleLink').on(
@@ -198,7 +256,7 @@ for (long defaultTeamId : defaultTeamIds) {
 						width: 600
 					},
 					id: '<portlet:namespace />selectSiteRole',
-					title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "site-role") %>',
+					title: '<liferay-ui:message arguments="site-role" key="select-x" />',
 					uri: '<portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="struts_action" value="/sites_admin/select_site_role" /><portlet:param name="step" value="2" /><portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" /></portlet:renderURL>'
 				},
 				function(event) {
@@ -212,7 +270,7 @@ for (long defaultTeamId : defaultTeamIds) {
 
 					var rowColumns = [];
 
-					rowColumns.push(A.Escape.html(event.roletitle));
+					rowColumns.push('<i class="' + event.iconcssclass + '"></i> ' + A.Escape.html(event.roletitle));
 
 					if (event.groupid) {
 						rowColumns.push('<a class="modify-link" data-rowId="' + event.roleid + '" href="javascript:;"><%= UnicodeFormatter.toString(removeRoleIcon) %></a>');
@@ -244,7 +302,13 @@ for (long defaultTeamId : defaultTeamIds) {
 						width: 680
 					},
 					id: '<portlet:namespace />selectTeam',
-					title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "team") %>',
+					title: '<liferay-ui:message arguments="team" key="select-x" />',
+
+					<portlet:renderURL var="selectTeamURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+						<portlet:param name="struts_action" value="/sites_admin/select_team" />
+						<portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" />
+					</portlet:renderURL>
+
 					uri: '<%= selectTeamURL.toString() %>'
 				},
 				function(event) {

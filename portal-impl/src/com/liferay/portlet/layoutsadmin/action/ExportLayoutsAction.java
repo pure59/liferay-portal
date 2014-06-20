@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,18 +14,18 @@
 
 package com.liferay.portlet.layoutsadmin.action;
 
+import com.liferay.portal.LARFileNameException;
 import com.liferay.portal.NoSuchGroupException;
-import com.liferay.portal.kernel.json.JSONArray;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
-import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
-import com.liferay.portal.kernel.util.DateRange;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.UniqueList;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.security.auth.PrincipalException;
@@ -34,14 +34,14 @@ import com.liferay.portal.service.LayoutServiceUtil;
 import com.liferay.portal.struts.PortletAction;
 import com.liferay.portlet.sites.action.ActionUtil;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
+import javax.portlet.PortletRequest;
 import javax.portlet.PortletRequestDispatcher;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
@@ -65,56 +65,50 @@ public class ExportLayoutsAction extends PortletAction {
 			ActionResponse actionResponse)
 		throws Exception {
 
+		hideDefaultSuccessMessage(actionRequest);
+
 		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
 
+		if (Validator.isNull(cmd)) {
+			return;
+		}
+
 		try {
-			long groupId = ParamUtil.getLong(actionRequest, "groupId");
+			long groupId = ParamUtil.getLong(actionRequest, "liveGroupId");
 			boolean privateLayout = ParamUtil.getBoolean(
 				actionRequest, "privateLayout");
-			long[] layoutIds = getLayoutIds(
-				groupId, privateLayout,
-				ParamUtil.getString(actionRequest, "layoutIds"));
-			String fileName = ParamUtil.getString(
-				actionRequest, "exportFileName");
+			long[] layoutIds = getLayoutIds(actionRequest);
 
-			DateRange dateRange = ExportImportHelperUtil.getDateRange(
-				actionRequest, groupId, privateLayout, 0, null);
+			String taskName = StringPool.BLANK;
 
-			Date startDate = dateRange.getStartDate();
-			Date endDate = dateRange.getEndDate();
-
-			if (Validator.isNotNull(cmd)) {
-				LayoutServiceUtil.exportLayoutsAsFileInBackground(
-					fileName, groupId, privateLayout, layoutIds,
-					actionRequest.getParameterMap(), startDate, endDate,
-					fileName);
-
-				String redirect = ParamUtil.getString(
-					actionRequest, "redirect");
-
-				sendRedirect(actionRequest, actionResponse, redirect);
+			if (privateLayout) {
+				taskName = LanguageUtil.get(
+					actionRequest.getLocale(), "private-pages");
 			}
 			else {
-				if (startDate != null) {
-					actionResponse.setRenderParameter(
-						"startDate", String.valueOf(startDate.getTime()));
-				}
-
-				if (endDate != null) {
-					actionResponse.setRenderParameter(
-						"endDate", String.valueOf(endDate.getTime()));
-				}
+				taskName = LanguageUtil.get(
+					actionRequest.getLocale(), "public-pages");
 			}
+
+			LayoutServiceUtil.exportLayoutsAsFileInBackground(
+				taskName, groupId, privateLayout, layoutIds,
+				actionRequest.getParameterMap(), null, null);
+
+			String redirect = ParamUtil.getString(actionRequest, "redirect");
+
+			sendRedirect(actionRequest, actionResponse, redirect);
 		}
 		catch (Exception e) {
-			_log.error(e, e);
-
 			SessionErrors.add(actionRequest, e.getClass());
 
-			String pagesRedirect = ParamUtil.getString(
-				actionRequest, "pagesRedirect");
+			if (!(e instanceof LARFileNameException)) {
+				_log.error(e, e);
 
-			sendRedirect(actionRequest, actionResponse, pagesRedirect);
+				String pagesRedirect = ParamUtil.getString(
+					actionRequest, "pagesRedirect");
+
+				sendRedirect(actionRequest, actionResponse, pagesRedirect);
+			}
 		}
 	}
 
@@ -161,50 +155,30 @@ public class ExportLayoutsAction extends PortletAction {
 		portletRequestDispatcher.include(resourceRequest, resourceResponse);
 	}
 
-	protected void addLayoutIds(
-			List<Long> layoutIds, long groupId, boolean privateLayout,
-			long layoutId)
+	protected long[] getLayoutIds(PortletRequest portletRequest)
 		throws Exception {
 
-		List<Layout> layouts = LayoutLocalServiceUtil.getLayouts(
-			groupId, privateLayout, layoutId);
+		List<Layout> layouts = new UniqueList<Layout>();
 
-		for (Layout layout : layouts) {
-			layoutIds.add(layout.getLayoutId());
+		Map<Long, Boolean> layoutIdMap = ExportImportHelperUtil.getLayoutIdMap(
+			portletRequest);
 
-			addLayoutIds(
-				layoutIds, layout.getGroupId(), layout.isPrivateLayout(),
-				layout.getLayoutId());
-		}
-	}
+		for (Map.Entry<Long, Boolean> entry : layoutIdMap.entrySet()) {
+			long plid = GetterUtil.getLong(String.valueOf(entry.getKey()));
+			boolean includeChildren = entry.getValue();
 
-	protected long[] getLayoutIds(
-			long groupId, boolean privateLayout, String layoutIdsJSON)
-		throws Exception {
+			Layout layout = LayoutLocalServiceUtil.getLayout(plid);
 
-		if (Validator.isNull(layoutIdsJSON)) {
-			return new long[0];
-		}
-
-		List<Long> layoutIds = new ArrayList<Long>();
-
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray(layoutIdsJSON);
-
-		for (int i = 0; i < jsonArray.length(); ++i) {
-			JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-			long layoutId = jsonObject.getLong("layoutId");
-
-			if (layoutId > 0) {
-				layoutIds.add(layoutId);
+			if (!layouts.contains(layout)) {
+				layouts.add(layout);
 			}
 
-			if (jsonObject.getBoolean("includeChildren")) {
-				addLayoutIds(layoutIds, groupId, privateLayout, layoutId);
+			if (includeChildren) {
+				layouts.addAll(layout.getAllChildren());
 			}
 		}
 
-		return ArrayUtil.toArray(layoutIds.toArray(new Long[layoutIds.size()]));
+		return ExportImportHelperUtil.getLayoutIds(layouts);
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(ExportLayoutsAction.class);

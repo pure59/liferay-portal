@@ -47,12 +47,16 @@ AUI.add(
 			instance._closeText = options.closeText;
 			instance._node = options.node;
 			instance._noticeType = options.type || 'notice';
-			instance._noticeClass = 'alert-block popup-alert-notice';
+			instance._noticeClass = 'alert-block';
 			instance._onClose = options.onClose;
 			instance._useCloseButton = true;
 
-			if (options.useAnimation && !Lang.isNumber(options.timeout)) {
-				options.timeout = 5000;
+			if (options.useAnimation) {
+				instance._noticeClass += ' popup-alert-notice';
+
+				if (!Lang.isNumber(options.timeout)) {
+					options.timeout = 5000;
+				}
 			}
 
 			instance._animationConfig = options.animationConfig || {
@@ -84,7 +88,7 @@ AUI.add(
 			}
 
 			if (instance._noticeType == 'warning') {
-				instance._noticeClass = 'alert-error popup-alert-warning';
+				instance._noticeClass = 'alert-danger popup-alert-warning';
 			}
 
 			if (options.noticeClass) {
@@ -131,96 +135,6 @@ AUI.add(
 				}
 			},
 
-			_afterNoticeShow: function(event) {
-				var instance = this;
-
-				instance._preventHide();
-
-				var notice = instance._notice;
-
-				if (instance._useAnimation) {
-					var animationConfig = instance._animationConfig;
-
-					var left = animationConfig.left;
-					var top = animationConfig.top;
-
-					if (!left) {
-						var noticeRegion = ADOM.region(ANode.getDOMNode(notice));
-
-						left = (ADOM.winWidth() / 2) - (noticeRegion.width / 2);
-
-						top = -noticeRegion.height;
-
-						animationConfig.left = left + STR_PX;
-					}
-
-					notice.setXY([left, top]);
-
-					notice.transition(
-						instance._animationConfig,
-						function() {
-							instance._hideHandle = A.later(instance._timeout, notice, STR_HIDE);
-						}
-					);
-				}
-				else {
-					instance._hideHandle = A.later(instance._timeout, notice, STR_HIDE);
-				}
-			},
-
-			_beforeNoticeHide: function(event) {
-				var instance = this;
-
-				var returnVal;
-
-				if (instance._useAnimation) {
-					var animationConfig = A.merge(
-						instance._animationConfig,
-						{
-							top: -instance._notice.get('offsetHeight') + STR_PX
-						}
-					);
-
-					instance._notice.transition(animationConfig);
-
-					returnVal = new Do.Halt(null);
-				}
-
-				return returnVal;
-			},
-
-			_createHTML: function() {
-				var instance = this;
-
-				var content = instance._content;
-				var node = A.one(instance._node);
-
-				var notice = node || ANode.create('<div class="alert" dynamic="true"></div>');
-
-				if (content) {
-					notice.html(content);
-				}
-
-				notice.addClass(instance._noticeClass);
-
-				instance._addCloseButton(notice);
-				instance._addToggleButton(notice);
-
-				if (!node || (node && !node.inDoc())) {
-					instance._body.append(notice);
-				}
-
-				instance._body.addClass(CSS_ALERTS);
-
-				if (instance._timeout > 0) {
-					Do.before(instance._beforeNoticeHide, notice, STR_HIDE, instance);
-
-					Do.after(instance._afterNoticeShow, notice, STR_SHOW, instance);
-				}
-
-				instance._notice = notice;
-			},
-
 			_addCloseButton: function(notice) {
 				var instance = this;
 
@@ -235,7 +149,7 @@ AUI.add(
 				}
 
 				if (instance._useCloseButton) {
-					var html =  '<button class="btn submit popup-alert-close">' +
+					var html =  '<button class="btn btn-default submit popup-alert-close">' +
 									instance._closeText +
 								'</button>';
 
@@ -286,6 +200,130 @@ AUI.add(
 
 					notice.append(toggleButton);
 				}
+			},
+
+			_afterNoticeShow: function(event) {
+				var instance = this;
+
+				instance._preventHide();
+
+				var notice = instance._notice;
+
+				if (instance._useAnimation) {
+					var animationConfig = instance._animationConfig;
+
+					var left = animationConfig.left;
+					var top = animationConfig.top;
+
+					if (!left) {
+						var noticeRegion = ADOM.region(ANode.getDOMNode(notice));
+
+						left = (ADOM.winWidth() / 2) - (noticeRegion.width / 2);
+
+						top = -noticeRegion.height;
+
+						animationConfig.left = left + STR_PX;
+					}
+
+					notice.setXY([left, top]);
+
+					notice.transition(
+						instance._animationConfig,
+						function() {
+							instance._hideHandle = A.later(instance._timeout, notice, STR_HIDE);
+						}
+					);
+				}
+				else {
+					if (instance._timeout > -1) {
+						instance._hideHandle = A.later(instance._timeout, notice, STR_HIDE);
+					}
+				}
+
+				Liferay.fire(
+					'noticeShow',
+					{
+						notice: instance,
+						useAnimation: instance._useAnimation
+					}
+				);
+			},
+
+			_beforeNoticeHide: function(event) {
+				var instance = this;
+
+				var returnVal;
+
+				if (instance._useAnimation) {
+					var animationConfig = A.merge(
+						instance._animationConfig,
+						{
+							top: -instance._notice.get('offsetHeight') + STR_PX
+						}
+					);
+
+					instance._notice.transition(
+						animationConfig,
+						function() {
+							instance._notice.toggle(false);
+						}
+					);
+
+					returnVal = new Do.Halt(null);
+				}
+
+				Liferay.fire(
+					'noticeHide',
+					{
+						notice: instance,
+						useAnimation: instance._useAnimation
+					}
+				);
+
+				return returnVal;
+			},
+
+			_beforeNoticeShow: function(event) {
+				var instance = this;
+
+				instance._notice.toggle(true);
+			},
+
+			_createHTML: function() {
+				var instance = this;
+
+				var content = instance._content;
+				var node = A.one(instance._node);
+
+				var notice = node || ANode.create('<div class="alert" dynamic="true"></div>');
+
+				if (content) {
+					notice.html(content);
+				}
+
+				A.Array.each(
+					instance._noticeClass.split(' '),
+					function(item, index) {
+						notice.addClass(item);
+					}
+				);
+
+				instance._addCloseButton(notice);
+				instance._addToggleButton(notice);
+
+				if (!node || (node && !node.inDoc())) {
+					instance._body.prepend(notice);
+				}
+
+				instance._body.addClass(CSS_ALERTS);
+
+				Do.before(instance._beforeNoticeHide, notice, STR_HIDE, instance);
+
+				Do.before(instance._beforeNoticeShow, notice, STR_SHOW, instance);
+
+				Do.after(instance._afterNoticeShow, notice, STR_SHOW, instance);
+
+				instance._notice = notice;
 			},
 
 			_preventHide: function() {

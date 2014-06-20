@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,13 +16,23 @@ package com.liferay.portlet.mobiledevicerules.service.base;
 
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.IdentifiableBean;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.DefaultActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Projection;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
+import com.liferay.portal.kernel.lar.ManifestSummary;
+import com.liferay.portal.kernel.lar.PortletDataContext;
+import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -32,12 +42,11 @@ import com.liferay.portal.service.PersistedModelLocalServiceRegistry;
 import com.liferay.portal.service.persistence.SystemEventPersistence;
 import com.liferay.portal.service.persistence.UserFinder;
 import com.liferay.portal.service.persistence.UserPersistence;
+import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.mobiledevicerules.model.MDRRule;
 import com.liferay.portlet.mobiledevicerules.service.MDRRuleLocalService;
-import com.liferay.portlet.mobiledevicerules.service.persistence.MDRActionPersistence;
 import com.liferay.portlet.mobiledevicerules.service.persistence.MDRRuleGroupFinder;
-import com.liferay.portlet.mobiledevicerules.service.persistence.MDRRuleGroupInstancePersistence;
 import com.liferay.portlet.mobiledevicerules.service.persistence.MDRRuleGroupPersistence;
 import com.liferay.portlet.mobiledevicerules.service.persistence.MDRRulePersistence;
 
@@ -72,11 +81,10 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 *
 	 * @param mdrRule the m d r rule
 	 * @return the m d r rule that was added
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
-	public MDRRule addMDRRule(MDRRule mdrRule) throws SystemException {
+	public MDRRule addMDRRule(MDRRule mdrRule) {
 		mdrRule.setNew(true);
 
 		return mdrRulePersistence.update(mdrRule);
@@ -99,12 +107,10 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param ruleId the primary key of the m d r rule
 	 * @return the m d r rule that was removed
 	 * @throws PortalException if a m d r rule with the primary key could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	@Override
-	public MDRRule deleteMDRRule(long ruleId)
-		throws PortalException, SystemException {
+	public MDRRule deleteMDRRule(long ruleId) throws PortalException {
 		return mdrRulePersistence.remove(ruleId);
 	}
 
@@ -113,11 +119,10 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 *
 	 * @param mdrRule the m d r rule
 	 * @return the m d r rule that was removed
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	@Override
-	public MDRRule deleteMDRRule(MDRRule mdrRule) throws SystemException {
+	public MDRRule deleteMDRRule(MDRRule mdrRule) {
 		return mdrRulePersistence.remove(mdrRule);
 	}
 
@@ -134,12 +139,10 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 *
 	 * @param dynamicQuery the dynamic query
 	 * @return the matching rows
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public List dynamicQuery(DynamicQuery dynamicQuery) {
 		return mdrRulePersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -154,12 +157,10 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param start the lower bound of the range of model instances
 	 * @param end the upper bound of the range of model instances (not inclusive)
 	 * @return the range of matching rows
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end)
-		throws SystemException {
+	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
 		return mdrRulePersistence.findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -175,12 +176,11 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param end the upper bound of the range of model instances (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching rows
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
 	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
+		OrderByComparator orderByComparator) {
 		return mdrRulePersistence.findWithDynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -190,11 +190,9 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 *
 	 * @param dynamicQuery the dynamic query
 	 * @return the number of rows that match the dynamic query
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public long dynamicQueryCount(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public long dynamicQueryCount(DynamicQuery dynamicQuery) {
 		return mdrRulePersistence.countWithDynamicQuery(dynamicQuery);
 	}
 
@@ -204,16 +202,15 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param dynamicQuery the dynamic query
 	 * @param projection the projection to apply to the query
 	 * @return the number of rows that match the dynamic query
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public long dynamicQueryCount(DynamicQuery dynamicQuery,
-		Projection projection) throws SystemException {
+		Projection projection) {
 		return mdrRulePersistence.countWithDynamicQuery(dynamicQuery, projection);
 	}
 
 	@Override
-	public MDRRule fetchMDRRule(long ruleId) throws SystemException {
+	public MDRRule fetchMDRRule(long ruleId) {
 		return mdrRulePersistence.fetchByPrimaryKey(ruleId);
 	}
 
@@ -223,11 +220,9 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param uuid the m d r rule's UUID
 	 * @param  companyId the primary key of the company
 	 * @return the matching m d r rule, or <code>null</code> if a matching m d r rule could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public MDRRule fetchMDRRuleByUuidAndCompanyId(String uuid, long companyId)
-		throws SystemException {
+	public MDRRule fetchMDRRuleByUuidAndCompanyId(String uuid, long companyId) {
 		return mdrRulePersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
@@ -237,11 +232,9 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param uuid the m d r rule's UUID
 	 * @param groupId the primary key of the group
 	 * @return the matching m d r rule, or <code>null</code> if a matching m d r rule could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public MDRRule fetchMDRRuleByUuidAndGroupId(String uuid, long groupId)
-		throws SystemException {
+	public MDRRule fetchMDRRuleByUuidAndGroupId(String uuid, long groupId) {
 		return mdrRulePersistence.fetchByUUID_G(uuid, groupId);
 	}
 
@@ -251,17 +244,101 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param ruleId the primary key of the m d r rule
 	 * @return the m d r rule
 	 * @throws PortalException if a m d r rule with the primary key could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public MDRRule getMDRRule(long ruleId)
-		throws PortalException, SystemException {
+	public MDRRule getMDRRule(long ruleId) throws PortalException {
 		return mdrRulePersistence.findByPrimaryKey(ruleId);
 	}
 
 	@Override
+	public ActionableDynamicQuery getActionableDynamicQuery() {
+		ActionableDynamicQuery actionableDynamicQuery = new DefaultActionableDynamicQuery();
+
+		actionableDynamicQuery.setBaseLocalService(com.liferay.portlet.mobiledevicerules.service.MDRRuleLocalServiceUtil.getService());
+		actionableDynamicQuery.setClass(MDRRule.class);
+		actionableDynamicQuery.setClassLoader(getClassLoader());
+
+		actionableDynamicQuery.setPrimaryKeyPropertyName("ruleId");
+
+		return actionableDynamicQuery;
+	}
+
+	protected void initActionableDynamicQuery(
+		ActionableDynamicQuery actionableDynamicQuery) {
+		actionableDynamicQuery.setBaseLocalService(com.liferay.portlet.mobiledevicerules.service.MDRRuleLocalServiceUtil.getService());
+		actionableDynamicQuery.setClass(MDRRule.class);
+		actionableDynamicQuery.setClassLoader(getClassLoader());
+
+		actionableDynamicQuery.setPrimaryKeyPropertyName("ruleId");
+	}
+
+	@Override
+	public ExportActionableDynamicQuery getExportActionableDynamicQuery(
+		final PortletDataContext portletDataContext) {
+		final ExportActionableDynamicQuery exportActionableDynamicQuery = new ExportActionableDynamicQuery() {
+				@Override
+				public long performCount() throws PortalException {
+					ManifestSummary manifestSummary = portletDataContext.getManifestSummary();
+
+					StagedModelType stagedModelType = getStagedModelType();
+
+					long modelAdditionCount = super.performCount();
+
+					manifestSummary.addModelAdditionCount(stagedModelType.toString(),
+						modelAdditionCount);
+
+					long modelDeletionCount = ExportImportHelperUtil.getModelDeletionCount(portletDataContext,
+							stagedModelType);
+
+					manifestSummary.addModelDeletionCount(stagedModelType.toString(),
+						modelDeletionCount);
+
+					return modelAdditionCount;
+				}
+			};
+
+		initActionableDynamicQuery(exportActionableDynamicQuery);
+
+		exportActionableDynamicQuery.setAddCriteriaMethod(new ActionableDynamicQuery.AddCriteriaMethod() {
+				@Override
+				public void addCriteria(DynamicQuery dynamicQuery) {
+					portletDataContext.addDateRangeCriteria(dynamicQuery,
+						"modifiedDate");
+				}
+			});
+
+		exportActionableDynamicQuery.setCompanyId(portletDataContext.getCompanyId());
+
+		exportActionableDynamicQuery.setGroupId(portletDataContext.getScopeGroupId());
+
+		exportActionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+				@Override
+				public void performAction(Object object)
+					throws PortalException {
+					MDRRule stagedModel = (MDRRule)object;
+
+					StagedModelDataHandlerUtil.exportStagedModel(portletDataContext,
+						stagedModel);
+				}
+			});
+		exportActionableDynamicQuery.setStagedModelType(new StagedModelType(
+				PortalUtil.getClassNameId(MDRRule.class.getName())));
+
+		return exportActionableDynamicQuery;
+	}
+
+	/**
+	 * @throws PortalException
+	 */
+	@Override
+	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
+		throws PortalException {
+		return deleteMDRRule((MDRRule)persistedModel);
+	}
+
+	@Override
 	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
-		throws PortalException, SystemException {
+		throws PortalException {
 		return mdrRulePersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
@@ -272,11 +349,10 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param  companyId the primary key of the company
 	 * @return the matching m d r rule
 	 * @throws PortalException if a matching m d r rule could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public MDRRule getMDRRuleByUuidAndCompanyId(String uuid, long companyId)
-		throws PortalException, SystemException {
+		throws PortalException {
 		return mdrRulePersistence.findByUuid_C_First(uuid, companyId, null);
 	}
 
@@ -287,11 +363,10 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param groupId the primary key of the group
 	 * @return the matching m d r rule
 	 * @throws PortalException if a matching m d r rule could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public MDRRule getMDRRuleByUuidAndGroupId(String uuid, long groupId)
-		throws PortalException, SystemException {
+		throws PortalException {
 		return mdrRulePersistence.findByUUID_G(uuid, groupId);
 	}
 
@@ -305,11 +380,9 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @param start the lower bound of the range of m d r rules
 	 * @param end the upper bound of the range of m d r rules (not inclusive)
 	 * @return the range of m d r rules
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public List<MDRRule> getMDRRules(int start, int end)
-		throws SystemException {
+	public List<MDRRule> getMDRRules(int start, int end) {
 		return mdrRulePersistence.findAll(start, end);
 	}
 
@@ -317,10 +390,9 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * Returns the number of m d r rules.
 	 *
 	 * @return the number of m d r rules
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public int getMDRRulesCount() throws SystemException {
+	public int getMDRRulesCount() {
 		return mdrRulePersistence.countAll();
 	}
 
@@ -329,69 +401,11 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 *
 	 * @param mdrRule the m d r rule
 	 * @return the m d r rule that was updated
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
-	public MDRRule updateMDRRule(MDRRule mdrRule) throws SystemException {
+	public MDRRule updateMDRRule(MDRRule mdrRule) {
 		return mdrRulePersistence.update(mdrRule);
-	}
-
-	/**
-	 * Returns the m d r action local service.
-	 *
-	 * @return the m d r action local service
-	 */
-	public com.liferay.portlet.mobiledevicerules.service.MDRActionLocalService getMDRActionLocalService() {
-		return mdrActionLocalService;
-	}
-
-	/**
-	 * Sets the m d r action local service.
-	 *
-	 * @param mdrActionLocalService the m d r action local service
-	 */
-	public void setMDRActionLocalService(
-		com.liferay.portlet.mobiledevicerules.service.MDRActionLocalService mdrActionLocalService) {
-		this.mdrActionLocalService = mdrActionLocalService;
-	}
-
-	/**
-	 * Returns the m d r action remote service.
-	 *
-	 * @return the m d r action remote service
-	 */
-	public com.liferay.portlet.mobiledevicerules.service.MDRActionService getMDRActionService() {
-		return mdrActionService;
-	}
-
-	/**
-	 * Sets the m d r action remote service.
-	 *
-	 * @param mdrActionService the m d r action remote service
-	 */
-	public void setMDRActionService(
-		com.liferay.portlet.mobiledevicerules.service.MDRActionService mdrActionService) {
-		this.mdrActionService = mdrActionService;
-	}
-
-	/**
-	 * Returns the m d r action persistence.
-	 *
-	 * @return the m d r action persistence
-	 */
-	public MDRActionPersistence getMDRActionPersistence() {
-		return mdrActionPersistence;
-	}
-
-	/**
-	 * Sets the m d r action persistence.
-	 *
-	 * @param mdrActionPersistence the m d r action persistence
-	 */
-	public void setMDRActionPersistence(
-		MDRActionPersistence mdrActionPersistence) {
-		this.mdrActionPersistence = mdrActionPersistence;
 	}
 
 	/**
@@ -451,138 +465,6 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	}
 
 	/**
-	 * Returns the m d r rule group local service.
-	 *
-	 * @return the m d r rule group local service
-	 */
-	public com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupLocalService getMDRRuleGroupLocalService() {
-		return mdrRuleGroupLocalService;
-	}
-
-	/**
-	 * Sets the m d r rule group local service.
-	 *
-	 * @param mdrRuleGroupLocalService the m d r rule group local service
-	 */
-	public void setMDRRuleGroupLocalService(
-		com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupLocalService mdrRuleGroupLocalService) {
-		this.mdrRuleGroupLocalService = mdrRuleGroupLocalService;
-	}
-
-	/**
-	 * Returns the m d r rule group remote service.
-	 *
-	 * @return the m d r rule group remote service
-	 */
-	public com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupService getMDRRuleGroupService() {
-		return mdrRuleGroupService;
-	}
-
-	/**
-	 * Sets the m d r rule group remote service.
-	 *
-	 * @param mdrRuleGroupService the m d r rule group remote service
-	 */
-	public void setMDRRuleGroupService(
-		com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupService mdrRuleGroupService) {
-		this.mdrRuleGroupService = mdrRuleGroupService;
-	}
-
-	/**
-	 * Returns the m d r rule group persistence.
-	 *
-	 * @return the m d r rule group persistence
-	 */
-	public MDRRuleGroupPersistence getMDRRuleGroupPersistence() {
-		return mdrRuleGroupPersistence;
-	}
-
-	/**
-	 * Sets the m d r rule group persistence.
-	 *
-	 * @param mdrRuleGroupPersistence the m d r rule group persistence
-	 */
-	public void setMDRRuleGroupPersistence(
-		MDRRuleGroupPersistence mdrRuleGroupPersistence) {
-		this.mdrRuleGroupPersistence = mdrRuleGroupPersistence;
-	}
-
-	/**
-	 * Returns the m d r rule group finder.
-	 *
-	 * @return the m d r rule group finder
-	 */
-	public MDRRuleGroupFinder getMDRRuleGroupFinder() {
-		return mdrRuleGroupFinder;
-	}
-
-	/**
-	 * Sets the m d r rule group finder.
-	 *
-	 * @param mdrRuleGroupFinder the m d r rule group finder
-	 */
-	public void setMDRRuleGroupFinder(MDRRuleGroupFinder mdrRuleGroupFinder) {
-		this.mdrRuleGroupFinder = mdrRuleGroupFinder;
-	}
-
-	/**
-	 * Returns the m d r rule group instance local service.
-	 *
-	 * @return the m d r rule group instance local service
-	 */
-	public com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupInstanceLocalService getMDRRuleGroupInstanceLocalService() {
-		return mdrRuleGroupInstanceLocalService;
-	}
-
-	/**
-	 * Sets the m d r rule group instance local service.
-	 *
-	 * @param mdrRuleGroupInstanceLocalService the m d r rule group instance local service
-	 */
-	public void setMDRRuleGroupInstanceLocalService(
-		com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupInstanceLocalService mdrRuleGroupInstanceLocalService) {
-		this.mdrRuleGroupInstanceLocalService = mdrRuleGroupInstanceLocalService;
-	}
-
-	/**
-	 * Returns the m d r rule group instance remote service.
-	 *
-	 * @return the m d r rule group instance remote service
-	 */
-	public com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupInstanceService getMDRRuleGroupInstanceService() {
-		return mdrRuleGroupInstanceService;
-	}
-
-	/**
-	 * Sets the m d r rule group instance remote service.
-	 *
-	 * @param mdrRuleGroupInstanceService the m d r rule group instance remote service
-	 */
-	public void setMDRRuleGroupInstanceService(
-		com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupInstanceService mdrRuleGroupInstanceService) {
-		this.mdrRuleGroupInstanceService = mdrRuleGroupInstanceService;
-	}
-
-	/**
-	 * Returns the m d r rule group instance persistence.
-	 *
-	 * @return the m d r rule group instance persistence
-	 */
-	public MDRRuleGroupInstancePersistence getMDRRuleGroupInstancePersistence() {
-		return mdrRuleGroupInstancePersistence;
-	}
-
-	/**
-	 * Sets the m d r rule group instance persistence.
-	 *
-	 * @param mdrRuleGroupInstancePersistence the m d r rule group instance persistence
-	 */
-	public void setMDRRuleGroupInstancePersistence(
-		MDRRuleGroupInstancePersistence mdrRuleGroupInstancePersistence) {
-		this.mdrRuleGroupInstancePersistence = mdrRuleGroupInstancePersistence;
-	}
-
-	/**
 	 * Returns the counter local service.
 	 *
 	 * @return the counter local service
@@ -599,25 +481,6 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	public void setCounterLocalService(
 		com.liferay.counter.service.CounterLocalService counterLocalService) {
 		this.counterLocalService = counterLocalService;
-	}
-
-	/**
-	 * Returns the resource local service.
-	 *
-	 * @return the resource local service
-	 */
-	public com.liferay.portal.service.ResourceLocalService getResourceLocalService() {
-		return resourceLocalService;
-	}
-
-	/**
-	 * Sets the resource local service.
-	 *
-	 * @param resourceLocalService the resource local service
-	 */
-	public void setResourceLocalService(
-		com.liferay.portal.service.ResourceLocalService resourceLocalService) {
-		this.resourceLocalService = resourceLocalService;
 	}
 
 	/**
@@ -732,6 +595,81 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 		this.userFinder = userFinder;
 	}
 
+	/**
+	 * Returns the m d r rule group local service.
+	 *
+	 * @return the m d r rule group local service
+	 */
+	public com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupLocalService getMDRRuleGroupLocalService() {
+		return mdrRuleGroupLocalService;
+	}
+
+	/**
+	 * Sets the m d r rule group local service.
+	 *
+	 * @param mdrRuleGroupLocalService the m d r rule group local service
+	 */
+	public void setMDRRuleGroupLocalService(
+		com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupLocalService mdrRuleGroupLocalService) {
+		this.mdrRuleGroupLocalService = mdrRuleGroupLocalService;
+	}
+
+	/**
+	 * Returns the m d r rule group remote service.
+	 *
+	 * @return the m d r rule group remote service
+	 */
+	public com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupService getMDRRuleGroupService() {
+		return mdrRuleGroupService;
+	}
+
+	/**
+	 * Sets the m d r rule group remote service.
+	 *
+	 * @param mdrRuleGroupService the m d r rule group remote service
+	 */
+	public void setMDRRuleGroupService(
+		com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupService mdrRuleGroupService) {
+		this.mdrRuleGroupService = mdrRuleGroupService;
+	}
+
+	/**
+	 * Returns the m d r rule group persistence.
+	 *
+	 * @return the m d r rule group persistence
+	 */
+	public MDRRuleGroupPersistence getMDRRuleGroupPersistence() {
+		return mdrRuleGroupPersistence;
+	}
+
+	/**
+	 * Sets the m d r rule group persistence.
+	 *
+	 * @param mdrRuleGroupPersistence the m d r rule group persistence
+	 */
+	public void setMDRRuleGroupPersistence(
+		MDRRuleGroupPersistence mdrRuleGroupPersistence) {
+		this.mdrRuleGroupPersistence = mdrRuleGroupPersistence;
+	}
+
+	/**
+	 * Returns the m d r rule group finder.
+	 *
+	 * @return the m d r rule group finder
+	 */
+	public MDRRuleGroupFinder getMDRRuleGroupFinder() {
+		return mdrRuleGroupFinder;
+	}
+
+	/**
+	 * Sets the m d r rule group finder.
+	 *
+	 * @param mdrRuleGroupFinder the m d r rule group finder
+	 */
+	public void setMDRRuleGroupFinder(MDRRuleGroupFinder mdrRuleGroupFinder) {
+		this.mdrRuleGroupFinder = mdrRuleGroupFinder;
+	}
+
 	public void afterPropertiesSet() {
 		persistedModelLocalServiceRegistry.register("com.liferay.portlet.mobiledevicerules.model.MDRRule",
 			mdrRuleLocalService);
@@ -771,13 +709,18 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	}
 
 	/**
-	 * Performs an SQL query.
+	 * Performs a SQL query.
 	 *
 	 * @param sql the sql query
 	 */
-	protected void runSQL(String sql) throws SystemException {
+	protected void runSQL(String sql) {
 		try {
 			DataSource dataSource = mdrRulePersistence.getDataSource();
+
+			DB db = DBFactoryUtil.getDB();
+
+			sql = db.buildSQL(sql);
+			sql = PortalUtil.transformSQL(sql);
 
 			SqlUpdate sqlUpdate = SqlUpdateFactoryUtil.getSqlUpdate(dataSource,
 					sql, new int[0]);
@@ -789,36 +732,14 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 		}
 	}
 
-	@BeanReference(type = com.liferay.portlet.mobiledevicerules.service.MDRActionLocalService.class)
-	protected com.liferay.portlet.mobiledevicerules.service.MDRActionLocalService mdrActionLocalService;
-	@BeanReference(type = com.liferay.portlet.mobiledevicerules.service.MDRActionService.class)
-	protected com.liferay.portlet.mobiledevicerules.service.MDRActionService mdrActionService;
-	@BeanReference(type = MDRActionPersistence.class)
-	protected MDRActionPersistence mdrActionPersistence;
 	@BeanReference(type = com.liferay.portlet.mobiledevicerules.service.MDRRuleLocalService.class)
 	protected com.liferay.portlet.mobiledevicerules.service.MDRRuleLocalService mdrRuleLocalService;
 	@BeanReference(type = com.liferay.portlet.mobiledevicerules.service.MDRRuleService.class)
 	protected com.liferay.portlet.mobiledevicerules.service.MDRRuleService mdrRuleService;
 	@BeanReference(type = MDRRulePersistence.class)
 	protected MDRRulePersistence mdrRulePersistence;
-	@BeanReference(type = com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupLocalService.class)
-	protected com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupLocalService mdrRuleGroupLocalService;
-	@BeanReference(type = com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupService.class)
-	protected com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupService mdrRuleGroupService;
-	@BeanReference(type = MDRRuleGroupPersistence.class)
-	protected MDRRuleGroupPersistence mdrRuleGroupPersistence;
-	@BeanReference(type = MDRRuleGroupFinder.class)
-	protected MDRRuleGroupFinder mdrRuleGroupFinder;
-	@BeanReference(type = com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupInstanceLocalService.class)
-	protected com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupInstanceLocalService mdrRuleGroupInstanceLocalService;
-	@BeanReference(type = com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupInstanceService.class)
-	protected com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupInstanceService mdrRuleGroupInstanceService;
-	@BeanReference(type = MDRRuleGroupInstancePersistence.class)
-	protected MDRRuleGroupInstancePersistence mdrRuleGroupInstancePersistence;
 	@BeanReference(type = com.liferay.counter.service.CounterLocalService.class)
 	protected com.liferay.counter.service.CounterLocalService counterLocalService;
-	@BeanReference(type = com.liferay.portal.service.ResourceLocalService.class)
-	protected com.liferay.portal.service.ResourceLocalService resourceLocalService;
 	@BeanReference(type = com.liferay.portal.service.SystemEventLocalService.class)
 	protected com.liferay.portal.service.SystemEventLocalService systemEventLocalService;
 	@BeanReference(type = SystemEventPersistence.class)
@@ -831,6 +752,14 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	protected UserPersistence userPersistence;
 	@BeanReference(type = UserFinder.class)
 	protected UserFinder userFinder;
+	@BeanReference(type = com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupLocalService.class)
+	protected com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupLocalService mdrRuleGroupLocalService;
+	@BeanReference(type = com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupService.class)
+	protected com.liferay.portlet.mobiledevicerules.service.MDRRuleGroupService mdrRuleGroupService;
+	@BeanReference(type = MDRRuleGroupPersistence.class)
+	protected MDRRuleGroupPersistence mdrRuleGroupPersistence;
+	@BeanReference(type = MDRRuleGroupFinder.class)
+	protected MDRRuleGroupFinder mdrRuleGroupFinder;
 	@BeanReference(type = PersistedModelLocalServiceRegistry.class)
 	protected PersistedModelLocalServiceRegistry persistedModelLocalServiceRegistry;
 	private String _beanIdentifier;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.social.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see SocialActivitySettingService
  * @generated
  */
+@ProviderType
 public class SocialActivitySettingServiceWrapper
 	implements SocialActivitySettingService,
 		ServiceWrapper<SocialActivitySettingService> {
@@ -54,8 +57,7 @@ public class SocialActivitySettingServiceWrapper
 	@Override
 	public com.liferay.portlet.social.model.SocialActivityDefinition getActivityDefinition(
 		long groupId, java.lang.String className, int activityType)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialActivitySettingService.getActivityDefinition(groupId,
 			className, activityType);
 	}
@@ -63,8 +65,7 @@ public class SocialActivitySettingServiceWrapper
 	@Override
 	public java.util.List<com.liferay.portlet.social.model.SocialActivityDefinition> getActivityDefinitions(
 		long groupId, java.lang.String className)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialActivitySettingService.getActivityDefinitions(groupId,
 			className);
 	}
@@ -72,16 +73,14 @@ public class SocialActivitySettingServiceWrapper
 	@Override
 	public java.util.List<com.liferay.portlet.social.model.SocialActivitySetting> getActivitySettings(
 		long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialActivitySettingService.getActivitySettings(groupId);
 	}
 
 	@Override
 	public com.liferay.portal.kernel.json.JSONArray getJSONActivityDefinitions(
 		long groupId, java.lang.String className)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialActivitySettingService.getJSONActivityDefinitions(groupId,
 			className);
 	}
@@ -89,8 +88,7 @@ public class SocialActivitySettingServiceWrapper
 	@Override
 	public void updateActivitySetting(long groupId, java.lang.String className,
 		boolean enabled)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_socialActivitySettingService.updateActivitySetting(groupId, className,
 			enabled);
 	}
@@ -99,8 +97,7 @@ public class SocialActivitySettingServiceWrapper
 	public void updateActivitySetting(long groupId, java.lang.String className,
 		int activityType,
 		com.liferay.portlet.social.model.SocialActivityCounterDefinition activityCounterDefinition)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_socialActivitySettingService.updateActivitySetting(groupId, className,
 			activityType, activityCounterDefinition);
 	}
@@ -109,8 +106,7 @@ public class SocialActivitySettingServiceWrapper
 	public void updateActivitySettings(long groupId,
 		java.lang.String className, int activityType,
 		java.util.List<com.liferay.portlet.social.model.SocialActivityCounterDefinition> activityCounterDefinitions)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_socialActivitySettingService.updateActivitySettings(groupId,
 			className, activityType, activityCounterDefinitions);
 	}
@@ -118,6 +114,7 @@ public class SocialActivitySettingServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public SocialActivitySettingService getWrappedSocialActivitySettingService() {
 		return _socialActivitySettingService;
 	}
@@ -125,6 +122,7 @@ public class SocialActivitySettingServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedSocialActivitySettingService(
 		SocialActivitySettingService socialActivitySettingService) {
 		_socialActivitySettingService = socialActivitySettingService;

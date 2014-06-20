@@ -1,6 +1,7 @@
 package ${packagePath}.model;
 
-import com.liferay.portal.kernel.exception.SystemException;
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -23,6 +24,11 @@ import java.util.Map;
  * @see ${entity.name}
  * @generated
  */
+
+<#if pluginName == "">
+	@ProviderType
+</#if>
+
 public class ${entity.name}Wrapper implements ${entity.name}, ModelWrapper<${entity.name}> {
 
 	public ${entity.name}Wrapper(${entity.name} ${entity.varName}) {
@@ -84,6 +90,11 @@ public class ${entity.name}Wrapper implements ${entity.name}, ModelWrapper<${ent
 			<#assign parameters = method.parameters>
 
 			${serviceBuilder.getJavadocComment(method)}
+
+			<#if serviceBuilder.hasAnnotation(method, "Deprecated")>
+				@Deprecated
+			</#if>
+
 			@Override
 			public ${serviceBuilder.getTypeGenericsName(method.returns)} ${method.name} (
 
@@ -154,6 +165,33 @@ public class ${entity.name}Wrapper implements ${entity.name}, ModelWrapper<${ent
 		return false;
 	}
 
+	<#if entity.isHierarchicalTree()>
+		@Override
+		public long getNestedSetsTreeNodeLeft() {
+			return _${entity.varName}.getNestedSetsTreeNodeLeft();
+		}
+
+		@Override
+		public long getNestedSetsTreeNodeRight() {
+			return _${entity.varName}.getNestedSetsTreeNodeRight();
+		}
+
+		@Override
+		public long getNestedSetsTreeNodeScopeId() {
+			return _${entity.varName}.getNestedSetsTreeNodeScopeId();
+		}
+
+		@Override
+		public void setNestedSetsTreeNodeLeft(long nestedSetsTreeNodeLeft) {
+			_${entity.varName}.setNestedSetsTreeNodeLeft(nestedSetsTreeNodeLeft);
+		}
+
+		@Override
+		public void setNestedSetsTreeNodeRight(long nestedSetsTreeNodeRight) {
+			_${entity.varName}.setNestedSetsTreeNodeRight(nestedSetsTreeNodeRight);
+		}
+	</#if>
+
 	<#if entity.isStagedModel() && !hasGetStagedModelTypeMethod!false>
 		@Override
 		public StagedModelType getStagedModelType() {
@@ -164,6 +202,7 @@ public class ${entity.name}Wrapper implements ${entity.name}, ModelWrapper<${ent
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public ${entity.name} getWrapped${entity.name}() {
 		return _${entity.varName};
 	}
@@ -171,6 +210,16 @@ public class ${entity.name}Wrapper implements ${entity.name}, ModelWrapper<${ent
 	@Override
 	public ${entity.name} getWrappedModel() {
 		return _${entity.varName};
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _${entity.varName}.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _${entity.varName}.isFinderCacheEnabled();
 	}
 
 	@Override

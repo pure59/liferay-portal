@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,7 +19,7 @@ import com.liferay.portal.kernel.dao.orm.ProjectionFactory;
 import com.liferay.portal.kernel.dao.orm.ProjectionList;
 import com.liferay.portal.kernel.dao.orm.Type;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
-import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.ArrayUtil;
 
 import org.hibernate.criterion.Projections;
 
@@ -94,7 +94,7 @@ public class ProjectionFactoryImpl implements ProjectionFactory {
 	public Projection sqlProjection(
 		String sql, String[] columnAliases, Type[] types) {
 
-		if (Validator.isNull(types)) {
+		if (ArrayUtil.isEmpty(types)) {
 			return new ProjectionImpl(
 				Projections.sqlProjection(sql, columnAliases, null));
 		}

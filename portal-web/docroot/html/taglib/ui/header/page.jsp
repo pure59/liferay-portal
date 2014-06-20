@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,20 +18,31 @@
 
 <%
 if (Validator.isNull(backLabel)) {
-	backLabel = LanguageUtil.get(pageContext, "back");
+	backLabel = LanguageUtil.get(request, "back");
 }
 
 if (Validator.isNotNull(backURL) && !backURL.equals("javascript:history.go(-1);")) {
 	backURL = HtmlUtil.escapeHREF(PortalUtil.escapeRedirect(backURL));
 }
 
-String headerTitle = (localizeTitle) ? LanguageUtil.get(pageContext, title) : title;
+String headerTitle = (localizeTitle) ? LanguageUtil.get(request, title) : title;
 %>
 
 <div class="taglib-header <%= cssClass %>">
 	<c:if test="<%= showBackURL && Validator.isNotNull(backURL) %>">
 		<span class="header-back-to">
-			<a class="icon-chevron-left" href="<%= backURL %>" id="<%= namespace %>TabsBack" title="<%= backLabel %>"><span class="helper-hidden-accessible"><%= backLabel %></span></a>
+			<a class="icon-circle-arrow-left previous-level" href="<%= backURL %>" id="<%= namespace %>TabsBack" title="<%= HtmlUtil.escapeAttribute(backLabel) %>">
+				<span class="helper-hidden-accessible">
+					<c:choose>
+						<c:when test="<%= escapeXml %>">
+							<%= HtmlUtil.escape(backLabel) %>
+						</c:when>
+						<c:otherwise>
+							<%= backLabel %>
+						</c:otherwise>
+					</c:choose>
+				</span>
+			</a>
 		</span>
 	</c:if>
 

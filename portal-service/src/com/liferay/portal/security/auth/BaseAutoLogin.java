@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,6 +16,11 @@ package com.liferay.portal.security.auth;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.util.PortalUtil;
+
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,7 +28,12 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author Mate Thurzo
  */
-public abstract class BaseAutoLogin implements AutoLogin {
+public abstract class BaseAutoLogin implements AuthVerifier, AutoLogin {
+
+	@Override
+	public String getAuthType() {
+		return this.getClass().getSimpleName();
+	}
 
 	@Override
 	public String[] handleException(
@@ -44,6 +54,41 @@ public abstract class BaseAutoLogin implements AutoLogin {
 		}
 		catch (Exception e) {
 			return handleException(request, response, e);
+		}
+	}
+
+	@Override
+	public AuthVerifierResult verify(
+			AccessControlContext accessControlContext, Properties properties)
+		throws AuthException {
+
+		try {
+			AuthVerifierResult authVerifierResult = new AuthVerifierResult();
+
+			String[] credentials = login(
+				accessControlContext.getRequest(),
+				accessControlContext.getResponse());
+
+			if (credentials != null) {
+				authVerifierResult.setPassword(credentials[1]);
+				authVerifierResult.setState(AuthVerifierResult.State.SUCCESS);
+				authVerifierResult.setUserId(Long.valueOf(credentials[0]));
+			}
+
+			return authVerifierResult;
+		}
+		catch (AutoLoginException ale) {
+			throw new AuthException(ale);
+		}
+	}
+
+	protected void addRedirect(HttpServletRequest request) {
+		String redirect = ParamUtil.getString(request, "redirect");
+
+		if (Validator.isNotNull(redirect)) {
+			request.setAttribute(
+				AutoLogin.AUTO_LOGIN_REDIRECT_AND_CONTINUE,
+				PortalUtil.escapeRedirect(redirect));
 		}
 	}
 

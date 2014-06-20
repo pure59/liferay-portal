@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,14 +16,7 @@
 
 <%@ include file="/html/portlet/init.jsp" %>
 
-<%@ page import="com.liferay.portal.kernel.search.Hits" %><%@
-page import="com.liferay.portal.kernel.search.Indexer" %><%@
-page import="com.liferay.portal.kernel.search.SearchContext" %><%@
-page import="com.liferay.portal.kernel.search.SearchContextFactory" %><%@
-page import="com.liferay.portlet.asset.model.AssetEntry" %><%@
-page import="com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil" %><%@
-page import="com.liferay.portlet.asset.service.AssetEntryServiceUtil" %><%@
-page import="com.liferay.portlet.asset.service.persistence.AssetEntryQuery" %><%@
+<%@ page import="com.liferay.portlet.bookmarks.BookmarksSettings" %><%@
 page import="com.liferay.portlet.bookmarks.EntryURLException" %><%@
 page import="com.liferay.portlet.bookmarks.FolderNameException" %><%@
 page import="com.liferay.portlet.bookmarks.NoSuchEntryException" %><%@
@@ -36,37 +29,35 @@ page import="com.liferay.portlet.bookmarks.service.BookmarksFolderLocalServiceUt
 page import="com.liferay.portlet.bookmarks.service.BookmarksFolderServiceUtil" %><%@
 page import="com.liferay.portlet.bookmarks.service.permission.BookmarksEntryPermission" %><%@
 page import="com.liferay.portlet.bookmarks.service.permission.BookmarksFolderPermission" %><%@
+page import="com.liferay.portlet.bookmarks.util.BookmarksConstants" %><%@
 page import="com.liferay.portlet.bookmarks.util.BookmarksSearcher" %><%@
-page import="com.liferay.portlet.bookmarks.util.BookmarksUtil" %><%@
-page import="com.liferay.portlet.trash.util.TrashUtil" %>
+page import="com.liferay.portlet.bookmarks.util.BookmarksUtil" %>
 
 <%
+BookmarksSettings bookmarksSettings = BookmarksSettings.getInstance(scopeGroupId);
+
 PortalPreferences portalPreferences = PortletPreferencesFactoryUtil.getPortalPreferences(request);
 
 String portletResource = ParamUtil.getString(request, "portletResource");
 
-if (layout.isTypeControlPanel()) {
-	portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(themeDisplay.getCompanyId(), scopeGroupId, PortletKeys.PREFS_OWNER_TYPE_GROUP, 0, PortletKeys.BOOKMARKS, null);
-}
-
-long rootFolderId = PrefsParamUtil.getLong(portletPreferences, request, "rootFolderId", BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID);
+long rootFolderId = bookmarksSettings.getRootFolderId();
 String rootFolderName = StringPool.BLANK;
 
 if (rootFolderId != BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 	try {
-		BookmarksFolder rootFolder = BookmarksFolderServiceUtil.getFolder(rootFolderId);
+		BookmarksFolder rootFolder = BookmarksFolderLocalServiceUtil.getFolder(rootFolderId);
 
 		rootFolderName = rootFolder.getName();
+
+		if (rootFolder.getGroupId() != scopeGroupId) {
+			rootFolderId = BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID;
+			rootFolderName = StringPool.BLANK;
+		}
 	}
 	catch (NoSuchFolderException nsfe) {
+		rootFolderId = BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID;
 	}
 }
-
-boolean showFoldersSearch = PrefsParamUtil.getBoolean(portletPreferences, request, "showFoldersSearch", true);
-boolean showSubfolders = PrefsParamUtil.getBoolean(portletPreferences, request, "showSubfolders", true);
-int foldersPerPage = PrefsParamUtil.getInteger(portletPreferences, request, "foldersPerPage", SearchContainer.DEFAULT_DELTA);
-
-String defaultFolderColumns = "folder,num-of-folders,num-of-entries";
 
 String portletId = portletDisplay.getId();
 
@@ -74,32 +65,27 @@ if (portletId.equals(PortletKeys.PORTLET_CONFIGURATION)) {
 	portletId = portletResource;
 }
 
-if (portletId.equals(PortletKeys.BOOKMARKS)) {
-	defaultFolderColumns += ",action";
+String allFolderColumns = "folder,num-of-folders,num-of-entries";
+
+if (portletId.equals(PortletKeys.BOOKMARKS) || portletId.equals(PortletKeys.BOOKMARKS_ADMIN)) {
+	allFolderColumns += ",action";
 }
 
-String allFolderColumns = defaultFolderColumns;
+String[] folderColumns = bookmarksSettings.getFolderColumns();
 
-String[] folderColumns = StringUtil.split(PrefsParamUtil.getString(portletPreferences, request, "folderColumns", defaultFolderColumns));
-
-if (!portletId.equals(PortletKeys.BOOKMARKS)) {
+if (!portletId.equals(PortletKeys.BOOKMARKS) && !portletId.equals(PortletKeys.BOOKMARKS_ADMIN)) {
 	folderColumns = ArrayUtil.remove(folderColumns, "action");
 }
 
-boolean enableRelatedAssets = GetterUtil.getBoolean(portletPreferences.getValue("enableRelatedAssets", null), true);
-int entriesPerPage = PrefsParamUtil.getInteger(portletPreferences, request, "entriesPerPage", SearchContainer.DEFAULT_DELTA);
+String allEntryColumns = "name,url,visits,modified-date";
 
-String defaultEntryColumns = "name,url,visits,modified-date";
-
-if (portletId.equals(PortletKeys.BOOKMARKS)) {
-	defaultEntryColumns += ",action";
+if (portletId.equals(PortletKeys.BOOKMARKS) || portletId.equals(PortletKeys.BOOKMARKS_ADMIN)) {
+	allEntryColumns += ",action";
 }
 
-String allEntryColumns = defaultEntryColumns;
+String[] entryColumns = bookmarksSettings.getEntryColumns();
 
-String[] entryColumns = StringUtil.split(PrefsParamUtil.getString(portletPreferences, request, "entryColumns", defaultEntryColumns));
-
-if (!portletId.equals(PortletKeys.BOOKMARKS)) {
+if (!portletId.equals(PortletKeys.BOOKMARKS) && !portletId.equals(PortletKeys.BOOKMARKS_ADMIN)) {
 	entryColumns = ArrayUtil.remove(entryColumns, "action");
 }
 

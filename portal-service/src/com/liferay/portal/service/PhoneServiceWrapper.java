@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link PhoneService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see PhoneService
  * @generated
  */
+@ProviderType
 public class PhoneServiceWrapper implements PhoneService,
 	ServiceWrapper<PhoneService> {
 	public PhoneServiceWrapper(PhoneService phoneService) {
@@ -48,15 +51,15 @@ public class PhoneServiceWrapper implements PhoneService,
 	}
 
 	/**
-	* @deprecated As of 6.2.0, replaced by {@link #addPhone( String, long,
+	* @deprecated As of 6.2.0, replaced by {@link #addPhone(String, long,
 	String, String, int, boolean, ServiceContext)}
 	*/
+	@Deprecated
 	@Override
 	public com.liferay.portal.model.Phone addPhone(java.lang.String className,
 		long classPK, java.lang.String number, java.lang.String extension,
 		int typeId, boolean primary)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _phoneService.addPhone(className, classPK, number, extension,
 			typeId, primary);
 	}
@@ -66,31 +69,27 @@ public class PhoneServiceWrapper implements PhoneService,
 		long classPK, java.lang.String number, java.lang.String extension,
 		int typeId, boolean primary,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _phoneService.addPhone(className, classPK, number, extension,
 			typeId, primary, serviceContext);
 	}
 
 	@Override
 	public void deletePhone(long phoneId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_phoneService.deletePhone(phoneId);
 	}
 
 	@Override
 	public com.liferay.portal.model.Phone getPhone(long phoneId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _phoneService.getPhone(phoneId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.Phone> getPhones(
 		java.lang.String className, long classPK)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _phoneService.getPhones(className, classPK);
 	}
 
@@ -98,8 +97,7 @@ public class PhoneServiceWrapper implements PhoneService,
 	public com.liferay.portal.model.Phone updatePhone(long phoneId,
 		java.lang.String number, java.lang.String extension, int typeId,
 		boolean primary)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _phoneService.updatePhone(phoneId, number, extension, typeId,
 			primary);
 	}
@@ -107,6 +105,7 @@ public class PhoneServiceWrapper implements PhoneService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public PhoneService getWrappedPhoneService() {
 		return _phoneService;
 	}
@@ -114,6 +113,7 @@ public class PhoneServiceWrapper implements PhoneService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedPhoneService(PhoneService phoneService) {
 		_phoneService = phoneService;
 	}

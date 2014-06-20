@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.softwarecatalog.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see SCProductVersionService
  * @generated
  */
+@ProviderType
 public class SCProductVersionServiceWrapper implements SCProductVersionService,
 	ServiceWrapper<SCProductVersionService> {
 	public SCProductVersionServiceWrapper(
@@ -57,8 +60,7 @@ public class SCProductVersionServiceWrapper implements SCProductVersionService,
 		java.lang.String directDownloadURL, boolean testDirectDownloadURL,
 		boolean repoStoreArtifact, long[] frameworkVersionIds,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _scProductVersionService.addProductVersion(productEntryId,
 			version, changeLog, downloadPageURL, directDownloadURL,
 			testDirectDownloadURL, repoStoreArtifact, frameworkVersionIds,
@@ -67,32 +69,28 @@ public class SCProductVersionServiceWrapper implements SCProductVersionService,
 
 	@Override
 	public void deleteProductVersion(long productVersionId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_scProductVersionService.deleteProductVersion(productVersionId);
 	}
 
 	@Override
 	public com.liferay.portlet.softwarecatalog.model.SCProductVersion getProductVersion(
 		long productVersionId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _scProductVersionService.getProductVersion(productVersionId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductVersion> getProductVersions(
 		long productEntryId, int start, int end)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _scProductVersionService.getProductVersions(productEntryId,
 			start, end);
 	}
 
 	@Override
 	public int getProductVersionsCount(long productEntryId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _scProductVersionService.getProductVersionsCount(productEntryId);
 	}
 
@@ -102,8 +100,7 @@ public class SCProductVersionServiceWrapper implements SCProductVersionService,
 		java.lang.String changeLog, java.lang.String downloadPageURL,
 		java.lang.String directDownloadURL, boolean testDirectDownloadURL,
 		boolean repoStoreArtifact, long[] frameworkVersionIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _scProductVersionService.updateProductVersion(productVersionId,
 			version, changeLog, downloadPageURL, directDownloadURL,
 			testDirectDownloadURL, repoStoreArtifact, frameworkVersionIds);
@@ -112,6 +109,7 @@ public class SCProductVersionServiceWrapper implements SCProductVersionService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public SCProductVersionService getWrappedSCProductVersionService() {
 		return _scProductVersionService;
 	}
@@ -119,6 +117,7 @@ public class SCProductVersionServiceWrapper implements SCProductVersionService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedSCProductVersionService(
 		SCProductVersionService scProductVersionService) {
 		_scProductVersionService = scProductVersionService;

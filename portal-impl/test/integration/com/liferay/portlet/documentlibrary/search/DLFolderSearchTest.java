@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -20,16 +20,17 @@ import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.search.BaseSearchTestCase;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.test.Sync;
 import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
+import com.liferay.portal.util.test.RandomTestUtil;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
-import com.liferay.portlet.documentlibrary.util.DLAppTestUtil;
+import com.liferay.portlet.documentlibrary.util.test.DLAppTestUtil;
 
-import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -44,44 +45,70 @@ import org.junit.runner.RunWith;
 @Sync
 public class DLFolderSearchTest extends BaseSearchTestCase {
 
+	@Ignore()
 	@Override
+	@Test
+	public void testLocalizedSearch() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
 	public void testSearchAttachments() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchByDDMStructureField() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchComments() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchExpireAllVersions() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchExpireLatestVersion() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
+	public void testSearchMyEntries() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
+	public void testSearchRecentEntries() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
 	public void testSearchStatus() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchVersions() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchWithinDDMStructure() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
 	@Override
@@ -92,8 +119,14 @@ public class DLFolderSearchTest extends BaseSearchTestCase {
 
 		DLFolder parentDLFolder = (DLFolder)parentBaseModel;
 
+		long folderId = DLFolderConstants.DEFAULT_PARENT_FOLDER_ID;
+
+		if (parentDLFolder != null) {
+			folderId = parentDLFolder.getFolderId();
+		}
+
 		Folder folder = DLAppTestUtil.addFolder(
-			parentDLFolder.getFolderId(), keywords, serviceContext);
+			folderId, keywords, serviceContext);
 
 		return (DLFolder)folder.getModel();
 	}
@@ -105,12 +138,25 @@ public class DLFolderSearchTest extends BaseSearchTestCase {
 
 	@Override
 	protected BaseModel<?> getParentBaseModel(
+			BaseModel<?> parentBaseModel, ServiceContext serviceContext)
+		throws Exception {
+
+		Folder folder = DLAppTestUtil.addFolder(
+			(Long)parentBaseModel.getPrimaryKeyObj(),
+			RandomTestUtil.randomString(_FOLDER_NAME_MAX_LENGTH),
+			serviceContext);
+
+		return (DLFolder)folder.getModel();
+	}
+
+	@Override
+	protected BaseModel<?> getParentBaseModel(
 			Group group, ServiceContext serviceContext)
 		throws Exception {
 
 		Folder folder = DLAppTestUtil.addFolder(
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-			ServiceTestUtil.randomString(_FOLDER_NAME_MAX_LENGTH),
+			RandomTestUtil.randomString(_FOLDER_NAME_MAX_LENGTH),
 			serviceContext);
 
 		return (DLFolder)folder.getModel();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -38,6 +38,7 @@ import org.apache.commons.compress.archivers.zip.UnsupportedZipFeatureException;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.poi.EncryptedDocumentException;
+import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
@@ -86,11 +87,16 @@ public class TikaRawMetadataProcessor extends XugglerRawMetadataProcessor {
 						"Unable to extract metadata from an encrypted file");
 				}
 			}
+			else if (e instanceof TikaException) {
+				if (_log.isWarnEnabled()) {
+					_log.warn("Unable to extract metadata");
+				}
+			}
 			else {
 				_log.error(e, e);
 			}
 
-			throw new IOException(e.getMessage());
+			throw new IOException(e);
 		}
 
 		// Remove potential security risks
@@ -103,8 +109,7 @@ public class TikaRawMetadataProcessor extends XugglerRawMetadataProcessor {
 
 	@Override
 	protected Metadata extractMetadata(
-			String extension, String mimeType, File file)
-		throws SystemException {
+		String extension, String mimeType, File file) {
 
 		Metadata metadata = super.extractMetadata(extension, mimeType, file);
 
@@ -125,6 +130,7 @@ public class TikaRawMetadataProcessor extends XugglerRawMetadataProcessor {
 
 			try {
 				Future<Metadata> future = ProcessExecutor.execute(
+					ClassPathUtil.getGlobalClassPath(),
 					ClassPathUtil.getPortalClassPath(),
 					extractMetadataProcessCallable);
 
@@ -152,8 +158,7 @@ public class TikaRawMetadataProcessor extends XugglerRawMetadataProcessor {
 
 	@Override
 	protected Metadata extractMetadata(
-			String extension, String mimeType, InputStream inputStream)
-		throws SystemException {
+		String extension, String mimeType, InputStream inputStream) {
 
 		Metadata metadata = super.extractMetadata(
 			extension, mimeType, inputStream);
@@ -179,6 +184,7 @@ public class TikaRawMetadataProcessor extends XugglerRawMetadataProcessor {
 					new ExtractMetadataProcessCallable(file, metadata, _parser);
 
 				Future<Metadata> future = ProcessExecutor.execute(
+					ClassPathUtil.getGlobalClassPath(),
 					ClassPathUtil.getPortalClassPath(),
 					extractMetadataProcessCallable);
 

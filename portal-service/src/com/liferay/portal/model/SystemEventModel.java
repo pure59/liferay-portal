@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,8 +14,9 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -37,7 +38,9 @@ import java.util.Date;
  * @see com.liferay.portal.model.impl.SystemEventModelImpl
  * @generated
  */
-public interface SystemEventModel extends AttachedModel, BaseModel<SystemEvent> {
+@ProviderType
+public interface SystemEventModel extends AttachedModel, BaseModel<SystemEvent>,
+	MVCCModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -57,6 +60,22 @@ public interface SystemEventModel extends AttachedModel, BaseModel<SystemEvent> 
 	 * @param primaryKey the primary key of this system event
 	 */
 	public void setPrimaryKey(long primaryKey);
+
+	/**
+	 * Returns the mvcc version of this system event.
+	 *
+	 * @return the mvcc version of this system event
+	 */
+	@Override
+	public long getMvccVersion();
+
+	/**
+	 * Sets the mvcc version of this system event.
+	 *
+	 * @param mvccVersion the mvcc version of this system event
+	 */
+	@Override
+	public void setMvccVersion(long mvccVersion);
 
 	/**
 	 * Returns the system event ID of this system event.
@@ -118,9 +137,8 @@ public interface SystemEventModel extends AttachedModel, BaseModel<SystemEvent> 
 	 * Returns the user uuid of this system event.
 	 *
 	 * @return the user uuid of this system event
-	 * @throws SystemException if a system exception occurred
 	 */
-	public String getUserUuid() throws SystemException;
+	public String getUserUuid();
 
 	/**
 	 * Sets the user uuid of this system event.

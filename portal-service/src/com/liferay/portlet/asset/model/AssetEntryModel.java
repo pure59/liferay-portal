@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,13 +14,15 @@
 
 package com.liferay.portlet.asset.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.AttachedModel;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.GroupedModel;
+import com.liferay.portal.model.LocalizedModel;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -44,8 +46,9 @@ import java.util.Map;
  * @see com.liferay.portlet.asset.model.impl.AssetEntryModelImpl
  * @generated
  */
+@ProviderType
 public interface AssetEntryModel extends AttachedModel, BaseModel<AssetEntry>,
-	GroupedModel {
+	GroupedModel, LocalizedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -132,10 +135,9 @@ public interface AssetEntryModel extends AttachedModel, BaseModel<AssetEntry>,
 	 * Returns the user uuid of this asset entry.
 	 *
 	 * @return the user uuid of this asset entry
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getUserUuid() throws SystemException;
+	public String getUserUuid();
 
 	/**
 	 * Sets the user uuid of this asset entry.
@@ -776,6 +778,16 @@ public interface AssetEntryModel extends AttachedModel, BaseModel<AssetEntry>,
 	@Override
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext);
 
+	@Override
+	public String[] getAvailableLanguageIds();
+
+	@Override
+	public String getDefaultLanguageId();
+
+	@Override
+	public void prepareLocalizedFieldsForImport() throws LocaleException;
+
+	@Override
 	public void prepareLocalizedFieldsForImport(Locale defaultImportLocale)
 		throws LocaleException;
 

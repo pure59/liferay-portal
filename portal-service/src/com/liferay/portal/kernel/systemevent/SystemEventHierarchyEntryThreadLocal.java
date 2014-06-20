@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,6 @@
 package com.liferay.portal.kernel.systemevent;
 
 import com.liferay.counter.service.CounterLocalServiceUtil;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.model.SystemEventConstants;
 import com.liferay.portal.util.PortalUtil;
@@ -46,6 +45,20 @@ public class SystemEventHierarchyEntryThreadLocal {
 	}
 
 	public static SystemEventHierarchyEntry pop() {
+		return pop(-1, -1);
+	}
+
+	public static SystemEventHierarchyEntry pop(Class<?> clazz) {
+		return pop(PortalUtil.getClassNameId(clazz), 0);
+	}
+
+	public static SystemEventHierarchyEntry pop(Class<?> clazz, long classPK) {
+		return pop(PortalUtil.getClassNameId(clazz), classPK);
+	}
+
+	public static SystemEventHierarchyEntry pop(
+		long classNameId, long classPK) {
+
 		Stack<SystemEventHierarchyEntry> systemEventHierarchyEntries =
 			_systemEventHierarchyEntries.get();
 
@@ -53,37 +66,56 @@ public class SystemEventHierarchyEntryThreadLocal {
 			return null;
 		}
 
-		return systemEventHierarchyEntries.pop();
+		SystemEventHierarchyEntry systemEventHierarchyEntry =
+			systemEventHierarchyEntries.peek();
+
+		if (((classNameId < 0) && (classPK < 0)) ||
+			systemEventHierarchyEntry.hasTypedModel(classNameId, classPK)) {
+
+			return systemEventHierarchyEntries.pop();
+		}
+
+		return null;
 	}
 
-	public static SystemEventHierarchyEntry push() throws SystemException {
+	public static SystemEventHierarchyEntry pop(String className) {
+		return pop(PortalUtil.getClassNameId(className), 0);
+	}
+
+	public static SystemEventHierarchyEntry pop(
+		String className, long classPK) {
+
+		return pop(PortalUtil.getClassNameId(className), classPK);
+	}
+
+	public static SystemEventHierarchyEntry push() {
 		return push(SystemEventConstants.ACTION_SKIP);
 	}
 
-	public static SystemEventHierarchyEntry push(Class<?> clazz, long classPK)
-		throws SystemException {
+	public static SystemEventHierarchyEntry push(Class<?> clazz) {
+		return push(
+			PortalUtil.getClassNameId(clazz), 0,
+			SystemEventConstants.ACTION_SKIP);
+	}
 
+	public static SystemEventHierarchyEntry push(Class<?> clazz, long classPK) {
 		return push(
 			PortalUtil.getClassNameId(clazz), classPK,
 			SystemEventConstants.ACTION_SKIP);
 	}
 
 	public static SystemEventHierarchyEntry push(
-			Class<?> clazz, long classPK, int action)
-		throws SystemException {
+		Class<?> clazz, long classPK, int action) {
 
 		return push(PortalUtil.getClassNameId(clazz), classPK, action);
 	}
 
-	public static SystemEventHierarchyEntry push(int action)
-		throws SystemException {
-
+	public static SystemEventHierarchyEntry push(int action) {
 		return push(0, 0, action);
 	}
 
 	public static SystemEventHierarchyEntry push(
-			long classNameId, long classPK, int action)
-		throws SystemException {
+		long classNameId, long classPK, int action) {
 
 		long parentSystemEventId = 0;
 		long systemEventSetKey = 0;
@@ -121,9 +153,12 @@ public class SystemEventHierarchyEntryThreadLocal {
 		return systemEventHierarchyEntries.push(systemEventHierarchyEntry);
 	}
 
+	public static SystemEventHierarchyEntry push(String className) {
+		return push(className, 0, SystemEventConstants.ACTION_SKIP);
+	}
+
 	public static SystemEventHierarchyEntry push(
-			String className, long classPK, int action)
-		throws SystemException {
+		String className, long classPK, int action) {
 
 		return push(PortalUtil.getClassNameId(className), classPK, action);
 	}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.documentlibrary.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DLFileEntryType
  * @generated
  */
+@ProviderType
 public class DLFileEntryTypeWrapper implements DLFileEntryType,
 	ModelWrapper<DLFileEntryType> {
 	public DLFileEntryTypeWrapper(DLFileEntryType dlFileEntryType) {
@@ -259,11 +262,9 @@ public class DLFileEntryTypeWrapper implements DLFileEntryType,
 	* Returns the user uuid of this document library file entry type.
 	*
 	* @return the user uuid of this document library file entry type
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _dlFileEntryType.getUserUuid();
 	}
 
@@ -698,6 +699,22 @@ public class DLFileEntryTypeWrapper implements DLFileEntryType,
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _dlFileEntryType.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _dlFileEntryType.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_dlFileEntryType.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -746,15 +763,22 @@ public class DLFileEntryTypeWrapper implements DLFileEntryType,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_dlFileEntryType.persist();
 	}
 
 	@Override
-	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMStructure> getDDMStructures()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMStructure> getDDMStructures() {
 		return _dlFileEntryType.getDDMStructures();
+	}
+
+	@Override
+	public java.lang.String getUnambiguousName(
+		java.util.List<com.liferay.portlet.documentlibrary.model.DLFileEntryType> dlFileEntryTypes,
+		long groupId, java.util.Locale locale)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _dlFileEntryType.getUnambiguousName(dlFileEntryTypes, groupId,
+			locale);
 	}
 
 	@Override
@@ -790,6 +814,7 @@ public class DLFileEntryTypeWrapper implements DLFileEntryType,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public DLFileEntryType getWrappedDLFileEntryType() {
 		return _dlFileEntryType;
 	}
@@ -797,6 +822,16 @@ public class DLFileEntryTypeWrapper implements DLFileEntryType,
 	@Override
 	public DLFileEntryType getWrappedModel() {
 		return _dlFileEntryType;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _dlFileEntryType.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _dlFileEntryType.isFinderCacheEnabled();
 	}
 
 	@Override

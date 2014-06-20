@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.servlet.ServletContextPool;
+import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -88,7 +89,7 @@ public abstract class JSONAction extends Action {
 				_log.warn(se.getMessage());
 			}
 
-			json = JSONFactoryUtil.serializeException(se);
+			json = JSONFactoryUtil.serializeThrowable(se);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -157,13 +158,15 @@ public abstract class JSONAction extends Action {
 			}
 		}
 
-		if (PropsValues.AUTH_TOKEN_CHECK_ENABLED &&
-			PropsValues.JSON_SERVICE_AUTH_TOKEN_ENABLED) {
-
+		if (PropsValues.JSON_SERVICE_AUTH_TOKEN_ENABLED) {
 			if (!AuthSettingsUtil.isAccessAllowed(request, _hostsAllowed)) {
-				AuthTokenUtil.check(request);
+				AuthTokenUtil.checkCSRFToken(request, getCSRFOrigin(request));
 			}
 		}
+	}
+
+	protected String getCSRFOrigin(HttpServletRequest request) {
+		return ClassUtil.getClassName(this);
 	}
 
 	protected String getReroutePath() {

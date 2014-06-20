@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,6 +22,8 @@ import java.util.Set;
  */
 public interface AuthTokenWhitelist {
 
+	public Set<String> getOriginCSRFWhitelist();
+
 	public Set<String> getPortletCSRFWhitelist();
 
 	public Set<String> getPortletCSRFWhitelistActions();
@@ -30,11 +32,17 @@ public interface AuthTokenWhitelist {
 
 	public Set<String> getPortletInvocationWhitelistActions();
 
+	public boolean isOriginCSRFWhitelisted(long companyId, String origin);
+
 	public boolean isPortletCSRFWhitelisted(
 		long companyId, String portletId, String strutsAction);
 
 	public boolean isPortletInvocationWhitelisted(
 		long companyId, String portletId, String strutsAction);
+
+	public boolean isValidSharedSecret(String sharedSecret);
+
+	public Set<String> resetOriginCSRFWhitelist();
 
 	public Set<String> resetPortletCSRFWhitelist();
 

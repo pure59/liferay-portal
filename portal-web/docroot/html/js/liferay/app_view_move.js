@@ -10,6 +10,8 @@ AUI.add(
 
 		var CSS_ACTIVE_AREA_PROXY = 'active-area-proxy';
 
+		var CSS_ICON_REPLY = 'icon-reply-all';
+
 		var DATA_FOLDER_ID = 'data-folder-id';
 
 		var SELECTOR_DRAGGABLE_NODES = '[data-draggable]';
@@ -122,15 +124,12 @@ AUI.add(
 						instance._eventEditEntry = instance.ns('editEntry');
 
 						var eventHandles = [
-							Liferay.on(instance._eventEditEntry, instance._editEntry, instance),
-							Liferay.after(instance.ns('dataRetrieveSuccess'), instance._initDropTargets, instance)
+							Liferay.on(instance._eventEditEntry, instance._editEntry, instance)
 						];
 
 						instance._eventHandles = eventHandles;
 
-						if (themeDisplay.isSignedIn() && this.get('updateable')) {
-							instance._initDragDrop();
-						}
+						instance._registerDragDrop();
 					},
 
 					destructor: function() {
@@ -237,25 +236,6 @@ AUI.add(
 							);
 						}
 
-						if (TOUCH) {
-							instance._dragTask = A.debounce(
-								function(entryLink) {
-									if (entryLink) {
-										entryLink.simulate('click');
-									}
-								},
-								A.DD.DDM.get('clickTimeThresh')
-							);
-
-							dd.after(
-								'afterMouseDown',
-								function(event) {
-									instance._dragTask(event.target.get(STR_NODE).one(instance.get('draggableCSSClass')));
-								},
-								instance
-							);
-						}
-
 						instance._initDropTargets();
 
 						instance._ddHandler = ddHandler;
@@ -268,7 +248,7 @@ AUI.add(
 							var items = instance._portletContainer.all('[data-folder="true"]');
 
 							items.each(
-								function(item, index, collection) {
+								function(item, index) {
 									item.plug(
 										A.Plugin.Drop,
 										{
@@ -303,6 +283,7 @@ AUI.add(
 						var proxyNode = event.target.get(STR_DRAG_NODE);
 
 						proxyNode.removeClass(CSS_ACTIVE_AREA_PROXY);
+						proxyNode.removeClass(CSS_ICON_REPLY);
 
 						proxyNode.empty();
 
@@ -344,7 +325,7 @@ AUI.add(
 
 							var itemTitle = Lang.trim(dropTarget.attr('data-title'));
 
-							proxyNode.html(Lang.sub(moveText, [selectedItemsCount, itemTitle]));
+							proxyNode.html(Lang.sub(moveText, [selectedItemsCount, Liferay.Util.escapeHTML(itemTitle)]));
 						}
 					},
 
@@ -368,10 +349,6 @@ AUI.add(
 
 					_onDragStart: function(event) {
 						var instance = this;
-
-						if (instance._dragTask) {
-							instance._dragTask.cancel();
-						}
 
 						var target = event.target;
 
@@ -402,14 +379,15 @@ AUI.add(
 						proxyNode.html(Lang.sub(moveText, [selectedItemsCount]));
 
 						proxyNode.addClass(CSS_ACTIVE_AREA_PROXY);
+						proxyNode.addClass(CSS_ICON_REPLY);
 
 						var dd = instance._ddHandler.dd;
 
 						dd.set(
 							STR_DATA,
 							{
-								selectedItemsCount: selectedItemsCount,
-								selectedItems: selectedItems
+								selectedItems: selectedItems,
+								selectedItemsCount: selectedItemsCount
 							}
 						);
 					},
@@ -432,7 +410,7 @@ AUI.add(
 
 						var allRowIds = instance.get('allRowIds');
 
-						var allRowsIdCheckbox = instance.ns(allRowIds + 'Checkbox');
+						var allRowsIdCheckbox = instance.ns(allRowIds);
 
 						var processEntryIds = instance.get('processEntryIds');
 
@@ -440,13 +418,23 @@ AUI.add(
 
 						var checkBoxesIds = processEntryIds.checkBoxesIds;
 
-						for (var i = 0, checkBoxesIdsLength = checkBoxesIds.length; i < checkBoxesIdsLength; i++) {
+						for (var i = 0; i < checkBoxesIds.length; i++) {
 							var listEntryIds = Util.listCheckedExcept(form, allRowsIdCheckbox, checkBoxesIds[i]);
 
 							form.get(entryIds[i]).val(listEntryIds);
 						}
 
 						submitForm(form, url);
+					},
+
+					_registerDragDrop: function() {
+						var instance = this;
+
+						instance._eventHandles.push(Liferay.after(instance.ns('dataRetrieveSuccess'), instance._initDropTargets, instance));
+
+						if (themeDisplay.isSignedIn() && this.get('updateable')) {
+							instance._initDragDrop();
+						}
 					},
 
 					_updateFolderIdRedirectUrl: function(redirectUrl) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -43,7 +43,9 @@ import java.security.Security;
 import java.security.URIParameter;
 import java.security.cert.Certificate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -112,6 +114,11 @@ public abstract class BasePACLPolicy implements PACLPolicy {
 	@Override
 	public String getServletContextName() {
 		return _servletContextName;
+	}
+
+	@Override
+	public List<URL> getURLs() {
+		return _urls;
 	}
 
 	@Override
@@ -269,5 +276,6 @@ public abstract class BasePACLPolicy implements PACLPolicy {
 	private Policy _policy;
 	private Properties _properties;
 	private String _servletContextName;
+	private List<URL> _urls = new ArrayList<URL>();
 
 }

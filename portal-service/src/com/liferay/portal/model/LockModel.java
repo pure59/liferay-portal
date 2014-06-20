@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,8 +14,9 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -37,7 +38,8 @@ import java.util.Date;
  * @see com.liferay.portal.model.impl.LockModelImpl
  * @generated
  */
-public interface LockModel extends BaseModel<Lock> {
+@ProviderType
+public interface LockModel extends BaseModel<Lock>, MVCCModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -57,6 +59,22 @@ public interface LockModel extends BaseModel<Lock> {
 	 * @param primaryKey the primary key of this lock
 	 */
 	public void setPrimaryKey(long primaryKey);
+
+	/**
+	 * Returns the mvcc version of this lock.
+	 *
+	 * @return the mvcc version of this lock
+	 */
+	@Override
+	public long getMvccVersion();
+
+	/**
+	 * Sets the mvcc version of this lock.
+	 *
+	 * @param mvccVersion the mvcc version of this lock
+	 */
+	@Override
+	public void setMvccVersion(long mvccVersion);
 
 	/**
 	 * Returns the uuid of this lock.
@@ -119,9 +137,8 @@ public interface LockModel extends BaseModel<Lock> {
 	 * Returns the user uuid of this lock.
 	 *
 	 * @return the user uuid of this lock
-	 * @throws SystemException if a system exception occurred
 	 */
-	public String getUserUuid() throws SystemException;
+	public String getUserUuid();
 
 	/**
 	 * Sets the user uuid of this lock.

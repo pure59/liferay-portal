@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.social.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see SocialActivityLimitLocalService
  * @generated
  */
+@ProviderType
 public class SocialActivityLimitLocalServiceWrapper
 	implements SocialActivityLimitLocalService,
 		ServiceWrapper<SocialActivityLimitLocalService> {
@@ -36,12 +39,10 @@ public class SocialActivityLimitLocalServiceWrapper
 	*
 	* @param socialActivityLimit the social activity limit
 	* @return the social activity limit that was added
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialActivityLimit addSocialActivityLimit(
-		com.liferay.portlet.social.model.SocialActivityLimit socialActivityLimit)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.social.model.SocialActivityLimit socialActivityLimit) {
 		return _socialActivityLimitLocalService.addSocialActivityLimit(socialActivityLimit);
 	}
 
@@ -63,13 +64,11 @@ public class SocialActivityLimitLocalServiceWrapper
 	* @param activityLimitId the primary key of the social activity limit
 	* @return the social activity limit that was removed
 	* @throws PortalException if a social activity limit with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialActivityLimit deleteSocialActivityLimit(
 		long activityLimitId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialActivityLimitLocalService.deleteSocialActivityLimit(activityLimitId);
 	}
 
@@ -78,12 +77,10 @@ public class SocialActivityLimitLocalServiceWrapper
 	*
 	* @param socialActivityLimit the social activity limit
 	* @return the social activity limit that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialActivityLimit deleteSocialActivityLimit(
-		com.liferay.portlet.social.model.SocialActivityLimit socialActivityLimit)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.social.model.SocialActivityLimit socialActivityLimit) {
 		return _socialActivityLimitLocalService.deleteSocialActivityLimit(socialActivityLimit);
 	}
 
@@ -97,13 +94,11 @@ public class SocialActivityLimitLocalServiceWrapper
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _socialActivityLimitLocalService.dynamicQuery(dynamicQuery);
 	}
 
@@ -118,13 +113,12 @@ public class SocialActivityLimitLocalServiceWrapper
 	* @param start the lower bound of the range of model instances
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @return the range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		int end) {
 		return _socialActivityLimitLocalService.dynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -141,15 +135,13 @@ public class SocialActivityLimitLocalServiceWrapper
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return _socialActivityLimitLocalService.dynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -159,12 +151,10 @@ public class SocialActivityLimitLocalServiceWrapper
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public long dynamicQueryCount(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _socialActivityLimitLocalService.dynamicQueryCount(dynamicQuery);
 	}
 
@@ -174,21 +164,18 @@ public class SocialActivityLimitLocalServiceWrapper
 	* @param dynamicQuery the dynamic query
 	* @param projection the projection to apply to the query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public long dynamicQueryCount(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
-		com.liferay.portal.kernel.dao.orm.Projection projection)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.Projection projection) {
 		return _socialActivityLimitLocalService.dynamicQueryCount(dynamicQuery,
 			projection);
 	}
 
 	@Override
 	public com.liferay.portlet.social.model.SocialActivityLimit fetchSocialActivityLimit(
-		long activityLimitId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long activityLimitId) {
 		return _socialActivityLimitLocalService.fetchSocialActivityLimit(activityLimitId);
 	}
 
@@ -198,21 +185,33 @@ public class SocialActivityLimitLocalServiceWrapper
 	* @param activityLimitId the primary key of the social activity limit
 	* @return the social activity limit
 	* @throws PortalException if a social activity limit with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialActivityLimit getSocialActivityLimit(
 		long activityLimitId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialActivityLimitLocalService.getSocialActivityLimit(activityLimitId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
+		return _socialActivityLimitLocalService.getActionableDynamicQuery();
+	}
+
+	/**
+	* @throws PortalException
+	*/
+	@Override
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _socialActivityLimitLocalService.deletePersistedModel(persistedModel);
 	}
 
 	@Override
 	public com.liferay.portal.model.PersistedModel getPersistedModel(
 		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialActivityLimitLocalService.getPersistedModel(primaryKeyObj);
 	}
 
@@ -226,12 +225,10 @@ public class SocialActivityLimitLocalServiceWrapper
 	* @param start the lower bound of the range of social activity limits
 	* @param end the upper bound of the range of social activity limits (not inclusive)
 	* @return the range of social activity limits
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public java.util.List<com.liferay.portlet.social.model.SocialActivityLimit> getSocialActivityLimits(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return _socialActivityLimitLocalService.getSocialActivityLimits(start,
 			end);
 	}
@@ -240,11 +237,9 @@ public class SocialActivityLimitLocalServiceWrapper
 	* Returns the number of social activity limits.
 	*
 	* @return the number of social activity limits
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public int getSocialActivityLimitsCount()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getSocialActivityLimitsCount() {
 		return _socialActivityLimitLocalService.getSocialActivityLimitsCount();
 	}
 
@@ -253,12 +248,10 @@ public class SocialActivityLimitLocalServiceWrapper
 	*
 	* @param socialActivityLimit the social activity limit
 	* @return the social activity limit that was updated
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portlet.social.model.SocialActivityLimit updateSocialActivityLimit(
-		com.liferay.portlet.social.model.SocialActivityLimit socialActivityLimit)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.social.model.SocialActivityLimit socialActivityLimit) {
 		return _socialActivityLimitLocalService.updateSocialActivityLimit(socialActivityLimit);
 	}
 
@@ -286,8 +279,7 @@ public class SocialActivityLimitLocalServiceWrapper
 	public com.liferay.portlet.social.model.SocialActivityLimit addActivityLimit(
 		long userId, long groupId, long classNameId, long classPK,
 		int activityType, java.lang.String activityCounterName, int limitPeriod)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _socialActivityLimitLocalService.addActivityLimit(userId,
 			groupId, classNameId, classPK, activityType, activityCounterName,
 			limitPeriod);
@@ -296,8 +288,7 @@ public class SocialActivityLimitLocalServiceWrapper
 	@Override
 	public com.liferay.portlet.social.model.SocialActivityLimit fetchActivityLimit(
 		long groupId, long userId, long classNameId, long classPK,
-		int activityType, java.lang.String activityCounterName)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int activityType, java.lang.String activityCounterName) {
 		return _socialActivityLimitLocalService.fetchActivityLimit(groupId,
 			userId, classNameId, classPK, activityType, activityCounterName);
 	}
@@ -305,6 +296,7 @@ public class SocialActivityLimitLocalServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public SocialActivityLimitLocalService getWrappedSocialActivityLimitLocalService() {
 		return _socialActivityLimitLocalService;
 	}
@@ -312,6 +304,7 @@ public class SocialActivityLimitLocalServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedSocialActivityLimitLocalService(
 		SocialActivityLimitLocalService socialActivityLimitLocalService) {
 		_socialActivityLimitLocalService = socialActivityLimitLocalService;

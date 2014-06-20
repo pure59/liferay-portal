@@ -29,23 +29,48 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SUCCESS_MESSAGE</td>
+	<td>//div[contains(@class,'alert-success')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SUCCESS_MESSAGE_RECYCLE_BIN</td>
-	<td>//form[@id='_19_undoForm']</td>
+	<td>//form[@id='_182_undoForm']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>INFO_MESSAGE_THREAD</td>
-	<td>//div[@id='messageBoardsThreadsPanelContent']/div/div[@class='alert alert-info']</td>
+	<td>//div[@id='messageBoardsThreadsPanelContent']/div/div[contains(@class,'alert') and contains(@class,'alert-info')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ADD_CATEGORY_BUTTON</td>
-	<td>//button[contains(.,'Add Category')]</td>
+	<td>//div[@class='category-buttons']/a[contains(.,'Add Category')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PERMISSIONS_BUTTON</td>
+	<td>//div[@class='category-buttons']/a[contains(.,'Permissions')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>POST_NEW_THREAD_BUTTON</td>
-	<td>//button[contains(.,'Post New Thread')]</td>
+	<td>//div[@class='category-buttons']/a[contains(.,'Post New Thread')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>RSS_LINK</td>
+	<td>//div[contains(@class,'category-subscription-types')]/span/a/span[contains(.,'RSS')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SUBSCRIBE_LINK</td>
+	<td>//div[contains(@class,'category-subscription-types')]/span/a/span[contains(.,'Subscribe')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>UNSUBSCRIBE_LINK</td>
+	<td>//div[contains(@class,'category-subscription-types')]/span/a/span[contains(.,'Unsubscribe')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -56,32 +81,42 @@
 <!--NAVIGATION-->
 <tr>
 	<td>NAVIGATION_MESSAGE_BOARDS_HOME</td>
-	<td>//section[@id='portlet_19']//ul/li/a[contains(.,'Message Boards Home')]</td>
+	<td>//div[contains(@class,'navbar')]//ul/li/a[contains(.,'Message Boards Home')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>NAVIGATION_RECENT_POSTS</td>
-	<td>//section[@id='portlet_19']//ul/li/a[contains(.,'Recent Posts')]</td>
+	<td>//div[contains(@class,'navbar')]//ul/li/a[contains(.,'Recent Posts')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>NAVIGATION_MY_POSTS</td>
-	<td>//section[@id='portlet_19']//ul/li/a[contains(.,'My Posts')]</td>
+	<td>//div[contains(@class,'navbar')]//ul/li/a[contains(.,'My Posts')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>NAVIGATION_MY_SUBSCRIPTIONS</td>
-	<td>//section[@id='portlet_19']//ul/li/a[contains(.,'My Subscriptions')]</td>
+	<td>//div[contains(@class,'navbar')]//ul/li/a[contains(.,'My Subscriptions')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>NAVIGATION_STATISTICS</td>
-	<td>//section[@id='portlet_19']//ul/li/a[contains(.,'Statistics')]</td>
+	<td>//div[contains(@class,'navbar')]//ul/li/a[contains(.,'Statistics')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>NAVIGATION_BANNED_USERS</td>
-	<td>//section[@id='portlet_19']//ul/li/a[contains(.,'Banned Users')]</td>
+	<td>//div[contains(@class,'navbar')]//ul/li/a[contains(.,'Banned Users')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>NAVIGATION_SEARCH_FIELD</td>
+	<td>//input[contains(@class,'search-query')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>NAVIGATION_SEARCH_BUTTON</td>
+	<td>//button[@type='submit']</td>
 	<td></td>
 </tr>
 <tr>
@@ -91,28 +126,58 @@
 </tr>
 <!--CATEGORY_TABLE-->
 <tr>
-	<td>CATEGORY_TABLE_CATEGORY_1</td>
-	<td>xpath=(//div[contains(@id,'mbCategoriesSearchContainer')]//tr/td[1]/a)[1]</td>
+	<td>CATEGORY_TABLE_PANEL</td>
+	<td>//div[@id=&quot;messageBoardsCategoriesPanel&quot;]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>CATEGORY_TABLE_CATEGORIES_1</td>
-	<td>xpath=(//div[contains(@id,'mbCategoriesSearchContainer')]//tr/td[2]/a)[1]</td>
+	<td>CATEGORY_TABLE_CATEGORY</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[contains(.,'${key_categoryName}')]/td[1]/a/span[@class='category-title'] | //div[contains(@id,'mbCategoriesSearchContainer')]//tr[contains(.,'${key_categoryName}')]/td[1]/a/strong[contains(.,'${key_categoryName}')]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>CATEGORY_TABLE_THREADS_1</td>
-	<td>xpath=(//div[contains(@id,'mbCategoriesSearchContainer')]//tr/td[3]/a)[1]</td>
+	<td>CATEGORY_TABLE_CATEGORY_DESCRIPTION</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[contains(.,'${key_categoryName}')]/td[1]/a/div[@class='category-description']</td>
 	<td></td>
 </tr>
 <tr>
-	<td>CATEGORY_TABLE_POSTS_1</td>
-	<td>xpath=(//div[contains(@id,'mbCategoriesSearchContainer')]//tr/td[4]/a)[1]</td>
+	<td>CATEGORY_TABLE_CATEGORY_SUBCATEGORY</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[contains(.,'${key_categoryName}')]/td/a[2]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>CATEGORY_TABLE_ACTIONS_1</td>
-	<td>xpath=(//div[contains(@id,'mbCategoriesSearchContainer')]//tr/td/div/a[@title='Actions'])[1]</td>
+	<td>CATEGORY_TABLE_CATEGORY_SUBCATEGORY_GENERIC</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[1]/td/a[2]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CATEGORY_TABLE_CATEGORY_GENERIC</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[1]/td[1]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CATEGORY_TABLE_CATEGORIES</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[contains(.,'${key_categoryName}')]/td[2]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CATEGORY_TABLE_THREADS</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[contains(.,'${key_categoryName}')]/td[3]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CATEGORY_TABLE_POSTS</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[contains(.,'${key_categoryName}')]/td[4]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CATEGORY_TABLE_ACTIONS</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[contains(.,'${key_categoryName}')]/td/div/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CATEGORY_TABLE_ACTIONS_GENERIC</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[1]//div/a</td>
 	<td></td>
 </tr>
 <tr>
@@ -163,33 +228,53 @@
 </tr>
 <!--THREAD_TABLE-->
 <tr>
+	<td>THREAD_TABLE_PANEL</td>
+	<td>//div[@id=&quot;messageBoardsThreadsPanel&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>THREAD_TABLE_THREAD_LOCKED_ICON</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[1]/a/img[@title='Thread Locked']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>THREAD_TABLE_THREAD</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${threadSubject}')]/td[1]/a</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[1]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>THREAD_TABLE_FLAG</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[2]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>THREAD_TABLE_STARTED_BY</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${threadSubject}')]/td[3]/a</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[3]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>THREAD_TABLE_POSTS</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${threadSubject}')]/td[4]/a</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[4]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>THREAD_TABLE_LAST_POST</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${threadSubject}')]/td[6]/a</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[6]/div</td>
 	<td></td>
 </tr>
 <tr>
 	<td>THREAD_TABLE_ACTIONS</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${threadSubject}')]//a[@title='Actions']</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]//a[contains(@class,'btn')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>THREAD_TABLE_ACTIONS_GENERIC</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[1]//a[@title='Actions']</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[1]//a[contains(@class,'btn')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>THREAD_TABLE_RSS</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]//a[contains(.,'RSS')]</td>
 	<td></td>
 </tr>
 <tr>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,6 @@
 package com.liferay.portlet.layoutsadmin.util;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.DateUtil;
@@ -69,7 +68,7 @@ public class SitemapImpl implements Sitemap {
 	@Override
 	public String getSitemap(
 			long groupId, boolean privateLayout, ThemeDisplay themeDisplay)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		Document document = SAXReaderUtil.createDocument();
 
@@ -167,7 +166,8 @@ public class SitemapImpl implements Sitemap {
 				Locale locale = entry.getKey();
 				String href = entry.getValue();
 
-				Element alternateURLElement = urlElement.addElement("link");
+				Element alternateURLElement = urlElement.addElement(
+					"xhtml:link", "http://www.w3.org/1999/xhtml");
 
 				alternateURLElement.addAttribute("href", href);
 				alternateURLElement.addAttribute(
@@ -175,7 +175,8 @@ public class SitemapImpl implements Sitemap {
 				alternateURLElement.addAttribute("rel", "alternate");
 			}
 
-			Element alternateURLElement = urlElement.addElement("link");
+			Element alternateURLElement = urlElement.addElement(
+				"xhtml:link", "http://www.w3.org/1999/xhtml");
 
 			alternateURLElement.addAttribute("rel", "alternate");
 			alternateURLElement.addAttribute("hreflang", "x-default");
@@ -184,11 +185,15 @@ public class SitemapImpl implements Sitemap {
 	}
 
 	protected Map<Locale, String> getAlternateURLs(
-		String canonicalURL, ThemeDisplay themeDisplay, Layout layout) {
+			String canonicalURL, ThemeDisplay themeDisplay, Layout layout)
+		throws PortalException {
 
 		Map<Locale, String> alternateURLs = new HashMap<Locale, String>();
 
-		for (Locale availableLocale : LanguageUtil.getAvailableLocales()) {
+		Locale[] availableLocales = LanguageUtil.getAvailableLocales(
+			layout.getGroupId());
+
+		for (Locale availableLocale : availableLocales) {
 			String alternateURL = PortalUtil.getAlternateURL(
 				canonicalURL, themeDisplay, availableLocale, layout);
 
@@ -200,7 +205,7 @@ public class SitemapImpl implements Sitemap {
 
 	protected void visitArticles(
 			Element element, Layout layout, ThemeDisplay themeDisplay)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		List<JournalArticle> journalArticles =
 			JournalArticleServiceUtil.getArticlesByLayoutUuid(
@@ -244,10 +249,11 @@ public class SitemapImpl implements Sitemap {
 				element, articleURL, null, journalArticle.getModifiedDate(),
 				articleURL, getAlternateURLs(articleURL, themeDisplay, layout));
 
-			Locale[] availableLocales = LanguageUtil.getAvailableLocales();
+			Locale[] availableLocales = LanguageUtil.getAvailableLocales(
+				layout.getGroupId());
 
 			if (availableLocales.length > 1) {
-				Locale defaultLocale = LocaleUtil.getDefault();
+				Locale defaultLocale = LocaleUtil.getSiteDefault();
 
 				for (Locale availableLocale : availableLocales) {
 					if (!availableLocale.equals(defaultLocale)) {
@@ -268,12 +274,12 @@ public class SitemapImpl implements Sitemap {
 
 	protected void visitLayout(
 			Element element, Layout layout, ThemeDisplay themeDisplay)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UnicodeProperties typeSettingsProperties =
 			layout.getTypeSettingsProperties();
 
-		if (layout.isHidden() || !PortalUtil.isLayoutSitemapable(layout) ||
+		if (!PortalUtil.isLayoutSitemapable(layout) ||
 			!GetterUtil.getBoolean(
 				typeSettingsProperties.getProperty("sitemap-include"), true)) {
 
@@ -291,10 +297,11 @@ public class SitemapImpl implements Sitemap {
 			layout.getModifiedDate(), layoutFullURL,
 			getAlternateURLs(layoutFullURL, themeDisplay, layout));
 
-		Locale[] availableLocales = LanguageUtil.getAvailableLocales();
+		Locale[] availableLocales = LanguageUtil.getAvailableLocales(
+			layout.getGroupId());
 
 		if (availableLocales.length > 1) {
-			Locale defaultLocale = LocaleUtil.getDefault();
+			Locale defaultLocale = LocaleUtil.getSiteDefault();
 
 			for (Locale availableLocale : availableLocales) {
 				if (availableLocale.equals(defaultLocale)) {
@@ -310,17 +317,18 @@ public class SitemapImpl implements Sitemap {
 					getAlternateURLs(layoutFullURL, themeDisplay, layout));
 			}
 		}
-
-		visitArticles(element, layout, themeDisplay);
-		visitLayouts(element, layout.getChildren(), themeDisplay);
 	}
 
 	protected void visitLayouts(
 			Element element, List<Layout> layouts, ThemeDisplay themeDisplay)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		for (Layout layout : layouts) {
 			visitLayout(element, layout, themeDisplay);
+
+			visitArticles(element, layout, themeDisplay);
+
+			visitLayouts(element, layout.getChildren(), themeDisplay);
 		}
 	}
 

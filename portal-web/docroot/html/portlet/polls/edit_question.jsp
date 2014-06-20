@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -56,6 +56,8 @@ boolean deleteChoice = false;
 if (choiceName > 0) {
 	deleteChoice = true;
 }
+
+boolean showHeader = ParamUtil.getBoolean(request, "showHeader", true);
 %>
 
 <liferay-portlet:actionURL refererPlid="<%= themeDisplay.getRefererPlid() %>" var="editQuestionURL">
@@ -70,11 +72,13 @@ if (choiceName > 0) {
 	<aui:input name="choicesCount" type="hidden" value="<%= choicesCount %>" />
 	<aui:input name="choiceName" type="hidden" value="" />
 
-	<liferay-ui:header
-		backURL="<%= redirect %>"
-		localizeTitle="<%= (question == null) %>"
-		title='<%= (question == null) ? "new-question" : question.getTitle(locale) %>'
-	/>
+	<c:if test="<%= showHeader %>">
+		<liferay-ui:header
+			backURL="<%= redirect %>"
+			localizeTitle="<%= (question == null) %>"
+			title='<%= (question == null) ? "new-poll" : question.getTitle(locale) %>'
+		/>
+	</c:if>
 
 	<liferay-ui:error exception="<%= QuestionChoiceException.class %>" message="please-enter-valid-choices" />
 	<liferay-ui:error exception="<%= QuestionDescriptionException.class %>" message="please-enter-a-valid-description" />
@@ -84,7 +88,7 @@ if (choiceName > 0) {
 	<aui:model-context bean="<%= question %>" model="<%= PollsQuestion.class %>" />
 
 	<aui:fieldset>
-		<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" name="title" />
+		<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) || windowState.equals(LiferayWindowState.POP_UP) %>" name="title" />
 
 		<aui:input label="polls-question" name="description" />
 
@@ -128,7 +132,9 @@ if (choiceName > 0) {
 			}
 			%>
 
-			<aui:button cssClass="add-choice" onClick='<%= renderResponse.getNamespace() + "addPollChoice();" %>' value="add-choice" />
+			<aui:button-row>
+				<aui:button cssClass="add-choice" onClick='<%= renderResponse.getNamespace() + "addPollChoice();" %>' value="add-choice" />
+			</aui:button-row>
 		</aui:field-wrapper>
 
 		<c:if test="<%= question == null %>">
@@ -149,12 +155,12 @@ if (choiceName > 0) {
 
 <aui:script>
 	function <portlet:namespace />addPollChoice() {
+		document.<portlet:namespace />fm.<portlet:namespace />choicesCount.value = '<%= choicesCount + 1 %>';
+
 		<liferay-portlet:actionURL allowEmptyParam="<%= true %>" var="addPollChoiceURL">
 			<liferay-portlet:param name="struts_action" value="/polls/edit_question" />
 			<liferay-portlet:param name="<%= EditQuestionAction.CHOICE_DESCRIPTION_PREFIX + (char)(96 + choicesCount + 1) %>" value="" />
 		</liferay-portlet:actionURL>
-
-		document.<portlet:namespace />fm.<portlet:namespace />choicesCount.value = '<%= choicesCount + 1 %>';
 
 		submitForm(document.<portlet:namespace />fm, '<%= addPollChoiceURL %>');
 	}
@@ -167,7 +173,7 @@ if (choiceName > 0) {
 	}
 
 	function <portlet:namespace />saveQuestion() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = "<%= (question == null) ? Constants.ADD : Constants.UPDATE %>";
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (question == null) ? Constants.ADD : Constants.UPDATE %>';
 
 		submitForm(document.<portlet:namespace />fm);
 	}
@@ -176,9 +182,9 @@ if (choiceName > 0) {
 <%
 if (question != null) {
 	PortalUtil.addPortletBreadcrumbEntry(request, question.getTitle(locale), null);
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "edit"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "edit"), currentURL);
 }
 else {
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "add-question"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "add-poll"), currentURL);
 }
 %>

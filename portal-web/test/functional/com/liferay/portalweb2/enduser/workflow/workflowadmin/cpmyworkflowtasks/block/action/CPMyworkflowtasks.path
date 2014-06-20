@@ -25,17 +25,37 @@
 </tr>
 <tr>
 	<td>SUCCESS_MESSAGE</td>
-	<td>//div[@class='alert alert-success']</td>
+	<td>//div[contains(@class,'alert') and contains(@class,'alert-success')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ASSIGNED_TO_ME_INFO_MESSAGE</td>
-	<td>//div[@id='workflowMyTasksPanel']//div[@class='alert alert-info']</td>
+	<td>//div[@id='workflowMyTasksPanel']//div[contains(@class,'alert') and contains(@class,'alert-info')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ASSIGNED_TO_MY_ROLES_INFO_MESSAGE</td>
-	<td>//div[@id='workflowMyRolesTasksPanel']//div[@class='alert alert-info']</td>
+	<td>//div[@id='workflowMyRolesTasksPanel']//div[contains(@class,'alert') and contains(@class,'alert-info')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ASSIGNED_TO_ME_COLLAPSED</td>
+	<td>//div[@class='panel-heading toggler-header toggler-header-collapsed']//span[contains(.,'Assigned to Me')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ASSIGNED_TO_ME_EXPANDED</td>
+	<td>//div[@class='panel-heading toggler-header toggler-header-expanded']//span[contains(.,'Assigned to Me')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ASSIGNED_TO_MY_ROLES_COLLAPSED</td>
+	<td>//div[@class='panel-heading toggler-header toggler-header-collapsed']//span[contains(.,'Assigned to My Roles')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ASSIGNED_TO_MY_ROLES_EXPANDED</td>
+	<td>//div[@class='panel-heading toggler-header toggler-header-expanded']//span[contains(.,'Assigned to My Roles')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -46,12 +66,12 @@
 <!--NAVIGATION-->
 <tr>
 	<td>NAVIGATION_PENDING</td>
-	<td>//ul[@class='nav nav-tabs']/li/a[contains(.,'Pending')]</td>
+	<td>//ul[contains(@class,'nav') and contains(@class,'nav-tabs')]/li/a[contains(.,'Pending')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>NAVIGATION_COMPLETED</td>
-	<td>//ul[@class='nav nav-tabs']/li/a[contains(.,'Completed')]</td>
+	<td>//ul[contains(@class,'nav') and contains(@class,'nav-tabs')]/li/a[contains(.,'Completed')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -76,6 +96,17 @@
 	<td></td>
 </tr>
 <!--ADVANCED_SEARCH-->
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--TABLE_GENERIC-->
+<tr>
+	<td>TABLE_GENERIC_ASSET_TITLE</td>
+	<td>//tr[contains(.,'${key_workflowAssetTitle}')]/td[2]/a</td>
+	<td></td>
+</tr>
 <tr>
 	<td></td>
 	<td></td>
@@ -126,6 +157,11 @@
 <tr>
 	<td>ASSIGNED_TO_ME_MENULIST_REJECT</td>
 	<td>//a[@role='menuitem' and contains(.,'Reject')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ASSIGNED_TO_ME_MENULIST_RESUBMIT</td>
+	<td>//a[@role='menuitem' and contains(.,'Resubmit')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -192,6 +228,16 @@
 </tr>
 <!--PANEL-->
 <tr>
+	<td>PANEL_DUE_DATE</td>
+	<td>//input[contains(@id,'_153_') and contains(@id,'_dueDate')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PANEL_DUE_DATE_TIME</td>
+	<td>//input[contains(@id,'_153_') and contains(@id,'_dueDateTime')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PANEL_COMMENT_FIELD</td>
 	<td>//textarea[@id='_153_comment']</td>
 	<td></td>
@@ -204,6 +250,48 @@
 <tr>
 	<td>PANEL_CANCEL_BUTTON</td>
 	<td>//button[.='Cancel']</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--PREVIEW-->
+<tr>
+	<td>PREVIEW_ACTIVITY</td>
+	<td>//div[@class='panel-toggle' and contains(.,'Activities')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PREVIEW_ACTIVITY_ENTRY</td>
+	<td>//div[@class='panel-inner']/div/div[contains(.,'${key_workflowActivityComment}')]</td>
+	<td></td>
+</tr>
+<!--COMPLETED_TABLE-->
+<tr>
+	<td>COMPLETED_TABLE_TASK</td>
+	<td>//tr[contains(.,'${key_workflowAssetTitle}')]/td/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COMPLETED_TABLE_ASSET_TITLE</td>
+	<td>//tr[contains(.,'${key_workflowAssetTitle}')]/td[2]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COMPLETED_TABLE_ASSET_TYPE</td>
+	<td>//tr[contains(.,'${key_workflowAssetTitle}')]/td[3]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COMPLETED_TABLE_LAST_ACTIVITY_DATE</td>
+	<td>//tr[contains(.,'${key_workflowAssetTitle}')]/td[4]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COMPLETED_TABLE_DUE_DATE</td>
+	<td>//tr[contains(.,'${key_workflowAssetTitle}')]/td[5]/a</td>
 	<td></td>
 </tr>
 </tbody>

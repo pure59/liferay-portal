@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.wiki.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see WikiPage
  * @generated
  */
+@ProviderType
 public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	public WikiPageWrapper(WikiPage wikiPage) {
 		_wikiPage = wikiPage;
@@ -367,11 +370,9 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	* Returns the user uuid of this wiki page.
 	*
 	* @return the user uuid of this wiki page
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _wikiPage.getUserUuid();
 	}
 
@@ -709,11 +710,9 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	* Returns the status by user uuid of this wiki page.
 	*
 	* @return the status by user uuid of this wiki page
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getStatusByUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getStatusByUserUuid() {
 		return _wikiPage.getStatusByUserUuid();
 	}
 
@@ -768,8 +767,70 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	}
 
 	/**
+	* Returns the trash entry created when this wiki page was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this wiki page.
+	*
+	* @return the trash entry created when this wiki page was moved to the Recycle Bin
+	*/
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry getTrashEntry()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _wikiPage.getTrashEntry();
+	}
+
+	/**
+	* Returns the class primary key of the trash entry for this wiki page.
+	*
+	* @return the class primary key of the trash entry for this wiki page
+	*/
+	@Override
+	public long getTrashEntryClassPK() {
+		return _wikiPage.getTrashEntryClassPK();
+	}
+
+	/**
+	* Returns the trash handler for this wiki page.
+	*
+	* @return the trash handler for this wiki page
+	*/
+	@Override
+	public com.liferay.portal.kernel.trash.TrashHandler getTrashHandler() {
+		return _wikiPage.getTrashHandler();
+	}
+
+	/**
+	* Returns <code>true</code> if this wiki page is in the Recycle Bin.
+	*
+	* @return <code>true</code> if this wiki page is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrash() {
+		return _wikiPage.isInTrash();
+	}
+
+	/**
+	* Returns <code>true</code> if the parent of this wiki page is in the Recycle Bin.
+	*
+	* @return <code>true</code> if the parent of this wiki page is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrashContainer() {
+		return _wikiPage.isInTrashContainer();
+	}
+
+	@Override
+	public boolean isInTrashExplicitly() {
+		return _wikiPage.isInTrashExplicitly();
+	}
+
+	@Override
+	public boolean isInTrashImplicitly() {
+		return _wikiPage.isInTrashImplicitly();
+	}
+
+	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
+	@Deprecated
 	@Override
 	public boolean getApproved() {
 		return _wikiPage.getApproved();
@@ -833,16 +894,6 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	@Override
 	public boolean isIncomplete() {
 		return _wikiPage.isIncomplete();
-	}
-
-	/**
-	* Returns <code>true</code> if this wiki page is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this wiki page is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _wikiPage.isInTrash();
 	}
 
 	/**
@@ -964,40 +1015,44 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_wikiPage.persist();
 	}
 
 	@Override
 	public com.liferay.portal.kernel.repository.model.Folder addAttachmentsFolder()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _wikiPage.addAttachmentsFolder();
 	}
 
 	@Override
-	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getAttachmentsFileEntries()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public com.liferay.portlet.wiki.model.WikiPage fetchParentPage() {
+		return _wikiPage.fetchParentPage();
+	}
+
+	@Override
+	public com.liferay.portlet.wiki.model.WikiPage fetchRedirectPage() {
+		return _wikiPage.fetchRedirectPage();
+	}
+
+	@Override
+	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getAttachmentsFileEntries() {
 		return _wikiPage.getAttachmentsFileEntries();
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getAttachmentsFileEntries(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return _wikiPage.getAttachmentsFileEntries(start, end);
 	}
 
 	@Override
-	public int getAttachmentsFileEntriesCount()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getAttachmentsFileEntriesCount() {
 		return _wikiPage.getAttachmentsFileEntriesCount();
 	}
 
 	@Override
-	public long getAttachmentsFolderId()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public long getAttachmentsFolderId() {
 		return _wikiPage.getAttachmentsFolderId();
 	}
 
@@ -1007,21 +1062,18 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	}
 
 	@Override
-	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getDeletedAttachmentsFileEntries()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getDeletedAttachmentsFileEntries() {
 		return _wikiPage.getDeletedAttachmentsFileEntries();
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getDeletedAttachmentsFileEntries(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return _wikiPage.getDeletedAttachmentsFileEntries(start, end);
 	}
 
 	@Override
-	public int getDeletedAttachmentsFileEntriesCount()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getDeletedAttachmentsFileEntriesCount() {
 		return _wikiPage.getDeletedAttachmentsFileEntriesCount();
 	}
 
@@ -1031,13 +1083,13 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	}
 
 	@Override
-	public long getNodeAttachmentsFolderId()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public long getNodeAttachmentsFolderId() {
 		return _wikiPage.getNodeAttachmentsFolderId();
 	}
 
 	@Override
-	public com.liferay.portlet.wiki.model.WikiPage getParentPage() {
+	public com.liferay.portlet.wiki.model.WikiPage getParentPage()
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _wikiPage.getParentPage();
 	}
 
@@ -1047,13 +1099,9 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	}
 
 	@Override
-	public com.liferay.portlet.wiki.model.WikiPage getRedirectPage() {
+	public com.liferay.portlet.wiki.model.WikiPage getRedirectPage()
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _wikiPage.getRedirectPage();
-	}
-
-	@Override
-	public com.liferay.portlet.wiki.model.WikiNode getTrashContainer() {
-		return _wikiPage.getTrashContainer();
 	}
 
 	@Override
@@ -1069,11 +1117,6 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	@Override
 	public java.util.List<com.liferay.portlet.wiki.model.WikiPage> getViewableParentPages() {
 		return _wikiPage.getViewableParentPages();
-	}
-
-	@Override
-	public boolean isInTrashContainer() {
-		return _wikiPage.isInTrashContainer();
 	}
 
 	@Override
@@ -1108,6 +1151,7 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public WikiPage getWrappedWikiPage() {
 		return _wikiPage;
 	}
@@ -1115,6 +1159,16 @@ public class WikiPageWrapper implements WikiPage, ModelWrapper<WikiPage> {
 	@Override
 	public WikiPage getWrappedModel() {
 		return _wikiPage;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _wikiPage.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _wikiPage.isFinderCacheEnabled();
 	}
 
 	@Override

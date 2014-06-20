@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -53,7 +53,7 @@ long ruleGroupId = BeanParamUtil.getLong(ruleGroup, request, "ruleGroupId");
 	<aui:model-context bean="<%= ruleGroup %>" model="<%= MDRRuleGroup.class %>" />
 
 	<aui:fieldset>
-		<aui:input name="name" />
+		<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) || windowState.equals(LiferayWindowState.POP_UP) %>" name="name" />
 
 		<aui:input name="description" />
 	</aui:fieldset>
@@ -73,7 +73,7 @@ long ruleGroupId = BeanParamUtil.getLong(ruleGroup, request, "ruleGroupId");
 			</liferay-portlet:renderURL>
 
 			<liferay-ui:icon
-				image="manage_nodes"
+				iconCssClass="icon-cog"
 				label="<%= true %>"
 				message="manage-classification-rules"
 				url="<%= editRulesURL.toString() %>"

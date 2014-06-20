@@ -19,33 +19,43 @@
 	<td></td>
 </tr>
 <tr>
+	<td>PORTLET_TITLE</td>
+	<td>//h2[@id='cpPortletTitle']/span[@class='portlet-title-text']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>NAVBAR_CONTAINER</td>
+	<td>//div[@class='navbar ' or contains(@class,'navbar-default')]//div[@class='container']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ADD_CATEGORY_BUTTON</td>
-	<td>//div[@class='category-buttons']/button[contains(.,'Add Category')]</td>
+	<td>//div[@class='category-buttons']/a[contains(.,'Add Category')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>POST_NEW_THREAD_BUTTON</td>
-	<td>//div[@class='category-buttons']/button[contains(.,'Post New Thread')]</td>
+	<td>//div[@class='category-buttons']/a[contains(.,'Post New Thread')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PERMISSIONS_BUTTON</td>
-	<td>//div[@class='category-buttons']/button[contains(.,'Permissions')]</td>
+	<td>//div[@class='category-buttons']/a[contains(.,'Permissions')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SUCCESS_MESSAGE</td>
-	<td>//div[@class='alert alert-success']</td>
+	<td>//div[contains(@class,'alert') and contains(@class,'alert-success')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SUCCESS_MESSAGE_RECYCLE_BIN</td>
-	<td>//form[@id='_162_undoForm']</td>
+	<td>//form[@id='_182_undoForm']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>INFO_MESSAGE_THREAD</td>
-	<td>//div[@id='messageBoardsThreadsPanelContent']/div/form/div[@class='alert alert-info']</td>
+	<td>//div[@id='messageBoardsThreadsPanelContent']/div/form/div[contains(@class,'alert') and contains(@class,'alert-info')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -102,7 +112,7 @@
 </tr>
 <tr>
 	<td>CATEGORY_TABLE_ACTIONS</td>
-	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[contains(.,'${key_categoryName}')]/td[6]/div/a[@title='Actions']</td>
+	<td>//div[contains(@id,'mbCategoriesSearchContainer')]//tr[contains(.,'${key_categoryName}')]/td[6]/div/a</td>
 	<td></td>
 </tr>
 <tr>
@@ -190,7 +200,7 @@
 </tr>
 <tr>
 	<td>THREAD_TABLE_ACTIONS</td>
-	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td[8]/div/a[@title='Actions']</td>
+	<td>//div[contains(@id,'mbThreadsSearchContainer')]//tr[contains(.,'${key_threadSubject}')]/td/div/a</td>
 	<td></td>
 </tr>
 <tr>

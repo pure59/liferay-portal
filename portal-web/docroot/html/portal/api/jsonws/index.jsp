@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,9 +22,9 @@
 
 <div id="wrapper">
 	<header id="banner" role="banner">
-		<hgroup id="heading">
+		<div id="heading">
 			<h1 class="site-title">
-				<a class="logo" href="<%= jsonWSContextPath %>" title="JSONWS API">
+				<a class="logo" href="<%= HtmlUtil.escapeAttribute(jsonWSContextPath) %>" title="JSONWS API">
 					<img alt="JSONWS API" height="<%= themeDisplay.getCompanyLogoHeight() %>" src="<%= HtmlUtil.escape(themeDisplay.getCompanyLogo()) %>" width="<%= themeDisplay.getCompanyLogoWidth() %>" />
 				</a>
 
@@ -32,7 +32,7 @@
 					JSONWS API
 				</span>
 			</h1>
-		</hgroup>
+		</div>
 	</header>
 
 	<div id="content">

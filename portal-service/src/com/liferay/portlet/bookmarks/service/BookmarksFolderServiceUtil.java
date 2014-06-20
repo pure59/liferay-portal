@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.bookmarks.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.bookmarks.service.impl.BookmarksFolderServiceImpl
  * @generated
  */
+@ProviderType
 public class BookmarksFolderServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -60,149 +63,139 @@ public class BookmarksFolderServiceUtil {
 		long parentFolderId, java.lang.String name,
 		java.lang.String description,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addFolder(parentFolderId, name, description, serviceContext);
 	}
 
 	public static void deleteFolder(long folderId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteFolder(folderId);
 	}
 
 	public static void deleteFolder(long folderId, boolean includeTrashedEntries)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteFolder(folderId, includeTrashedEntries);
 	}
 
 	public static com.liferay.portlet.bookmarks.model.BookmarksFolder getFolder(
 		long folderId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getFolder(folderId);
 	}
 
 	public static java.util.List<java.lang.Long> getFolderIds(long groupId,
 		long folderId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getFolderIds(groupId, folderId);
 	}
 
 	public static java.util.List<com.liferay.portlet.bookmarks.model.BookmarksFolder> getFolders(
-		long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId) {
 		return getService().getFolders(groupId);
 	}
 
 	public static java.util.List<com.liferay.portlet.bookmarks.model.BookmarksFolder> getFolders(
-		long groupId, long parentFolderId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long parentFolderId) {
 		return getService().getFolders(groupId, parentFolderId);
 	}
 
 	public static java.util.List<com.liferay.portlet.bookmarks.model.BookmarksFolder> getFolders(
-		long groupId, long parentFolderId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long parentFolderId, int start, int end) {
 		return getService().getFolders(groupId, parentFolderId, start, end);
 	}
 
 	public static java.util.List<com.liferay.portlet.bookmarks.model.BookmarksFolder> getFolders(
-		long groupId, long parentFolderId, int status, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long parentFolderId, int status, int start, int end) {
 		return getService()
 				   .getFolders(groupId, parentFolderId, status, start, end);
 	}
 
 	public static java.util.List<java.lang.Object> getFoldersAndEntries(
-		long groupId, long folderId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long folderId) {
 		return getService().getFoldersAndEntries(groupId, folderId);
 	}
 
 	public static java.util.List<java.lang.Object> getFoldersAndEntries(
-		long groupId, long folderId, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long folderId, int status) {
 		return getService().getFoldersAndEntries(groupId, folderId, status);
 	}
 
 	public static java.util.List<java.lang.Object> getFoldersAndEntries(
-		long groupId, long folderId, int status, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long folderId, int status, int start, int end) {
 		return getService()
 				   .getFoldersAndEntries(groupId, folderId, status, start, end);
 	}
 
-	public static int getFoldersAndEntriesCount(long groupId, long folderId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getFoldersAndEntriesCount(long groupId, long folderId) {
 		return getService().getFoldersAndEntriesCount(groupId, folderId);
 	}
 
 	public static int getFoldersAndEntriesCount(long groupId, long folderId,
-		int status) throws com.liferay.portal.kernel.exception.SystemException {
+		int status) {
 		return getService().getFoldersAndEntriesCount(groupId, folderId, status);
 	}
 
-	public static int getFoldersCount(long groupId, long parentFolderId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getFoldersCount(long groupId, long parentFolderId) {
 		return getService().getFoldersCount(groupId, parentFolderId);
 	}
 
 	public static int getFoldersCount(long groupId, long parentFolderId,
-		int status) throws com.liferay.portal.kernel.exception.SystemException {
+		int status) {
 		return getService().getFoldersCount(groupId, parentFolderId, status);
 	}
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #getSubfolderIds(List, long,
+	long, boolean)}
+	*/
+	@Deprecated
 	public static void getSubfolderIds(
-		java.util.List<java.lang.Long> folderIds, long groupId, long folderId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<java.lang.Long> folderIds, long groupId, long folderId) {
 		getService().getSubfolderIds(folderIds, groupId, folderId);
 	}
 
+	public static void getSubfolderIds(
+		java.util.List<java.lang.Long> folderIds, long groupId, long folderId,
+		boolean recurse) {
+		getService().getSubfolderIds(folderIds, groupId, folderId, recurse);
+	}
+
 	public static java.util.List<java.lang.Long> getSubfolderIds(long groupId,
-		long folderId, boolean recurse)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long folderId, boolean recurse) {
 		return getService().getSubfolderIds(groupId, folderId, recurse);
 	}
 
 	public static com.liferay.portlet.bookmarks.model.BookmarksFolder moveFolder(
 		long folderId, long parentFolderId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().moveFolder(folderId, parentFolderId);
 	}
 
 	public static com.liferay.portlet.bookmarks.model.BookmarksFolder moveFolderFromTrash(
 		long folderId, long parentFolderId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().moveFolderFromTrash(folderId, parentFolderId);
 	}
 
-	public static void moveFolderToTrash(long folderId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		getService().moveFolderToTrash(folderId);
+	public static com.liferay.portlet.bookmarks.model.BookmarksFolder moveFolderToTrash(
+		long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().moveFolderToTrash(folderId);
 	}
 
 	public static void restoreFolderFromTrash(long folderId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().restoreFolderFromTrash(folderId);
 	}
 
 	public static void subscribeFolder(long groupId, long folderId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().subscribeFolder(groupId, folderId);
 	}
 
 	public static void unsubscribeFolder(long groupId, long folderId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().unsubscribeFolder(groupId, folderId);
 	}
 
@@ -210,8 +203,7 @@ public class BookmarksFolderServiceUtil {
 		long folderId, long parentFolderId, java.lang.String name,
 		java.lang.String description, boolean mergeWithParentFolder,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateFolder(folderId, parentFolderId, name, description,
 			mergeWithParentFolder, serviceContext);
@@ -231,6 +223,7 @@ public class BookmarksFolderServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(BookmarksFolderService service) {
 	}
 

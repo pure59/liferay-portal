@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.OrganizationServiceImpl
  * @generated
  */
+@ProviderType
 public class OrganizationServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -64,12 +67,10 @@ public class OrganizationServiceUtil {
 	* @throws PortalException if a group or organization with the primary key
 	could not be found or if the user did not have permission to
 	assign group members
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addGroupOrganizations(long groupId,
 		long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().addGroupOrganizations(groupId, organizationIds);
 	}
 
@@ -106,12 +107,12 @@ public class OrganizationServiceUtil {
 	could not be found, if the organization's information was
 	invalid, or if the user did not have permission to add the
 	organization
-	* @throws SystemException if a system exception occurred
 	* @deprecated As of 6.2.0, replaced by {@link #addOrganization(long,
 	String, String, long, long, int, String, boolean,
 	java.util.List, java.util.List, java.util.List,
 	java.util.List, java.util.List, ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portal.model.Organization addOrganization(
 		long parentOrganizationId, java.lang.String name,
 		java.lang.String type, boolean recursable, long regionId,
@@ -122,8 +123,7 @@ public class OrganizationServiceUtil {
 		java.util.List<com.liferay.portal.model.Phone> phones,
 		java.util.List<com.liferay.portal.model.Website> websites,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addOrganization(parentOrganizationId, name, type,
 			recursable, regionId, countryId, statusId, comments, site,
@@ -159,18 +159,17 @@ public class OrganizationServiceUtil {
 	key could not be found, if the organization information was
 	invalid, or if the user did not have permission to add the
 	organization
-	* @throws SystemException if a system exception occurred
 	* @deprecated As of 6.2.0, replaced by {@link #addOrganization(long,
 	String, String, long, long, int, String, boolean,
 	ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portal.model.Organization addOrganization(
 		long parentOrganizationId, java.lang.String name,
 		java.lang.String type, boolean recursable, long regionId,
 		long countryId, int statusId, java.lang.String comments, boolean site,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addOrganization(parentOrganizationId, name, type,
 			recursable, regionId, countryId, statusId, comments, site,
@@ -208,7 +207,6 @@ public class OrganizationServiceUtil {
 	could not be found, if the organization's information was
 	invalid, or if the user did not have permission to add the
 	organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization addOrganization(
 		long parentOrganizationId, java.lang.String name,
@@ -220,8 +218,7 @@ public class OrganizationServiceUtil {
 		java.util.List<com.liferay.portal.model.Phone> phones,
 		java.util.List<com.liferay.portal.model.Website> websites,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addOrganization(parentOrganizationId, name, type, regionId,
 			countryId, statusId, comments, site, addresses, emailAddresses,
@@ -253,15 +250,13 @@ public class OrganizationServiceUtil {
 	* @throws PortalException if the parent organization with the primary key
 	could not be found, if the organization information was invalid,
 	or if the user did not have permission to add the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization addOrganization(
 		long parentOrganizationId, java.lang.String name,
 		java.lang.String type, long regionId, long countryId, int statusId,
 		java.lang.String comments, boolean site,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addOrganization(parentOrganizationId, name, type, regionId,
 			countryId, statusId, comments, site, serviceContext);
@@ -275,28 +270,24 @@ public class OrganizationServiceUtil {
 	* @param organizationIds the primary keys of the organizations
 	* @throws PortalException if the user did not have permission to update the
 	password policy
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addPasswordPolicyOrganizations(long passwordPolicyId,
 		long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService()
 			.addPasswordPolicyOrganizations(passwordPolicyId, organizationIds);
 	}
 
 	/**
-	* Deletes the logo of the organization.
+	* Deletes the organization's logo.
 	*
 	* @param organizationId the primary key of the organization
 	* @throws PortalException if an organization with the primary key could not
 	be found, if the organization's logo could not be found, or if
 	the user did not have permission to update the organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void deleteLogo(long organizationId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteLogo(organizationId);
 	}
 
@@ -309,11 +300,9 @@ public class OrganizationServiceUtil {
 	be found, if the user did not have permission to delete the
 	organization, if the organization had a workflow in approved
 	status, or if the organization was a parent organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void deleteOrganization(long organizationId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteOrganization(organizationId);
 	}
 
@@ -324,14 +313,13 @@ public class OrganizationServiceUtil {
 	* @param max the maximum number of the organizations to be considered
 	* @return the organizations which the user has permission to manage
 	* @throws PortalException if a portal exception occurred
-	* @throws SystemException if a system exception occurred
 	* @deprecated As of 6.2.0, replaced by {@link #getOrganizations(long, long,
 	int, int)}
 	*/
+	@Deprecated
 	public static java.util.List<com.liferay.portal.model.Organization> getManageableOrganizations(
 		java.lang.String actionId, int max)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getManageableOrganizations(actionId, max);
 	}
 
@@ -343,12 +331,10 @@ public class OrganizationServiceUtil {
 	* @throws PortalException if an organization with the primary key could not
 	be found or if the user did not have permission to view the
 	organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization getOrganization(
 		long organizationId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getOrganization(organizationId);
 	}
 
@@ -361,11 +347,9 @@ public class OrganizationServiceUtil {
 	<code>0</code> if the organization could not be found
 	* @throws PortalException if the user did not have permission to view the
 	organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static long getOrganizationId(long companyId, java.lang.String name)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getOrganizationId(companyId, name);
 	}
 
@@ -376,11 +360,9 @@ public class OrganizationServiceUtil {
 	* @param parentOrganizationId the primary key of the organizations' parent
 	organization
 	* @return the organizations belonging to the parent organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> getOrganizations(
-		long companyId, long parentOrganizationId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, long parentOrganizationId) {
 		return getService().getOrganizations(companyId, parentOrganizationId);
 	}
 
@@ -405,11 +387,9 @@ public class OrganizationServiceUtil {
 	* @param end the upper bound of the range of organizations to return (not
 	inclusive)
 	* @return the range of organizations belonging to the parent organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> getOrganizations(
-		long companyId, long parentOrganizationId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, long parentOrganizationId, int start, int end) {
 		return getService()
 				   .getOrganizations(companyId, parentOrganizationId, start, end);
 	}
@@ -421,11 +401,9 @@ public class OrganizationServiceUtil {
 	* @param parentOrganizationId the primary key of the organizations' parent
 	organization
 	* @return the number of organizations belonging to the parent organization
-	* @throws SystemException if a system exception occurred
 	*/
 	public static int getOrganizationsCount(long companyId,
-		long parentOrganizationId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long parentOrganizationId) {
 		return getService()
 				   .getOrganizationsCount(companyId, parentOrganizationId);
 	}
@@ -436,12 +414,9 @@ public class OrganizationServiceUtil {
 	* @param userId the primary key of the user
 	* @return the organizations associated with the user
 	* @throws PortalException if a user with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Organization> getUserOrganizations(
-		long userId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long userId) throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getUserOrganizations(userId);
 	}
 
@@ -454,12 +429,10 @@ public class OrganizationServiceUtil {
 	* @throws PortalException if a group or organization with the primary key
 	could not be found or if the user did not have permission to
 	assign group members
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void setGroupOrganizations(long groupId,
 		long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().setGroupOrganizations(groupId, organizationIds);
 	}
 
@@ -471,12 +444,10 @@ public class OrganizationServiceUtil {
 	* @throws PortalException if a group or organization with the primary key
 	could not be found or if the user did not have permission to
 	assign group members
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void unsetGroupOrganizations(long groupId,
 		long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().unsetGroupOrganizations(groupId, organizationIds);
 	}
 
@@ -488,12 +459,10 @@ public class OrganizationServiceUtil {
 	* @throws PortalException if a password policy or organization with the
 	primary key could not be found, or if the user did not have
 	permission to update the password policy
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void unsetPasswordPolicyOrganizations(long passwordPolicyId,
 		long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService()
 			.unsetPasswordPolicyOrganizations(passwordPolicyId, organizationIds);
 	}
@@ -528,12 +497,13 @@ public class OrganizationServiceUtil {
 	with the primary key could not be found, if the user did not
 	have permission to update the organization information, or if
 	the new information was invalid
-	* @throws SystemException if a system exception occurred
 	* @deprecated As of 6.2.0, replaced by {@link #updateOrganization(long,
 	long, String, String, long, long, int, String, boolean,
 	java.util.List, java.util.List, java.util.List,
-	java.util.List, java.util.List, ServiceContext)}
+	java.util.List, java.util.List, boolean, byte[],
+	ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portal.model.Organization updateOrganization(
 		long organizationId, long parentOrganizationId, java.lang.String name,
 		java.lang.String type, boolean recursable, long regionId,
@@ -544,8 +514,7 @@ public class OrganizationServiceUtil {
 		java.util.List<com.liferay.portal.model.Phone> phones,
 		java.util.List<com.liferay.portal.model.Website> websites,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateOrganization(organizationId, parentOrganizationId,
 			name, type, recursable, regionId, countryId, statusId, comments,
@@ -578,18 +547,17 @@ public class OrganizationServiceUtil {
 	with the primary key could not be found, if the user did not
 	have permission to update the organization, or if the new
 	information was invalid
-	* @throws SystemException if a system exception occurred
 	* @deprecated As of 6.2.0, replaced by {@link #updateOrganization(long,
 	long, String, String, long, long, int, String, boolean,
 	ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portal.model.Organization updateOrganization(
 		long organizationId, long parentOrganizationId, java.lang.String name,
 		java.lang.String type, boolean recursable, long regionId,
 		long countryId, int statusId, java.lang.String comments, boolean site,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateOrganization(organizationId, parentOrganizationId,
 			name, type, recursable, regionId, countryId, statusId, comments,
@@ -608,6 +576,8 @@ public class OrganizationServiceUtil {
 	* @param countryId the primary key of the organization's country
 	* @param statusId the organization's workflow status
 	* @param comments the comments about the organization
+	* @param logo whether to update the ogranization's logo
+	* @param logoBytes the new logo image data
 	* @param site whether the organization is to be associated with a main
 	site
 	* @param addresses the organization's addresses
@@ -624,8 +594,61 @@ public class OrganizationServiceUtil {
 	the primary key could not be found, if the user did not have
 	permission to update the organization information, or if the new
 	information was invalid
-	* @throws SystemException if a system exception occurred
 	*/
+	public static com.liferay.portal.model.Organization updateOrganization(
+		long organizationId, long parentOrganizationId, java.lang.String name,
+		java.lang.String type, long regionId, long countryId, int statusId,
+		java.lang.String comments, boolean logo, byte[] logoBytes,
+		boolean site,
+		java.util.List<com.liferay.portal.model.Address> addresses,
+		java.util.List<com.liferay.portal.model.EmailAddress> emailAddresses,
+		java.util.List<com.liferay.portal.model.OrgLabor> orgLabors,
+		java.util.List<com.liferay.portal.model.Phone> phones,
+		java.util.List<com.liferay.portal.model.Website> websites,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .updateOrganization(organizationId, parentOrganizationId,
+			name, type, regionId, countryId, statusId, comments, logo,
+			logoBytes, site, addresses, emailAddresses, orgLabors, phones,
+			websites, serviceContext);
+	}
+
+	/**
+	* Updates the organization with additional parameters.
+	*
+	* @param organizationId the primary key of the organization
+	* @param parentOrganizationId the primary key of the organization's
+	parent organization
+	* @param name the organization's name
+	* @param type the organization's type
+	* @param regionId the primary key of the organization's region
+	* @param countryId the primary key of the organization's country
+	* @param statusId the organization's workflow status
+	* @param comments the comments about the organization
+	* @param site whether the organization is to be associated with a main
+	site
+	* @param addresses the organization's addresses
+	* @param emailAddresses the organization's email addresses
+	* @param orgLabors the organization's hours of operation
+	* @param phones the organization's phone numbers
+	* @param websites the organization's websites
+	* @param serviceContext the service context to be applied (optionally
+	<code>null</code>). Can set asset category IDs and asset tag
+	names for the organization, and merge expando bridge
+	attributes for the organization.
+	* @return the organization
+	* @throws PortalException if an organization or parent organization
+	with the primary key could not be found, if the user did not
+	have permission to update the organization information, or if
+	the new information was invalid
+	* @deprecated As of 7.0.0, replaced by {@link #updateOrganization(long,
+	long, String, String, long, long, int, String, boolean,
+	java.util.List, java.util.List, java.util.List,
+	java.util.List, java.util.List, boolean, byte[],
+	ServiceContext)}
+	*/
+	@Deprecated
 	public static com.liferay.portal.model.Organization updateOrganization(
 		long organizationId, long parentOrganizationId, java.lang.String name,
 		java.lang.String type, long regionId, long countryId, int statusId,
@@ -636,8 +659,7 @@ public class OrganizationServiceUtil {
 		java.util.List<com.liferay.portal.model.Phone> phones,
 		java.util.List<com.liferay.portal.model.Website> websites,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateOrganization(organizationId, parentOrganizationId,
 			name, type, regionId, countryId, statusId, comments, site,
@@ -668,15 +690,13 @@ public class OrganizationServiceUtil {
 	the primary key could not be found, if the user did not have
 	permission to update the organization, or if the new information
 	was invalid
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Organization updateOrganization(
 		long organizationId, long parentOrganizationId, java.lang.String name,
 		java.lang.String type, long regionId, long countryId, int statusId,
 		java.lang.String comments, boolean site,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateOrganization(organizationId, parentOrganizationId,
 			name, type, regionId, countryId, statusId, comments, site,
@@ -697,6 +717,7 @@ public class OrganizationServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(OrganizationService service) {
 	}
 

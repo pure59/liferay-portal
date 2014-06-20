@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -28,6 +30,7 @@ import java.util.Map;
  * @see UserIdMapper
  * @generated
  */
+@ProviderType
 public class UserIdMapperWrapper implements UserIdMapper,
 	ModelWrapper<UserIdMapper> {
 	public UserIdMapperWrapper(UserIdMapper userIdMapper) {
@@ -48,6 +51,7 @@ public class UserIdMapperWrapper implements UserIdMapper,
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("userIdMapperId", getUserIdMapperId());
 		attributes.put("userId", getUserId());
 		attributes.put("type", getType());
@@ -59,6 +63,12 @@ public class UserIdMapperWrapper implements UserIdMapper,
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long userIdMapperId = (Long)attributes.get("userIdMapperId");
 
 		if (userIdMapperId != null) {
@@ -111,6 +121,26 @@ public class UserIdMapperWrapper implements UserIdMapper,
 	}
 
 	/**
+	* Returns the mvcc version of this user ID mapper.
+	*
+	* @return the mvcc version of this user ID mapper
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _userIdMapper.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this user ID mapper.
+	*
+	* @param mvccVersion the mvcc version of this user ID mapper
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_userIdMapper.setMvccVersion(mvccVersion);
+	}
+
+	/**
 	* Returns the user ID mapper ID of this user ID mapper.
 	*
 	* @return the user ID mapper ID of this user ID mapper
@@ -154,11 +184,9 @@ public class UserIdMapperWrapper implements UserIdMapper,
 	* Returns the user uuid of this user ID mapper.
 	*
 	* @return the user uuid of this user ID mapper
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _userIdMapper.getUserUuid();
 	}
 
@@ -331,8 +359,7 @@ public class UserIdMapperWrapper implements UserIdMapper,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_userIdMapper.persist();
 	}
 
@@ -358,6 +385,7 @@ public class UserIdMapperWrapper implements UserIdMapper,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public UserIdMapper getWrappedUserIdMapper() {
 		return _userIdMapper;
 	}
@@ -365,6 +393,16 @@ public class UserIdMapperWrapper implements UserIdMapper,
 	@Override
 	public UserIdMapper getWrappedModel() {
 		return _userIdMapper;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _userIdMapper.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _userIdMapper.isFinderCacheEnabled();
 	}
 
 	@Override

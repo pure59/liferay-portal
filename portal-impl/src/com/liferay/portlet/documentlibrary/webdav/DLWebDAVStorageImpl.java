@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,7 +18,6 @@ import com.liferay.portal.DuplicateLockException;
 import com.liferay.portal.InvalidLockException;
 import com.liferay.portal.NoSuchLockException;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
@@ -52,13 +51,17 @@ import com.liferay.portlet.asset.service.AssetLinkLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.DuplicateFileException;
 import com.liferay.portlet.documentlibrary.DuplicateFolderNameException;
+import com.liferay.portlet.documentlibrary.FileSizeException;
 import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
 import com.liferay.portlet.documentlibrary.NoSuchFolderException;
+import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
+import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
 import com.liferay.portlet.documentlibrary.util.DL;
 import com.liferay.portlet.expando.model.ExpandoBridge;
+import com.liferay.portlet.trash.util.TrashUtil;
 
 import java.io.File;
 import java.io.InputStream;
@@ -244,7 +247,16 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 			if (model instanceof Folder) {
 				Folder folder = (Folder)model;
 
-				DLAppServiceUtil.deleteFolder(folder.getFolderId());
+				long folderId = folder.getFolderId();
+
+				if ((folder.getModel() instanceof DLFolder) &&
+					TrashUtil.isTrashEnabled(folder.getGroupId())) {
+
+					DLAppServiceUtil.moveFolderToTrash(folderId);
+				}
+				else {
+					DLAppServiceUtil.deleteFolder(folderId);
+				}
 			}
 			else {
 				FileEntry fileEntry = (FileEntry)model;
@@ -255,7 +267,16 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 					return WebDAVUtil.SC_LOCKED;
 				}
 
-				DLAppServiceUtil.deleteFileEntry(fileEntry.getFileEntryId());
+				long fileEntryId = fileEntry.getFileEntryId();
+
+				if ((fileEntry.getModel() instanceof DLFileEntry) &&
+					TrashUtil.isTrashEnabled(fileEntry.getGroupId())) {
+
+					DLAppServiceUtil.moveFileEntryToTrash(fileEntryId);
+				}
+				else {
+					DLAppServiceUtil.deleteFileEntry(fileEntryId);
+				}
 			}
 
 			return HttpServletResponse.SC_NO_CONTENT;
@@ -718,11 +739,14 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 
 			return HttpServletResponse.SC_CREATED;
 		}
-		catch (PrincipalException pe) {
-			return HttpServletResponse.SC_FORBIDDEN;
+		catch (FileSizeException fse) {
+			return HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE;
 		}
 		catch (NoSuchFolderException nsfe) {
 			return HttpServletResponse.SC_CONFLICT;
+		}
+		catch (PrincipalException pe) {
+			return HttpServletResponse.SC_FORBIDDEN;
 		}
 		catch (PortalException pe) {
 			if (_log.isWarnEnabled()) {
@@ -906,24 +930,22 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 		if (pathArray.length <= 1) {
 			return folderId;
 		}
-		else {
-			long groupId = WebDAVUtil.getGroupId(companyId, pathArray);
 
-			int x = pathArray.length;
+		long groupId = WebDAVUtil.getGroupId(companyId, pathArray);
 
-			if (parent) {
-				x--;
-			}
+		int x = pathArray.length;
 
-			for (int i = 2; i < x; i++) {
-				String name = pathArray[i];
+		if (parent) {
+			x--;
+		}
 
-				Folder folder = DLAppServiceUtil.getFolder(
-					groupId, folderId, name);
+		for (int i = 2; i < x; i++) {
+			String name = pathArray[i];
 
-				if (groupId == folder.getRepositoryId()) {
-					folderId = folder.getFolderId();
-				}
+			Folder folder = DLAppServiceUtil.getFolder(groupId, folderId, name);
+
+			if (groupId == folder.getRepositoryId()) {
+				folderId = folder.getFolderId();
 			}
 		}
 
@@ -981,8 +1003,7 @@ public class DLWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 	}
 
 	protected void populateServiceContext(
-			ServiceContext serviceContext, FileEntry fileEntry)
-		throws SystemException {
+		ServiceContext serviceContext, FileEntry fileEntry) {
 
 		String className = DLFileEntryConstants.getClassName();
 

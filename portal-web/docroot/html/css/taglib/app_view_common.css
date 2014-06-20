@@ -1,3 +1,5 @@
+@import "mixins";
+
 .app-view-entry {
 	.entry-thumbnail {
 		margin: 0;
@@ -24,7 +26,7 @@
 
 		.entry-metadata {
 			dt, dd, .entry-categories, .entry-tags, .entry-description {
-				color: #f0f0f0;
+				color: #F0F0F0;
 			}
 		}
 	}
@@ -34,7 +36,6 @@
 		font-size: 1.15em;
 		font-weight: bold;
 		padding: 5px 0 10px 0;
-		word-wrap: break-word;
 	}
 
 	.entry-link {
@@ -45,7 +46,12 @@
 	}
 
 	.entry-metadata {
-		margin: 10px 0 20px 170px;
+		margin: 10px 0 20px;
+
+		@include respond-to(phone, tablet) {
+			margin: 0 0 5px 15px;
+			width: 85%;
+		}
 
 		.entry-title {
 			padding-bottom: 3px;
@@ -56,7 +62,7 @@
 		}
 
 		dl {
-			margin: 0px;
+			margin: 0;
 
 			&.entry-latest-approved-container {
 				margin: 20px 0 20px 0;
@@ -83,7 +89,7 @@
 			display: inline;
 
 			.workflow-status {
-				padding-left: .2em;
+				padding-left: 0.2em;
 			}
 		}
 
@@ -100,21 +106,18 @@
 
 			.asset-category {
 				font-weight: normal;
-				margin-left: .8em;
+				margin-left: 0.8em;
 			}
 		}
 	}
 
 	.folder-action, .entry-action {
-		height: 20px;
-		overflow: hidden;
 		position: absolute;
 		right: 6px;
 		top: 10px;
-		width: 22px;
 
-		& .direction-down {
-			height: 20px;
+		.btn {
+			padding: 0;
 		}
 	}
 
@@ -130,6 +133,10 @@
 		margin: 5px 10px 5px 5px;
 		position: relative;
 		text-align: center;
+
+		@include respond-to(phone, tablet) {
+			float: none;
+		}
 	}
 
 	&.selected, &.selected:hover {
@@ -137,7 +144,13 @@
 	}
 
 	&.selected a {
-		color: #FFF;
+		&, &:focus, &:hover {
+			color: #FFF;
+		}
+
+		.lfr-icon-menu-arrow {
+			color: #333;
+		}
 	}
 
 	&.active-area, &.active-area.hover, &.active-area td {
@@ -146,24 +159,15 @@
 
 	.overlay.folder-action a, .overlay.entry-action a {
 		display: block;
-		float: right;
-		min-height: 15px;
+		width: 20px;
 	}
 
 	&:hover, &.hover {
 		background-color: #D3E8F1;
 	}
 
-	.overlay {
-		clip: rect(0, 0, 0, 0);
-	}
-
-	&:hover .overlay, &.hover .overlay, &:hover .entry-selector, &.selected .entry-selector {
-		clip: rect(auto auto auto auto);
-	}
-
 	.entry-title .entry-categories, a.entry-title .entry-tags {
-		font-size: 16px ;
+		font-size: 16px;
 	}
 
 	a.entry-link:hover {
@@ -171,6 +175,17 @@
 
 		.entry-metadata .entry-title .entry-title-text {
 			text-decoration: underline;
+		}
+	}
+}
+
+.lfr-search-container td .overlay {
+	&.folder-action, &.entry-action {
+		position: static;
+
+		.btn a {
+			display: block;
+			padding: 4px 12px;
 		}
 	}
 }

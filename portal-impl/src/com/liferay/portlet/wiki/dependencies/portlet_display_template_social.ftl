@@ -1,10 +1,6 @@
 <#assign liferay_ui = taglibLiferayHash["/WEB-INF/tld/liferay-ui.tld"] />
 
-<#assign assetEntryLocalService = serviceLocator.findService("com.liferay.portlet.asset.service.AssetEntryLocalService") />
-
 <#assign wikiPageClassName = "com.liferay.portlet.wiki.model.WikiPage" />
-
-<#assign assetEntry = assetEntryLocalService.getEntry(wikiPageClassName, entry.getResourcePrimKey()) />
 
 <#assign assetRenderer = assetEntry.getAssetRenderer() />
 
@@ -100,9 +96,6 @@
 				<th>
 					<@liferay.language key="ratings" />
 				</th>
-				<th>
-					<@liferay.language key="views" />
-				</th>
 			</tr>
 
 			<#list childPages as childPage>
@@ -125,9 +118,6 @@
 					<td>
 						<@getRatings cssClass="child-ratings" entry=childPage />
 					</td>
-					<td>
-						<span class="stats">${assetEntryLocalService.getEntry(wikiPageClassName, childPage.getResourcePrimKey()).getViewCount()}</span>
-					</td>
 				</tr>
 			</#list>
 		</table>
@@ -148,7 +138,7 @@
 		${addPageURL.setParameter("parentTitle", entry.getTitle())}
 
 		<@liferay_ui["icon"]
-			image="add_article"
+			iconCssClass="icon-plus"
 			label=true
 			message="add-child-page"
 			url=addPageURL?string
@@ -162,7 +152,7 @@
 	${viewPageAttachmentsURL.setParameter("struts_action", "/wiki/view_page_attachments") }
 
 	<@liferay_ui["icon"]
-		image="clip"
+		iconCssClass="icon-paperclip"
 		label=true
 		message='${entry.getAttachmentsFileEntriesCount() + languageUtil.get(locale, "attachments")}'
 		url=viewPageAttachmentsURL?string
@@ -170,7 +160,7 @@
 </#macro>
 
 <#macro getDiscussion>
-	<#if validator.isNotNull(assetRenderer.getDiscussionPath()) && (enableComments == "true")>
+	<#if validator.isNotNull(assetRenderer.getDiscussionPath()) && getterUtil.getBoolean(enableComments)>
 		<br />
 
 		<#assign discussionURL = renderResponse.createActionURL() />
@@ -182,7 +172,7 @@
 			classPK=entry.getResourcePrimKey()
 			formAction=discussionURL?string
 			formName="fm2"
-			ratingsEnabled=enableCommentRatings == "true"
+			ratingsEnabled=getterUtil.getBoolean(enableCommentRatings)
 			redirect=currentURL
 			subject=assetRenderer.getTitle(locale)
 			userId=assetRenderer.getUserId()
@@ -200,7 +190,7 @@
 		${editPageURL.setParameter("title", entry.getTitle())}
 
 		<@liferay_ui["icon"]
-			image="edit"
+			iconCssClass="icon-edit"
 			message=entry.getTitle()
 			url=editPageURL?string
 		/>
@@ -214,7 +204,7 @@
 	${viewPageDetailsURL.setParameter("redirect", currentURL)}
 
 	<@liferay_ui["icon"]
-		image="history"
+		iconCssClass="icon-file-alt"
 		message="details"
 		url=viewPageDetailsURL?string
 	/>
@@ -226,11 +216,11 @@
 	${printURL.setParameter("viewMode", "print")}
 	${printURL.setWindowState("pop_up")}
 
-	<#assign title = languageUtil.format(locale, "print-x-x", ["hide-accessible", htmlUtil.escape(assetRenderer.getTitle(locale))]) />
+	<#assign title = languageUtil.format(locale, "print-x-x", ["hide-accessible", htmlUtil.escape(assetRenderer.getTitle(locale))], false) />
 	<#assign taglibPrintURL = "javascript:Liferay.Util.openWindow({dialog: {width: 960}, id:'" + renderResponse.getNamespace() + "printAsset', title: '" + title + "', uri: '" + htmlUtil.escapeURL(printURL.toString()) + "'});" />
 
 	<@liferay_ui["icon"]
-		image="print"
+		iconCssClass="icon-print"
 		message="print"
 		url=taglibPrintURL
 	/>
@@ -240,7 +230,7 @@
 	cssClass
 	entry
 >
-	<#if enablePageRatings == "true">
+	<#if getterUtil.getBoolean(enablePageRatings)>
 		<div class="${cssClass}">
 			<@liferay_ui["ratings"]
 				className=wikiPageClassName
@@ -251,7 +241,7 @@
 </#macro>
 
 <#macro getRelatedAssets>
-	<#if assetEntry?? && (enableRelatedAssets == "true")>
+	<#if assetEntry?? && getterUtil.getBoolean(enableRelatedAssets)>
 		<@liferay_ui["asset-links"]
 			assetEntryId=assetEntry.getEntryId()
 		/>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.mobiledevicerules.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see MDRActionService
  * @generated
  */
+@ProviderType
 public class MDRActionServiceWrapper implements MDRActionService,
 	ServiceWrapper<MDRActionService> {
 	public MDRActionServiceWrapper(MDRActionService mdrActionService) {
@@ -56,8 +59,7 @@ public class MDRActionServiceWrapper implements MDRActionService,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		java.lang.String type, java.lang.String typeSettings,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrActionService.addAction(ruleGroupInstanceId, nameMap,
 			descriptionMap, type, typeSettings, serviceContext);
 	}
@@ -70,32 +72,28 @@ public class MDRActionServiceWrapper implements MDRActionService,
 		java.lang.String type,
 		com.liferay.portal.kernel.util.UnicodeProperties typeSettingsProperties,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrActionService.addAction(ruleGroupInstanceId, nameMap,
 			descriptionMap, type, typeSettingsProperties, serviceContext);
 	}
 
 	@Override
 	public void deleteAction(long actionId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_mdrActionService.deleteAction(actionId);
 	}
 
 	@Override
 	public com.liferay.portlet.mobiledevicerules.model.MDRAction fetchAction(
 		long actionId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrActionService.fetchAction(actionId);
 	}
 
 	@Override
 	public com.liferay.portlet.mobiledevicerules.model.MDRAction getAction(
 		long actionId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrActionService.getAction(actionId);
 	}
 
@@ -106,8 +104,7 @@ public class MDRActionServiceWrapper implements MDRActionService,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		java.lang.String type, java.lang.String typeSettings,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrActionService.updateAction(actionId, nameMap,
 			descriptionMap, type, typeSettings, serviceContext);
 	}
@@ -120,8 +117,7 @@ public class MDRActionServiceWrapper implements MDRActionService,
 		java.lang.String type,
 		com.liferay.portal.kernel.util.UnicodeProperties typeSettingsProperties,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrActionService.updateAction(actionId, nameMap,
 			descriptionMap, type, typeSettingsProperties, serviceContext);
 	}
@@ -129,6 +125,7 @@ public class MDRActionServiceWrapper implements MDRActionService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public MDRActionService getWrappedMDRActionService() {
 		return _mdrActionService;
 	}
@@ -136,6 +133,7 @@ public class MDRActionServiceWrapper implements MDRActionService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedMDRActionService(MDRActionService mdrActionService) {
 		_mdrActionService = mdrActionService;
 	}

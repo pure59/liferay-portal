@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,57 +19,57 @@
 <%
 String displayStyle = (String)request.getAttribute("liferay-ui:app-view-display-style:displayStyle");
 String[] displayStyles = (String[])request.getAttribute("liferay-ui:app-view-display-style:displayStyles");
+String eventName = (String)request.getAttribute("liferay-ui:app-view-display-style:eventName");
 Map<String, String> requestParams = (Map<String, String>)request.getAttribute("liferay-ui:app-view-display-style:requestParams");
 %>
 
 <c:if test="<%= displayStyles.length > 1 %>">
-	<div class="toolbar" id="<portlet:namespace />displayStyleButtons">
-		<div class="btn-group btn-group-radio">
+	<span class="display-style-buttons-container" id="<portlet:namespace />displayStyleButtonsContainer">
+		<div class="display-style-buttons" id="<portlet:namespace />displayStyleButtons">
+			<aui:nav-item anchorCssClass="btn btn-default" dropdown="<%= true %>" iconCssClass='<%= "icon-" + _getIcon(displayStyle) %>'>
 
-			<%
-			for (int i = 0; i < displayStyles.length; i++) {
-				String dataStyle = displayStyles[i];
+				<%
+				for (int i = 0; i < displayStyles.length; i++) {
+					String dataStyle = displayStyles[i];
 
-				String iconClass = displayStyles[i];
+					Map<String, Object> data = new HashMap<String, Object>();
 
-				if (iconClass.equals("icon")) {
-					iconClass = "icon-th-large";
+					data.put("displayStyle", dataStyle);
+				%>
+
+					<aui:nav-item
+						anchorData="<%= data %>"
+						href="javascript:;"
+						iconCssClass='<%= "icon-" + _getIcon(dataStyle) %>'
+						label="<%= dataStyle %>"
+					/>
+
+				<%
 				}
-				else if (iconClass.equals("descriptive")) {
-					iconClass = "icon-th-list";
-				}
-				else if (iconClass.equals("list")) {
-					iconClass ="icon-align-justify";
-				}
-			%>
+				%>
 
-				<button class='btn <%= displayStyle.equals(displayStyles[i]) ? "active" : StringPool.BLANK %>' data-displayStyle="<%= dataStyle %>"><i class="<%= iconClass %>"></i></button>
-
-			<%
-			}
-			%>
-
+			</aui:nav-item>
 		</div>
-	</div>
+	</span>
 </c:if>
 
 <c:if test="<%= displayStyles.length > 1 %>">
-	<aui:script use="aui-base,aui-toolbar">
-		var buttonRow = A.one('#<portlet:namespace />displayStyleButtons');
-
+	<aui:script use="aui-base">
 		function changeDisplayStyle(displayStyle) {
 			var config = {};
 
 			<%
-			Set<String> requestParamNames = requestParams.keySet();
+			if (requestParams != null) {
+				Set<String> requestParamNames = requestParams.keySet();
 
-			for (String requestParamName : requestParamNames) {
-				String requestParamValue = requestParams.get(requestParamName);
+				for (String requestParamName : requestParamNames) {
+					String requestParamValue = requestParams.get(requestParamName);
 			%>
 
-				config['<portlet:namespace /><%= requestParamName %>'] = '<%= HtmlUtil.escapeJS(requestParamValue) %>';
+					config['<portlet:namespace /><%= requestParamName %>'] = '<%= HtmlUtil.escapeJS(requestParamValue) %>';
 
 			<%
+				}
 			}
 			%>
 
@@ -85,25 +85,46 @@ Map<String, String> requestParams = (Map<String, String>)request.getAttribute("l
 			);
 		}
 
-		var displayStyleToolbar = buttonRow.getData('displayStyleToolbar');
+		var displayStyleButtonsMenu = A.one('#<portlet:namespace />displayStyleButtons .dropdown-menu');
 
-		if (displayStyleToolbar) {
-			displayStyleToolbar.clear();
-		}
+		if (displayStyleButtonsMenu) {
+			displayStyleButtonsMenu.delegate(
+				'click',
+				function(event) {
+					var displayStyle = event.currentTarget.attr('data-displayStyle');
 
-		displayStyleToolbar = new A.Toolbar(
-			{
-				boundingBox: buttonRow,
-				on: {
-					click: function(event) {
-						var btnNode = this.getEnclosingWidget(event).getSelectedButtons()[0];
-
-						changeDisplayStyle(btnNode.attr('data-displayStyle'));
+					if (<%= requestParams != null %>) {
+						changeDisplayStyle(displayStyle);
 					}
-				}
-			}
-		).render();
-
-		buttonRow.setData('displayStyleToolbar', displayStyleToolbar);
+					else if (<%= eventName != null %>) {
+						Liferay.fire(
+							'<%= eventName %>',
+							{
+								displayStyle: displayStyle
+							}
+						);
+					}
+				},
+				'li > a'
+			);
+		}
 	</aui:script>
 </c:if>
+
+<%!
+private String _getIcon(String displayStyle) {
+	String displayStyleIcon = displayStyle;
+
+	if (displayStyle.equals("descriptive")) {
+		displayStyleIcon = "th-list";
+	}
+	else if (displayStyle.equals("icon")) {
+		displayStyleIcon = "th-large";
+	}
+	else if (displayStyle.equals("list")) {
+		displayStyleIcon = "align-justify";
+	}
+
+	return displayStyleIcon;
+}
+%>

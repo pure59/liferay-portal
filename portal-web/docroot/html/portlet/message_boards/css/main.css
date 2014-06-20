@@ -1,3 +1,5 @@
+@import "compass";
+
 .portlet-asset-publisher, .portlet-message-boards, .portlet-trash {
 	.category-buttons {
 		clear: both;
@@ -6,32 +8,19 @@
 
 	.category-subscriptions {
 		clear: both;
+		margin-bottom: 1em;
 		overflow: hidden;
 	}
 
 	.category-subscription-types {
 		float: right;
-	}
-
-	.code {
-		background: #FFF;
-		border: 1px solid #777;
-		font-family: monospace;
-		overflow-x: auto;
-		white-space: pre;
-	}
-
-	.code-lines {
-		border-right: 1px solid #CCC;
-		color: #000;
-		margin-right: 5px;
-		padding: 0px 5px 0px 5px;
+		margin-bottom: 0;
 	}
 
 	.quote {
 		background: #FFF url(@theme_image_path@/message_boards/quoteleft.png) left top no-repeat;
 		border: 1px solid #777;
-		padding: 5px 0px 0px 5px;
+		padding: 5px 0 0 5px;
 	}
 
 	.quote-content {
@@ -41,7 +30,7 @@
 
 	.quote-title {
 		font-weight: bold;
-		padding: 5px 0px 5px 0px;
+		padding: 5px 0 5px 0;
 	}
 
 	.title {
@@ -87,10 +76,15 @@
 	.message-container {
 		border: 1px solid #CCC;
 		margin: 5px 0 0 0;
+		overflow: auto;
 
 		table {
 			border-collapse: collapse;
 			table-layout: fixed;
+		}
+
+		.lfr-code table {
+			table-layout: auto;
 		}
 
 		td {
@@ -142,6 +136,10 @@
 	.message-container .user-info {
 		border-right: 1px solid #CCC;
 		padding: 5px;
+
+		.user-name {
+			@include hyphenation;
+		}
 	}
 
 	.clear {
@@ -176,8 +174,8 @@
 	}
 
 	.views {
-		color: #999;
 		clear: both;
+		color: #999;
 		float: left;
 		padding: 5px 0;
 		text-align: center;
@@ -225,6 +223,7 @@
 
 	.toggle_id_message_boards_view_message_thread {
 		border: 1px solid #CCC;
+		clear: both;
 		margin: 5px 0 0 0;
 		width: 100%;
 	}
@@ -254,6 +253,7 @@
 
 	.message-container .thread-message-view, .thread-view {
 		border-collapse: collapse;
+		min-width: 400px;
 		padding: 0;
 		width: 100%;
 	}
@@ -294,17 +294,31 @@
 		}
 	}
 
+	.category-description, .category-title {
+		display: block;
+	}
+
+	.category-description {
+		@include hyphenation;
+	}
+
+	.category-title {
+		@include ellipsis;
+
+		font-weight: bold;
+	}
+
 	.subcategories {
 		text-decoration: underline;
 	}
 
 	.taglib-flags {
 		float: left;
-		margin-left: 20px;
+		margin: 10px 0 0 20px;
 	}
 
 	.threads-panel {
-		margin-top: 2em;
+		margin-top: 1em;
 	}
 
 	.displayStyle-question {

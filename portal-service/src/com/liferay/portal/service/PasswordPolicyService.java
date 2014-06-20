@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -32,6 +34,7 @@ import com.liferay.portal.security.ac.AccessControlled;
  * @see com.liferay.portal.service.impl.PasswordPolicyServiceImpl
  * @generated
  */
+@ProviderType
 @AccessControlled
 @JSONWebService
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
@@ -63,6 +66,7 @@ public interface PasswordPolicyService extends BaseService {
 	int, int, int, int, String, boolean, int, boolean, long,
 	long, int, boolean, int, long, long, long, ServiceContext)}
 	*/
+	@Deprecated
 	public com.liferay.portal.model.PasswordPolicy addPasswordPolicy(
 		java.lang.String name, java.lang.String description,
 		boolean changeable, boolean changeRequired, long minAge,
@@ -72,8 +76,7 @@ public interface PasswordPolicyService extends BaseService {
 		boolean expireable, long maxAge, long warningTime, int graceLimit,
 		boolean lockout, int maxFailure, long lockoutDuration,
 		long resetFailureCount, long resetTicketMaxAge)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public com.liferay.portal.model.PasswordPolicy addPasswordPolicy(
 		java.lang.String name, java.lang.String description,
@@ -85,12 +88,10 @@ public interface PasswordPolicyService extends BaseService {
 		int graceLimit, boolean lockout, int maxFailure, long lockoutDuration,
 		long resetFailureCount, long resetTicketMaxAge,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public void deletePasswordPolicy(long passwordPolicyId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	/**
 	* @deprecated As of 6.2.0, replaced by {@link #updatePasswordPolicy(long,
@@ -99,6 +100,7 @@ public interface PasswordPolicyService extends BaseService {
 	long, long, int, boolean, int, long, long, long,
 	ServiceContext)}
 	*/
+	@Deprecated
 	public com.liferay.portal.model.PasswordPolicy updatePasswordPolicy(
 		long passwordPolicyId, java.lang.String name,
 		java.lang.String description, boolean changeable,
@@ -108,8 +110,7 @@ public interface PasswordPolicyService extends BaseService {
 		boolean history, int historyCount, boolean expireable, long maxAge,
 		long warningTime, int graceLimit, boolean lockout, int maxFailure,
 		long lockoutDuration, long resetFailureCount, long resetTicketMaxAge)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public com.liferay.portal.model.PasswordPolicy updatePasswordPolicy(
 		long passwordPolicyId, java.lang.String name,
@@ -122,6 +123,5 @@ public interface PasswordPolicyService extends BaseService {
 		boolean lockout, int maxFailure, long lockoutDuration,
 		long resetFailureCount, long resetTicketMaxAge,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 }

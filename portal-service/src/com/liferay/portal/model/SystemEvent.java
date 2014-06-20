@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.util.Accessor;
 
 /**
@@ -25,6 +27,7 @@ import com.liferay.portal.kernel.util.Accessor;
  * @see com.liferay.portal.model.impl.SystemEventModelImpl
  * @generated
  */
+@ProviderType
 public interface SystemEvent extends SystemEventModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -35,6 +38,16 @@ public interface SystemEvent extends SystemEventModel, PersistedModel {
 			@Override
 			public Long get(SystemEvent systemEvent) {
 				return systemEvent.getSystemEventId();
+			}
+
+			@Override
+			public Class<Long> getAttributeClass() {
+				return Long.class;
+			}
+
+			@Override
+			public Class<SystemEvent> getTypeClass() {
+				return SystemEvent.class;
 			}
 		};
 

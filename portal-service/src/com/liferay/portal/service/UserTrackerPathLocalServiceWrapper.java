@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link UserTrackerPathLocalService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see UserTrackerPathLocalService
  * @generated
  */
+@ProviderType
 public class UserTrackerPathLocalServiceWrapper
 	implements UserTrackerPathLocalService,
 		ServiceWrapper<UserTrackerPathLocalService> {
@@ -34,12 +37,10 @@ public class UserTrackerPathLocalServiceWrapper
 	*
 	* @param userTrackerPath the user tracker path
 	* @return the user tracker path that was added
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.UserTrackerPath addUserTrackerPath(
-		com.liferay.portal.model.UserTrackerPath userTrackerPath)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.UserTrackerPath userTrackerPath) {
 		return _userTrackerPathLocalService.addUserTrackerPath(userTrackerPath);
 	}
 
@@ -61,13 +62,11 @@ public class UserTrackerPathLocalServiceWrapper
 	* @param userTrackerPathId the primary key of the user tracker path
 	* @return the user tracker path that was removed
 	* @throws PortalException if a user tracker path with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.UserTrackerPath deleteUserTrackerPath(
 		long userTrackerPathId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userTrackerPathLocalService.deleteUserTrackerPath(userTrackerPathId);
 	}
 
@@ -76,12 +75,10 @@ public class UserTrackerPathLocalServiceWrapper
 	*
 	* @param userTrackerPath the user tracker path
 	* @return the user tracker path that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.UserTrackerPath deleteUserTrackerPath(
-		com.liferay.portal.model.UserTrackerPath userTrackerPath)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.UserTrackerPath userTrackerPath) {
 		return _userTrackerPathLocalService.deleteUserTrackerPath(userTrackerPath);
 	}
 
@@ -95,13 +92,11 @@ public class UserTrackerPathLocalServiceWrapper
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _userTrackerPathLocalService.dynamicQuery(dynamicQuery);
 	}
 
@@ -116,13 +111,12 @@ public class UserTrackerPathLocalServiceWrapper
 	* @param start the lower bound of the range of model instances
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @return the range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		int end) {
 		return _userTrackerPathLocalService.dynamicQuery(dynamicQuery, start,
 			end);
 	}
@@ -139,15 +133,13 @@ public class UserTrackerPathLocalServiceWrapper
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	@SuppressWarnings("rawtypes")
 	public java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return _userTrackerPathLocalService.dynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -157,12 +149,10 @@ public class UserTrackerPathLocalServiceWrapper
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public long dynamicQueryCount(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _userTrackerPathLocalService.dynamicQueryCount(dynamicQuery);
 	}
 
@@ -172,21 +162,18 @@ public class UserTrackerPathLocalServiceWrapper
 	* @param dynamicQuery the dynamic query
 	* @param projection the projection to apply to the query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public long dynamicQueryCount(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
-		com.liferay.portal.kernel.dao.orm.Projection projection)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.Projection projection) {
 		return _userTrackerPathLocalService.dynamicQueryCount(dynamicQuery,
 			projection);
 	}
 
 	@Override
 	public com.liferay.portal.model.UserTrackerPath fetchUserTrackerPath(
-		long userTrackerPathId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long userTrackerPathId) {
 		return _userTrackerPathLocalService.fetchUserTrackerPath(userTrackerPathId);
 	}
 
@@ -196,21 +183,33 @@ public class UserTrackerPathLocalServiceWrapper
 	* @param userTrackerPathId the primary key of the user tracker path
 	* @return the user tracker path
 	* @throws PortalException if a user tracker path with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.UserTrackerPath getUserTrackerPath(
 		long userTrackerPathId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userTrackerPathLocalService.getUserTrackerPath(userTrackerPathId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
+		return _userTrackerPathLocalService.getActionableDynamicQuery();
+	}
+
+	/**
+	* @throws PortalException
+	*/
+	@Override
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _userTrackerPathLocalService.deletePersistedModel(persistedModel);
 	}
 
 	@Override
 	public com.liferay.portal.model.PersistedModel getPersistedModel(
 		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userTrackerPathLocalService.getPersistedModel(primaryKeyObj);
 	}
 
@@ -224,12 +223,10 @@ public class UserTrackerPathLocalServiceWrapper
 	* @param start the lower bound of the range of user tracker paths
 	* @param end the upper bound of the range of user tracker paths (not inclusive)
 	* @return the range of user tracker paths
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public java.util.List<com.liferay.portal.model.UserTrackerPath> getUserTrackerPaths(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return _userTrackerPathLocalService.getUserTrackerPaths(start, end);
 	}
 
@@ -237,11 +234,9 @@ public class UserTrackerPathLocalServiceWrapper
 	* Returns the number of user tracker paths.
 	*
 	* @return the number of user tracker paths
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public int getUserTrackerPathsCount()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getUserTrackerPathsCount() {
 		return _userTrackerPathLocalService.getUserTrackerPathsCount();
 	}
 
@@ -250,12 +245,10 @@ public class UserTrackerPathLocalServiceWrapper
 	*
 	* @param userTrackerPath the user tracker path
 	* @return the user tracker path that was updated
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public com.liferay.portal.model.UserTrackerPath updateUserTrackerPath(
-		com.liferay.portal.model.UserTrackerPath userTrackerPath)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.UserTrackerPath userTrackerPath) {
 		return _userTrackerPathLocalService.updateUserTrackerPath(userTrackerPath);
 	}
 
@@ -281,8 +274,7 @@ public class UserTrackerPathLocalServiceWrapper
 
 	@Override
 	public java.util.List<com.liferay.portal.model.UserTrackerPath> getUserTrackerPaths(
-		long userTrackerId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long userTrackerId, int start, int end) {
 		return _userTrackerPathLocalService.getUserTrackerPaths(userTrackerId,
 			start, end);
 	}
@@ -290,6 +282,7 @@ public class UserTrackerPathLocalServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public UserTrackerPathLocalService getWrappedUserTrackerPathLocalService() {
 		return _userTrackerPathLocalService;
 	}
@@ -297,6 +290,7 @@ public class UserTrackerPathLocalServiceWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedUserTrackerPathLocalService(
 		UserTrackerPathLocalService userTrackerPathLocalService) {
 		_userTrackerPathLocalService = userTrackerPathLocalService;

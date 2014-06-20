@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.layoutsadmin.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -36,6 +37,19 @@ public class LayoutFriendlyURLStagedModelDataHandler
 		{LayoutFriendlyURL.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException {
+
+		LayoutFriendlyURL layoutFriendlyURL =
+			LayoutFriendlyURLLocalServiceUtil.
+				getLayoutFriendlyURLByUuidAndGroupId(uuid, groupId);
+
+		LayoutFriendlyURLLocalServiceUtil.deleteLayoutFriendlyURL(
+			layoutFriendlyURL);
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -52,7 +66,7 @@ public class LayoutFriendlyURLStagedModelDataHandler
 		portletDataContext.addClassedModel(
 			layoutFriendlyURLElement,
 			ExportImportPathUtil.getModelPath(layoutFriendlyURL),
-			layoutFriendlyURL, LayoutPortletDataHandler.NAMESPACE);
+			layoutFriendlyURL);
 	}
 
 	@Override
@@ -72,16 +86,16 @@ public class LayoutFriendlyURLStagedModelDataHandler
 			plids, layoutFriendlyURL.getPlid(), layoutFriendlyURL.getPlid());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			layoutFriendlyURL, LayoutPortletDataHandler.NAMESPACE);
+			layoutFriendlyURL);
 
 		LayoutFriendlyURL importedLayoutFriendlyURL = null;
 
 		if (portletDataContext.isDataStrategyMirror()) {
 			LayoutFriendlyURL existingLayoutFriendlyURL =
-				getExistingLayoutFriendlyURL(
+				fetchExistingLayoutFriendlyURL(
 					portletDataContext, layoutFriendlyURL, plid);
 
-			layoutFriendlyURL= getLayoutFriendlyURL(
+			layoutFriendlyURL = getUniqueLayoutFriendlyURL(
 				portletDataContext, layoutFriendlyURL,
 				existingLayoutFriendlyURL);
 
@@ -107,7 +121,7 @@ public class LayoutFriendlyURLStagedModelDataHandler
 			}
 		}
 		else {
-			layoutFriendlyURL = getLayoutFriendlyURL(
+			layoutFriendlyURL = getUniqueLayoutFriendlyURL(
 				portletDataContext, layoutFriendlyURL, null);
 
 			importedLayoutFriendlyURL =
@@ -120,14 +134,12 @@ public class LayoutFriendlyURLStagedModelDataHandler
 		}
 
 		portletDataContext.importClassedModel(
-			layoutFriendlyURL, importedLayoutFriendlyURL,
-			LayoutPortletDataHandler.NAMESPACE);
+			layoutFriendlyURL, importedLayoutFriendlyURL);
 	}
 
-	protected LayoutFriendlyURL getExistingLayoutFriendlyURL(
-			PortletDataContext portletDataContext,
-			LayoutFriendlyURL layoutFriendlyURL, long plid)
-		throws Exception {
+	protected LayoutFriendlyURL fetchExistingLayoutFriendlyURL(
+		PortletDataContext portletDataContext,
+		LayoutFriendlyURL layoutFriendlyURL, long plid) {
 
 		LayoutFriendlyURL existingLayoutFriendlyURL =
 			LayoutFriendlyURLLocalServiceUtil.
@@ -144,7 +156,7 @@ public class LayoutFriendlyURLStagedModelDataHandler
 		return existingLayoutFriendlyURL;
 	}
 
-	protected LayoutFriendlyURL getLayoutFriendlyURL(
+	protected LayoutFriendlyURL getUniqueLayoutFriendlyURL(
 			PortletDataContext portletDataContext,
 			LayoutFriendlyURL layoutFriendlyURL,
 			LayoutFriendlyURL existingLayoutFriendlyURL)
@@ -163,7 +175,7 @@ public class LayoutFriendlyURLStagedModelDataHandler
 			if ((duplicateLayoutFriendlyURL == null) ||
 				((existingLayoutFriendlyURL != null) &&
 				 (existingLayoutFriendlyURL.getLayoutFriendlyURLId() ==
-						duplicateLayoutFriendlyURL.getLayoutFriendlyURLId()))) {
+					duplicateLayoutFriendlyURL.getLayoutFriendlyURLId()))) {
 
 				break;
 			}

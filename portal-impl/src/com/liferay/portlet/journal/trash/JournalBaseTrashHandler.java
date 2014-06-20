@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,11 +15,11 @@
 package com.liferay.portlet.journal.trash;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.trash.BaseTrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.trash.TrashRenderer;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.ContainerModel;
 import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.journal.model.JournalFolder;
@@ -36,7 +36,7 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 
 	@Override
 	public ContainerModel getContainerModel(long containerModelId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return JournalFolderLocalServiceUtil.getFolder(containerModelId);
 	}
@@ -54,7 +54,7 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 	@Override
 	public List<ContainerModel> getContainerModels(
 			long classPK, long parentContainerModelId, int start, int end)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		List<JournalFolder> folders =
 			JournalFolderLocalServiceUtil.getFolders(
@@ -73,7 +73,7 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 	@Override
 	public int getContainerModelsCount(
 			long classPK, long parentContainerModelId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return JournalFolderLocalServiceUtil.getFoldersCount(
 			getGroupId(classPK), parentContainerModelId);
@@ -81,7 +81,7 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 
 	@Override
 	public List<ContainerModel> getParentContainerModels(long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		List<ContainerModel> containerModels = new ArrayList<ContainerModel>();
 
@@ -119,26 +119,27 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 
 	@Override
 	public int getTrashContainedModelsCount(long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		JournalFolder folder = JournalFolderLocalServiceUtil.getFolder(classPK);
 
-		return JournalArticleLocalServiceUtil.getArticlesCount(
-			folder.getGroupId(), classPK);
+		return JournalArticleLocalServiceUtil.searchCount(
+			folder.getGroupId(), classPK, WorkflowConstants.STATUS_IN_TRASH);
 	}
 
 	@Override
 	public List<TrashRenderer> getTrashContainedModelTrashRenderers(
 			long classPK, int start, int end)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		List<TrashRenderer> trashRenderers = new ArrayList<TrashRenderer>();
 
 		JournalFolder folder = JournalFolderLocalServiceUtil.getFolder(classPK);
 
 		List<JournalArticle> articles =
-			JournalArticleLocalServiceUtil.getArticles(
-				folder.getGroupId(), classPK, start, end);
+			JournalArticleLocalServiceUtil.search(
+				folder.getGroupId(), classPK, WorkflowConstants.STATUS_IN_TRASH,
+				start, end);
 
 		for (JournalArticle article : articles) {
 			TrashHandler trashHandler =
@@ -161,18 +162,18 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 
 	@Override
 	public int getTrashContainerModelsCount(long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		JournalFolder folder = JournalFolderLocalServiceUtil.getFolder(classPK);
 
 		return JournalFolderLocalServiceUtil.getFoldersCount(
-			folder.getGroupId(), classPK);
+			folder.getGroupId(), classPK, WorkflowConstants.STATUS_IN_TRASH);
 	}
 
 	@Override
 	public List<TrashRenderer> getTrashContainerModelTrashRenderers(
 			long classPK, int start, int end)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		List<TrashRenderer> trashRenderers = new ArrayList<TrashRenderer>();
 
@@ -180,7 +181,8 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 
 		List<JournalFolder> folders =
 			JournalFolderLocalServiceUtil.getFolders(
-					folder.getGroupId(), classPK, start, end);
+				folder.getGroupId(), classPK, WorkflowConstants.STATUS_IN_TRASH,
+				start, end);
 
 		for (JournalFolder curFolder : folders) {
 			TrashHandler trashHandler =
@@ -202,6 +204,6 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 	}
 
 	protected abstract long getGroupId(long classPK)
-		throws PortalException, SystemException;
+		throws PortalException;
 
 }

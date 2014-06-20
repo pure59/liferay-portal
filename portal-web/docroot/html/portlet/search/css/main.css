@@ -46,37 +46,8 @@
 				margin: 0 0 1em;
 			}
 
-			.facet-value {
-				font-size: 1.1em;
-				padding: 3px;
-				padding-right: 0;
-
-				a {
-					text-decoration: none;
-
-					img {
-						margin-right: 8px;
-						vertical-align: middle;
-					}
-				}
-
-				&.current-term {
-					background: #5B677D;
-					font-weight: bold;
-					margin-bottom: 2px;
-
-					a {
-						color: #FFF;
-
-						img {
-							margin-right: 8px;
-						}
-					}
-
-					.frequency {
-						display: none;
-					}
-				}
+			.facet-value.active .frequency {
+				display: none;
 			}
 
 			.date .calendar {
@@ -190,9 +161,9 @@
 				}
 
 				.asset-entry-type {
+					color: #777;
 					float: right;
 					font-size: 0.8em;
-					color: #777;
 				}
 
 				.toggle-details {
@@ -232,21 +203,33 @@
 		padding: 5px 0;
 	}
 
+	.search-suggested-spelling {
+		margin: 0;
+
+		.suggested-keywords a {
+			font-size: 1.3em;
+		}
+
+		.changed-keyword {
+			font-style: italic;
+			font-weight: bold;
+		}
+	}
+
 	.section-title {
 		font-size: 1.3em;
 		font-weight: bold;
 		margin: 10px 0;
-	}
-
-	.taglib-asset-categories-summary .asset-vocabulary {
-		background: url(@theme_image_path@/common/folder.png) no-repeat 0 50%;
-		padding: 2px 5px 2px 20px;
 	}
 }
 
 .portlet-search.portlet-configuration {
 	.fieldset-content {
 		padding-top: 0.5em;
+	}
+
+	.options-container {
+		margin-left: 1.8em;
 	}
 
 	.search-configuration-text {

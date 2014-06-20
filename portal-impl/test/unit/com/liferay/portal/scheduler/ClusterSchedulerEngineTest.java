@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,13 +15,14 @@
 package com.liferay.portal.scheduler;
 
 import com.liferay.portal.cluster.AddressImpl;
-import com.liferay.portal.cluster.ClusterInvokeThreadLocal;
 import com.liferay.portal.cluster.ClusterableContextThreadLocal;
 import com.liferay.portal.kernel.cluster.Address;
+import com.liferay.portal.kernel.cluster.AddressSerializerUtil;
 import com.liferay.portal.kernel.cluster.ClusterEventListener;
 import com.liferay.portal.kernel.cluster.ClusterExecutor;
 import com.liferay.portal.kernel.cluster.ClusterExecutorUtil;
 import com.liferay.portal.kernel.cluster.ClusterInvokeAcceptor;
+import com.liferay.portal.kernel.cluster.ClusterInvokeThreadLocal;
 import com.liferay.portal.kernel.cluster.ClusterMessageType;
 import com.liferay.portal.kernel.cluster.ClusterNode;
 import com.liferay.portal.kernel.cluster.ClusterNodeResponse;
@@ -42,16 +43,15 @@ import com.liferay.portal.kernel.scheduler.TriggerState;
 import com.liferay.portal.kernel.scheduler.TriggerType;
 import com.liferay.portal.kernel.scheduler.messaging.SchedulerResponse;
 import com.liferay.portal.kernel.servlet.PluginContextLifecycleThreadLocal;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.MethodHandler;
 import com.liferay.portal.kernel.util.MethodKey;
 import com.liferay.portal.kernel.util.ObjectValuePair;
-import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.model.Lock;
 import com.liferay.portal.model.impl.LockImpl;
-import com.liferay.portal.service.LockLocalService;
 import com.liferay.portal.service.LockLocalServiceUtil;
 import com.liferay.portal.service.impl.LockLocalServiceImpl;
 import com.liferay.portal.util.PortalImpl;
@@ -66,7 +66,6 @@ import java.io.ObjectOutput;
 import java.io.Serializable;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import java.net.InetAddress;
@@ -101,20 +100,13 @@ public class ClusterSchedulerEngineTest {
 
 		portalUUIDUtil.setPortalUUID(new PortalUUIDImpl());
 
-		Field field = ReflectionUtil.getDeclaredField(
-			LockLocalServiceUtil.class, "_service");
-
-		LockLocalService lockLocalService = new MockLockLocalService();
-
-		field.set(null, lockLocalService);
-
-		field = ClusterableContextThreadLocal.class.getDeclaredField(
-			"_contextThreadLocal");
-
-		field.setAccessible(true);
+		ReflectionTestUtil.setFieldValue(
+			LockLocalServiceUtil.class, "_service", new MockLockLocalService());
 
 		_threadLocalContext =
-			(ThreadLocal<HashMap<String, Serializable>>)field.get(null);
+			(ThreadLocal<HashMap<String, Serializable>>)
+				ReflectionTestUtil.getFieldValue(
+					ClusterableContextThreadLocal.class, "_contextThreadLocal");
 
 		Method method = ClusterSchedulerEngine.class.getDeclaredMethod(
 			"delete", String.class);
@@ -286,7 +278,7 @@ public class ClusterSchedulerEngineTest {
 
 		Assert.assertTrue(schedulerResponseMap.isEmpty());
 
-		String newMaster = _clusterSchedulerEngine.getSerializedString(
+		String newMaster = AddressSerializerUtil.serialize(
 			MockClusterExecutor._anotherAddress);
 
 		MockLockLocalService.setLock(newMaster);
@@ -311,7 +303,7 @@ public class ClusterSchedulerEngineTest {
 
 		Assert.assertTrue(schedulerResponseMap.isEmpty());
 
-		String newMaster = _clusterSchedulerEngine.getSerializedString(
+		String newMaster = AddressSerializerUtil.serialize(
 			MockClusterExecutor._anotherAddress);
 
 		MockLockLocalService.setLock(newMaster);
@@ -625,7 +617,7 @@ public class ClusterSchedulerEngineTest {
 
 		Assert.assertEquals(2, schedulerResponseMap.size());
 
-		String newMaster = _clusterSchedulerEngine.getSerializedString(
+		String newMaster = AddressSerializerUtil.serialize(
 			ClusterExecutorUtil.getLocalClusterNodeAddress());
 
 		MockLockLocalService.setLock(newMaster);
@@ -940,7 +932,7 @@ public class ClusterSchedulerEngineTest {
 		}
 
 		MockLockLocalService.setLock(
-			clusterSchedulerEngine.getSerializedString(masterAddress));
+			AddressSerializerUtil.serialize(masterAddress));
 
 		SchedulerEngineHelperImpl schedulerEngineHelperImpl =
 			new SchedulerEngineHelperImpl();
@@ -981,13 +973,11 @@ public class ClusterSchedulerEngineTest {
 			ClusterSchedulerEngine clusterSchedulerEngine)
 		throws Exception {
 
-		Field field = ReflectionUtil.getDeclaredField(
-			ClusterSchedulerEngine.class, "_memoryClusteredJobs");
-
 		Map<String, ObjectValuePair<SchedulerResponse, TriggerState>>
 			memoryJobs =
 				(Map<String, ObjectValuePair<SchedulerResponse, TriggerState>>)
-					field.get(clusterSchedulerEngine);
+					ReflectionTestUtil.getFieldValue(
+						clusterSchedulerEngine, "_memoryClusteredJobs");
 
 		if (memoryJobs.isEmpty()) {
 			return Collections.emptyMap();
@@ -1036,11 +1026,9 @@ public class ClusterSchedulerEngineTest {
 	private boolean _isMaster(ClusterSchedulerEngine clusterSchedulerEngine)
 		throws Exception {
 
-		Field localClusterNodeAddressField = ReflectionUtil.getDeclaredField(
-			ClusterSchedulerEngine.class, "_localClusterNodeAddress");
-
 		String localClusterNodeAddress =
-			(String)localClusterNodeAddressField.get(clusterSchedulerEngine);
+			(String)ReflectionTestUtil.getFieldValue(
+				clusterSchedulerEngine, "_localClusterNodeAddress");
 
 		Lock lock = MockLockLocalService.getLock();
 
@@ -1174,7 +1162,8 @@ public class ClusterSchedulerEngineTest {
 			long timestamp = System.currentTimeMillis();
 
 			_localAddress = new AddressImpl(new MockAddress(timestamp));
-			_anotherAddress= new AddressImpl(new MockAddress(timestamp + 1000));
+			_anotherAddress = new AddressImpl(
+				new MockAddress(timestamp + 1000));
 
 			_addresses.add(_localAddress);
 			_addresses.add(_anotherAddress);
@@ -1392,10 +1381,7 @@ public class ClusterSchedulerEngineTest {
 		}
 
 		@Override
-		public Lock lock(
-			String className, String key, String owner,
-			boolean retrieveFromCache) {
-
+		public Lock lock(String className, String key, String owner) {
 			if (_lock == null) {
 				Lock lock = new LockImpl();
 
@@ -1411,7 +1397,7 @@ public class ClusterSchedulerEngineTest {
 		@Override
 		public Lock lock(
 			String className, String key, String expectedOwner,
-			String updatedOwner, boolean retrieveFromCache) {
+			String updatedOwner) {
 
 			Lock lock = new LockImpl();
 
@@ -1424,10 +1410,7 @@ public class ClusterSchedulerEngineTest {
 		}
 
 		@Override
-		public void unlock(
-			String className, String key, String owner,
-			boolean retrieveFromCache) {
-
+		public void unlock(String className, String key, String owner) {
 			_lock = null;
 		}
 

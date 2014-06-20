@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -76,7 +76,8 @@ public class PostgreSQLDB extends BaseDB {
 			while (rs.next()) {
 				String indexName = rs.getString("indexname");
 				String tableName = rs.getString("tablename");
-				String indexSQL = rs.getString("indexdef").toLowerCase().trim();
+				String indexSQL = StringUtil.toLowerCase(
+					rs.getString("indexdef").trim());
 
 				boolean unique = true;
 
@@ -118,14 +119,17 @@ public class PostgreSQLDB extends BaseDB {
 		sb.append("create database ");
 		sb.append(databaseName);
 		sb.append(" encoding = 'UNICODE';\n");
-		sb.append("\\c ");
-		sb.append(databaseName);
-		sb.append(";\n\n");
-		sb.append(getCreateTablesContent(sqlDir, suffix));
-		sb.append("\n\n");
-		sb.append(readFile(sqlDir + "/indexes/indexes-postgresql.sql"));
-		sb.append("\n\n");
-		sb.append(readFile(sqlDir + "/sequences/sequences-postgresql.sql"));
+
+		if (population != BARE) {
+			sb.append("\\c ");
+			sb.append(databaseName);
+			sb.append(";\n\n");
+			sb.append(getCreateTablesContent(sqlDir, suffix));
+			sb.append("\n\n");
+			sb.append(readFile(sqlDir + "/indexes/indexes-postgresql.sql"));
+			sb.append("\n\n");
+			sb.append(readFile(sqlDir + "/sequences/sequences-postgresql.sql"));
+		}
 
 		return sb.toString();
 	}

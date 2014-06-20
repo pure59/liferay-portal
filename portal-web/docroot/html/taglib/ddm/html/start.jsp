@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,7 +18,12 @@
 
 <div class="lfr-ddm-container" id="<%= randomNamespace %>">
 	<c:if test="<%= Validator.isNotNull(xsd) %>">
-		<%= DDMXSDUtil.getHTML(pageContext, xsd, fields, portletResponse.getNamespace(), fieldsNamespace, readOnly, requestedLocale) %>
+
+		<%
+		pageContext.setAttribute("checkRequired", checkRequired);
+		%>
+
+		<%= DDMXSDUtil.getHTML(request, response, xsd, fields, portletResponse.getNamespace(), fieldsNamespace, mode, readOnly, requestedLocale) %>
 
 		<aui:input name="<%= fieldsDisplayInputName %>" type="hidden" />
 

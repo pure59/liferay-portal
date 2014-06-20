@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.mobiledevicerules.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see MDRRuleService
  * @generated
  */
+@ProviderType
 public class MDRRuleServiceWrapper implements MDRRuleService,
 	ServiceWrapper<MDRRuleService> {
 	public MDRRuleServiceWrapper(MDRRuleService mdrRuleService) {
@@ -56,8 +59,7 @@ public class MDRRuleServiceWrapper implements MDRRuleService,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		java.lang.String type, java.lang.String typeSettings,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrRuleService.addRule(ruleGroupId, nameMap, descriptionMap,
 			type, typeSettings, serviceContext);
 	}
@@ -70,32 +72,26 @@ public class MDRRuleServiceWrapper implements MDRRuleService,
 		java.lang.String type,
 		com.liferay.portal.kernel.util.UnicodeProperties typeSettings,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrRuleService.addRule(ruleGroupId, nameMap, descriptionMap,
 			type, typeSettings, serviceContext);
 	}
 
 	@Override
 	public void deleteRule(long ruleId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_mdrRuleService.deleteRule(ruleId);
 	}
 
 	@Override
 	public com.liferay.portlet.mobiledevicerules.model.MDRRule fetchRule(
-		long ruleId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long ruleId) throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrRuleService.fetchRule(ruleId);
 	}
 
 	@Override
 	public com.liferay.portlet.mobiledevicerules.model.MDRRule getRule(
-		long ruleId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long ruleId) throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrRuleService.getRule(ruleId);
 	}
 
@@ -105,8 +101,7 @@ public class MDRRuleServiceWrapper implements MDRRuleService,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		java.lang.String type, java.lang.String typeSettings,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrRuleService.updateRule(ruleId, nameMap, descriptionMap,
 			type, typeSettings, serviceContext);
 	}
@@ -118,8 +113,7 @@ public class MDRRuleServiceWrapper implements MDRRuleService,
 		java.lang.String type,
 		com.liferay.portal.kernel.util.UnicodeProperties typeSettingsProperties,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrRuleService.updateRule(ruleId, nameMap, descriptionMap,
 			type, typeSettingsProperties, serviceContext);
 	}
@@ -127,6 +121,7 @@ public class MDRRuleServiceWrapper implements MDRRuleService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public MDRRuleService getWrappedMDRRuleService() {
 		return _mdrRuleService;
 	}
@@ -134,6 +129,7 @@ public class MDRRuleServiceWrapper implements MDRRuleService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedMDRRuleService(MDRRuleService mdrRuleService) {
 		_mdrRuleService = mdrRuleService;
 	}

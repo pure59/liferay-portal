@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -32,9 +32,9 @@ PortletURL portletURL = renderResponse.createRenderURL();
 portletURL.setParameter("struts_action", "/message_boards/edit_message");
 portletURL.setParameter("messageId", String.valueOf(message.getMessageId()));
 
-PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "edit"), portletURL.toString());
+PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "edit"), portletURL.toString());
 
-PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "removed-attachments"), currentURL);
+PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "removed-attachments"), currentURL);
 
 PortletURL iteratorURL = renderResponse.createRenderURL();
 
@@ -77,32 +77,38 @@ iteratorURL.setParameter("messageId", String.valueOf(messageId));
 		keyProperty="fileEntryId"
 		modelVar="fileEntry"
 	>
-		<portlet:actionURL var="rowURL" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>">
-			<portlet:param name="struts_action" value="/message_boards/get_message_attachment" />
-			<portlet:param name="messageId" value="<%= String.valueOf(message.getMessageId()) %>" />
-			<portlet:param name="attachment" value="<%= fileEntry.getTitle() %>" />
-			<portlet:param name="status" value="<%= String.valueOf(WorkflowConstants.STATUS_IN_TRASH) %>" />
-		</portlet:actionURL>
+
+		<%
+		String rowHREF = PortletFileRepositoryUtil.getDownloadPortletFileEntryURL(themeDisplay, fileEntry, "status=" + WorkflowConstants.STATUS_IN_TRASH);
+		%>
 
 		<liferay-ui:search-container-column-text
-			href="<%= rowURL %>"
+			href="<%= rowHREF %>"
 			name="file-name"
 		>
+
+			<%
+			AssetRendererFactory assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(DLFileEntry.class.getName());
+
+			AssetRenderer assetRenderer = assetRendererFactory.getAssetRenderer(fileEntry.getFileEntryId());
+			%>
+
 			<liferay-ui:icon
-				image='<%= "../file_system/small/" + DLUtil.getFileIcon(fileEntry.getExtension()) %>'
+				iconCssClass="<%= assetRenderer.getIconCssClass() %>"
 				label="<%= true %>"
 				message="<%= TrashUtil.getOriginalTitle(fileEntry.getTitle()) %>"
 			/>
 		</liferay-ui:search-container-column-text>
 
 		<liferay-ui:search-container-column-text
-			href="<%= rowURL %>"
+			href="<%= rowHREF %>"
 			name="size"
 			value="<%= TextFormatter.formatStorageSize(fileEntry.getSize(), locale) %>"
 		/>
 
 		<liferay-ui:search-container-column-jsp
 			align="right"
+			cssClass="entry-action"
 			path="/html/portlet/message_boards/deleted_message_attachment_action.jsp"
 		/>
 	</liferay-ui:search-container-row>

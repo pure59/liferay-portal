@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.kernel.xml.XPath;
@@ -273,7 +274,7 @@ public class XMLStorageAdapter extends BaseStorageAdapter {
 	}
 
 	private String _toXPath(Condition condition) {
-		StringBundler sb = new StringBundler();
+		StringBundler sb = new StringBundler(3);
 
 		if (condition.isJunction()) {
 			sb.append(StringPool.OPEN_PARENTHESIS);
@@ -337,7 +338,7 @@ public class XMLStorageAdapter extends BaseStorageAdapter {
 
 			if (itr.hasNext()) {
 				sb.append(StringPool.SPACE);
-				sb.append(logicalOperatorString.toLowerCase());
+				sb.append(StringUtil.toLowerCase(logicalOperatorString));
 				sb.append(StringPool.SPACE);
 			}
 		}

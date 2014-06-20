@@ -1,4 +1,9 @@
-Export-Package: com.liferay.*
-Import-Package: *;resolution:=optional
+Bundle-Version: 6.2.0
+Export-Package:\
+	!com.liferay.portal.kernel.test.*,\
+	com.liferay.*
+Import-Package: *
 Include-Resource: classes
 Private-Package: *
+
+-baseline: *;version="6.2.0"

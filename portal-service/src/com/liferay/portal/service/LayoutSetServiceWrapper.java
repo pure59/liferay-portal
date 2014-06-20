@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link LayoutSetService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see LayoutSetService
  * @generated
  */
+@ProviderType
 public class LayoutSetServiceWrapper implements LayoutSetService,
 	ServiceWrapper<LayoutSetService> {
 	public LayoutSetServiceWrapper(LayoutSetService layoutSetService) {
@@ -65,14 +68,12 @@ public class LayoutSetServiceWrapper implements LayoutSetService,
 	* @param layoutSetPrototypeUuid the uuid of the layout set prototype to
 	link with
 	* @throws PortalException if a portal exception occurred
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
 	public void updateLayoutSetPrototypeLinkEnabled(long groupId,
 		boolean privateLayout, boolean layoutSetPrototypeLinkEnabled,
 		java.lang.String layoutSetPrototypeUuid)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_layoutSetService.updateLayoutSetPrototypeLinkEnabled(groupId,
 			privateLayout, layoutSetPrototypeLinkEnabled, layoutSetPrototypeUuid);
 	}
@@ -80,32 +81,28 @@ public class LayoutSetServiceWrapper implements LayoutSetService,
 	@Override
 	public void updateLogo(long groupId, boolean privateLayout, boolean logo,
 		byte[] bytes)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_layoutSetService.updateLogo(groupId, privateLayout, logo, bytes);
 	}
 
 	@Override
 	public void updateLogo(long groupId, boolean privateLayout, boolean logo,
 		java.io.File file)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_layoutSetService.updateLogo(groupId, privateLayout, logo, file);
 	}
 
 	@Override
 	public void updateLogo(long groupId, boolean privateLayout, boolean logo,
 		java.io.InputStream inputStream)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_layoutSetService.updateLogo(groupId, privateLayout, logo, inputStream);
 	}
 
 	@Override
 	public void updateLogo(long groupId, boolean privateLayout, boolean logo,
 		java.io.InputStream inputStream, boolean cleanUpStream)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_layoutSetService.updateLogo(groupId, privateLayout, logo, inputStream,
 			cleanUpStream);
 	}
@@ -114,8 +111,7 @@ public class LayoutSetServiceWrapper implements LayoutSetService,
 	public com.liferay.portal.model.LayoutSet updateLookAndFeel(long groupId,
 		boolean privateLayout, java.lang.String themeId,
 		java.lang.String colorSchemeId, java.lang.String css, boolean wapTheme)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutSetService.updateLookAndFeel(groupId, privateLayout,
 			themeId, colorSchemeId, css, wapTheme);
 	}
@@ -123,16 +119,14 @@ public class LayoutSetServiceWrapper implements LayoutSetService,
 	@Override
 	public com.liferay.portal.model.LayoutSet updateSettings(long groupId,
 		boolean privateLayout, java.lang.String settings)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutSetService.updateSettings(groupId, privateLayout, settings);
 	}
 
 	@Override
 	public com.liferay.portal.model.LayoutSet updateVirtualHost(long groupId,
 		boolean privateLayout, java.lang.String virtualHost)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutSetService.updateVirtualHost(groupId, privateLayout,
 			virtualHost);
 	}
@@ -140,6 +134,7 @@ public class LayoutSetServiceWrapper implements LayoutSetService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public LayoutSetService getWrappedLayoutSetService() {
 		return _layoutSetService;
 	}
@@ -147,6 +142,7 @@ public class LayoutSetServiceWrapper implements LayoutSetService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedLayoutSetService(LayoutSetService layoutSetService) {
 		_layoutSetService = layoutSetService;
 	}

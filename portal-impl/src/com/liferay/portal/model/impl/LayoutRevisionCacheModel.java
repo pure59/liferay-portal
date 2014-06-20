@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.LayoutRevision;
+import com.liferay.portal.model.MVCCModel;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -34,12 +35,24 @@ import java.util.Date;
  * @generated
  */
 public class LayoutRevisionCacheModel implements CacheModel<LayoutRevision>,
-	Externalizable {
+	Externalizable, MVCCModel {
+	@Override
+	public long getMvccVersion() {
+		return mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		this.mvccVersion = mvccVersion;
+	}
+
 	@Override
 	public String toString() {
 		StringBundler sb = new StringBundler(63);
 
-		sb.append("{layoutRevisionId=");
+		sb.append("{mvccVersion=");
+		sb.append(mvccVersion);
+		sb.append(", layoutRevisionId=");
 		sb.append(layoutRevisionId);
 		sb.append(", groupId=");
 		sb.append(groupId);
@@ -79,8 +92,6 @@ public class LayoutRevisionCacheModel implements CacheModel<LayoutRevision>,
 		sb.append(robots);
 		sb.append(", typeSettings=");
 		sb.append(typeSettings);
-		sb.append(", iconImage=");
-		sb.append(iconImage);
 		sb.append(", iconImageId=");
 		sb.append(iconImageId);
 		sb.append(", themeId=");
@@ -110,6 +121,7 @@ public class LayoutRevisionCacheModel implements CacheModel<LayoutRevision>,
 	public LayoutRevision toEntityModel() {
 		LayoutRevisionImpl layoutRevisionImpl = new LayoutRevisionImpl();
 
+		layoutRevisionImpl.setMvccVersion(mvccVersion);
 		layoutRevisionImpl.setLayoutRevisionId(layoutRevisionId);
 		layoutRevisionImpl.setGroupId(groupId);
 		layoutRevisionImpl.setCompanyId(companyId);
@@ -186,7 +198,6 @@ public class LayoutRevisionCacheModel implements CacheModel<LayoutRevision>,
 			layoutRevisionImpl.setTypeSettings(typeSettings);
 		}
 
-		layoutRevisionImpl.setIconImage(iconImage);
 		layoutRevisionImpl.setIconImageId(iconImageId);
 
 		if (themeId == null) {
@@ -248,6 +259,7 @@ public class LayoutRevisionCacheModel implements CacheModel<LayoutRevision>,
 
 	@Override
 	public void readExternal(ObjectInput objectInput) throws IOException {
+		mvccVersion = objectInput.readLong();
 		layoutRevisionId = objectInput.readLong();
 		groupId = objectInput.readLong();
 		companyId = objectInput.readLong();
@@ -268,7 +280,6 @@ public class LayoutRevisionCacheModel implements CacheModel<LayoutRevision>,
 		keywords = objectInput.readUTF();
 		robots = objectInput.readUTF();
 		typeSettings = objectInput.readUTF();
-		iconImage = objectInput.readBoolean();
 		iconImageId = objectInput.readLong();
 		themeId = objectInput.readUTF();
 		colorSchemeId = objectInput.readUTF();
@@ -284,6 +295,7 @@ public class LayoutRevisionCacheModel implements CacheModel<LayoutRevision>,
 	@Override
 	public void writeExternal(ObjectOutput objectOutput)
 		throws IOException {
+		objectOutput.writeLong(mvccVersion);
 		objectOutput.writeLong(layoutRevisionId);
 		objectOutput.writeLong(groupId);
 		objectOutput.writeLong(companyId);
@@ -348,7 +360,6 @@ public class LayoutRevisionCacheModel implements CacheModel<LayoutRevision>,
 			objectOutput.writeUTF(typeSettings);
 		}
 
-		objectOutput.writeBoolean(iconImage);
 		objectOutput.writeLong(iconImageId);
 
 		if (themeId == null) {
@@ -399,6 +410,7 @@ public class LayoutRevisionCacheModel implements CacheModel<LayoutRevision>,
 		objectOutput.writeLong(statusDate);
 	}
 
+	public long mvccVersion;
 	public long layoutRevisionId;
 	public long groupId;
 	public long companyId;
@@ -419,7 +431,6 @@ public class LayoutRevisionCacheModel implements CacheModel<LayoutRevision>,
 	public String keywords;
 	public String robots;
 	public String typeSettings;
-	public boolean iconImage;
 	public long iconImageId;
 	public String themeId;
 	public String colorSchemeId;

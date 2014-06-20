@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -38,8 +38,6 @@
 				monthParam="schedulerStartDateMonth"
 				monthValue="<%= cal.get(Calendar.MONTH) %>"
 				yearParam="schedulerStartDateYear"
-				yearRangeEnd="<%= cal.get(Calendar.YEAR) + 5 %>"
-				yearRangeStart="<%= cal.get(Calendar.YEAR) %>"
 				yearValue="<%= cal.get(Calendar.YEAR) %>"
 			/>
 
@@ -50,7 +48,6 @@
 				amPmValue="<%= cal.get(Calendar.AM_PM) %>"
 				hourParam="schedulerStartDateHour"
 				hourValue="<%= hour %>"
-				minuteInterval="<%= 1 %>"
 				minuteParam="schedulerStartDateMinute"
 				minuteValue="<%= cal.get(Calendar.MINUTE) %>"
 			/>
@@ -70,8 +67,6 @@
 				monthParam="schedulerEndDateMonth"
 				monthValue="<%= cal.get(Calendar.MONTH) %>"
 				yearParam="schedulerEndDateYear"
-				yearRangeEnd="<%= cal.get(Calendar.YEAR) + 5 %>"
-				yearRangeStart="<%= cal.get(Calendar.YEAR) %>"
 				yearValue="<%= cal.get(Calendar.YEAR) %>"
 			/>
 
@@ -82,7 +77,6 @@
 				amPmValue="<%= cal.get(Calendar.AM_PM) %>"
 				hourParam="schedulerEndDateHour"
 				hourValue="<%= hour %>"
-				minuteInterval="<%= 1 %>"
 				minuteParam="schedulerEndDateMinute"
 				minuteValue="<%= cal.get(Calendar.MINUTE) %>"
 			/>
@@ -94,13 +88,13 @@
 
 <aui:script>
 	function <portlet:namespace />showTable(id) {
-		document.getElementById("<portlet:namespace />neverTable").style.display = "none";
-		document.getElementById("<portlet:namespace />dailyTable").style.display = "none";
-		document.getElementById("<portlet:namespace />weeklyTable").style.display = "none";
-		document.getElementById("<portlet:namespace />monthlyTable").style.display = "none";
-		document.getElementById("<portlet:namespace />yearlyTable").style.display = "none";
+		document.getElementById('<portlet:namespace />neverTable').style.display = 'none';
+		document.getElementById('<portlet:namespace />dailyTable').style.display = 'none';
+		document.getElementById('<portlet:namespace />weeklyTable').style.display = 'none';
+		document.getElementById('<portlet:namespace />monthlyTable').style.display = 'none';
+		document.getElementById('<portlet:namespace />yearlyTable').style.display = 'none';
 
-		document.getElementById(id).style.display = "block";
+		document.getElementById(id).style.display = 'block';
 	}
 
 	Liferay.Util.toggleRadio('<portlet:namespace />schedulerEndBy', '<portlet:namespace />schedulerEndDateType');

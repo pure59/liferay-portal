@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,13 +15,11 @@
 package com.liferay.portlet.mobiledevicerules.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutSet;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.mobiledevicerules.model.MDRRuleGroupInstance;
 import com.liferay.portlet.mobiledevicerules.service.base.MDRRuleGroupInstanceServiceBaseImpl;
 import com.liferay.portlet.mobiledevicerules.service.permission.MDRPermissionUtil;
@@ -39,7 +37,7 @@ public class MDRRuleGroupInstanceServiceImpl
 	public MDRRuleGroupInstance addRuleGroupInstance(
 			long groupId, String className, long classPK, long ruleGroupId,
 			int priority, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		MDRPermissionUtil.check(
 			getPermissionChecker(), groupId,
@@ -53,7 +51,7 @@ public class MDRRuleGroupInstanceServiceImpl
 	public MDRRuleGroupInstance addRuleGroupInstance(
 			long groupId, String className, long classPK, long ruleGroupId,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		MDRPermissionUtil.check(
 			getPermissionChecker(), groupId,
@@ -65,7 +63,7 @@ public class MDRRuleGroupInstanceServiceImpl
 
 	@Override
 	public void deleteRuleGroupInstance(long ruleGroupInstanceId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		MDRRuleGroupInstance ruleGroupInstance =
 			mdrRuleGroupInstancePersistence.findByPrimaryKey(
@@ -80,23 +78,20 @@ public class MDRRuleGroupInstanceServiceImpl
 
 	@Override
 	public List<MDRRuleGroupInstance> getRuleGroupInstances(
-			String className, long classPK, int start, int end,
-			OrderByComparator orderByComparator)
-		throws SystemException {
+		String className, long classPK, int start, int end,
+		OrderByComparator orderByComparator) {
 
 		long groupId = getGroupId(className, classPK);
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 
 		return mdrRuleGroupInstancePersistence.filterFindByG_C_C(
 			groupId, classNameId, classPK, start, end, orderByComparator);
 	}
 
 	@Override
-	public int getRuleGroupInstancesCount(String className, long classPK)
-		throws SystemException {
-
+	public int getRuleGroupInstancesCount(String className, long classPK) {
 		long groupId = getGroupId(className, classPK);
-		long classNameId = PortalUtil.getClassNameId(className);
+		long classNameId = classNameLocalService.getClassNameId(className);
 
 		return mdrRuleGroupInstancePersistence.filterCountByG_C_C(
 			groupId, classNameId, classPK);
@@ -105,7 +100,7 @@ public class MDRRuleGroupInstanceServiceImpl
 	@Override
 	public MDRRuleGroupInstance updateRuleGroupInstance(
 			long ruleGroupInstanceId, int priority)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		MDRRuleGroupInstance ruleGroupInstance =
 			mdrRuleGroupInstancePersistence.findByPrimaryKey(
@@ -119,9 +114,7 @@ public class MDRRuleGroupInstanceServiceImpl
 			ruleGroupInstanceId, priority);
 	}
 
-	protected long getGroupId(String className, long classPK)
-		throws SystemException {
-
+	protected long getGroupId(String className, long classPK) {
 		long groupId = 0;
 
 		if (className.equals(Layout.class.getName())) {

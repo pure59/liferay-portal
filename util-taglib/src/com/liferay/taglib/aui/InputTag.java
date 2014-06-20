@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,13 +17,16 @@ package com.liferay.taglib.aui;
 import com.liferay.portal.kernel.servlet.taglib.aui.ValidatorTag;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TextFormatter;
 import com.liferay.portal.kernel.util.Tuple;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.ModelHintsUtil;
+import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.taglib.aui.base.BaseInputTag;
-import com.liferay.util.PwdGenerator;
 
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +45,7 @@ public class InputTag extends BaseInputTag {
 
 	@Override
 	public int doEndTag() throws JspException {
+		updateFormCheckboxNames();
 		updateFormValidators();
 
 		return super.doEndTag();
@@ -119,7 +123,6 @@ public class InputTag extends BaseInputTag {
 	protected void cleanUp() {
 		super.cleanUp();
 
-		_forLabel = null;
 		_validators = null;
 	}
 
@@ -150,6 +153,18 @@ public class InputTag extends BaseInputTag {
 		if (Validator.isNull(defaultLanguageId)) {
 			defaultLanguageId = (String)pageContext.getAttribute(
 				"aui:model-context:defaultLanguageId");
+		}
+
+		if (Validator.isNull(defaultLanguageId)) {
+			if ((model != null) &&
+				ModelHintsUtil.hasField(model.getName(), "groupId")) {
+
+				ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+					WebKeys.THEME_DISPLAY);
+
+				defaultLanguageId = LocaleUtil.toLanguageId(
+					themeDisplay.getSiteDefaultLocale());
+			}
 		}
 
 		if (Validator.isNull(defaultLanguageId)) {
@@ -200,17 +215,36 @@ public class InputTag extends BaseInputTag {
 				id = name;
 			}
 			else {
-				id = PwdGenerator.getPassword(PwdGenerator.KEY3, 4);
+				id = StringUtil.randomId();
 			}
+		}
+
+		String forLabel = id;
+
+		if (Validator.equals(type,"assetTags")) {
+			forLabel = forLabel.concat("assetTagNames");
+		}
+
+		String languageId = getLanguageId();
+
+		if (Validator.isNotNull(languageId)) {
+			forLabel = LocalizationUtil.getLocalizedName(forLabel, languageId);
 		}
 
 		String label = getLabel();
 
 		if (label == null) {
-			label = TextFormatter.format(name, TextFormatter.K);
+			label = TextFormatter.format(name, TextFormatter.P);
 		}
 
-		_forLabel = id;
+		String title = getTitle();
+
+		if ((title == null) && (Validator.isNull(label) ||
+			 Validator.equals(type, "image"))) {
+
+			title = TextFormatter.format(name, TextFormatter.P);
+		}
+
 		_inputName = getName();
 
 		String baseType = null;
@@ -226,7 +260,8 @@ public class InputTag extends BaseInputTag {
 		}
 		else if (Validator.isNotNull(type)) {
 			if (Validator.equals(type, "checkbox") ||
-				Validator.equals(type, "radio")) {
+				Validator.equals(type, "radio") ||
+				Validator.equals(type, "resource")) {
 
 				baseType = type;
 			}
@@ -249,11 +284,12 @@ public class InputTag extends BaseInputTag {
 		setNamespacedAttribute(request, "bean", bean);
 		setNamespacedAttribute(request, "defaultLanguageId", defaultLanguageId);
 		setNamespacedAttribute(request, "field", field);
-		setNamespacedAttribute(request, "forLabel", _forLabel);
+		setNamespacedAttribute(request, "forLabel", forLabel);
 		setNamespacedAttribute(request, "formName", formName);
 		setNamespacedAttribute(request, "id", id);
 		setNamespacedAttribute(request, "label", label);
 		setNamespacedAttribute(request, "model", model);
+		setNamespacedAttribute(request, "title", String.valueOf(title));
 		setNamespacedAttribute(request, "wrappedField", wrappedField);
 
 		request.setAttribute(getAttributeNamespace() + "value", getValue());
@@ -261,6 +297,28 @@ public class InputTag extends BaseInputTag {
 		if ((_validators != null) && (_validators.get("required") != null)) {
 			setNamespacedAttribute(
 				request, "required", Boolean.TRUE.toString());
+		}
+	}
+
+	protected void updateFormCheckboxNames() {
+		if (!Validator.equals(getType(), "checkbox")) {
+			return;
+		}
+
+		List<String> checkboxNames = (List<String>)request.getAttribute(
+			"aui:form:checkboxNames");
+
+		if (checkboxNames != null) {
+			String inputName = _inputName;
+
+			String languageId = getLanguageId();
+
+			if (Validator.isNotNull(languageId)) {
+				inputName = LocalizationUtil.getLocalizedName(
+					inputName, languageId);
+			}
+
+			checkboxNames.add(inputName);
 		}
 	}
 
@@ -280,13 +338,21 @@ public class InputTag extends BaseInputTag {
 			List<ValidatorTag> validatorTags = ListUtil.fromMapValues(
 				_validators);
 
-			validatorTagsMap.put(_inputName, validatorTags);
+			String inputName = _inputName;
+
+			String languageId = getLanguageId();
+
+			if (Validator.isNotNull(languageId)) {
+				inputName = LocalizationUtil.getLocalizedName(
+					inputName, languageId);
+			}
+
+			validatorTagsMap.put(inputName, validatorTags);
 		}
 	}
 
 	private static final boolean _CLEAN_UP_SET_ATTRIBUTES = true;
 
-	private String _forLabel;
 	private String _inputName;
 	private Map<String, ValidatorTag> _validators;
 

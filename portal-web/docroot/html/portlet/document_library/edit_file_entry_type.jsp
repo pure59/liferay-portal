@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -54,7 +54,7 @@ String scopeAvailableFields = ParamUtil.getString(request, "scopeAvailableFields
 
 <liferay-util:buffer var="removeStructureIcon">
 	<liferay-ui:icon
-		image="unlink"
+		iconCssClass="icon-remove"
 		label="<%= true %>"
 		message="remove"
 	/>
@@ -86,7 +86,13 @@ String scopeAvailableFields = ParamUtil.getString(request, "scopeAvailableFields
 	<aui:model-context bean="<%= fileEntryType %>" model="<%= DLFileEntryType.class %>" />
 
 	<aui:fieldset cssClass="edit-file-entry-type">
-		<aui:input name="name" />
+		<c:if test="<%= DDMStorageLinkLocalServiceUtil.getStructureStorageLinksCount(ddmStructureId) > 0 %>">
+			<div class="alert alert-warning">
+				<liferay-ui:message key="there-are-content-references-to-this-structure.-you-may-lose-data-if-a-field-name-is-renamed-or-removed" />
+			</div>
+		</c:if>
+
+		<aui:input autoFocus="<%= windowState.equals(LiferayWindowState.POP_UP) %>" name="name" />
 
 		<liferay-ui:panel collapsible="<%= true %>" extended="<%= false %>" id="detailsMetadataFields" persistState="<%= true %>" title="details">
 			<aui:input name="description" />
@@ -98,7 +104,7 @@ String scopeAvailableFields = ParamUtil.getString(request, "scopeAvailableFields
 
 		<liferay-ui:panel collapsible="<%= true %>" extended="<%= false %>" id="additionalMetadataFields" persistState="<%= true %>" title="additional-metadata-fields">
 			<liferay-ui:search-container
-				headerNames='<%= (fileEntryType == null) ? "name,null" : "name" %>'
+				headerNames="name,null"
 				total="<%= (ddmStructures != null) ? ddmStructures.size() : 0 %>"
 			>
 				<liferay-ui:search-container-results
@@ -126,8 +132,9 @@ String scopeAvailableFields = ParamUtil.getString(request, "scopeAvailableFields
 
 			<liferay-ui:icon
 				cssClass="modify-link select-metadata"
-				image="add"
+				iconCssClass="icon-search"
 				label="<%= true %>"
+				linkCssClass="btn btn-default"
 				message="select-metadata-set"
 				url='<%= "javascript:" + renderResponse.getNamespace() + "openDDMStructureSelector();" %>'
 			/>
@@ -160,11 +167,11 @@ String scopeAvailableFields = ParamUtil.getString(request, "scopeAvailableFields
 				},
 				eventName: '<portlet:namespace />selectDDMStructure',
 				refererPortletName: '<%= PortletKeys.DOCUMENT_LIBRARY %>',
-				showGlobalScope: true,
+				showAncestorScopes: true,
 				showManageTemplates: false,
 				showToolbar: true,
 				struts_action: '/dynamic_data_mapping/select_structure',
-				title: '<%= UnicodeLanguageUtil.get(pageContext, "metadata-sets") %>'
+				title: '<%= UnicodeLanguageUtil.get(request, "metadata-sets") %>'
 			},
 			function(event) {
 				var A = AUI();
@@ -210,9 +217,9 @@ String scopeAvailableFields = ParamUtil.getString(request, "scopeAvailableFields
 
 <%
 if (fileEntryType == null) {
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "add-document-type"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "add-document-type"), currentURL);
 }
 else {
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "edit-document-type"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "edit-document-type"), currentURL);
 }
 %>

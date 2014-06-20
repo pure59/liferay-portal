@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,16 +19,17 @@ import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.search.BaseSearchTestCase;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.test.Sync;
 import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
+import com.liferay.portal.util.test.RandomTestUtil;
 import com.liferay.portlet.bookmarks.model.BookmarksFolder;
 import com.liferay.portlet.bookmarks.model.BookmarksFolderConstants;
-import com.liferay.portlet.bookmarks.util.BookmarksTestUtil;
+import com.liferay.portlet.bookmarks.util.test.BookmarksTestUtil;
 
-import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -43,44 +44,70 @@ import org.junit.runner.RunWith;
 @Sync
 public class BookmarksFolderSearchTest extends BaseSearchTestCase {
 
+	@Ignore()
 	@Override
+	@Test
+	public void testLocalizedSearch() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
 	public void testSearchAttachments() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchByDDMStructureField() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchComments() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchExpireAllVersions() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchExpireLatestVersion() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
+	public void testSearchMyEntries() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
+	public void testSearchRecentEntries() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
 	public void testSearchStatus() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchVersions() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testSearchWithinDDMStructure() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
 	@Override
@@ -91,8 +118,13 @@ public class BookmarksFolderSearchTest extends BaseSearchTestCase {
 
 		BookmarksFolder parentFolder = (BookmarksFolder)parentBaseModel;
 
-		return BookmarksTestUtil.addFolder(
-			parentFolder.getFolderId(), keywords, serviceContext);
+		long folderId = BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID;
+
+		if (parentFolder != null) {
+			folderId = parentFolder.getFolderId();
+		}
+
+		return BookmarksTestUtil.addFolder(folderId, keywords, serviceContext);
 	}
 
 	@Override
@@ -102,12 +134,22 @@ public class BookmarksFolderSearchTest extends BaseSearchTestCase {
 
 	@Override
 	protected BaseModel<?> getParentBaseModel(
+			BaseModel<?> parentBaseModel, ServiceContext serviceContext)
+		throws Exception {
+
+		return BookmarksTestUtil.addFolder(
+			(Long)parentBaseModel.getPrimaryKeyObj(),
+			RandomTestUtil.randomString(), serviceContext);
+	}
+
+	@Override
+	protected BaseModel<?> getParentBaseModel(
 			Group group, ServiceContext serviceContext)
 		throws Exception {
 
 		return BookmarksTestUtil.addFolder(
 			BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-			ServiceTestUtil.randomString(), serviceContext);
+			RandomTestUtil.randomString(), serviceContext);
 	}
 
 	@Override

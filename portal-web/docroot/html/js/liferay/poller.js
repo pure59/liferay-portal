@@ -28,12 +28,13 @@ AUI.add(
 		var _portletIdsMap = {};
 
 		var _metaData = {
-			startPolling: true,
 			browserKey: _browserKey,
 			companyId: themeDisplay.getCompanyId(),
-			portletIdsMap: _portletIdsMap
+			portletIdsMap: _portletIdsMap,
+			startPolling: true
 		};
 
+		var _customDelay = null;
 		var _portlets = {};
 		var _requestDelay = _delays[0];
 		var _sendQueue = [];
@@ -90,7 +91,7 @@ AUI.add(
 			if (Util.isArray(response)) {
 				var meta = response.shift();
 
-				for (var i = 0, length = response.length; i < length; i++) {
+				for (var i = 0; i < response.length; i++) {
 					var chunk = response[i].payload;
 
 					var chunkData = chunk.data;
@@ -203,7 +204,7 @@ AUI.add(
 			_createRequestTimer();
 		};
 
-		var _updatePortletIdsMap = function(item, index, collection) {
+		var _updatePortletIdsMap = function(item, index) {
 			_portletIdsMap[index] = item.initialRequest;
 		};
 
@@ -214,8 +215,6 @@ AUI.add(
 				instance.setEncryptedUserId(options.encryptedUserId);
 				instance.setSupportsComet(options.supportsComet);
 			},
-
-			url: _url,
 
 			addListener: function(key, listener, scope) {
 				_portlets[key] = {
@@ -231,8 +230,15 @@ AUI.add(
 				}
 			},
 
+			cancelCustomDelay: function() {
+				_customDelay = null;
+			},
+
 			getDelay: function() {
-				if (_delayIndex <= _maxDelay) {
+				if (_customDelay !== null) {
+					_requestDelay = _customDelay;
+				}
+				else if (_delayIndex <= _maxDelay) {
 					_requestDelay = _delays[_delayIndex];
 					_delayAccessCount++;
 
@@ -274,6 +280,15 @@ AUI.add(
 				_createRequestTimer();
 			},
 
+			setCustomDelay: function(delay) {
+				if (delay === null) {
+					_customDelay = delay;
+				}
+				else {
+					_customDelay = delay / 1000;
+				}
+			},
+
 			setDelay: function(delay) {
 				_requestDelay = delay / 1000;
 			},
@@ -306,8 +321,8 @@ AUI.add(
 					}
 
 					var requestData = {
-						portletId: key,
-						data: data
+						data: data,
+						portletId: key
 					};
 
 					if (chunkId) {
@@ -324,7 +339,9 @@ AUI.add(
 				_cancelRequestTimer();
 
 				_suspended = true;
-			}
+			},
+
+			url: _url
 		};
 
 		A.getDoc().on(

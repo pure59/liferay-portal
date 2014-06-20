@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatalists.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see DDLRecordSetService
  * @generated
  */
+@ProviderType
 public class DDLRecordSetServiceWrapper implements DDLRecordSetService,
 	ServiceWrapper<DDLRecordSetService> {
 	public DDLRecordSetServiceWrapper(DDLRecordSetService ddlRecordSetService) {
@@ -56,8 +59,7 @@ public class DDLRecordSetServiceWrapper implements DDLRecordSetService,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		int minDisplayRows, int scope,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecordSetService.addRecordSet(groupId, ddmStructureId,
 			recordSetKey, nameMap, descriptionMap, minDisplayRows, scope,
 			serviceContext);
@@ -65,25 +67,55 @@ public class DDLRecordSetServiceWrapper implements DDLRecordSetService,
 
 	@Override
 	public void deleteRecordSet(long recordSetId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_ddlRecordSetService.deleteRecordSet(recordSetId);
 	}
 
 	@Override
 	public com.liferay.portlet.dynamicdatalists.model.DDLRecordSet getRecordSet(
 		long recordSetId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecordSetService.getRecordSet(recordSetId);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.dynamicdatalists.model.DDLRecordSet> search(
+		long companyId, long groupId, java.lang.String keywords, int scope,
+		int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return _ddlRecordSetService.search(companyId, groupId, keywords, scope,
+			start, end, orderByComparator);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.dynamicdatalists.model.DDLRecordSet> search(
+		long companyId, long groupId, java.lang.String name,
+		java.lang.String description, int scope, boolean andOperator,
+		int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		return _ddlRecordSetService.search(companyId, groupId, name,
+			description, scope, andOperator, start, end, orderByComparator);
+	}
+
+	@Override
+	public int searchCount(long companyId, long groupId,
+		java.lang.String keywords, int scope) {
+		return _ddlRecordSetService.searchCount(companyId, groupId, keywords,
+			scope);
+	}
+
+	@Override
+	public int searchCount(long companyId, long groupId, java.lang.String name,
+		java.lang.String description, int scope, boolean andOperator) {
+		return _ddlRecordSetService.searchCount(companyId, groupId, name,
+			description, scope, andOperator);
 	}
 
 	@Override
 	public com.liferay.portlet.dynamicdatalists.model.DDLRecordSet updateMinDisplayRows(
 		long recordSetId, int minDisplayRows,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecordSetService.updateMinDisplayRows(recordSetId,
 			minDisplayRows, serviceContext);
 	}
@@ -95,8 +127,7 @@ public class DDLRecordSetServiceWrapper implements DDLRecordSetService,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		int minDisplayRows,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecordSetService.updateRecordSet(recordSetId,
 			ddmStructureId, nameMap, descriptionMap, minDisplayRows,
 			serviceContext);
@@ -109,8 +140,7 @@ public class DDLRecordSetServiceWrapper implements DDLRecordSetService,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		int minDisplayRows,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecordSetService.updateRecordSet(groupId, ddmStructureId,
 			recordSetKey, nameMap, descriptionMap, minDisplayRows,
 			serviceContext);
@@ -119,6 +149,7 @@ public class DDLRecordSetServiceWrapper implements DDLRecordSetService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public DDLRecordSetService getWrappedDDLRecordSetService() {
 		return _ddlRecordSetService;
 	}
@@ -126,6 +157,7 @@ public class DDLRecordSetServiceWrapper implements DDLRecordSetService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedDDLRecordSetService(
 		DDLRecordSetService ddlRecordSetService) {
 		_ddlRecordSetService = ddlRecordSetService;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -211,8 +211,7 @@ public class Log4JUtil {
 	}
 
 	/**
-	 * @see {@link com.liferay.portal.util.FileImpl#getBytes(InputStream, int,
-	 *      boolean)}
+	 * @see com.liferay.portal.util.FileImpl#getBytes(InputStream, int, boolean)
 	 */
 	private static byte[] _getBytes(InputStream inputStream)
 		throws IOException {
@@ -226,13 +225,15 @@ public class Log4JUtil {
 	}
 
 	private static java.util.logging.Level _getJdkLevel(String priority) {
-		if (priority.equalsIgnoreCase(Level.DEBUG.toString())) {
+		if (StringUtil.equalsIgnoreCase(priority, Level.DEBUG.toString())) {
 			return java.util.logging.Level.FINE;
 		}
-		else if (priority.equalsIgnoreCase(Level.ERROR.toString())) {
+		else if (StringUtil.equalsIgnoreCase(
+					priority, Level.ERROR.toString())) {
+
 			return java.util.logging.Level.SEVERE;
 		}
-		else if (priority.equalsIgnoreCase(Level.WARN.toString())) {
+		else if (StringUtil.equalsIgnoreCase(priority, Level.WARN.toString())) {
 			return java.util.logging.Level.WARNING;
 		}
 		else {
@@ -290,22 +291,27 @@ public class Log4JUtil {
 			return urlContent;
 		}
 
-		int x = urlContent.indexOf("<appender name=\"FILE\"");
+		urlContent = _removeAppender(urlContent, "TEXT_FILE");
 
-		int y = urlContent.indexOf("</appender>", x);
+		return _removeAppender(urlContent, "XML_FILE");
+	}
+
+	private static String _removeAppender(String content, String appenderName) {
+		int x = content.indexOf("<appender name=\"" + appenderName + "\"");
+
+		int y = content.indexOf("</appender>", x);
 
 		if (y != -1) {
-			y = urlContent.indexOf("<", y + 1);
+			y = content.indexOf("<", y + 1);
 		}
 
 		if ((x != -1) && (y != -1)) {
-			urlContent = urlContent.substring(0, x) + urlContent.substring(y);
+			content = content.substring(0, x) + content.substring(y);
 		}
 
-		urlContent = StringUtil.replace(
-			urlContent, "<appender-ref ref=\"FILE\" />", StringPool.BLANK);
-
-		return urlContent;
+		return StringUtil.replace(
+			content, "<appender-ref ref=\"" + appenderName + "\" />",
+			StringPool.BLANK);
 	}
 
 	private static Map<String, String> _customLogSettings =

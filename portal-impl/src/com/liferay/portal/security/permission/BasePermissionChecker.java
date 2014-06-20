@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -137,6 +137,7 @@ public abstract class BasePermissionChecker implements PermissionChecker {
 	/**
 	 * @deprecated As of 6.1.0, renamed to {@link #isGroupAdmin(long)}
 	 */
+	@Deprecated
 	@Override
 	public boolean isCommunityAdmin(long groupId) {
 		return isGroupAdmin(groupId);
@@ -145,6 +146,7 @@ public abstract class BasePermissionChecker implements PermissionChecker {
 	/**
 	 * @deprecated As of 6.1.0, renamed to {@link #isGroupOwner(long)}
 	 */
+	@Deprecated
 	@Override
 	public boolean isCommunityOwner(long groupId) {
 		return isGroupOwner(groupId);

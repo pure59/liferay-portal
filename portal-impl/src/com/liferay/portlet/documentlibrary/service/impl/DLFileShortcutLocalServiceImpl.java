@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,17 +14,22 @@
 
 package com.liferay.portlet.documentlibrary.service.impl;
 
+import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
+import com.liferay.portal.kernel.util.TreePathUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.ResourceConstants;
+import com.liferay.portal.model.SystemEventConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
 import com.liferay.portlet.documentlibrary.model.DLFileShortcut;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
+import com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl;
+import com.liferay.portlet.documentlibrary.model.impl.DLFolderModelImpl;
 import com.liferay.portlet.documentlibrary.service.base.DLFileShortcutLocalServiceBaseImpl;
 
 import java.util.Date;
@@ -40,7 +45,7 @@ public class DLFileShortcutLocalServiceImpl
 	public DLFileShortcut addFileShortcut(
 			long userId, long groupId, long folderId, long toFileEntryId,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		// File shortcut
 
@@ -64,6 +69,7 @@ public class DLFileShortcutLocalServiceImpl
 		fileShortcut.setModifiedDate(serviceContext.getModifiedDate(now));
 		fileShortcut.setFolderId(folderId);
 		fileShortcut.setToFileEntryId(toFileEntryId);
+		fileShortcut.setTreePath(fileShortcut.buildTreePath());
 		fileShortcut.setActive(true);
 		fileShortcut.setStatus(WorkflowConstants.STATUS_APPROVED);
 		fileShortcut.setStatusByUserId(userId);
@@ -90,11 +96,8 @@ public class DLFileShortcutLocalServiceImpl
 		// Folder
 
 		if (folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			DLFolder dlFolder = dlFolderPersistence.findByPrimaryKey(folderId);
-
-			dlFolder.setLastPostDate(fileShortcut.getModifiedDate());
-
-			dlFolderPersistence.update(dlFolder);
+			dlFolderLocalService.updateLastPostDate(
+				folderId, fileShortcut.getModifiedDate());
 		}
 
 		// Asset
@@ -114,7 +117,7 @@ public class DLFileShortcutLocalServiceImpl
 	public void addFileShortcutResources(
 			DLFileShortcut fileShortcut, boolean addGroupPermissions,
 			boolean addGuestPermissions)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		resourceLocalService.addResources(
 			fileShortcut.getCompanyId(), fileShortcut.getGroupId(),
@@ -127,7 +130,7 @@ public class DLFileShortcutLocalServiceImpl
 	public void addFileShortcutResources(
 			DLFileShortcut fileShortcut, String[] groupPermissions,
 			String[] guestPermissions)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		resourceLocalService.addModelResources(
 			fileShortcut.getCompanyId(), fileShortcut.getGroupId(),
@@ -140,7 +143,7 @@ public class DLFileShortcutLocalServiceImpl
 	public void addFileShortcutResources(
 			long fileShortcutId, boolean addGroupPermissions,
 			boolean addGuestPermissions)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		DLFileShortcut fileShortcut =
 			dlFileShortcutPersistence.findByPrimaryKey(fileShortcutId);
@@ -153,7 +156,7 @@ public class DLFileShortcutLocalServiceImpl
 	public void addFileShortcutResources(
 			long fileShortcutId, String[] groupPermissions,
 			String[] guestPermissions)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		DLFileShortcut fileShortcut =
 			dlFileShortcutPersistence.findByPrimaryKey(fileShortcutId);
@@ -163,8 +166,9 @@ public class DLFileShortcutLocalServiceImpl
 	}
 
 	@Override
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
 	public void deleteFileShortcut(DLFileShortcut fileShortcut)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		// File shortcut
 
@@ -184,35 +188,39 @@ public class DLFileShortcutLocalServiceImpl
 
 		// Trash
 
-		trashEntryLocalService.deleteEntry(
-			DLFileShortcut.class.getName(), fileShortcut.getFileShortcutId());
+		if (fileShortcut.isInTrashExplicitly()) {
+			trashEntryLocalService.deleteEntry(
+				DLFileShortcut.class.getName(),
+				fileShortcut.getFileShortcutId());
+		}
+		else {
+			trashVersionLocalService.deleteTrashVersion(
+				DLFileShortcut.class.getName(),
+				fileShortcut.getFileShortcutId());
+		}
 	}
 
 	@Override
-	public void deleteFileShortcut(long fileShortcutId)
-		throws PortalException, SystemException {
-
+	public void deleteFileShortcut(long fileShortcutId) throws PortalException {
 		DLFileShortcut fileShortcut =
 			dlFileShortcutLocalService.getDLFileShortcut(fileShortcutId);
 
-		deleteFileShortcut(fileShortcut);
+		dlFileShortcutLocalService.deleteFileShortcut(fileShortcut);
 	}
 
 	@Override
-	public void deleteFileShortcuts(long toFileEntryId)
-		throws PortalException, SystemException {
-
+	public void deleteFileShortcuts(long toFileEntryId) throws PortalException {
 		List<DLFileShortcut> fileShortcuts =
 			dlFileShortcutPersistence.findByToFileEntryId(toFileEntryId);
 
 		for (DLFileShortcut fileShortcut : fileShortcuts) {
-			deleteFileShortcut(fileShortcut);
+			dlFileShortcutLocalService.deleteFileShortcut(fileShortcut);
 		}
 	}
 
 	@Override
 	public void deleteFileShortcuts(long groupId, long folderId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		deleteFileShortcuts(groupId, folderId, true);
 	}
@@ -220,22 +228,20 @@ public class DLFileShortcutLocalServiceImpl
 	@Override
 	public void deleteFileShortcuts(
 			long groupId, long folderId, boolean includeTrashedEntries)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		List<DLFileShortcut> fileShortcuts =
 			dlFileShortcutPersistence.findByG_F(groupId, folderId);
 
 		for (DLFileShortcut fileShortcut : fileShortcuts) {
-			if (includeTrashedEntries || !fileShortcut.isInTrash()) {
-				deleteFileShortcut(fileShortcut);
+			if (includeTrashedEntries || !fileShortcut.isInTrashExplicitly()) {
+				dlFileShortcutLocalService.deleteFileShortcut(fileShortcut);
 			}
 		}
 	}
 
 	@Override
-	public void disableFileShortcuts(long toFileEntryId)
-		throws SystemException {
-
+	public void disableFileShortcuts(long toFileEntryId) {
 		List<DLFileShortcut> fileShortcuts =
 			dlFileShortcutPersistence.findByToFileEntryId(toFileEntryId);
 
@@ -247,7 +253,7 @@ public class DLFileShortcutLocalServiceImpl
 	}
 
 	@Override
-	public void enableFileShortcuts(long toFileEntryId) throws SystemException {
+	public void enableFileShortcuts(long toFileEntryId) {
 		List<DLFileShortcut> fileShortcuts =
 			dlFileShortcutPersistence.findByToFileEntryId(toFileEntryId);
 
@@ -260,16 +266,15 @@ public class DLFileShortcutLocalServiceImpl
 
 	@Override
 	public DLFileShortcut getFileShortcut(long fileShortcutId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return dlFileShortcutPersistence.findByPrimaryKey(fileShortcutId);
 	}
 
 	@Override
 	public List<DLFileShortcut> getFileShortcuts(
-			long groupId, long folderId, boolean active, int status, int start,
-			int end)
-		throws SystemException {
+		long groupId, long folderId, boolean active, int status, int start,
+		int end) {
 
 		return dlFileShortcutPersistence.findByG_F_A_S(
 			groupId, folderId, active, status, start, end);
@@ -277,18 +282,35 @@ public class DLFileShortcutLocalServiceImpl
 
 	@Override
 	public int getFileShortcutsCount(
-			long groupId, long folderId, boolean active, int status)
-		throws SystemException {
+		long groupId, long folderId, boolean active, int status) {
 
 		return dlFileShortcutPersistence.countByG_F_A_S(
 			groupId, folderId, active, status);
 	}
 
 	@Override
+	public void rebuildTree(long companyId) {
+		dlFolderLocalService.rebuildTree(companyId);
+
+		Session session = dlFileShortcutPersistence.openSession();
+
+		try {
+			TreePathUtil.rebuildTree(
+				session, companyId, DLFileShortcutModelImpl.TABLE_NAME,
+				DLFolderModelImpl.TABLE_NAME, "folderId", true);
+		}
+		finally {
+			dlFileShortcutPersistence.closeSession(session);
+
+			dlFileShortcutPersistence.clearCache();
+		}
+	}
+
+	@Override
 	public void updateAsset(
 			long userId, DLFileShortcut fileShortcut, long[] assetCategoryIds,
 			String[] assetTagNames)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		FileEntry fileEntry = dlAppLocalService.getFileEntry(
 			fileShortcut.getToFileEntryId());
@@ -306,7 +328,7 @@ public class DLFileShortcutLocalServiceImpl
 	public DLFileShortcut updateFileShortcut(
 			long userId, long fileShortcutId, long folderId, long toFileEntryId,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		// File shortcut
 
@@ -321,17 +343,15 @@ public class DLFileShortcutLocalServiceImpl
 			serviceContext.getModifiedDate(new Date()));
 		fileShortcut.setFolderId(folderId);
 		fileShortcut.setToFileEntryId(toFileEntryId);
+		fileShortcut.setTreePath(fileShortcut.buildTreePath());
 
 		dlFileShortcutPersistence.update(fileShortcut);
 
 		// Folder
 
 		if (folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			DLFolder dlFolder = dlFolderPersistence.findByPrimaryKey(folderId);
-
-			dlFolder.setLastPostDate(fileShortcut.getModifiedDate());
-
-			dlFolderPersistence.update(dlFolder);
+			dlFolderLocalService.updateLastPostDate(
+				folderId, fileShortcut.getModifiedDate());
 		}
 
 		// Asset
@@ -349,8 +369,7 @@ public class DLFileShortcutLocalServiceImpl
 
 	@Override
 	public void updateFileShortcuts(
-			long oldToFileEntryId, long newToFileEntryId)
-		throws SystemException {
+		long oldToFileEntryId, long newToFileEntryId) {
 
 		List<DLFileShortcut> fileShortcuts =
 			dlFileShortcutPersistence.findByToFileEntryId(oldToFileEntryId);
@@ -366,7 +385,7 @@ public class DLFileShortcutLocalServiceImpl
 	public void updateStatus(
 			long userId, long fileShortcutId, int status,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(userId);
 
@@ -383,7 +402,7 @@ public class DLFileShortcutLocalServiceImpl
 
 	protected void copyAssetTags(
 			FileEntry fileEntry, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		String[] assetTagNames = assetTagLocalService.getTagNames(
 			FileEntry.class.getName(), fileEntry.getFileEntryId());
@@ -395,9 +414,7 @@ public class DLFileShortcutLocalServiceImpl
 		serviceContext.setAssetTagNames(assetTagNames);
 	}
 
-	protected long getFolderId(long companyId, long folderId)
-		throws SystemException {
-
+	protected long getFolderId(long companyId, long folderId) {
 		if (folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
 			// Ensure folder exists and belongs to the proper company
@@ -413,12 +430,13 @@ public class DLFileShortcutLocalServiceImpl
 	}
 
 	protected void validate(User user, long toFileEntryId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		FileEntry fileEntry = dlAppLocalService.getFileEntry(toFileEntryId);
 
 		if (user.getCompanyId() != fileEntry.getCompanyId()) {
-			throw new NoSuchFileEntryException();
+			throw new NoSuchFileEntryException(
+				"{fileEntryId=" + toFileEntryId + "}");
 		}
 	}
 

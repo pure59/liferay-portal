@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -47,7 +47,10 @@ public class SocialHotDeployListener extends BaseHotDeployListener {
 		}
 		catch (Throwable t) {
 			throwHotDeployException(
-				hotDeployEvent, "Error registering social for ", t);
+				hotDeployEvent,
+				"Error registering social for " +
+					hotDeployEvent.getServletContextName(),
+				t);
 		}
 	}
 
@@ -60,7 +63,10 @@ public class SocialHotDeployListener extends BaseHotDeployListener {
 		}
 		catch (Throwable t) {
 			throwHotDeployException(
-				hotDeployEvent, "Error unregistering social for ", t);
+				hotDeployEvent,
+				"Error unregistering social for " +
+					hotDeployEvent.getServletContextName(),
+				t);
 		}
 	}
 

@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -23,7 +23,7 @@ boolean privateLayout = ParamUtil.getBoolean(request, "privateLayout");
 PortletURL portletURL = liferayPortletResponse.createRenderURL();
 
 portletURL.setParameter("struts_action", "/layouts_admin/import_layouts");
-portletURL.setParameter("tabs2", "all-import-processes");
+portletURL.setParameter("tabs2", "current-and-previous");
 portletURL.setParameter("groupId", String.valueOf(groupId));
 portletURL.setParameter("privateLayout", String.valueOf(privateLayout));
 
@@ -39,7 +39,7 @@ else {
 	orderByType = portalPreferences.getValue(PortletKeys.BACKGROUND_TASK, "entries-order-by-type", "desc");
 }
 
-OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderByComparator(orderByCol, orderByType);
+OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBackgroundTaskOrderByComparator(orderByCol, orderByType);
 %>
 
 <liferay-ui:search-container
@@ -60,9 +60,16 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 		modelVar="backgroundTask"
 	>
 		<liferay-ui:search-container-column-text
-			name="user-name"
-			value="<%= backgroundTask.getUserName() %>"
-		/>
+			cssClass="background-task-user-column"
+			name="user"
+		>
+			<liferay-ui:user-display
+				displayStyle="3"
+				showUserDetails="<%= false %>"
+				showUserName="<%= false %>"
+				userId="<%= backgroundTask.getUserId() %>"
+			/>
+		</liferay-ui:search-container-column-text>
 
 		<liferay-ui:search-container-column-jsp
 			cssClass="background-task-status-column"
@@ -84,15 +91,16 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 
 		<liferay-ui:search-container-column-text>
 			<c:if test="<%= !backgroundTask.isInProgress() %>">
+
+				<%
+				Date completionDate = backgroundTask.getCompletionDate();
+				%>
+
 				<portlet:actionURL var="deleteBackgroundTaskURL">
 					<portlet:param name="struts_action" value="/group_pages/delete_background_task" />
 					<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
 					<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />
 				</portlet:actionURL>
-
-				<%
-				Date completionDate = backgroundTask.getCompletionDate();
-				%>
 
 				<liferay-ui:icon-delete
 					label="true"
@@ -105,3 +113,13 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 
 	<liferay-ui:search-iterator />
 </liferay-ui:search-container>
+
+<%
+int incompleteBackgroundTaskCount = BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(groupId, LayoutImportBackgroundTaskExecutor.class.getName(), false);
+%>
+
+<div class="hide incomplete-process-message">
+	<liferay-util:include page="/html/portlet/layouts_admin/incomplete_processes_message.jsp">
+		<liferay-util:param name="incompleteBackgroundTaskCount" value="<%= String.valueOf(incompleteBackgroundTaskCount) %>" />
+	</liferay-util:include>
+</div>

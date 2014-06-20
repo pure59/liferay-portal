@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -45,18 +45,18 @@ portletURL.setParameter("redirect", redirect);
 <liferay-ui:header
 	backURL="<%= backURL %>"
 	localizeTitle="<%= false %>"
-	title='<%= LanguageUtil.format(pageContext, "classification-rules-for-x", ruleGroup.getName(locale), false) %>'
+	title='<%= LanguageUtil.format(request, "classification-rules-for-x", ruleGroup.getName(locale), false) %>'
 />
 
 <aui:nav-bar>
-	<aui:nav>
+	<aui:nav cssClass="navbar-nav">
 		<liferay-portlet:renderURL var="addURL">
 			<portlet:param name="struts_action" value="/mobile_device_rules/edit_rule" />
 			<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
 			<portlet:param name="ruleGroupId" value="<%= String.valueOf(ruleGroupId) %>" />
 		</liferay-portlet:renderURL>
 
-		<aui:nav-item href="<%= addURL %>" iconClass="icon-plus" label="add-classification-rule" />
+		<aui:nav-item href="<%= addURL %>" iconCssClass="icon-plus" label="add-classification-rule" />
 	</aui:nav>
 </aui:nav-bar>
 
@@ -68,10 +68,10 @@ portletURL.setParameter("redirect", redirect);
 	emptyResultsMessage="no-classification-rules-are-configured-for-this-device-family"
 	headerNames="name,type"
 	iteratorURL="<%= portletURL %>"
+	total="<%= MDRRuleLocalServiceUtil.getRulesCount(ruleGroupId) %>"
 >
 	<liferay-ui:search-container-results
 		results="<%= MDRRuleLocalServiceUtil.getRules(ruleGroupId, searchContainer.getStart(), searchContainer.getEnd()) %>"
-		total="<%= MDRRuleLocalServiceUtil.getRulesCount(ruleGroupId) %>"
 	/>
 
 	<liferay-ui:search-container-row

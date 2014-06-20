@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,7 +21,11 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portlet.documentlibrary.model.DLFileEntry;
+import com.liferay.portlet.documentlibrary.social.DLActivityKeys;
 import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.wiki.model.WikiPage;
 import com.liferay.portlet.wiki.social.WikiActivityKeys;
@@ -30,6 +34,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Sergio Sanchez
@@ -84,100 +91,65 @@ public class UpgradeSocial extends UpgradeProcess {
 		}
 	}
 
-	protected void addActivitySet(
-			long activitySetId, long groupId, long companyId, long userId,
-			long createDate, long classNameId, long classPK, int type_)
-		throws Exception {
-
-		Connection con = null;
-		PreparedStatement ps = null;
-
-		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
-
-			StringBundler sb = new StringBundler(4);
-
-			sb.append("insert into SocialActivitySet (activitySetId, ");
-			sb.append("groupId, companyId, userId, createDate, modifiedDate, ");
-			sb.append("classNameId, classPK, type_, activityCount) values ");
-			sb.append("(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-			ps = con.prepareStatement(sb.toString());
-
-			ps.setLong(1, activitySetId);
-			ps.setLong(2, groupId);
-			ps.setLong(3, companyId);
-			ps.setLong(4, userId);
-			ps.setLong(5, createDate);
-			ps.setLong(6, createDate);
-			ps.setLong(7, classNameId);
-			ps.setLong(8, classPK);
-			ps.setInt(9, type_);
-			ps.setInt(10, 1);
-
-			ps.executeUpdate();
-		}
-		catch (Exception e) {
-			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to add activity set " + activitySetId, e);
-			}
-		}
-		finally {
-			DataAccess.cleanUp(con, ps);
-		}
-	}
-
 	@Override
 	protected void doUpgrade() throws Exception {
+		updateDLFileVersionActivities();
 		updateJournalActivities();
 		updateSOSocialActivities();
 		updateWikiPageActivities();
-
-		migrateActivities();
 	}
 
-	protected boolean hasActivitySets() throws Exception {
-		Connection con = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+	protected Timestamp getUniqueModifiedDate(
+		Set<String> keys, long groupId, long userId, Timestamp modifiedDate,
+		long classNameId, long resourcePrimKey, double type) {
 
-		try {
-			con = DataAccess.getUpgradeOptimizedConnection();
+		while (true) {
+			StringBundler sb = new StringBundler(11);
 
-			ps = con.prepareStatement("select count(*) from SocialActivitySet");
+			sb.append(groupId);
+			sb.append(StringPool.DASH);
+			sb.append(userId);
+			sb.append(StringPool.DASH);
+			sb.append(modifiedDate);
+			sb.append(StringPool.DASH);
+			sb.append(classNameId);
+			sb.append(StringPool.DASH);
+			sb.append(resourcePrimKey);
+			sb.append(StringPool.DASH);
+			sb.append(type);
 
-			rs = ps.executeQuery();
+			String key = sb.toString();
 
-			while (rs.next()) {
-				int count = rs.getInt(1);
+			modifiedDate = new Timestamp(modifiedDate.getTime() + 1);
 
-				if (count > 0) {
-					return true;
-				}
+			if (!keys.contains(key)) {
+				keys.add(key);
+
+				return modifiedDate;
 			}
-
-			return false;
-		}
-		finally {
-			DataAccess.cleanUp(con, ps, rs);
 		}
 	}
 
-	protected void migrateActivities() throws Exception {
-		if (hasActivitySets()) {
-			return;
-		}
+	protected void updateDLFileVersionActivities() throws Exception {
+		long classNameId = PortalUtil.getClassNameId(DLFileEntry.class);
+
+		runSQL("delete from SocialActivity where classNameId = " + classNameId);
 
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
+			Set<String> keys = new HashSet<String>();
+
 			con = DataAccess.getUpgradeOptimizedConnection();
 
 			ps = con.prepareStatement(
-				"select groupId, companyId, userId, createDate, classNameId, " +
-					"classPK, type_ from SocialActivity");
+				"select groupId, companyId, userId, modifiedDate, " +
+					"fileEntryId, title, version from DLFileVersion " +
+						"where status = ?");
+
+			ps.setInt(1, WorkflowConstants.STATUS_APPROVED);
 
 			rs = ps.executeQuery();
 
@@ -185,14 +157,30 @@ public class UpgradeSocial extends UpgradeProcess {
 				long groupId = rs.getLong("groupId");
 				long companyId = rs.getLong("companyId");
 				long userId = rs.getLong("userId");
-				long createDate = rs.getLong("createDate");
-				long classNameId = rs.getLong("classNameId");
-				long classPK = rs.getLong("classPK");
-				int type_ = rs.getInt("type_");
+				Timestamp modifiedDate = rs.getTimestamp("modifiedDate");
+				long fileEntryId = rs.getLong("fileEntryId");
+				String title = rs.getString("title");
+				double version = rs.getDouble("version");
 
-				addActivitySet(
-					increment(), groupId, companyId, userId, createDate,
-					classNameId, classPK, type_);
+				int type = DLActivityKeys.ADD_FILE_ENTRY;
+
+				if (version > 1.0) {
+					type = DLActivityKeys.UPDATE_FILE_ENTRY;
+				}
+
+				modifiedDate = getUniqueModifiedDate(
+					keys, groupId, userId, modifiedDate, classNameId,
+					fileEntryId, type);
+
+				JSONObject extraDataJSONObject =
+					JSONFactoryUtil.createJSONObject();
+
+				extraDataJSONObject.put("title", title);
+
+				addActivity(
+					increment(), groupId, companyId, userId, modifiedDate, 0,
+					classNameId, fileEntryId, type,
+					extraDataJSONObject.toString(), 0);
 			}
 		}
 		finally {
@@ -268,6 +256,8 @@ public class UpgradeSocial extends UpgradeProcess {
 		ResultSet rs = null;
 
 		try {
+			Set<String> keys = new HashSet<String>();
+
 			con = DataAccess.getUpgradeOptimizedConnection();
 
 			ps = con.prepareStatement(
@@ -289,6 +279,10 @@ public class UpgradeSocial extends UpgradeProcess {
 				if (version > 1.0) {
 					type = WikiActivityKeys.UPDATE_PAGE;
 				}
+
+				modifiedDate = getUniqueModifiedDate(
+					keys, groupId, userId, modifiedDate, classNameId,
+					resourcePrimKey, type);
 
 				JSONObject extraDataJSONObject =
 					JSONFactoryUtil.createJSONObject();

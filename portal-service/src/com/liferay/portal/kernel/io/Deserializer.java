@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -197,19 +197,18 @@ public class Deserializer {
 
 			return new String(chars, 0, length);
 		}
-		else {
-			detectBufferUnderflow(length * 2);
 
-			char[] chars = CharBufferPool.borrow(length);
+		detectBufferUnderflow(length * 2);
 
-			for (int i = 0; i < length; i++) {
-				chars[i] = BigEndianCodec.getChar(buffer, index);
+		char[] chars = CharBufferPool.borrow(length);
 
-				index += 2;
-			}
+		for (int i = 0; i < length; i++) {
+			chars[i] = BigEndianCodec.getChar(buffer, index);
 
-			return new String(chars, 0, length);
+			index += 2;
 		}
+
+		return new String(chars, 0, length);
 	}
 
 	/**

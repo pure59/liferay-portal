@@ -5,6 +5,8 @@ AUI.add(
 		var Lang = A.Lang;
 		var FormBuilderField = A.FormBuilderField;
 
+		var BODY = A.getBody();
+
 		var instanceOf = A.instanceOf;
 		var isObject = Lang.isObject;
 
@@ -14,6 +16,8 @@ AUI.add(
 
 		var MAP_HIDDEN_FIELD_ATTRS = {
 			checkbox: ['readOnly', 'required'],
+
+			separator: ['readOnly', 'required', 'predefinedValue', 'indexType'],
 
 			DEFAULT: ['readOnly']
 		};
@@ -33,9 +37,12 @@ AUI.add(
 
 		var TPL_ELEMENT = '<{nodeName}{attributeList}></{nodeName}>';
 
+		var UNLOCALIZABLE_FIELD_ATTRS = ['indexType', 'name', 'required', 'repeatable', 'showLabel'];
+
 		var XML_ATTRIBUTES_FIELD_ATTRS = {
 			dataType: 1,
 			indexType: 1,
+			localizable: 1,
 			multiple: 1,
 			name: 1,
 			options: 1,
@@ -62,9 +69,9 @@ AUI.add(
 					}
 				},
 
-				NAME: 'availableField',
+				EXTENDS: A.FormBuilderAvailableField,
 
-				EXTENDS: A.FormBuilderAvailableField
+				NAME: 'availableField'
 			}
 		);
 
@@ -88,48 +95,17 @@ AUI.add(
 						value: STR_BLANK
 					},
 
-					translationManager: {
-						validator: isObject,
-						value: {}
-					},
-
-					validator: {
-						setter: function(val) {
-							var instance = this;
-
-							var config = A.merge(
-								{
-									rules: {
-										name: {
-											required: true,
-											structureFieldName: true
-										}
-									},
-									fieldStrings: {
-										name: {
-											required: Liferay.Language.get('this-field-is-required')
-										}
-									}
-								},
-								val
-							);
-
-							return config;
-						},
-						value: {}
-					},
-
 					strings: {
 						value: {
 							addNode: Liferay.Language.get('add-field'),
 							button: Liferay.Language.get('button'),
 							buttonType: Liferay.Language.get('button-type'),
-							close: Liferay.Language.get('close'),
 							deleteFieldsMessage: Liferay.Language.get('are-you-sure-you-want-to-delete-the-selected-entries'),
 							duplicateMessage: Liferay.Language.get('duplicate'),
 							editMessage: Liferay.Language.get('edit'),
 							label: Liferay.Language.get('field-label'),
 							large: Liferay.Language.get('large'),
+							localizable: Liferay.Language.get('localizable'),
 							medium: Liferay.Language.get('medium'),
 							multiple: Liferay.Language.get('multiple'),
 							name: Liferay.Language.get('name'),
@@ -150,6 +126,37 @@ AUI.add(
 							width: Liferay.Language.get('width'),
 							yes: Liferay.Language.get('yes')
 						}
+					},
+
+					translationManager: {
+						validator: isObject,
+						value: {}
+					},
+
+					validator: {
+						setter: function(val) {
+							var instance = this;
+
+							var config = A.merge(
+								{
+									fieldStrings: {
+										name: {
+											required: Liferay.Language.get('this-field-is-required')
+										}
+									},
+									rules: {
+										name: {
+											required: true,
+											structureFieldName: true
+										}
+									}
+								},
+								val
+							);
+
+							return config;
+						},
+						value: {}
 					}
 				},
 
@@ -161,7 +168,7 @@ AUI.add(
 					initializer: function() {
 						var instance = this;
 
-						instance.LOCALIZABLE_FIELD_ATTRS = A.Array(LOCALIZABLE_FIELD_ATTRS);
+						instance.LOCALIZABLE_FIELD_ATTRS = AArray(LOCALIZABLE_FIELD_ATTRS);
 						instance.MAP_HIDDEN_FIELD_ATTRS = A.clone(MAP_HIDDEN_FIELD_ATTRS);
 
 						var translationManager = instance.translationManager = new Liferay.TranslationManager(instance.get('translationManager'));
@@ -174,6 +181,8 @@ AUI.add(
 						);
 
 						instance.addTarget(Liferay.Util.getOpener().Liferay);
+
+						instance._toggleInputDirection(translationManager.get('defaultLocale'));
 					},
 
 					bindUI: function() {
@@ -233,7 +242,7 @@ AUI.add(
 						buffer.push(root.openTag);
 
 						instance.get('fields').each(
-							function(item, index, collection) {
+							function(item, index) {
 								instance._appendStructureTypeElementAndMetaData(item, buffer);
 							}
 						);
@@ -256,22 +265,20 @@ AUI.add(
 					_afterEditingLocaleChange: function(event) {
 						var instance = this;
 
-						var editingField = instance.editingField;
-
-						if (editingField) {
-							editingField.set('readOnlyAttributes', instance._getReadOnlyFieldAttributes(editingField));
-						}
+						instance._syncFieldsReadOnlyAttributes();
 
 						instance._updateFieldsLocalizationMap(event.prevVal);
 
 						instance._syncFieldsLocaleUI(event.newVal);
+
+						instance._toggleInputDirection(event.newVal);
 					},
 
 					_appendStructureChildren: function(field, buffer) {
 						var instance = this;
 
 						field.get('fields').each(
-							function(item, index, collection) {
+							function(item, index) {
 								instance._appendStructureTypeElementAndMetaData(item, buffer);
 							}
 						);
@@ -285,7 +292,7 @@ AUI.add(
 						if (options) {
 							AArray.each(
 								options,
-								function(item, index, collection) {
+								function(item, index) {
 									var name = item.name;
 
 									if (!name) {
@@ -325,7 +332,7 @@ AUI.add(
 
 						A.each(
 							localizationMap,
-							function(item, index, collection) {
+							function(item, index) {
 								if (isObject(item)) {
 									var metadataTag = instance._createDynamicNode(
 										'meta-data',
@@ -357,6 +364,7 @@ AUI.add(
 								dataType: field.get('dataType'),
 								fieldNamespace: field.get('fieldNamespace'),
 								indexType: field.get('indexType'),
+								localizable: field.get('localizable'),
 								multiple: field.get('multiple'),
 								name: field.get('name'),
 								readOnly: field.get('readOnly'),
@@ -378,7 +386,7 @@ AUI.add(
 
 						AArray.each(
 							availableLocales,
-							function(item1, index1, collection1) {
+							function(item1, index1) {
 								var metadata = instance._createDynamicNode(
 									'meta-data',
 									{
@@ -390,7 +398,7 @@ AUI.add(
 
 								AArray.each(
 									field.getProperties(),
-									function(item2, index2, collection2) {
+									function(item2, index2) {
 										var attributeName = item2.attributeName;
 
 										if (!XML_ATTRIBUTES_FIELD_ATTRS[attributeName]) {
@@ -439,7 +447,7 @@ AUI.add(
 						if (attributeMap) {
 							A.each(
 								attributeMap,
-								function(item, index, collection) {
+								function(item, index) {
 									if (item !== undefined) {
 										attrs.push([index, '="', item, '" '].join(STR_BLANK));
 									}
@@ -463,18 +471,24 @@ AUI.add(
 
 						var translationManager = instance.translationManager;
 
+						var defaultLocale = translationManager.get('defaultLocale');
 						var editingLocale = translationManager.get('editingLocale');
 
 						var readOnlyAttributes = field.get('readOnlyAttributes');
 
-						if (editingLocale === translationManager.get('defaultLocale')) {
-							AArray.removeItem(readOnlyAttributes, 'name');
-						}
-						else if (AArray.indexOf(readOnlyAttributes, 'name') === -1) {
-							readOnlyAttributes.push('name');
-						}
+						AArray.each(
+							UNLOCALIZABLE_FIELD_ATTRS,
+							function(item, index) {
+								if (defaultLocale === editingLocale) {
+									AArray.removeItem(readOnlyAttributes, item);
+								}
+								else {
+									readOnlyAttributes.push(item);
+								}
+							}
+						);
 
-						return readOnlyAttributes;
+						return AArray.dedupe(readOnlyAttributes);
 					},
 
 					_onPropertyModelChange: function(event) {
@@ -488,7 +502,7 @@ AUI.add(
 
 						var readOnlyAttributes = editingField.get('readOnlyAttributes');
 
-						if (changed.hasOwnProperty('value') && (A.Array.indexOf(readOnlyAttributes, 'name') === -1)) {
+						if (changed.hasOwnProperty('value') && (AArray.indexOf(readOnlyAttributes, 'name') === -1)) {
 							if (attributeName === 'name') {
 								editingField.set('autoGeneratedName', event.autoGeneratedName === true);
 							}
@@ -503,7 +517,7 @@ AUI.add(
 									var modelList = instance.propertyList.get('data');
 
 									var nameModel = modelList.filter(
-										function(item, index, collection) {
+										function(item, index) {
 											return (item.get('attributeName') === 'name');
 										}
 									);
@@ -525,7 +539,7 @@ AUI.add(
 					_renderSettings: function() {
 						var instance = this;
 
-						LiferayFormBuilder.superclass._renderSettings.apply(instance, arguments);
+						instance._renderPropertyList();
 
 						instance.propertyList.on('model:change', instance._onPropertyModelChange, instance);
 					},
@@ -535,7 +549,7 @@ AUI.add(
 
 						var fields = AArray.map(
 							val,
-							function(item, index, collection) {
+							function(item, index) {
 								return A.instanceOf(item, A.AvailableField) ? item : new A.LiferayAvailableField(item);
 							}
 						);
@@ -556,7 +570,7 @@ AUI.add(
 
 						AArray.each(
 							options,
-							function(item, index, collection) {
+							function(item, index) {
 								var localizationMap = item.localizationMap;
 
 								if (isObject(localizationMap)) {
@@ -589,7 +603,7 @@ AUI.add(
 								if (isObject(localizationMap) && isObject(localeMap)) {
 									AArray.each(
 										instance.LOCALIZABLE_FIELD_ATTRS,
-										function(item, index, collection) {
+										function(item, index) {
 											field.set(item, localeMap[item]);
 										}
 									);
@@ -606,6 +620,27 @@ AUI.add(
 						);
 					},
 
+					_syncFieldsReadOnlyAttributes: function(fields) {
+						var instance = this;
+
+						fields = fields || instance.get('fields');
+
+						fields.each(
+							function(field) {
+								field.set('readOnlyAttributes', instance._getReadOnlyFieldAttributes(field));
+
+								instance._syncFieldsReadOnlyAttributes(field.get('fields'));
+							}
+						);
+					},
+
+					_toggleInputDirection: function(locale) {
+						var rtl = (Liferay.Language.direction[locale] === 'rtl');
+
+						BODY.toggleClass('form-builder-ltr-inputs', !rtl);
+						BODY.toggleClass('form-builder-rtl-inputs', rtl);
+					},
+
 					_updateFieldOptionsLocalizationMap: function(field, locale) {
 						var instance = this;
 
@@ -613,7 +648,7 @@ AUI.add(
 
 						AArray.each(
 							options,
-							function(item, index, collection) {
+							function(item, index) {
 								var localizationMap = item.localizationMap;
 
 								if (!isObject(localizationMap)) {
@@ -637,7 +672,7 @@ AUI.add(
 						fields = fields || instance.get('fields');
 
 						fields.each(
-							function(item, index, collection) {
+							function(item, index) {
 								var localizationMap = {};
 
 								localizationMap[locale] = item.getAttrs(instance.LOCALIZABLE_FIELD_ATTRS);
@@ -661,12 +696,10 @@ AUI.add(
 				},
 
 				normalizeKey: function(str) {
-					str = A.Text.AccentFold.fold(str);
-
 					A.each(
 						str,
-						function(item, index, collection) {
-							if (!A.Text.Unicode.test(item, 'L') && !A.Text.Unicode.test(item, 'N')) {
+						function(item, index) {
+							if (!A.Text.Unicode.test(item, 'L') && !A.Text.Unicode.test(item, 'N') && !A.Text.Unicode.test(item, 'Pd')) {
 								str = str.replace(item, STR_SPACE);
 							}
 						}
@@ -677,9 +710,156 @@ AUI.add(
 			}
 		);
 
-		LiferayFormBuilder.DEFAULT_ICON_CLASS = 'form-builder-field-icon form-builder-field-icon-default';
+		LiferayFormBuilder.Util = {
+			getFileEntry: function(fileJSON, callback) {
+				var instance = this;
+
+				fileJSON = instance.parseJSON(fileJSON);
+
+				Liferay.Service(
+					'/dlapp/get-file-entry-by-uuid-and-group-id',
+					{
+						groupId: fileJSON.groupId,
+						uuid: fileJSON.uuid
+					},
+					callback
+				);
+			},
+
+			getFileEntryURL: function(fileEntry) {
+				var instance = this;
+
+				var buffer = [
+					themeDisplay.getPathContext(),
+					'documents',
+					fileEntry.groupId,
+					fileEntry.folderId,
+					encodeURIComponent(fileEntry.title)
+				];
+
+				return buffer.join('/');
+			},
+
+			parseJSON: function(value) {
+				var instance = this;
+
+				var data = {};
+
+				try {
+					data = JSON.parse(value);
+				}
+				catch (e) {
+				}
+
+				return data;
+			}
+		};
+
+		LiferayFormBuilder.DEFAULT_ICON_CLASS = 'icon-fb-custom-field';
 
 		var AVAILABLE_FIELDS = {
+			DDM_STRUCTURE: [
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.checkbox,
+					iconClass: 'icon-fb-boolean',
+					label: Liferay.Language.get('boolean'),
+					type: 'checkbox'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-calendar',
+					label: Liferay.Language.get('date'),
+					type: 'ddm-date'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-fb-decimal',
+					label: Liferay.Language.get('decimal'),
+					type: 'ddm-decimal'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-file-text',
+					label: Liferay.Language.get('documents-and-media'),
+					type: 'ddm-documentlibrary'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-edit-sign',
+					label: Liferay.Language.get('html'),
+					type: 'ddm-text-html'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-globe',
+					label: Liferay.Language.get('geolocation'),
+					type: 'ddm-geolocation'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-fb-integer',
+					label: Liferay.Language.get('integer'),
+					type: 'ddm-integer'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-link',
+					label: Liferay.Language.get('link-to-page'),
+					type: 'ddm-link-to-page'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-fb-number',
+					label: Liferay.Language.get('number'),
+					type: 'ddm-number'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-fb-radio',
+					label: Liferay.Language.get('radio'),
+					type: 'radio'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-fb-select',
+					label: Liferay.Language.get('select'),
+					type: 'select'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-fb-text',
+					label: Liferay.Language.get('text'),
+					type: 'text'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-fb-text-box',
+					label: Liferay.Language.get('text-box'),
+					type: 'textarea'
+				}
+			],
+
+			DDM_TEMPLATE: [
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-fb-paragraph',
+					label: Liferay.Language.get('paragraph'),
+					type: 'ddm-paragraph'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-fb-separator',
+					label: Liferay.Language.get('separator'),
+					type: 'ddm-separator'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
+					iconClass: 'icon-fb-fieldset',
+					label: Liferay.Language.get('fieldset'),
+					type: 'fieldset'
+				}
+			],
+
 			DEFAULT: [
 				{
 					fieldLabel: Liferay.Language.get('button'),
@@ -689,7 +869,7 @@ AUI.add(
 				},
 				{
 					fieldLabel: Liferay.Language.get('checkbox'),
-					iconClass: 'form-builder-field-icon form-builder-field-icon-checkbox',
+					iconClass: 'icon-fb-boolean',
 					label: Liferay.Language.get('checkbox'),
 					type: 'checkbox'
 				},
@@ -701,132 +881,42 @@ AUI.add(
 				},
 				{
 					fieldLabel: Liferay.Language.get('text-box'),
-					iconClass: 'form-builder-field-icon form-builder-field-icon-text',
+					iconClass: 'icon-fb-text',
 					label: Liferay.Language.get('text-box'),
 					type: 'text'
 				},
 				{
 					fieldLabel: Liferay.Language.get('text-area'),
-					iconClass: 'form-builder-field-icon form-builder-field-icon-textarea',
+					iconClass: 'icon-fb-text-box',
 					label: Liferay.Language.get('text-area'),
 					type: 'textarea'
 				},
 				{
 					fieldLabel: Liferay.Language.get('radio-buttons'),
-					iconClass: 'form-builder-field-icon form-builder-field-icon-radio',
+					iconClass: 'icon-fb-radio',
 					label: Liferay.Language.get('radio-buttons'),
 					type: 'radio'
 				},
 				{
 					fieldLabel: Liferay.Language.get('select-option'),
-					iconClass: 'form-builder-field-icon form-builder-field-icon-select',
+					iconClass: 'icon-fb-select',
 					label: Liferay.Language.get('select-option'),
 					type: 'select'
-				}
-			],
-
-			DDM_STRUCTURE: [
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.checkbox,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-checkbox',
-					label: Liferay.Language.get('boolean'),
-					type: 'checkbox'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-date',
-					label: Liferay.Language.get('date'),
-					type: 'ddm-date'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-decimal',
-					label: Liferay.Language.get('decimal'),
-					type: 'ddm-decimal'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-document',
-					label: Liferay.Language.get('documents-and-media'),
-					type: 'ddm-documentlibrary'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon lfr-ddm-text-html-icon',
-					label: Liferay.Language.get('html'),
-					type: 'ddm-text-html'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-integer',
-					label: Liferay.Language.get('integer'),
-					type: 'ddm-integer'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon lfr-ddm-link-icon',
-					label: Liferay.Language.get('link-to-page'),
-					type: 'ddm-link-to-page'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-number',
-					label: Liferay.Language.get('number'),
-					type: 'ddm-number'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-radio',
-					label: Liferay.Language.get('radio'),
-					type: 'radio'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-select',
-					label: Liferay.Language.get('select'),
-					type: 'select'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-text',
-					label: Liferay.Language.get('text'),
-					type: 'text'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-textarea',
-					label: Liferay.Language.get('text-box'),
-					type: 'textarea'
-				}
-			],
-
-			DDM_TEMPLATE: [
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-paragraph',
-					label: Liferay.Language.get('paragraph'),
-					type: 'ddm-paragraph'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-separator',
-					label: Liferay.Language.get('separator'),
-					type: 'ddm-separator'
-				},
-				{
-					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon form-builder-field-icon-fieldset',
-					label: Liferay.Language.get('fieldset'),
-					type: 'fieldset'
 				}
 			],
 
 			WCM_STRUCTURE: [
 				{
 					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.DEFAULT,
-					iconClass: 'form-builder-field-icon lfr-wcm-image lfr-wcm-image-icon',
+					iconClass: 'icon-picture',
 					label: Liferay.Language.get('image'),
-					type: 'wcm-image'
+					type: 'ddm-image'
+				},
+				{
+					hiddenAttributes: MAP_HIDDEN_FIELD_ATTRS.separator,
+					iconClass: 'icon-fb-separator',
+					label: Liferay.Language.get('separator'),
+					type: 'ddm-separator'
 				}
 			]
 		};
@@ -839,6 +929,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-form-builder', 'aui-form-validator', 'aui-text-unicode', 'json', 'liferay-menu', 'liferay-translation-manager', 'text']
+		requires: ['arraysort', 'aui-form-builder', 'aui-form-validator', 'aui-text-unicode', 'json', 'liferay-menu', 'liferay-translation-manager', 'liferay-util-window', 'text']
 	}
 );

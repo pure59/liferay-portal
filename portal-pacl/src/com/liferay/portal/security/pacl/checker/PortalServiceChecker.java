@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.security.pacl.Reflection;
 
 import java.security.Permission;
 
@@ -28,8 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import sun.reflect.Reflection;
 
 /**
  * @author Brian Wing Shun Chan
@@ -117,7 +116,7 @@ public class PortalServiceChecker extends BaseChecker {
 		String servletContextName, String className, String methodName,
 		Permission permission) {
 
-		int stackIndex = getStackIndex(15, 14);
+		int stackIndex = Reflection.getStackIndex(15, 14);
 
 		Class<?> callerClass = Reflection.getCallerClass(stackIndex);
 

@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -33,11 +33,11 @@ portletURL.setParameter("struts_action", "/dynamic_data_lists/view");
 		<%
 		RecordSetDisplayTerms displayTerms = (RecordSetDisplayTerms)searchContainer.getDisplayTerms();
 		RecordSetSearchTerms searchTerms = (RecordSetSearchTerms)searchContainer.getSearchTerms();
+
+		request.setAttribute(WebKeys.SEARCH_CONTAINER, searchContainer);
 		%>
 
-		<liferay-util:include page="/html/portlet/dynamic_data_lists/toolbar.jsp">
-			<liferay-util:param name="toolbarItem" value="view-all" />
-		</liferay-util:include>
+		<liferay-util:include page="/html/portlet/dynamic_data_lists/toolbar.jsp" />
 
 		<liferay-ui:search-container-results>
 			<%@ include file="/html/portlet/dynamic_data_lists/record_set_search_results.jspf" %>
@@ -65,11 +65,10 @@ portletURL.setParameter("struts_action", "/dynamic_data_lists/view");
 
 			<liferay-ui:search-container-column-jsp
 				align="right"
+				cssClass="entry-action"
 				path="/html/portlet/dynamic_data_lists/record_set_action.jsp"
 			/>
 		</liferay-ui:search-container-row>
-
-		<div class="separator"><!-- --></div>
 
 		<liferay-ui:search-iterator />
 	</liferay-ui:search-container>
@@ -107,7 +106,7 @@ portletURL.setParameter("struts_action", "/dynamic_data_lists/view");
 						toolbars: {
 							footer: [
 								{
-									label: '<%= UnicodeLanguageUtil.get(pageContext, "ok") %>',
+									label: '<%= UnicodeLanguageUtil.get(request, "ok") %>',
 									on: {
 										click: function() {
 											submitForm(form, url, false);
@@ -115,7 +114,7 @@ portletURL.setParameter("struts_action", "/dynamic_data_lists/view");
 									}
 								},
 								{
-									label: '<%= UnicodeLanguageUtil.get(pageContext, "cancel") %>',
+									label: '<%= UnicodeLanguageUtil.get(request, "cancel") %>',
 									on: {
 										click: function() {
 											dialog.hide();
@@ -125,7 +124,7 @@ portletURL.setParameter("struts_action", "/dynamic_data_lists/view");
 							]
 						}
 					},
-					title: '<%= UnicodeLanguageUtil.get(pageContext, "export") %>'
+					title: '<%= UnicodeLanguageUtil.get(request, "export") %>'
 				}
 			);
 

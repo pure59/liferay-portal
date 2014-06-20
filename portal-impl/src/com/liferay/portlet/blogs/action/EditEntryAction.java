@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,16 +15,14 @@
 package com.liferay.portlet.blogs.action;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.sanitizer.SanitizerException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.servlet.SessionMessages;
+import com.liferay.portal.kernel.upload.LiferayFileItemException;
+import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.HttpUtil;
@@ -34,6 +32,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
@@ -56,12 +55,14 @@ import com.liferay.portlet.blogs.NoSuchEntryException;
 import com.liferay.portlet.blogs.model.BlogsEntry;
 import com.liferay.portlet.blogs.service.BlogsEntryLocalServiceUtil;
 import com.liferay.portlet.blogs.service.BlogsEntryServiceUtil;
+import com.liferay.portlet.documentlibrary.FileSizeException;
+import com.liferay.portlet.trash.util.TrashUtil;
 
 import java.io.InputStream;
 
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -100,25 +101,36 @@ public class EditEntryAction extends PortletAction {
 			BlogsEntry entry = null;
 			String oldUrlTitle = StringPool.BLANK;
 
-			if (cmd.equals(Constants.ADD) || cmd.equals(Constants.UPDATE)) {
+			UploadException uploadException =
+				(UploadException)actionRequest.getAttribute(
+					WebKeys.UPLOAD_EXCEPTION);
+
+			if (uploadException != null) {
+				if (uploadException.isExceededLiferayFileItemSizeLimit()) {
+					throw new LiferayFileItemException();
+				}
+				else if (uploadException.isExceededSizeLimit()) {
+					throw new FileSizeException(uploadException.getCause());
+				}
+
+				throw new PortalException(uploadException.getCause());
+			}
+			else if (cmd.equals(Constants.ADD) ||
+					 cmd.equals(Constants.UPDATE)) {
+
 				Object[] returnValue = updateEntry(actionRequest);
 
 				entry = (BlogsEntry)returnValue[0];
 				oldUrlTitle = ((String)returnValue[1]);
 			}
 			else if (cmd.equals(Constants.DELETE)) {
-				deleteEntries(
-					(LiferayPortletConfig)portletConfig, actionRequest, false);
+				deleteEntries(actionRequest, false);
 			}
 			else if (cmd.equals(Constants.MOVE_TO_TRASH)) {
-				deleteEntries(
-					(LiferayPortletConfig)portletConfig, actionRequest, true);
+				deleteEntries(actionRequest, true);
 			}
 			else if (cmd.equals(Constants.SUBSCRIBE)) {
 				subscribe(actionRequest);
-			}
-			else if (cmd.equals(Constants.RESTORE)) {
-				restoreEntries(actionRequest);
 			}
 			else if (cmd.equals(Constants.UNSUBSCRIBE)) {
 				unsubscribe(actionRequest);
@@ -132,10 +144,9 @@ public class EditEntryAction extends PortletAction {
 			String redirect = ParamUtil.getString(actionRequest, "redirect");
 			boolean updateRedirect = false;
 
-			if (Validator.isNotNull(oldUrlTitle)) {
-				String portletId = HttpUtil.getParameter(
-					redirect, "p_p_id", false);
+			String portletId = HttpUtil.getParameter(redirect, "p_p_id", false);
 
+			if (Validator.isNotNull(oldUrlTitle)) {
 				String oldRedirectParam =
 					PortalUtil.getPortletNamespace(portletId) + "redirect";
 
@@ -201,11 +212,15 @@ public class EditEntryAction extends PortletAction {
 
 					if (Validator.isNotNull(redirect)) {
 						if (cmd.equals(Constants.ADD) && (entry != null)) {
+							String namespace = PortalUtil.getPortletNamespace(
+								portletId);
+
 							redirect = HttpUtil.addParameter(
-								redirect, "className",
+								redirect, namespace + "className",
 								BlogsEntry.class.getName());
 							redirect = HttpUtil.addParameter(
-								redirect, "classPK", entry.getEntryId());
+								redirect, namespace + "classPK",
+								entry.getEntryId());
 						}
 
 						actionResponse.sendRedirect(redirect);
@@ -226,6 +241,8 @@ public class EditEntryAction extends PortletAction {
 					 e instanceof EntrySmallImageNameException ||
 					 e instanceof EntrySmallImageSizeException ||
 					 e instanceof EntryTitleException ||
+					 e instanceof LiferayFileItemException ||
+					 e instanceof FileSizeException ||
 					 e instanceof SanitizerException) {
 
 				SessionErrors.add(actionRequest, e.getClass());
@@ -291,7 +308,6 @@ public class EditEntryAction extends PortletAction {
 	}
 
 	protected void deleteEntries(
-			LiferayPortletConfig liferayPortletConfig,
 			ActionRequest actionRequest, boolean moveToTrash)
 		throws Exception {
 
@@ -307,27 +323,24 @@ public class EditEntryAction extends PortletAction {
 				ParamUtil.getString(actionRequest, "deleteEntryIds"), 0L);
 		}
 
+		List<TrashedModel> trashedModels = new ArrayList<TrashedModel>();
+
 		for (long deleteEntryId : deleteEntryIds) {
 			if (moveToTrash) {
-				BlogsEntryServiceUtil.moveEntryToTrash(deleteEntryId);
+				BlogsEntry entry = BlogsEntryServiceUtil.moveEntryToTrash(
+					deleteEntryId);
+
+				trashedModels.add(entry);
 			}
 			else {
 				BlogsEntryServiceUtil.deleteEntry(deleteEntryId);
 			}
 		}
 
-		if (moveToTrash && (deleteEntryIds.length > 0)) {
-			Map<String, String[]> data = new HashMap<String, String[]>();
+		if (moveToTrash && !trashedModels.isEmpty()) {
+			TrashUtil.addTrashSessionMessages(actionRequest, trashedModels);
 
-			data.put(
-				"restoreEntryIds", ArrayUtil.toStringArray(deleteEntryIds));
-
-			SessionMessages.add(
-				actionRequest,
-				liferayPortletConfig.getPortletId() +
-					SessionMessages.KEY_SUFFIX_DELETE_SUCCESS_DATA, data);
-
-			hideDefaultSuccessMessage(liferayPortletConfig, actionRequest);
+			hideDefaultSuccessMessage(actionRequest);
 		}
 	}
 
@@ -369,17 +382,6 @@ public class EditEntryAction extends PortletAction {
 		return portletURL.toString();
 	}
 
-	protected void restoreEntries(ActionRequest actionRequest)
-		throws PortalException, SystemException {
-
-		long[] restoreEntryIds = StringUtil.split(
-			ParamUtil.getString(actionRequest, "restoreEntryIds"), 0L);
-
-		for (long restoreEntryId : restoreEntryIds) {
-			BlogsEntryServiceUtil.restoreEntryFromTrash(restoreEntryId);
-		}
-	}
-
 	protected void subscribe(ActionRequest actionRequest) throws Exception {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -398,30 +400,36 @@ public class EditEntryAction extends PortletAction {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
 		long entryId = ParamUtil.getLong(actionRequest, "entryId");
+
+		BlogsEntry entry = BlogsEntryLocalServiceUtil.getEntry(entryId);
 
 		String content = ParamUtil.getString(actionRequest, "content");
 
-		BlogsEntry entry = BlogsEntryLocalServiceUtil.getEntry(entryId);
+		Calendar displayDateCal = CalendarFactoryUtil.getCalendar(
+			themeDisplay.getTimeZone());
+
+		displayDateCal.setTime(entry.getDisplayDate());
+
+		int displayDateMonth = displayDateCal.get(Calendar.MONTH);
+		int displayDateDay = displayDateCal.get(Calendar.DATE);
+		int displayDateYear = displayDateCal.get(Calendar.YEAR);
+		int displayDateHour = displayDateCal.get(Calendar.HOUR);
+		int displayDateMinute = displayDateCal.get(Calendar.MINUTE);
+
+		if (displayDateCal.get(Calendar.AM_PM) == Calendar.PM) {
+			displayDateHour += 12;
+		}
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			actionRequest);
 
+		serviceContext.setCommand(Constants.UPDATE);
+
 		try {
-			Calendar displayDateCal = CalendarFactoryUtil.getCalendar();
-
-			displayDateCal.setTime(entry.getDisplayDate());
-
-			int displayDateMonth = displayDateCal.get(Calendar.MONTH);
-			int displayDateDay = displayDateCal.get(Calendar.DATE);
-			int displayDateYear = displayDateCal.get(Calendar.YEAR);
-			int displayDateHour = displayDateCal.get(Calendar.HOUR);
-			int displayDateMinute = displayDateCal.get(Calendar.MINUTE);
-
-			if (displayDateCal.get(Calendar.AM_PM) == Calendar.PM) {
-				displayDateHour += 12;
-			}
-
 			BlogsEntryServiceUtil.updateEntry(
 				entryId, entry.getTitle(), entry.getDescription(), content,
 				displayDateMonth, displayDateDay, displayDateYear,
@@ -452,6 +460,7 @@ public class EditEntryAction extends PortletAction {
 		long entryId = ParamUtil.getLong(actionRequest, "entryId");
 
 		String title = ParamUtil.getString(actionRequest, "title");
+		String deckTitle = ParamUtil.getString(actionRequest, "deckTitle");
 		String description = ParamUtil.getString(actionRequest, "description");
 		String content = ParamUtil.getString(actionRequest, "content");
 
@@ -496,18 +505,13 @@ public class EditEntryAction extends PortletAction {
 					actionRequest, "smallImageURL");
 
 				if (smallImage && Validator.isNull(smallImageURL)) {
-					boolean attachments = ParamUtil.getBoolean(
-						actionRequest, "attachments");
+					UploadPortletRequest uploadPortletRequest =
+						PortalUtil.getUploadPortletRequest(actionRequest);
 
-					if (attachments) {
-						UploadPortletRequest uploadPortletRequest =
-							PortalUtil.getUploadPortletRequest(actionRequest);
-
-						smallImageFileName = uploadPortletRequest.getFileName(
-							"smallFile");
-						smallImageInputStream =
-							uploadPortletRequest.getFileAsStream("smallFile");
-					}
+					smallImageFileName = uploadPortletRequest.getFileName(
+						"smallFile");
+					smallImageInputStream =
+						uploadPortletRequest.getFileAsStream("smallFile");
 				}
 			}
 
@@ -522,7 +526,7 @@ public class EditEntryAction extends PortletAction {
 				// Add entry
 
 				entry = BlogsEntryServiceUtil.addEntry(
-					title, description, content, displayDateMonth,
+					title, deckTitle, description, content, displayDateMonth,
 					displayDateDay, displayDateYear, displayDateHour,
 					displayDateMinute, allowPingbacks, allowTrackbacks,
 					trackbacks, smallImage, smallImageURL, smallImageFileName,
@@ -541,11 +545,11 @@ public class EditEntryAction extends PortletAction {
 				String tempOldUrlTitle = entry.getUrlTitle();
 
 				entry = BlogsEntryServiceUtil.updateEntry(
-					entryId, title, description, content, displayDateMonth,
-					displayDateDay, displayDateYear, displayDateHour,
-					displayDateMinute, allowPingbacks, allowTrackbacks,
-					trackbacks, smallImage, smallImageURL, smallImageFileName,
-					smallImageInputStream, serviceContext);
+					entryId, title, deckTitle, description, content,
+					displayDateMonth, displayDateDay, displayDateYear,
+					displayDateHour, displayDateMinute, allowPingbacks,
+					allowTrackbacks, trackbacks, smallImage, smallImageURL,
+					smallImageFileName, smallImageInputStream, serviceContext);
 
 				if (!tempOldUrlTitle.equals(entry.getUrlTitle())) {
 					oldUrlTitle = tempOldUrlTitle;

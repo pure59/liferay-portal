@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -36,7 +36,7 @@ if (Validator.isNotNull(portletResource)) {
 	String portletId = portlet.getPortletId();
 
 	if (portletId.equals(PortletKeys.PORTAL)) {
-		portletResourceLabel = LanguageUtil.get(pageContext, "general-permissions");
+		portletResourceLabel = LanguageUtil.get(request, "general-permissions");
 	}
 	else {
 		portletResourceLabel = PortalUtil.getPortletLongTitle(portlet, application, locale);
@@ -63,7 +63,7 @@ if (Validator.isNotNull(portletResource)) {
 	<aui:input name="modelResources" type="hidden" value='<%= (modelResources == null) ? "" : StringUtil.merge(modelResources) %>' />
 	<aui:input name="selectedTargets" type="hidden" />
 
-	<h3><%= portletResourceLabel %></h3>
+	<h3><%= HtmlUtil.escape(portletResourceLabel) %></h3>
 
 	<%
 	request.setAttribute("edit_role_permissions.jsp-curPortletResource", portletResource);
@@ -95,7 +95,7 @@ if (Validator.isNotNull(portletResource)) {
 			for (int i = 0; i < modelResources.size(); i++) {
 				String curModelResource = (String)modelResources.get(i);
 
-				String curModelResourceName = ResourceActionsUtil.getModelResource(pageContext, curModelResource);
+				String curModelResourceName = ResourceActionsUtil.getModelResource(request, curModelResource);
 			%>
 
 				<h5 id="<%= _getResourceHtmlId(curModelResource) %>"><%= curModelResourceName %></h5>
@@ -133,11 +133,11 @@ if (Validator.isNotNull(portletResource)) {
 
 			List resultRows = searchContainer.getResultRows();
 
-			for (TemplateHandler templateHandler : TemplateHandlerRegistryUtil.getTemplateHandlers()) {
-				if (!(templateHandler instanceof BasePortletDisplayTemplateHandler)) {
-					continue;
-				}
+			List <TemplateHandler> templateHandlers = PortletDisplayTemplateUtil.getPortletDisplayTemplateHandlers();
 
+			ListUtil.sort(templateHandlers, new TemplateHandlerComparator(locale));
+
+			for (TemplateHandler templateHandler : templateHandlers) {
 				String actionId = ActionKeys.ADD_PORTLET_DISPLAY_TEMPLATE;
 				String resource = templateHandler.getResourceName();
 				int scope = ResourceConstants.SCOPE_COMPANY;
@@ -158,7 +158,7 @@ if (Validator.isNotNull(portletResource)) {
 
 				relatedPortletResources.add(curPortlet.getPortletId());
 
-				row.addText(PortalUtil.getPortletLongTitle(curPortlet, application, locale) + ": " + _getActionLabel(pageContext, themeDisplay, resource, actionId));
+				row.addText(PortalUtil.getPortletLongTitle(curPortlet, application, locale) + ": " + _getActionLabel(request, themeDisplay, resource, actionId));
 
 				row.addJSP("/html/portlet/roles_admin/edit_role_permissions_resource_scope.jsp");
 
@@ -188,7 +188,7 @@ definePermissionsURL.setParameter(Constants.CMD, Constants.VIEW);
 definePermissionsURL.setParameter("redirect", backURL);
 definePermissionsURL.setParameter("roleId", String.valueOf(role.getRoleId()));
 
-PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "define-permissions"), definePermissionsURL.toString());
+PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "define-permissions"), definePermissionsURL.toString());
 
 if (Validator.isNotNull(portletResource)) {
 	PortletURL resourceURL = liferayPortletResponse.createRenderURL();

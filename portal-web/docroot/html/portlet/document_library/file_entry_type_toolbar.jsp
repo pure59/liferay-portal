@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,16 +19,17 @@
 <%
 String strutsAction = ParamUtil.getString(request, "strutsAction", "/document_library/view_file_entry_type");
 
-String toolbarItem = ParamUtil.getString(request, "toolbarItem", "view-all");
+String toolbarItem = ParamUtil.getString(request, "toolbarItem");
+
+boolean includeBasicFileEntryType = ParamUtil.getBoolean(request, "includeBasicFileEntryType");
 %>
 
 <aui:nav-bar>
-	<aui:nav>
+	<aui:nav cssClass="navbar-nav">
 		<portlet:renderURL var="viewFileEntryTypesURL">
 			<portlet:param name="struts_action" value="<%= strutsAction %>" />
+			<portlet:param name="includeBasicFileEntryType" value="<%= String.valueOf(includeBasicFileEntryType) %>" />
 		</portlet:renderURL>
-
-		<aui:nav-item href="<%= viewFileEntryTypesURL %>" label="view-all" selected='<%= toolbarItem.equals("view-all") %>' />
 
 		<c:if test="<%= DLPermission.contains(permissionChecker, scopeGroupId, ActionKeys.ADD_DOCUMENT_TYPE) %>">
 			<portlet:renderURL var="addFileEntryTypeURL">
@@ -36,7 +37,19 @@ String toolbarItem = ParamUtil.getString(request, "toolbarItem", "view-all");
 				<portlet:param name="redirect" value="<%= viewFileEntryTypesURL %>" />
 			</portlet:renderURL>
 
-			<aui:nav-item href="<%= addFileEntryTypeURL %>" iconClass="icon-plus" label="add" selected='<%= toolbarItem.equals("add") %>' />
+			<aui:nav-item href="<%= addFileEntryTypeURL %>" iconCssClass="icon-plus" label="add" selected='<%= toolbarItem.equals("add") %>' />
 		</c:if>
 	</aui:nav>
+
+	<aui:nav-bar-search>
+		<div class="col-xs-12 form-search">
+			<liferay-portlet:renderURL varImpl="searchURL">
+				<portlet:param name="struts_action" value="<%= strutsAction %>" />
+			</liferay-portlet:renderURL>
+
+			<aui:form action="<%= searchURL.toString() %>" method="post" name="fm">
+				<liferay-ui:input-search />
+			</aui:form>
+		</div>
+	</aui:nav-bar-search>
 </aui:nav-bar>

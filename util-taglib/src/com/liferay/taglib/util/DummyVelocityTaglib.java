@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -30,12 +30,14 @@ import com.liferay.taglib.ui.IconTag;
 import com.liferay.taglib.ui.JournalArticleTag;
 import com.liferay.taglib.ui.MySitesTag;
 import com.liferay.taglib.ui.PngImageTag;
+import com.liferay.taglib.ui.QuickAccessTag;
 import com.liferay.taglib.ui.RatingsTag;
 
 import javax.portlet.PortletURL;
 import javax.portlet.WindowState;
 
 import javax.servlet.ServletContext;
+import javax.servlet.jsp.PageContext;
 
 /**
  * @author Daniel Reuther
@@ -57,6 +59,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	 *             Boolean, Boolean, Boolean, String, long, long, String,
 	 *             Boolean, Boolean, long, long, Boolean, String)}
 	 */
+	@Deprecated
 	@Override
 	public void actionURL(
 			String windowState, String portletMode, Boolean secure,
@@ -122,6 +125,19 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 		throws Exception {
 	}
 
+	@Override
+	public void discussion(
+			String className, long classPK, String formAction, String formName,
+			boolean hideControls, boolean ratingsEnabled, String redirect,
+			long userId)
+		throws Exception {
+	}
+
+	/**
+	 * @deprecated As of 6.2.0, replaced by {@link #discussion(String, long,
+	 *             String, String, boolean, boolean, String, long)})}
+	 */
+	@Deprecated
 	@Override
 	public void discussion(
 			String className, long classPK, String formAction, String formName,
@@ -199,7 +215,17 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	}
 
 	@Override
+	public PageContext getPageContext() {
+		return null;
+	}
+
+	@Override
 	public PngImageTag getPngImageTag() throws Exception {
+		return null;
+	}
+
+	@Override
+	public QuickAccessTag getQuickAccessTag() throws Exception {
 		return null;
 	}
 
@@ -226,6 +252,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #iconBack}
 	 */
+	@Deprecated
 	@Override
 	public void iconBack() throws Exception {
 		portletIconBack();
@@ -234,6 +261,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconClose}
 	 */
+	@Deprecated
 	@Override
 	public void iconClose() throws Exception {
 		portletIconClose();
@@ -242,6 +270,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconConfiguration}
 	 */
+	@Deprecated
 	@Override
 	public void iconConfiguration() throws Exception {
 		portletIconConfiguration();
@@ -250,6 +279,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconEdit}
 	 */
+	@Deprecated
 	@Override
 	public void iconEdit() throws Exception {
 		portletIconEdit();
@@ -258,6 +288,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconEditDefaults}
 	 */
+	@Deprecated
 	@Override
 	public void iconEditDefaults() throws Exception {
 		portletIconEditDefaults();
@@ -266,6 +297,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconEditGuest}
 	 */
+	@Deprecated
 	@Override
 	public void iconEditGuest() throws Exception {
 		portletIconEditGuest();
@@ -274,6 +306,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconHelp}
 	 */
+	@Deprecated
 	@Override
 	public void iconHelp() throws Exception {
 		portletIconHelp();
@@ -286,6 +319,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconMaximize}
 	 */
+	@Deprecated
 	@Override
 	public void iconMaximize() throws Exception {
 		portletIconMaximize();
@@ -294,6 +328,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconMinimize}
 	 */
+	@Deprecated
 	@Override
 	public void iconMinimize() throws Exception {
 		portletIconMinimize();
@@ -302,6 +337,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconOptions}
 	 */
+	@Deprecated
 	@Override
 	public void iconOptions() throws Exception {
 		portletIconOptions();
@@ -310,6 +346,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconPortlet}
 	 */
+	@Deprecated
 	@Override
 	public void iconPortlet() throws Exception {
 		portletIconPortlet();
@@ -318,6 +355,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconPortlet(Portlet)}
 	 */
+	@Deprecated
 	@Override
 	public void iconPortlet(Portlet portlet) throws Exception {
 		portletIconPortlet();
@@ -326,6 +364,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconPortletCss}
 	 */
+	@Deprecated
 	@Override
 	public void iconPortletCss() throws Exception {
 		portletIconPortletCss();
@@ -334,6 +373,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconPrint}
 	 */
+	@Deprecated
 	@Override
 	public void iconPrint() throws Exception {
 		portletIconPrint();
@@ -342,6 +382,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconRefresh}
 	 */
+	@Deprecated
 	@Override
 	public void iconRefresh() throws Exception {
 		portletIconRefresh();
@@ -378,14 +419,15 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 
 	@Override
 	public void language(
-			String formName, String formAction, String name, int displayStyle)
+			String formName, String formAction, String name,
+			String displayStyle)
 		throws Exception {
 	}
 
 	@Override
 	public void language(
 			String formName, String formAction, String name,
-			String[] languageIds, int displayStyle)
+			String[] languageIds, String displayStyle)
 		throws Exception {
 	}
 
@@ -400,6 +442,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #mySites}
 	 */
+	@Deprecated
 	@Override
 	public void myPlaces() throws Exception {
 	}
@@ -407,6 +450,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #mySites(int)}
 	 */
+	@Deprecated
 	@Override
 	public void myPlaces(int max) throws Exception {
 	}
@@ -431,6 +475,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	 * @deprecated As of 6.2.0, replaced by {@link #permissionsURL(String,
 	 *             String, String, Object, String, String, int[])}
 	 */
+	@Deprecated
 	@Override
 	public void permissionsURL(
 			String redirect, String modelResource,
@@ -500,6 +545,14 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	}
 
 	@Override
+	public void quickAccess() throws Exception {
+	}
+
+	@Override
+	public void quickAccess(String contentId) throws Exception {
+	}
+
+	@Override
 	public void ratings(
 			String className, long classPK, int numberOfStars, String type,
 			String url)
@@ -531,6 +584,7 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 	 *             Boolean, Boolean, Boolean, long, long, String, Boolean,
 	 *             Boolean, long, long, Boolean, String)}
 	 */
+	@Deprecated
 	@Override
 	public void renderURL(
 			String windowState, String portletMode, Boolean secure,
@@ -593,6 +647,10 @@ public class DummyVelocityTaglib implements VelocityTaglib {
 		throws Exception {
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public void staging() throws Exception {
 	}

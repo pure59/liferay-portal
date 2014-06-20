@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,10 @@
 
 package com.liferay.portlet.journal.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.service.ServiceContext;
@@ -37,6 +38,7 @@ import java.util.List;
  * @see JournalArticleResourcePersistenceImpl
  * @generated
  */
+@ProviderType
 public class JournalArticleResourceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -61,8 +63,7 @@ public class JournalArticleResourceUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#countWithDynamicQuery(DynamicQuery)
 	 */
-	public long countWithDynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
 	}
 
@@ -70,7 +71,7 @@ public class JournalArticleResourceUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery)
 	 */
 	public static List<JournalArticleResource> findWithDynamicQuery(
-		DynamicQuery dynamicQuery) throws SystemException {
+		DynamicQuery dynamicQuery) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -78,8 +79,7 @@ public class JournalArticleResourceUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery, int, int)
 	 */
 	public static List<JournalArticleResource> findWithDynamicQuery(
-		DynamicQuery dynamicQuery, int start, int end)
-		throws SystemException {
+		DynamicQuery dynamicQuery, int start, int end) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -88,7 +88,7 @@ public class JournalArticleResourceUtil {
 	 */
 	public static List<JournalArticleResource> findWithDynamicQuery(
 		DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
+		OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findWithDynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
@@ -98,8 +98,7 @@ public class JournalArticleResourceUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel)
 	 */
 	public static JournalArticleResource update(
-		JournalArticleResource journalArticleResource)
-		throws SystemException {
+		JournalArticleResource journalArticleResource) {
 		return getPersistence().update(journalArticleResource);
 	}
 
@@ -108,7 +107,7 @@ public class JournalArticleResourceUtil {
 	 */
 	public static JournalArticleResource update(
 		JournalArticleResource journalArticleResource,
-		ServiceContext serviceContext) throws SystemException {
+		ServiceContext serviceContext) {
 		return getPersistence().update(journalArticleResource, serviceContext);
 	}
 
@@ -117,11 +116,9 @@ public class JournalArticleResourceUtil {
 	*
 	* @param uuid the uuid
 	* @return the matching journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticleResource> findByUuid(
-		java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid) {
 		return getPersistence().findByUuid(uuid);
 	}
 
@@ -136,11 +133,9 @@ public class JournalArticleResourceUtil {
 	* @param start the lower bound of the range of journal article resources
 	* @param end the upper bound of the range of journal article resources (not inclusive)
 	* @return the range of matching journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticleResource> findByUuid(
-		java.lang.String uuid, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, int start, int end) {
 		return getPersistence().findByUuid(uuid, start, end);
 	}
 
@@ -156,12 +151,10 @@ public class JournalArticleResourceUtil {
 	* @param end the upper bound of the range of journal article resources (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticleResource> findByUuid(
 		java.lang.String uuid, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findByUuid(uuid, start, end, orderByComparator);
 	}
 
@@ -172,13 +165,11 @@ public class JournalArticleResourceUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching journal article resource
 	* @throws com.liferay.portlet.journal.NoSuchArticleResourceException if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource findByUuid_First(
 		java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence().findByUuid_First(uuid, orderByComparator);
 	}
 
@@ -188,12 +179,10 @@ public class JournalArticleResourceUtil {
 	* @param uuid the uuid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching journal article resource, or <code>null</code> if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource fetchByUuid_First(
 		java.lang.String uuid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByUuid_First(uuid, orderByComparator);
 	}
 
@@ -204,13 +193,11 @@ public class JournalArticleResourceUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching journal article resource
 	* @throws com.liferay.portlet.journal.NoSuchArticleResourceException if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource findByUuid_Last(
 		java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence().findByUuid_Last(uuid, orderByComparator);
 	}
 
@@ -220,12 +207,10 @@ public class JournalArticleResourceUtil {
 	* @param uuid the uuid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching journal article resource, or <code>null</code> if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource fetchByUuid_Last(
 		java.lang.String uuid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByUuid_Last(uuid, orderByComparator);
 	}
 
@@ -237,13 +222,11 @@ public class JournalArticleResourceUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next journal article resource
 	* @throws com.liferay.portlet.journal.NoSuchArticleResourceException if a journal article resource with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource[] findByUuid_PrevAndNext(
 		long resourcePrimKey, java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence()
 				   .findByUuid_PrevAndNext(resourcePrimKey, uuid,
 			orderByComparator);
@@ -253,10 +236,8 @@ public class JournalArticleResourceUtil {
 	* Removes all the journal article resources where uuid = &#63; from the database.
 	*
 	* @param uuid the uuid
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByUuid(java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByUuid(java.lang.String uuid) {
 		getPersistence().removeByUuid(uuid);
 	}
 
@@ -265,10 +246,8 @@ public class JournalArticleResourceUtil {
 	*
 	* @param uuid the uuid
 	* @return the number of matching journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByUuid(java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByUuid(java.lang.String uuid) {
 		return getPersistence().countByUuid(uuid);
 	}
 
@@ -279,12 +258,10 @@ public class JournalArticleResourceUtil {
 	* @param groupId the group ID
 	* @return the matching journal article resource
 	* @throws com.liferay.portlet.journal.NoSuchArticleResourceException if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource findByUUID_G(
 		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence().findByUUID_G(uuid, groupId);
 	}
 
@@ -294,11 +271,9 @@ public class JournalArticleResourceUtil {
 	* @param uuid the uuid
 	* @param groupId the group ID
 	* @return the matching journal article resource, or <code>null</code> if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource fetchByUUID_G(
-		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, long groupId) {
 		return getPersistence().fetchByUUID_G(uuid, groupId);
 	}
 
@@ -309,11 +284,9 @@ public class JournalArticleResourceUtil {
 	* @param groupId the group ID
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching journal article resource, or <code>null</code> if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource fetchByUUID_G(
-		java.lang.String uuid, long groupId, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String uuid, long groupId, boolean retrieveFromCache) {
 		return getPersistence().fetchByUUID_G(uuid, groupId, retrieveFromCache);
 	}
 
@@ -323,12 +296,10 @@ public class JournalArticleResourceUtil {
 	* @param uuid the uuid
 	* @param groupId the group ID
 	* @return the journal article resource that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource removeByUUID_G(
 		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence().removeByUUID_G(uuid, groupId);
 	}
 
@@ -338,10 +309,8 @@ public class JournalArticleResourceUtil {
 	* @param uuid the uuid
 	* @param groupId the group ID
 	* @return the number of matching journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByUUID_G(java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByUUID_G(java.lang.String uuid, long groupId) {
 		return getPersistence().countByUUID_G(uuid, groupId);
 	}
 
@@ -350,11 +319,9 @@ public class JournalArticleResourceUtil {
 	*
 	* @param groupId the group ID
 	* @return the matching journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticleResource> findByGroupId(
-		long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId) {
 		return getPersistence().findByGroupId(groupId);
 	}
 
@@ -369,11 +336,9 @@ public class JournalArticleResourceUtil {
 	* @param start the lower bound of the range of journal article resources
 	* @param end the upper bound of the range of journal article resources (not inclusive)
 	* @return the range of matching journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticleResource> findByGroupId(
-		long groupId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, int start, int end) {
 		return getPersistence().findByGroupId(groupId, start, end);
 	}
 
@@ -389,12 +354,10 @@ public class JournalArticleResourceUtil {
 	* @param end the upper bound of the range of journal article resources (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticleResource> findByGroupId(
 		long groupId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByGroupId(groupId, start, end, orderByComparator);
 	}
@@ -406,13 +369,11 @@ public class JournalArticleResourceUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching journal article resource
 	* @throws com.liferay.portlet.journal.NoSuchArticleResourceException if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource findByGroupId_First(
 		long groupId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence().findByGroupId_First(groupId, orderByComparator);
 	}
 
@@ -422,12 +383,10 @@ public class JournalArticleResourceUtil {
 	* @param groupId the group ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching journal article resource, or <code>null</code> if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource fetchByGroupId_First(
 		long groupId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByGroupId_First(groupId, orderByComparator);
 	}
 
@@ -438,13 +397,11 @@ public class JournalArticleResourceUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching journal article resource
 	* @throws com.liferay.portlet.journal.NoSuchArticleResourceException if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource findByGroupId_Last(
 		long groupId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence().findByGroupId_Last(groupId, orderByComparator);
 	}
 
@@ -454,12 +411,10 @@ public class JournalArticleResourceUtil {
 	* @param groupId the group ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching journal article resource, or <code>null</code> if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource fetchByGroupId_Last(
 		long groupId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByGroupId_Last(groupId, orderByComparator);
 	}
 
@@ -471,13 +426,11 @@ public class JournalArticleResourceUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next journal article resource
 	* @throws com.liferay.portlet.journal.NoSuchArticleResourceException if a journal article resource with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource[] findByGroupId_PrevAndNext(
 		long resourcePrimKey, long groupId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence()
 				   .findByGroupId_PrevAndNext(resourcePrimKey, groupId,
 			orderByComparator);
@@ -487,10 +440,8 @@ public class JournalArticleResourceUtil {
 	* Removes all the journal article resources where groupId = &#63; from the database.
 	*
 	* @param groupId the group ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByGroupId(long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByGroupId(long groupId) {
 		getPersistence().removeByGroupId(groupId);
 	}
 
@@ -499,10 +450,8 @@ public class JournalArticleResourceUtil {
 	*
 	* @param groupId the group ID
 	* @return the number of matching journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByGroupId(long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByGroupId(long groupId) {
 		return getPersistence().countByGroupId(groupId);
 	}
 
@@ -513,12 +462,10 @@ public class JournalArticleResourceUtil {
 	* @param articleId the article ID
 	* @return the matching journal article resource
 	* @throws com.liferay.portlet.journal.NoSuchArticleResourceException if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource findByG_A(
 		long groupId, java.lang.String articleId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence().findByG_A(groupId, articleId);
 	}
 
@@ -528,11 +475,9 @@ public class JournalArticleResourceUtil {
 	* @param groupId the group ID
 	* @param articleId the article ID
 	* @return the matching journal article resource, or <code>null</code> if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource fetchByG_A(
-		long groupId, java.lang.String articleId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, java.lang.String articleId) {
 		return getPersistence().fetchByG_A(groupId, articleId);
 	}
 
@@ -543,11 +488,9 @@ public class JournalArticleResourceUtil {
 	* @param articleId the article ID
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching journal article resource, or <code>null</code> if a matching journal article resource could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource fetchByG_A(
-		long groupId, java.lang.String articleId, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, java.lang.String articleId, boolean retrieveFromCache) {
 		return getPersistence().fetchByG_A(groupId, articleId, retrieveFromCache);
 	}
 
@@ -557,12 +500,10 @@ public class JournalArticleResourceUtil {
 	* @param groupId the group ID
 	* @param articleId the article ID
 	* @return the journal article resource that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource removeByG_A(
 		long groupId, java.lang.String articleId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence().removeByG_A(groupId, articleId);
 	}
 
@@ -572,10 +513,8 @@ public class JournalArticleResourceUtil {
 	* @param groupId the group ID
 	* @param articleId the article ID
 	* @return the number of matching journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByG_A(long groupId, java.lang.String articleId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByG_A(long groupId, java.lang.String articleId) {
 		return getPersistence().countByG_A(groupId, articleId);
 	}
 
@@ -616,18 +555,15 @@ public class JournalArticleResourceUtil {
 	* @param resourcePrimKey the primary key of the journal article resource
 	* @return the journal article resource that was removed
 	* @throws com.liferay.portlet.journal.NoSuchArticleResourceException if a journal article resource with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource remove(
 		long resourcePrimKey)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence().remove(resourcePrimKey);
 	}
 
 	public static com.liferay.portlet.journal.model.JournalArticleResource updateImpl(
-		com.liferay.portlet.journal.model.JournalArticleResource journalArticleResource)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.journal.model.JournalArticleResource journalArticleResource) {
 		return getPersistence().updateImpl(journalArticleResource);
 	}
 
@@ -637,12 +573,10 @@ public class JournalArticleResourceUtil {
 	* @param resourcePrimKey the primary key of the journal article resource
 	* @return the journal article resource
 	* @throws com.liferay.portlet.journal.NoSuchArticleResourceException if a journal article resource with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource findByPrimaryKey(
 		long resourcePrimKey)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.journal.NoSuchArticleResourceException {
+		throws com.liferay.portlet.journal.NoSuchArticleResourceException {
 		return getPersistence().findByPrimaryKey(resourcePrimKey);
 	}
 
@@ -651,22 +585,23 @@ public class JournalArticleResourceUtil {
 	*
 	* @param resourcePrimKey the primary key of the journal article resource
 	* @return the journal article resource, or <code>null</code> if a journal article resource with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.journal.model.JournalArticleResource fetchByPrimaryKey(
-		long resourcePrimKey)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long resourcePrimKey) {
 		return getPersistence().fetchByPrimaryKey(resourcePrimKey);
+	}
+
+	public static java.util.Map<java.io.Serializable, com.liferay.portlet.journal.model.JournalArticleResource> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys) {
+		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
 	* Returns all the journal article resources.
 	*
 	* @return the journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
-	public static java.util.List<com.liferay.portlet.journal.model.JournalArticleResource> findAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static java.util.List<com.liferay.portlet.journal.model.JournalArticleResource> findAll() {
 		return getPersistence().findAll();
 	}
 
@@ -680,11 +615,9 @@ public class JournalArticleResourceUtil {
 	* @param start the lower bound of the range of journal article resources
 	* @param end the upper bound of the range of journal article resources (not inclusive)
 	* @return the range of journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticleResource> findAll(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return getPersistence().findAll(start, end);
 	}
 
@@ -699,22 +632,17 @@ public class JournalArticleResourceUtil {
 	* @param end the upper bound of the range of journal article resources (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.journal.model.JournalArticleResource> findAll(
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findAll(start, end, orderByComparator);
 	}
 
 	/**
 	* Removes all the journal article resources from the database.
-	*
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeAll() {
 		getPersistence().removeAll();
 	}
 
@@ -722,10 +650,8 @@ public class JournalArticleResourceUtil {
 	* Returns the number of journal article resources.
 	*
 	* @return the number of journal article resources
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countAll() {
 		return getPersistence().countAll();
 	}
 
@@ -743,6 +669,7 @@ public class JournalArticleResourceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setPersistence(JournalArticleResourcePersistence persistence) {
 	}
 

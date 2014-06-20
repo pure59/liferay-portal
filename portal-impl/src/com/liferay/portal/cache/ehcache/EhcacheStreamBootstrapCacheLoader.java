@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import net.sf.ehcache.CacheException;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.bootstrap.BootstrapCacheLoader;
 
@@ -46,17 +45,26 @@ public class EhcacheStreamBootstrapCacheLoader implements BootstrapCacheLoader {
 			_started = true;
 		}
 
-		for (Ehcache ehcache : _deferredEhcaches) {
-			if (_log.isDebugEnabled()) {
-				_log.debug("Loading deferred cache " + ehcache.getName());
-			}
+		if (_deferredEhcaches.isEmpty()) {
+			return;
+		}
 
-			try {
-				EhcacheStreamBootstrapHelpUtil.acquireCachePeers(ehcache);
+		if (_log.isDebugEnabled()) {
+			_log.debug("Loading deferred caches");
+		}
+
+		try {
+			EhcacheStreamBootstrapHelpUtil.loadCachesFromCluster(
+				_deferredEhcaches.toArray(
+					new Ehcache[_deferredEhcaches.size()]));
+		}
+		catch (Exception e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to load cache data from the cluster", e);
 			}
-			catch (Exception e) {
-				throw new CacheException(e);
-			}
+		}
+		finally {
+			_deferredEhcaches.clear();
 		}
 	}
 
@@ -90,10 +98,12 @@ public class EhcacheStreamBootstrapCacheLoader implements BootstrapCacheLoader {
 		}
 
 		try {
-			EhcacheStreamBootstrapHelpUtil.acquireCachePeers(ehcache);
+			EhcacheStreamBootstrapHelpUtil.loadCachesFromCluster(ehcache);
 		}
 		catch (Exception e) {
-			throw new CacheException(e);
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to load cache data from the cluster", e);
+			}
 		}
 	}
 

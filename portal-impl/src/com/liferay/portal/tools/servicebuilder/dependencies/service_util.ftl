@@ -1,9 +1,15 @@
 package ${packagePath}.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.bean.PortletBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.service.Invokable${sessionTypeName}Service;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.util.tracker.ServiceTracker;
 
 <#if sessionTypeName == "Local">
 /**
@@ -42,6 +48,15 @@ import com.liferay.portal.service.Invokable${sessionTypeName}Service;
  * @generated
  */
 </#if>
+
+<#if classDeprecated>
+	@Deprecated
+</#if>
+
+<#if pluginName == "">
+	@ProviderType
+</#if>
+
 public class ${entity.name}${sessionTypeName}ServiceUtil {
 
 	/*
@@ -53,6 +68,10 @@ public class ${entity.name}${sessionTypeName}ServiceUtil {
 	<#list methods as method>
 		<#if !method.isConstructor() && !method.isStatic() && method.isPublic() && serviceBuilder.isCustomMethod(method)>
 			${serviceBuilder.getJavadocComment(method)}
+
+			<#if serviceBuilder.hasAnnotation(method, "Deprecated")>
+				@Deprecated
+			</#if>
 
 			<#if method.name = "dynamicQuery" && (method.parameters?size != 0)>
 				@SuppressWarnings("rawtypes")
@@ -109,32 +128,49 @@ public class ${entity.name}${sessionTypeName}ServiceUtil {
 	</#if>
 
 	public static ${entity.name}${sessionTypeName}Service getService() {
-		if (_service == null) {
-			<#if pluginName != "">
-				Invokable${sessionTypeName}Service invokable${sessionTypeName}Service = (Invokable${sessionTypeName}Service)PortletBeanLocatorUtil.locate(ClpSerializer.getServletContextName(), ${entity.name}${sessionTypeName}Service.class.getName());
+		<#if osgiModule>
+			return _serviceTracker.getService();
+		<#else>
+			if (_service == null) {
+				<#if pluginName != "">
+					Invokable${sessionTypeName}Service invokable${sessionTypeName}Service = (Invokable${sessionTypeName}Service)PortletBeanLocatorUtil.locate(ClpSerializer.getServletContextName(), ${entity.name}${sessionTypeName}Service.class.getName());
 
-				if (invokable${sessionTypeName}Service instanceof ${entity.name}${sessionTypeName}Service) {
-					_service = (${entity.name}${sessionTypeName}Service)invokable${sessionTypeName}Service;
-				}
-				else {
-					_service = new ${entity.name}${sessionTypeName}ServiceClp(invokable${sessionTypeName}Service);
-				}
-			<#else>
-				_service = (${entity.name}${sessionTypeName}Service)PortalBeanLocatorUtil.locate(${entity.name}${sessionTypeName}Service.class.getName());
-			</#if>
+					if (invokable${sessionTypeName}Service instanceof ${entity.name}${sessionTypeName}Service) {
+						_service = (${entity.name}${sessionTypeName}Service)invokable${sessionTypeName}Service;
+					}
+					else {
+						_service = new ${entity.name}${sessionTypeName}ServiceClp(invokable${sessionTypeName}Service);
+					}
+				<#else>
+					_service = (${entity.name}${sessionTypeName}Service)PortalBeanLocatorUtil.locate(${entity.name}${sessionTypeName}Service.class.getName());
+				</#if>
 
-			ReferenceRegistry.registerReference(${entity.name}${sessionTypeName}ServiceUtil.class, "_service");
-		}
+				ReferenceRegistry.registerReference(${entity.name}${sessionTypeName}ServiceUtil.class, "_service");
+			}
 
-		return _service;
+			return _service;
+		</#if>
 	}
 
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(${entity.name}${sessionTypeName}Service service) {
 	}
 
-	private static ${entity.name}${sessionTypeName}Service _service;
+	<#if osgiModule>
+		private static ServiceTracker<${entity.name}${sessionTypeName}Service, ${entity.name}${sessionTypeName}Service> _serviceTracker;
+
+		static {
+			Bundle bundle = FrameworkUtil.getBundle(${entity.name}${sessionTypeName}ServiceUtil.class);
+
+			_serviceTracker = new ServiceTracker<${entity.name}${sessionTypeName}Service, ${entity.name}${sessionTypeName}Service>(bundle.getBundleContext(), ${entity.name}${sessionTypeName}Service.class, null);
+
+			_serviceTracker.open();
+		}
+	<#else>
+		private static ${entity.name}${sessionTypeName}Service _service;
+	</#if>
 
 }

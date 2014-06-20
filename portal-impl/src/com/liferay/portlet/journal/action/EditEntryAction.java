@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,17 +14,13 @@
 
 package com.liferay.portlet.journal.action;
 
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.servlet.SessionMessages;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
@@ -37,14 +33,17 @@ import com.liferay.portlet.asset.AssetCategoryException;
 import com.liferay.portlet.asset.AssetTagException;
 import com.liferay.portlet.journal.DuplicateArticleIdException;
 import com.liferay.portlet.journal.DuplicateFolderNameException;
+import com.liferay.portlet.journal.InvalidDDMStructureException;
 import com.liferay.portlet.journal.NoSuchArticleException;
 import com.liferay.portlet.journal.NoSuchFolderException;
 import com.liferay.portlet.journal.model.JournalArticle;
+import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.journal.service.JournalArticleServiceUtil;
 import com.liferay.portlet.journal.service.JournalFolderServiceUtil;
+import com.liferay.portlet.trash.util.TrashUtil;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -77,8 +76,7 @@ public class EditEntryAction extends PortletAction {
 			if (cmd.equals(Constants.DELETE) ||
 				cmd.equals(Constants.DELETE_VERSIONS)) {
 
-				deleteEntries(
-					(LiferayPortletConfig)portletConfig, actionRequest, false);
+				deleteEntries(actionRequest, false);
 			}
 			else if (cmd.equals(Constants.EXPIRE)) {
 				expireEntries(actionRequest);
@@ -87,11 +85,7 @@ public class EditEntryAction extends PortletAction {
 				moveEntries(actionRequest);
 			}
 			else if (cmd.equals(Constants.MOVE_TO_TRASH)) {
-				deleteEntries(
-					(LiferayPortletConfig)portletConfig, actionRequest, true);
-			}
-			else if (cmd.equals(Constants.RESTORE)) {
-				restoreEntryFromTrash(actionRequest);
+				deleteEntries(actionRequest, true);
 			}
 
 			String redirect = PortalUtil.escapeRedirect(
@@ -143,7 +137,7 @@ public class EditEntryAction extends PortletAction {
 			}
 			else if (e instanceof DuplicateArticleIdException ||
 					 e instanceof DuplicateFolderNameException ||
-					 e instanceof NoSuchFolderException) {
+					 e instanceof InvalidDDMStructureException) {
 
 				SessionErrors.add(actionRequest, e.getClass());
 			}
@@ -188,19 +182,23 @@ public class EditEntryAction extends PortletAction {
 	}
 
 	protected void deleteEntries(
-			LiferayPortletConfig liferayPortletConfig,
 			ActionRequest actionRequest, boolean moveToTrash)
 		throws Exception {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		List<TrashedModel> trashedModels = new ArrayList<TrashedModel>();
+
 		long[] deleteFolderIds = StringUtil.split(
 			ParamUtil.getString(actionRequest, "folderIds"), 0L);
 
 		for (long deleteFolderId : deleteFolderIds) {
 			if (moveToTrash) {
-				JournalFolderServiceUtil.moveFolderToTrash(deleteFolderId);
+				JournalFolder folder =
+					JournalFolderServiceUtil.moveFolderToTrash(deleteFolderId);
+
+				trashedModels.add(folder);
 			}
 			else {
 				JournalFolderServiceUtil.deleteFolder(deleteFolderId);
@@ -210,40 +208,23 @@ public class EditEntryAction extends PortletAction {
 		String[] deleteArticleIds = StringUtil.split(
 			ParamUtil.getString(actionRequest, "articleIds"));
 
-		long[] restoreArticleIds = new long[deleteArticleIds.length];
-
-		for (int i = 0; i < deleteArticleIds.length; i++) {
-			String deleteArticleId = deleteArticleIds[i];
-
+		for (String deleteArticleId : deleteArticleIds) {
 			if (moveToTrash) {
 				JournalArticle article =
 					JournalArticleServiceUtil.moveArticleToTrash(
 						themeDisplay.getScopeGroupId(), deleteArticleId);
 
-				restoreArticleIds[i] = article.getResourcePrimKey();
+				trashedModels.add(article);
 			}
 			else {
 				ActionUtil.deleteArticle(actionRequest, deleteArticleId);
 			}
 		}
 
-		if (moveToTrash &&
-			((deleteArticleIds.length > 0) || (deleteFolderIds.length > 0))) {
+		if (moveToTrash && !trashedModels.isEmpty()) {
+			TrashUtil.addTrashSessionMessages(actionRequest, trashedModels);
 
-			Map<String, String[]> data = new HashMap<String, String[]>();
-
-			data.put(
-				"restoreArticleIds",
-				ArrayUtil.toStringArray(restoreArticleIds));
-			data.put(
-				"restoreFolderIds", ArrayUtil.toStringArray(deleteFolderIds));
-
-			SessionMessages.add(
-				actionRequest,
-				liferayPortletConfig.getPortletId() +
-					SessionMessages.KEY_SUFFIX_DELETE_SUCCESS_DATA, data);
-
-			hideDefaultSuccessMessage(liferayPortletConfig, actionRequest);
+			hideDefaultSuccessMessage(actionRequest);
 		}
 	}
 
@@ -284,6 +265,8 @@ public class EditEntryAction extends PortletAction {
 				folderId, newFolderId, serviceContext);
 		}
 
+		List<String> invalidArticleIds = new ArrayList<String>();
+
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
@@ -291,26 +274,17 @@ public class EditEntryAction extends PortletAction {
 			ParamUtil.getString(actionRequest, "articleIds"));
 
 		for (String articleId : articleIds) {
-			JournalArticleServiceUtil.moveArticle(
-				themeDisplay.getScopeGroupId(), articleId, newFolderId);
-		}
-	}
-
-	protected void restoreEntryFromTrash(ActionRequest actionRequest)
-		throws PortalException, SystemException {
-
-		long[] restoreFolderIds = StringUtil.split(
-			ParamUtil.getString(actionRequest, "restoreFolderIds"), 0L);
-
-		for (long restoreFolderId : restoreFolderIds) {
-			JournalFolderServiceUtil.restoreFolderFromTrash(restoreFolderId);
+			try {
+				JournalArticleServiceUtil.moveArticle(
+					themeDisplay.getScopeGroupId(), articleId, newFolderId);
+			}
+			catch (InvalidDDMStructureException idse) {
+				invalidArticleIds.add(articleId);
+			}
 		}
 
-		long[] restoreArticleIds = StringUtil.split(
-			ParamUtil.getString(actionRequest, "restoreArticleIds"), 0L);
-
-		for (long restoreEntryId : restoreArticleIds) {
-			JournalArticleServiceUtil.restoreArticleFromTrash(restoreEntryId);
+		if (!invalidArticleIds.isEmpty()) {
+			throw new InvalidDDMStructureException();
 		}
 	}
 

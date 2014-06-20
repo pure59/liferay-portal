@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,11 +14,14 @@
 
 package com.liferay.portlet.passwordpoliciesadmin.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.xml.Element;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.model.PasswordPolicy;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.PasswordPolicyLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 
@@ -29,6 +32,23 @@ public class PasswordPolicyStagedModelDataHandler
 	extends BaseStagedModelDataHandler<PasswordPolicy> {
 
 	public static final String[] CLASS_NAMES = {PasswordPolicy.class.getName()};
+
+	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException {
+
+		Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+		PasswordPolicy passwordPolicy =
+			PasswordPolicyLocalServiceUtil.
+				fetchPasswordPolicyByUuidAndCompanyId(
+					uuid, group.getCompanyId());
+
+		if (passwordPolicy != null) {
+			PasswordPolicyLocalServiceUtil.deletePasswordPolicy(passwordPolicy);
+		}
+	}
 
 	@Override
 	public String[] getClassNames() {
@@ -46,8 +66,7 @@ public class PasswordPolicyStagedModelDataHandler
 
 		portletDataContext.addClassedModel(
 			passwordPolicyElement,
-			ExportImportPathUtil.getModelPath(passwordPolicy), passwordPolicy,
-			PasswordPolicyPortletDataHandler.NAMESPACE);
+			ExportImportPathUtil.getModelPath(passwordPolicy), passwordPolicy);
 	}
 
 	@Override
@@ -60,7 +79,7 @@ public class PasswordPolicyStagedModelDataHandler
 			passwordPolicy.getUserUuid());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			passwordPolicy, PasswordPolicyPortletDataHandler.NAMESPACE);
+			passwordPolicy);
 
 		PasswordPolicy existingPasswordPolicy =
 			PasswordPolicyLocalServiceUtil.
@@ -131,8 +150,7 @@ public class PasswordPolicyStagedModelDataHandler
 		}
 
 		portletDataContext.importClassedModel(
-			passwordPolicy, importedPasswordPolicy,
-			PasswordPolicyPortletDataHandler.NAMESPACE);
+			passwordPolicy, importedPasswordPolicy);
 	}
 
 }

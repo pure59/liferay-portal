@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -84,7 +84,7 @@ public class DoPrivilegedHandler
 
 			return _bean.equals(object);
 		}
-		else if (!SecurityManagerUtil.isActive() || _isNotPrivileged(method)) {
+		else if (_isNotPrivileged(method)) {
 			return method.invoke(_bean, arguments);
 		}
 

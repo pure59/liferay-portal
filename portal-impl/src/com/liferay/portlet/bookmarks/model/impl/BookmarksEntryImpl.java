@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,8 +15,6 @@
 package com.liferay.portlet.bookmarks.model.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portlet.bookmarks.NoSuchFolderException;
 import com.liferay.portlet.bookmarks.model.BookmarksFolder;
 import com.liferay.portlet.bookmarks.service.BookmarksFolderLocalServiceUtil;
 
@@ -29,44 +27,19 @@ public class BookmarksEntryImpl extends BookmarksEntryBaseImpl {
 	}
 
 	@Override
-	public BookmarksFolder getFolder() throws PortalException, SystemException {
+	public String buildTreePath() throws PortalException {
+		BookmarksFolder folder = getFolder();
+
+		return folder.buildTreePath();
+	}
+
+	@Override
+	public BookmarksFolder getFolder() throws PortalException {
 		if (getFolderId() <= 0) {
 			return new BookmarksFolderImpl();
 		}
 
 		return BookmarksFolderLocalServiceUtil.getFolder(getFolderId());
-	}
-
-	@Override
-	public BookmarksFolder getTrashContainer()
-		throws PortalException, SystemException {
-
-		BookmarksFolder folder = null;
-
-		try {
-			folder = getFolder();
-		}
-		catch (NoSuchFolderException nsfe) {
-			return null;
-		}
-
-		if (folder.isInTrash()) {
-			return folder;
-		}
-
-		return folder.getTrashContainer();
-	}
-
-	@Override
-	public boolean isInTrashContainer()
-		throws PortalException, SystemException {
-
-		if (getTrashContainer() != null) {
-			return true;
-		}
-		else {
-			return false;
-		}
 	}
 
 }

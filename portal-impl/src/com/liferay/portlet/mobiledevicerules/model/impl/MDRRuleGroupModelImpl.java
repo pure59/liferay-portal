@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,7 +16,7 @@ package com.liferay.portlet.mobiledevicerules.model.impl;
 
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -27,8 +27,10 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -47,6 +49,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The base model implementation for the MDRRuleGroup service. Represents a row in the &quot;MDRRuleGroup&quot; database table, with each column mapped to a property of this class.
@@ -201,6 +205,9 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
@@ -267,8 +274,8 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -291,8 +298,8 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getRuleGroupId() {
 		return _ruleGroupId;
 	}
@@ -302,8 +309,8 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 		_ruleGroupId = ruleGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -325,8 +332,8 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -348,8 +355,8 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -360,17 +367,23 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -385,8 +398,8 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -396,8 +409,8 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -407,8 +420,8 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 		_modifiedDate = modifiedDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -468,7 +481,7 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 
 	@Override
 	public void setName(String name, Locale locale) {
-		setName(name, locale, LocaleUtil.getDefault());
+		setName(name, locale, LocaleUtil.getSiteDefault());
 	}
 
 	@Override
@@ -493,7 +506,7 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 
 	@Override
 	public void setNameMap(Map<Locale, String> nameMap) {
-		setNameMap(nameMap, LocaleUtil.getDefault());
+		setNameMap(nameMap, LocaleUtil.getSiteDefault());
 	}
 
 	@Override
@@ -506,8 +519,8 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 				LocaleUtil.toLanguageId(defaultLocale)));
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -567,7 +580,7 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 
 	@Override
 	public void setDescription(String description, Locale locale) {
-		setDescription(description, locale, LocaleUtil.getDefault());
+		setDescription(description, locale, LocaleUtil.getSiteDefault());
 	}
 
 	@Override
@@ -594,7 +607,7 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 
 	@Override
 	public void setDescriptionMap(Map<Locale, String> descriptionMap) {
-		setDescriptionMap(descriptionMap, LocaleUtil.getDefault());
+		setDescriptionMap(descriptionMap, LocaleUtil.getSiteDefault());
 	}
 
 	@Override
@@ -633,13 +646,85 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 	}
 
 	@Override
+	public String[] getAvailableLanguageIds() {
+		Set<String> availableLanguageIds = new TreeSet<String>();
+
+		Map<Locale, String> nameMap = getNameMap();
+
+		for (Map.Entry<Locale, String> entry : nameMap.entrySet()) {
+			Locale locale = entry.getKey();
+			String value = entry.getValue();
+
+			if (Validator.isNotNull(value)) {
+				availableLanguageIds.add(LocaleUtil.toLanguageId(locale));
+			}
+		}
+
+		Map<Locale, String> descriptionMap = getDescriptionMap();
+
+		for (Map.Entry<Locale, String> entry : descriptionMap.entrySet()) {
+			Locale locale = entry.getKey();
+			String value = entry.getValue();
+
+			if (Validator.isNotNull(value)) {
+				availableLanguageIds.add(LocaleUtil.toLanguageId(locale));
+			}
+		}
+
+		return availableLanguageIds.toArray(new String[availableLanguageIds.size()]);
+	}
+
+	@Override
+	public String getDefaultLanguageId() {
+		String xml = getName();
+
+		if (xml == null) {
+			return StringPool.BLANK;
+		}
+
+		Locale defaultLocale = LocaleUtil.getSiteDefault();
+
+		return LocalizationUtil.getDefaultLanguageId(xml, defaultLocale);
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport() throws LocaleException {
+		Locale defaultLocale = LocaleUtil.fromLanguageId(getDefaultLanguageId());
+
+		Locale[] availableLocales = LocaleUtil.fromLanguageIds(getAvailableLanguageIds());
+
+		Locale defaultImportLocale = LocalizationUtil.getDefaultImportLocale(MDRRuleGroup.class.getName(),
+				getPrimaryKey(), defaultLocale, availableLocales);
+
+		prepareLocalizedFieldsForImport(defaultImportLocale);
+	}
+
+	@Override
 	@SuppressWarnings("unused")
 	public void prepareLocalizedFieldsForImport(Locale defaultImportLocale)
 		throws LocaleException {
-		setName(getName(defaultImportLocale), defaultImportLocale,
-			defaultImportLocale);
-		setDescription(getDescription(defaultImportLocale),
-			defaultImportLocale, defaultImportLocale);
+		Locale defaultLocale = LocaleUtil.getSiteDefault();
+
+		String modelDefaultLanguageId = getDefaultLanguageId();
+
+		String name = getName(defaultLocale);
+
+		if (Validator.isNull(name)) {
+			setName(getName(modelDefaultLanguageId), defaultLocale);
+		}
+		else {
+			setName(getName(defaultLocale), defaultLocale, defaultLocale);
+		}
+
+		String description = getDescription(defaultLocale);
+
+		if (Validator.isNull(description)) {
+			setDescription(getDescription(modelDefaultLanguageId), defaultLocale);
+		}
+		else {
+			setDescription(getDescription(defaultLocale), defaultLocale,
+				defaultLocale);
+		}
 	}
 
 	@Override
@@ -712,6 +797,16 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 	@Override
 	public int hashCode() {
 		return (int)getPrimaryKey();
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
 	}
 
 	@Override
@@ -893,7 +988,6 @@ public class MDRRuleGroupModelImpl extends BaseModelImpl<MDRRuleGroup>
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;

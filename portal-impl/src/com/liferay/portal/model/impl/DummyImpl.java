@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -50,6 +50,16 @@ public class DummyImpl extends BaseModelImpl<Dummy> implements Dummy {
 	@Override
 	public Serializable getPrimaryKeyObj() {
 		return StringPool.BLANK;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return false;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return false;
 	}
 
 	@Override

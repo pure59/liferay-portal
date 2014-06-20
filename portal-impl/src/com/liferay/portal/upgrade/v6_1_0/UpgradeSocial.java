@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -667,20 +667,21 @@ public class UpgradeSocial extends UpgradeProcess {
 					encodeEquityToActivityKey(classNameId, actionId));
 
 				if (tuple == null) {
-					StringBundler sb = new StringBundler();
-
-					sb.append("Unknown Social Equity setting with action ");
-					sb.append(actionId);
-					sb.append("for ");
-
-					String className = PortalUtil.getClassName(classNameId);
-
-					sb.append(className);
-
-					sb.append(". Please configure this action using the ");
-					sb.append("Social Activity portlet in the Control Panel.");
-
 					if (_log.isWarnEnabled()) {
+						StringBundler sb = new StringBundler(6);
+
+						sb.append("Unknown Social Equity setting with action ");
+						sb.append(actionId);
+						sb.append("for ");
+
+						String className = PortalUtil.getClassName(classNameId);
+
+						sb.append(className);
+
+						sb.append(". Please configure this action using the ");
+						sb.append(
+							"Social Activity portlet in the Control Panel.");
+
 						_log.warn(sb.toString());
 					}
 

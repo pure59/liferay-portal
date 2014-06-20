@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link TeamService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see TeamService
  * @generated
  */
+@ProviderType
 public class TeamServiceWrapper implements TeamService,
 	ServiceWrapper<TeamService> {
 	public TeamServiceWrapper(TeamService teamService) {
@@ -50,75 +53,66 @@ public class TeamServiceWrapper implements TeamService,
 	@Override
 	public com.liferay.portal.model.Team addTeam(long groupId,
 		java.lang.String name, java.lang.String description)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _teamService.addTeam(groupId, name, description);
 	}
 
 	@Override
 	public void deleteTeam(long teamId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_teamService.deleteTeam(teamId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.Team> getGroupTeams(
 		long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _teamService.getGroupTeams(groupId);
 	}
 
 	@Override
 	public com.liferay.portal.model.Team getTeam(long teamId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _teamService.getTeam(teamId);
 	}
 
 	@Override
 	public com.liferay.portal.model.Team getTeam(long groupId,
 		java.lang.String name)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _teamService.getTeam(groupId, name);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.Team> getUserTeams(
-		long userId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		long userId) throws com.liferay.portal.kernel.exception.PortalException {
 		return _teamService.getUserTeams(userId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portal.model.Team> getUserTeams(
 		long userId, long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _teamService.getUserTeams(userId, groupId);
 	}
 
 	@Override
 	public boolean hasUserTeam(long userId, long teamId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _teamService.hasUserTeam(userId, teamId);
 	}
 
 	@Override
 	public com.liferay.portal.model.Team updateTeam(long teamId,
 		java.lang.String name, java.lang.String description)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _teamService.updateTeam(teamId, name, description);
 	}
 
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public TeamService getWrappedTeamService() {
 		return _teamService;
 	}
@@ -126,6 +120,7 @@ public class TeamServiceWrapper implements TeamService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedTeamService(TeamService teamService) {
 		_teamService = teamService;
 	}

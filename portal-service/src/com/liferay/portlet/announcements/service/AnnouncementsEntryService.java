@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.announcements.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -34,6 +36,7 @@ import com.liferay.portal.service.BaseService;
  * @see com.liferay.portlet.announcements.service.impl.AnnouncementsEntryServiceImpl
  * @generated
  */
+@ProviderType
 @AccessControlled
 @JSONWebService
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
@@ -67,14 +70,14 @@ public interface AnnouncementsEntryService extends BaseService {
 		int expirationDateMonth, int expirationDateDay, int expirationDateYear,
 		int expirationDateHour, int expirationDateMinute, int priority,
 		boolean alert)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	/**
 	* @deprecated As of 6.2.0, replaced by {@link #addEntry(long, long, long,
 	String, String, String, String, int, int, int, int, int,
 	boolean, int, int, int, int, int, int, boolean)}
 	*/
+	@Deprecated
 	public com.liferay.portlet.announcements.model.AnnouncementsEntry addEntry(
 		long plid, long classNameId, long classPK, java.lang.String title,
 		java.lang.String content, java.lang.String url, java.lang.String type,
@@ -82,26 +85,22 @@ public interface AnnouncementsEntryService extends BaseService {
 		int displayDateHour, int displayDateMinute, int expirationDateMonth,
 		int expirationDateDay, int expirationDateYear, int expirationDateHour,
 		int expirationDateMinute, int priority, boolean alert)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public void deleteEntry(long entryId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public com.liferay.portlet.announcements.model.AnnouncementsEntry getEntry(
 		long entryId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public com.liferay.portlet.announcements.model.AnnouncementsEntry updateEntry(
 		long entryId, java.lang.String title, java.lang.String content,
 		java.lang.String url, java.lang.String type, int displayDateMonth,
 		int displayDateDay, int displayDateYear, int displayDateHour,
-		int displayDateMinute, int expirationDateMonth, int expirationDateDay,
-		int expirationDateYear, int expirationDateHour,
-		int expirationDateMinute, int priority)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
+		int displayDateMinute, boolean displayImmediately,
+		int expirationDateMonth, int expirationDateDay, int expirationDateYear,
+		int expirationDateHour, int expirationDateMinute, int priority)
+		throws com.liferay.portal.kernel.exception.PortalException;
 }

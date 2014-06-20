@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,6 +15,8 @@
 package com.liferay.portal.kernel.util;
 
 import com.liferay.portal.kernel.security.pacl.permission.PortalRuntimePermission;
+
+import java.util.regex.Pattern;
 
 /**
  * @author Julio Camarero
@@ -33,8 +35,19 @@ public class FriendlyURLNormalizerUtil {
 		return getFriendlyURLNormalizer().normalize(friendlyURL);
 	}
 
+	/**
+	 * @deprecated As of 6.2.0, replaced by {@link #normalize(String, Pattern)}
+	 */
+	@Deprecated
 	public static String normalize(String friendlyURL, char[] replaceChars) {
 		return getFriendlyURLNormalizer().normalize(friendlyURL, replaceChars);
+	}
+
+	public static String normalize(
+		String friendlyURL, Pattern friendlyURLPattern) {
+
+		return getFriendlyURLNormalizer().normalize(
+			friendlyURL, friendlyURLPattern);
 	}
 
 	public void setFriendlyURLNormalizer(

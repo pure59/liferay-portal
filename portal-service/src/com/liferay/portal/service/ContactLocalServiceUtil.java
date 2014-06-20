@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.ContactLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class ContactLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -43,11 +46,9 @@ public class ContactLocalServiceUtil {
 	*
 	* @param contact the contact
 	* @return the contact that was added
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Contact addContact(
-		com.liferay.portal.model.Contact contact)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.Contact contact) {
 		return getService().addContact(contact);
 	}
 
@@ -67,11 +68,9 @@ public class ContactLocalServiceUtil {
 	* @param contactId the primary key of the contact
 	* @return the contact that was removed
 	* @throws PortalException if a contact with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Contact deleteContact(long contactId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().deleteContact(contactId);
 	}
 
@@ -80,11 +79,9 @@ public class ContactLocalServiceUtil {
 	*
 	* @param contact the contact
 	* @return the contact that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Contact deleteContact(
-		com.liferay.portal.model.Contact contact)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.Contact contact) {
 		return getService().deleteContact(contact);
 	}
 
@@ -97,12 +94,10 @@ public class ContactLocalServiceUtil {
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@SuppressWarnings("rawtypes")
 	public static java.util.List dynamicQuery(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return getService().dynamicQuery(dynamicQuery);
 	}
 
@@ -117,12 +112,11 @@ public class ContactLocalServiceUtil {
 	* @param start the lower bound of the range of model instances
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @return the range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@SuppressWarnings("rawtypes")
 	public static java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		int end) {
 		return getService().dynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -138,14 +132,12 @@ public class ContactLocalServiceUtil {
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching rows
-	* @throws SystemException if a system exception occurred
 	*/
 	@SuppressWarnings("rawtypes")
 	public static java.util.List dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getService()
 				   .dynamicQuery(dynamicQuery, start, end, orderByComparator);
 	}
@@ -155,11 +147,9 @@ public class ContactLocalServiceUtil {
 	*
 	* @param dynamicQuery the dynamic query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	public static long dynamicQueryCount(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return getService().dynamicQueryCount(dynamicQuery);
 	}
 
@@ -169,17 +159,14 @@ public class ContactLocalServiceUtil {
 	* @param dynamicQuery the dynamic query
 	* @param projection the projection to apply to the query
 	* @return the number of rows that match the dynamic query
-	* @throws SystemException if a system exception occurred
 	*/
 	public static long dynamicQueryCount(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
-		com.liferay.portal.kernel.dao.orm.Projection projection)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.dao.orm.Projection projection) {
 		return getService().dynamicQueryCount(dynamicQuery, projection);
 	}
 
-	public static com.liferay.portal.model.Contact fetchContact(long contactId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static com.liferay.portal.model.Contact fetchContact(long contactId) {
 		return getService().fetchContact(contactId);
 	}
 
@@ -189,18 +176,28 @@ public class ContactLocalServiceUtil {
 	* @param contactId the primary key of the contact
 	* @return the contact
 	* @throws PortalException if a contact with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Contact getContact(long contactId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getContact(contactId);
+	}
+
+	public static com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
+		return getService().getActionableDynamicQuery();
+	}
+
+	/**
+	* @throws PortalException
+	*/
+	public static com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().deletePersistedModel(persistedModel);
 	}
 
 	public static com.liferay.portal.model.PersistedModel getPersistedModel(
 		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getPersistedModel(primaryKeyObj);
 	}
 
@@ -214,11 +211,9 @@ public class ContactLocalServiceUtil {
 	* @param start the lower bound of the range of contacts
 	* @param end the upper bound of the range of contacts (not inclusive)
 	* @return the range of contacts
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portal.model.Contact> getContacts(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return getService().getContacts(start, end);
 	}
 
@@ -226,10 +221,8 @@ public class ContactLocalServiceUtil {
 	* Returns the number of contacts.
 	*
 	* @return the number of contacts
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int getContactsCount()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getContactsCount() {
 		return getService().getContactsCount();
 	}
 
@@ -238,11 +231,9 @@ public class ContactLocalServiceUtil {
 	*
 	* @param contact the contact
 	* @return the contact that was updated
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Contact updateContact(
-		com.liferay.portal.model.Contact contact)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.model.Contact contact) {
 		return getService().updateContact(contact);
 	}
 
@@ -275,8 +266,7 @@ public class ContactLocalServiceUtil {
 		java.lang.String mySpaceSn, java.lang.String skypeSn,
 		java.lang.String twitterSn, java.lang.String ymSn,
 		java.lang.String jobTitle)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addContact(userId, className, classPK, emailAddress,
 			firstName, middleName, lastName, prefixId, suffixId, male,
@@ -287,15 +277,13 @@ public class ContactLocalServiceUtil {
 
 	public static java.util.List<com.liferay.portal.model.Contact> getContacts(
 		long classNameId, long classPK, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getService()
 				   .getContacts(classNameId, classPK, start, end,
 			orderByComparator);
 	}
 
-	public static int getContactsCount(long classNameId, long classPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getContactsCount(long classNameId, long classPK) {
 		return getService().getContactsCount(classNameId, classPK);
 	}
 
@@ -310,8 +298,7 @@ public class ContactLocalServiceUtil {
 		java.lang.String mySpaceSn, java.lang.String skypeSn,
 		java.lang.String twitterSn, java.lang.String ymSn,
 		java.lang.String jobTitle)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateContact(contactId, emailAddress, firstName,
 			middleName, lastName, prefixId, suffixId, male, birthdayMonth,
@@ -333,6 +320,7 @@ public class ContactLocalServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(ContactLocalService service) {
 	}
 

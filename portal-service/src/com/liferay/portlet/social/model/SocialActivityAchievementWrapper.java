@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.social.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see SocialActivityAchievement
  * @generated
  */
+@ProviderType
 public class SocialActivityAchievementWrapper
 	implements SocialActivityAchievement,
 		ModelWrapper<SocialActivityAchievement> {
@@ -212,11 +215,9 @@ public class SocialActivityAchievementWrapper
 	* Returns the user uuid of this social activity achievement.
 	*
 	* @return the user uuid of this social activity achievement
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _socialActivityAchievement.getUserUuid();
 	}
 
@@ -400,8 +401,7 @@ public class SocialActivityAchievementWrapper
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_socialActivityAchievement.persist();
 	}
 
@@ -428,6 +428,7 @@ public class SocialActivityAchievementWrapper
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public SocialActivityAchievement getWrappedSocialActivityAchievement() {
 		return _socialActivityAchievement;
 	}
@@ -435,6 +436,16 @@ public class SocialActivityAchievementWrapper
 	@Override
 	public SocialActivityAchievement getWrappedModel() {
 		return _socialActivityAchievement;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _socialActivityAchievement.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _socialActivityAchievement.isFinderCacheEnabled();
 	}
 
 	@Override

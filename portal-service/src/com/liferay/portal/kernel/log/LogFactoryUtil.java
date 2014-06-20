@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author Brian Wing Shun Chan
  * @author Shuyang Zhou
+ * @author Raymond Augé
  */
 public class LogFactoryUtil {
 
@@ -40,7 +41,12 @@ public class LogFactoryUtil {
 		LogWrapper logWrapper = _logWrappers.get(name);
 
 		if (logWrapper == null) {
-			logWrapper = new LogWrapper(_logFactory.getLog(name));
+			if (SanitizerLogWrapper.isEnabled()) {
+				logWrapper = new SanitizerLogWrapper(_logFactory.getLog(name));
+			}
+			else {
+				logWrapper = new LogWrapper(_logFactory.getLog(name));
+			}
 
 			LogWrapper previousLogWrapper = _logWrappers.putIfAbsent(
 				name, logWrapper);

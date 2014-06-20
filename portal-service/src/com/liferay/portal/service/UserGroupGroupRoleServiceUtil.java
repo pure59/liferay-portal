@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.UserGroupGroupRoleServiceImpl
  * @generated
  */
+@ProviderType
 public class UserGroupGroupRoleServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -58,29 +61,25 @@ public class UserGroupGroupRoleServiceUtil {
 
 	public static void addUserGroupGroupRoles(long userGroupId, long groupId,
 		long[] roleIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().addUserGroupGroupRoles(userGroupId, groupId, roleIds);
 	}
 
 	public static void addUserGroupGroupRoles(long[] userGroupIds,
 		long groupId, long roleId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().addUserGroupGroupRoles(userGroupIds, groupId, roleId);
 	}
 
 	public static void deleteUserGroupGroupRoles(long userGroupId,
 		long groupId, long[] roleIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteUserGroupGroupRoles(userGroupId, groupId, roleIds);
 	}
 
 	public static void deleteUserGroupGroupRoles(long[] userGroupIds,
 		long groupId, long roleId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteUserGroupGroupRoles(userGroupIds, groupId, roleId);
 	}
 
@@ -98,6 +97,7 @@ public class UserGroupGroupRoleServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(UserGroupGroupRoleService service) {
 	}
 

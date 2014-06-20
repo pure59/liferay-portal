@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -222,7 +222,7 @@ public class VerifySQLServer extends VerifyProcess {
 					_log.info("Dropping index " + tableName + "." + indexName);
 				}
 
-				String indexNameUpperCase = indexName.toUpperCase();
+				String indexNameUpperCase = StringUtil.toUpperCase(indexName);
 
 				if (indexNameUpperCase.startsWith("PK")) {
 					String primaryKeyColumnNames = StringUtil.merge(
@@ -299,7 +299,8 @@ public class VerifySQLServer extends VerifyProcess {
 			"'Cyrus%') and (sysobjects.name not like 'QUARTZ%')";
 
 	private static final String _FILTER_NONUNICODE_DATA_TYPES =
-		"((systypes.name = 'varchar') OR (systypes.name = 'text'))";
+		"((systypes.name = 'ntext') OR (systypes.name = 'text') OR " +
+			"(systypes.name = 'varchar'))";
 
 	private static Log _log = LogFactoryUtil.getLog(VerifySQLServer.class);
 

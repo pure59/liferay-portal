@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,9 +16,7 @@ package com.liferay.portal.kernel.resiliency.spi.agent.annotation;
 
 import com.liferay.portal.kernel.test.CodeCoverageAssertor;
 import com.liferay.portal.kernel.test.NewClassLoaderJUnitTestRunner;
-import com.liferay.portal.kernel.util.ReflectionUtil;
-
-import java.lang.reflect.Field;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 
 import java.util.Map;
 
@@ -40,13 +38,19 @@ public class DistributedRegistryTest {
 
 	@Before
 	public void setUp() throws Exception {
-		_exactDirections = _getExactDirections();
-		_postfixDirections = _getPostfixDirections();
-		_prefixDirections = _getPrefixDirections();
+		_exactDirections =
+			(Map<String, Direction>)ReflectionTestUtil.getFieldValue(
+				DistributedRegistry.class, "_exactDirections");
+		_postfixDirections =
+			(Map<String, Direction>)ReflectionTestUtil.getFieldValue(
+				DistributedRegistry.class, "_postfixDirections");
+		_prefixDirections =
+			(Map<String, Direction>)ReflectionTestUtil.getFieldValue(
+				DistributedRegistry.class, "_prefixDirections");
 	}
 
 	@Test
-	public void testClassRegister() {
+	public void testClassRegisterAndUnregister() {
 		DistributedRegistry.registerDistributed(ChildClass.class);
 
 		Assert.assertEquals(3, _exactDirections.size());
@@ -73,6 +77,12 @@ public class DistributedRegistryTest {
 		Assert.assertEquals(
 			Direction.DUPLEX, _prefixDirections.get(ChildClass.name12));
 
+		DistributedRegistry.unregisterDistributed(ChildClass.class);
+
+		Assert.assertTrue(_exactDirections.isEmpty());
+		Assert.assertTrue(_postfixDirections.isEmpty());
+		Assert.assertTrue(_prefixDirections.isEmpty());
+
 		try {
 			DistributedRegistry.registerDistributed(BadInitialization.class);
 
@@ -89,6 +99,11 @@ public class DistributedRegistryTest {
 
 			Assert.assertSame(NullPointerException.class, throwable.getClass());
 		}
+	}
+
+	@Test
+	public void testConstructor() {
+		new DistributedRegistry();
 	}
 
 	@Test
@@ -187,15 +202,36 @@ public class DistributedRegistryTest {
 	}
 
 	@Test
-	public void testIndividualRegister() {
+	public void testIndividualRegisterAndUnregister() {
+
+		// Exact
+
 		DistributedRegistry.registerDistributed(
 			"name1", Direction.REQUEST, MatchType.EXACT);
 
 		Assert.assertEquals(1, _exactDirections.size());
 		Assert.assertTrue(_postfixDirections.isEmpty());
 		Assert.assertTrue(_prefixDirections.isEmpty());
-		Assert.assertEquals(
-			Direction.REQUEST, _exactDirections.remove("name1"));
+		Assert.assertEquals(Direction.REQUEST, _exactDirections.get("name1"));
+		Assert.assertFalse(
+			DistributedRegistry.unregisterDistributed(
+				"Name1", Direction.REQUEST, MatchType.EXACT));
+		Assert.assertTrue(
+			DistributedRegistry.unregisterDistributed(
+				"name1", Direction.REQUEST, MatchType.EXACT));
+		Assert.assertTrue(_exactDirections.isEmpty());
+
+		DistributedRegistry.registerDistributed(
+			"name1", Direction.REQUEST, MatchType.EXACT);
+
+		Assert.assertTrue(
+			DistributedRegistry.unregisterDistributed(
+				"name1", null, MatchType.EXACT));
+		Assert.assertFalse(
+			DistributedRegistry.unregisterDistributed(
+				"name1", null, MatchType.EXACT));
+
+		// Postfix
 
 		DistributedRegistry.registerDistributed(
 			"name2", Direction.RESPONSE, MatchType.POSTFIX);
@@ -204,7 +240,26 @@ public class DistributedRegistryTest {
 		Assert.assertTrue(_exactDirections.isEmpty());
 		Assert.assertTrue(_prefixDirections.isEmpty());
 		Assert.assertEquals(
-			Direction.RESPONSE, _postfixDirections.remove("name2"));
+			Direction.RESPONSE, _postfixDirections.get("name2"));
+		Assert.assertFalse(
+			DistributedRegistry.unregisterDistributed(
+				"Name2", Direction.RESPONSE, MatchType.POSTFIX));
+		Assert.assertTrue(
+			DistributedRegistry.unregisterDistributed(
+				"name2", Direction.RESPONSE, MatchType.POSTFIX));
+		Assert.assertTrue(_postfixDirections.isEmpty());
+
+		DistributedRegistry.registerDistributed(
+			"name2", Direction.RESPONSE, MatchType.POSTFIX);
+
+		Assert.assertTrue(
+			DistributedRegistry.unregisterDistributed(
+				"name2", null, MatchType.POSTFIX));
+		Assert.assertFalse(
+			DistributedRegistry.unregisterDistributed(
+				"name2", null, MatchType.POSTFIX));
+
+		// Prefix
 
 		DistributedRegistry.registerDistributed(
 			"name3", Direction.DUPLEX, MatchType.PREFIX);
@@ -212,35 +267,24 @@ public class DistributedRegistryTest {
 		Assert.assertEquals(1, _prefixDirections.size());
 		Assert.assertTrue(_exactDirections.isEmpty());
 		Assert.assertTrue(_postfixDirections.isEmpty());
-		Assert.assertEquals(
-			Direction.DUPLEX, _prefixDirections.remove("name3"));
-	}
+		Assert.assertEquals(Direction.DUPLEX, _prefixDirections.get("name3"));
+		Assert.assertFalse(
+			DistributedRegistry.unregisterDistributed(
+				"Name3", Direction.DUPLEX, MatchType.PREFIX));
+		Assert.assertTrue(
+			DistributedRegistry.unregisterDistributed(
+				"name3", Direction.DUPLEX, MatchType.PREFIX));
+		Assert.assertTrue(_prefixDirections.isEmpty());
 
-	private static Map<String, Direction> _getExactDirections()
-		throws Exception {
+		DistributedRegistry.registerDistributed(
+			"name3", Direction.DUPLEX, MatchType.PREFIX);
 
-		Field exactDirectionsField = ReflectionUtil.getDeclaredField(
-			DistributedRegistry.class, "_exactDirections");
-
-		return (Map<String, Direction>)exactDirectionsField.get(null);
-	}
-
-	private static Map<String, Direction> _getPostfixDirections()
-		throws Exception {
-
-		Field postfixDirectionsField = ReflectionUtil.getDeclaredField(
-			DistributedRegistry.class, "_postfixDirections");
-
-		return (Map<String, Direction>)postfixDirectionsField.get(null);
-	}
-
-	private static Map<String, Direction> _getPrefixDirections()
-		throws Exception {
-
-		Field prefixDirectionsField = ReflectionUtil.getDeclaredField(
-			DistributedRegistry.class, "_prefixDirections");
-
-		return (Map<String, Direction>)prefixDirectionsField.get(null);
+		Assert.assertTrue(
+			DistributedRegistry.unregisterDistributed(
+				"name3", null, MatchType.PREFIX));
+		Assert.assertFalse(
+			DistributedRegistry.unregisterDistributed(
+				"name3", null, MatchType.PREFIX));
 	}
 
 	private Map<String, Direction> _exactDirections;
@@ -290,7 +334,7 @@ public class DistributedRegistryTest {
 		public static String name9 = "name9";
 	}
 
-	private static interface ParentInterface {
+	private interface ParentInterface {
 
 		@Distributed(direction = Direction.REQUEST, matchType = MatchType.EXACT)
 		public static final String name1 = "name1";

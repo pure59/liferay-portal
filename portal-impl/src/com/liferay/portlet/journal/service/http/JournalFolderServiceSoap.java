@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.journal.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -62,6 +64,7 @@ import java.rmi.RemoteException;
  * @see com.liferay.portlet.journal.service.JournalFolderServiceUtil
  * @generated
  */
+@ProviderType
 public class JournalFolderServiceSoap {
 	public static com.liferay.portlet.journal.model.JournalFolderSoap addFolder(
 		long groupId, long parentFolderId, java.lang.String name,
@@ -290,11 +293,29 @@ public class JournalFolderServiceSoap {
 		}
 	}
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #getSubfolderIds(List, long,
+	long, boolean)}
+	*/
+	@Deprecated
 	public static void getSubfolderIds(Long[] folderIds, long groupId,
 		long folderId) throws RemoteException {
 		try {
 			JournalFolderServiceUtil.getSubfolderIds(ListUtil.toList(folderIds),
 				groupId, folderId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static void getSubfolderIds(Long[] folderIds, long groupId,
+		long folderId, boolean recurse) throws RemoteException {
+		try {
+			JournalFolderServiceUtil.getSubfolderIds(ListUtil.toList(folderIds),
+				groupId, folderId, recurse);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -352,10 +373,12 @@ public class JournalFolderServiceSoap {
 		}
 	}
 
-	public static void moveFolderToTrash(long folderId)
-		throws RemoteException {
+	public static com.liferay.portlet.journal.model.JournalFolderSoap moveFolderToTrash(
+		long folderId) throws RemoteException {
 		try {
-			JournalFolderServiceUtil.moveFolderToTrash(folderId);
+			com.liferay.portlet.journal.model.JournalFolder returnValue = JournalFolderServiceUtil.moveFolderToTrash(folderId);
+
+			return com.liferay.portlet.journal.model.JournalFolderSoap.toSoapModel(returnValue);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -376,6 +399,30 @@ public class JournalFolderServiceSoap {
 		}
 	}
 
+	public static void subscribe(long groupId, long folderId)
+		throws RemoteException {
+		try {
+			JournalFolderServiceUtil.subscribe(groupId, folderId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static void unsubscribe(long groupId, long folderId)
+		throws RemoteException {
+		try {
+			JournalFolderServiceUtil.unsubscribe(groupId, folderId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	public static com.liferay.portlet.journal.model.JournalFolderSoap updateFolder(
 		long folderId, long parentFolderId, java.lang.String name,
 		java.lang.String description, boolean mergeWithParentFolder,
@@ -385,6 +432,26 @@ public class JournalFolderServiceSoap {
 			com.liferay.portlet.journal.model.JournalFolder returnValue = JournalFolderServiceUtil.updateFolder(folderId,
 					parentFolderId, name, description, mergeWithParentFolder,
 					serviceContext);
+
+			return com.liferay.portlet.journal.model.JournalFolderSoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.journal.model.JournalFolderSoap updateFolder(
+		long folderId, long parentFolderId, java.lang.String name,
+		java.lang.String description, long[] ddmStructureIds,
+		int restrictionType, boolean mergeWithParentFolder,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws RemoteException {
+		try {
+			com.liferay.portlet.journal.model.JournalFolder returnValue = JournalFolderServiceUtil.updateFolder(folderId,
+					parentFolderId, name, description, ddmStructureIds,
+					restrictionType, mergeWithParentFolder, serviceContext);
 
 			return com.liferay.portlet.journal.model.JournalFolderSoap.toSoapModel(returnValue);
 		}

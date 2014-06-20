@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -81,17 +81,20 @@ long licenseId = BeanParamUtil.getLong(license, request, "licenseId");
 </tr>
 </table>
 
-<br />
+<div class="btn-toolbar">
+	<aui:button cssClass="btn-primary" type="submit" value="save" />
 
-<input type="submit" value="<liferay-ui:message key="save" />" />
+	<%
+	String taglibCancel = "location.href = '" + HtmlUtil.escape(PortalUtil.escapeRedirect(redirect)) + "';";
+	%>
 
-<input onClick="location.href = '<%= HtmlUtil.escape(PortalUtil.escapeRedirect(redirect)) %>';" type="button" value="<liferay-ui:message key="cancel" />" />
-
+	<aui:button onClick="<%= taglibCancel %>" value="cancel" />
+</div>
 </form>
 
 <aui:script>
 	function <portlet:namespace />saveLicense() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = "<%= (license == null) ? Constants.ADD : Constants.UPDATE %>";
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (license == null) ? Constants.ADD : Constants.UPDATE %>';
 
 		submitForm(document.<portlet:namespace />fm);
 	}
@@ -103,13 +106,13 @@ PortletURL portletURL = renderResponse.createRenderURL();
 portletURL.setParameter("struts_action", "/software_catalog/view");
 portletURL.setParameter("tabs1", "licenses");
 
-PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "licenses"), portletURL.toString());
+PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "licenses"), portletURL.toString());
 
 if (license != null) {
 	PortalUtil.addPortletBreadcrumbEntry(request, license.getName(), null);
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "edit"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "edit"), currentURL);
 }
 else {
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "add-license"), currentURL);
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "add-license"), currentURL);
 }
 %>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -25,6 +25,8 @@ public interface SPIRegistry {
 
 	public void addExcludedPortletId(String portletId);
 
+	public SPI getErrorSPI();
+
 	public Set<String> getExcludedPortletIds();
 
 	public SPI getPortletSPI(String portletId);
@@ -34,6 +36,9 @@ public interface SPIRegistry {
 	public void registerSPI(SPI spi) throws RemoteException;
 
 	public void removeExcludedPortletId(String portletId);
+
+	public void setSPIRegistryValidator(
+		SPIRegistryValidator spiRegistryValidator);
 
 	public void unregisterSPI(SPI spi);
 

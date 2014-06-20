@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -30,14 +31,17 @@ import org.junit.runner.RunWith;
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
 public class SeleniumBuilderContextTest {
 
-	public SeleniumBuilderContextTest() {
-		if (_seleniumBuilderContext == null) {
-			try {
-				_seleniumBuilderContext = new SeleniumBuilderContext(_BASE_DIR);
-			}
-			catch (Exception e) {
-				_log.error(e, e);
-			}
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+		try {
+			_seleniumBuilderFileUtil = new SeleniumBuilderFileUtil(
+				_BASE_DIR, ".");
+
+			_seleniumBuilderContext = new SeleniumBuilderContext(
+				_seleniumBuilderFileUtil, _LIFERAY_SELENIUM_DIR);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
 		}
 	}
 
@@ -337,6 +341,30 @@ public class SeleniumBuilderContextTest {
 	}
 
 	@Test
+	public void testMacroDefinitionElement1006_2() throws Exception {
+		test(
+			"MacroDefinitionElement1006_2.macro",
+			"Error 1006: Invalid extends attribute value in " + _DIR_NAME +
+				"/MacroDefinitionElement1006_2.macro:1");
+	}
+
+	@Test
+	public void testMacroDefinitionElement1006_3() throws Exception {
+		test(
+			"MacroDefinitionElement1006_3.macro",
+			"Error 1006: Invalid extends attribute value in " + _DIR_NAME +
+				"/MacroDefinitionElement1006_3.macro:1");
+	}
+
+	@Test
+	public void testMacroDefinitionElement1006_4() throws Exception {
+		test(
+			"MacroDefinitionElement1006_4.macro",
+			"Error 1006: Invalid extends attribute value in " + _DIR_NAME +
+				"/MacroDefinitionElement1006_4.macro:1");
+	}
+
+	@Test
 	public void testMacroExecuteElement1006_3() throws Exception {
 		test(
 			"MacroExecuteElement1006_3.macro",
@@ -425,6 +453,78 @@ public class SeleniumBuilderContextTest {
 	}
 
 	@Test
+	public void testMacroNotElement1006() throws Exception {
+		test(
+			"MacroNotElement1006.macro",
+			"Error 1006: Invalid action attribute value in " +
+				_DIR_NAME + "/MacroNotElement1006.macro:5");
+	}
+
+	@Test
+	public void testMacroNotElement1010() throws Exception {
+		test(
+			"MacroNotElement1010.macro",
+			"Error 1010: Invalid locator-key PAGE_NAME_X at " + _DIR_NAME +
+				"/MacroNotElement1010.macro:5");
+	}
+
+	@Test
+	public void testMacroVarElement1010() throws Exception {
+		test(
+			"MacroVarElement1010.macro",
+			"Error 1010: Invalid locator-key FAIL at " + _DIR_NAME +
+				"/MacroVarElement1010.macro:2");
+	}
+
+	@Test
+	public void testMacroVarElement1014() throws Exception {
+		test(
+			"MacroVarElement1014.macro",
+			"Error 1014: Invalid path Fail at " + _DIR_NAME +
+				"/MacroVarElement1014.macro:2");
+	}
+
+	@Test
+	public void testPathExtendPath1010_1() throws Exception {
+		test(
+			"PathExtendPath1010_1.action",
+			"Error 1010: Invalid locator-key LOCATOR_KEY at " + _DIR_NAME +
+				"/PathExtendPath1010_1.action:3");
+	}
+
+	@Test
+	public void testPathExtendPath1010_2() throws Exception {
+		test(
+			"PathExtendPath1010_2.action",
+			"Error 1010: Invalid locator-key LOCATOR_ at " + _DIR_NAME +
+				"/PathExtendPath1010_2.action:3");
+	}
+
+	@Test
+	public void testPathExtendPath1012() throws Exception {
+		test(
+			"PathExtendPath1012.action",
+			"Error 1012: Invalid function command Function at " + _DIR_NAME +
+				"/PathExtendPath1012.action:4");
+	}
+
+	@Test
+	public void testPathVariable1010() throws Exception {
+		test(
+			"PathVariable1010.action",
+			"Error 1010: Invalid locator-key LOCATO at " + _DIR_NAME +
+				"/PathVariable1010.action:3");
+	}
+
+	@Test
+	public void testPathVariable1012() throws Exception {
+		test(
+			"PathVariable1012.action",
+			"Error 1012: Invalid function command HELLOWORLD at " + _DIR_NAME +
+				"/PathVariable1012.action:4");
+	}
+
+	@Test
 	public void testTestCase() throws Exception {
 		test("TestCase.testcase");
 	}
@@ -434,7 +534,23 @@ public class SeleniumBuilderContextTest {
 		test(
 			"TestCaseCommandElement1009.testcase",
 			"Error 1009: Duplicate command name name at " + _DIR_NAME +
-				"/TestCaseCommandElement1009.testcase:6");
+				"/TestCaseCommandElement1009.testcase:8");
+	}
+
+	@Test
+	public void testTestCaseDefinitionElement1006_2() throws Exception {
+		test(
+			"TestCaseDefinitionElement1006_2.testcase",
+			"Error 1006: Invalid extends attribute value in " + _DIR_NAME +
+				"/TestCaseDefinitionElement1006_2.testcase:1");
+	}
+
+	@Test
+	public void testTestCaseDefinitionElement1006_3() throws Exception {
+		test(
+			"TestCaseDefinitionElement1006_3.testcase",
+			"Error 1006: Invalid extends attribute value in " + _DIR_NAME +
+				"/TestCaseDefinitionElement1006_3.testcase:1");
 	}
 
 	@Test
@@ -442,7 +558,7 @@ public class SeleniumBuilderContextTest {
 		test(
 			"TestCaseExecuteElement1006_3.testcase",
 			"Error 1006: Invalid action attribute value in " + _DIR_NAME +
-				"/TestCaseExecuteElement1006_3.testcase:3");
+				"/TestCaseExecuteElement1006_3.testcase:5");
 	}
 
 	@Test
@@ -450,7 +566,7 @@ public class SeleniumBuilderContextTest {
 		test(
 			"TestCaseExecuteElement1006_4.testcase",
 			"Error 1006: Invalid action attribute value in " + _DIR_NAME +
-				"/TestCaseExecuteElement1006_4.testcase:3");
+				"/TestCaseExecuteElement1006_4.testcase:5");
 	}
 
 	@Test
@@ -458,7 +574,7 @@ public class SeleniumBuilderContextTest {
 		test(
 			"TestCaseExecuteElement1006_5.testcase",
 			"Error 1006: Invalid macro attribute value in " + _DIR_NAME +
-				"/TestCaseExecuteElement1006_5.testcase:3");
+				"/TestCaseExecuteElement1006_5.testcase:5");
 	}
 
 	@Test
@@ -466,7 +582,7 @@ public class SeleniumBuilderContextTest {
 		test(
 			"TestCaseExecuteElement1006_6.testcase",
 			"Error 1006: Invalid macro attribute value in " + _DIR_NAME +
-				"/TestCaseExecuteElement1006_6.testcase:3");
+				"/TestCaseExecuteElement1006_6.testcase:5");
 	}
 
 	@Test
@@ -474,7 +590,7 @@ public class SeleniumBuilderContextTest {
 		test(
 			"TestCaseExecuteElement1010.testcase",
 			"Error 1010: Invalid locator-key PAGE_NAME_X at " + _DIR_NAME +
-				"/TestCaseExecuteElement1010.testcase:3");
+				"/TestCaseExecuteElement1010.testcase:5");
 	}
 
 	@Test
@@ -482,7 +598,7 @@ public class SeleniumBuilderContextTest {
 		test(
 			"TestCaseExecuteElement1011_1.testcase",
 			"Error 1011: Invalid action name BaseLiferays at " + _DIR_NAME +
-				"/TestCaseExecuteElement1011_1.testcase:3");
+				"/TestCaseExecuteElement1011_1.testcase:5");
 	}
 
 	@Test
@@ -490,7 +606,7 @@ public class SeleniumBuilderContextTest {
 		test(
 			"TestCaseExecuteElement1011_2.testcase",
 			"Error 1011: Invalid macro name BlogsEntrys at " + _DIR_NAME +
-				"/TestCaseExecuteElement1011_2.testcase:3");
+				"/TestCaseExecuteElement1011_2.testcase:5");
 	}
 
 	@Test
@@ -498,7 +614,7 @@ public class SeleniumBuilderContextTest {
 		test(
 			"TestCaseExecuteElement1012_1.testcase",
 			"Error 1012: Invalid action command clicks at " + _DIR_NAME +
-				"/TestCaseExecuteElement1012_1.testcase:3");
+				"/TestCaseExecuteElement1012_1.testcase:5");
 	}
 
 	@Test
@@ -506,7 +622,7 @@ public class SeleniumBuilderContextTest {
 		test(
 			"TestCaseExecuteElement1012_2.testcase",
 			"Error 1012: Invalid macro command pgAdder at " + _DIR_NAME +
-				"/TestCaseExecuteElement1012_2.testcase:3");
+				"/TestCaseExecuteElement1012_2.testcase:5");
 	}
 
 	@Test
@@ -518,33 +634,11 @@ public class SeleniumBuilderContextTest {
 	}
 
 	@Test
-	public void testTestSuite() throws Exception {
-		test("TestSuite.testsuite");
-	}
-
-	@Test
-	public void testTestSuiteExecuteElement1011_1() throws Exception {
+	public void testTestCaseSetUpElement1006_2() throws Exception {
 		test(
-			"TestSuiteExecuteElement1011_1.testsuite",
-			"Error 1011: Invalid test-case name test-case-fail at " +
-				_DIR_NAME + "/TestSuiteExecuteElement1011_1.testsuite:2");
-	}
-
-	@Test
-	public void testTestSuiteExecuteElement1011_2() throws Exception {
-		test(
-			"TestSuiteExecuteElement1011_2.testsuite",
-			"Error 1011: Invalid test-suite name test-suite-fail at " +
-				_DIR_NAME + "/TestSuiteExecuteElement1011_2.testsuite:2");
-	}
-
-	@Test
-	public void testTestSuiteFileName1008() throws Exception {
-		test(
-			"EndUserCollaborationAcceptance.testsuite",
-			"Error 1008: Duplicate file name EndUserCollaborationAcceptance " +
-				"at " + _DIR_NAME +
-				"/EndUserCollaborationAcceptance.testsuite");
+			"TestCaseSetUpElement1006_2.testcase",
+			"Error 1006: Invalid test-case attribute value in " + _DIR_NAME +
+				"/TestCaseSetUpElement1006_2.testcase:5");
 	}
 
 	protected void test(String fileName) throws Exception {
@@ -595,15 +689,20 @@ public class SeleniumBuilderContextTest {
 		}
 	}
 
-	private static final String _BASE_DIR = "./portal-web/test/functional/";
+	private static final String _BASE_DIR =
+		"./portal-impl/test/integration/com/liferay/portal/tools" +
+			"/seleniumbuilder/dependencies/context";
 
-	private static final String _DIR_NAME =
-		"/../../../portal-impl/test/integration/com/liferay/portal/tools/" +
-			"seleniumbuilder/dependencies";
+	private static final String _DIR_NAME = "/..";
+
+	private static final String _LIFERAY_SELENIUM_DIR =
+		"../../../../../../../../../../portal-web/test/functional/com/liferay" +
+			"/portalweb/portal/util/liferayselenium/";
 
 	private static Log _log = LogFactoryUtil.getLog(
 		SeleniumBuilderContextTest.class);
 
 	private static SeleniumBuilderContext _seleniumBuilderContext;
+	private static SeleniumBuilderFileUtil _seleniumBuilderFileUtil;
 
 }

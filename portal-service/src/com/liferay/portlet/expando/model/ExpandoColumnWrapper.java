@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.expando.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see ExpandoColumn
  * @generated
  */
+@ProviderType
 public class ExpandoColumnWrapper implements ExpandoColumn,
 	ModelWrapper<ExpandoColumn> {
 	public ExpandoColumnWrapper(ExpandoColumn expandoColumn) {
@@ -365,8 +368,7 @@ public class ExpandoColumnWrapper implements ExpandoColumn,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_expandoColumn.persist();
 	}
 
@@ -413,6 +415,7 @@ public class ExpandoColumnWrapper implements ExpandoColumn,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public ExpandoColumn getWrappedExpandoColumn() {
 		return _expandoColumn;
 	}
@@ -420,6 +423,16 @@ public class ExpandoColumnWrapper implements ExpandoColumn,
 	@Override
 	public ExpandoColumn getWrappedModel() {
 		return _expandoColumn;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _expandoColumn.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _expandoColumn.isFinderCacheEnabled();
 	}
 
 	@Override

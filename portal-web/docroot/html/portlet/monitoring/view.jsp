@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -28,22 +28,21 @@ portletURL.setParameter("struts_action", "/monitoring/view");
 			title="live-sessions"
 		/>
 
+		<%
+		Map<String, UserTracker> sessionUsers = LiveUsers.getSessionUsers(company.getCompanyId());
+
+		List<UserTracker> userTrackers = new ArrayList<UserTracker>(sessionUsers.values());
+
+		userTrackers = ListUtil.sort(userTrackers, new UserTrackerModifiedDateComparator());
+		%>
+
 		<liferay-ui:search-container
 			emptyResultsMessage="there-are-no-live-sessions"
 			headerNames="session-id,user-id,name,screen-name,last-request,num-of-hits"
+			total="<%= userTrackers.size() %>"
 		>
-
-			<%
-			Map<String, UserTracker> sessionUsers = LiveUsers.getSessionUsers(company.getCompanyId());
-
-			List<UserTracker> userTrackers = new ArrayList<UserTracker>(sessionUsers.values());
-
-			userTrackers = ListUtil.sort(userTrackers, new UserTrackerModifiedDateComparator());
-			%>
-
 			<liferay-ui:search-container-results
 				results="<%= ListUtil.subList(userTrackers, searchContainer.getStart(), searchContainer.getEnd()) %>"
-				total="<%= userTrackers.size() %>"
 			/>
 
 			<liferay-ui:search-container-row
@@ -51,11 +50,6 @@ portletURL.setParameter("struts_action", "/monitoring/view");
 				keyProperty="userTrackerId"
 				modelVar="userTracker"
 			>
-				<portlet:renderURL var="rowURL">
-					<portlet:param name="struts_action" value="/monitoring/edit_session" />
-					<portlet:param name="redirect" value="<%= currentURL %>" />
-					<portlet:param name="sessionId" value="<%= userTracker.getSessionId() %>" />
-				</portlet:renderURL>
 
 				<%
 				User user2 = null;
@@ -66,6 +60,12 @@ portletURL.setParameter("struts_action", "/monitoring/view");
 				catch (NoSuchUserException nsue) {
 				}
 				%>
+
+				<portlet:renderURL var="rowURL">
+					<portlet:param name="struts_action" value="/monitoring/edit_session" />
+					<portlet:param name="redirect" value="<%= currentURL %>" />
+					<portlet:param name="sessionId" value="<%= userTracker.getSessionId() %>" />
+				</portlet:renderURL>
 
 				<liferay-ui:search-container-column-text
 					href="<%= rowURL %>"
@@ -82,13 +82,13 @@ portletURL.setParameter("struts_action", "/monitoring/view");
 				<liferay-ui:search-container-column-text
 					href="<%= rowURL %>"
 					name="user-id"
-					value='<%= ((user2 != null) ? HtmlUtil.escape(user2.getFullName()) : LanguageUtil.get(pageContext, "not-available")) %>'
+					value='<%= ((user2 != null) ? HtmlUtil.escape(user2.getFullName()) : LanguageUtil.get(request, "not-available")) %>'
 				/>
 
 				<liferay-ui:search-container-column-text
 					href="<%= rowURL %>"
 					name="screen-name"
-					value='<%= ((user2 != null) ? user2.getScreenName() : LanguageUtil.get(pageContext, "not-available")) %>'
+					value='<%= ((user2 != null) ? user2.getScreenName() : LanguageUtil.get(request, "not-available")) %>'
 				/>
 
 				<liferay-ui:search-container-column-date
@@ -109,9 +109,9 @@ portletURL.setParameter("struts_action", "/monitoring/view");
 		</liferay-ui:search-container>
 	</c:when>
 	<c:when test="<%= !PropsValues.LIVE_USERS_ENABLED %>">
-		<%= LanguageUtil.format(pageContext, "display-of-live-session-data-is-disabled", PropsKeys.LIVE_USERS_ENABLED) %>
+		<%= LanguageUtil.format(request, "display-of-live-session-data-is-disabled", PropsKeys.LIVE_USERS_ENABLED, false) %>
 	</c:when>
 	<c:otherwise>
-		<%= LanguageUtil.format(pageContext, "display-of-live-session-data-is-disabled", PropsKeys.SESSION_TRACKER_MEMORY_ENABLED) %>
+		<%= LanguageUtil.format(request, "display-of-live-session-data-is-disabled", PropsKeys.SESSION_TRACKER_MEMORY_ENABLED, false) %>
 	</c:otherwise>
 </c:choose>

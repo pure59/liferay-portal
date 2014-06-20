@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -72,11 +72,10 @@ public class UpdateReminderQueryAction extends Action {
 
 				return actionMapping.findForward("portal.error");
 			}
-			else {
-				PortalUtil.sendError(e, request, response);
 
-				return null;
-			}
+			PortalUtil.sendError(e, request, response);
+
+			return null;
 		}
 	}
 
@@ -84,7 +83,8 @@ public class UpdateReminderQueryAction extends Action {
 			HttpServletRequest request, HttpServletResponse response)
 		throws Exception {
 
-		AuthTokenUtil.check(request);
+		AuthTokenUtil.checkCSRFToken(
+			request, UpdateReminderQueryAction.class.getName());
 
 		long userId = PortalUtil.getUserId(request);
 		String question = ParamUtil.getString(request, "reminderQueryQuestion");

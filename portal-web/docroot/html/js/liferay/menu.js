@@ -1,15 +1,17 @@
 AUI.add(
 	'liferay-menu',
 	function(A) {
+		var Browser = Liferay.Browser;
 		var Lang = A.Lang;
+		var Util = Liferay.Util;
 
 		var trim = Lang.trim;
+
+		var ARIA_ATTR_ROLE = 'role';
 
 		var ATTR_CLASS_NAME = 'className';
 
 		var AUTO = 'auto';
-
-		var ARIA_ATTR_ROLE = 'role';
 
 		var CSS_BTN_PRIMARY = 'btn-primary';
 
@@ -72,8 +74,6 @@ AUI.add(
 		var REGEX_MAX_DISPLAY_ITEMS = /max-display-items-(\d+)/;
 
 		var SELECTOR_ANCHOR = 'a';
-
-		var SELECTOR_TEXT = 'a, span';
 
 		var SELECTOR_LIST_ITEM = 'li';
 
@@ -149,7 +149,7 @@ AUI.add(
 						mapAlignHorizontalTrigger = MAP_ALIGN_HORIZONTAL_TRIGGER_RTL;
 					}
 
-					if (cssClass.indexOf(AUTO) == -1) {
+					if (cssClass.indexOf(AUTO) === -1) {
 						var directionMatch = cssClass.match(REGEX_DIRECTION);
 
 						var direction = (directionMatch && directionMatch[1]) || AUTO;
@@ -173,7 +173,27 @@ AUI.add(
 				var overlay = instance._overlay;
 
 				if (!overlay) {
-					overlay = new A.OverlayBase(
+					var MenuOverlay = A.Component.create(
+						{
+							NAME: 'overlay',
+
+							AUGMENTS: [
+								A.WidgetCssClass,
+								A.WidgetPosition,
+								A.WidgetStdMod,
+								A.WidgetModality,
+								A.WidgetPositionAlign,
+								A.WidgetPositionConstrain,
+								A.WidgetStack
+							],
+
+							CSS_PREFIX: 'overlay',
+
+							EXTENDS: A.Widget
+						}
+					);
+
+					overlay = new MenuOverlay(
 						{
 							align: {
 								node: trigger,
@@ -185,8 +205,6 @@ AUI.add(
 							zIndex: Liferay.zIndex.MENU
 						}
 					).render();
-
-					var boundingBox = overlay.get('boundingBox');
 
 					instance._overlay = overlay;
 				}
@@ -201,7 +219,7 @@ AUI.add(
 				var liveSearch = menu && MAP_LIVE_SEARCH[menu.guid()];
 
 				if (liveSearch) {
-					liveSearch.search(STR_BLANK);
+					liveSearch.reset();
 				}
 
 				var listItems;
@@ -224,11 +242,39 @@ AUI.add(
 
 					instance._setARIARoles(trigger, menu, listContainer);
 
-					Liferay.Util.createFlyouts(
+					Util.createFlyouts(
 						{
 							container: listContainer.getDOM()
 						}
 					);
+
+					if (trigger.hasClass('select')) {
+						listContainer.delegate(
+							'click',
+							function(event) {
+								var selectedListItem = event.currentTarget;
+
+								var selectedListItemIcon = selectedListItem.one('i');
+
+								var triggerIcon = trigger.one('i');
+
+								if (selectedListItemIcon && triggerIcon) {
+									var selectedListItemIconClass = selectedListItemIcon.attr('class');
+
+									triggerIcon.attr('class', selectedListItemIconClass);
+								}
+
+								var selectedListItemMessage = selectedListItem.one('.lfr-icon-menu-text');
+
+								var triggerMessage = trigger.one('.lfr-icon-menu-text');
+
+								if (selectedListItemMessage && triggerMessage) {
+									triggerMessage.setContent(selectedListItemMessage.text());
+								}
+							},
+							SELECTOR_LIST_ITEM
+						);
+					}
 				}
 
 				overlay.setStdModContent(A.WidgetStdMod.BODY, menu);
@@ -238,7 +284,7 @@ AUI.add(
 
 					trigger.setData('menuHeight', menuHeight);
 
-					if (menuHeight != AUTO) {
+					if (menuHeight !== AUTO) {
 						listContainer.setStyle('maxHeight', menuHeight);
 					}
 				}
@@ -255,7 +301,7 @@ AUI.add(
 
 				var height = AUTO;
 
-				if (cssClass.indexOf('lfr-menu-expanded') == -1) {
+				if (cssClass.indexOf('lfr-menu-expanded') === -1) {
 					var params = REGEX_MAX_DISPLAY_ITEMS.exec(cssClass);
 
 					var maxDisplayItems = params && parseInt(params[1], 10);
@@ -287,15 +333,42 @@ AUI.add(
 
 					var overlay = instance._overlay;
 
-					var align = overlay.get('align');
+					if (Util.isPhone() || Util.isTablet()) {
+						overlay.hide();
 
-					align.points = instance._getAlignPoints(cssClass);
+						overlay.setAttrs(
+							{
+								align: null,
+								centered: true,
+								modal: true,
+								width: '90%'
+							}
+						);
+					}
+					else {
+						var align = overlay.get('align');
+
+						align.points = instance._getAlignPoints(cssClass);
+
+						overlay.setAttrs(
+							{
+								align: align,
+								centered: false,
+								modal: false,
+								width: 'auto'
+							}
+						);
+
+						var focusManager = overlay.bodyNode.focusManager;
+
+						if (focusManager) {
+							focusManager.focus(0);
+						}
+					}
 
 					overlay.show();
 
-					overlay.set('align', align);
-
-					if (Liferay.Browser.isIe() && Liferay.Browser.getMajorVersion() <= 7) {
+					if (Browser.isIe() && Browser.getMajorVersion() <= 7) {
 						var searchContainer = menu.one(SELECTOR_SEARCH_CONTAINER);
 
 						if (searchContainer) {
@@ -310,12 +383,6 @@ AUI.add(
 					}
 					else {
 						trigger.get(PARENT_NODE).addClass(CSS_OPEN);
-					}
-
-					var focusManager = overlay.bodyNode.focusManager;
-
-					if (focusManager) {
-						focusManager.focus(0);
 					}
 				}
 			},
@@ -469,61 +536,46 @@ AUI.add(
 			Menu,
 			'_getLiveSearch',
 			function(trigger, menu) {
-				var instance = Menu._INSTANCE;
+				var instance = this;
 
 				var id = menu.guid();
 
 				var liveSearch = MAP_LIVE_SEARCH[id];
 
 				if (!liveSearch) {
-					var searchId = A.guid();
-
 					var listNode = menu.one('ul');
 
-					var searchLabelNode = trigger.one(SELECTOR_ANCHOR) || trigger;
+					var results = [];
 
-					var searchBoxContent = Lang.sub(
-						TPL_SEARCH_BOX,
+					listNode.all('li').each(
+						function(node) {
+							results.push(
+								{
+									name: trim(node.one('.taglib-text-icon').text()),
+									node: node
+								}
+							);
+						}
+					);
+
+					liveSearch = new Liferay.MenuFilter(
 						{
-							searchId: searchId,
-							searchLabeledBy: searchLabelNode.guid(),
-							searchOwns: listNode.guid()
+							content: listNode,
+							minQueryLength: 0,
+							queryDelay: 0,
+							resultFilters: 'phraseMatch',
+							resultTextLocator: 'name',
+							source: results
 						}
 					);
 
-					var inputSearch = A.Node.create(searchBoxContent);
-
-					inputSearch.swallowEvent('click');
-
-					menu.prepend(inputSearch);
-
-					var options = {
-						data: function(node) {
-							return trim(node.one(SELECTOR_TEXT).text());
-						},
-						input: '#' + searchId,
-						nodes: '#' + listNode.guid() + ' > li'
-					};
-
-					liveSearch = new A.LiveSearch(options);
-
-					var bodyNode = instance._overlay.bodyNode;
-
-					liveSearch.after(
-						'search',
-						function(event) {
-							var focusManager = bodyNode.focusManager;
-
-							if (focusManager) {
-								focusManager.refresh();
-							}
-						}
-					);
+					liveSearch.get('inputNode').swallowEvent('click');
 
 					MAP_LIVE_SEARCH[id] = liveSearch;
 				}
+
 			},
-			['aui-live-search-deprecated'],
+			['liferay-menu-filter'],
 			true
 		);
 
@@ -552,9 +604,22 @@ AUI.add(
 					instance._activeTrigger = trigger;
 
 					if (!handles.length) {
+						var listContainer = trigger.getData('menuListContainer');
+
+						A.Event.defineOutside('touchend');
+
 						handles.push(
 							A.getWin().on('resize', A.debounce(instance._positionActiveMenu, 200, instance)),
-							A.getDoc().on(EVENT_CLICK, instance._closeActiveMenu, instance)
+							A.getDoc().on(EVENT_CLICK, instance._closeActiveMenu, instance),
+							listContainer.on(
+								'touchendoutside',
+								function(event) {
+									event.preventDefault();
+
+									instance._closeActiveMenu();
+								},
+								instance
+							)
 						);
 
 						var DDM = A.DD && A.DD.DDM;
@@ -569,7 +634,7 @@ AUI.add(
 					event.halt();
 				}
 			},
-			['aui-overlay-deprecated']
+			['aui-widget-cssclass', 'event-outside', 'event-touch', 'widget', 'widget-modality', 'widget-position', 'widget-position-align', 'widget-position-constrain', 'widget-stack', 'widget-stdmod']
 		);
 
 		Liferay.Menu = Menu;

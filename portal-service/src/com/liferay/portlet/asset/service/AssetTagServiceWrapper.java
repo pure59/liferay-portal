@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.asset.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see AssetTagService
  * @generated
  */
+@ProviderType
 public class AssetTagServiceWrapper implements AssetTagService,
 	ServiceWrapper<AssetTagService> {
 	public AssetTagServiceWrapper(AssetTagService assetTagService) {
@@ -53,57 +56,49 @@ public class AssetTagServiceWrapper implements AssetTagService,
 	public com.liferay.portlet.asset.model.AssetTag addTag(
 		java.lang.String name, java.lang.String[] tagProperties,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _assetTagService.addTag(name, tagProperties, serviceContext);
 	}
 
 	@Override
 	public void deleteTag(long tagId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_assetTagService.deleteTag(tagId);
 	}
 
 	@Override
 	public void deleteTags(long[] tagIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_assetTagService.deleteTags(tagIds);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.asset.model.AssetTag> getGroupsTags(
-		long[] groupIds)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long[] groupIds) {
 		return _assetTagService.getGroupsTags(groupIds);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.asset.model.AssetTag> getGroupTags(
-		long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId) {
 		return _assetTagService.getGroupTags(groupId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.asset.model.AssetTag> getGroupTags(
 		long groupId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator obc)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator obc) {
 		return _assetTagService.getGroupTags(groupId, start, end, obc);
 	}
 
 	@Override
-	public int getGroupTagsCount(long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getGroupTagsCount(long groupId) {
 		return _assetTagService.getGroupTagsCount(groupId);
 	}
 
 	@Override
 	public com.liferay.portlet.asset.model.AssetTagDisplay getGroupTagsDisplay(
-		long groupId, java.lang.String name, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, java.lang.String name, int start, int end) {
 		return _assetTagService.getGroupTagsDisplay(groupId, name, start, end);
 	}
 
@@ -111,33 +106,30 @@ public class AssetTagServiceWrapper implements AssetTagService,
 	* @deprecated As of 6.2.0, replaced by {@link #getGroupTagsDisplay(long,
 	String, int, int)}
 	*/
+	@Deprecated
 	@Override
 	public com.liferay.portal.kernel.json.JSONObject getJSONGroupTags(
 		long groupId, java.lang.String name, int start, int end)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _assetTagService.getJSONGroupTags(groupId, name, start, end);
 	}
 
 	@Override
 	public com.liferay.portlet.asset.model.AssetTag getTag(long tagId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _assetTagService.getTag(tagId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.asset.model.AssetTag> getTags(
-		long groupId, long classNameId, java.lang.String name)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long classNameId, java.lang.String name) {
 		return _assetTagService.getTags(groupId, classNameId, name);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.asset.model.AssetTag> getTags(
 		long groupId, long classNameId, java.lang.String name, int start,
-		int end, com.liferay.portal.kernel.util.OrderByComparator obc)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int end, com.liferay.portal.kernel.util.OrderByComparator obc) {
 		return _assetTagService.getTags(groupId, classNameId, name, start, end,
 			obc);
 	}
@@ -145,16 +137,14 @@ public class AssetTagServiceWrapper implements AssetTagService,
 	@Override
 	public java.util.List<com.liferay.portlet.asset.model.AssetTag> getTags(
 		long groupId, java.lang.String name, java.lang.String[] tagProperties,
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return _assetTagService.getTags(groupId, name, tagProperties, start, end);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.asset.model.AssetTag> getTags(
 		long[] groupIds, java.lang.String name,
-		java.lang.String[] tagProperties, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String[] tagProperties, int start, int end) {
 		return _assetTagService.getTags(groupIds, name, tagProperties, start,
 			end);
 	}
@@ -162,58 +152,52 @@ public class AssetTagServiceWrapper implements AssetTagService,
 	@Override
 	public java.util.List<com.liferay.portlet.asset.model.AssetTag> getTags(
 		java.lang.String className, long classPK)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _assetTagService.getTags(className, classPK);
 	}
 
 	@Override
 	public int getTagsCount(long groupId, long classNameId,
-		java.lang.String name)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String name) {
 		return _assetTagService.getTagsCount(groupId, classNameId, name);
 	}
 
 	@Override
-	public int getTagsCount(long groupId, java.lang.String name)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getTagsCount(long groupId, java.lang.String name) {
 		return _assetTagService.getTagsCount(groupId, name);
 	}
 
 	@Override
 	public int getTagsCount(long groupId, java.lang.String name,
-		java.lang.String[] tagProperties)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String[] tagProperties) {
 		return _assetTagService.getTagsCount(groupId, name, tagProperties);
 	}
 
 	@Override
 	public void mergeTags(long fromTagId, long toTagId,
 		boolean overrideProperties)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_assetTagService.mergeTags(fromTagId, toTagId, overrideProperties);
 	}
 
 	@Override
 	public void mergeTags(long[] fromTagIds, long toTagId,
 		boolean overrideProperties)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_assetTagService.mergeTags(fromTagIds, toTagId, overrideProperties);
 	}
 
 	@Override
 	public com.liferay.portal.kernel.json.JSONArray search(long groupId,
 		java.lang.String name, java.lang.String[] tagProperties, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		int end) {
 		return _assetTagService.search(groupId, name, tagProperties, start, end);
 	}
 
 	@Override
 	public com.liferay.portal.kernel.json.JSONArray search(long[] groupIds,
 		java.lang.String name, java.lang.String[] tagProperties, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		int end) {
 		return _assetTagService.search(groupIds, name, tagProperties, start, end);
 	}
 
@@ -221,8 +205,7 @@ public class AssetTagServiceWrapper implements AssetTagService,
 	public com.liferay.portlet.asset.model.AssetTag updateTag(long tagId,
 		java.lang.String name, java.lang.String[] tagProperties,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _assetTagService.updateTag(tagId, name, tagProperties,
 			serviceContext);
 	}
@@ -230,6 +213,7 @@ public class AssetTagServiceWrapper implements AssetTagService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public AssetTagService getWrappedAssetTagService() {
 		return _assetTagService;
 	}
@@ -237,6 +221,7 @@ public class AssetTagServiceWrapper implements AssetTagService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedAssetTagService(AssetTagService assetTagService) {
 		_assetTagService = assetTagService;
 	}

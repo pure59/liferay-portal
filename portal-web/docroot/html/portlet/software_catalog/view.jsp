@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -90,7 +90,7 @@ portletURL.setParameter("tabs1", tabs1);
 		orderableHeaders.put("type", "type");
 		orderableHeaders.put("modified-date", "modified-date");
 
-		SearchContainer searchContainer = new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, portletURL, headerNames, LanguageUtil.get(pageContext, "no-products-were-found"));
+		SearchContainer searchContainer = new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, portletURL, headerNames, LanguageUtil.get(request, "no-products-were-found"));
 
 		searchContainer.setOrderableHeaders(orderableHeaders);
 		searchContainer.setOrderByCol(orderByCol);
@@ -191,16 +191,16 @@ portletURL.setParameter("tabs1", tabs1);
 				row.addText(latestProductVersion.getVersion(), rowURL);
 			}
 			else {
-				row.addText(LanguageUtil.get(pageContext, "not-available"), rowURL);
+				row.addText(LanguageUtil.get(request, "not-available"), rowURL);
 			}
 
 			// Type
 
-			row.addText(LanguageUtil.get(pageContext, productEntry.getType()), rowURL);
+			row.addText(LanguageUtil.get(request, productEntry.getType()), rowURL);
 
 			// Tags
 
-			row.addText(LanguageUtil.get(pageContext, productEntry.getTags()), rowURL);
+			row.addText(LanguageUtil.get(request, productEntry.getTags()), rowURL);
 
 			// Licenses
 
@@ -230,7 +230,7 @@ portletURL.setParameter("tabs1", tabs1);
 
 			// Action
 
-			row.addJSP("right", SearchEntry.DEFAULT_VALIGN, "/html/portlet/software_catalog/product_entry_action.jsp");
+			row.addJSP("/html/portlet/software_catalog/product_entry_action.jsp", "entry-action");
 
 			// Add result row
 
@@ -261,15 +261,18 @@ portletURL.setParameter("tabs1", tabs1);
 
 			</select>
 
-			<input type="submit" value="<liferay-ui:message key="search" />" />
+			<aui:button type="submit" value="search" />
 		</div>
 
-		<br />
-
 		<c:if test="<%= showAddProductEntryButton && showPermissionsButton %>">
-			<div>
+			<div class="btn-toolbar">
 				<c:if test="<%= showAddProductEntryButton %>">
-					<input onClick="<portlet:namespace />addProduct();" type="button" value="<liferay-ui:message key="add-product" />" />
+
+					<%
+					String taglibAddProduct = renderResponse.getNamespace() + "addProduct();";
+					%>
+
+					<aui:button onClick="<%= taglibAddProduct %>" value="add-product" />
 				</c:if>
 
 				<c:if test="<%= showPermissionsButton %>">
@@ -280,11 +283,13 @@ portletURL.setParameter("tabs1", tabs1);
 						var="permissionsURL"
 					/>
 
-					<input onClick="location.href = '<%= permissionsURL %>';" type="button" value="<liferay-ui:message key="permissions" />" />
+					<%
+					String taglibPermissions = "location.href = '" + permissionsURL + "';";
+					%>
+
+					<aui:button onClick="<%= taglibPermissions %>" value="permissions" />
 				</c:if>
 			</div>
-
-			<br />
 		</c:if>
 
 		<liferay-ui:search-iterator searchContainer="<%= searchContainer %>" />
@@ -328,23 +333,21 @@ portletURL.setParameter("tabs1", tabs1);
 		searchContainer.setOrderByCol(orderByCol);
 		searchContainer.setOrderByType(orderByType);
 
+		List results = null;
 		int total = 0;
 
 		if (tabs1.equals("products")) {
 			total = SCProductEntryLocalServiceUtil.getProductEntriesCount(scopeGroupId);
-		}
-		else {
-			total = SCProductEntryLocalServiceUtil.getProductEntriesCount(scopeGroupId, user.getUserId());
-		}
 
-		searchContainer.setTotal(total);
+			searchContainer.setTotal(total);
 
-		List results = null;
-
-		if (tabs1.equals("products")) {
 			results = SCProductEntryLocalServiceUtil.getProductEntries(scopeGroupId, searchContainer.getStart(), searchContainer.getEnd(), orderByComparator);
 		}
 		else {
+			total = SCProductEntryLocalServiceUtil.getProductEntriesCount(scopeGroupId, user.getUserId());
+
+			searchContainer.setTotal(total);
+
 			results = SCProductEntryLocalServiceUtil.getProductEntries(scopeGroupId, user.getUserId(), searchContainer.getStart(), searchContainer.getEnd(), orderByComparator);
 		}
 
@@ -394,16 +397,16 @@ portletURL.setParameter("tabs1", tabs1);
 				row.addText(latestProductVersion.getVersion(), rowURL);
 			}
 			else {
-				row.addText(LanguageUtil.get(pageContext, "not-available"), rowURL);
+				row.addText(LanguageUtil.get(request, "not-available"), rowURL);
 			}
 
 			// Type
 
-			row.addText(LanguageUtil.get(pageContext, productEntry.getType()), rowURL);
+			row.addText(LanguageUtil.get(request, productEntry.getType()), rowURL);
 
 			// Tags
 
-			row.addText(LanguageUtil.get(pageContext, productEntry.getTags()), rowURL);
+			row.addText(LanguageUtil.get(request, productEntry.getTags()), rowURL);
 
 			// Licenses
 
@@ -433,7 +436,7 @@ portletURL.setParameter("tabs1", tabs1);
 
 			// Action
 
-			row.addJSP("right", SearchEntry.DEFAULT_VALIGN, "/html/portlet/software_catalog/product_entry_action.jsp");
+			row.addJSP("/html/portlet/software_catalog/product_entry_action.jsp", "entry-action");
 
 			// Add result row
 
@@ -444,11 +447,18 @@ portletURL.setParameter("tabs1", tabs1);
 		%>
 
 		<c:if test="<%= showAddProductEntryButton %>">
-			<div>
-				<input onClick="location.href = '<portlet:renderURL><portlet:param name="struts_action" value="/software_catalog/edit_product_entry" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:renderURL>';" type="button" value="<liferay-ui:message key="add-product" />" />
-			</div>
+			<div class="btn-toolbar">
+				<portlet:renderURL var="addProductURL">
+					<portlet:param name="struts_action" value="/software_catalog/edit_product_entry" />
+					<portlet:param name="redirect" value="<%= currentURL %>" />
+				</portlet:renderURL>
 
-			<br />
+				<%
+				String taglibAddProduct = "location.href = '" + addProductURL + "';";
+				%>
+
+				<aui:button onClick="<%= taglibAddProduct %>" value="add-product" />
+			</div>
 		</c:if>
 
 		<liferay-ui:search-iterator searchContainer="<%= searchContainer %>" />
@@ -507,13 +517,13 @@ portletURL.setParameter("tabs1", tabs1);
 
 			rowTextEntry = (TextSearchEntry)rowTextEntry.clone();
 
-			rowTextEntry.setName(LanguageUtil.get(pageContext,frameworkVersion.isActive() ? "yes" : "no"));
+			rowTextEntry.setName(LanguageUtil.get(request,frameworkVersion.isActive() ? "yes" : "no"));
 
 			row.addText(rowTextEntry);
 
 			// Action
 
-			row.addJSP("right", SearchEntry.DEFAULT_VALIGN, "/html/portlet/software_catalog/framework_version_action.jsp");
+			row.addJSP("/html/portlet/software_catalog/framework_version_action.jsp", "entry-action");
 
 			// Add result row
 
@@ -527,9 +537,18 @@ portletURL.setParameter("tabs1", tabs1);
 		%>
 
 		<c:if test="<%= showAddFrameworkVersionButton || showPermissionsButton %>">
-			<div>
+			<div class="btn-toolbar">
 				<c:if test="<%= showAddFrameworkVersionButton %>">
-					<input onClick="location.href = '<portlet:renderURL><portlet:param name="struts_action" value="/software_catalog/edit_framework_version" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:renderURL>';" type="button" value="<liferay-ui:message key="add-framework-version" />" />
+					<portlet:renderURL var="addFrameworkURL">
+						<portlet:param name="struts_action" value="/software_catalog/edit_framework_version" />
+						<portlet:param name="redirect" value="<%= currentURL %>" />
+					</portlet:renderURL>
+
+					<%
+					String taglibAddFramework = "location.href = '" + addFrameworkURL + "';";
+					%>
+
+					<aui:button onClick="<%= taglibAddFramework %>" value="add-framework-version" />
 				</c:if>
 
 				<c:if test="<%= showPermissionsButton %>">
@@ -540,11 +559,13 @@ portletURL.setParameter("tabs1", tabs1);
 						var="permissionsURL"
 					/>
 
-					<input onClick="location.href = '<%= permissionsURL %>';" type="button" value="<liferay-ui:message key="permissions" />" />
+					<%
+					String taglibPermissions = "location.href = '" + permissionsURL + "';";
+					%>
+
+					<aui:button onClick="<%= taglibPermissions %>" value="permissions" />
 				</c:if>
 			</div>
-
-			<br />
 		</c:if>
 
 		<liferay-ui:search-iterator searchContainer="<%= searchContainer %>" />
@@ -605,7 +626,7 @@ portletURL.setParameter("tabs1", tabs1);
 
 			rowTextEntry = (TextSearchEntry)rowTextEntry.clone();
 
-			rowTextEntry.setName(LanguageUtil.get(pageContext, license.isOpenSource() ? "yes" : "no"));
+			rowTextEntry.setName(LanguageUtil.get(request, license.isOpenSource() ? "yes" : "no"));
 
 			row.addText(rowTextEntry);
 
@@ -613,7 +634,7 @@ portletURL.setParameter("tabs1", tabs1);
 
 			rowTextEntry = (TextSearchEntry)rowTextEntry.clone();
 
-			rowTextEntry.setName(LanguageUtil.get(pageContext, license.isActive() ? "yes" : "no"));
+			rowTextEntry.setName(LanguageUtil.get(request, license.isActive() ? "yes" : "no"));
 
 			row.addText(rowTextEntry);
 
@@ -621,13 +642,13 @@ portletURL.setParameter("tabs1", tabs1);
 
 			rowTextEntry = (TextSearchEntry)rowTextEntry.clone();
 
-			rowTextEntry.setName(LanguageUtil.get(pageContext, license.isRecommended() ? "yes" : "no"));
+			rowTextEntry.setName(LanguageUtil.get(request, license.isRecommended() ? "yes" : "no"));
 
 			row.addText(rowTextEntry);
 
 			// Action
 
-			row.addJSP("right", SearchEntry.DEFAULT_VALIGN, "/html/portlet/software_catalog/license_action.jsp");
+			row.addJSP("/html/portlet/software_catalog/license_action.jsp", "entry-action");
 
 			// Add result row
 
@@ -636,11 +657,18 @@ portletURL.setParameter("tabs1", tabs1);
 		%>
 
 		<c:if test="<%= hasAddLicensePermission %>">
-			<div>
-				<input onClick="location.href = '<portlet:renderURL><portlet:param name="struts_action" value="/software_catalog/edit_license" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:renderURL>';" type="button" value="<liferay-ui:message key="add-license" />" />
-			</div>
+			<div class="btn-toolbar">
+				<portlet:renderURL var="addLicenseURL">
+					<portlet:param name="struts_action" value="/software_catalog/edit_license" />
+					<portlet:param name="redirect" value="<%= currentURL %>" />
+				</portlet:renderURL>
 
-			<br />
+				<%
+				String taglibAddLicense = "location.href = '" + addLicenseURL + "';";
+				%>
+
+				<aui:button onClick="<%= taglibAddLicense %>" value="add-license" />
+			</div>
 		</c:if>
 
 		<liferay-ui:search-iterator searchContainer="<%= searchContainer %>" />
@@ -669,8 +697,8 @@ portletURL.setParameter("tabs1", tabs1);
 
 <%
 if (!tabs1.equals("products")) {
-	PortalUtil.setPageSubtitle(LanguageUtil.get(pageContext, StringUtil.replace(tabs1, StringPool.UNDERLINE, StringPool.DASH)), request);
+	PortalUtil.setPageSubtitle(LanguageUtil.get(request, StringUtil.replace(tabs1, StringPool.UNDERLINE, StringPool.DASH)), request);
 
-	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, TextFormatter.format(tabs1, TextFormatter.O)), portletURL.toString());
+	PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, TextFormatter.format(tabs1, TextFormatter.O)), portletURL.toString());
 }
 %>

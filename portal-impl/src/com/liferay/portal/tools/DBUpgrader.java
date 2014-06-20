@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -36,6 +36,7 @@ import com.liferay.portal.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.service.ReleaseLocalServiceUtil;
 import com.liferay.portal.service.ResourceActionLocalServiceUtil;
 import com.liferay.portal.spring.aop.ServiceBeanAopCacheManager;
+import com.liferay.portal.spring.aop.ServiceBeanAopCacheManagerUtil;
 import com.liferay.portal.util.InitUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
@@ -68,7 +69,7 @@ public class DBUpgrader {
 
 			stopWatch.start();
 
-			InitUtil.initWithSpring();
+			InitUtil.initWithSpringAndModuleFramework();
 
 			upgrade();
 			verify();
@@ -120,11 +121,6 @@ public class DBUpgrader {
 			throw new RuntimeException(msg);
 		}
 
-		// Reload SQL
-
-		CustomSQLUtil.reloadCustomSQL();
-		SQLTransformer.reloadSQLTransformer();
-
 		// Upgrade
 
 		if (_log.isDebugEnabled()) {
@@ -151,6 +147,11 @@ public class DBUpgrader {
 				_enableTransactions();
 			}
 		}
+
+		// Reload SQL
+
+		CustomSQLUtil.reloadCustomSQL();
+		SQLTransformer.reloadSQLTransformer();
 
 		// Update company key
 
@@ -229,8 +230,15 @@ public class DBUpgrader {
 			_disableTransactions();
 		}
 
+		boolean newBuildNumber = false;
+
+		if (ReleaseInfo.getBuildNumber() > release.getBuildNumber()) {
+			newBuildNumber = true;
+		}
+
 		try {
-			StartupHelperUtil.verifyProcess(release.isVerified());
+			StartupHelperUtil.verifyProcess(
+				newBuildNumber, release.isVerified());
 		}
 		catch (Exception e) {
 			_updateReleaseState(ReleaseConstants.STATE_VERIFY_FAILURE);
@@ -360,6 +368,8 @@ public class DBUpgrader {
 
 		field.set(
 			null, new ConcurrentHashMap<MethodInvocation, Annotation[]>());
+
+		ServiceBeanAopCacheManagerUtil.reset();
 	}
 
 	private static int _getReleaseState() throws Exception {

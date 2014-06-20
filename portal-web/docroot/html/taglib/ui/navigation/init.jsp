@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,7 +17,7 @@
 <%@ include file="/html/taglib/init.jsp" %>
 
 <%
-String bulletStyle = ((String)request.getAttribute("liferay-ui:navigation:bulletStyle")).toLowerCase();
+String bulletStyle = StringUtil.toLowerCase(((String)request.getAttribute("liferay-ui:navigation:bulletStyle")));
 String displayStyle = (String)request.getAttribute("liferay-ui:navigation:displayStyle");
 boolean preview = GetterUtil.getBoolean((String)request.getAttribute("liferay-ui:navigation:preview"));
 

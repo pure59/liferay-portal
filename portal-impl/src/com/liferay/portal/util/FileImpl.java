@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -66,6 +66,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.tika.Tika;
+import org.apache.tika.exception.TikaException;
 import org.apache.tools.ant.DirectoryScanner;
 
 import org.mozilla.intl.chardet.nsDetector;
@@ -205,18 +206,33 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 	}
 
 	@Override
+	public File createTempFile(String prefix, String extension) {
+		return new File(createTempFileName(prefix, extension));
+	}
+
+	@Override
 	public String createTempFileName() {
-		return createTempFileName(null);
+		return createTempFileName(null, null);
 	}
 
 	@Override
 	public String createTempFileName(String extension) {
-		StringBundler sb = new StringBundler();
+		return createTempFileName(null, extension);
+	}
+
+	@Override
+	public String createTempFileName(String prefix, String extension) {
+		StringBundler sb = new StringBundler(7);
 
 		sb.append(SystemProperties.get(SystemProperties.TMP_DIR));
 		sb.append(StringPool.SLASH);
+
+		if (Validator.isNotNull(prefix)) {
+			sb.append(prefix);
+		}
+
 		sb.append(Time.getTimestamp());
-		sb.append(PwdGenerator.getPassword(PwdGenerator.KEY2, 8));
+		sb.append(PwdGenerator.getPassword(8, PwdGenerator.KEY2));
 
 		if (Validator.isFileExtension(extension)) {
 			sb.append(StringPool.PERIOD);
@@ -345,6 +361,7 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 
 			if (forkProcess) {
 				Future<String> future = ProcessExecutor.execute(
+					ClassPathUtil.getGlobalClassPath(),
 					ClassPathUtil.getPortalClassPath(),
 					new ExtractTextProcessCallable(getBytes(is)));
 
@@ -365,6 +382,11 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 					_log.warn(
 						"Unable to extract text from an encrypted file " +
 							fileName);
+				}
+			}
+			else if (e instanceof TikaException) {
+				if (_log.isWarnEnabled()) {
+					_log.warn("Unable to extract text from " + fileName);
 				}
 			}
 			else {
@@ -440,6 +462,11 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 	}
 
 	@Override
+	public byte[] getBytes(Class<?> clazz, String fileName) throws IOException {
+		return getBytes(clazz.getResourceAsStream(fileName));
+	}
+
+	@Override
 	public byte[] getBytes(File file) throws IOException {
 		if ((file == null) || !file.exists()) {
 			return null;
@@ -496,7 +523,8 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 		int pos = fileName.lastIndexOf(CharPool.PERIOD);
 
 		if (pos > 0) {
-			return fileName.substring(pos + 1, fileName.length()).toLowerCase();
+			return StringUtil.toLowerCase(
+				fileName.substring(pos + 1, fileName.length()));
 		}
 		else {
 			return StringPool.BLANK;

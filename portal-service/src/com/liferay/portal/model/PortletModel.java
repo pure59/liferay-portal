@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.AutoEscape;
 import com.liferay.portal.service.ServiceContext;
@@ -34,7 +36,8 @@ import java.io.Serializable;
  * @see com.liferay.portal.model.impl.PortletModelImpl
  * @generated
  */
-public interface PortletModel extends BaseModel<Portlet> {
+@ProviderType
+public interface PortletModel extends BaseModel<Portlet>, MVCCModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -54,6 +57,22 @@ public interface PortletModel extends BaseModel<Portlet> {
 	 * @param primaryKey the primary key of this portlet
 	 */
 	public void setPrimaryKey(long primaryKey);
+
+	/**
+	 * Returns the mvcc version of this portlet.
+	 *
+	 * @return the mvcc version of this portlet
+	 */
+	@Override
+	public long getMvccVersion();
+
+	/**
+	 * Sets the mvcc version of this portlet.
+	 *
+	 * @param mvccVersion the mvcc version of this portlet
+	 */
+	@Override
+	public void setMvccVersion(long mvccVersion);
 
 	/**
 	 * Returns the ID of this portlet.

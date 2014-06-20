@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,7 +18,6 @@ import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.staging.MergeLayoutPrototypesThreadLocal;
@@ -68,16 +67,9 @@ public class LayoutLocalServiceVirtualLayoutsAdvice
 		Method method = methodInvocation.getMethod();
 
 		String methodName = method.getName();
-
-		Object[] arguments = methodInvocation.getArguments();
-
 		Class<?>[] parameterTypes = method.getParameterTypes();
 
-		if (MergeLayoutPrototypesThreadLocal.isMergeComplete(
-				methodName, arguments, parameterTypes)) {
-
-			return methodInvocation.proceed();
-		}
+		Object[] arguments = methodInvocation.getArguments();
 
 		boolean workflowEnabled = WorkflowThreadLocal.isEnabled();
 
@@ -87,13 +79,19 @@ public class LayoutLocalServiceVirtualLayoutsAdvice
 
 			Layout layout = (Layout)methodInvocation.proceed();
 
-			if (Validator.isNull(layout.getLayoutPrototypeUuid()) &&
-				Validator.isNull(layout.getSourcePrototypeLayoutUuid())) {
+			Group group = layout.getGroup();
+
+			if (isMergeComplete(method, arguments, group)) {
+				return layout;
+			}
+
+			if ((Validator.isNull(layout.getLayoutPrototypeUuid()) &&
+				 Validator.isNull(layout.getSourcePrototypeLayoutUuid())) ||
+				!layout.getLayoutPrototypeLinkEnabled()) {
 
 				return layout;
 			}
 
-			Group group = layout.getGroup();
 			LayoutSet layoutSet = layout.getLayoutSet();
 
 			try {
@@ -110,7 +108,7 @@ public class LayoutLocalServiceVirtualLayoutsAdvice
 			}
 			finally {
 				MergeLayoutPrototypesThreadLocal.setMergeComplete(
-					methodName, arguments, parameterTypes);
+					method, arguments);
 				WorkflowThreadLocal.setEnabled(workflowEnabled);
 			}
 		}
@@ -119,18 +117,23 @@ public class LayoutLocalServiceVirtualLayoutsAdvice
 				  Arrays.equals(parameterTypes, _TYPES_L_B_L_B_I_I))) {
 
 			long groupId = (Long)arguments[0];
+
+			Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+			if (isMergeComplete(method, arguments, group)) {
+				return methodInvocation.proceed();
+			}
+
 			boolean privateLayout = (Boolean)arguments[1];
 			long parentLayoutId = (Long)arguments[2];
 
 			try {
-				Group group = GroupLocalServiceUtil.getGroup(groupId);
-
 				LayoutSet layoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
 					groupId, privateLayout);
 
 				mergeLayoutSetPrototypeLayouts(
-					methodName, arguments, parameterTypes, group, layoutSet,
-					privateLayout, workflowEnabled);
+					method, arguments, group, layoutSet, privateLayout,
+					workflowEnabled);
 
 				List<Layout> layouts = (List<Layout>)methodInvocation.proceed();
 
@@ -231,8 +234,7 @@ public class LayoutLocalServiceVirtualLayoutsAdvice
 	}
 
 	protected List<Layout> getPrototypeLinkedLayouts(
-			long groupId, boolean privateLayout)
-		throws SystemException {
+		long groupId, boolean privateLayout) {
 
 		Class<?> clazz = getClass();
 
@@ -261,10 +263,24 @@ public class LayoutLocalServiceVirtualLayoutsAdvice
 		return LayoutLocalServiceUtil.dynamicQuery(dynamicQuery);
 	}
 
+	protected boolean isMergeComplete(
+		Method method, Object[] arguments, Group group) {
+
+		if (MergeLayoutPrototypesThreadLocal.isMergeComplete(
+				method, arguments) &&
+			(!group.isUser() ||
+			 PropsValues.USER_GROUPS_COPY_LAYOUTS_TO_USER_PERSONAL_SITE)) {
+
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
 	protected void mergeLayoutSetPrototypeLayouts(
-		String methodName, Object[] arguments, Class<?>[] parameterTypes,
-		Group group, LayoutSet layoutSet, boolean privateLayout,
-		boolean workflowEnabled) {
+		Method method, Object[] arguments, Group group, LayoutSet layoutSet,
+		boolean privateLayout, boolean workflowEnabled) {
 
 		try {
 			if (!SitesUtil.isLayoutSetMergeable(group, layoutSet)) {
@@ -283,7 +299,7 @@ public class LayoutLocalServiceVirtualLayoutsAdvice
 		}
 		finally {
 			MergeLayoutPrototypesThreadLocal.setMergeComplete(
-				methodName, arguments, parameterTypes);
+				method, arguments);
 			WorkflowThreadLocal.setEnabled(workflowEnabled);
 		}
 	}

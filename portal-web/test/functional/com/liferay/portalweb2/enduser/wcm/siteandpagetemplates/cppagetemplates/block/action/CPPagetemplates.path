@@ -25,7 +25,7 @@
 </tr>
 <tr>
 	<td>SUCCESS_MESSAGE</td>
-	<td>//div[@class='alert alert-success']</td>
+	<td>//div[contains(@class,'alert') and contains(@class,'alert-success')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -40,18 +40,23 @@
 </tr>
 <!--PAGE_TEMPLATE_TABLE-->
 <tr>
+	<td>PAGE_TEMPLATE_TABLE_NAME</td>
+	<td>//tr[contains(.,'${key_pageTemplateName}')]/td[1]/a</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PAGE_TEMPLATE_TABLE_NAME_1</td>
 	<td>xpath=(//tr/td[1]/a)[1]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>PAGE_TEMPLATE_TABLE_ACTIVE_1</td>
-	<td>xpath=(//tr/td[2]/a)[1]</td>
+	<td>PAGE_TEMPLATE_TABLE_NAME_2</td>
+	<td>xpath=(//tr/td[1]/a)[2]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>PAGE_TEMPLATE_TABLE_ACTIONS_1</td>
-	<td>xpath=(//tr/td[3]/div/a)[1]</td>
+	<td>PAGE_TEMPLATE_TABLE_NAME_3</td>
+	<td>xpath=(//tr/td[1]/a)[3]</td>
 	<td></td>
 </tr>
 <tr>
@@ -60,13 +65,38 @@
 	<td></td>
 </tr>
 <tr>
-	<td>PAGE_TEMPLATE_TABLE_ACTIVE_4</td>
-	<td>xpath=(//tr/td[2]/a)[4]</td>
+	<td>PAGE_TEMPLATE_TABLE_DESCRITPION</td>
+	<td>//tr[contains(.,'${key_pageTemplateName}')]/td[2]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PAGE_TEMPLATE_TABLE_DESCRITPION_1</td>
+	<td>xpath=(//tr/td[2])[1]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PAGE_TEMPLATE_TABLE_DESCRIPTION_2</td>
+	<td>xpath=(//tr/td[2])[2]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PAGE_TEMPLATE_TABLE_DESCRIPTION_3</td>
+	<td>xpath=(//tr/td[2])[3]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PAGE_TEMPLATE_TABLE_ACTIVE</td>
+	<td>//tr[contains(.,'${key_pageTemplateName}')]/td[3]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PAGE_TEMPLATE_TABLE_ACTIONS</td>
+	<td>//tr[contains(.,'${key_pageTemplateName}')]/td[4]/div/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PAGE_TEMPLATE_TABLE_ACTIONS_4</td>
-	<td>xpath=(//tr/td[3]/div/a)[4]</td>
+	<td>xpath=(//tr/td[4]/div/a)[4]</td>
 	<td></td>
 </tr>
 <tr>

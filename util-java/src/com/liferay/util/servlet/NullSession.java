@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,7 +16,7 @@ package com.liferay.util.servlet;
 
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.util.PwdGenerator;
+import com.liferay.portal.kernel.util.StringUtil;
 
 import java.util.Collections;
 import java.util.Enumeration;
@@ -37,7 +37,7 @@ public class NullSession implements HttpSession {
 		_creationTime = System.currentTimeMillis();
 		_id =
 			NullSession.class.getName() + StringPool.POUND +
-				PwdGenerator.getPinNumber();
+				StringUtil.randomId();
 		_lastAccessedTime = _creationTime;
 		_maxInactiveInterval = 0;
 		_servletContext = null;
@@ -82,6 +82,7 @@ public class NullSession implements HttpSession {
 	/**
 	 * @deprecated As of 6.1.0
 	 */
+	@Deprecated
 	@Override
 	public javax.servlet.http.HttpSessionContext getSessionContext() {
 		return null;

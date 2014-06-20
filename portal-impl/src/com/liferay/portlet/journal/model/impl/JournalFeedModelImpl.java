@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,7 @@
 package com.liferay.portlet.journal.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -23,8 +23,10 @@ import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -235,6 +237,9 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		attributes.put("feedFormat", getFeedFormat());
 		attributes.put("feedVersion", getFeedVersion());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
@@ -380,8 +385,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -404,8 +409,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getId() {
 		return _id;
 	}
@@ -415,8 +420,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_id = id;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -438,8 +443,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -461,8 +466,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -473,17 +478,23 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -498,8 +509,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -509,8 +520,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -520,8 +531,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_modifiedDate = modifiedDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getFeedId() {
 		if (_feedId == null) {
 			return StringPool.BLANK;
@@ -546,8 +557,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		return GetterUtil.getString(_originalFeedId);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -562,8 +573,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_name = name;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -578,8 +589,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_description = description;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getType() {
 		if (_type == null) {
 			return StringPool.BLANK;
@@ -594,8 +605,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_type = type;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getStructureId() {
 		if (_structureId == null) {
 			return StringPool.BLANK;
@@ -610,8 +621,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_structureId = structureId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getTemplateId() {
 		if (_templateId == null) {
 			return StringPool.BLANK;
@@ -626,8 +637,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_templateId = templateId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getRendererTemplateId() {
 		if (_rendererTemplateId == null) {
 			return StringPool.BLANK;
@@ -642,8 +653,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_rendererTemplateId = rendererTemplateId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getDelta() {
 		return _delta;
 	}
@@ -653,8 +664,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_delta = delta;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getOrderByCol() {
 		if (_orderByCol == null) {
 			return StringPool.BLANK;
@@ -669,8 +680,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_orderByCol = orderByCol;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getOrderByType() {
 		if (_orderByType == null) {
 			return StringPool.BLANK;
@@ -685,8 +696,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_orderByType = orderByType;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getTargetLayoutFriendlyUrl() {
 		if (_targetLayoutFriendlyUrl == null) {
 			return StringPool.BLANK;
@@ -701,8 +712,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_targetLayoutFriendlyUrl = targetLayoutFriendlyUrl;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getTargetPortletId() {
 		if (_targetPortletId == null) {
 			return StringPool.BLANK;
@@ -717,8 +728,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_targetPortletId = targetPortletId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getContentField() {
 		if (_contentField == null) {
 			return StringPool.BLANK;
@@ -733,8 +744,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_contentField = contentField;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getFeedFormat() {
 		if (_feedFormat == null) {
 			return StringPool.BLANK;
@@ -749,8 +760,8 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 		_feedFormat = feedFormat;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public double getFeedVersion() {
 		return _feedVersion;
 	}
@@ -864,6 +875,16 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 	@Override
 	public int hashCode() {
 		return (int)getPrimaryKey();
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
 	}
 
 	@Override
@@ -1218,7 +1239,6 @@ public class JournalFeedModelImpl extends BaseModelImpl<JournalFeed>
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;

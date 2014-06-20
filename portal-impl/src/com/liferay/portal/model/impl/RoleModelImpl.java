@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,7 +16,7 @@ package com.liferay.portal.model.impl;
 
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -30,7 +30,9 @@ import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleModel;
 import com.liferay.portal.model.RoleSoap;
+import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -46,6 +48,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The base model implementation for the Role service. Represents a row in the &quot;Role_&quot; database table, with each column mapped to a property of this class.
@@ -69,6 +73,7 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 	 */
 	public static final String TABLE_NAME = "Role_";
 	public static final Object[][] TABLE_COLUMNS = {
+			{ "mvccVersion", Types.BIGINT },
 			{ "uuid_", Types.VARCHAR },
 			{ "roleId", Types.BIGINT },
 			{ "companyId", Types.BIGINT },
@@ -84,7 +89,7 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 			{ "type_", Types.INTEGER },
 			{ "subtype", Types.VARCHAR }
 		};
-	public static final String TABLE_SQL_CREATE = "create table Role_ (uuid_ VARCHAR(75) null,roleId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,name VARCHAR(75) null,title STRING null,description STRING null,type_ INTEGER,subtype VARCHAR(75) null)";
+	public static final String TABLE_SQL_CREATE = "create table Role_ (mvccVersion LONG default 0,uuid_ VARCHAR(75) null,roleId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,name VARCHAR(75) null,title STRING null,description STRING null,type_ INTEGER,subtype VARCHAR(75) null)";
 	public static final String TABLE_SQL_DROP = "drop table Role_";
 	public static final String ORDER_BY_JPQL = " ORDER BY role.name ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY Role_.name ASC";
@@ -121,6 +126,7 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 
 		Role model = new RoleImpl();
 
+		model.setMvccVersion(soapModel.getMvccVersion());
 		model.setUuid(soapModel.getUuid());
 		model.setRoleId(soapModel.getRoleId());
 		model.setCompanyId(soapModel.getCompanyId());
@@ -169,8 +175,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 				"value.object.finder.cache.enabled.Groups_Roles"), true);
 	public static final String MAPPING_TABLE_USERS_ROLES_NAME = "Users_Roles";
 	public static final Object[][] MAPPING_TABLE_USERS_ROLES_COLUMNS = {
-			{ "userId", Types.BIGINT },
-			{ "roleId", Types.BIGINT }
+			{ "roleId", Types.BIGINT },
+			{ "userId", Types.BIGINT }
 		};
 	public static final String MAPPING_TABLE_USERS_ROLES_SQL_CREATE = "create table Users_Roles (roleId LONG not null,userId LONG not null,primary key (roleId, userId))";
 	public static final boolean FINDER_CACHE_ENABLED_USERS_ROLES = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
@@ -215,6 +221,7 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
 		attributes.put("roleId", getRoleId());
 		attributes.put("companyId", getCompanyId());
@@ -230,11 +237,20 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		attributes.put("type", getType());
 		attributes.put("subtype", getSubtype());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		String uuid = (String)attributes.get("uuid");
 
 		if (uuid != null) {
@@ -320,8 +336,19 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -344,8 +371,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getRoleId() {
 		return _roleId;
 	}
@@ -355,8 +382,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		_roleId = roleId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -378,8 +405,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -390,17 +417,23 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -415,8 +448,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -426,8 +459,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -457,8 +490,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		setClassNameId(classNameId);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassNameId() {
 		return _classNameId;
 	}
@@ -480,8 +513,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		return _originalClassNameId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassPK() {
 		return _classPK;
 	}
@@ -503,8 +536,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		return _originalClassPK;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -529,8 +562,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		return GetterUtil.getString(_originalName);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getTitle() {
 		if (_title == null) {
 			return StringPool.BLANK;
@@ -628,8 +661,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 				"Title", LocaleUtil.toLanguageId(defaultLocale)));
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getDescription() {
 		if (_description == null) {
 			return StringPool.BLANK;
@@ -731,8 +764,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 				LocaleUtil.toLanguageId(defaultLocale)));
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getType() {
 		return _type;
 	}
@@ -754,8 +787,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 		return _originalType;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getSubtype() {
 		if (_subtype == null) {
 			return StringPool.BLANK;
@@ -804,13 +837,85 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 	}
 
 	@Override
+	public String[] getAvailableLanguageIds() {
+		Set<String> availableLanguageIds = new TreeSet<String>();
+
+		Map<Locale, String> titleMap = getTitleMap();
+
+		for (Map.Entry<Locale, String> entry : titleMap.entrySet()) {
+			Locale locale = entry.getKey();
+			String value = entry.getValue();
+
+			if (Validator.isNotNull(value)) {
+				availableLanguageIds.add(LocaleUtil.toLanguageId(locale));
+			}
+		}
+
+		Map<Locale, String> descriptionMap = getDescriptionMap();
+
+		for (Map.Entry<Locale, String> entry : descriptionMap.entrySet()) {
+			Locale locale = entry.getKey();
+			String value = entry.getValue();
+
+			if (Validator.isNotNull(value)) {
+				availableLanguageIds.add(LocaleUtil.toLanguageId(locale));
+			}
+		}
+
+		return availableLanguageIds.toArray(new String[availableLanguageIds.size()]);
+	}
+
+	@Override
+	public String getDefaultLanguageId() {
+		String xml = getTitle();
+
+		if (xml == null) {
+			return StringPool.BLANK;
+		}
+
+		Locale defaultLocale = LocaleUtil.getDefault();
+
+		return LocalizationUtil.getDefaultLanguageId(xml, defaultLocale);
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport() throws LocaleException {
+		Locale defaultLocale = LocaleUtil.fromLanguageId(getDefaultLanguageId());
+
+		Locale[] availableLocales = LocaleUtil.fromLanguageIds(getAvailableLanguageIds());
+
+		Locale defaultImportLocale = LocalizationUtil.getDefaultImportLocale(Role.class.getName(),
+				getPrimaryKey(), defaultLocale, availableLocales);
+
+		prepareLocalizedFieldsForImport(defaultImportLocale);
+	}
+
+	@Override
 	@SuppressWarnings("unused")
 	public void prepareLocalizedFieldsForImport(Locale defaultImportLocale)
 		throws LocaleException {
-		setTitle(getTitle(defaultImportLocale), defaultImportLocale,
-			defaultImportLocale);
-		setDescription(getDescription(defaultImportLocale),
-			defaultImportLocale, defaultImportLocale);
+		Locale defaultLocale = LocaleUtil.getDefault();
+
+		String modelDefaultLanguageId = getDefaultLanguageId();
+
+		String title = getTitle(defaultLocale);
+
+		if (Validator.isNull(title)) {
+			setTitle(getTitle(modelDefaultLanguageId), defaultLocale);
+		}
+		else {
+			setTitle(getTitle(defaultLocale), defaultLocale, defaultLocale);
+		}
+
+		String description = getDescription(defaultLocale);
+
+		if (Validator.isNull(description)) {
+			setDescription(getDescription(modelDefaultLanguageId), defaultLocale);
+		}
+		else {
+			setDescription(getDescription(defaultLocale), defaultLocale,
+				defaultLocale);
+		}
 	}
 
 	@Override
@@ -827,6 +932,7 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 	public Object clone() {
 		RoleImpl roleImpl = new RoleImpl();
 
+		roleImpl.setMvccVersion(getMvccVersion());
 		roleImpl.setUuid(getUuid());
 		roleImpl.setRoleId(getRoleId());
 		roleImpl.setCompanyId(getCompanyId());
@@ -888,6 +994,16 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 	}
 
 	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
+	}
+
+	@Override
 	public void resetOriginalValues() {
 		RoleModelImpl roleModelImpl = this;
 
@@ -919,6 +1035,8 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 	@Override
 	public CacheModel<Role> toCacheModel() {
 		RoleCacheModel roleCacheModel = new RoleCacheModel();
+
+		roleCacheModel.mvccVersion = getMvccVersion();
 
 		roleCacheModel.uuid = getUuid();
 
@@ -1003,9 +1121,11 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(29);
+		StringBundler sb = new StringBundler(31);
 
-		sb.append("{uuid=");
+		sb.append("{mvccVersion=");
+		sb.append(getMvccVersion());
+		sb.append(", uuid=");
 		sb.append(getUuid());
 		sb.append(", roleId=");
 		sb.append(getRoleId());
@@ -1040,12 +1160,16 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(46);
+		StringBundler sb = new StringBundler(49);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.model.Role");
 		sb.append("</model-name>");
 
+		sb.append(
+			"<column><column-name>mvccVersion</column-name><column-value><![CDATA[");
+		sb.append(getMvccVersion());
+		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>uuid</column-name><column-value><![CDATA[");
 		sb.append(getUuid());
@@ -1110,6 +1234,7 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 
 	private static ClassLoader _classLoader = Role.class.getClassLoader();
 	private static Class<?>[] _escapedModelInterfaces = new Class[] { Role.class };
+	private long _mvccVersion;
 	private String _uuid;
 	private String _originalUuid;
 	private long _roleId;
@@ -1117,7 +1242,6 @@ public class RoleModelImpl extends BaseModelImpl<Role> implements RoleModel {
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;

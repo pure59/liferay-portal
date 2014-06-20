@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,19 +16,21 @@ package com.liferay.portlet.softwarecatalog.service.base;
 
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.IdentifiableBean;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.service.BaseServiceImpl;
+import com.liferay.portal.service.persistence.GroupFinder;
+import com.liferay.portal.service.persistence.GroupPersistence;
 import com.liferay.portal.service.persistence.UserFinder;
 import com.liferay.portal.service.persistence.UserPersistence;
+import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.softwarecatalog.model.SCFrameworkVersion;
 import com.liferay.portlet.softwarecatalog.service.SCFrameworkVersionService;
 import com.liferay.portlet.softwarecatalog.service.persistence.SCFrameworkVersionPersistence;
-import com.liferay.portlet.softwarecatalog.service.persistence.SCLicensePersistence;
-import com.liferay.portlet.softwarecatalog.service.persistence.SCProductEntryPersistence;
-import com.liferay.portlet.softwarecatalog.service.persistence.SCProductScreenshotPersistence;
 import com.liferay.portlet.softwarecatalog.service.persistence.SCProductVersionPersistence;
 
 import javax.sql.DataSource;
@@ -111,215 +113,6 @@ public abstract class SCFrameworkVersionServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
-	 * Returns the s c license local service.
-	 *
-	 * @return the s c license local service
-	 */
-	public com.liferay.portlet.softwarecatalog.service.SCLicenseLocalService getSCLicenseLocalService() {
-		return scLicenseLocalService;
-	}
-
-	/**
-	 * Sets the s c license local service.
-	 *
-	 * @param scLicenseLocalService the s c license local service
-	 */
-	public void setSCLicenseLocalService(
-		com.liferay.portlet.softwarecatalog.service.SCLicenseLocalService scLicenseLocalService) {
-		this.scLicenseLocalService = scLicenseLocalService;
-	}
-
-	/**
-	 * Returns the s c license remote service.
-	 *
-	 * @return the s c license remote service
-	 */
-	public com.liferay.portlet.softwarecatalog.service.SCLicenseService getSCLicenseService() {
-		return scLicenseService;
-	}
-
-	/**
-	 * Sets the s c license remote service.
-	 *
-	 * @param scLicenseService the s c license remote service
-	 */
-	public void setSCLicenseService(
-		com.liferay.portlet.softwarecatalog.service.SCLicenseService scLicenseService) {
-		this.scLicenseService = scLicenseService;
-	}
-
-	/**
-	 * Returns the s c license persistence.
-	 *
-	 * @return the s c license persistence
-	 */
-	public SCLicensePersistence getSCLicensePersistence() {
-		return scLicensePersistence;
-	}
-
-	/**
-	 * Sets the s c license persistence.
-	 *
-	 * @param scLicensePersistence the s c license persistence
-	 */
-	public void setSCLicensePersistence(
-		SCLicensePersistence scLicensePersistence) {
-		this.scLicensePersistence = scLicensePersistence;
-	}
-
-	/**
-	 * Returns the s c product entry local service.
-	 *
-	 * @return the s c product entry local service
-	 */
-	public com.liferay.portlet.softwarecatalog.service.SCProductEntryLocalService getSCProductEntryLocalService() {
-		return scProductEntryLocalService;
-	}
-
-	/**
-	 * Sets the s c product entry local service.
-	 *
-	 * @param scProductEntryLocalService the s c product entry local service
-	 */
-	public void setSCProductEntryLocalService(
-		com.liferay.portlet.softwarecatalog.service.SCProductEntryLocalService scProductEntryLocalService) {
-		this.scProductEntryLocalService = scProductEntryLocalService;
-	}
-
-	/**
-	 * Returns the s c product entry remote service.
-	 *
-	 * @return the s c product entry remote service
-	 */
-	public com.liferay.portlet.softwarecatalog.service.SCProductEntryService getSCProductEntryService() {
-		return scProductEntryService;
-	}
-
-	/**
-	 * Sets the s c product entry remote service.
-	 *
-	 * @param scProductEntryService the s c product entry remote service
-	 */
-	public void setSCProductEntryService(
-		com.liferay.portlet.softwarecatalog.service.SCProductEntryService scProductEntryService) {
-		this.scProductEntryService = scProductEntryService;
-	}
-
-	/**
-	 * Returns the s c product entry persistence.
-	 *
-	 * @return the s c product entry persistence
-	 */
-	public SCProductEntryPersistence getSCProductEntryPersistence() {
-		return scProductEntryPersistence;
-	}
-
-	/**
-	 * Sets the s c product entry persistence.
-	 *
-	 * @param scProductEntryPersistence the s c product entry persistence
-	 */
-	public void setSCProductEntryPersistence(
-		SCProductEntryPersistence scProductEntryPersistence) {
-		this.scProductEntryPersistence = scProductEntryPersistence;
-	}
-
-	/**
-	 * Returns the s c product screenshot local service.
-	 *
-	 * @return the s c product screenshot local service
-	 */
-	public com.liferay.portlet.softwarecatalog.service.SCProductScreenshotLocalService getSCProductScreenshotLocalService() {
-		return scProductScreenshotLocalService;
-	}
-
-	/**
-	 * Sets the s c product screenshot local service.
-	 *
-	 * @param scProductScreenshotLocalService the s c product screenshot local service
-	 */
-	public void setSCProductScreenshotLocalService(
-		com.liferay.portlet.softwarecatalog.service.SCProductScreenshotLocalService scProductScreenshotLocalService) {
-		this.scProductScreenshotLocalService = scProductScreenshotLocalService;
-	}
-
-	/**
-	 * Returns the s c product screenshot persistence.
-	 *
-	 * @return the s c product screenshot persistence
-	 */
-	public SCProductScreenshotPersistence getSCProductScreenshotPersistence() {
-		return scProductScreenshotPersistence;
-	}
-
-	/**
-	 * Sets the s c product screenshot persistence.
-	 *
-	 * @param scProductScreenshotPersistence the s c product screenshot persistence
-	 */
-	public void setSCProductScreenshotPersistence(
-		SCProductScreenshotPersistence scProductScreenshotPersistence) {
-		this.scProductScreenshotPersistence = scProductScreenshotPersistence;
-	}
-
-	/**
-	 * Returns the s c product version local service.
-	 *
-	 * @return the s c product version local service
-	 */
-	public com.liferay.portlet.softwarecatalog.service.SCProductVersionLocalService getSCProductVersionLocalService() {
-		return scProductVersionLocalService;
-	}
-
-	/**
-	 * Sets the s c product version local service.
-	 *
-	 * @param scProductVersionLocalService the s c product version local service
-	 */
-	public void setSCProductVersionLocalService(
-		com.liferay.portlet.softwarecatalog.service.SCProductVersionLocalService scProductVersionLocalService) {
-		this.scProductVersionLocalService = scProductVersionLocalService;
-	}
-
-	/**
-	 * Returns the s c product version remote service.
-	 *
-	 * @return the s c product version remote service
-	 */
-	public com.liferay.portlet.softwarecatalog.service.SCProductVersionService getSCProductVersionService() {
-		return scProductVersionService;
-	}
-
-	/**
-	 * Sets the s c product version remote service.
-	 *
-	 * @param scProductVersionService the s c product version remote service
-	 */
-	public void setSCProductVersionService(
-		com.liferay.portlet.softwarecatalog.service.SCProductVersionService scProductVersionService) {
-		this.scProductVersionService = scProductVersionService;
-	}
-
-	/**
-	 * Returns the s c product version persistence.
-	 *
-	 * @return the s c product version persistence
-	 */
-	public SCProductVersionPersistence getSCProductVersionPersistence() {
-		return scProductVersionPersistence;
-	}
-
-	/**
-	 * Sets the s c product version persistence.
-	 *
-	 * @param scProductVersionPersistence the s c product version persistence
-	 */
-	public void setSCProductVersionPersistence(
-		SCProductVersionPersistence scProductVersionPersistence) {
-		this.scProductVersionPersistence = scProductVersionPersistence;
-	}
-
-	/**
 	 * Returns the counter local service.
 	 *
 	 * @return the counter local service
@@ -336,6 +129,80 @@ public abstract class SCFrameworkVersionServiceBaseImpl extends BaseServiceImpl
 	public void setCounterLocalService(
 		com.liferay.counter.service.CounterLocalService counterLocalService) {
 		this.counterLocalService = counterLocalService;
+	}
+
+	/**
+	 * Returns the group local service.
+	 *
+	 * @return the group local service
+	 */
+	public com.liferay.portal.service.GroupLocalService getGroupLocalService() {
+		return groupLocalService;
+	}
+
+	/**
+	 * Sets the group local service.
+	 *
+	 * @param groupLocalService the group local service
+	 */
+	public void setGroupLocalService(
+		com.liferay.portal.service.GroupLocalService groupLocalService) {
+		this.groupLocalService = groupLocalService;
+	}
+
+	/**
+	 * Returns the group remote service.
+	 *
+	 * @return the group remote service
+	 */
+	public com.liferay.portal.service.GroupService getGroupService() {
+		return groupService;
+	}
+
+	/**
+	 * Sets the group remote service.
+	 *
+	 * @param groupService the group remote service
+	 */
+	public void setGroupService(
+		com.liferay.portal.service.GroupService groupService) {
+		this.groupService = groupService;
+	}
+
+	/**
+	 * Returns the group persistence.
+	 *
+	 * @return the group persistence
+	 */
+	public GroupPersistence getGroupPersistence() {
+		return groupPersistence;
+	}
+
+	/**
+	 * Sets the group persistence.
+	 *
+	 * @param groupPersistence the group persistence
+	 */
+	public void setGroupPersistence(GroupPersistence groupPersistence) {
+		this.groupPersistence = groupPersistence;
+	}
+
+	/**
+	 * Returns the group finder.
+	 *
+	 * @return the group finder
+	 */
+	public GroupFinder getGroupFinder() {
+		return groupFinder;
+	}
+
+	/**
+	 * Sets the group finder.
+	 *
+	 * @param groupFinder the group finder
+	 */
+	public void setGroupFinder(GroupFinder groupFinder) {
+		this.groupFinder = groupFinder;
 	}
 
 	/**
@@ -431,6 +298,63 @@ public abstract class SCFrameworkVersionServiceBaseImpl extends BaseServiceImpl
 		this.userFinder = userFinder;
 	}
 
+	/**
+	 * Returns the s c product version local service.
+	 *
+	 * @return the s c product version local service
+	 */
+	public com.liferay.portlet.softwarecatalog.service.SCProductVersionLocalService getSCProductVersionLocalService() {
+		return scProductVersionLocalService;
+	}
+
+	/**
+	 * Sets the s c product version local service.
+	 *
+	 * @param scProductVersionLocalService the s c product version local service
+	 */
+	public void setSCProductVersionLocalService(
+		com.liferay.portlet.softwarecatalog.service.SCProductVersionLocalService scProductVersionLocalService) {
+		this.scProductVersionLocalService = scProductVersionLocalService;
+	}
+
+	/**
+	 * Returns the s c product version remote service.
+	 *
+	 * @return the s c product version remote service
+	 */
+	public com.liferay.portlet.softwarecatalog.service.SCProductVersionService getSCProductVersionService() {
+		return scProductVersionService;
+	}
+
+	/**
+	 * Sets the s c product version remote service.
+	 *
+	 * @param scProductVersionService the s c product version remote service
+	 */
+	public void setSCProductVersionService(
+		com.liferay.portlet.softwarecatalog.service.SCProductVersionService scProductVersionService) {
+		this.scProductVersionService = scProductVersionService;
+	}
+
+	/**
+	 * Returns the s c product version persistence.
+	 *
+	 * @return the s c product version persistence
+	 */
+	public SCProductVersionPersistence getSCProductVersionPersistence() {
+		return scProductVersionPersistence;
+	}
+
+	/**
+	 * Sets the s c product version persistence.
+	 *
+	 * @param scProductVersionPersistence the s c product version persistence
+	 */
+	public void setSCProductVersionPersistence(
+		SCProductVersionPersistence scProductVersionPersistence) {
+		this.scProductVersionPersistence = scProductVersionPersistence;
+	}
+
 	public void afterPropertiesSet() {
 	}
 
@@ -466,13 +390,18 @@ public abstract class SCFrameworkVersionServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
-	 * Performs an SQL query.
+	 * Performs a SQL query.
 	 *
 	 * @param sql the sql query
 	 */
-	protected void runSQL(String sql) throws SystemException {
+	protected void runSQL(String sql) {
 		try {
 			DataSource dataSource = scFrameworkVersionPersistence.getDataSource();
+
+			DB db = DBFactoryUtil.getDB();
+
+			sql = db.buildSQL(sql);
+			sql = PortalUtil.transformSQL(sql);
 
 			SqlUpdate sqlUpdate = SqlUpdateFactoryUtil.getSqlUpdate(dataSource,
 					sql, new int[0]);
@@ -490,30 +419,16 @@ public abstract class SCFrameworkVersionServiceBaseImpl extends BaseServiceImpl
 	protected com.liferay.portlet.softwarecatalog.service.SCFrameworkVersionService scFrameworkVersionService;
 	@BeanReference(type = SCFrameworkVersionPersistence.class)
 	protected SCFrameworkVersionPersistence scFrameworkVersionPersistence;
-	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCLicenseLocalService.class)
-	protected com.liferay.portlet.softwarecatalog.service.SCLicenseLocalService scLicenseLocalService;
-	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCLicenseService.class)
-	protected com.liferay.portlet.softwarecatalog.service.SCLicenseService scLicenseService;
-	@BeanReference(type = SCLicensePersistence.class)
-	protected SCLicensePersistence scLicensePersistence;
-	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCProductEntryLocalService.class)
-	protected com.liferay.portlet.softwarecatalog.service.SCProductEntryLocalService scProductEntryLocalService;
-	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCProductEntryService.class)
-	protected com.liferay.portlet.softwarecatalog.service.SCProductEntryService scProductEntryService;
-	@BeanReference(type = SCProductEntryPersistence.class)
-	protected SCProductEntryPersistence scProductEntryPersistence;
-	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCProductScreenshotLocalService.class)
-	protected com.liferay.portlet.softwarecatalog.service.SCProductScreenshotLocalService scProductScreenshotLocalService;
-	@BeanReference(type = SCProductScreenshotPersistence.class)
-	protected SCProductScreenshotPersistence scProductScreenshotPersistence;
-	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCProductVersionLocalService.class)
-	protected com.liferay.portlet.softwarecatalog.service.SCProductVersionLocalService scProductVersionLocalService;
-	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCProductVersionService.class)
-	protected com.liferay.portlet.softwarecatalog.service.SCProductVersionService scProductVersionService;
-	@BeanReference(type = SCProductVersionPersistence.class)
-	protected SCProductVersionPersistence scProductVersionPersistence;
 	@BeanReference(type = com.liferay.counter.service.CounterLocalService.class)
 	protected com.liferay.counter.service.CounterLocalService counterLocalService;
+	@BeanReference(type = com.liferay.portal.service.GroupLocalService.class)
+	protected com.liferay.portal.service.GroupLocalService groupLocalService;
+	@BeanReference(type = com.liferay.portal.service.GroupService.class)
+	protected com.liferay.portal.service.GroupService groupService;
+	@BeanReference(type = GroupPersistence.class)
+	protected GroupPersistence groupPersistence;
+	@BeanReference(type = GroupFinder.class)
+	protected GroupFinder groupFinder;
 	@BeanReference(type = com.liferay.portal.service.ResourceLocalService.class)
 	protected com.liferay.portal.service.ResourceLocalService resourceLocalService;
 	@BeanReference(type = com.liferay.portal.service.UserLocalService.class)
@@ -524,5 +439,11 @@ public abstract class SCFrameworkVersionServiceBaseImpl extends BaseServiceImpl
 	protected UserPersistence userPersistence;
 	@BeanReference(type = UserFinder.class)
 	protected UserFinder userFinder;
+	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCProductVersionLocalService.class)
+	protected com.liferay.portlet.softwarecatalog.service.SCProductVersionLocalService scProductVersionLocalService;
+	@BeanReference(type = com.liferay.portlet.softwarecatalog.service.SCProductVersionService.class)
+	protected com.liferay.portlet.softwarecatalog.service.SCProductVersionService scProductVersionService;
+	@BeanReference(type = SCProductVersionPersistence.class)
+	protected SCProductVersionPersistence scProductVersionPersistence;
 	private String _beanIdentifier;
 }

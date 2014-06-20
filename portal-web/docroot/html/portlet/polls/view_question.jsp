@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -41,6 +41,7 @@ if (viewResults && !PollsQuestionPermission.contains(permissionChecker, question
 <aui:form action="<%= viewQuestionActionURL %>" method="post" name="fm">
 	<portlet:renderURL var="viewQuestionRenderURL">
 		<portlet:param name="struts_action" value="/polls/view_question" />
+		<portlet:param name="redirect" value="<%= redirect %>" />
 		<portlet:param name="questionId" value="<%= String.valueOf(question.getQuestionId()) %>" />
 	</portlet:renderURL>
 
@@ -59,7 +60,7 @@ if (viewResults && !PollsQuestionPermission.contains(permissionChecker, question
 			title="<%= question.getTitle(locale) %>"
 		/>
 
-		<span style="font-size: x-small;">
+		<span>
 			<%= StringUtil.replace(question.getDescription(locale), StringPool.NEW_LINE, "<br />") %>
 		</span>
 
@@ -91,7 +92,7 @@ if (viewResults && !PollsQuestionPermission.contains(permissionChecker, question
 					</portlet:renderURL>
 
 					<liferay-ui:icon
-						image="view"
+						iconCssClass="icon-search"
 						label="<%= true %>"
 						message="view-results"
 						url="<%= viewResultsURL %>"
@@ -128,7 +129,7 @@ if (viewResults && !PollsQuestionPermission.contains(permissionChecker, question
 
 				<%
 				PortalUtil.addPortletBreadcrumbEntry(request, HtmlUtil.unescape(question.getTitle(locale)), viewQuestionURL.toString());
-				PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "results"), currentURL);
+				PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "results"), currentURL);
 				%>
 
 			</c:otherwise>

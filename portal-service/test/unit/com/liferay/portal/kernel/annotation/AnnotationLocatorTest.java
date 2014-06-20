@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -33,8 +33,15 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 /**
- * <p><tr> <th colspan = 3> Test Classes Inherited Hierarchy </th> </tr> <tr
- * valign="top"> <td>
+ * <p>
+ * <table>
+ * <tr>
+ * <th colspan = 3>
+ * Test Classes Inherited Hierarchy
+ * </th>
+ * </tr>
+ * <tr valign="top">
+ * <td>
  * <pre>
  * &#64;Type(value = 5)
  * OriginClass {    -------->
@@ -560,8 +567,8 @@ public class AnnotationLocatorTest {
 
 						Assert.assertEquals(
 							"@Type : " + method.getName() + "()@" +
-							clazz.getName(), expectedType.value(),
-							actualType.value());
+								clazz.getName(),
+							expectedType.value(), actualType.value());
 					}
 				}
 			}

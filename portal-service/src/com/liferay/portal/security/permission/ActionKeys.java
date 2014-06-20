@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -60,6 +60,9 @@ public class ActionKeys {
 	public static final String ADD_FOLDER = "ADD_FOLDER";
 
 	public static final String ADD_FRAMEWORK_VERSION = "ADD_FRAMEWORK_VERSION";
+
+	public static final String ADD_GENERAL_ANNOUNCEMENTS =
+		"ADD_GENERAL_ANNOUNCEMENTS";
 
 	public static final String ADD_IMAGE = "ADD_IMAGE";
 

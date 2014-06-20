@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -106,7 +106,7 @@ public class JavadocFormatter {
 
 		System.out.println("Input directory is " + _inputDir);
 
-		String limit = arguments.get("javadoc.limit");
+		String[] limits = StringUtil.split(arguments.get("javadoc.limit"), ",");
 
 		_outputFilePrefix = GetterUtil.getString(
 			arguments.get("javadoc.output.file.prefix"));
@@ -127,59 +127,73 @@ public class JavadocFormatter {
 		directoryScanner.setExcludes(
 			new String[] {"**\\classes\\**", "**\\portal-client\\**"});
 
-		List<String> includes = new ArrayList<String>();
+		for (String limit : limits) {
+			List<String> includes = new ArrayList<String>();
 
-		if (Validator.isNotNull(limit) && !limit.startsWith("$")) {
-			System.out.println("Limit on " + limit);
+			if (Validator.isNotNull(limit) && !limit.startsWith("$")) {
+				System.out.println("Limit on " + limit);
 
-			String[] limitArray = StringUtil.split(limit, '/');
+				String[] limitArray = StringUtil.split(limit, '/');
 
-			for (String curLimit : limitArray) {
-				includes.add(
-					"**\\" + StringUtil.replace(curLimit, ".", "\\") +
-						"\\**\\*.java");
-				includes.add("**\\" + curLimit + ".java");
-			}
-		}
-		else {
-			includes.add("**\\*.java");
-		}
-
-		directoryScanner.setIncludes(
-			includes.toArray(new String[includes.size()]));
-
-		directoryScanner.scan();
-
-		String[] fileNames = directoryScanner.getIncludedFiles();
-
-		if ((fileNames.length == 0) && Validator.isNotNull(limit) &&
-			!limit.startsWith("$")) {
-
-			StringBundler sb = new StringBundler("Limit file not found: ");
-
-			sb.append(limit);
-
-			if (limit.contains(".")) {
-				sb.append(" Specify limit filename without package path or ");
-				sb.append("file type suffix.");
+				for (String curLimit : limitArray) {
+					includes.add(
+						"**\\" + StringUtil.replace(curLimit, ".", "\\") +
+							"\\**\\*.java");
+					includes.add("**\\" + curLimit + ".java");
+				}
 			}
 
-			System.out.println(sb.toString());
-		}
+			else {
+				includes.add("**\\*.java");
+			}
 
-		_languagePropertiesFile = new File("src/content/Language.properties");
+			directoryScanner.setIncludes(
+				includes.toArray(new String[includes.size()]));
 
-		if (_languagePropertiesFile.exists()) {
-			_languageProperties = new Properties();
+			directoryScanner.scan();
 
-			_languageProperties.load(
-				new FileInputStream(_languagePropertiesFile.getAbsolutePath()));
-		}
+			String[] fileNames = StringPool.EMPTY_ARRAY;
 
-		for (String fileName : fileNames) {
-			fileName = StringUtil.replace(fileName, "\\", "/");
+			fileNames = directoryScanner.getIncludedFiles();
 
-			_format(fileName);
+			if ((fileNames.length == 0) && Validator.isNotNull(limit) &&
+				!limit.startsWith("$")) {
+
+				StringBundler sb = new StringBundler("Limit file not found: ");
+
+				sb.append(limit);
+
+				if (limit.contains(".")) {
+					sb.append(
+						" Specify limit filename without package path or ");
+					sb.append("file type suffix.");
+				}
+
+				System.out.println(sb.toString());
+			}
+
+			_languagePropertiesFile = new File(
+				"src/content/Language.properties");
+
+			if (_languagePropertiesFile.exists()) {
+				_languageProperties = new Properties();
+
+				_languageProperties.load(
+					new FileInputStream(
+						_languagePropertiesFile.getAbsolutePath()));
+			}
+
+			for (String fileName : fileNames) {
+				fileName = StringUtil.replace(fileName, "\\", "/");
+
+				try {
+					_format(fileName);
+				}
+				catch (Exception e) {
+					throw new RuntimeException(
+						"Unable to format file " + fileName, e);
+				}
+			}
 		}
 
 		for (Map.Entry<String, Tuple> entry : _javadocxXmlTuples.entrySet()) {
@@ -276,6 +290,24 @@ public class JavadocFormatter {
 		Element commentElement = rootElement.addElement("comment");
 
 		commentElement.addCDATA(comment);
+	}
+
+	private String _addDeprecatedTag(
+		String comment, AbstractBaseJavaEntity abstractBaseJavaEntity,
+		String indent) {
+
+		if (comment == null) {
+			return null;
+		}
+
+		if (!comment.contains("* @deprecated ") ||
+			ServiceBuilder.hasAnnotation(
+				abstractBaseJavaEntity, "Deprecated")) {
+
+			return comment;
+		}
+
+		return comment + indent + "@Deprecated\n";
 	}
 
 	private void _addDocletElements(
@@ -554,10 +586,7 @@ public class JavadocFormatter {
 		for (DocletTag paramDocletTag : paramDocletTags) {
 			String curValue = paramDocletTag.getValue();
 
-			if (!curValue.startsWith(name)) {
-				continue;
-			}
-			else {
+			if (curValue.equals(name) || curValue.startsWith(name + " ")) {
 				value = curValue;
 
 				break;
@@ -774,27 +803,37 @@ public class JavadocFormatter {
 			fileName, originalContent, javadocLessContent, document);
 	}
 
-	private String _formatCDATA(String cdata, String exclude) {
-		StringBundler sb = new StringBundler();
+	private String _formatCDATA(String cdata) {
+		cdata = cdata.replaceAll(
+			"(?s)\\s*<(p|[ou]l)>\\s*(.*?)\\s*</\\1>\\s*",
+			"\n\n<$1>\n$2\n</$1>\n\n");
+		cdata = cdata.replaceAll(
+			"(?s)\\s*<li>\\s*(.*?)\\s*</li>\\s*", "\n<li>\n$1\n</li>\n");
+		cdata = StringUtil.replace(cdata, "</li>\n\n<li>", "</li>\n<li>");
+		cdata = cdata.replaceAll("\n\\s+\n", "\n\n");
+		cdata = cdata.replaceAll(" +", " ");
 
-		String startTag = "<" + exclude + ">";
-		String endTag = "</" + exclude + ">";
+		// Trim whitespace inside paragraph tags or in the first paragraph
 
-		String[] cdataParts = cdata.split(startTag);
+		Matcher matcher = _paragraphTagPattern.matcher(cdata);
 
-		for (String cdataPart : cdataParts) {
-			if (!cdataPart.contains(endTag)) {
-				cdataPart = _getCDATA(cdataPart);
-			}
+		StringBuffer sb = new StringBuffer();
 
-			if (cdataPart.contains("</" + exclude + ">")) {
-				sb.append(startTag);
-			}
+		while (matcher.find()) {
+			String trimmed = _trimMultilineText(matcher.group());
 
-			sb.append(cdataPart);
+			// Escape dollar signs
+
+			trimmed = trimmed.replaceAll("\\$", "\\\\\\$");
+
+			matcher.appendReplacement(sb, trimmed);
 		}
 
-		return sb.toString();
+		matcher.appendTail(sb);
+
+		cdata = sb.toString();
+
+		return cdata.trim();
 	}
 
 	private String _formatInlines(String text) {
@@ -816,48 +855,89 @@ public class JavadocFormatter {
 	}
 
 	private String _getCDATA(String cdata) {
-		if (cdata == null) {
+		StringBundler sb = new StringBundler();
+
+		if ((cdata == null) || cdata.isEmpty()) {
 			return StringPool.BLANK;
 		}
-		else if (cdata.contains("<pre>")) {
-			cdata = _formatCDATA(cdata, "pre");
-		}
-		else if (cdata.contains("<table>")) {
-			cdata = _formatCDATA(cdata, "table");
-		}
-		else {
-			cdata = cdata.replaceAll(
-				"(?s)\\s*<(p|[ou]l)>\\s*(.*?)\\s*</\\1>\\s*",
-				"\n\n<$1>\n$2\n</$1>\n\n");
-			cdata = cdata.replaceAll(
-				"(?s)\\s*<li>\\s*(.*?)\\s*</li>\\s*", "\n<li>\n$1\n</li>\n");
-			cdata = StringUtil.replace(cdata, "</li>\n\n<li>", "</li>\n<li>");
-			cdata = cdata.replaceAll("\n\\s+\n", "\n\n");
-			cdata.replaceAll(" +", " ");
 
-			// Trim whitespace inside paragraph tags or in the first paragraph
+		int cdataBeginIndex = 0;
 
-			Pattern pattern = Pattern.compile(
-				"(^.*?(?=\n\n|$)+|(?<=<p>\n).*?(?=\n</p>))", Pattern.DOTALL);
+		while (!cdata.isEmpty()) {
+			int preTagIndex = cdata.indexOf("<pre>");
+			int tableTagIndex = cdata.indexOf("<table>");
 
-			Matcher matcher = pattern.matcher(cdata);
+			boolean hasPreTag = (preTagIndex != -1) ? true : false;
+			boolean hasTableTag = (tableTagIndex != -1) ? true : false;
 
-			StringBuffer sb = new StringBuffer();
+			if (!hasPreTag && !hasTableTag) {
+				sb.append(_formatCDATA(cdata));
 
-			while (matcher.find()) {
-				String trimmed = _trimMultilineText(matcher.group());
-
-				// Escape dollar signs
-
-				trimmed = trimmed.replaceAll("\\$", "\\\\\\$");
-
-				matcher.appendReplacement(sb, trimmed);
+				break;
 			}
 
-			matcher.appendTail(sb);
+			boolean startsWithPreTag = (preTagIndex == 0) ? true : false;
+			boolean startsWithTableTag = (tableTagIndex == 0) ? true : false;
 
-			cdata = sb.toString();
+			if (startsWithPreTag || startsWithTableTag) {
+				sb.append("\n");
+
+				String tagName = null;
+
+				if (preTagIndex == 0) {
+					tagName = "pre";
+				}
+				else {
+					tagName = "table";
+				}
+
+				String startTag = "<" + tagName + ">";
+				String endTag = "</" + tagName + ">";
+
+				int startTagLength = startTag.length();
+				int endTagLength = endTag.length();
+
+				int endTagIndex = cdata.indexOf(endTag, startTagLength - 1);
+
+				sb.append(cdata.substring(0, endTagIndex + endTagLength));
+
+				sb.append("\n");
+
+				cdataBeginIndex = endTagIndex + endTagLength;
+			}
+			else {
+
+				// Format the cdata up to the next pre or table tag
+
+				int startTagIndex = 0;
+
+				if (hasPreTag && hasTableTag) {
+					if (preTagIndex < tableTagIndex) {
+						startTagIndex = preTagIndex;
+					}
+					else {
+						startTagIndex = tableTagIndex;
+					}
+				}
+				else if (hasPreTag && !hasTableTag) {
+					startTagIndex = preTagIndex;
+				}
+				else {
+
+					// Must have table tag and no pre tag
+
+					startTagIndex = tableTagIndex;
+				}
+
+				sb.append(_formatCDATA(cdata.substring(0, startTagIndex)));
+
+				cdataBeginIndex = startTagIndex;
+			}
+
+			cdata = cdata.substring(cdataBeginIndex);
 		}
+
+		cdata = sb.toString();
 
 		return cdata.trim();
 	}
@@ -1140,8 +1220,8 @@ public class JavadocFormatter {
 	}
 
 	private String _getJavaFieldComment(
-		String[] lines, Map<String, Element> fieldElementsMap,
-		JavaField javaField) {
+		Map<String, Element> fieldElementsMap, JavaField javaField,
+		String indent) {
 
 		String fieldKey = _getFieldKey(javaField);
 
@@ -1150,8 +1230,6 @@ public class JavadocFormatter {
 		if (fieldElement == null) {
 			return null;
 		}
-
-		String indent = _getIndent(lines, javaField);
 
 		StringBundler sb = new StringBundler();
 
@@ -1197,8 +1275,8 @@ public class JavadocFormatter {
 	}
 
 	private String _getJavaMethodComment(
-		String[] lines, Map<String, Element> methodElementsMap,
-		JavaMethod javaMethod) {
+		Map<String, Element> methodElementsMap, JavaMethod javaMethod,
+		String indent) {
 
 		String methodKey = _getMethodKey(javaMethod);
 
@@ -1207,8 +1285,6 @@ public class JavadocFormatter {
 		if (methodElement == null) {
 			return null;
 		}
-
-		String indent = _getIndent(lines, javaMethod);
 
 		StringBundler sb = new StringBundler();
 
@@ -1316,28 +1392,6 @@ public class JavadocFormatter {
 		}
 
 		return typeValue;
-	}
-
-	private boolean _hasAnnotation(
-		AbstractBaseJavaEntity abstractBaseJavaEntity, String annotationName) {
-
-		Annotation[] annotations = abstractBaseJavaEntity.getAnnotations();
-
-		if (annotations == null) {
-			return false;
-		}
-
-		for (int i = 0; i < annotations.length; i++) {
-			Type type = annotations[i].getType();
-
-			JavaClass javaClass = type.getJavaClass();
-
-			if (annotationName.equals(javaClass.getName())) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	private boolean _hasGeneratedTag(String content) {
@@ -1456,15 +1510,14 @@ public class JavadocFormatter {
 			if (samePackage) {
 				return !ancestorJavaMethod.isPrivate();
 			}
-			else {
-				if (ancestorJavaMethod.isProtected() ||
-					ancestorJavaMethod.isPublic()) {
 
-					return true;
-				}
-				else {
-					return false;
-				}
+			if (ancestorJavaMethod.isProtected() ||
+				ancestorJavaMethod.isPublic()) {
+
+				return true;
+			}
+			else {
+				return false;
 			}
 		}
 
@@ -1556,17 +1609,29 @@ public class JavadocFormatter {
 			}
 		}
 
-		return sb.toString().trim();
+		content = sb.toString();
+
+		return content.trim();
 	}
 
 	private String _trimMultilineText(String text) {
-		String[] textArray = StringUtil.splitLines(text);
+		String[] lines = StringUtil.splitLines(text);
 
-		for (int i = 0; i < textArray.length; i++) {
-			textArray[i] = textArray[i].trim();
+		StringBundler sb = new StringBundler();
+
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i].trim();
+
+			sb.append(line);
+
+			if (!line.endsWith(StringPool.OPEN_PARENTHESIS) &&
+				(i < (lines.length - 1))) {
+
+				sb.append(StringPool.SPACE);
+			}
 		}
 
-		return StringUtil.merge(textArray, " ");
+		return sb.toString();
 	}
 
 	private void _updateJavadocsXmlFile(
@@ -1638,9 +1703,12 @@ public class JavadocFormatter {
 
 		Map<Integer, String> commentsMap = new TreeMap<Integer, String>();
 
-		commentsMap.put(
-			_getJavaClassLineNumber(javaClass),
-			_getJavaClassComment(rootElement, javaClass));
+		String javaClassComment = _getJavaClassComment(rootElement, javaClass);
+
+		javaClassComment = _addDeprecatedTag(
+			javaClassComment, javaClass, StringPool.BLANK);
+
+		commentsMap.put(_getJavaClassLineNumber(javaClass), javaClassComment);
 
 		Map<String, Element> methodElementsMap = new HashMap<String, Element>();
 
@@ -1659,17 +1727,21 @@ public class JavadocFormatter {
 				continue;
 			}
 
+			String indent = _getIndent(lines, javaMethod);
+
 			String javaMethodComment = _getJavaMethodComment(
-				lines, methodElementsMap, javaMethod);
+				methodElementsMap, javaMethod, indent);
+
+			javaMethodComment = _addDeprecatedTag(
+				javaMethodComment, javaMethod, indent);
 
 			// Handle override tag insertion
 
-			if (!_hasAnnotation(javaMethod, "Override")) {
+			if (!ServiceBuilder.hasAnnotation(javaMethod, "Override")) {
 				if (_isOverrideMethod(
 						javaClass, javaMethod, ancestorJavaClassTuples)) {
 
-					String overrideLine =
-						_getIndent(lines, javaMethod) + "@Override\n";
+					String overrideLine = indent + "@Override\n";
 
 					if (Validator.isNotNull(javaMethodComment)) {
 						javaMethodComment = javaMethodComment + overrideLine;
@@ -1700,9 +1772,15 @@ public class JavadocFormatter {
 				continue;
 			}
 
-			commentsMap.put(
-				javaField.getLineNumber(),
-				_getJavaFieldComment(lines, fieldElementsMap, javaField));
+			String indent = _getIndent(lines, javaField);
+
+			String javaFieldComment = _getJavaFieldComment(
+				fieldElementsMap, javaField, indent);
+
+			javaFieldComment = _addDeprecatedTag(
+				javaFieldComment, javaField, indent);
+
+			commentsMap.put(javaField.getLineNumber(), javaFieldComment);
 		}
 
 		StringBundler sb = new StringBundler(javadocLessContent.length());
@@ -1720,7 +1798,9 @@ public class JavadocFormatter {
 			sb.append("\n");
 		}
 
-		String formattedContent = sb.toString().trim();
+		String formattedContent = sb.toString();
+
+		formattedContent = formattedContent.trim();
 
 		if (!originalContent.equals(formattedContent)) {
 			File file = new File(_inputDir + fileName);
@@ -1822,7 +1902,8 @@ public class JavadocFormatter {
 			}
 
 			if (line.startsWith(linePrefix)) {
-				sb.append(linePrefix + value);
+				sb.append(linePrefix);
+				sb.append(value);
 			}
 			else {
 				sb.append(line);
@@ -1902,6 +1983,8 @@ public class JavadocFormatter {
 	private Properties _languageProperties;
 	private File _languagePropertiesFile;
 	private String _outputFilePrefix;
+	private Pattern _paragraphTagPattern = Pattern.compile(
+		"(^.*?(?=\n\n|$)+|(?<=<p>\n).*?(?=\n</p>))", Pattern.DOTALL);
 	private boolean _updateJavadocs;
 
 }

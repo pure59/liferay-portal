@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,8 +14,9 @@
 
 package com.liferay.portlet.documentlibrary.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.StagedGroupedModel;
@@ -41,6 +42,7 @@ import java.util.Date;
  * @see com.liferay.portlet.documentlibrary.model.impl.DLFileVersionModelImpl
  * @generated
  */
+@ProviderType
 public interface DLFileVersionModel extends BaseModel<DLFileVersion>,
 	StagedGroupedModel, WorkflowedModel {
 	/*
@@ -146,10 +148,9 @@ public interface DLFileVersionModel extends BaseModel<DLFileVersion>,
 	 * Returns the user uuid of this document library file version.
 	 *
 	 * @return the user uuid of this document library file version
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getUserUuid() throws SystemException;
+	public String getUserUuid();
 
 	/**
 	 * Sets the user uuid of this document library file version.
@@ -249,6 +250,21 @@ public interface DLFileVersionModel extends BaseModel<DLFileVersion>,
 	 * @param fileEntryId the file entry ID of this document library file version
 	 */
 	public void setFileEntryId(long fileEntryId);
+
+	/**
+	 * Returns the tree path of this document library file version.
+	 *
+	 * @return the tree path of this document library file version
+	 */
+	@AutoEscape
+	public String getTreePath();
+
+	/**
+	 * Sets the tree path of this document library file version.
+	 *
+	 * @param treePath the tree path of this document library file version
+	 */
+	public void setTreePath(String treePath);
 
 	/**
 	 * Returns the extension of this document library file version.
@@ -434,10 +450,9 @@ public interface DLFileVersionModel extends BaseModel<DLFileVersion>,
 	 * Returns the status by user uuid of this document library file version.
 	 *
 	 * @return the status by user uuid of this document library file version
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getStatusByUserUuid() throws SystemException;
+	public String getStatusByUserUuid();
 
 	/**
 	 * Sets the status by user uuid of this document library file version.
@@ -483,6 +498,7 @@ public interface DLFileVersionModel extends BaseModel<DLFileVersion>,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	 */
+	@Deprecated
 	@Override
 	public boolean getApproved();
 
@@ -533,14 +549,6 @@ public interface DLFileVersionModel extends BaseModel<DLFileVersion>,
 	 */
 	@Override
 	public boolean isIncomplete();
-
-	/**
-	 * Returns <code>true</code> if this document library file version is in the Recycle Bin.
-	 *
-	 * @return <code>true</code> if this document library file version is in the Recycle Bin; <code>false</code> otherwise
-	 */
-	@Override
-	public boolean isInTrash();
 
 	/**
 	 * Returns <code>true</code> if this document library file version is pending.

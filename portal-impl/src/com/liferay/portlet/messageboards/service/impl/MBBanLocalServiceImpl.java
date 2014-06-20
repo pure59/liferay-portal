@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,9 +15,9 @@
 package com.liferay.portlet.messageboards.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.model.SystemEventConstants;
@@ -40,7 +40,7 @@ public class MBBanLocalServiceImpl extends MBBanLocalServiceBaseImpl {
 	@Override
 	public MBBan addBan(
 			long userId, long banUserId, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(userId);
 		long groupId = serviceContext.getScopeGroupId();
@@ -71,68 +71,56 @@ public class MBBanLocalServiceImpl extends MBBanLocalServiceBaseImpl {
 
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public void checkBan(long groupId, long banUserId)
-		throws PortalException, SystemException {
-
+	public void checkBan(long groupId, long banUserId) throws PortalException {
 		if (hasBan(groupId, banUserId)) {
 			throw new BannedUserException();
 		}
 	}
 
 	@Override
-	public void deleteBan(long banId) throws PortalException, SystemException {
+	public void deleteBan(long banId) throws PortalException {
 		MBBan ban = mbBanPersistence.findByPrimaryKey(banId);
 
-		deleteBan(ban);
+		mbBanLocalService.deleteBan(ban);
 	}
 
 	@Override
-	public void deleteBan(long banUserId, ServiceContext serviceContext)
-		throws PortalException, SystemException {
-
+	public void deleteBan(long banUserId, ServiceContext serviceContext) {
 		long groupId = serviceContext.getScopeGroupId();
 
 		MBBan ban = mbBanPersistence.fetchByG_B(groupId, banUserId);
 
 		if (ban != null) {
-			deleteBan(ban);
+			mbBanLocalService.deleteBan(ban);
 		}
 	}
 
 	@Override
-	public void deleteBan(MBBan ban) throws PortalException, SystemException {
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
+	public void deleteBan(MBBan ban) {
 		mbBanPersistence.remove(ban);
-
-		systemEventLocalService.addSystemEvent(
-			0, ban.getGroupId(), MBBan.class.getName(), ban.getBanId(),
-			ban.getUuid(), null, SystemEventConstants.TYPE_DELETE, null);
-
 	}
 
 	@Override
-	public void deleteBansByBanUserId(long banUserId)
-		throws PortalException, SystemException {
-
+	public void deleteBansByBanUserId(long banUserId) {
 		List<MBBan> bans = mbBanPersistence.findByBanUserId(banUserId);
 
 		for (MBBan ban : bans) {
-			deleteBan(ban);
+			mbBanLocalService.deleteBan(ban);
 		}
 	}
 
 	@Override
-	public void deleteBansByGroupId(long groupId)
-		throws PortalException, SystemException {
-
+	public void deleteBansByGroupId(long groupId) {
 		List<MBBan> bans = mbBanPersistence.findByGroupId(groupId);
 
 		for (MBBan ban : bans) {
-			deleteBan(ban);
+			mbBanLocalService.deleteBan(ban);
 		}
 	}
 
 	@Override
-	public void expireBans() throws SystemException {
+	public void expireBans() {
 		if (PropsValues.MESSAGE_BOARDS_EXPIRE_BAN_INTERVAL <= 0) {
 			return;
 		}
@@ -142,10 +130,12 @@ public class MBBanLocalServiceImpl extends MBBanLocalServiceBaseImpl {
 		List<MBBan> bans = mbBanPersistence.findAll();
 
 		for (MBBan ban : bans) {
-			long unbanDate = MBUtil.getUnbanDate(
-				ban, PropsValues.MESSAGE_BOARDS_EXPIRE_BAN_INTERVAL).getTime();
+			Date unbanDate = MBUtil.getUnbanDate(
+				ban, PropsValues.MESSAGE_BOARDS_EXPIRE_BAN_INTERVAL);
 
-			if (now >= unbanDate) {
+			long unbanTime = unbanDate.getTime();
+
+			if (now >= unbanTime) {
 				if (_log.isDebugEnabled()) {
 					_log.debug(
 						"Auto expiring ban " + ban.getBanId() + " on user " +
@@ -158,19 +148,17 @@ public class MBBanLocalServiceImpl extends MBBanLocalServiceBaseImpl {
 	}
 
 	@Override
-	public List<MBBan> getBans(long groupId, int start, int end)
-		throws SystemException {
-
+	public List<MBBan> getBans(long groupId, int start, int end) {
 		return mbBanPersistence.findByGroupId(groupId, start, end);
 	}
 
 	@Override
-	public int getBansCount(long groupId) throws SystemException {
+	public int getBansCount(long groupId) {
 		return mbBanPersistence.countByGroupId(groupId);
 	}
 
 	@Override
-	public boolean hasBan(long groupId, long banUserId) throws SystemException {
+	public boolean hasBan(long groupId, long banUserId) {
 		if (mbBanPersistence.fetchByG_B(groupId, banUserId) == null) {
 			return false;
 		}

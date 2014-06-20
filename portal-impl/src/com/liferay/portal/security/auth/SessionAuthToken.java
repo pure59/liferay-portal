@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -20,7 +20,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.service.permission.PortletPermissionUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.util.Encryptor;
+import com.liferay.portlet.SecurityPortletContainerWrapper;
 import com.liferay.util.PwdGenerator;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,37 +33,53 @@ public class SessionAuthToken implements AuthToken {
 
 	@Override
 	public void check(HttpServletRequest request) throws PrincipalException {
+		checkCSRFToken(
+			request, SecurityPortletContainerWrapper.class.getName());
+	}
+
+	@Override
+	public void checkCSRFToken(HttpServletRequest request, String origin)
+		throws PrincipalException {
+
+		if (!PropsValues.AUTH_TOKEN_CHECK_ENABLED) {
+			return;
+		}
+
+		String sharedSecret = ParamUtil.getString(request, "p_auth_secret");
+
+		if (AuthTokenWhitelistUtil.isValidSharedSecret(sharedSecret)) {
+			return;
+		}
+
 		long companyId = PortalUtil.getCompanyId(request);
 
-		String ppid = ParamUtil.getString(request, "p_p_id");
-
-		String portletNamespace = PortalUtil.getPortletNamespace(ppid);
-
-		String strutsAction = ParamUtil.getString(
-			request, portletNamespace + "struts_action");
-
-		if (AuthTokenWhitelistUtil.isPortletCSRFWhitelisted(
-				companyId, ppid, strutsAction)) {
+		if (AuthTokenWhitelistUtil.isCSRFOrigintWhitelisted(
+				companyId, origin)) {
 
 			return;
 		}
 
-		String requestAuthenticationToken = ParamUtil.getString(
-			request, "p_auth");
+		if (origin.equals(SecurityPortletContainerWrapper.class.getName())) {
+			String ppid = ParamUtil.getString(request, "p_p_id");
 
-		String sessionAuthenticationToken = getSessionAuthenticationToken(
+			String portletNamespace = PortalUtil.getPortletNamespace(ppid);
+
+			String strutsAction = ParamUtil.getString(
+				request, portletNamespace + "struts_action");
+
+			if (AuthTokenWhitelistUtil.isPortletCSRFWhitelisted(
+					companyId, ppid, strutsAction)) {
+
+				return;
+			}
+		}
+
+		String csrfToken = ParamUtil.getString(request, "p_auth");
+
+		String sessionToken = getSessionAuthenticationToken(
 			request, _CSRF, false);
 
-		String propertiesAuthenticatonTokenSharedSecret = Encryptor.digest(
-			PropsValues.AUTH_TOKEN_SHARED_SECRET);
-
-		String requestAuthenticatonTokenSharedSecret = ParamUtil.getString(
-			request, "p_auth_secret");
-
-		if (!requestAuthenticationToken.equals(sessionAuthenticationToken) &&
-			!requestAuthenticatonTokenSharedSecret.equals(
-				propertiesAuthenticatonTokenSharedSecret)) {
-
+		if (!csrfToken.equals(sessionToken)) {
 			throw new PrincipalException("Invalid authentication token");
 		}
 	}
@@ -122,7 +138,8 @@ public class SessionAuthToken implements AuthToken {
 			tokenKey);
 
 		if (createToken && Validator.isNull(sessionAuthenticationToken)) {
-			sessionAuthenticationToken = PwdGenerator.getPassword();
+			sessionAuthenticationToken = PwdGenerator.getPassword(
+				PropsValues.AUTH_TOKEN_LENGTH);
 
 			session.setAttribute(tokenKey, sessionAuthenticationToken);
 		}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,12 +16,12 @@ package com.liferay.portlet.trash.action;
 
 import com.liferay.portal.TrashPermissionException;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
+import com.liferay.portal.kernel.trash.TrashRenderer;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -31,7 +31,9 @@ import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
+import com.liferay.portlet.trash.RestoreEntryException;
 import com.liferay.portlet.trash.model.TrashEntry;
 import com.liferay.portlet.trash.service.TrashEntryServiceUtil;
 import com.liferay.portlet.trash.util.TrashUtil;
@@ -99,15 +101,18 @@ public class EditEntryAction extends PortletAction {
 			if (cmd.equals(Constants.RENAME) || cmd.equals(Constants.RESTORE) ||
 				cmd.equals(Constants.OVERRIDE) || cmd.equals(Constants.MOVE)) {
 
-				addRestoreData(
-					(LiferayPortletConfig)portletConfig, actionRequest,
-					entryOVPs);
+				addRestoreData(actionRequest, entryOVPs);
 			}
 
 			sendRedirect(actionRequest, actionResponse);
 		}
 		catch (Exception e) {
-			if (e instanceof TrashPermissionException) {
+			if (e instanceof RestoreEntryException) {
+				RestoreEntryException ree = (RestoreEntryException)e;
+
+				SessionErrors.add(actionRequest, ree.getClass(), ree);
+			}
+			else if (e instanceof TrashPermissionException) {
 				TrashPermissionException tpe = (TrashPermissionException)e;
 
 				SessionErrors.add(actionRequest, tpe.getClass(), tpe);
@@ -138,15 +143,20 @@ public class EditEntryAction extends PortletAction {
 	}
 
 	protected void addRestoreData(
-			LiferayPortletConfig liferayPortletConfig,
 			ActionRequest actionRequest,
 			List<ObjectValuePair<String, Long>> entryOVPs)
 		throws Exception {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
 		if ((entryOVPs == null) || (entryOVPs.size() <= 0)) {
 			return;
 		}
 
+		List<String> restoreClassNames = new ArrayList<String>();
+		List<String> restoreEntryLinks = new ArrayList<String>();
+		List<String> restoreEntryMessages = new ArrayList<String>();
 		List<String> restoreLinks = new ArrayList<String>();
 		List<String> restoreMessages = new ArrayList<String>();
 
@@ -156,9 +166,10 @@ public class EditEntryAction extends PortletAction {
 			TrashHandler trashHandler =
 				TrashHandlerRegistryUtil.getTrashHandler(entryOVP.getKey());
 
-			String restoreLink = trashHandler.getRestoreLink(
+			String restoreEntryLink = trashHandler.getRestoreContainedModelLink(
 				actionRequest, entryOVP.getValue());
-
+			String restoreLink = trashHandler.getRestoreContainerModelLink(
+				actionRequest, entryOVP.getValue());
 			String restoreMessage = trashHandler.getRestoreMessage(
 				actionRequest, entryOVP.getValue());
 
@@ -168,21 +179,35 @@ public class EditEntryAction extends PortletAction {
 				continue;
 			}
 
+			restoreClassNames.add(trashHandler.getClassName());
+			restoreEntryLinks.add(restoreEntryLink);
+
+			TrashRenderer trashRenderer = trashHandler.getTrashRenderer(
+				entryOVP.getValue());
+
+			String restoreEntryTitle = trashRenderer.getTitle(
+				themeDisplay.getLocale());
+
+			restoreEntryMessages.add(restoreEntryTitle);
+
 			restoreLinks.add(restoreLink);
 			restoreMessages.add(restoreMessage);
 		}
 
 		Map<String, List<String>> data = new HashMap<String, List<String>>();
 
+		data.put("restoreClassNames", restoreClassNames);
+		data.put("restoreEntryLinks", restoreEntryLinks);
+		data.put("restoreEntryMessages", restoreEntryMessages);
 		data.put("restoreLinks", restoreLinks);
 		data.put("restoreMessages", restoreMessages);
 
 		SessionMessages.add(
 			actionRequest,
-			liferayPortletConfig.getPortletId() +
+			PortalUtil.getPortletId(actionRequest) +
 				SessionMessages.KEY_SUFFIX_DELETE_SUCCESS_DATA, data);
 
-		hideDefaultSuccessMessage(liferayPortletConfig, actionRequest);
+		hideDefaultSuccessMessage(actionRequest);
 	}
 
 	protected void deleteEntries(ActionRequest actionRequest) throws Exception {
@@ -217,7 +242,10 @@ public class EditEntryAction extends PortletAction {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		TrashEntryServiceUtil.deleteEntries(themeDisplay.getScopeGroupId());
+		long groupId = ParamUtil.getLong(
+			actionRequest, "groupId", themeDisplay.getScopeGroupId());
+
+		TrashEntryServiceUtil.deleteEntries(groupId);
 	}
 
 	protected List<ObjectValuePair<String, Long>> getEntryOVPs(
@@ -263,23 +291,22 @@ public class EditEntryAction extends PortletAction {
 
 			return getEntryOVPs(entry.getClassName(), entry.getClassPK());
 		}
-		else {
-			long[] restoreEntryIds = StringUtil.split(
-				ParamUtil.getString(actionRequest, "restoreTrashEntryIds"), 0L);
 
-			List<ObjectValuePair<String, Long>> entryOVPs =
-				new ArrayList<ObjectValuePair<String, Long>>();
+		long[] restoreEntryIds = StringUtil.split(
+			ParamUtil.getString(actionRequest, "restoreTrashEntryIds"), 0L);
 
-			for (int i = 0; i < restoreEntryIds.length; i++) {
-				TrashEntry entry = TrashEntryServiceUtil.restoreEntry(
-					trashEntryId);
+		List<ObjectValuePair<String, Long>> entryOVPs =
+			new ArrayList<ObjectValuePair<String, Long>>();
 
-				entryOVPs.addAll(
-					getEntryOVPs(entry.getClassName(), entry.getClassPK()));
-			}
+		for (long restoreEntryId : restoreEntryIds) {
+			TrashEntry entry = TrashEntryServiceUtil.restoreEntry(
+				restoreEntryId);
 
-			return entryOVPs;
+			entryOVPs.addAll(
+				getEntryOVPs(entry.getClassName(), entry.getClassPK()));
 		}
+
+		return entryOVPs;
 	}
 
 	protected List<ObjectValuePair<String, Long>> restoreOverride(

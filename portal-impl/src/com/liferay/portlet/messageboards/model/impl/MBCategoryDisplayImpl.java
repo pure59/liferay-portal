@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,6 @@
 
 package com.liferay.portlet.messageboards.model.impl;
 
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ListTree;
@@ -130,12 +129,8 @@ public class MBCategoryDisplayImpl implements MBCategoryDisplay {
 	}
 
 	protected void init(long scopeGroupId, long categoryId) throws Exception {
-		long[] categoryIds = MBCategoryServiceUtil.getCategoryIds(
-			scopeGroupId, categoryId);
-
 		_allCategories = MBCategoryServiceUtil.getCategories(
-			scopeGroupId, categoryIds, WorkflowConstants.STATUS_APPROVED,
-			QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+			scopeGroupId, WorkflowConstants.STATUS_APPROVED);
 
 		_rootCategory = new MBCategoryImpl();
 

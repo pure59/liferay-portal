@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.dynamicdatalists.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see DDLRecordVersion
  * @generated
  */
+@ProviderType
 public class DDLRecordVersionWrapper implements DDLRecordVersion,
 	ModelWrapper<DDLRecordVersion> {
 	public DDLRecordVersionWrapper(DDLRecordVersion ddlRecordVersion) {
@@ -266,11 +269,9 @@ public class DDLRecordVersionWrapper implements DDLRecordVersion,
 	* Returns the user uuid of this d d l record version.
 	*
 	* @return the user uuid of this d d l record version
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _ddlRecordVersion.getUserUuid();
 	}
 
@@ -468,11 +469,9 @@ public class DDLRecordVersionWrapper implements DDLRecordVersion,
 	* Returns the status by user uuid of this d d l record version.
 	*
 	* @return the status by user uuid of this d d l record version
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getStatusByUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getStatusByUserUuid() {
 		return _ddlRecordVersion.getStatusByUserUuid();
 	}
 
@@ -529,6 +528,7 @@ public class DDLRecordVersionWrapper implements DDLRecordVersion,
 	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
+	@Deprecated
 	@Override
 	public boolean getApproved() {
 		return _ddlRecordVersion.getApproved();
@@ -592,16 +592,6 @@ public class DDLRecordVersionWrapper implements DDLRecordVersion,
 	@Override
 	public boolean isIncomplete() {
 		return _ddlRecordVersion.isIncomplete();
-	}
-
-	/**
-	* Returns <code>true</code> if this d d l record version is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this d d l record version is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _ddlRecordVersion.isInTrash();
 	}
 
 	/**
@@ -725,15 +715,13 @@ public class DDLRecordVersionWrapper implements DDLRecordVersion,
 
 	@Override
 	public com.liferay.portlet.dynamicdatalists.model.DDLRecord getRecord()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecordVersion.getRecord();
 	}
 
 	@Override
 	public com.liferay.portlet.dynamicdatalists.model.DDLRecordSet getRecordSet()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _ddlRecordVersion.getRecordSet();
 	}
 
@@ -760,6 +748,7 @@ public class DDLRecordVersionWrapper implements DDLRecordVersion,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public DDLRecordVersion getWrappedDDLRecordVersion() {
 		return _ddlRecordVersion;
 	}
@@ -767,6 +756,16 @@ public class DDLRecordVersionWrapper implements DDLRecordVersion,
 	@Override
 	public DDLRecordVersion getWrappedModel() {
 		return _ddlRecordVersion;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _ddlRecordVersion.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _ddlRecordVersion.isFinderCacheEnabled();
 	}
 
 	@Override

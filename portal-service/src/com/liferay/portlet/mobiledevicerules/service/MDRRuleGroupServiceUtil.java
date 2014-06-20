@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.mobiledevicerules.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.mobiledevicerules.service.impl.MDRRuleGroupServiceImpl
  * @generated
  */
+@ProviderType
 public class MDRRuleGroupServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -61,8 +64,7 @@ public class MDRRuleGroupServiceUtil {
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addRuleGroup(groupId, nameMap, descriptionMap,
 			serviceContext);
@@ -71,28 +73,24 @@ public class MDRRuleGroupServiceUtil {
 	public static com.liferay.portlet.mobiledevicerules.model.MDRRuleGroup copyRuleGroup(
 		long ruleGroupId, long groupId,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().copyRuleGroup(ruleGroupId, groupId, serviceContext);
 	}
 
 	public static void deleteRuleGroup(long ruleGroupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteRuleGroup(ruleGroupId);
 	}
 
 	public static com.liferay.portlet.mobiledevicerules.model.MDRRuleGroup fetchRuleGroup(
 		long ruleGroupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().fetchRuleGroup(ruleGroupId);
 	}
 
 	public static com.liferay.portlet.mobiledevicerules.model.MDRRuleGroup getRuleGroup(
 		long ruleGroupId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getRuleGroup(ruleGroupId);
 	}
 
@@ -101,8 +99,7 @@ public class MDRRuleGroupServiceUtil {
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateRuleGroup(ruleGroupId, nameMap, descriptionMap,
 			serviceContext);
@@ -122,6 +119,7 @@ public class MDRRuleGroupServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(MDRRuleGroupService service) {
 	}
 

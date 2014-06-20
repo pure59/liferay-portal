@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,8 +14,9 @@
 
 package com.liferay.portlet.dynamicdatamapping.util;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
@@ -29,7 +30,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
@@ -47,6 +48,7 @@ import javax.portlet.PortletURL;
 /**
  * @author Eduardo Garcia
  */
+@ProviderType
 public abstract class BaseDDMDisplay implements DDMDisplay {
 
 	@Override
@@ -81,15 +83,16 @@ public abstract class BaseDDMDisplay implements DDMDisplay {
 			long classPK, String portletResource)
 		throws Exception {
 
-		String backURL = ParamUtil.getString(liferayPortletRequest, "backURL");
+		String redirect = ParamUtil.getString(
+			liferayPortletRequest, "redirect");
 
-		if (Validator.isNull(backURL) || Validator.isNull(portletResource)) {
-			backURL = getViewTemplatesURL(
+		if (Validator.isNull(redirect) || Validator.isNull(portletResource)) {
+			return getViewTemplatesURL(
 				liferayPortletRequest, liferayPortletResponse, classNameId,
 				classPK);
 		}
 
-		return backURL;
+		return redirect;
 	}
 
 	@Override
@@ -197,6 +200,19 @@ public abstract class BaseDDMDisplay implements DDMDisplay {
 	}
 
 	@Override
+	public long[] getTemplateGroupIds(
+			ThemeDisplay themeDisplay, boolean includeAncestorTemplates)
+		throws Exception {
+
+		if (includeAncestorTemplates) {
+			return PortalUtil.getCurrentAndAncestorSiteGroupIds(
+				themeDisplay.getScopeGroupId());
+		}
+
+		return new long[] {themeDisplay.getScopeGroupId()};
+	}
+
+	@Override
 	public long getTemplateHandlerClassNameId(
 		DDMTemplate template, long classNameId) {
 
@@ -249,7 +265,8 @@ public abstract class BaseDDMDisplay implements DDMDisplay {
 
 	@Override
 	public String getViewTemplatesTitle(
-		DDMStructure structure, boolean controlPanel, Locale locale) {
+		DDMStructure structure, boolean controlPanel, boolean search,
+		Locale locale) {
 
 		if (structure != null) {
 			return LanguageUtil.format(
@@ -260,23 +277,31 @@ public abstract class BaseDDMDisplay implements DDMDisplay {
 		return getDefaultViewTemplateTitle(locale);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
 	@Override
-	public String getViewTemplatesTitle(DDMStructure structure, Locale locale) {
-		return getViewTemplatesTitle(structure, false, locale);
+	public String getViewTemplatesTitle(
+		DDMStructure structure, boolean controlPanel, Locale locale) {
+
+		return getViewTemplatesTitle(structure, controlPanel, false, locale);
 	}
 
 	@Override
-	public boolean isShowAddStructureButton(
-		PermissionChecker permissionChecker, long groupId) {
+	public String getViewTemplatesTitle(DDMStructure structure, Locale locale) {
+		return getViewTemplatesTitle(structure, false, false, locale);
+	}
 
+	@Override
+	public boolean isShowAddStructureButton() {
 		String portletId = getPortletId();
 
 		if (portletId.equals(PortletKeys.DYNAMIC_DATA_MAPPING)) {
 			return false;
 		}
 
-		return permissionChecker.hasPermission(
-			groupId, getResourceName(), groupId, getAddStructureActionId());
+		return true;
 	}
 
 	@Override
@@ -286,7 +311,7 @@ public abstract class BaseDDMDisplay implements DDMDisplay {
 
 	protected long getControlPanelPlid(
 			LiferayPortletRequest liferayPortletRequest)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return PortalUtil.getControlPanelPlid(liferayPortletRequest);
 	}

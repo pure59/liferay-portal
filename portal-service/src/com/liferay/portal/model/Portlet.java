@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.util.Accessor;
 
 /**
@@ -25,6 +27,7 @@ import com.liferay.portal.kernel.util.Accessor;
  * @see com.liferay.portal.model.impl.PortletModelImpl
  * @generated
  */
+@ProviderType
 public interface Portlet extends PortletModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -35,6 +38,16 @@ public interface Portlet extends PortletModel, PersistedModel {
 			@Override
 			public String get(Portlet portlet) {
 				return portlet.getPortletId();
+			}
+
+			@Override
+			public Class<String> getAttributeClass() {
+				return String.class;
+			}
+
+			@Override
+			public Class<Portlet> getTypeClass() {
+				return Portlet.class;
 			}
 		};
 
@@ -182,6 +195,13 @@ public interface Portlet extends PortletModel, PersistedModel {
 	* @return the configuration action instance of the portlet
 	*/
 	public com.liferay.portal.kernel.portlet.ConfigurationAction getConfigurationActionInstance();
+
+	/**
+	* Returns the servlet context name of the portlet.
+	*
+	* @return the servlet context name of the portlet
+	*/
+	public java.lang.String getContextName();
 
 	/**
 	* Returns the servlet context path of the portlet.
@@ -857,6 +877,13 @@ public interface Portlet extends PortletModel, PersistedModel {
 	public boolean getShowPortletInactive();
 
 	/**
+	* Returns <code>true</code> if the portlet uses Single Page Application.
+	*
+	* @return <code>true</code> if the portlet uses Single Page Application
+	*/
+	public boolean getSinglePageApplication();
+
+	/**
 	* Returns the names of the classes that represent social activity
 	* interpreters associated with the portlet.
 	*
@@ -871,6 +898,15 @@ public interface Portlet extends PortletModel, PersistedModel {
 	* @return the social activity interpreter instances of the portlet
 	*/
 	public java.util.List<com.liferay.portlet.social.model.SocialActivityInterpreter> getSocialActivityInterpreterInstances();
+
+	/**
+	* Returns <code>true</code> if the portlet uses Social Interactions
+	* Configuration
+	*
+	* @return <code>true</code> if the portlet uses Social Interactions
+	Configuration
+	*/
+	public boolean getSocialInteractionsConfiguration();
 
 	/**
 	* Returns the name of the social request interpreter class of the portlet.
@@ -1123,7 +1159,7 @@ public interface Portlet extends PortletModel, PersistedModel {
 	*
 	* @return the workflow handler instances of the portlet
 	*/
-	public java.util.List<com.liferay.portal.kernel.workflow.WorkflowHandler> getWorkflowHandlerInstances();
+	public java.util.List<com.liferay.portal.kernel.workflow.WorkflowHandler<?>> getWorkflowHandlerInstances();
 
 	/**
 	* Returns the name of the XML-RPC method class of the portlet.
@@ -1148,6 +1184,22 @@ public interface Portlet extends PortletModel, PersistedModel {
 	portlet to a layout
 	*/
 	public boolean hasAddPortletPermission(long userId);
+
+	public boolean hasFooterPortalCss();
+
+	public boolean hasFooterPortalJavaScript();
+
+	public boolean hasFooterPortletCss();
+
+	public boolean hasFooterPortletJavaScript();
+
+	public boolean hasHeaderPortalCss();
+
+	public boolean hasHeaderPortalJavaScript();
+
+	public boolean hasHeaderPortletCss();
+
+	public boolean hasHeaderPortletJavaScript();
 
 	/**
 	* Returns <code>true</code> if the portlet supports more than one mime
@@ -1369,6 +1421,22 @@ public interface Portlet extends PortletModel, PersistedModel {
 	* @return <code>true</code> if users are shown that the portlet is inactive
 	*/
 	public boolean isShowPortletInactive();
+
+	/**
+	* Returns <code>true</code> if the portlet uses Single Page Application.
+	*
+	* @return <code>true</code> if the portlet uses Single Page Application
+	*/
+	public boolean isSinglePageApplication();
+
+	/**
+	* Returns <code>true</code> if the portlet uses Social Interactions
+	* Configuration
+	*
+	* @return <code>true</code> if the portlet uses Social Interactions
+	Configuration
+	*/
+	public boolean isSocialInteractionsConfiguration();
 
 	/**
 	* Returns <code>true</code> if the portlet is a static portlet that is
@@ -2080,6 +2148,14 @@ public interface Portlet extends PortletModel, PersistedModel {
 	public void setShowPortletInactive(boolean showPortletInactive);
 
 	/**
+	* Set to <code>true</code> if the portlet uses Single Page Application.
+	*
+	* @param singlePageApplication boolean value for whether or not the the
+	portlet uses Single Page Application
+	*/
+	public void setSinglePageApplication(boolean singlePageApplication);
+
+	/**
 	* Sets the names of the classes that represent social activity interpreters
 	* associated with the portlet.
 	*
@@ -2088,6 +2164,9 @@ public interface Portlet extends PortletModel, PersistedModel {
 	*/
 	public void setSocialActivityInterpreterClasses(
 		java.util.List<java.lang.String> socialActivityInterpreterClasses);
+
+	public void setSocialInteractionsConfiguration(
+		boolean socialInteractionsConfiguration);
 
 	/**
 	* Sets the name of the social request interpreter class of the portlet.
@@ -2157,13 +2236,6 @@ public interface Portlet extends PortletModel, PersistedModel {
 	portlet
 	*/
 	public void setTemplateHandlerClass(java.lang.String templateHandlerClass);
-
-	/**
-	* Sets the timestamp of the portlet.
-	*
-	* @param timestamp the timestamp of the portlet
-	*/
-	public void setTimestamp(long timestamp);
 
 	/**
 	* Sets the names of the classes that represent trash handlers associated to

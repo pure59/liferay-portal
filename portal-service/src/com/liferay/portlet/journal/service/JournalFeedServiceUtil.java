@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.journal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.journal.service.impl.JournalFeedServiceImpl
  * @generated
  */
+@ProviderType
 public class JournalFeedServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -66,8 +69,7 @@ public class JournalFeedServiceUtil {
 		java.lang.String targetPortletId, java.lang.String contentField,
 		java.lang.String feedType, double feedVersion,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addFeed(groupId, feedId, autoFeedId, name, description,
 			type, structureId, templateId, rendererTemplateId, delta,
@@ -75,29 +77,43 @@ public class JournalFeedServiceUtil {
 			contentField, feedType, feedVersion, serviceContext);
 	}
 
+	public static void deleteFeed(long feedId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		getService().deleteFeed(feedId);
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #deleteFeed(long, String)}
+	*/
+	@Deprecated
 	public static void deleteFeed(long groupId, long feedId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteFeed(groupId, feedId);
 	}
 
 	public static void deleteFeed(long groupId, java.lang.String feedId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteFeed(groupId, feedId);
 	}
 
 	public static com.liferay.portlet.journal.model.JournalFeed getFeed(
+		long feedId) throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().getFeed(feedId);
+	}
+
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getFeed(long, String)}
+	*/
+	@Deprecated
+	public static com.liferay.portlet.journal.model.JournalFeed getFeed(
 		long groupId, long feedId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getFeed(groupId, feedId);
 	}
 
 	public static com.liferay.portlet.journal.model.JournalFeed getFeed(
 		long groupId, java.lang.String feedId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getFeed(groupId, feedId);
 	}
 
@@ -111,8 +127,7 @@ public class JournalFeedServiceUtil {
 		java.lang.String targetPortletId, java.lang.String contentField,
 		java.lang.String feedType, double feedVersion,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateFeed(groupId, feedId, name, description, type,
 			structureId, templateId, rendererTemplateId, delta, orderByCol,
@@ -134,6 +149,7 @@ public class JournalFeedServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(JournalFeedService service) {
 	}
 

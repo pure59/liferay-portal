@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -31,6 +31,7 @@ public class LayoutSoap implements Serializable {
 	public static LayoutSoap toSoapModel(Layout model) {
 		LayoutSoap soapModel = new LayoutSoap();
 
+		soapModel.setMvccVersion(model.getMvccVersion());
 		soapModel.setUuid(model.getUuid());
 		soapModel.setPlid(model.getPlid());
 		soapModel.setGroupId(model.getGroupId());
@@ -51,7 +52,6 @@ public class LayoutSoap implements Serializable {
 		soapModel.setTypeSettings(model.getTypeSettings());
 		soapModel.setHidden(model.getHidden());
 		soapModel.setFriendlyURL(model.getFriendlyURL());
-		soapModel.setIconImage(model.getIconImage());
 		soapModel.setIconImageId(model.getIconImageId());
 		soapModel.setThemeId(model.getThemeId());
 		soapModel.setColorSchemeId(model.getColorSchemeId());
@@ -112,6 +112,14 @@ public class LayoutSoap implements Serializable {
 
 	public void setPrimaryKey(long pk) {
 		setPlid(pk);
+	}
+
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
 	}
 
 	public String getUuid() {
@@ -282,18 +290,6 @@ public class LayoutSoap implements Serializable {
 		_friendlyURL = friendlyURL;
 	}
 
-	public boolean getIconImage() {
-		return _iconImage;
-	}
-
-	public boolean isIconImage() {
-		return _iconImage;
-	}
-
-	public void setIconImage(boolean iconImage) {
-		_iconImage = iconImage;
-	}
-
 	public long getIconImageId() {
 		return _iconImageId;
 	}
@@ -379,6 +375,7 @@ public class LayoutSoap implements Serializable {
 		_sourcePrototypeLayoutUuid = sourcePrototypeLayoutUuid;
 	}
 
+	private long _mvccVersion;
 	private String _uuid;
 	private long _plid;
 	private long _groupId;
@@ -399,7 +396,6 @@ public class LayoutSoap implements Serializable {
 	private String _typeSettings;
 	private boolean _hidden;
 	private String _friendlyURL;
-	private boolean _iconImage;
 	private long _iconImageId;
 	private String _themeId;
 	private String _colorSchemeId;

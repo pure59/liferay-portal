@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.documentlibrary.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -61,6 +63,7 @@ import java.rmi.RemoteException;
  * @see com.liferay.portlet.documentlibrary.service.DLFileVersionServiceUtil
  * @generated
  */
+@ProviderType
 public class DLFileVersionServiceSoap {
 	public static com.liferay.portlet.documentlibrary.model.DLFileVersionSoap getFileVersion(
 		long fileVersionId) throws RemoteException {
@@ -68,6 +71,36 @@ public class DLFileVersionServiceSoap {
 			com.liferay.portlet.documentlibrary.model.DLFileVersion returnValue = DLFileVersionServiceUtil.getFileVersion(fileVersionId);
 
 			return com.liferay.portlet.documentlibrary.model.DLFileVersionSoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.documentlibrary.model.DLFileVersionSoap[] getFileVersions(
+		long fileEntryId, int status) throws RemoteException {
+		try {
+			java.util.List<com.liferay.portlet.documentlibrary.model.DLFileVersion> returnValue =
+				DLFileVersionServiceUtil.getFileVersions(fileEntryId, status);
+
+			return com.liferay.portlet.documentlibrary.model.DLFileVersionSoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static int getFileVersionsCount(long fileEntryId, int status)
+		throws RemoteException {
+		try {
+			int returnValue = DLFileVersionServiceUtil.getFileVersionsCount(fileEntryId,
+					status);
+
+			return returnValue;
 		}
 		catch (Exception e) {
 			_log.error(e, e);

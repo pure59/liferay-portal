@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -74,8 +74,10 @@ public class DocumentLibraryPortletDisplayTemplateHandler
 			"documents", List.class, PortletDisplayTemplateConstants.ENTRIES,
 			"document", FileEntry.class, "curFileEntry", "title");
 
+		String[] restrictedVariables = getRestrictedVariables(language);
+
 		TemplateVariableGroup documentServicesTemplateVariableGroup =
-			new TemplateVariableGroup("document-services");
+			new TemplateVariableGroup("document-services", restrictedVariables);
 
 		documentServicesTemplateVariableGroup.setAutocompleteEnabled(false);
 

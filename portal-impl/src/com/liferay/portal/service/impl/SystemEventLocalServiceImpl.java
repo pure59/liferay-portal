@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,6 @@
 package com.liferay.portal.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.systemevent.SystemEventHierarchyEntry;
 import com.liferay.portal.kernel.systemevent.SystemEventHierarchyEntryThreadLocal;
 import com.liferay.portal.kernel.util.StringPool;
@@ -25,6 +24,7 @@ import com.liferay.portal.model.Group;
 import com.liferay.portal.model.SystemEvent;
 import com.liferay.portal.model.SystemEventConstants;
 import com.liferay.portal.model.User;
+import com.liferay.portal.security.auth.CompanyThreadLocal;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.service.base.SystemEventLocalServiceBaseImpl;
 
@@ -42,7 +42,7 @@ public class SystemEventLocalServiceImpl
 			long userId, long groupId, String className, long classPK,
 			String classUuid, String referrerClassName, int type,
 			String extraData)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userId == 0) {
 			userId = PrincipalThreadLocal.getUserId();
@@ -72,7 +72,7 @@ public class SystemEventLocalServiceImpl
 	public SystemEvent addSystemEvent(
 			long companyId, String className, long classPK, String classUuid,
 			String referrerClassName, int type, String extraData)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return addSystemEvent(
 			0, companyId, 0, className, classPK, classUuid, referrerClassName,
@@ -80,14 +80,18 @@ public class SystemEventLocalServiceImpl
 	}
 
 	@Override
-	public void deleteSystemEvents(long groupId) throws SystemException {
+	public void deleteSystemEvents(long groupId) {
 		systemEventPersistence.removeByGroupId(groupId);
 	}
 
 	@Override
+	public void deleteSystemEvents(long groupId, long systemEventSetKey) {
+		systemEventPersistence.removeByG_S(groupId, systemEventSetKey);
+	}
+
+	@Override
 	public SystemEvent fetchSystemEvent(
-			long groupId, long classNameId, long classPK, int type)
-		throws SystemException {
+		long groupId, long classNameId, long classPK, int type) {
 
 		return systemEventPersistence.fetchByG_C_C_T_First(
 			groupId, classNameId, classPK, type, null);
@@ -95,8 +99,7 @@ public class SystemEventLocalServiceImpl
 
 	@Override
 	public List<SystemEvent> getSystemEvents(
-			long groupId, long classNameId, long classPK)
-		throws SystemException {
+		long groupId, long classNameId, long classPK) {
 
 		return systemEventPersistence.findByG_C_C(
 			groupId, classNameId, classPK);
@@ -104,8 +107,7 @@ public class SystemEventLocalServiceImpl
 
 	@Override
 	public List<SystemEvent> getSystemEvents(
-			long groupId, long classNameId, long classPK, int type)
-		throws SystemException {
+		long groupId, long classNameId, long classPK, int type) {
 
 		return systemEventPersistence.findByG_C_C_T(
 			groupId, classNameId, classPK, type);
@@ -115,7 +117,7 @@ public class SystemEventLocalServiceImpl
 			long userId, long companyId, long groupId, String className,
 			long classPK, String classUuid, String referrerClassName, int type,
 			String extraData, String userName)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		SystemEventHierarchyEntry systemEventHierarchyEntry =
 			SystemEventHierarchyEntryThreadLocal.peek();
@@ -133,12 +135,14 @@ public class SystemEventLocalServiceImpl
 			}
 		}
 
-		Company company = companyPersistence.findByPrimaryKey(companyId);
+		if (!CompanyThreadLocal.isDeleteInProcess()) {
+			Company company = companyPersistence.findByPrimaryKey(companyId);
 
-		Group companyGroup = company.getGroup();
+			Group companyGroup = company.getGroup();
 
-		if (companyGroup.getGroupId() == groupId) {
-			groupId = 0;
+			if (companyGroup.getGroupId() == groupId) {
+				groupId = 0;
+			}
 		}
 
 		if (Validator.isNotNull(referrerClassName) &&

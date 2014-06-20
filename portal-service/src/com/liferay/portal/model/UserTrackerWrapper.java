@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see UserTracker
  * @generated
  */
+@ProviderType
 public class UserTrackerWrapper implements UserTracker,
 	ModelWrapper<UserTracker> {
 	public UserTrackerWrapper(UserTracker userTracker) {
@@ -49,6 +52,7 @@ public class UserTrackerWrapper implements UserTracker,
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("userTrackerId", getUserTrackerId());
 		attributes.put("companyId", getCompanyId());
 		attributes.put("userId", getUserId());
@@ -63,6 +67,12 @@ public class UserTrackerWrapper implements UserTracker,
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long userTrackerId = (Long)attributes.get("userTrackerId");
 
 		if (userTrackerId != null) {
@@ -133,6 +143,26 @@ public class UserTrackerWrapper implements UserTracker,
 	}
 
 	/**
+	* Returns the mvcc version of this user tracker.
+	*
+	* @return the mvcc version of this user tracker
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _userTracker.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this user tracker.
+	*
+	* @param mvccVersion the mvcc version of this user tracker
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_userTracker.setMvccVersion(mvccVersion);
+	}
+
+	/**
 	* Returns the user tracker ID of this user tracker.
 	*
 	* @return the user tracker ID of this user tracker
@@ -196,11 +226,9 @@ public class UserTrackerWrapper implements UserTracker,
 	* Returns the user uuid of this user tracker.
 	*
 	* @return the user uuid of this user tracker
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _userTracker.getUserUuid();
 	}
 
@@ -413,8 +441,7 @@ public class UserTrackerWrapper implements UserTracker,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_userTracker.persist();
 	}
 
@@ -465,6 +492,7 @@ public class UserTrackerWrapper implements UserTracker,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public UserTracker getWrappedUserTracker() {
 		return _userTracker;
 	}
@@ -472,6 +500,16 @@ public class UserTrackerWrapper implements UserTracker,
 	@Override
 	public UserTracker getWrappedModel() {
 		return _userTracker;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _userTracker.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _userTracker.isFinderCacheEnabled();
 	}
 
 	@Override

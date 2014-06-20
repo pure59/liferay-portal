@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -33,6 +35,7 @@ import com.liferay.portal.security.ac.AccessControlled;
  * @see com.liferay.portal.service.impl.ClassNameServiceImpl
  * @generated
  */
+@ProviderType
 @AccessControlled
 @JSONWebService
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
@@ -60,8 +63,7 @@ public interface ClassNameService extends BaseService {
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public com.liferay.portal.model.ClassName fetchClassName(
-		java.lang.String value)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		java.lang.String value);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public long fetchClassNameId(java.lang.Class<?> clazz);

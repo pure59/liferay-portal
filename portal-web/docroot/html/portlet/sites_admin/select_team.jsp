@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -33,27 +33,29 @@ String eventName = ParamUtil.getString(request, "eventName", liferayPortletRespo
 	<portlet:param name="eventName" value="<%= eventName %>" />
 </liferay-portlet:renderURL>
 
-<aui:form action="<%= portletURL.toString() %>" method="get" name="selectTeamFm">
+<aui:form action="<%= portletURL.toString() %>" cssClass="form-search" method="get" name="selectTeamFm">
 	<liferay-portlet:renderURLParams varImpl="portletURL" />
 
 	<liferay-ui:search-container
 		searchContainer="<%= new TeamSearch(renderRequest, portletURL) %>"
 	>
-		<liferay-ui:search-form
-			page="/html/portlet/sites_admin/team_search.jsp"
-		/>
+
+		<%
+		TeamDisplayTerms searchTerms = (TeamDisplayTerms)searchContainer.getSearchTerms();
+
+		portletURL.setParameter(searchContainer.getCurParam(), String.valueOf(searchContainer.getCur()));
+
+		total = TeamLocalServiceUtil.searchCount(groupId, searchTerms.getName(), searchTerms.getDescription(), new LinkedHashMap<String, Object>());
+
+		searchContainer.setTotal(total);
+		%>
+
+		<liferay-ui:input-search name="<%= searchTerms.NAME %>" />
 
 		<div class="separator"><!-- --></div>
 
-		<%
-		TeamSearchTerms searchTerms = (TeamSearchTerms)searchContainer.getSearchTerms();
-
-		portletURL.setParameter(searchContainer.getCurParam(), String.valueOf(searchContainer.getCur()));
-		%>
-
 		<liferay-ui:search-container-results
 			results="<%= TeamLocalServiceUtil.search(groupId, searchTerms.getName(), searchTerms.getDescription(), new LinkedHashMap<String, Object>(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
-			total="<%= TeamLocalServiceUtil.searchCount(groupId, searchTerms.getName(), searchTerms.getDescription(), new LinkedHashMap<String, Object>()) %>"
 		/>
 
 		<liferay-ui:search-container-row
@@ -64,12 +66,12 @@ String eventName = ParamUtil.getString(request, "eventName", liferayPortletRespo
 		>
 			<liferay-ui:search-container-column-text
 				name="name"
-				value="<%= curTeam.getName() %>"
+				value="<%= HtmlUtil.escape(curTeam.getName()) %>"
 			/>
 
 			<liferay-ui:search-container-column-text
 				name="description"
-				value="<%= curTeam.getDescription() %>"
+				value="<%= HtmlUtil.escape(curTeam.getDescription()) %>"
 			/>
 
 			<liferay-ui:search-container-column-text>
@@ -77,13 +79,29 @@ String eventName = ParamUtil.getString(request, "eventName", liferayPortletRespo
 				<%
 				Map<String, Object> data = new HashMap<String, Object>();
 
-				data.put("teamdescription", HtmlUtil.escape(curTeam.getDescription()));
+				data.put("teamdescription", curTeam.getDescription());
 				data.put("teamid", curTeam.getTeamId());
-				data.put("teamname", HtmlUtil.escape(curTeam.getName()));
+				data.put("teamname", curTeam.getName());
 				data.put("teamsearchcontainername", "teams");
+
+				boolean disabled = false;
+
+				Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+				long[] defaultTeamIds = StringUtil.split(group.getTypeSettingsProperties().getProperty("defaultTeamIds"), 0L);
+
+				for (long defaultTeamId : defaultTeamIds) {
+					Team team = TeamLocalServiceUtil.getTeam(defaultTeamId);
+
+					if (team.getTeamId() == curTeam.getTeamId()) {
+						disabled = true;
+
+						break;
+					}
+				}
 				%>
 
-				<aui:button cssClass="selector-button" data="<%= data %>" value="choose" />
+				<aui:button cssClass="selector-button" data="<%= data %>" disabled="<%= disabled %>" value="choose" />
 			</liferay-ui:search-container-column-text>
 
 		</liferay-ui:search-container-row>
@@ -95,15 +113,14 @@ String eventName = ParamUtil.getString(request, "eventName", liferayPortletRespo
 <aui:script use="aui-base">
 	var Util = Liferay.Util;
 
-	A.one('#<portlet:namespace />selectTeamFm').delegate(
-		'click',
-		function(event) {
-			var result = Util.getAttributes(event.currentTarget, 'data-');
+	var openingLiferay = Util.getOpener().Liferay;
 
-			Util.getOpener().Liferay.fire('<%= HtmlUtil.escapeJS(eventName) %>', result);
-
-			Util.getWindow().hide();
-		},
-		'.selector-button'
+	openingLiferay.fire(
+		'<portlet:namespace />enableRemovedTeams',
+		{
+			selectors: A.all('.selector-button:disabled')
+		}
 	);
+
+	Util.selectEntityHandler('#<portlet:namespace />selectTeamFm', '<%= HtmlUtil.escapeJS(eventName) %>');
 </aui:script>

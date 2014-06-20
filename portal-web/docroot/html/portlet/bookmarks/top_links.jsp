@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -28,7 +28,7 @@ portletURL.setParameter("tag", StringPool.BLANK);
 %>
 
 <aui:nav-bar>
-	<aui:nav>
+	<aui:nav cssClass="navbar-nav">
 
 		<%
 		String label = "home";
@@ -61,32 +61,28 @@ portletURL.setParameter("tag", StringPool.BLANK);
 		</c:if>
 	</aui:nav>
 
-	<c:if test="<%= showFoldersSearch %>">
+	<c:if test="<%= bookmarksSettings.isShowFoldersSearch() %>">
 		<liferay-portlet:renderURL varImpl="searchURL">
 			<portlet:param name="struts_action" value="/bookmarks/search" />
 		</liferay-portlet:renderURL>
 
-		<div class="navbar-search pull-right">
-			<div class="form-search">
+		<aui:nav-bar-search>
+			<div class="col-xs-12 form-search">
 				<aui:form action="<%= searchURL %>" method="get" name="searchFm">
 					<liferay-portlet:renderURLParams varImpl="searchURL" />
 					<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 					<aui:input name="breadcrumbsFolderId" type="hidden" value="<%= folderId %>" />
 					<aui:input name="searchFolderIds" type="hidden" value="<%= folderId %>" />
 
-					<div class="input-append">
-						<input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" class="search-query span9" id="<portlet:namespace/>keywords1" name="<portlet:namespace/>keywords" placeholder="<liferay-ui:message key="keywords" />" type="text" />
-
-						<aui:button primary="<%= false %>" type="submit" value="search" />
-					</div>
+					<liferay-ui:input-search autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" id="keywords1" name="keywords" placeholder='<%= LanguageUtil.get(locale, "keywords") %>' />
 				</aui:form>
 			</div>
-		</div>
+		</aui:nav-bar-search>
 	</c:if>
 </aui:nav-bar>
 
 <c:if test="<%= layout.isTypeControlPanel() %>">
 	<div id="breadcrumb">
-		<liferay-ui:breadcrumb showCurrentGroup="<%= false %>" showCurrentPortlet="<%= false %>" showGuestGroup="<%= false %>" showLayout="<%= false %>" showPortletBreadcrumb="<%= true %>" />
+		<liferay-ui:breadcrumb showCurrentGroup="<%= false %>" showGuestGroup="<%= false %>" showLayout="<%= false %>" showPortletBreadcrumb="<%= true %>" />
 	</div>
 </c:if>

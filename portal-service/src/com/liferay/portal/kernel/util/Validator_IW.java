@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -111,12 +111,20 @@ public class Validator_IW {
 		return Validator.isBlank(s);
 	}
 
+	public boolean isBoolean(java.lang.String value) {
+		return Validator.isBoolean(value);
+	}
+
 	public boolean isChar(char c) {
 		return Validator.isChar(c);
 	}
 
 	public boolean isChar(java.lang.String s) {
 		return Validator.isChar(s);
+	}
+
+	public boolean isContent(java.lang.String s) {
+		return Validator.isContent(s);
 	}
 
 	public boolean isDate(int month, int day, int year) {
@@ -203,6 +211,10 @@ public class Validator_IW {
 		return Validator.isNotNull(obj);
 	}
 
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	public boolean isNotNull(java.lang.Object[] array) {
 		return Validator.isNotNull(array);
 	}
@@ -219,6 +231,10 @@ public class Validator_IW {
 		return Validator.isNull(obj);
 	}
 
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	public boolean isNull(java.lang.Object[] array) {
 		return Validator.isNull(array);
 	}

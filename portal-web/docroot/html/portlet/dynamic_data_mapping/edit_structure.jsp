@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,6 +18,8 @@
 
 <%
 String redirect = ParamUtil.getString(request, "redirect");
+String closeRedirect = ParamUtil.getString(request, "closeRedirect");
+boolean showBackURL = ParamUtil.getBoolean(request, "showBackURL", true);
 
 String portletResourceNamespace = ParamUtil.getString(request, "portletResourceNamespace");
 
@@ -39,6 +41,7 @@ catch (NoSuchStructureException nsee) {
 
 long classNameId = PortalUtil.getClassNameId(DDMStructure.class);
 long classPK = BeanParamUtil.getLong(structure, request, "structureId");
+String structureKey = BeanParamUtil.getString(structure, request, "structureKey");
 
 String script = BeanParamUtil.getString(structure, request, "xsd");
 
@@ -50,7 +53,7 @@ if (Validator.isNotNull(script)) {
 			scriptJSONArray = DDMXSDUtil.getJSONArray(structure, script);
 		}
 		catch (Exception e) {
-			scriptJSONArray = DDMXSDUtil.getJSONArray(structure.getDocument());
+			scriptJSONArray = DDMXSDUtil.getJSONArray(structure.getXsd());
 		}
 	}
 	else {
@@ -63,9 +66,18 @@ if (Validator.isNotNull(script)) {
 	<portlet:param name="struts_action" value="/dynamic_data_mapping/edit_structure" />
 </portlet:actionURL>
 
+<%
+String requestEditStructureURL = ParamUtil.getString(request, "editStructureURL");
+
+if (Validator.isNotNull(requestEditStructureURL)) {
+	editStructureURL = requestEditStructureURL;
+}
+%>
+
 <aui:form action="<%= editStructureURL %>" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveStructure();" %>'>
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= (structure != null) ? Constants.UPDATE : Constants.ADD %>" />
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
+	<aui:input name="closeRedirect" type="hidden" value="<%= closeRedirect %>" />
 	<aui:input name="groupId" type="hidden" value="<%= groupId %>" />
 	<aui:input name="classNameId" type="hidden" value="<%= String.valueOf(classNameId) %>" />
 	<aui:input name="classPK" type="hidden" value="<%= String.valueOf(classPK) %>" />
@@ -78,7 +90,9 @@ if (Validator.isNotNull(script)) {
 		LocaleException le = (LocaleException)errorException;
 		%>
 
-		<liferay-ui:message arguments="<%= new String[] {StringUtil.merge(le.getSourceAvailableLocales(), StringPool.COMMA_AND_SPACE), StringUtil.merge(le.getTargetAvailableLocales(), StringPool.COMMA_AND_SPACE)} %>" key="the-default-language-x-does-not-match-the-portal's-available-languages-x" />
+		<c:if test="<%= le.getType() == LocaleException.TYPE_CONTENT %>">
+			<liferay-ui:message arguments="<%= new String[] {StringUtil.merge(le.getSourceAvailableLocales(), StringPool.COMMA_AND_SPACE), StringUtil.merge(le.getTargetAvailableLocales(), StringPool.COMMA_AND_SPACE)} %>" key="the-default-language-x-does-not-match-the-portal's-available-languages-x" />
+		</c:if>
 	</liferay-ui:error>
 
 	<liferay-ui:error exception="<%= StructureDuplicateElementException.class %>" message="please-enter-unique-structure-field-names-(including-field-names-inherited-from-the-parent-structure)" />
@@ -94,27 +108,37 @@ if (Validator.isNotNull(script)) {
 		title = structure.getName(locale);
 	}
 	else {
-		title = LanguageUtil.format(pageContext, "new-x", ddmDisplay.getStructureName(locale));
+		title = LanguageUtil.format(request, "new-x", ddmDisplay.getStructureName(locale), false);
 	}
 	%>
 
-	<portlet:renderURL var="viewRecordsURL">
-		<portlet:param name="struts_action" value="/dynamic_data_lists/view" />
-	</portlet:renderURL>
-
 	<liferay-ui:header
-		backURL="<%= viewRecordsURL %>"
+		backURL="<%= redirect %>"
 		localizeTitle="<%= localizeTitle %>"
+		showBackURL="<%= showBackURL %>"
 		title="<%= title %>"
 	/>
 
 	<aui:model-context bean="<%= structure %>" model="<%= DDMStructure.class %>" />
 
 	<aui:fieldset>
-		<aui:input name="name" />
+		<aui:field-wrapper>
+			<c:if test="<%= (structure != null) && ((DDMStorageLinkLocalServiceUtil.getStructureStorageLinksCount(classPK) > 0) || (JournalArticleLocalServiceUtil.getStructureArticlesCount(groupId, structureKey) > 0)) %>">
+				<div class="alert alert-warning">
+					<liferay-ui:message key="there-are-content-references-to-this-structure.-you-may-lose-data-if-a-field-name-is-renamed-or-removed" />
+				</div>
+			</c:if>
+			<c:if test="<%= (classPK > 0) && (DDMTemplateLocalServiceUtil.getTemplatesCount(groupId, classNameId, classPK) > 0) %>">
+				<div class="alert alert-info">
+					<liferay-ui:message key="there-are-template-references-to-this-structure.-please-update-them-if-a-field-name-is-renamed-or-removed" />
+				</div>
+			</c:if>
+		</aui:field-wrapper>
+
+		<aui:input autoFocus="<%= windowState.equals(LiferayWindowState.POP_UP) %>" name="name" />
 
 		<liferay-ui:panel-container cssClass="lfr-structure-entry-details-container" extended="<%= false %>" id="structureDetailsPanelContainer" persistState="<%= true %>">
-			<liferay-ui:panel collapsible="<%= true %>" defaultState="closed" extended="<%= false %>" id="structureDetailsSectionPanel" persistState="<%= true %>" title='<%= LanguageUtil.get(pageContext, "details") %>'>
+			<liferay-ui:panel collapsible="<%= true %>" defaultState="closed" extended="<%= false %>" id="structureDetailsSectionPanel" persistState="<%= true %>" title='<%= LanguageUtil.get(request, "details") %>'>
 				<aui:row cssClass="lfr-ddm-types-form-column">
 					<c:choose>
 						<c:when test="<%= scopeClassNameId == 0 %>">
@@ -160,40 +184,23 @@ if (Validator.isNotNull(script)) {
 
 				<aui:input name="description" />
 
-				<aui:field-wrapper label='<%= LanguageUtil.format(pageContext, "parent-x", ddmDisplay.getStructureName(locale)) %>'>
+				<aui:field-wrapper label='<%= LanguageUtil.format(request, "parent-x", ddmDisplay.getStructureName(locale), false) %>'>
 					<aui:input name="parentStructureId" type="hidden" value="<%= parentStructureId %>" />
 
-					<c:choose>
-						<c:when test="<%= (structure == null) || Validator.isNotNull(parentStructureId) %>">
-							<portlet:renderURL var="parentStructureURL">
-								<portlet:param name="struts_action" value="/dynamic_data_mapping/edit_structure" />
-								<portlet:param name="redirect" value="<%= currentURL %>" />
-								<portlet:param name="groupId" value="<%= String.valueOf(scopeGroupId) %>" />
-								<portlet:param name="classNameId" value="<%= String.valueOf(classNameId) %>" />
-								<portlet:param name="classPK" value="<%= String.valueOf(parentStructureId) %>" />
-							</portlet:renderURL>
+					<div class="input-group">
+						<aui:input label="" name="parentStructureName" type="resource" value="<%= parentStructureName %>" />
 
-							<aui:a href="<%= parentStructureURL %>" id="parentStructureName" label="<%= HtmlUtil.escape(parentStructureName) %>" />
-						</c:when>
-						<c:otherwise>
-							<aui:a href="" id="parentStructureName" />
-						</c:otherwise>
-					</c:choose>
+						<aui:button onClick='<%= renderResponse.getNamespace() + "openParentStructureSelector();" %>' value="select" />
 
-					<aui:button onClick='<%= renderResponse.getNamespace() + "openParentStructureSelector();" %>' value="select" />
-
-					<aui:button name="removeParentStructureButton" onClick='<%= renderResponse.getNamespace() + "removeParentStructure();" %>' value="remove" />
+						<aui:button name="removeParentStructureButton" onClick='<%= renderResponse.getNamespace() + "removeParentStructure();" %>' value="remove" />
+					</div>
 				</aui:field-wrapper>
 
 				<c:if test="<%= structure != null %>">
-					<aui:field-wrapper label="url">
-						<liferay-ui:input-resource url='<%= themeDisplay.getPortalURL() + themeDisplay.getPathMain() + "/dynamic_data_mapping/get_structure?structureId=" + classPK %>' />
-					</aui:field-wrapper>
+					<aui:input name="url" type="resource" value='<%= themeDisplay.getPortalURL() + themeDisplay.getPathMain() + "/dynamic_data_mapping/get_structure?structureId=" + classPK %>' />
 
 					<c:if test="<%= Validator.isNotNull(refererWebDAVToken) %>">
-						<aui:field-wrapper label="webdav-url">
-							<liferay-ui:input-resource url="<%= structure.getWebDavURL(themeDisplay, refererWebDAVToken) %>" />
-						</aui:field-wrapper>
+						<aui:input name="webDavURL" type="resource" value="<%= structure.getWebDavURL(themeDisplay, refererWebDAVToken) %>" />
 					</c:if>
 				</c:if>
 			</liferay-ui:panel>
@@ -204,7 +211,7 @@ if (Validator.isNotNull(script)) {
 <%@ include file="/html/portlet/dynamic_data_mapping/form_builder.jspf" %>
 
 <aui:button-row>
-	<aui:button onClick='<%= renderResponse.getNamespace() + "saveStructure();" %>' primary="<%= true %>" value='<%= LanguageUtil.get(pageContext, "save") %>' />
+	<aui:button onClick='<%= renderResponse.getNamespace() + "saveStructure();" %>' primary="<%= true %>" value='<%= LanguageUtil.get(request, "save") %>' />
 
 	<aui:button href="<%= redirect %>" type="cancel" />
 </aui:button-row>
@@ -219,18 +226,21 @@ if (Validator.isNotNull(script)) {
 					destroyOnHide: true
 				},
 				eventName: '<portlet:namespace />selectParentStructure',
-				showGlobalScope: true,
+				showAncestorScopes: true,
 				showManageTemplates: false,
 				struts_action: '/dynamic_data_mapping/select_structure',
 				title: '<%= HtmlUtil.escapeJS(scopeTitle) %>'
 			},
 			function(event) {
+				var A = AUI();
+
 				document.<portlet:namespace />fm.<portlet:namespace />parentStructureId.value = event.ddmstructureid;
 
 				var nameEl = document.getElementById('<portlet:namespace />parentStructureName');
 
 				nameEl.href = '<portlet:renderURL><portlet:param name="struts_action" value="/dynamic_data_mapping/edit_structure" /><portlet:param name="redirect" value="<%= currentURL %>" /><portlet:param name="groupId" value="<%= String.valueOf(scopeGroupId) %>" /><portlet:param name="classNameId" value="<%= String.valueOf(classNameId) %>" /></portlet:renderURL>&<portlet:namespace />classPK=' + event.ddmstructureid;
-				nameEl.innerHTML = event.name + '&nbsp;';
+
+				nameEl.value = A.Lang.String.unescapeEntities(event.name);
 
 				document.getElementById('<portlet:namespace />removeParentStructureButton').disabled = false;
 			}
@@ -243,7 +253,7 @@ if (Validator.isNotNull(script)) {
 		var nameEl = document.getElementById('<portlet:namespace />parentStructureName');
 
 		nameEl.href = '#';
-		nameEl.innerHTML = '';
+		nameEl.value = '';
 
 		document.getElementById('<portlet:namespace />removeParentStructureButton').disabled = true;
 	}

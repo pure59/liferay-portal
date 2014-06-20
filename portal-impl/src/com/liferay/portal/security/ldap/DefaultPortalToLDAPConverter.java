@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -185,8 +185,7 @@ public class DefaultPortalToLDAPConverter implements PortalToLDAPConverter {
 
 	@Override
 	public Attributes getLDAPUserAttributes(
-			long ldapServerId, User user, Properties userMappings)
-		throws SystemException {
+		long ldapServerId, User user, Properties userMappings) {
 
 		Attributes attributes = new BasicAttributes(true);
 
@@ -396,7 +395,7 @@ public class DefaultPortalToLDAPConverter implements PortalToLDAPConverter {
 	protected void addModificationItem(
 		BasicAttribute basicAttribute, Modifications modifications) {
 
-		if (Validator.isNotNull(basicAttribute)) {
+		if (basicAttribute != null) {
 			modifications.addItem(basicAttribute);
 		}
 	}
@@ -405,16 +404,12 @@ public class DefaultPortalToLDAPConverter implements PortalToLDAPConverter {
 		String attributeName, String attributeValue,
 		Modifications modifications) {
 
-		if (Validator.isNotNull(attributeName) &&
-			Validator.isNotNull(attributeValue)) {
-
+		if (Validator.isNotNull(attributeName)) {
 			modifications.addItem(attributeName, attributeValue);
 		}
 	}
 
-	protected String getEncryptedPasswordForLDAP(User user)
-		throws SystemException {
-
+	protected String getEncryptedPasswordForLDAP(User user) {
 		String password = user.getPasswordUnencrypted();
 
 		if (Validator.isNull(password)) {
@@ -432,9 +427,12 @@ public class DefaultPortalToLDAPConverter implements PortalToLDAPConverter {
 		try {
 			StringBundler sb = new StringBundler(4);
 
-			sb.append(StringPool.OPEN_CURLY_BRACE);
-			sb.append(algorithm);
-			sb.append(StringPool.CLOSE_CURLY_BRACE);
+			if (!algorithm.equals(PasswordEncryptorUtil.TYPE_NONE)) {
+				sb.append(StringPool.OPEN_CURLY_BRACE);
+				sb.append(algorithm);
+				sb.append(StringPool.CLOSE_CURLY_BRACE);
+			}
+
 			sb.append(PasswordEncryptorUtil.encrypt(algorithm, password, null));
 
 			return sb.toString();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.trash.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see TrashEntry
  * @generated
  */
+@ProviderType
 public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 	public TrashEntryWrapper(TrashEntry trashEntry) {
 		_trashEntry = trashEntry;
@@ -57,6 +60,7 @@ public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 		attributes.put("createDate", getCreateDate());
 		attributes.put("classNameId", getClassNameId());
 		attributes.put("classPK", getClassPK());
+		attributes.put("systemEventSetKey", getSystemEventSetKey());
 		attributes.put("typeSettings", getTypeSettings());
 		attributes.put("status", getStatus());
 
@@ -111,6 +115,12 @@ public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 
 		if (classPK != null) {
 			setClassPK(classPK);
+		}
+
+		Long systemEventSetKey = (Long)attributes.get("systemEventSetKey");
+
+		if (systemEventSetKey != null) {
+			setSystemEventSetKey(systemEventSetKey);
 		}
 
 		String typeSettings = (String)attributes.get("typeSettings");
@@ -230,11 +240,9 @@ public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 	* Returns the user uuid of this trash entry.
 	*
 	* @return the user uuid of this trash entry
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _trashEntry.getUserUuid();
 	}
 
@@ -341,6 +349,26 @@ public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 	@Override
 	public void setClassPK(long classPK) {
 		_trashEntry.setClassPK(classPK);
+	}
+
+	/**
+	* Returns the system event set key of this trash entry.
+	*
+	* @return the system event set key of this trash entry
+	*/
+	@Override
+	public long getSystemEventSetKey() {
+		return _trashEntry.getSystemEventSetKey();
+	}
+
+	/**
+	* Sets the system event set key of this trash entry.
+	*
+	* @param systemEventSetKey the system event set key of this trash entry
+	*/
+	@Override
+	public void setSystemEventSetKey(long systemEventSetKey) {
+		_trashEntry.setSystemEventSetKey(systemEventSetKey);
 	}
 
 	/**
@@ -482,8 +510,7 @@ public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_trashEntry.persist();
 	}
 
@@ -506,6 +533,16 @@ public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 	public java.lang.String getTypeSettingsProperty(java.lang.String key,
 		java.lang.String defaultValue) {
 		return _trashEntry.getTypeSettingsProperty(key, defaultValue);
+	}
+
+	@Override
+	public boolean isTrashEntry(java.lang.Class<?> clazz, long classPK) {
+		return _trashEntry.isTrashEntry(clazz, classPK);
+	}
+
+	@Override
+	public boolean isTrashEntry(java.lang.String className, long classPK) {
+		return _trashEntry.isTrashEntry(className, classPK);
 	}
 
 	@Override
@@ -542,6 +579,7 @@ public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public TrashEntry getWrappedTrashEntry() {
 		return _trashEntry;
 	}
@@ -549,6 +587,16 @@ public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 	@Override
 	public TrashEntry getWrappedModel() {
 		return _trashEntry;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _trashEntry.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _trashEntry.isFinderCacheEnabled();
 	}
 
 	@Override

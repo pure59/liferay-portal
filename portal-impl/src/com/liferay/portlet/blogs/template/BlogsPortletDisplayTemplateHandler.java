@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -72,8 +72,10 @@ public class BlogsPortletDisplayTemplateHandler
 			"blog-entries", List.class, PortletDisplayTemplateConstants.ENTRIES,
 			"blog-entry", BlogsEntry.class, "curBlogEntry", "title");
 
+		String[] restrictedVariables = getRestrictedVariables(language);
+
 		TemplateVariableGroup blogServicesTemplateVariableGroup =
-			new TemplateVariableGroup("blog-services");
+			new TemplateVariableGroup("blog-services", restrictedVariables);
 
 		blogServicesTemplateVariableGroup.setAutocompleteEnabled(false);
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -23,7 +23,7 @@ import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.journal.model.JournalArticleConstants;
 import com.liferay.portlet.journal.service.JournalArticleLocalServiceUtil;
 import com.liferay.portlet.journal.service.permission.JournalArticlePermission;
-import com.liferay.portlet.journal.service.permission.JournalPermission;
+import com.liferay.portlet.journal.service.permission.JournalFolderPermission;
 import com.liferay.portlet.social.model.BaseSocialActivityInterpreter;
 import com.liferay.portlet.social.model.SocialActivity;
 import com.liferay.portlet.social.model.SocialActivityConstants;
@@ -38,18 +38,6 @@ public class JournalArticleActivityInterpreter
 	@Override
 	public String[] getClassNames() {
 		return _CLASS_NAMES;
-	}
-
-	@Override
-	protected String getEntryTitle(
-			SocialActivity activity, ServiceContext serviceContext)
-		throws Exception {
-
-		JournalArticle article =
-			JournalArticleLocalServiceUtil.getLatestArticle(
-				activity.getClassPK());
-
-		return article.getTitle(serviceContext.getLocale());
 	}
 
 	@Override
@@ -82,18 +70,18 @@ public class JournalArticleActivityInterpreter
 
 		if (activityType == JournalActivityKeys.ADD_ARTICLE) {
 			if (Validator.isNull(groupName)) {
-				return "activity-journal-article-add-article";
+				return "activity-journal-article-add-web-content";
 			}
 			else {
-				return "activity-journal-article-add-article-in";
+				return "activity-journal-article-add-web-content-in";
 			}
 		}
 		else if (activityType == JournalActivityKeys.UPDATE_ARTICLE) {
 			if (Validator.isNull(groupName)) {
-				return "activity-journal-article-update-article";
+				return "activity-journal-article-update-web-content";
 			}
 			else {
-				return "activity-journal-article-update-article-in";
+				return "activity-journal-article-update-web-content-in";
 			}
 		}
 		else if (activityType == SocialActivityConstants.TYPE_MOVE_TO_TRASH) {
@@ -126,18 +114,18 @@ public class JournalArticleActivityInterpreter
 
 		int activityType = activity.getType();
 
-		if ((activityType == JournalActivityKeys.ADD_ARTICLE) &&
-			!JournalPermission.contains(
-				permissionChecker, activity.getGroupId(),
-				ActionKeys.ADD_ARTICLE)) {
+		if (activityType == JournalActivityKeys.ADD_ARTICLE) {
+			JournalArticle article =
+				JournalArticleLocalServiceUtil.getLatestArticle(
+					activity.getClassPK());
 
-			return false;
+			return JournalFolderPermission.contains(
+				permissionChecker, article.getGroupId(), article.getFolderId(),
+				ActionKeys.ADD_ARTICLE);
 		}
-		else if ((activityType == JournalActivityKeys.UPDATE_ARTICLE) &&
-				 !JournalArticlePermission.contains(
-				permissionChecker, activity.getClassPK(), ActionKeys.UPDATE)) {
-
-			return false;
+		else if (activityType == JournalActivityKeys.UPDATE_ARTICLE) {
+			return JournalArticlePermission.contains(
+				permissionChecker, activity.getClassPK(), ActionKeys.UPDATE);
 		}
 
 		return JournalArticlePermission.contains(

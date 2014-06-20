@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -124,7 +124,7 @@ public class ProgressTrackerTest {
 
 		public MockInstallProcess(MockHttpSession mockHttpSession) {
 			ProgressTracker progressTracker = new ProgressTracker(
-				mockHttpSession, ProgressTrackerTest.class.getName());
+				ProgressTrackerTest.class.getName());
 
 			progressTracker.addProgress(
 				ProgressStatusConstants.DOWNLOADING, 25, "downloading");
@@ -143,11 +143,11 @@ public class ProgressTrackerTest {
 		}
 
 		public void finish() {
-			_progressTracker.finish();
+			_progressTracker.finish(_mockHttpSession);
 		}
 
 		public void initialize() {
-			_progressTracker.initialize();
+			_progressTracker.initialize(_mockHttpSession);
 		}
 
 		private ProgressTracker _progressTracker;

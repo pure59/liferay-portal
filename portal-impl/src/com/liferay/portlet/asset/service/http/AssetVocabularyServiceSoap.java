@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.asset.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -65,11 +67,13 @@ import java.util.Map;
  * @see com.liferay.portlet.asset.service.AssetVocabularyServiceUtil
  * @generated
  */
+@ProviderType
 public class AssetVocabularyServiceSoap {
 	/**
 	* @deprecated As of 6.1.0 {@link #addVocabulary(String, Map, Map, String,
 	ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portlet.asset.model.AssetVocabularySoap addVocabulary(
 		java.lang.String[] titleMapLanguageIds,
 		java.lang.String[] titleMapValues,
@@ -141,6 +145,7 @@ public class AssetVocabularyServiceSoap {
 	* @deprecated As of 6.2.0, Replaced by {@link #deleteVocabularies(long[],
 	ServiceContext)}
 	*/
+	@Deprecated
 	public static void deleteVocabularies(long[] vocabularyIds)
 		throws RemoteException {
 		try {
@@ -183,6 +188,10 @@ public class AssetVocabularyServiceSoap {
 		}
 	}
 
+	/**
+	* @deprecated As of 7.0.0, with no direct replacement
+	*/
+	@Deprecated
 	public static com.liferay.portlet.asset.model.AssetVocabularySoap[] getCompanyVocabularies(
 		long companyId) throws RemoteException {
 		try {
@@ -219,6 +228,23 @@ public class AssetVocabularyServiceSoap {
 			java.util.List<com.liferay.portlet.asset.model.AssetVocabulary> returnValue =
 				AssetVocabularyServiceUtil.getGroupsVocabularies(groupIds,
 					className);
+
+			return com.liferay.portlet.asset.model.AssetVocabularySoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.asset.model.AssetVocabularySoap[] getGroupsVocabularies(
+		long[] groupIds, java.lang.String className, long classTypePK)
+		throws RemoteException {
+		try {
+			java.util.List<com.liferay.portlet.asset.model.AssetVocabulary> returnValue =
+				AssetVocabularyServiceUtil.getGroupsVocabularies(groupIds,
+					className, classTypePK);
 
 			return com.liferay.portlet.asset.model.AssetVocabularySoap.toSoapModels(returnValue);
 		}
@@ -297,6 +323,21 @@ public class AssetVocabularyServiceSoap {
 		}
 	}
 
+	public static com.liferay.portlet.asset.model.AssetVocabularySoap[] getGroupVocabularies(
+		long[] groupIds) throws RemoteException {
+		try {
+			java.util.List<com.liferay.portlet.asset.model.AssetVocabulary> returnValue =
+				AssetVocabularyServiceUtil.getGroupVocabularies(groupIds);
+
+			return com.liferay.portlet.asset.model.AssetVocabularySoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	public static int getGroupVocabulariesCount(long groupId)
 		throws RemoteException {
 		try {
@@ -316,6 +357,20 @@ public class AssetVocabularyServiceSoap {
 		try {
 			int returnValue = AssetVocabularyServiceUtil.getGroupVocabulariesCount(groupId,
 					name);
+
+			return returnValue;
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static int getGroupVocabulariesCount(long[] groupIds)
+		throws RemoteException {
+		try {
+			int returnValue = AssetVocabularyServiceUtil.getGroupVocabulariesCount(groupIds);
 
 			return returnValue;
 		}
@@ -364,6 +419,7 @@ public class AssetVocabularyServiceSoap {
 	/**
 	* @deprecated As of 6.2.0, with no direct replacement
 	*/
+	@Deprecated
 	public static java.lang.String getJSONGroupVocabularies(long groupId,
 		java.lang.String name, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator obc)
@@ -381,6 +437,11 @@ public class AssetVocabularyServiceSoap {
 		}
 	}
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link
+	#AssetUtil.filterVocabularyIds(PermissionChecker, long[])}
+	*/
+	@Deprecated
 	public static com.liferay.portlet.asset.model.AssetVocabularySoap[] getVocabularies(
 		long[] vocabularyIds) throws RemoteException {
 		try {
@@ -410,10 +471,27 @@ public class AssetVocabularyServiceSoap {
 		}
 	}
 
+	public static com.liferay.portlet.asset.model.AssetVocabularyDisplay searchVocabulariesDisplay(
+		long groupId, java.lang.String title, int start, int end,
+		boolean addDefaultVocabulary) throws RemoteException {
+		try {
+			com.liferay.portlet.asset.model.AssetVocabularyDisplay returnValue = AssetVocabularyServiceUtil.searchVocabulariesDisplay(groupId,
+					title, start, end, addDefaultVocabulary);
+
+			return returnValue;
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	/**
 	* @deprecated As of 6.1.0, {@link #updateVocabulary(long, String, Map, Map,
 	String, ServiceContext)}
 	*/
+	@Deprecated
 	public static com.liferay.portlet.asset.model.AssetVocabularySoap updateVocabulary(
 		long vocabularyId, java.lang.String[] titleMapLanguageIds,
 		java.lang.String[] titleMapValues,

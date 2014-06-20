@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.ratings.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portlet.ratings.service.impl.RatingsEntryServiceImpl
  * @generated
  */
+@ProviderType
 public class RatingsEntryServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -57,15 +60,13 @@ public class RatingsEntryServiceUtil {
 	}
 
 	public static void deleteEntry(java.lang.String className, long classPK)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().deleteEntry(className, classPK);
 	}
 
 	public static com.liferay.portlet.ratings.model.RatingsEntry updateEntry(
 		java.lang.String className, long classPK, double score)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().updateEntry(className, classPK, score);
 	}
 
@@ -83,6 +84,7 @@ public class RatingsEntryServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(RatingsEntryService service) {
 	}
 

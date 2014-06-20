@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,7 +18,6 @@ import com.liferay.portal.dao.shard.ShardDataSourceTargetSource;
 import com.liferay.portal.dao.shard.ShardSelector;
 import com.liferay.portal.dao.shard.ShardSessionFactoryTargetSource;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -148,13 +147,12 @@ public class ShardAdvice {
 
 			return _setShardNameByCompanyId(companyId);
 		}
-		else {
-			String shardName = companyServiceStack.peek();
 
-			_setShardName(shardName);
+		String shardName = companyServiceStack.peek();
 
-			return shardName;
-		}
+		_setShardName(shardName);
+
+		return shardName;
 	}
 
 	public void setShardSessionFactoryTargetSource(
@@ -180,7 +178,7 @@ public class ShardAdvice {
 	}
 
 	private String _setShardNameByCompanyId(long companyId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		String shardName = PropsValues.SHARD_DEFAULT_NAME;
 
@@ -211,8 +209,9 @@ public class ShardAdvice {
 
 	static {
 		try {
-			_shardSelector = (ShardSelector)Class.forName(
-				PropsValues.SHARD_SELECTOR).newInstance();
+			Class<?> clazz = Class.forName(PropsValues.SHARD_SELECTOR);
+
+			_shardSelector = (ShardSelector)clazz.newInstance();
 		}
 		catch (Exception e) {
 			_log.error(e, e);

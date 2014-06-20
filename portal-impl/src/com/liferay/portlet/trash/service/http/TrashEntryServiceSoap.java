@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.trash.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -61,6 +63,7 @@ import java.rmi.RemoteException;
  * @see com.liferay.portlet.trash.service.TrashEntryServiceUtil
  * @generated
  */
+@ProviderType
 public class TrashEntryServiceSoap {
 	/**
 	* Deletes the trash entries with the matching group ID considering
@@ -68,7 +71,6 @@ public class TrashEntryServiceSoap {
 	*
 	* @param groupId the primary key of the group
 	* @throws PortalException if a portal exception occurred
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void deleteEntries(long groupId) throws RemoteException {
 		try {
@@ -88,7 +90,6 @@ public class TrashEntryServiceSoap {
 	* @throws PortalException if a trash entry with the primary key could not
 	be found or if the user did not have permission to delete any one
 	of the trash entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void deleteEntries(long[] entryIds) throws RemoteException {
 		try {
@@ -114,7 +115,6 @@ public class TrashEntryServiceSoap {
 	* @throws PortalException if a trash entry with the primary key could not
 	be found or if the user did not have permission to delete the
 	trash entry
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void deleteEntry(long entryId) throws RemoteException {
 		try {
@@ -141,7 +141,6 @@ public class TrashEntryServiceSoap {
 	* @throws PortalException if a trash entry with the entity class name and
 	primary key could not be found or if the user did not have
 	permission to delete the entry
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void deleteEntry(java.lang.String className, long classPK)
 		throws RemoteException {
@@ -161,7 +160,6 @@ public class TrashEntryServiceSoap {
 	* @param groupId the primary key of the group
 	* @return the matching trash entries
 	* @throws PrincipalException if a principal exception occurred
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.trash.model.TrashEntryList getEntries(
 		long groupId) throws RemoteException {
@@ -189,7 +187,6 @@ public class TrashEntryServiceSoap {
 	* @return the range of matching trash entries ordered by comparator
 	<code>obc</code>
 	* @throws PrincipalException if a system exception occurred
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.trash.model.TrashEntryList getEntries(
 		long groupId, int start, int end,
@@ -241,7 +238,6 @@ public class TrashEntryServiceSoap {
 	new location, if the user did not have permission to restore the
 	trash entry, if a duplicate trash entry exists at the new
 	location, or if a portal exception occurred
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void moveEntry(java.lang.String className, long classPK,
 		long destinationContainerModelId,
@@ -309,7 +305,6 @@ public class TrashEntryServiceSoap {
 	the user did not have permission to overwrite an existing trash
 	entry, to rename the trash entry being restored, or to restore
 	the trash entry in general
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.trash.model.TrashEntrySoap restoreEntry(
 		long entryId, long overrideClassPK, java.lang.String name)
@@ -317,6 +312,37 @@ public class TrashEntryServiceSoap {
 		try {
 			com.liferay.portlet.trash.model.TrashEntry returnValue = TrashEntryServiceUtil.restoreEntry(entryId,
 					overrideClassPK, name);
+
+			return com.liferay.portlet.trash.model.TrashEntrySoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.trash.model.TrashEntrySoap restoreEntry(
+		java.lang.String className, long classPK) throws RemoteException {
+		try {
+			com.liferay.portlet.trash.model.TrashEntry returnValue = TrashEntryServiceUtil.restoreEntry(className,
+					classPK);
+
+			return com.liferay.portlet.trash.model.TrashEntrySoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.trash.model.TrashEntrySoap restoreEntry(
+		java.lang.String className, long classPK, long overrideClassPK,
+		java.lang.String name) throws RemoteException {
+		try {
+			com.liferay.portlet.trash.model.TrashEntry returnValue = TrashEntryServiceUtil.restoreEntry(className,
+					classPK, overrideClassPK, name);
 
 			return com.liferay.portlet.trash.model.TrashEntrySoap.toSoapModel(returnValue);
 		}

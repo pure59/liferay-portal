@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,13 +15,6 @@
 --%>
 
 <%@ include file="/html/portlet/wiki/init.jsp" %>
-
-<portlet:actionURL var="undoTrashURL">
-	<portlet:param name="struts_action" value="/wiki/edit_page" />
-	<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.RESTORE %>" />
-</portlet:actionURL>
-
-<liferay-ui:trash-undo portletURL="<%= undoTrashURL %>" />
 
 <liferay-util:include page="/html/portlet/wiki/top_links.jsp" />
 

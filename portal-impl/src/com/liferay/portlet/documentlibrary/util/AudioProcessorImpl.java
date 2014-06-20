@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -40,7 +40,6 @@ import com.liferay.portal.repository.liferayrepository.model.LiferayFileVersion;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
-import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
 import com.liferay.util.log4j.Log4JUtil;
 
 import java.io.File;
@@ -176,24 +175,6 @@ public class AudioProcessorImpl
 		super.trigger(sourceFileVersion, destinationFileVersion);
 
 		_queueGeneration(sourceFileVersion, destinationFileVersion);
-	}
-
-	@Override
-	protected void deletePreviews(
-		long companyId, long groupId, long fileEntryId, long fileVersionId) {
-
-		String pathSegment = getPathSegment(
-			groupId, fileEntryId, fileVersionId, true);
-
-		for (String previewType : _PREVIEW_TYPES) {
-			String path = pathSegment + StringPool.PERIOD + previewType;
-
-			try {
-				DLStoreUtil.deleteDirectory(companyId, REPOSITORY_ID, path);
-			}
-			catch (Exception e) {
-			}
-		}
 	}
 
 	@Override
@@ -368,13 +349,9 @@ public class AudioProcessorImpl
 			return;
 		}
 
-		StopWatch stopWatch = null;
+		StopWatch stopWatch = new StopWatch();
 
-		if (_log.isInfoEnabled()) {
-			stopWatch = new StopWatch();
-
-			stopWatch.start();
-		}
+		stopWatch.start();
 
 		try {
 			if (PropsValues.DL_FILE_ENTRY_PREVIEW_FORK_PROCESS_ENABLED) {
@@ -389,6 +366,7 @@ public class AudioProcessorImpl
 							PropsKeys.DL_FILE_ENTRY_PREVIEW_AUDIO, false));
 
 				Future<String> future = ProcessExecutor.execute(
+					ClassPathUtil.getGlobalClassPath(),
 					ClassPathUtil.getPortalClassPath(), processCallable);
 
 				String processIdentity = String.valueOf(

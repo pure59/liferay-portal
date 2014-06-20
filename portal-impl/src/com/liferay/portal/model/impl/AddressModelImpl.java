@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,7 @@
 package com.liferay.portal.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.DateUtil;
@@ -28,7 +28,9 @@ import com.liferay.portal.model.Address;
 import com.liferay.portal.model.AddressModel;
 import com.liferay.portal.model.AddressSoap;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -67,6 +69,7 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 	 */
 	public static final String TABLE_NAME = "Address";
 	public static final Object[][] TABLE_COLUMNS = {
+			{ "mvccVersion", Types.BIGINT },
 			{ "uuid_", Types.VARCHAR },
 			{ "addressId", Types.BIGINT },
 			{ "companyId", Types.BIGINT },
@@ -87,7 +90,7 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 			{ "mailing", Types.BOOLEAN },
 			{ "primary_", Types.BOOLEAN }
 		};
-	public static final String TABLE_SQL_CREATE = "create table Address (uuid_ VARCHAR(75) null,addressId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,street1 VARCHAR(75) null,street2 VARCHAR(75) null,street3 VARCHAR(75) null,city VARCHAR(75) null,zip VARCHAR(75) null,regionId LONG,countryId LONG,typeId INTEGER,mailing BOOLEAN,primary_ BOOLEAN)";
+	public static final String TABLE_SQL_CREATE = "create table Address (mvccVersion LONG default 0,uuid_ VARCHAR(75) null,addressId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,street1 VARCHAR(75) null,street2 VARCHAR(75) null,street3 VARCHAR(75) null,city VARCHAR(75) null,zip VARCHAR(75) null,regionId LONG,countryId LONG,typeId INTEGER,mailing BOOLEAN,primary_ BOOLEAN)";
 	public static final String TABLE_SQL_DROP = "drop table Address";
 	public static final String ORDER_BY_JPQL = " ORDER BY address.createDate ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY Address.createDate ASC";
@@ -125,6 +128,7 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 
 		Address model = new AddressImpl();
 
+		model.setMvccVersion(soapModel.getMvccVersion());
 		model.setUuid(soapModel.getUuid());
 		model.setAddressId(soapModel.getAddressId());
 		model.setCompanyId(soapModel.getCompanyId());
@@ -208,6 +212,7 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
 		attributes.put("addressId", getAddressId());
 		attributes.put("companyId", getCompanyId());
@@ -228,11 +233,20 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		attributes.put("mailing", getMailing());
 		attributes.put("primary", getPrimary());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		String uuid = (String)attributes.get("uuid");
 
 		if (uuid != null) {
@@ -348,8 +362,19 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@JSON
+	@Override
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -372,8 +397,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getAddressId() {
 		return _addressId;
 	}
@@ -383,8 +408,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_addressId = addressId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -406,8 +431,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -426,21 +451,27 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
 	public long getOriginalUserId() {
 		return _originalUserId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -455,8 +486,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -468,8 +499,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -499,8 +530,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		setClassNameId(classNameId);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassNameId() {
 		return _classNameId;
 	}
@@ -522,8 +553,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		return _originalClassNameId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassPK() {
 		return _classPK;
 	}
@@ -545,8 +576,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		return _originalClassPK;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getStreet1() {
 		if (_street1 == null) {
 			return StringPool.BLANK;
@@ -561,8 +592,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_street1 = street1;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getStreet2() {
 		if (_street2 == null) {
 			return StringPool.BLANK;
@@ -577,8 +608,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_street2 = street2;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getStreet3() {
 		if (_street3 == null) {
 			return StringPool.BLANK;
@@ -593,8 +624,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_street3 = street3;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getCity() {
 		if (_city == null) {
 			return StringPool.BLANK;
@@ -609,8 +640,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_city = city;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getZip() {
 		if (_zip == null) {
 			return StringPool.BLANK;
@@ -625,8 +656,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_zip = zip;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getRegionId() {
 		return _regionId;
 	}
@@ -636,8 +667,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_regionId = regionId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCountryId() {
 		return _countryId;
 	}
@@ -647,8 +678,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_countryId = countryId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getTypeId() {
 		return _typeId;
 	}
@@ -658,8 +689,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		_typeId = typeId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getMailing() {
 		return _mailing;
 	}
@@ -686,8 +717,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 		return _originalMailing;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getPrimary() {
 		return _primary;
 	}
@@ -751,6 +782,7 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 	public Object clone() {
 		AddressImpl addressImpl = new AddressImpl();
 
+		addressImpl.setMvccVersion(getMvccVersion());
 		addressImpl.setUuid(getUuid());
 		addressImpl.setAddressId(getAddressId());
 		addressImpl.setCompanyId(getCompanyId());
@@ -817,6 +849,16 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 	}
 
 	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
+	}
+
+	@Override
 	public void resetOriginalValues() {
 		AddressModelImpl addressModelImpl = this;
 
@@ -852,6 +894,8 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 	@Override
 	public CacheModel<Address> toCacheModel() {
 		AddressCacheModel addressCacheModel = new AddressCacheModel();
+
+		addressCacheModel.mvccVersion = getMvccVersion();
 
 		addressCacheModel.uuid = getUuid();
 
@@ -952,9 +996,11 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(39);
+		StringBundler sb = new StringBundler(41);
 
-		sb.append("{uuid=");
+		sb.append("{mvccVersion=");
+		sb.append(getMvccVersion());
+		sb.append(", uuid=");
 		sb.append(getUuid());
 		sb.append(", addressId=");
 		sb.append(getAddressId());
@@ -999,12 +1045,16 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(61);
+		StringBundler sb = new StringBundler(64);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.model.Address");
 		sb.append("</model-name>");
 
+		sb.append(
+			"<column><column-name>mvccVersion</column-name><column-value><![CDATA[");
+		sb.append(getMvccVersion());
+		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>uuid</column-name><column-value><![CDATA[");
 		sb.append(getUuid());
@@ -1091,6 +1141,7 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 	private static Class<?>[] _escapedModelInterfaces = new Class[] {
 			Address.class
 		};
+	private long _mvccVersion;
 	private String _uuid;
 	private String _originalUuid;
 	private long _addressId;
@@ -1098,7 +1149,6 @@ public class AddressModelImpl extends BaseModelImpl<Address>
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private long _originalUserId;
 	private boolean _setOriginalUserId;
 	private String _userName;

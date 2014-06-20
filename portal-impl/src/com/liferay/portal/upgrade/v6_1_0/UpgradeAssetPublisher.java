@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,6 +16,7 @@ package com.liferay.portal.upgrade.v6_1_0;
 
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.upgrade.BaseUpgradePortletPreferences;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsValues;
@@ -88,7 +89,7 @@ public class UpgradeAssetPublisher extends BaseUpgradePortletPreferences {
 		String[] classNameIds = portletPreferences.getValues(
 			"classNameIds", null);
 
-		if ((classNameIds == null) || (classNameIds.length == 0)) {
+		if (ArrayUtil.isEmpty(classNameIds)) {
 			return PortletPreferencesFactoryUtil.toXML(portletPreferences);
 		}
 

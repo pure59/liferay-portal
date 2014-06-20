@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.ratings.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -29,6 +31,7 @@ import java.util.Map;
  * @see RatingsStats
  * @generated
  */
+@ProviderType
 public class RatingsStatsWrapper implements RatingsStats,
 	ModelWrapper<RatingsStats> {
 	public RatingsStatsWrapper(RatingsStats ratingsStats) {
@@ -353,8 +356,7 @@ public class RatingsStatsWrapper implements RatingsStats,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_ratingsStats.persist();
 	}
 
@@ -380,6 +382,7 @@ public class RatingsStatsWrapper implements RatingsStats,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public RatingsStats getWrappedRatingsStats() {
 		return _ratingsStats;
 	}
@@ -387,6 +390,16 @@ public class RatingsStatsWrapper implements RatingsStats,
 	@Override
 	public RatingsStats getWrappedModel() {
 		return _ratingsStats;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _ratingsStats.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _ratingsStats.isFinderCacheEnabled();
 	}
 
 	@Override

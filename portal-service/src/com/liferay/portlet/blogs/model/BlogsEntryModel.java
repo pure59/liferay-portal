@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,15 +14,20 @@
 
 package com.liferay.portlet.blogs.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.StagedGroupedModel;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.model.WorkflowedModel;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
+import com.liferay.portlet.trash.model.TrashEntry;
 
 import java.io.Serializable;
 
@@ -41,8 +46,9 @@ import java.util.Date;
  * @see com.liferay.portlet.blogs.model.impl.BlogsEntryModelImpl
  * @generated
  */
+@ProviderType
 public interface BlogsEntryModel extends BaseModel<BlogsEntry>,
-	StagedGroupedModel, WorkflowedModel {
+	StagedGroupedModel, TrashedModel, WorkflowedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -146,10 +152,9 @@ public interface BlogsEntryModel extends BaseModel<BlogsEntry>,
 	 * Returns the user uuid of this blogs entry.
 	 *
 	 * @return the user uuid of this blogs entry
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getUserUuid() throws SystemException;
+	public String getUserUuid();
 
 	/**
 	 * Sets the user uuid of this blogs entry.
@@ -222,6 +227,21 @@ public interface BlogsEntryModel extends BaseModel<BlogsEntry>,
 	 * @param title the title of this blogs entry
 	 */
 	public void setTitle(String title);
+
+	/**
+	 * Returns the deck title of this blogs entry.
+	 *
+	 * @return the deck title of this blogs entry
+	 */
+	@AutoEscape
+	public String getDeckTitle();
+
+	/**
+	 * Sets the deck title of this blogs entry.
+	 *
+	 * @param deckTitle the deck title of this blogs entry
+	 */
+	public void setDeckTitle(String deckTitle);
 
 	/**
 	 * Returns the url title of this blogs entry.
@@ -425,10 +445,9 @@ public interface BlogsEntryModel extends BaseModel<BlogsEntry>,
 	 * Returns the status by user uuid of this blogs entry.
 	 *
 	 * @return the status by user uuid of this blogs entry
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public String getStatusByUserUuid() throws SystemException;
+	public String getStatusByUserUuid();
 
 	/**
 	 * Sets the status by user uuid of this blogs entry.
@@ -472,8 +491,55 @@ public interface BlogsEntryModel extends BaseModel<BlogsEntry>,
 	public void setStatusDate(Date statusDate);
 
 	/**
+	 * Returns the trash entry created when this blogs entry was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this blogs entry.
+	 *
+	 * @return the trash entry created when this blogs entry was moved to the Recycle Bin
+	 */
+	@Override
+	public TrashEntry getTrashEntry() throws PortalException;
+
+	/**
+	 * Returns the class primary key of the trash entry for this blogs entry.
+	 *
+	 * @return the class primary key of the trash entry for this blogs entry
+	 */
+	@Override
+	public long getTrashEntryClassPK();
+
+	/**
+	 * Returns the trash handler for this blogs entry.
+	 *
+	 * @return the trash handler for this blogs entry
+	 */
+	@Override
+	public TrashHandler getTrashHandler();
+
+	/**
+	 * Returns <code>true</code> if this blogs entry is in the Recycle Bin.
+	 *
+	 * @return <code>true</code> if this blogs entry is in the Recycle Bin; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isInTrash();
+
+	/**
+	 * Returns <code>true</code> if the parent of this blogs entry is in the Recycle Bin.
+	 *
+	 * @return <code>true</code> if the parent of this blogs entry is in the Recycle Bin; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isInTrashContainer();
+
+	@Override
+	public boolean isInTrashExplicitly();
+
+	@Override
+	public boolean isInTrashImplicitly();
+
+	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	 */
+	@Deprecated
 	@Override
 	public boolean getApproved();
 
@@ -524,14 +590,6 @@ public interface BlogsEntryModel extends BaseModel<BlogsEntry>,
 	 */
 	@Override
 	public boolean isIncomplete();
-
-	/**
-	 * Returns <code>true</code> if this blogs entry is in the Recycle Bin.
-	 *
-	 * @return <code>true</code> if this blogs entry is in the Recycle Bin; <code>false</code> otherwise
-	 */
-	@Override
-	public boolean isInTrash();
 
 	/**
 	 * Returns <code>true</code> if this blogs entry is pending.

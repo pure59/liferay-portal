@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -25,7 +25,9 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.ThreadLocalDistributor;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.impl.LayoutImpl;
+import com.liferay.portal.model.impl.PortletImpl;
 import com.liferay.portal.util.PortalImpl;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsImpl;
@@ -84,8 +86,19 @@ public class SPIAgentResponseTest {
 	}
 
 	@Before
-	public void setUp() {
+	public void setUp() throws IOException {
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
+
+		Portlet portlet = new PortletImpl() {
+
+			@Override
+			public String getContextName() {
+				return _SERVLET_CONTEXT_NAME;
+			}
+
+		};
+
+		originalRequest.setAttribute(WebKeys.SPI_AGENT_PORTLET, portlet);
 
 		HttpSession session = originalRequest.getSession();
 
@@ -95,6 +108,8 @@ public class SPIAgentResponseTest {
 		_mockHttpServletRequest = new MockHttpServletRequest();
 
 		_mockHttpServletRequest.setAttribute(
+			WebKeys.SPI_AGENT_PORTLET, portlet);
+		_mockHttpServletRequest.setAttribute(
 			WebKeys.SPI_AGENT_REQUEST, new SPIAgentRequest(originalRequest));
 
 		RequestAttributes.setRequestAttributes(_mockHttpServletRequest);
@@ -102,7 +117,8 @@ public class SPIAgentResponseTest {
 
 	@Test
 	public void testCaptureRequestSessionAttributes() {
-		SPIAgentResponse spiAgentResponse = new SPIAgentResponse();
+		SPIAgentResponse spiAgentResponse = new SPIAgentResponse(
+			_SERVLET_CONTEXT_NAME);
 
 		String threadLocalValue = "threadLocalValue";
 
@@ -154,7 +170,8 @@ public class SPIAgentResponseTest {
 
 		// Not a portal resiliency action
 
-		SPIAgentResponse spiAgentResponse = new SPIAgentResponse();
+		SPIAgentResponse spiAgentResponse = new SPIAgentResponse(
+			_SERVLET_CONTEXT_NAME);
 
 		spiAgentResponse.captureResponse(
 			new MockHttpServletRequest(),
@@ -188,8 +205,9 @@ public class SPIAgentResponseTest {
 
 		// Portal resiliency action, byte model output, native buffer
 
-		byte[] byteArray = new byte[] {(
-			byte)0, (byte)1, (byte)2, (byte)3, (byte)4, (byte)5};
+		byte[] byteArray = new byte[] {
+			(byte)0, (byte)1, (byte)2, (byte)3, (byte)4, (byte)5
+		};
 
 		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(byteArray.length);
 
@@ -230,7 +248,7 @@ public class SPIAgentResponseTest {
 		Assert.assertTrue(spiAgentResponse.portalResiliencyResponse);
 		Assert.assertNotNull(spiAgentResponse.metaData);
 		Assert.assertArrayEquals(
-			new byte[]{(byte)2, (byte)3}, spiAgentResponse.byteData);
+			new byte[] {(byte)2, (byte)3}, spiAgentResponse.byteData);
 		Assert.assertNull(spiAgentResponse.stringData);
 
 		// Portal resiliency action, char model output, empty
@@ -251,6 +269,9 @@ public class SPIAgentResponseTest {
 
 		bufferCacheServletResponse.setString(content);
 
+		mockHttpServletRequest.setParameter(
+			"portalResiliencyPortletShowFooter", StringPool.FALSE);
+
 		spiAgentResponse.captureResponse(
 			mockHttpServletRequest, bufferCacheServletResponse);
 
@@ -263,7 +284,8 @@ public class SPIAgentResponseTest {
 
 		bufferCacheServletResponse.setString(content);
 
-		mockHttpServletRequest.setParameter("prpsf", StringPool.TRUE);
+		mockHttpServletRequest.setParameter(
+			"portalResiliencyPortletShowFooter", StringPool.TRUE);
 
 		spiAgentResponse.captureResponse(
 			mockHttpServletRequest, bufferCacheServletResponse);
@@ -275,15 +297,17 @@ public class SPIAgentResponseTest {
 
 		// Portal resiliency action, char model output, with footer
 
-		content = "<body>content</body>";
+		content = "<div>content</div>";
 
 		bufferCacheServletResponse.setString(content);
 
-		mockHttpServletRequest.setServerPort(1234);
+		mockHttpServletRequest.setLocalAddr("127.0.0.1");
+		mockHttpServletRequest.setLocalPort(1234);
 
-		PortalUtil.setPortalPort(mockHttpServletRequest);
+		PortalUtil.setPortalInetSocketAddresses(mockHttpServletRequest);
 
-		mockHttpServletRequest.setParameter("prpsf", StringPool.TRUE);
+		mockHttpServletRequest.setParameter(
+			"portalResiliencyPortletShowFooter", StringPool.TRUE);
 
 		spiAgentResponse.captureResponse(
 			mockHttpServletRequest, bufferCacheServletResponse);
@@ -292,8 +316,8 @@ public class SPIAgentResponseTest {
 		Assert.assertNotNull(spiAgentResponse.metaData);
 		Assert.assertNull(spiAgentResponse.byteData);
 		Assert.assertEquals(
-			"<body>content<div class=\"alert alert-info\"><strong>This " +
-				"portlet is from SPI 1234</strong></div></body>",
+			"<div>content<div class=\"alert alert-info\"><strong>This " +
+				"portlet is from SPI 1234</strong></div></div>",
 			spiAgentResponse.stringData);
 	}
 
@@ -302,7 +326,8 @@ public class SPIAgentResponseTest {
 
 		// Exception
 
-		SPIAgentResponse spiAgentResponse = new SPIAgentResponse();
+		SPIAgentResponse spiAgentResponse = new SPIAgentResponse(
+			_SERVLET_CONTEXT_NAME);
 
 		Exception exception = new Exception();
 
@@ -477,6 +502,8 @@ public class SPIAgentResponseTest {
 			Assert.assertSame(ioException, pre.getCause());
 		}
 	}
+
+	private static final String _SERVLET_CONTEXT_NAME = "SERVLET_CONTEXT_NAME";
 
 	private static final String _SESSION_ATTRIBUTE_1 = "SESSION_ATTRIBUTE_1";
 

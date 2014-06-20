@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -44,6 +44,13 @@ public class PortalHookPermission extends BasicPermission {
 		return _subject;
 	}
 
+	public interface PACL {
+
+		public void checkPermission(
+			String name, ClassLoader portletClassLoader, Object subject);
+
+	}
+
 	private static PACL _pacl = new NoPACL();
 
 	private transient ClassLoader _classLoader;
@@ -55,13 +62,6 @@ public class PortalHookPermission extends BasicPermission {
 		public void checkPermission(
 			String name, ClassLoader portletClassLoader, Object subject) {
 		}
-
-	}
-
-	public static interface PACL {
-
-		public void checkPermission(
-			String name, ClassLoader portletClassLoader, Object subject);
 
 	}
 

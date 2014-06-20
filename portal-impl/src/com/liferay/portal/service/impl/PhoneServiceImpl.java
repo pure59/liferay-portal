@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,6 @@
 package com.liferay.portal.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.Phone;
 import com.liferay.portal.model.User;
 import com.liferay.portal.security.permission.ActionKeys;
@@ -31,14 +30,15 @@ import java.util.List;
 public class PhoneServiceImpl extends PhoneServiceBaseImpl {
 
 	/**
-	 * @deprecated As of 6.2.0, replaced by {@link #addPhone( String, long,
+	 * @deprecated As of 6.2.0, replaced by {@link #addPhone(String, long,
 	 *             String, String, int, boolean, ServiceContext)}
 	 */
+	@Deprecated
 	@Override
 	public Phone addPhone(
 			String className, long classPK, String number, String extension,
 			int typeId, boolean primary)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		CommonPermissionUtil.check(
 			getPermissionChecker(), className, classPK, ActionKeys.UPDATE);
@@ -52,7 +52,7 @@ public class PhoneServiceImpl extends PhoneServiceBaseImpl {
 	public Phone addPhone(
 			String className, long classPK, String number, String extension,
 			int typeId, boolean primary, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		CommonPermissionUtil.check(
 			getPermissionChecker(), className, classPK, ActionKeys.UPDATE);
@@ -63,22 +63,18 @@ public class PhoneServiceImpl extends PhoneServiceBaseImpl {
 	}
 
 	@Override
-	public void deletePhone(long phoneId)
-		throws PortalException, SystemException {
-
+	public void deletePhone(long phoneId) throws PortalException {
 		Phone phone = phonePersistence.findByPrimaryKey(phoneId);
 
 		CommonPermissionUtil.check(
 			getPermissionChecker(), phone.getClassNameId(), phone.getClassPK(),
 			ActionKeys.UPDATE);
 
-		phoneLocalService.deletePhone(phoneId);
+		phoneLocalService.deletePhone(phone);
 	}
 
 	@Override
-	public Phone getPhone(long phoneId)
-		throws PortalException, SystemException {
-
+	public Phone getPhone(long phoneId) throws PortalException {
 		Phone phone = phonePersistence.findByPrimaryKey(phoneId);
 
 		CommonPermissionUtil.check(
@@ -90,7 +86,7 @@ public class PhoneServiceImpl extends PhoneServiceBaseImpl {
 
 	@Override
 	public List<Phone> getPhones(String className, long classPK)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		CommonPermissionUtil.check(
 			getPermissionChecker(), className, classPK, ActionKeys.VIEW);
@@ -105,7 +101,7 @@ public class PhoneServiceImpl extends PhoneServiceBaseImpl {
 	public Phone updatePhone(
 			long phoneId, String number, String extension, int typeId,
 			boolean primary)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		Phone phone = phonePersistence.findByPrimaryKey(phoneId);
 

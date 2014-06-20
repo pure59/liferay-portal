@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.LayoutRevisionServiceImpl
  * @generated
  */
+@ProviderType
 public class LayoutRevisionServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -67,8 +70,7 @@ public class LayoutRevisionServiceUtil {
 		java.lang.String colorSchemeId, java.lang.String wapThemeId,
 		java.lang.String wapColorSchemeId, java.lang.String css,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addLayoutRevision(userId, layoutSetBranchId,
 			layoutBranchId, parentLayoutRevisionId, head, plid,
@@ -91,6 +93,7 @@ public class LayoutRevisionServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(LayoutRevisionService service) {
 	}
 

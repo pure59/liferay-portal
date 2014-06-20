@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -66,6 +66,10 @@ public class HttpUtil {
 		return getHttp().decodeURL(url);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #decodeURL(String)}
+	 */
+	@Deprecated
 	public static String decodeURL(String url, boolean unescapeSpaces) {
 		return getHttp().decodeURL(url, unescapeSpaces);
 	}
@@ -184,6 +188,10 @@ public class HttpUtil {
 		return getHttp().isProxyHost(host);
 	}
 
+	public static boolean isSecure(String url) {
+		return getHttp().isSecure(url);
+	}
+
 	public static Map<String, String[]> parameterMapFromString(
 		String queryString) {
 
@@ -214,6 +222,10 @@ public class HttpUtil {
 		return getHttp().protocolize(url, request);
 	}
 
+	public static String protocolize(String url, int port, boolean secure) {
+		return getHttp().protocolize(url, port, secure);
+	}
+
 	public static String protocolize(String url, RenderRequest renderRequest) {
 		return getHttp().protocolize(url, renderRequest);
 	}
@@ -226,8 +238,16 @@ public class HttpUtil {
 		return getHttp().removeParameter(url, name);
 	}
 
+	public static String removePathParameters(String uri) {
+		return getHttp().removePathParameters(uri);
+	}
+
 	public static String removeProtocol(String url) {
 		return getHttp().removeProtocol(url);
+	}
+
+	public static String sanitizeHeader(String header) {
+		return getHttp().sanitizeHeader(header);
 	}
 
 	public static String setParameter(String url, String name, boolean value) {
@@ -252,6 +272,10 @@ public class HttpUtil {
 
 	public static String setParameter(String url, String name, String value) {
 		return getHttp().setParameter(url, name, value);
+	}
+
+	public static String shortenURL(String url, int count) {
+		return getHttp().shortenURL(url, count);
 	}
 
 	public static byte[] URLtoByteArray(Http.Options options)

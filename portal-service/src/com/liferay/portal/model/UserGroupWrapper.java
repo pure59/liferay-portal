@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see UserGroup
  * @generated
  */
+@ProviderType
 public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	public UserGroupWrapper(UserGroup userGroup) {
 		_userGroup = userGroup;
@@ -49,6 +52,7 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
 		attributes.put("userGroupId", getUserGroupId());
 		attributes.put("companyId", getCompanyId());
@@ -66,6 +70,12 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		String uuid = (String)attributes.get("uuid");
 
 		if (uuid != null) {
@@ -154,6 +164,26 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	}
 
 	/**
+	* Returns the mvcc version of this user group.
+	*
+	* @return the mvcc version of this user group
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _userGroup.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this user group.
+	*
+	* @param mvccVersion the mvcc version of this user group
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_userGroup.setMvccVersion(mvccVersion);
+	}
+
+	/**
 	* Returns the uuid of this user group.
 	*
 	* @return the uuid of this user group
@@ -237,11 +267,9 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	* Returns the user uuid of this user group.
 	*
 	* @return the user uuid of this user group
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _userGroup.getUserUuid();
 	}
 
@@ -504,43 +532,43 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_userGroup.persist();
 	}
 
 	@Override
 	public com.liferay.portal.model.Group getGroup()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.getGroup();
 	}
 
 	@Override
+	public long getGroupId()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _userGroup.getGroupId();
+	}
+
+	@Override
 	public int getPrivateLayoutsPageCount()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.getPrivateLayoutsPageCount();
 	}
 
 	@Override
 	public int getPublicLayoutsPageCount()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.getPublicLayoutsPageCount();
 	}
 
 	@Override
 	public boolean hasPrivateLayouts()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.hasPrivateLayouts();
 	}
 
 	@Override
 	public boolean hasPublicLayouts()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.hasPublicLayouts();
 	}
 
@@ -571,6 +599,7 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public UserGroup getWrappedUserGroup() {
 		return _userGroup;
 	}
@@ -578,6 +607,16 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	@Override
 	public UserGroup getWrappedModel() {
 		return _userGroup;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _userGroup.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _userGroup.isFinderCacheEnabled();
 	}
 
 	@Override

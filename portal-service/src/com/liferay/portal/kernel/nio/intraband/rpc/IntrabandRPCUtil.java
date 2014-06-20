@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,25 +16,30 @@ package com.liferay.portal.kernel.nio.intraband.rpc;
 
 import com.liferay.portal.kernel.io.Deserializer;
 import com.liferay.portal.kernel.io.Serializer;
+import com.liferay.portal.kernel.nio.intraband.CompletionHandler;
+import com.liferay.portal.kernel.nio.intraband.CompletionHandler.CompletionType;
 import com.liferay.portal.kernel.nio.intraband.Datagram;
 import com.liferay.portal.kernel.nio.intraband.Intraband;
 import com.liferay.portal.kernel.nio.intraband.RegistrationReference;
 import com.liferay.portal.kernel.nio.intraband.SystemDataType;
 import com.liferay.portal.kernel.process.ProcessCallable;
 
+import java.io.IOException;
 import java.io.Serializable;
 
-import java.util.concurrent.TimeUnit;
+import java.util.EnumSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 /**
  * @author Shuyang Zhou
  */
 public class IntrabandRPCUtil {
 
-	public static <V extends Serializable> V execute(
-			RegistrationReference registrationReference,
-			ProcessCallable<V> processCallable)
-		throws IntrabandRPCException {
+	public static <V extends Serializable> Future<V> execute(
+		RegistrationReference registrationReference,
+		ProcessCallable<V> processCallable) {
 
 		Intraband intraband = registrationReference.getIntraband();
 
@@ -44,50 +49,99 @@ public class IntrabandRPCUtil {
 
 		serializer.writeObject(processCallable);
 
-		try {
-			Datagram responseDatagram = intraband.sendSyncDatagram(
-				registrationReference,
-				Datagram.createRequestDatagram(
-					systemDataType.getValue(), serializer.toByteBuffer()));
+		Datagram datagram = Datagram.createRequestDatagram(
+			systemDataType.getValue(), serializer.toByteBuffer());
 
-			Deserializer deserializer = new Deserializer(
-				responseDatagram.getDataByteBuffer());
+		FutureResult<V> futureResult = new FutureResult<V>();
 
-			return deserializer.readObject();
-		}
-		catch (Exception e) {
-			throw new IntrabandRPCException(e);
-		}
+		intraband.sendDatagram(
+			registrationReference, datagram, null, repliedEnumSet,
+			new FutureCompletionHandler<V>(futureResult));
+
+		return futureResult;
 	}
 
-	public static <V extends Serializable> V execute(
-			RegistrationReference registrationReference,
-			ProcessCallable<V> processCallable, long timeout, TimeUnit timeUnit)
-		throws IntrabandRPCException {
+	protected static Callable<Serializable> emptyCallable =
+		new Callable<Serializable>() {
 
-		Intraband intraband = registrationReference.getIntraband();
+		@Override
+		public Serializable call() throws Exception {
+			return null;
+		}
 
-		SystemDataType systemDataType = SystemDataType.RPC;
+	};
 
-		Serializer serializer = new Serializer();
+	protected static EnumSet<CompletionType> repliedEnumSet = EnumSet.of(
+		CompletionType.REPLIED);
 
-		serializer.writeObject(processCallable);
+	protected static class FutureCompletionHandler<V extends Serializable>
+		implements CompletionHandler<Object> {
 
-		try {
-			Datagram responseDatagram = intraband.sendSyncDatagram(
-				registrationReference,
-				Datagram.createRequestDatagram(
-					systemDataType.getValue(), serializer.toByteBuffer()),
-				timeout, timeUnit);
+		protected FutureCompletionHandler(FutureResult<V> futureResult) {
+			_futureResult = futureResult;
+		}
 
+		@Override
+		public void delivered(Object attachment) {
+		}
+
+		@Override
+		public void failed(Object attachment, IOException ioe) {
+			_futureResult.setException(ioe);
+		}
+
+		@Override
+		public void replied(Object attachment, Datagram datagram) {
 			Deserializer deserializer = new Deserializer(
-				responseDatagram.getDataByteBuffer());
+				datagram.getDataByteBuffer());
 
-			return deserializer.readObject();
+			try {
+				RPCResponse rpcResponse = deserializer.readObject();
+
+				Exception exception = rpcResponse.getException();
+
+				if (exception != null) {
+					_futureResult.setException(exception);
+				}
+				else {
+					_futureResult.set((V)rpcResponse.getResult());
+				}
+			}
+			catch (ClassNotFoundException cnfe) {
+				_futureResult.setException(cnfe);
+			}
 		}
-		catch (Exception e) {
-			throw new IntrabandRPCException(e);
+
+		@Override
+		public void submitted(Object attachment) {
 		}
+
+		@Override
+		public void timedOut(Object attachment) {
+			_futureResult.cancel(true);
+		}
+
+		private final FutureResult<V> _futureResult;
+
+	}
+
+	protected static class FutureResult<V extends Serializable>
+		extends FutureTask<V> {
+
+		protected FutureResult() {
+			super((Callable<V>)emptyCallable);
+		}
+
+		@Override
+		protected void set(V v) {
+			super.set(v);
+		}
+
+		@Override
+		protected void setException(Throwable t) {
+			super.setException(t);
+		}
+
 	}
 
 }

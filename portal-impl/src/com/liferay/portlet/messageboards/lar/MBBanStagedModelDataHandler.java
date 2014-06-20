@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -35,6 +35,18 @@ public class MBBanStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {MBBan.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+		String uuid, long groupId, String className, String extraData) {
+
+		MBBan ban = MBBanLocalServiceUtil.fetchMBBanByUuidAndGroupId(
+			uuid, groupId);
+
+		if (ban != null) {
+			MBBanLocalServiceUtil.deleteBan(ban);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -51,12 +63,11 @@ public class MBBanStagedModelDataHandler
 		User bannedUser = UserLocalServiceUtil.getUser(ban.getUserId());
 
 		portletDataContext.addReferenceElement(
-			ban, userBanElement, bannedUser, User.class,
+			ban, userBanElement, bannedUser,
 			PortletDataContext.REFERENCE_TYPE_DEPENDENCY_DISPOSABLE, true);
 
 		portletDataContext.addClassedModel(
-			userBanElement, ExportImportPathUtil.getModelPath(ban), ban,
-			MBPortletDataHandler.NAMESPACE);
+			userBanElement, ExportImportPathUtil.getModelPath(ban), ban);
 	}
 
 	@Override
@@ -80,7 +91,9 @@ public class MBBanStagedModelDataHandler
 		long userId = portletDataContext.getUserId(ban.getUserUuid());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			ban, MBPortletDataHandler.NAMESPACE);
+			ban);
+
+		serviceContext.setUuid(ban.getUuid());
 
 		MBBanLocalServiceUtil.addBan(userId, user.getUserId(), serviceContext);
 	}

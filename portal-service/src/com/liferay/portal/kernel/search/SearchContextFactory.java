@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,7 @@
 
 package com.liferay.portal.kernel.search;
 
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -57,7 +58,7 @@ public class SearchContextFactory {
 			String name = entry.getKey();
 			String[] values = entry.getValue();
 
-			if ((values != null) && (values.length > 0)) {
+			if (ArrayUtil.isNotEmpty(values)) {
 				if (values.length == 1) {
 					attributes.put(name, values[0]);
 				}
@@ -88,11 +89,9 @@ public class SearchContextFactory {
 
 		// Query config
 
-		QueryConfig queryConfig = new QueryConfig();
+		QueryConfig queryConfig = searchContext.getQueryConfig();
 
 		queryConfig.setLocale(themeDisplay.getLocale());
-
-		searchContext.setQueryConfig(queryConfig);
 
 		return searchContext;
 	}

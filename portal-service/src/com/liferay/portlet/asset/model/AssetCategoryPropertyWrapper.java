@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.asset.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -30,6 +32,7 @@ import java.util.Map;
  * @see AssetCategoryProperty
  * @generated
  */
+@ProviderType
 public class AssetCategoryPropertyWrapper implements AssetCategoryProperty,
 	ModelWrapper<AssetCategoryProperty> {
 	public AssetCategoryPropertyWrapper(
@@ -205,11 +208,9 @@ public class AssetCategoryPropertyWrapper implements AssetCategoryProperty,
 	* Returns the user uuid of this asset category property.
 	*
 	* @return the user uuid of this asset category property
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _assetCategoryProperty.getUserUuid();
 	}
 
@@ -443,8 +444,7 @@ public class AssetCategoryPropertyWrapper implements AssetCategoryProperty,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_assetCategoryProperty.persist();
 	}
 
@@ -471,6 +471,7 @@ public class AssetCategoryPropertyWrapper implements AssetCategoryProperty,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public AssetCategoryProperty getWrappedAssetCategoryProperty() {
 		return _assetCategoryProperty;
 	}
@@ -478,6 +479,16 @@ public class AssetCategoryPropertyWrapper implements AssetCategoryProperty,
 	@Override
 	public AssetCategoryProperty getWrappedModel() {
 		return _assetCategoryProperty;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _assetCategoryProperty.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _assetCategoryProperty.isFinderCacheEnabled();
 	}
 
 	@Override

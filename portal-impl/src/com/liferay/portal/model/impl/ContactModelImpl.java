@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,7 @@
 package com.liferay.portal.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
@@ -26,7 +26,9 @@ import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.Contact;
 import com.liferay.portal.model.ContactModel;
 import com.liferay.portal.model.ContactSoap;
+import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -65,6 +67,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	 */
 	public static final String TABLE_NAME = "Contact_";
 	public static final Object[][] TABLE_COLUMNS = {
+			{ "mvccVersion", Types.BIGINT },
 			{ "contactId", Types.BIGINT },
 			{ "companyId", Types.BIGINT },
 			{ "userId", Types.BIGINT },
@@ -99,7 +102,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 			{ "jobClass", Types.VARCHAR },
 			{ "hoursOfOperation", Types.VARCHAR }
 		};
-	public static final String TABLE_SQL_CREATE = "create table Contact_ (contactId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,accountId LONG,parentContactId LONG,emailAddress VARCHAR(75) null,firstName VARCHAR(75) null,middleName VARCHAR(75) null,lastName VARCHAR(75) null,prefixId INTEGER,suffixId INTEGER,male BOOLEAN,birthday DATE null,smsSn VARCHAR(75) null,aimSn VARCHAR(75) null,facebookSn VARCHAR(75) null,icqSn VARCHAR(75) null,jabberSn VARCHAR(75) null,msnSn VARCHAR(75) null,mySpaceSn VARCHAR(75) null,skypeSn VARCHAR(75) null,twitterSn VARCHAR(75) null,ymSn VARCHAR(75) null,employeeStatusId VARCHAR(75) null,employeeNumber VARCHAR(75) null,jobTitle VARCHAR(100) null,jobClass VARCHAR(75) null,hoursOfOperation VARCHAR(75) null)";
+	public static final String TABLE_SQL_CREATE = "create table Contact_ (mvccVersion LONG default 0,contactId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,accountId LONG,parentContactId LONG,emailAddress VARCHAR(75) null,firstName VARCHAR(75) null,middleName VARCHAR(75) null,lastName VARCHAR(75) null,prefixId INTEGER,suffixId INTEGER,male BOOLEAN,birthday DATE null,smsSn VARCHAR(75) null,aimSn VARCHAR(75) null,facebookSn VARCHAR(75) null,icqSn VARCHAR(75) null,jabberSn VARCHAR(75) null,msnSn VARCHAR(75) null,mySpaceSn VARCHAR(75) null,skypeSn VARCHAR(75) null,twitterSn VARCHAR(75) null,ymSn VARCHAR(75) null,employeeStatusId VARCHAR(75) null,employeeNumber VARCHAR(75) null,jobTitle VARCHAR(100) null,jobClass VARCHAR(75) null,hoursOfOperation VARCHAR(75) null)";
 	public static final String TABLE_SQL_DROP = "drop table Contact_";
 	public static final String ORDER_BY_JPQL = " ORDER BY contact.contactId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY Contact_.contactId ASC";
@@ -134,6 +137,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 
 		Contact model = new ContactImpl();
 
+		model.setMvccVersion(soapModel.getMvccVersion());
 		model.setContactId(soapModel.getContactId());
 		model.setCompanyId(soapModel.getCompanyId());
 		model.setUserId(soapModel.getUserId());
@@ -231,6 +235,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("contactId", getContactId());
 		attributes.put("companyId", getCompanyId());
 		attributes.put("userId", getUserId());
@@ -265,11 +270,20 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		attributes.put("jobClass", getJobClass());
 		attributes.put("hoursOfOperation", getHoursOfOperation());
 
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
+
 		return attributes;
 	}
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long contactId = (Long)attributes.get("contactId");
 
 		if (contactId != null) {
@@ -469,8 +483,19 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@JSON
+	@Override
 	public long getContactId() {
 		return _contactId;
 	}
@@ -480,8 +505,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_contactId = contactId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -503,8 +528,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -515,17 +540,23 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -540,8 +571,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -551,8 +582,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -582,8 +613,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		setClassNameId(classNameId);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassNameId() {
 		return _classNameId;
 	}
@@ -605,8 +636,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		return _originalClassNameId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassPK() {
 		return _classPK;
 	}
@@ -628,8 +659,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		return _originalClassPK;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getAccountId() {
 		return _accountId;
 	}
@@ -651,8 +682,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		return _originalAccountId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getParentContactId() {
 		return _parentContactId;
 	}
@@ -662,8 +693,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_parentContactId = parentContactId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getEmailAddress() {
 		if (_emailAddress == null) {
 			return StringPool.BLANK;
@@ -678,8 +709,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_emailAddress = emailAddress;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getFirstName() {
 		if (_firstName == null) {
 			return StringPool.BLANK;
@@ -694,8 +725,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_firstName = firstName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getMiddleName() {
 		if (_middleName == null) {
 			return StringPool.BLANK;
@@ -710,8 +741,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_middleName = middleName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getLastName() {
 		if (_lastName == null) {
 			return StringPool.BLANK;
@@ -726,8 +757,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_lastName = lastName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getPrefixId() {
 		return _prefixId;
 	}
@@ -737,8 +768,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_prefixId = prefixId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getSuffixId() {
 		return _suffixId;
 	}
@@ -748,8 +779,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_suffixId = suffixId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getMale() {
 		return _male;
 	}
@@ -764,8 +795,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_male = male;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getBirthday() {
 		return _birthday;
 	}
@@ -775,8 +806,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_birthday = birthday;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getSmsSn() {
 		if (_smsSn == null) {
 			return StringPool.BLANK;
@@ -791,8 +822,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_smsSn = smsSn;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getAimSn() {
 		if (_aimSn == null) {
 			return StringPool.BLANK;
@@ -807,8 +838,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_aimSn = aimSn;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getFacebookSn() {
 		if (_facebookSn == null) {
 			return StringPool.BLANK;
@@ -823,8 +854,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_facebookSn = facebookSn;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getIcqSn() {
 		if (_icqSn == null) {
 			return StringPool.BLANK;
@@ -839,8 +870,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_icqSn = icqSn;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getJabberSn() {
 		if (_jabberSn == null) {
 			return StringPool.BLANK;
@@ -855,8 +886,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_jabberSn = jabberSn;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getMsnSn() {
 		if (_msnSn == null) {
 			return StringPool.BLANK;
@@ -871,8 +902,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_msnSn = msnSn;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getMySpaceSn() {
 		if (_mySpaceSn == null) {
 			return StringPool.BLANK;
@@ -887,8 +918,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_mySpaceSn = mySpaceSn;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getSkypeSn() {
 		if (_skypeSn == null) {
 			return StringPool.BLANK;
@@ -903,8 +934,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_skypeSn = skypeSn;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getTwitterSn() {
 		if (_twitterSn == null) {
 			return StringPool.BLANK;
@@ -919,8 +950,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_twitterSn = twitterSn;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getYmSn() {
 		if (_ymSn == null) {
 			return StringPool.BLANK;
@@ -935,8 +966,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_ymSn = ymSn;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getEmployeeStatusId() {
 		if (_employeeStatusId == null) {
 			return StringPool.BLANK;
@@ -951,8 +982,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_employeeStatusId = employeeStatusId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getEmployeeNumber() {
 		if (_employeeNumber == null) {
 			return StringPool.BLANK;
@@ -967,8 +998,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_employeeNumber = employeeNumber;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getJobTitle() {
 		if (_jobTitle == null) {
 			return StringPool.BLANK;
@@ -983,8 +1014,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_jobTitle = jobTitle;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getJobClass() {
 		if (_jobClass == null) {
 			return StringPool.BLANK;
@@ -999,8 +1030,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		_jobClass = jobClass;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getHoursOfOperation() {
 		if (_hoursOfOperation == null) {
 			return StringPool.BLANK;
@@ -1046,6 +1077,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	public Object clone() {
 		ContactImpl contactImpl = new ContactImpl();
 
+		contactImpl.setMvccVersion(getMvccVersion());
 		contactImpl.setContactId(getContactId());
 		contactImpl.setCompanyId(getCompanyId());
 		contactImpl.setUserId(getUserId());
@@ -1128,6 +1160,16 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	}
 
 	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
+	}
+
+	@Override
 	public void resetOriginalValues() {
 		ContactModelImpl contactModelImpl = this;
 
@@ -1153,6 +1195,8 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public CacheModel<Contact> toCacheModel() {
 		ContactCacheModel contactCacheModel = new ContactCacheModel();
+
+		contactCacheModel.mvccVersion = getMvccVersion();
 
 		contactCacheModel.contactId = getContactId();
 
@@ -1366,9 +1410,11 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(67);
+		StringBundler sb = new StringBundler(69);
 
-		sb.append("{contactId=");
+		sb.append("{mvccVersion=");
+		sb.append(getMvccVersion());
+		sb.append(", contactId=");
 		sb.append(getContactId());
 		sb.append(", companyId=");
 		sb.append(getCompanyId());
@@ -1441,12 +1487,16 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(103);
+		StringBundler sb = new StringBundler(106);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.model.Contact");
 		sb.append("</model-name>");
 
+		sb.append(
+			"<column><column-name>mvccVersion</column-name><column-value><![CDATA[");
+		sb.append(getMvccVersion());
+		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>contactId</column-name><column-value><![CDATA[");
 		sb.append(getContactId());
@@ -1589,12 +1639,12 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	private static Class<?>[] _escapedModelInterfaces = new Class[] {
 			Contact.class
 		};
+	private long _mvccVersion;
 	private long _contactId;
 	private long _companyId;
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,10 +16,9 @@ package com.liferay.portal.security.pacl.checker;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.security.pacl.Reflection;
 
 import java.security.Permission;
-
-import sun.reflect.Reflection;
 
 /**
  * @author Brian Wing Shun Chan
@@ -65,7 +64,8 @@ public class SecurityChecker extends BaseChecker {
 	}
 
 	protected boolean hasGetPolicy(Permission permission) {
-		int stackIndex = getStackIndex(11, 11, 10);
+		int stackIndex = Reflection.getStackIndex(
+			new int[] {11, 11}, new int[] {11, 10});
 
 		Class<?> callerClass = Reflection.getCallerClass(stackIndex);
 
@@ -79,7 +79,8 @@ public class SecurityChecker extends BaseChecker {
 	}
 
 	protected boolean hasSetPolicy(Permission permission) {
-		int stackIndex = getStackIndex(11, 11, 10);
+		int stackIndex = Reflection.getStackIndex(
+			new int[] {11, 11}, new int[] {11, 10});
 
 		Class<?> callerClass = Reflection.getCallerClass(stackIndex);
 

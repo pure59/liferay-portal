@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -36,6 +36,7 @@ import com.liferay.portal.RequiredUserException;
 import com.liferay.portal.ReservedUserEmailAddressException;
 import com.liferay.portal.ReservedUserScreenNameException;
 import com.liferay.portal.UserEmailAddressException;
+import com.liferay.portal.UserFieldException;
 import com.liferay.portal.UserIdException;
 import com.liferay.portal.UserPasswordException;
 import com.liferay.portal.UserReminderQueryException;
@@ -44,11 +45,13 @@ import com.liferay.portal.UserSmsException;
 import com.liferay.portal.WebsiteURLException;
 import com.liferay.portal.kernel.bean.BeanParamUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -69,10 +72,12 @@ import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.model.Website;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.membershippolicy.MembershipPolicyException;
+import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.UserServiceUtil;
+import com.liferay.portal.service.permission.GroupPermissionUtil;
 import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
@@ -85,6 +90,7 @@ import com.liferay.portlet.announcements.model.AnnouncementsDelivery;
 import com.liferay.portlet.announcements.model.AnnouncementsEntryConstants;
 import com.liferay.portlet.announcements.model.impl.AnnouncementsDeliveryImpl;
 import com.liferay.portlet.announcements.service.AnnouncementsDeliveryLocalServiceUtil;
+import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 import com.liferay.portlet.sites.util.SitesUtil;
 import com.liferay.portlet.usersadmin.util.UsersAdmin;
 import com.liferay.portlet.usersadmin.util.UsersAdminUtil;
@@ -254,6 +260,7 @@ public class EditUserAction extends PortletAction {
 					 e instanceof ReservedUserEmailAddressException ||
 					 e instanceof ReservedUserScreenNameException ||
 					 e instanceof UserEmailAddressException ||
+					 e instanceof UserFieldException ||
 					 e instanceof UserIdException ||
 					 e instanceof UserPasswordException ||
 					 e instanceof UserReminderQueryException ||
@@ -405,13 +412,13 @@ public class EditUserAction extends PortletAction {
 				user.getUserId(), StringPool.BLANK, StringPool.BLANK,
 				StringPool.BLANK, false, reminderQueryQuestion,
 				reminderQueryAnswer, user.getScreenName(),
-				user.getEmailAddress(), facebookId, openId, languageId,
-				timeZoneId, greeting, comments, firstName, middleName, lastName,
-				prefixId, suffixId, male, birthdayMonth, birthdayDay,
-				birthdayYear, smsSn, aimSn, facebookSn, icqSn, jabberSn, msnSn,
-				mySpaceSn, skypeSn, twitterSn, ymSn, jobTitle, groupIds,
-				organizationIds, roleIds, userGroupRoles, userGroupIds,
-				addresses, emailAddresses, phones, websites,
+				user.getEmailAddress(), facebookId, openId, true, null,
+				languageId, timeZoneId, greeting, comments, firstName,
+				middleName, lastName, prefixId, suffixId, male, birthdayMonth,
+				birthdayDay, birthdayYear, smsSn, aimSn, facebookSn, icqSn,
+				jabberSn, msnSn, mySpaceSn, skypeSn, twitterSn, ymSn, jobTitle,
+				groupIds, organizationIds, roleIds, userGroupRoles,
+				userGroupIds, addresses, emailAddresses, phones, websites,
 				announcementsDeliveries, serviceContext);
 		}
 
@@ -456,7 +463,8 @@ public class EditUserAction extends PortletAction {
 					status = WorkflowConstants.STATUS_INACTIVE;
 				}
 
-				UserServiceUtil.updateStatus(deleteUserId, status);
+				UserServiceUtil.updateStatus(
+					deleteUserId, status, new ServiceContext());
 			}
 			else {
 				UserServiceUtil.deleteUser(deleteUserId);
@@ -534,12 +542,6 @@ public class EditUserAction extends PortletAction {
 
 		User user = PortalUtil.getSelectedUser(actionRequest);
 
-		boolean deleteLogo = ParamUtil.getBoolean(actionRequest, "deleteLogo");
-
-		if (deleteLogo) {
-			UserServiceUtil.deletePortrait(user.getUserId());
-		}
-
 		Contact contact = user.getContact();
 
 		String oldPassword = AdminUtil.getUpdateUserPassword(
@@ -567,6 +569,19 @@ public class EditUserAction extends PortletAction {
 			user, actionRequest, "emailAddress");
 		long facebookId = user.getFacebookId();
 		String openId = BeanParamUtil.getString(user, actionRequest, "openId");
+		boolean deleteLogo = ParamUtil.getBoolean(actionRequest, "deleteLogo");
+
+		byte[] portraitBytes = null;
+
+		long fileEntryId = ParamUtil.getLong(actionRequest, "fileEntryId");
+
+		if (fileEntryId > 0) {
+			FileEntry fileEntry = DLAppLocalServiceUtil.getFileEntry(
+				fileEntryId);
+
+			portraitBytes = FileUtil.getBytes(fileEntry.getContentStream());
+		}
+
 		String languageId = BeanParamUtil.getString(
 			user, actionRequest, "languageId");
 		String timeZoneId = BeanParamUtil.getString(
@@ -649,13 +664,14 @@ public class EditUserAction extends PortletAction {
 		user = UserServiceUtil.updateUser(
 			user.getUserId(), oldPassword, newPassword1, newPassword2,
 			passwordReset, reminderQueryQuestion, reminderQueryAnswer,
-			screenName, emailAddress, facebookId, openId, languageId,
-			timeZoneId, greeting, comments, firstName, middleName, lastName,
-			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
-			smsSn, aimSn, facebookSn, icqSn, jabberSn, msnSn, mySpaceSn,
-			skypeSn, twitterSn, ymSn, jobTitle, groupIds, organizationIds,
-			roleIds, userGroupRoles, userGroupIds, addresses, emailAddresses,
-			phones, websites, announcementsDeliveries, serviceContext);
+			screenName, emailAddress, facebookId, openId, !deleteLogo,
+			portraitBytes, languageId, timeZoneId, greeting, comments,
+			firstName, middleName, lastName, prefixId, suffixId, male,
+			birthdayMonth, birthdayDay, birthdayYear, smsSn, aimSn, facebookSn,
+			icqSn, jabberSn, msnSn, mySpaceSn, skypeSn, twitterSn, ymSn,
+			jobTitle, groupIds, organizationIds, roleIds, userGroupRoles,
+			userGroupIds, addresses, emailAddresses, phones, websites,
+			announcementsDeliveries, serviceContext);
 
 		if (oldScreenName.equals(user.getScreenName())) {
 			oldScreenName = StringPool.BLANK;
@@ -669,7 +685,7 @@ public class EditUserAction extends PortletAction {
 
 			HttpServletRequest request = PortalUtil.getHttpServletRequest(
 				actionRequest);
-			HttpServletResponse response= PortalUtil.getHttpServletResponse(
+			HttpServletResponse response = PortalUtil.getHttpServletResponse(
 				actionResponse);
 			HttpSession session = request.getSession();
 
@@ -701,6 +717,12 @@ public class EditUserAction extends PortletAction {
 		String portletId = serviceContext.getPortletId();
 
 		if (!portletId.equals(PortletKeys.MY_ACCOUNT)) {
+			Group group = user.getGroup();
+
+			boolean hasGroupUpdatePermission = GroupPermissionUtil.contains(
+				themeDisplay.getPermissionChecker(), group.getGroupId(),
+				ActionKeys.UPDATE);
+
 			long publicLayoutSetPrototypeId = ParamUtil.getLong(
 				actionRequest, "publicLayoutSetPrototypeId");
 			long privateLayoutSetPrototypeId = ParamUtil.getLong(
@@ -710,17 +732,22 @@ public class EditUserAction extends PortletAction {
 			boolean privateLayoutSetPrototypeLinkEnabled = ParamUtil.getBoolean(
 				actionRequest, "privateLayoutSetPrototypeLinkEnabled");
 
-			SitesUtil.updateLayoutSetPrototypesLinks(
-				user.getGroup(), publicLayoutSetPrototypeId,
-				privateLayoutSetPrototypeId,
-				publicLayoutSetPrototypeLinkEnabled,
-				privateLayoutSetPrototypeLinkEnabled);
+			if (hasGroupUpdatePermission &&
+				((publicLayoutSetPrototypeId > 0) ||
+				 (privateLayoutSetPrototypeId > 0))) {
+
+				SitesUtil.updateLayoutSetPrototypesLinks(
+					group, publicLayoutSetPrototypeId,
+					privateLayoutSetPrototypeId,
+					publicLayoutSetPrototypeLinkEnabled,
+					privateLayoutSetPrototypeLinkEnabled);
+			}
 		}
 
 		Company company = PortalUtil.getCompany(actionRequest);
 
 		if (company.isStrangersVerify() &&
-			!oldEmailAddress.equalsIgnoreCase(emailAddress)) {
+			!StringUtil.equalsIgnoreCase(oldEmailAddress, emailAddress)) {
 
 			SessionMessages.add(actionRequest, "verificationEmailSent");
 		}

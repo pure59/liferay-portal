@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,7 +18,9 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.DateUtil;
+import com.liferay.portal.model.SystemEventConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.messageboards.model.MBThread;
@@ -37,7 +39,7 @@ public class MBThreadFlagLocalServiceImpl
 	@Override
 	public void addThreadFlag(
 			long userId, MBThread thread, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(userId);
 
@@ -94,37 +96,32 @@ public class MBThreadFlagLocalServiceImpl
 	}
 
 	@Override
-	public void deleteThreadFlag(long threadFlagId)
-		throws PortalException, SystemException {
-
+	public void deleteThreadFlag(long threadFlagId) throws PortalException {
 		MBThreadFlag threadFlag = mbThreadFlagPersistence.findByPrimaryKey(
 			threadFlagId);
 
-		deleteThreadFlag(threadFlag);
+		mbThreadFlagLocalService.deleteThreadFlag(threadFlag);
 	}
 
 	@Override
-	public void deleteThreadFlag(MBThreadFlag threadFlag)
-		throws SystemException {
-
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
+	public void deleteThreadFlag(MBThreadFlag threadFlag) {
 		mbThreadFlagPersistence.remove(threadFlag);
 	}
 
 	@Override
-	public void deleteThreadFlagsByThreadId(long threadId)
-		throws SystemException {
-
+	public void deleteThreadFlagsByThreadId(long threadId) {
 		mbThreadFlagPersistence.removeByThreadId(threadId);
 	}
 
 	@Override
-	public void deleteThreadFlagsByUserId(long userId) throws SystemException {
+	public void deleteThreadFlagsByUserId(long userId) {
 		mbThreadFlagPersistence.removeByUserId(userId);
 	}
 
 	@Override
 	public MBThreadFlag getThreadFlag(long userId, MBThread thread)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(userId);
 
@@ -137,7 +134,7 @@ public class MBThreadFlagLocalServiceImpl
 
 	@Override
 	public boolean hasThreadFlag(long userId, MBThread thread)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(userId);
 

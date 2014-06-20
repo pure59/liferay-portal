@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,12 +14,17 @@
 
 package com.liferay.portlet.documentlibrary.asset;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.repository.RepositoryException;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.trash.TrashRenderer;
-import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.security.auth.PrincipalException;
+import com.liferay.portal.security.permission.ActionKeys;
+import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.WebKeys;
@@ -27,12 +32,15 @@ import com.liferay.portlet.asset.model.AssetRendererFactory;
 import com.liferay.portlet.asset.model.BaseAssetRenderer;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
+import com.liferay.portlet.documentlibrary.service.permission.DLFolderPermission;
 import com.liferay.portlet.trash.util.TrashUtil;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
@@ -71,6 +79,39 @@ public class DLFolderAssetRenderer
 	}
 
 	@Override
+	public String getIconCssClass() throws PortalException {
+		try {
+			if (_folder.isMountPoint()) {
+				return "icon-drive";
+			}
+
+			List<Long> subfolderIds = DLAppServiceUtil.getSubfolderIds(
+				_folder.getRepositoryId(), _folder.getFolderId(), false);
+
+			if (!subfolderIds.isEmpty()) {
+				return "icon-folder-close";
+			}
+
+			int count = DLAppServiceUtil.getFoldersFileEntriesCount(
+				_folder.getRepositoryId(),
+				ListUtil.fromArray(new Long[] {_folder.getFolderId()}),
+				WorkflowConstants.STATUS_APPROVED);
+
+			if (count > 0) {
+				return "icon-folder-close";
+			}
+		}
+		catch (PrincipalException pe) {
+			return "icon-remove";
+		}
+		catch (RepositoryException re) {
+			return "icon-remove";
+		}
+
+		return super.getIconCssClass();
+	}
+
+	@Override
 	public String getIconPath(ThemeDisplay themeDisplay) {
 		try {
 			if (DLAppServiceUtil.getFoldersAndFileEntriesAndFileShortcutsCount(
@@ -95,8 +136,10 @@ public class DLFolderAssetRenderer
 	}
 
 	@Override
-	public String getSummary(Locale locale) {
-		return HtmlUtil.stripHtml(_folder.getDescription());
+	public String getSummary(
+		PortletRequest portletRequest, PortletResponse portletResponse) {
+
+		return _folder.getDescription();
 	}
 
 	@Override
@@ -140,7 +183,7 @@ public class DLFolderAssetRenderer
 
 		PortletURL portletURL = liferayPortletResponse.createLiferayPortletURL(
 			getControlPanelPlid(liferayPortletRequest),
-			PortletKeys.DOCUMENT_LIBRARY, PortletRequest.RENDER_PHASE);
+			PortletKeys.DOCUMENT_LIBRARY_ADMIN, PortletRequest.RENDER_PHASE);
 
 		portletURL.setParameter(
 			"struts_action", "/document_library/edit_folder");
@@ -156,10 +199,13 @@ public class DLFolderAssetRenderer
 			WindowState windowState)
 		throws Exception {
 
-		PortletURL portletURL = liferayPortletResponse.createLiferayPortletURL(
-			PortletKeys.DOCUMENT_LIBRARY, PortletRequest.RENDER_PHASE);
+		AssetRendererFactory assetRendererFactory = getAssetRendererFactory();
 
-		portletURL.setParameter("struts_action", "/document_library/view");
+		PortletURL portletURL = assetRendererFactory.getURLView(
+			liferayPortletResponse, windowState);
+
+		portletURL.setParameter(
+			"struts_action", "/document_library_display/view");
 		portletURL.setParameter(
 			"folderId", String.valueOf(_folder.getFolderId()));
 		portletURL.setWindowState(windowState);
@@ -191,6 +237,22 @@ public class DLFolderAssetRenderer
 	@Override
 	public String getUuid() {
 		return _folder.getUuid();
+	}
+
+	@Override
+	public boolean hasEditPermission(PermissionChecker permissionChecker)
+		throws PortalException {
+
+		return DLFolderPermission.contains(
+			permissionChecker, _folder, ActionKeys.UPDATE);
+	}
+
+	@Override
+	public boolean hasViewPermission(PermissionChecker permissionChecker)
+		throws PortalException {
+
+		return DLFolderPermission.contains(
+			permissionChecker, _folder, ActionKeys.VIEW);
 	}
 
 	@Override

@@ -8,7 +8,7 @@
 	.edit-permissions {
 		form:after {
 			clear: both;
-			content: ".";
+			content: '';
 			display: block;
 			height: 0;
 			visibility: hidden;
@@ -26,6 +26,10 @@
 				}
 			}
 		}
+	}
+
+	.relative-range {
+		width: 165px;
 	}
 
 	.process-list {
@@ -54,6 +58,19 @@
 
 			.toggler-header-expanded:after {
 				content: " «";
+			}
+
+			.background-task-status-in-progress {
+				float: left;
+				margin-right: 1em;
+			}
+
+			.progress {
+				margin-bottom: 0.3em;
+			}
+
+			.progress-current-item {
+				font-size: 0.7em;
 			}
 		}
 	}

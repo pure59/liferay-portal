@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,27 +14,26 @@
 
 package com.liferay.portlet.wiki.lar;
 
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.Property;
+import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.DataLevel;
-import com.liferay.portal.kernel.lar.ManifestSummary;
 import com.liferay.portal.kernel.lar.PortletDataContext;
-import com.liferay.portal.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.portal.kernel.lar.PortletDataHandlerControl;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
-import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.model.WikiPage;
 import com.liferay.portlet.wiki.service.WikiPageLocalServiceUtil;
 import com.liferay.portlet.wiki.service.permission.WikiPermission;
 import com.liferay.portlet.wiki.service.persistence.WikiNodeUtil;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.portlet.PortletPreferences;
@@ -48,14 +47,7 @@ public class WikiDisplayPortletDataHandler extends WikiPortletDataHandler {
 	public WikiDisplayPortletDataHandler() {
 		setDataLevel(DataLevel.PORTLET_INSTANCE);
 		setDataPortletPreferences("title", "nodeId");
-		setExportControls(
-			new PortletDataHandlerBoolean(
-				NAMESPACE, "selected-node", true, true,
-				new PortletDataHandlerControl[] {
-					new PortletDataHandlerBoolean(
-						NAMESPACE, "referenced-content")
-				},
-				WikiPage.class.getName()));
+		setExportControls(new PortletDataHandlerControl[0]);
 	}
 
 	@Override
@@ -75,7 +67,7 @@ public class WikiDisplayPortletDataHandler extends WikiPortletDataHandler {
 	}
 
 	@Override
-	protected String doExportData(
+	protected PortletPreferences doProcessExportPortletPreferences(
 			PortletDataContext portletDataContext, String portletId,
 			PortletPreferences portletPreferences)
 		throws Exception {
@@ -89,7 +81,7 @@ public class WikiDisplayPortletDataHandler extends WikiPortletDataHandler {
 					"No node id found in preferences of portlet " + portletId);
 			}
 
-			return StringPool.BLANK;
+			return portletPreferences;
 		}
 
 		String title = portletPreferences.getValue("title", null);
@@ -100,7 +92,7 @@ public class WikiDisplayPortletDataHandler extends WikiPortletDataHandler {
 					"No title found in preferences of portlet " + portletId);
 			}
 
-			return StringPool.BLANK;
+			return portletPreferences;
 		}
 
 		WikiNode node = WikiNodeUtil.fetchByPrimaryKey(nodeId);
@@ -110,42 +102,37 @@ public class WikiDisplayPortletDataHandler extends WikiPortletDataHandler {
 				_log.warn("Unable to find wiki node");
 			}
 
-			return StringPool.BLANK;
+			return portletPreferences;
 		}
 
-		portletDataContext.addPermissions(
-			WikiPermission.RESOURCE_NAME, portletDataContext.getScopeGroupId());
+		portletDataContext.addPortletPermissions(WikiPermission.RESOURCE_NAME);
 
-		Element rootElement = addExportDataRootElement(portletDataContext);
+		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			portletDataContext, portletId, node);
 
-		rootElement.addAttribute(
-			"group-id", String.valueOf(portletDataContext.getScopeGroupId()));
+		ActionableDynamicQuery actionableDynamicQuery =
+			getPageActionableDynamicQuery(
+				portletDataContext, node.getNodeId(), portletId);
 
-		StagedModelDataHandlerUtil.exportStagedModel(portletDataContext, node);
+		actionableDynamicQuery.performActions();
 
-		List<WikiPage> pages = WikiPageLocalServiceUtil.getPages(
-			node.getNodeId(), QueryUtil.ALL_POS, QueryUtil.ALL_POS);
-
-		for (WikiPage page : pages) {
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, page);
-		}
-
-		return getExportDataRootElementString(rootElement);
+		return portletPreferences;
 	}
 
 	@Override
-	protected PortletPreferences doImportData(
+	protected PortletPreferences doProcessImportPortletPreferences(
 			PortletDataContext portletDataContext, String portletId,
-			PortletPreferences portletPreferences, String data)
+			PortletPreferences portletPreferences)
 		throws Exception {
 
-		portletDataContext.importPermissions(
-			WikiPermission.RESOURCE_NAME, portletDataContext.getSourceGroupId(),
-			portletDataContext.getScopeGroupId());
+		portletDataContext.importPortletPermissions(
+			WikiPermission.RESOURCE_NAME);
 
-		super.importData(
-			portletDataContext, portletId, portletPreferences, data);
+		StagedModelDataHandlerUtil.importReferenceStagedModels(
+			portletDataContext, WikiNode.class);
+
+		StagedModelDataHandlerUtil.importReferenceStagedModels(
+			portletDataContext, WikiPage.class);
 
 		long nodeId = GetterUtil.getLong(
 			portletPreferences.getValue("nodeId", StringPool.BLANK));
@@ -163,29 +150,47 @@ public class WikiDisplayPortletDataHandler extends WikiPortletDataHandler {
 		return portletPreferences;
 	}
 
-	@Override
-	protected void doPrepareManifestSummary(
-			PortletDataContext portletDataContext,
-			PortletPreferences portletPreferences)
-		throws Exception {
+	protected ActionableDynamicQuery getPageActionableDynamicQuery(
+		final PortletDataContext portletDataContext, final long nodeId,
+		final String portletId) {
 
-		ManifestSummary manifestSummary =
-			portletDataContext.getManifestSummary();
+		ActionableDynamicQuery actionableDynamicQuery =
+			WikiPageLocalServiceUtil.getExportActionableDynamicQuery(
+				portletDataContext);
 
-		if ((portletPreferences == null) ||
-			(manifestSummary.getModelAdditionCount(WikiPage.class) > -1)) {
+		final ActionableDynamicQuery.AddCriteriaMethod addCriteriaMethod =
+			actionableDynamicQuery.getAddCriteriaMethod();
 
-			return;
-		}
+		actionableDynamicQuery.setAddCriteriaMethod(
+			new ActionableDynamicQuery.AddCriteriaMethod() {
 
-		long nodeId = GetterUtil.getLong(
-			portletPreferences.getValue("nodeId", StringPool.BLANK));
+				@Override
+				public void addCriteria(DynamicQuery dynamicQuery) {
+					addCriteriaMethod.addCriteria(dynamicQuery);
 
-		if (nodeId > 0) {
-			manifestSummary.addModelAdditionCount(
-				new StagedModelType(WikiPage.class),
-				WikiPageLocalServiceUtil.getPagesCount(nodeId));
-		}
+					Property property = PropertyFactoryUtil.forName("nodeId");
+
+					dynamicQuery.add(property.eq(nodeId));
+				}
+
+			});
+
+		actionableDynamicQuery.setPerformActionMethod(
+			new ActionableDynamicQuery.PerformActionMethod() {
+
+				@Override
+				public void performAction(Object object)
+					throws PortalException {
+
+					WikiPage page = (WikiPage)object;
+
+					StagedModelDataHandlerUtil.exportReferenceStagedModel(
+						portletDataContext, portletId, page);
+				}
+
+			});
+
+		return actionableDynamicQuery;
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(

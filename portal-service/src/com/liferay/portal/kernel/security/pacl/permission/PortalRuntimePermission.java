@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -137,6 +137,28 @@ public class PortalRuntimePermission extends BasicPermission {
 		return _subject;
 	}
 
+	public interface PACL {
+
+		public void checkDynamicQuery(Class<?> implClass);
+
+		public void checkExpandoBridge(String className);
+
+		public void checkGetBeanProperty(
+			String servletContextName, Class<?> clazz, String property);
+
+		public void checkGetClassLoader(String classLoaderReferenceId);
+
+		public void checkPortletBagPool(String portletId);
+
+		public void checkSearchEngine(String searchEngineId);
+
+		public void checkSetBeanProperty(
+			String servletContextName, Class<?> clazz, String property);
+
+		public void checkThreadPoolExecutor(String name);
+
+	}
+
 	/**
 	 * This method ensures the calls stack is the proper length.
 	 */
@@ -223,28 +245,6 @@ public class PortalRuntimePermission extends BasicPermission {
 		@Override
 		public void checkThreadPoolExecutor(String name) {
 		}
-
-	}
-
-	public static interface PACL {
-
-		public void checkDynamicQuery(Class<?> implClass);
-
-		public void checkExpandoBridge(String className);
-
-		public void checkGetBeanProperty(
-			String servletContextName, Class<?> clazz, String property);
-
-		public void checkGetClassLoader(String classLoaderReferenceId);
-
-		public void checkPortletBagPool(String portletId);
-
-		public void checkSearchEngine(String searchEngineId);
-
-		public void checkSetBeanProperty(
-			String servletContextName, Class<?> clazz, String property);
-
-		public void checkThreadPoolExecutor(String name);
 
 	}
 

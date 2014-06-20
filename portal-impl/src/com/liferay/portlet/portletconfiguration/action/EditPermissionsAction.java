@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -35,6 +35,9 @@ import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebKeys;
+import com.liferay.portlet.StrictPortletPreferencesImpl;
+import com.liferay.portlet.portletconfiguration.util.ConfigurationActionRequest;
+import com.liferay.portlet.portletconfiguration.util.ConfigurationRenderRequest;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,9 +69,10 @@ public class EditPermissionsAction extends PortletAction {
 			ActionResponse actionResponse)
 		throws Exception {
 
-		actionRequest = ActionUtil.getWrappedActionRequest(actionRequest, null);
-
 		try {
+			actionRequest = new ConfigurationActionRequest(
+				actionRequest, new StrictPortletPreferencesImpl());
+
 			updateRolePermissions(actionRequest);
 
 			addSuccessMessage(actionRequest, actionResponse);
@@ -93,7 +97,8 @@ public class EditPermissionsAction extends PortletAction {
 			RenderResponse renderResponse)
 		throws Exception {
 
-		renderRequest = ActionUtil.getWrappedRenderRequest(renderRequest, null);
+		renderRequest = new ConfigurationRenderRequest(
+			renderRequest, new StrictPortletPreferencesImpl());
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)renderRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -122,7 +127,8 @@ public class EditPermissionsAction extends PortletAction {
 			SessionErrors.add(
 				renderRequest, PrincipalException.class.getName());
 
-			setForward(renderRequest, "portlet.portlet_configuration.error");
+			return actionMapping.findForward(
+				"portlet.portlet_configuration.error");
 		}
 
 		Portlet portlet = PortletLocalServiceUtil.getPortletById(
@@ -181,6 +187,36 @@ public class EditPermissionsAction extends PortletAction {
 		return actionIds;
 	}
 
+	protected void updateLayoutModifiedDate(
+			String selResource, String resourcePrimKey)
+		throws Exception {
+
+		long plid = 0;
+
+		int pos = resourcePrimKey.indexOf(PortletConstants.LAYOUT_SEPARATOR);
+
+		if (pos != -1) {
+			plid = GetterUtil.getLong(resourcePrimKey.substring(0, pos));
+		}
+		else if (selResource.equals(Layout.class.getName())) {
+			plid = GetterUtil.getLong(resourcePrimKey);
+		}
+
+		if (plid <= 0) {
+			return;
+		}
+
+		Layout layout = LayoutLocalServiceUtil.fetchLayout(plid);
+
+		if (layout != null) {
+			layout.setModifiedDate(new Date());
+
+			LayoutLocalServiceUtil.updateLayout(layout);
+
+			CacheUtil.clearCache(layout.getCompanyId());
+		}
+	}
+
 	protected void updateRolePermissions(ActionRequest actionRequest)
 		throws Exception {
 
@@ -233,21 +269,7 @@ public class EditPermissionsAction extends PortletAction {
 				resourcePrimKey, roleIdsToActionIds);
 		}
 
-		int pos = resourcePrimKey.indexOf(PortletConstants.LAYOUT_SEPARATOR);
-
-		if (pos != -1) {
-			long plid = GetterUtil.getLong(resourcePrimKey.substring(0, pos));
-
-			Layout layout = LayoutLocalServiceUtil.fetchLayout(plid);
-
-			if (layout != null) {
-				layout.setModifiedDate(new Date());
-
-				LayoutLocalServiceUtil.updateLayout(layout);
-
-				CacheUtil.clearCache(layout.getCompanyId());
-			}
-		}
+		updateLayoutModifiedDate(selResource, resourcePrimKey);
 
 		if (PropsValues.PERMISSIONS_PROPAGATION_ENABLED) {
 			Portlet portlet = PortletLocalServiceUtil.getPortletById(

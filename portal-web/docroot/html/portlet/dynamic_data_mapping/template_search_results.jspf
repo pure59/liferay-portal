@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,24 +17,24 @@
 <%
 TemplateSearchTerms searchTerms = (TemplateSearchTerms)searchContainer.getSearchTerms();
 
-long[] groupIds = new long[] {scopeGroupId};
-
-if (showGlobalScope) {
-	groupIds = PortalUtil.getSiteAndCompanyGroupIds(themeDisplay);
-}
-
+long[] groupIds = ddmDisplay.getTemplateGroupIds(themeDisplay, showAncestorScopes);
 long[] classNameIds = ddmDisplay.getTemplateClassNameIds(classNameId);
 long[] classPKs = ddmDisplay.getTemplateClassPKs(company.getCompanyId(), classNameId, classPK);
 
 if (searchTerms.isAdvancedSearch()) {
-	results = DDMTemplateServiceUtil.search(company.getCompanyId(), groupIds, classNameIds, classPKs, searchTerms.getName(), searchTerms.getDescription(), searchTerms.getType(), ddmDisplay.getTemplateMode(), null, searchTerms.isAndOperator(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 	total = DDMTemplateServiceUtil.searchCount(company.getCompanyId(), groupIds, classNameIds, classPKs, searchTerms.getName(), searchTerms.getDescription(), searchTerms.getType(), null, null, searchTerms.isAndOperator());
+
+	searchContainer.setTotal(total);
+
+	results = DDMTemplateServiceUtil.search(company.getCompanyId(), groupIds, classNameIds, classPKs, searchTerms.getName(), searchTerms.getDescription(), searchTerms.getType(), ddmDisplay.getTemplateMode(), null, searchTerms.isAndOperator(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 }
 else {
-	results = DDMTemplateServiceUtil.search(company.getCompanyId(), groupIds, classNameIds, classPKs, searchTerms.getKeywords(), searchTerms.getType(), ddmDisplay.getTemplateMode(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 	total = DDMTemplateServiceUtil.searchCount(company.getCompanyId(), groupIds, classNameIds, classPKs, searchTerms.getKeywords(), searchTerms.getType(), ddmDisplay.getTemplateMode());
+
+	searchContainer.setTotal(total);
+
+	results = DDMTemplateServiceUtil.search(company.getCompanyId(), groupIds, classNameIds, classPKs, searchTerms.getKeywords(), searchTerms.getType(), ddmDisplay.getTemplateMode(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator());
 }
 
-pageContext.setAttribute("results", results);
-pageContext.setAttribute("total", total);
+searchContainer.setResults(results);
 %>

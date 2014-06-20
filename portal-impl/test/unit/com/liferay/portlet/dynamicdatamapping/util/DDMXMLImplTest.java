@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,60 +15,24 @@
 package com.liferay.portlet.dynamicdatamapping.util;
 
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.xml.Attribute;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.Node;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
-import com.liferay.portal.xml.SAXReaderImpl;
-
-import java.io.IOException;
-import java.io.InputStream;
+import com.liferay.portlet.dynamicdatamapping.BaseDDMTest;
 
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author Manuel de la Peña
+ * @author Miguel Angelo Caldas Gallindo
  */
-@PrepareForTest({DDMXMLUtil.class, SAXReaderUtil.class})
-@RunWith(PowerMockRunner.class)
-public class DDMXMLImplTest extends PowerMockito {
-
-	@Before
-	public void setUp() {
-		spy(SAXReaderUtil.class);
-
-		when(
-			SAXReaderUtil.getSAXReader()
-		).thenReturn(
-			_saxReader
-		);
-
-		spy(DDMXMLUtil.class);
-
-		when(
-			DDMXMLUtil.getDDMXML()
-		).thenReturn(
-			_ddmXML
-		);
-	}
-
-	@After
-	public void tearDown() {
-		verifyStatic();
-	}
+public class DDMXMLImplTest extends BaseDDMTest {
 
 	@Test
 	public void testUpdateContentDefaultLocale() throws Exception {
@@ -111,30 +75,18 @@ public class DDMXMLImplTest extends PowerMockito {
 			return false;
 		}
 
-		Attribute defaultLocaleAttribute = rootElement.attribute(
-			"default-locale");
-
-		if (!newLocaleId.equals(defaultLocaleAttribute.getValue())) {
+		if (!newLocaleId.equals(rootElement.attributeValue("default-locale"))) {
 			return false;
 		}
 
 		return checkElementLocale(rootElement, newLocaleId);
 	}
 
-	protected String readXML(String fileName) throws IOException {
-		Class<?> clazz = getClass();
-
-		InputStream inputStream = clazz.getResourceAsStream(
-			"dependencies/" + fileName);
-
-		return StringUtil.read(inputStream);
-	}
-
 	protected void updateContentDefaultLocale(
 			String fileName, boolean expectedResult)
 		throws Exception {
 
-		String xml = readXML(fileName);
+		String xml = read(fileName);
 
 		Document document = SAXReaderUtil.read(xml);
 
@@ -148,16 +100,14 @@ public class DDMXMLImplTest extends PowerMockito {
 			Element rootElement = (Element)structureDocument.selectSingleNode(
 				"/structure/root");
 
-			Attribute defaultLocale = rootElement.attribute("default-locale");
-
 			Locale contentDefaultLocale = LocaleUtil.fromLanguageId(
-				defaultLocale.getValue());
+				rootElement.attributeValue("default-locale"));
 
 			Locale availableDefaultLocale = LocaleUtil.fromLanguageId("es_ES");
 
 			String rootXML = rootElement.asXML();
 
-			structureXML = DDMXMLUtil.updateXMLDefaultLocale(
+			structureXML = _ddmXML.updateXMLDefaultLocale(
 				rootXML, contentDefaultLocale, availableDefaultLocale);
 
 			Document updatedXMLDocument = SAXReaderUtil.read(structureXML);
@@ -177,7 +127,6 @@ public class DDMXMLImplTest extends PowerMockito {
 		Assert.assertFalse(expectedResult);
 	}
 
-	private DDMXMLImpl _ddmXML = new DDMXMLImpl();
-	private SAXReaderImpl _saxReader = new SAXReaderImpl();
+	private DDMXML _ddmXML = new DDMXMLImpl();
 
 }

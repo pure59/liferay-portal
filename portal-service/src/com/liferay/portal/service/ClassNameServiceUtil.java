@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.service;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  * @see com.liferay.portal.service.impl.ClassNameServiceImpl
  * @generated
  */
+@ProviderType
 public class ClassNameServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -57,8 +60,7 @@ public class ClassNameServiceUtil {
 	}
 
 	public static com.liferay.portal.model.ClassName fetchClassName(
-		java.lang.String value)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String value) {
 		return getService().fetchClassName(value);
 	}
 
@@ -84,6 +86,7 @@ public class ClassNameServiceUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setService(ClassNameService service) {
 	}
 

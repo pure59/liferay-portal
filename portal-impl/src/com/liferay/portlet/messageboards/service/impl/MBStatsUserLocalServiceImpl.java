@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -30,7 +30,6 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.util.ClassLoaderUtil;
-import com.liferay.portlet.messageboards.model.MBCategoryConstants;
 import com.liferay.portlet.messageboards.model.MBStatsUser;
 import com.liferay.portlet.messageboards.model.MBThread;
 import com.liferay.portlet.messageboards.model.impl.MBStatsUserImpl;
@@ -46,9 +45,7 @@ public class MBStatsUserLocalServiceImpl
 	extends MBStatsUserLocalServiceBaseImpl {
 
 	@Override
-	public MBStatsUser addStatsUser(long groupId, long userId)
-		throws SystemException {
-
+	public MBStatsUser addStatsUser(long groupId, long userId) {
 		long statsUserId = counterLocalService.increment();
 
 		MBStatsUser statsUser = mbStatsUserPersistence.create(statsUserId);
@@ -78,9 +75,7 @@ public class MBStatsUserLocalServiceImpl
 	}
 
 	@Override
-	public void deleteStatsUser(long statsUserId)
-		throws PortalException, SystemException {
-
+	public void deleteStatsUser(long statsUserId) throws PortalException {
 		MBStatsUser statsUser = mbStatsUserPersistence.findByPrimaryKey(
 			statsUserId);
 
@@ -88,12 +83,12 @@ public class MBStatsUserLocalServiceImpl
 	}
 
 	@Override
-	public void deleteStatsUser(MBStatsUser statsUser) throws SystemException {
+	public void deleteStatsUser(MBStatsUser statsUser) {
 		mbStatsUserPersistence.remove(statsUser);
 	}
 
 	@Override
-	public void deleteStatsUsersByGroupId(long groupId) throws SystemException {
+	public void deleteStatsUsersByGroupId(long groupId) {
 		List<MBStatsUser> statsUsers = mbStatsUserPersistence.findByGroupId(
 			groupId);
 
@@ -103,7 +98,7 @@ public class MBStatsUserLocalServiceImpl
 	}
 
 	@Override
-	public void deleteStatsUsersByUserId(long userId) throws SystemException {
+	public void deleteStatsUsersByUserId(long userId) {
 		List<MBStatsUser> statsUsers = mbStatsUserPersistence.findByUserId(
 			userId);
 
@@ -113,9 +108,7 @@ public class MBStatsUserLocalServiceImpl
 	}
 
 	@Override
-	public Date getLastPostDateByUserId(long groupId, long userId)
-		throws SystemException {
-
+	public Date getLastPostDateByUserId(long groupId, long userId) {
 		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
 			MBThread.class, MBStatsUserImpl.TABLE_NAME,
 			ClassLoaderUtil.getPortalClassLoader());
@@ -146,7 +139,7 @@ public class MBStatsUserLocalServiceImpl
 	}
 
 	@Override
-	public long getMessageCountByGroupId(long groupId) throws SystemException {
+	public long getMessageCountByGroupId(long groupId) {
 		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
 			MBStatsUser.class, MBStatsUserImpl.TABLE_NAME,
 			ClassLoaderUtil.getPortalClassLoader());
@@ -169,7 +162,7 @@ public class MBStatsUserLocalServiceImpl
 	}
 
 	@Override
-	public long getMessageCountByUserId(long userId) throws SystemException {
+	public long getMessageCountByUserId(long userId) {
 		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
 			MBStatsUser.class, MBStatsUserImpl.TABLE_NAME,
 			ClassLoaderUtil.getPortalClassLoader());
@@ -192,9 +185,7 @@ public class MBStatsUserLocalServiceImpl
 	}
 
 	@Override
-	public MBStatsUser getStatsUser(long groupId, long userId)
-		throws SystemException {
-
+	public MBStatsUser getStatsUser(long groupId, long userId) {
 		MBStatsUser statsUser = mbStatsUserPersistence.fetchByG_U(
 			groupId, userId);
 
@@ -208,7 +199,7 @@ public class MBStatsUserLocalServiceImpl
 	@Override
 	public List<MBStatsUser> getStatsUsersByGroupId(
 			long groupId, int start, int end)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		Group group = groupPersistence.findByPrimaryKey(groupId);
 
@@ -221,7 +212,7 @@ public class MBStatsUserLocalServiceImpl
 
 	@Override
 	public int getStatsUsersByGroupIdCount(long groupId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		Group group = groupPersistence.findByPrimaryKey(groupId);
 
@@ -233,48 +224,29 @@ public class MBStatsUserLocalServiceImpl
 	}
 
 	@Override
-	public List<MBStatsUser> getStatsUsersByUserId(long userId)
-		throws SystemException {
-
+	public List<MBStatsUser> getStatsUsersByUserId(long userId) {
 		return mbStatsUserPersistence.findByUserId(userId);
 	}
 
 	@Override
-	public MBStatsUser updateStatsUser(long groupId, long userId)
-		throws SystemException {
-
+	public MBStatsUser updateStatsUser(long groupId, long userId) {
 		return updateStatsUser(
 			groupId, userId, getLastPostDateByUserId(groupId, userId));
 	}
 
 	@Override
 	public MBStatsUser updateStatsUser(
-			long groupId, long userId, Date lastPostDate)
-		throws SystemException {
+		long groupId, long userId, Date lastPostDate) {
 
-		long[] categoryIds = mbCategoryService.getCategoryIds(
-			groupId, MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID);
-
-		int messageCount = mbMessagePersistence.countByG_U_C_S(
-			groupId, userId, categoryIds, WorkflowConstants.STATUS_APPROVED);
-
-		QueryDefinition queryDefinition = new QueryDefinition(
-			WorkflowConstants.STATUS_IN_TRASH);
-
-		List<MBThread> threads = mbThreadLocalService.getGroupThreads(
-			groupId, queryDefinition);
-
-		for (MBThread thread : threads) {
-			messageCount = messageCount - thread.getMessageCount();
-		}
+		int messageCount = mbMessagePersistence.countByG_U_S(
+			groupId, userId, WorkflowConstants.STATUS_APPROVED);
 
 		return updateStatsUser(groupId, userId, messageCount, lastPostDate);
 	}
 
 	@Override
 	public MBStatsUser updateStatsUser(
-			long groupId, long userId, int messageCount, Date lastPostDate)
-		throws SystemException {
+		long groupId, long userId, int messageCount, Date lastPostDate) {
 
 		MBStatsUser statsUser = getStatsUser(groupId, userId);
 

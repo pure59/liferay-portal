@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,15 +17,15 @@ package com.liferay.portlet.assetpublisher.action;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.portlet.DefaultConfigurationAction;
-import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
-import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
+import com.liferay.portal.kernel.staging.LayoutStagingUtil;
+import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
-import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -33,19 +33,26 @@ import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.model.LayoutRevision;
+import com.liferay.portal.model.LayoutSetBranch;
 import com.liferay.portal.model.LayoutTypePortletConstants;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
+import com.liferay.portal.service.LayoutRevisionLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebKeys;
+import com.liferay.portlet.PortletPreferencesImpl;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.AssetTagException;
 import com.liferay.portlet.asset.DuplicateQueryRuleException;
 import com.liferay.portlet.asset.model.AssetQueryRule;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
+import com.liferay.portlet.asset.model.ClassType;
+import com.liferay.portlet.asset.model.ClassTypeReader;
 import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
 import com.liferay.portlet.assetpublisher.util.AssetPublisher;
 import com.liferay.portlet.assetpublisher.util.AssetPublisherUtil;
@@ -53,6 +60,7 @@ import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.storage.Field;
 import com.liferay.portlet.dynamicdatamapping.storage.Fields;
 import com.liferay.portlet.dynamicdatamapping.util.DDMUtil;
+import com.liferay.util.ContentUtil;
 
 import java.io.Serializable;
 
@@ -61,20 +69,42 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletPreferences;
+import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Brian Wing Shun Chan
  * @author Juan Fernández
  */
 public class ConfigurationActionImpl extends DefaultConfigurationAction {
+
+	@Override
+	public void postProcess(
+		long companyId, PortletRequest portletRequest,
+		PortletPreferences portletPreferences) {
+
+		String languageId = LocaleUtil.toLanguageId(
+			LocaleUtil.getSiteDefault());
+
+		removeDefaultValue(
+			portletRequest, portletPreferences,
+			"emailAssetEntryAddedBody_" + languageId,
+			ContentUtil.get(
+				PropsValues.ASSET_PUBLISHER_EMAIL_ASSET_ENTRY_ADDED_BODY));
+		removeDefaultValue(
+			portletRequest, portletPreferences,
+			"emailAssetEntryAddedSubject_" + languageId,
+			ContentUtil.get(
+				PropsValues.ASSET_PUBLISHER_EMAIL_ASSET_ENTRY_ADDED_SUBJECT));
+	}
 
 	@Override
 	public void processAction(
@@ -94,7 +124,7 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 		}
 		else if (cmd.equals(Constants.UPDATE)) {
 			try {
-				validateEmailAssetEntryAdded(actionRequest);
+				validateEmail(actionRequest, "emailAssetEntryAdded");
 				validateEmailFrom(actionRequest);
 
 				updateDisplaySettings(actionRequest);
@@ -152,18 +182,15 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 			if (SessionErrors.isEmpty(actionRequest)) {
 				preferences.store();
 
-				LiferayPortletConfig liferayPortletConfig =
-					(LiferayPortletConfig)portletConfig;
-
 				SessionMessages.add(
 					actionRequest,
-					liferayPortletConfig.getPortletId() +
+					PortalUtil.getPortletId(actionRequest) +
 						SessionMessages.KEY_SUFFIX_REFRESH_PORTLET,
 					portletResource);
 
 				SessionMessages.add(
 					actionRequest,
-					liferayPortletConfig.getPortletId() +
+					PortalUtil.getPortletId(actionRequest) +
 						SessionMessages.KEY_SUFFIX_UPDATED_CONFIGURATION);
 			}
 
@@ -211,13 +238,24 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 
 		Field field = fields.get(fieldName);
 
-		Serializable fieldValue = field.getValue(themeDisplay.getLocale());
+		Serializable fieldValue = field.getValue(themeDisplay.getLocale(), 0);
+
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+		if (fieldValue != null) {
+			jsonObject.put("success", true);
+		}
+		else {
+			jsonObject.put("success", false);
+
+			writeJSON(resourceRequest, resourceResponse, jsonObject);
+
+			return;
+		}
 
 		DDMStructure ddmStructure = field.getDDMStructure();
 
 		String type = ddmStructure.getFieldType(fieldName);
-
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
 		Serializable displayValue = DDMUtil.getDisplayFieldValue(
 			themeDisplay, fieldValue, type);
@@ -242,13 +280,14 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 		else if (fieldValue instanceof Integer) {
 			jsonObject.put("value", (Integer)fieldValue);
 		}
+		else if (fieldValue instanceof Number) {
+			jsonObject.put("value", String.valueOf(fieldValue));
+		}
 		else {
 			jsonObject.put("value", (String)fieldValue);
 		}
 
-		resourceResponse.setContentType(ContentTypes.APPLICATION_JSON);
-
-		PortletResponseUtil.write(resourceResponse, jsonObject.toString());
+		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
 
 	protected void addScope(
@@ -319,12 +358,13 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(
 				className);
 
-		long[] groupIds = {
-			themeDisplay.getCompanyGroupId(), themeDisplay.getSiteGroupId()
-		};
+		ClassTypeReader classTypeReader =
+			assetRendererFactory.getClassTypeReader();
 
-		Map<Long, String> classTypes = assetRendererFactory.getClassTypes(
-			groupIds, themeDisplay.getLocale());
+		List<ClassType> classTypes = classTypeReader.getAvailableClassTypes(
+			PortalUtil.getCurrentAndAncestorSiteGroupIds(
+				themeDisplay.getSiteGroupId()),
+			themeDisplay.getLocale());
 
 		if (classTypes.isEmpty()) {
 			return null;
@@ -469,6 +509,12 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 
 		scopeIds = ArrayUtil.remove(scopeIds, scopeId);
 
+		if (scopeId.startsWith(AssetPublisher.SCOPE_ID_PARENT_GROUP_PREFIX)) {
+			scopeId = scopeId.substring("Parent".length());
+
+			scopeIds = ArrayUtil.remove(scopeIds, scopeId);
+		}
+
 		preferences.setValues("scopeIds", scopeIds);
 	}
 
@@ -573,9 +619,34 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 			}
 		}
 
-		LayoutLocalServiceUtil.updateLayout(
+		layout = LayoutLocalServiceUtil.updateLayout(
 			layout.getGroupId(), layout.isPrivateLayout(), layout.getLayoutId(),
 			layout.getTypeSettings());
+
+		if (LayoutStagingUtil.isBranchingLayout(layout)) {
+			HttpServletRequest request = PortalUtil.getHttpServletRequest(
+				actionRequest);
+
+			LayoutSetBranch layoutSetBranch =
+				LayoutStagingUtil.getLayoutSetBranch(layout.getLayoutSet());
+
+			long layoutSetBranchId = layoutSetBranch.getLayoutSetBranchId();
+
+			long layoutRevisionId = StagingUtil.getRecentLayoutRevisionId(
+				request, layoutSetBranchId, layout.getPlid());
+
+			LayoutRevision layoutRevision =
+				LayoutRevisionLocalServiceUtil.getLayoutRevision(
+					layoutRevisionId);
+
+			PortletPreferencesImpl portletPreferences =
+				(PortletPreferencesImpl)actionRequest.getPreferences();
+
+			if (layoutRevision != null) {
+				portletPreferences.setPlid(
+					layoutRevision.getLayoutRevisionId());
+			}
+		}
 	}
 
 	protected void updateDisplaySettings(ActionRequest actionRequest)
@@ -649,39 +720,6 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 			i++;
 
 			values = preferences.getValues("queryValues" + i, new String[0]);
-		}
-	}
-
-	protected void validateEmailAssetEntryAdded(ActionRequest actionRequest)
-		throws Exception {
-
-		String emailAssetEntryAddedSubject = getLocalizedParameter(
-			actionRequest, "emailAssetEntryAddedSubject");
-		String emailAssetEntryAddedBody = getLocalizedParameter(
-			actionRequest, "emailAssetEntryAddedBody");
-
-		if (Validator.isNull(emailAssetEntryAddedSubject)) {
-			SessionErrors.add(actionRequest, "emailAssetEntryAddedSubject");
-		}
-		else if (Validator.isNull(emailAssetEntryAddedBody)) {
-			SessionErrors.add(actionRequest, "emailAssetEntryAddedBody");
-		}
-	}
-
-	protected void validateEmailFrom(ActionRequest actionRequest)
-		throws Exception {
-
-		String emailFromName = getParameter(actionRequest, "emailFromName");
-		String emailFromAddress = getParameter(
-			actionRequest, "emailFromAddress");
-
-		if (Validator.isNull(emailFromName)) {
-			SessionErrors.add(actionRequest, "emailFromName");
-		}
-		else if (!Validator.isEmailAddress(emailFromAddress) &&
-				 !Validator.isVariableTerm(emailFromAddress)) {
-
-			SessionErrors.add(actionRequest, "emailFromAddress");
 		}
 	}
 

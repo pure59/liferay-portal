@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -94,6 +94,7 @@ import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.upload.UploadServletRequestImpl;
 import com.liferay.portal.util.MaintenanceUtil;
+import com.liferay.portal.util.Portal;
 import com.liferay.portal.util.PortalInstances;
 import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portal.util.PropsValues;
@@ -307,14 +308,12 @@ public class EditServerAction extends PortletAction {
 
 			return portletURL.toString();
 		}
-		else {
-			MaintenanceUtil.maintain(portletSession.getId(), className);
 
-			MessageBusUtil.sendMessage(
-				DestinationNames.CONVERT_PROCESS, className);
+		MaintenanceUtil.maintain(portletSession.getId(), className);
 
-			return null;
-		}
+		MessageBusUtil.sendMessage(DestinationNames.CONVERT_PROCESS, className);
+
+		return null;
 	}
 
 	protected void gc() throws Exception {
@@ -334,14 +333,14 @@ public class EditServerAction extends PortletAction {
 		throws Exception {
 
 		ProgressTracker progressTracker = new ProgressTracker(
-			actionRequest, WebKeys.XUGGLER_INSTALL_STATUS);
+			WebKeys.XUGGLER_INSTALL_STATUS);
 
 		progressTracker.addProgress(
 			ProgressStatusConstants.DOWNLOADING, 15, "downloading-xuggler");
 		progressTracker.addProgress(
 			ProgressStatusConstants.COPYING, 70, "copying-xuggler-files");
 
-		progressTracker.initialize();
+		progressTracker.initialize(actionRequest);
 
 		String jarName = ParamUtil.getString(actionRequest, "jarName");
 
@@ -363,7 +362,7 @@ public class EditServerAction extends PortletAction {
 			writeJSON(actionRequest, actionResponse, jsonObject);
 		}
 
-		progressTracker.finish();
+		progressTracker.finish(actionRequest);
 	}
 
 	protected void reindex(ActionRequest actionRequest) throws Exception {
@@ -474,7 +473,8 @@ public class EditServerAction extends PortletAction {
 		long[] companyIds = PortalInstances.getCompanyIds();
 
 		for (long companyId : companyIds) {
-			SearchEngineUtil.indexDictionaries(companyId);
+			SearchEngineUtil.indexQuerySuggestionDictionaries(companyId);
+			SearchEngineUtil.indexSpellCheckerDictionaries(companyId);
 		}
 	}
 
@@ -504,7 +504,8 @@ public class EditServerAction extends PortletAction {
 			SessionMessages.add(actionRequest, "language", language);
 			SessionMessages.add(actionRequest, "script", script);
 
-			ScriptingUtil.exec(null, portletObjects, language, script);
+			ScriptingUtil.exec(
+				null, portletObjects, language, script, StringPool.EMPTY_ARRAY);
 
 			unsyncPrintWriter.flush();
 
@@ -701,7 +702,8 @@ public class EditServerAction extends PortletAction {
 			String name = enu.nextElement();
 
 			if (name.startsWith("imageMagickLimit")) {
-				String key = name.substring(16, name.length()).toLowerCase();
+				String key = StringUtil.toLowerCase(
+					name.substring(16, name.length()));
 				String value = ParamUtil.getString(actionRequest, name);
 
 				portletPreferences.setValue(
@@ -719,6 +721,8 @@ public class EditServerAction extends PortletAction {
 			ActionRequest actionRequest, PortletPreferences portletPreferences)
 		throws Exception {
 
+		long dlFileEntryPreviewableProcessorMaxSize = ParamUtil.getLong(
+			actionRequest, "dlFileEntryPreviewableProcessorMaxSize");
 		long dlFileEntryThumbnailMaxHeight = ParamUtil.getLong(
 			actionRequest, "dlFileEntryThumbnailMaxHeight");
 		long dlFileEntryThumbnailMaxWidth = ParamUtil.getLong(
@@ -751,6 +755,9 @@ public class EditServerAction extends PortletAction {
 		long usersImageMaxSize = ParamUtil.getLong(
 			actionRequest, "usersImageMaxSize");
 
+		portletPreferences.setValue(
+			PropsKeys.DL_FILE_ENTRY_PREVIEWABLE_PROCESSOR_MAX_SIZE,
+			String.valueOf(dlFileEntryPreviewableProcessorMaxSize));
 		portletPreferences.setValue(
 			PropsKeys.DL_FILE_ENTRY_THUMBNAIL_MAX_HEIGHT,
 			String.valueOf(dlFileEntryThumbnailMaxHeight));
@@ -860,16 +867,24 @@ public class EditServerAction extends PortletAction {
 			advancedProperties);
 		portletPreferences.setValue(
 			PropsKeys.MAIL_SESSION_MAIL_POP3_HOST, pop3Host);
-		portletPreferences.setValue(
-			PropsKeys.MAIL_SESSION_MAIL_POP3_PASSWORD, pop3Password);
+
+		if (!pop3Password.equals(Portal.TEMP_OBFUSCATION_VALUE)) {
+			portletPreferences.setValue(
+				PropsKeys.MAIL_SESSION_MAIL_POP3_PASSWORD, pop3Password);
+		}
+
 		portletPreferences.setValue(
 			PropsKeys.MAIL_SESSION_MAIL_POP3_PORT, String.valueOf(pop3Port));
 		portletPreferences.setValue(
 			PropsKeys.MAIL_SESSION_MAIL_POP3_USER, pop3User);
 		portletPreferences.setValue(
 			PropsKeys.MAIL_SESSION_MAIL_SMTP_HOST, smtpHost);
-		portletPreferences.setValue(
-			PropsKeys.MAIL_SESSION_MAIL_SMTP_PASSWORD, smtpPassword);
+
+		if (!smtpPassword.equals(Portal.TEMP_OBFUSCATION_VALUE)) {
+			portletPreferences.setValue(
+				PropsKeys.MAIL_SESSION_MAIL_SMTP_PASSWORD, smtpPassword);
+		}
+
 		portletPreferences.setValue(
 			PropsKeys.MAIL_SESSION_MAIL_SMTP_PORT, String.valueOf(smtpPort));
 		portletPreferences.setValue(

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,18 +19,19 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.ClassedModel;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.test.Sync;
 import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
-import com.liferay.portal.util.TestPropsValues;
+import com.liferay.portal.util.test.RandomTestUtil;
+import com.liferay.portal.util.test.TestPropsValues;
 import com.liferay.portlet.trash.BaseTrashHandlerTestCase;
 import com.liferay.portlet.trash.util.TrashUtil;
 import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.service.WikiNodeLocalServiceUtil;
 
-import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -45,84 +46,132 @@ import org.junit.runner.RunWith;
 @Sync
 public class WikiNodeTrashHandlerTest extends BaseTrashHandlerTestCase {
 
+	@Ignore()
 	@Override
+	@Test
+	public void testDeleteTrashVersions() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
 	public void testTrashAndDeleteDraft() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashAndRestoreDraft() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
+	public void testTrashBaseModelAndParentAndDeleteGroupTrashEntries()
+		throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
+	public void testTrashBaseModelAndParentAndDeleteParent() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
+	public void testTrashBaseModelAndParentAndRestoreModel() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
+	public void testTrashGrandparentBaseModelAndRestoreParentModel()
+		throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
 	public void testTrashIsRestorableBaseModel() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashIsRestorableBaseModelWithParent1() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashIsRestorableBaseModelWithParent2() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashIsRestorableBaseModelWithParent3() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashIsRestorableBaseModelWithParent4() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashMoveBaseModel() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashMyBaseModel() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
+	public void testTrashParentAndDeleteGroupTrashEntries() throws Exception {
+	}
+
+	@Ignore()
+	@Override
+	@Test
 	public void testTrashParentAndDeleteParent() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
-	public void testTrashParentAndDeleteTrashEntries() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
-	}
-
-	@Override
-	public void testTrashParentAndRestoreModel() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
-	}
-
-	@Override
+	@Test
 	public void testTrashRecentBaseModel() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashVersionBaseModelAndDelete() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashVersionBaseModelAndRestore() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
+	@Ignore()
 	@Override
+	@Test
 	public void testTrashVersionParentBaseModel() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
+	}
+
+	@Ignore()
+	@Override
+	@Test
+	public void testTrashVersionParentBaseModelAndRestore() throws Exception {
 	}
 
 	@Override
@@ -137,11 +186,11 @@ public class WikiNodeTrashHandlerTest extends BaseTrashHandlerTestCase {
 
 		String title = getSearchKeywords();
 
-		title += ServiceTestUtil.randomString(
+		title += RandomTestUtil.randomString(
 			_NODE_NAME_MAX_LENGTH - title.length());
 
 		return WikiNodeLocalServiceUtil.addNode(
-			TestPropsValues.getUserId(), title, ServiceTestUtil.randomString(),
+			TestPropsValues.getUserId(), title, RandomTestUtil.randomString(),
 			serviceContext);
 	}
 

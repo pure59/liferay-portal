@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,13 +19,13 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.struts.PortletAction;
 import com.liferay.portlet.asset.model.AssetCategory;
+import com.liferay.portlet.asset.model.AssetCategoryConstants;
 import com.liferay.portlet.asset.service.AssetCategoryServiceUtil;
 
 import java.util.Locale;
@@ -108,7 +108,9 @@ public class EditCategoryAction extends PortletAction {
 			String value = ParamUtil.getString(
 				actionRequest, "value" + categoryPropertiesIndex);
 
-			categoryProperties[i] = key + StringPool.COLON + value;
+			categoryProperties[i] =
+				key + AssetCategoryConstants.PROPERTY_KEY_VALUE_SEPARATOR +
+					value;
 		}
 
 		return categoryProperties;

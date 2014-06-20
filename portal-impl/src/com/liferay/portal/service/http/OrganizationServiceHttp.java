@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -52,8 +52,7 @@ import com.liferay.portal.service.OrganizationServiceUtil;
 public class OrganizationServiceHttp {
 	public static void addGroupOrganizations(HttpPrincipal httpPrincipal,
 		long groupId, long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"addGroupOrganizations",
@@ -68,10 +67,6 @@ public class OrganizationServiceHttp {
 			catch (Exception e) {
 				if (e instanceof com.liferay.portal.kernel.exception.PortalException) {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
-				}
-
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
 				}
 
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
@@ -95,8 +90,7 @@ public class OrganizationServiceHttp {
 		java.util.List<com.liferay.portal.model.Phone> phones,
 		java.util.List<com.liferay.portal.model.Website> websites,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"addOrganization", _addOrganizationParameterTypes1);
@@ -116,10 +110,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -137,8 +127,7 @@ public class OrganizationServiceHttp {
 		java.lang.String name, java.lang.String type, boolean recursable,
 		long regionId, long countryId, int statusId, java.lang.String comments,
 		boolean site, com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"addOrganization", _addOrganizationParameterTypes2);
@@ -155,10 +144,6 @@ public class OrganizationServiceHttp {
 			catch (Exception e) {
 				if (e instanceof com.liferay.portal.kernel.exception.PortalException) {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
-				}
-
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
 				}
 
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
@@ -183,8 +168,7 @@ public class OrganizationServiceHttp {
 		java.util.List<com.liferay.portal.model.Phone> phones,
 		java.util.List<com.liferay.portal.model.Website> websites,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"addOrganization", _addOrganizationParameterTypes3);
@@ -204,10 +188,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -225,8 +205,7 @@ public class OrganizationServiceHttp {
 		java.lang.String name, java.lang.String type, long regionId,
 		long countryId, int statusId, java.lang.String comments, boolean site,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"addOrganization", _addOrganizationParameterTypes4);
@@ -245,10 +224,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -264,8 +239,7 @@ public class OrganizationServiceHttp {
 	public static void addPasswordPolicyOrganizations(
 		HttpPrincipal httpPrincipal, long passwordPolicyId,
 		long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"addPasswordPolicyOrganizations",
@@ -282,10 +256,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 		}
@@ -298,8 +268,7 @@ public class OrganizationServiceHttp {
 
 	public static void deleteLogo(HttpPrincipal httpPrincipal,
 		long organizationId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"deleteLogo", _deleteLogoParameterTypes6);
@@ -315,10 +284,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 		}
@@ -331,8 +296,7 @@ public class OrganizationServiceHttp {
 
 	public static void deleteOrganization(HttpPrincipal httpPrincipal,
 		long organizationId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"deleteOrganization", _deleteOrganizationParameterTypes7);
@@ -348,10 +312,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 		}
@@ -364,8 +324,7 @@ public class OrganizationServiceHttp {
 
 	public static java.util.List<com.liferay.portal.model.Organization> getManageableOrganizations(
 		HttpPrincipal httpPrincipal, java.lang.String actionId, int max)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"getManageableOrganizations",
@@ -384,10 +343,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -402,8 +357,7 @@ public class OrganizationServiceHttp {
 
 	public static com.liferay.portal.model.Organization getOrganization(
 		HttpPrincipal httpPrincipal, long organizationId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"getOrganization", _getOrganizationParameterTypes9);
@@ -421,10 +375,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -439,8 +389,7 @@ public class OrganizationServiceHttp {
 
 	public static long getOrganizationId(HttpPrincipal httpPrincipal,
 		long companyId, java.lang.String name)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"getOrganizationId", _getOrganizationIdParameterTypes10);
@@ -458,10 +407,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -475,8 +420,7 @@ public class OrganizationServiceHttp {
 	}
 
 	public static java.util.List<com.liferay.portal.model.Organization> getOrganizations(
-		HttpPrincipal httpPrincipal, long companyId, long parentOrganizationId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		HttpPrincipal httpPrincipal, long companyId, long parentOrganizationId) {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"getOrganizations", _getOrganizationsParameterTypes11);
@@ -490,10 +434,6 @@ public class OrganizationServiceHttp {
 				returnObj = TunnelUtil.invoke(httpPrincipal, methodHandler);
 			}
 			catch (Exception e) {
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -508,8 +448,7 @@ public class OrganizationServiceHttp {
 
 	public static java.util.List<com.liferay.portal.model.Organization> getOrganizations(
 		HttpPrincipal httpPrincipal, long companyId, long parentOrganizationId,
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"getOrganizations", _getOrganizationsParameterTypes12);
@@ -523,10 +462,6 @@ public class OrganizationServiceHttp {
 				returnObj = TunnelUtil.invoke(httpPrincipal, methodHandler);
 			}
 			catch (Exception e) {
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -540,8 +475,7 @@ public class OrganizationServiceHttp {
 	}
 
 	public static int getOrganizationsCount(HttpPrincipal httpPrincipal,
-		long companyId, long parentOrganizationId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, long parentOrganizationId) {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"getOrganizationsCount",
@@ -556,10 +490,6 @@ public class OrganizationServiceHttp {
 				returnObj = TunnelUtil.invoke(httpPrincipal, methodHandler);
 			}
 			catch (Exception e) {
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -574,8 +504,7 @@ public class OrganizationServiceHttp {
 
 	public static java.util.List<com.liferay.portal.model.Organization> getUserOrganizations(
 		HttpPrincipal httpPrincipal, long userId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"getUserOrganizations",
@@ -593,10 +522,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -611,8 +536,7 @@ public class OrganizationServiceHttp {
 
 	public static void setGroupOrganizations(HttpPrincipal httpPrincipal,
 		long groupId, long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"setGroupOrganizations",
@@ -629,10 +553,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 		}
@@ -645,8 +565,7 @@ public class OrganizationServiceHttp {
 
 	public static void unsetGroupOrganizations(HttpPrincipal httpPrincipal,
 		long groupId, long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"unsetGroupOrganizations",
@@ -663,10 +582,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 		}
@@ -680,8 +595,7 @@ public class OrganizationServiceHttp {
 	public static void unsetPasswordPolicyOrganizations(
 		HttpPrincipal httpPrincipal, long passwordPolicyId,
 		long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"unsetPasswordPolicyOrganizations",
@@ -696,10 +610,6 @@ public class OrganizationServiceHttp {
 			catch (Exception e) {
 				if (e instanceof com.liferay.portal.kernel.exception.PortalException) {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
-				}
-
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
 				}
 
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
@@ -723,8 +633,7 @@ public class OrganizationServiceHttp {
 		java.util.List<com.liferay.portal.model.Phone> phones,
 		java.util.List<com.liferay.portal.model.Website> websites,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"updateOrganization", _updateOrganizationParameterTypes18);
@@ -745,10 +654,6 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
-				}
-
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
@@ -767,8 +672,7 @@ public class OrganizationServiceHttp {
 		java.lang.String type, boolean recursable, long regionId,
 		long countryId, int statusId, java.lang.String comments, boolean site,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
 					"updateOrganization", _updateOrganizationParameterTypes19);
@@ -788,8 +692,49 @@ public class OrganizationServiceHttp {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
+				throw new com.liferay.portal.kernel.exception.SystemException(e);
+			}
+
+			return (com.liferay.portal.model.Organization)returnObj;
+		}
+		catch (com.liferay.portal.kernel.exception.SystemException se) {
+			_log.error(se, se);
+
+			throw se;
+		}
+	}
+
+	public static com.liferay.portal.model.Organization updateOrganization(
+		HttpPrincipal httpPrincipal, long organizationId,
+		long parentOrganizationId, java.lang.String name,
+		java.lang.String type, long regionId, long countryId, int statusId,
+		java.lang.String comments, boolean logo, byte[] logoBytes,
+		boolean site,
+		java.util.List<com.liferay.portal.model.Address> addresses,
+		java.util.List<com.liferay.portal.model.EmailAddress> emailAddresses,
+		java.util.List<com.liferay.portal.model.OrgLabor> orgLabors,
+		java.util.List<com.liferay.portal.model.Phone> phones,
+		java.util.List<com.liferay.portal.model.Website> websites,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		try {
+			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
+					"updateOrganization", _updateOrganizationParameterTypes20);
+
+			MethodHandler methodHandler = new MethodHandler(methodKey,
+					organizationId, parentOrganizationId, name, type, regionId,
+					countryId, statusId, comments, logo, logoBytes, site,
+					addresses, emailAddresses, orgLabors, phones, websites,
+					serviceContext);
+
+			Object returnObj = null;
+
+			try {
+				returnObj = TunnelUtil.invoke(httpPrincipal, methodHandler);
+			}
+			catch (Exception e) {
+				if (e instanceof com.liferay.portal.kernel.exception.PortalException) {
+					throw (com.liferay.portal.kernel.exception.PortalException)e;
 				}
 
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
@@ -815,11 +760,10 @@ public class OrganizationServiceHttp {
 		java.util.List<com.liferay.portal.model.Phone> phones,
 		java.util.List<com.liferay.portal.model.Website> websites,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
-					"updateOrganization", _updateOrganizationParameterTypes20);
+					"updateOrganization", _updateOrganizationParameterTypes21);
 
 			MethodHandler methodHandler = new MethodHandler(methodKey,
 					organizationId, parentOrganizationId, name, type, regionId,
@@ -834,10 +778,6 @@ public class OrganizationServiceHttp {
 			catch (Exception e) {
 				if (e instanceof com.liferay.portal.kernel.exception.PortalException) {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
-				}
-
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
 				}
 
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
@@ -858,11 +798,10 @@ public class OrganizationServiceHttp {
 		java.lang.String type, long regionId, long countryId, int statusId,
 		java.lang.String comments, boolean site,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(OrganizationServiceUtil.class,
-					"updateOrganization", _updateOrganizationParameterTypes21);
+					"updateOrganization", _updateOrganizationParameterTypes22);
 
 			MethodHandler methodHandler = new MethodHandler(methodKey,
 					organizationId, parentOrganizationId, name, type, regionId,
@@ -876,10 +815,6 @@ public class OrganizationServiceHttp {
 			catch (Exception e) {
 				if (e instanceof com.liferay.portal.kernel.exception.PortalException) {
 					throw (com.liferay.portal.kernel.exception.PortalException)e;
-				}
-
-				if (e instanceof com.liferay.portal.kernel.exception.SystemException) {
-					throw (com.liferay.portal.kernel.exception.SystemException)e;
 				}
 
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
@@ -978,12 +913,20 @@ public class OrganizationServiceHttp {
 	private static final Class<?>[] _updateOrganizationParameterTypes20 = new Class[] {
 			long.class, long.class, java.lang.String.class,
 			java.lang.String.class, long.class, long.class, int.class,
+			java.lang.String.class, boolean.class, byte[].class, boolean.class,
+			java.util.List.class, java.util.List.class, java.util.List.class,
+			java.util.List.class, java.util.List.class,
+			com.liferay.portal.service.ServiceContext.class
+		};
+	private static final Class<?>[] _updateOrganizationParameterTypes21 = new Class[] {
+			long.class, long.class, java.lang.String.class,
+			java.lang.String.class, long.class, long.class, int.class,
 			java.lang.String.class, boolean.class, java.util.List.class,
 			java.util.List.class, java.util.List.class, java.util.List.class,
 			java.util.List.class,
 			com.liferay.portal.service.ServiceContext.class
 		};
-	private static final Class<?>[] _updateOrganizationParameterTypes21 = new Class[] {
+	private static final Class<?>[] _updateOrganizationParameterTypes22 = new Class[] {
 			long.class, long.class, java.lang.String.class,
 			java.lang.String.class, long.class, long.class, int.class,
 			java.lang.String.class, boolean.class,

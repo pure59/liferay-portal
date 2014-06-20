@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,6 +16,7 @@ package com.liferay.portal.kernel.nio.intraband.welder.fifo;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.test.CaptureHandler;
 import com.liferay.portal.kernel.test.CodeCoverageAssertor;
 import com.liferay.portal.kernel.test.JDKLoggerTestUtil;
 import com.liferay.portal.kernel.test.NewClassLoaderJUnitTestRunner;
@@ -55,6 +56,11 @@ public class FIFOUtilTest {
 			}
 
 		};
+
+	@Test
+	public void testConstructor() {
+		new FIFOUtil();
+	}
 
 	@Test
 	public void testCreateFIFOWithBrokenFile() throws Exception {
@@ -100,12 +106,14 @@ public class FIFOUtilTest {
 		SecurityManager securityManager = new SecurityManager() {
 
 			@Override
-			public void checkDelete(String file) {
-				if (!checkFlag.get() && file.contains("temp-fifo-")) {
+			public void checkDelete(String fileName) {
+				if (!checkFlag.get() && fileName.contains("temp-fifo-")) {
 					checkFlag.set(true);
 
 					if (checkDeleteCount.getAndIncrement() == 0) {
-						Assert.assertTrue(new File(file).delete());
+						File file = new File(fileName);
+
+						Assert.assertTrue(file.delete());
 					}
 
 					checkFlag.set(false);
@@ -152,43 +160,48 @@ public class FIFOUtilTest {
 			return;
 		}
 
-		List<LogRecord> logRecords = JDKLoggerTestUtil.configureJDKLogger(
+		CaptureHandler captureHandler = JDKLoggerTestUtil.configureJDKLogger(
 			FIFOUtil.class.getName(), Level.WARNING);
 
-		File tempFolder = new File("tempFolder");
-
-		tempFolder.mkdirs();
-
-		tempFolder.setReadOnly();
-
-		String oldTempFolder = System.getProperty("java.io.tmpdir");
-
-		System.setProperty("java.io.tmpdir", tempFolder.getAbsolutePath());
-
 		try {
-			Assert.assertFalse(FIFOUtil.isFIFOSupported());
+			List<LogRecord> logRecords = captureHandler.getLogRecords();
+
+			File newTmpDir = new File("newTmpDir");
+
+			newTmpDir.delete();
+
+			String oldTmpDirName = System.getProperty("java.io.tmpdir");
+
+			System.setProperty("java.io.tmpdir", newTmpDir.getAbsolutePath());
+
+			try {
+				Assert.assertFalse(FIFOUtil.isFIFOSupported());
+			}
+			finally {
+				System.setProperty("java.io.tmpdir", oldTmpDirName);
+			}
+
+			Assert.assertEquals(1, logRecords.size());
+
+			LogRecord logRecord = logRecords.get(0);
+
+			Assert.assertEquals(
+				"Unable to detect FIFO support", logRecord.getMessage());
+
+			Throwable throwable = logRecord.getThrown();
+
+			Assert.assertEquals(Exception.class, throwable.getClass());
+
+			String message = throwable.getMessage();
+
+			Assert.assertTrue(
+				message.startsWith(
+					"Unable to create FIFO with command \"mkfifo\", " +
+						"external process returned "));
 		}
 		finally {
-			System.setProperty("java.io.tmpdir", oldTempFolder);
+			captureHandler.close();
 		}
-
-		Assert.assertEquals(1, logRecords.size());
-
-		LogRecord logRecord = logRecords.get(0);
-
-		Assert.assertEquals(
-			"Unable to detect FIFO support", logRecord.getMessage());
-
-		Throwable throwable = logRecord.getThrown();
-
-		Assert.assertEquals(Exception.class, throwable.getClass());
-
-		String message = throwable.getMessage();
-
-		Assert.assertTrue(
-			message.startsWith(
-				"Unable to create FIFO with command \"mkfifo\", external " +
-					"process returned "));
 	}
 
 	@Test
@@ -197,32 +210,39 @@ public class FIFOUtilTest {
 			return;
 		}
 
-		List<LogRecord> logRecords = JDKLoggerTestUtil.configureJDKLogger(
+		CaptureHandler captureHandler = JDKLoggerTestUtil.configureJDKLogger(
 			FIFOUtil.class.getName(), Level.OFF);
 
-		File tempFolder = new File("tempFolder");
-
-		tempFolder.mkdirs();
-
-		tempFolder.setReadOnly();
-
-		String oldTempFolder = System.getProperty("java.io.tmpdir");
-
-		System.setProperty("java.io.tmpdir", tempFolder.getAbsolutePath());
-
 		try {
-			Assert.assertFalse(FIFOUtil.isFIFOSupported());
+			List<LogRecord> logRecords = captureHandler.getLogRecords();
+
+			File newTmpDir = new File("newTmpDir");
+
+			newTmpDir.delete();
+
+			String oldTmpDirName = System.getProperty("java.io.tmpdir");
+
+			System.setProperty("java.io.tmpdir", newTmpDir.getAbsolutePath());
+
+			try {
+				Assert.assertFalse(FIFOUtil.isFIFOSupported());
+			}
+			finally {
+				System.setProperty("java.io.tmpdir", oldTmpDirName);
+			}
+
+			Assert.assertTrue(logRecords.isEmpty());
 		}
 		finally {
-			System.setProperty("java.io.tmpdir", oldTempFolder);
+			captureHandler.close();
 		}
-
-		Assert.assertTrue(logRecords.isEmpty());
 	}
 
 	private static boolean _shouldTest() {
 		if (OSDetector.isWindows()) {
-			_log.warn("This test only runs on nonwindows OS");
+			if (_log.isWarnEnabled()) {
+				_log.warn("This test only runs on nonwindows OS");
+			}
 
 			return false;
 		}

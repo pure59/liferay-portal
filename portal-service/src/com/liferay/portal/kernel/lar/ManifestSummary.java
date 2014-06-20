@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,9 @@
 
 package com.liferay.portal.kernel.lar;
 
+import aQute.bnd.annotation.ProviderType;
+
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LongWrapper;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -37,6 +40,7 @@ import java.util.Set;
  * @author Mate Thurzo
  * @author Zsolt Berentey
  */
+@ProviderType
 public class ManifestSummary implements Serializable {
 
 	public static String getManifestSummaryKey(
@@ -51,21 +55,29 @@ public class ManifestSummary implements Serializable {
 		return modelName.concat(StringPool.POUND).concat(referrerModelName);
 	}
 
-	public void addConfigurationPortlet(Portlet portlet, String[] options) {
+	public void addDataPortlet(
+		Portlet portlet, String[] configurationPortletOptions) {
+
 		String rootPortletId = portlet.getRootPortletId();
 
 		if (!_configurationPortletOptions.containsKey(rootPortletId)) {
-			_configurationPortlets.add(portlet);
-			_configurationPortletOptions.put(rootPortletId, options);
+			_dataPortlets.add(portlet);
+
+			_configurationPortletOptions.put(
+				rootPortletId, configurationPortletOptions);
 		}
 	}
 
-	public void addDataPortlet(Portlet portlet) {
+	public void addLayoutPortlet(
+		Portlet portlet, String[] configurationPortletOptions) {
+
 		String rootPortletId = portlet.getRootPortletId();
 
-		if (!_dataRootPortletIds.contains(rootPortletId)) {
-			_dataPortlets.add(portlet);
-			_dataRootPortletIds.add(rootPortletId);
+		if (!_configurationPortletOptions.containsKey(rootPortletId)) {
+			_layoutPortlets.add(portlet);
+
+			_configurationPortletOptions.put(
+				rootPortletId, configurationPortletOptions);
 		}
 	}
 
@@ -107,12 +119,33 @@ public class ManifestSummary implements Serializable {
 		_manifestSummaryKeys.add(manifestSummaryKey);
 	}
 
-	public String[] getConfigurationPortletOptions(String rootPortletId) {
-		return _configurationPortletOptions.get(rootPortletId);
+	@Override
+	public Object clone() {
+		ManifestSummary manifestSummary = new ManifestSummary();
+
+		manifestSummary._configurationPortletOptions =
+			new HashMap<String, String[]> (
+				manifestSummary._configurationPortletOptions);
+		manifestSummary._dataPortlets = new ArrayList<Portlet>(_dataPortlets);
+		manifestSummary._layoutPortlets = new ArrayList<Portlet>(
+			_layoutPortlets);
+
+		if (_exportDate != null) {
+			manifestSummary.setExportDate(new Date(_exportDate.getTime()));
+		}
+
+		manifestSummary._manifestSummaryKeys = new HashSet<String>(
+			_manifestSummaryKeys);
+		manifestSummary._modelAdditionCounters =
+			new HashMap<String, LongWrapper>(_modelAdditionCounters);
+		manifestSummary._modelDeletionCounters =
+			new HashMap<String, LongWrapper>(_modelDeletionCounters);
+
+		return manifestSummary;
 	}
 
-	public List<Portlet> getConfigurationPortlets() {
-		return _configurationPortlets;
+	public String[] getConfigurationPortletOptions(String rootPortletId) {
+		return _configurationPortletOptions.get(rootPortletId);
 	}
 
 	public List<Portlet> getDataPortlets() {
@@ -121,6 +154,10 @@ public class ManifestSummary implements Serializable {
 
 	public Date getExportDate() {
 		return _exportDate;
+	}
+
+	public List<Portlet> getLayoutPortlets() {
+		return _layoutPortlets;
 	}
 
 	public Collection<String> getManifestSummaryKeys() {
@@ -162,8 +199,56 @@ public class ManifestSummary implements Serializable {
 		return _modelAdditionCounters;
 	}
 
+	public long getModelDeletionCount() {
+		long modelDeletionCount = -1;
+
+		for (String manifestSummaryKey : _manifestSummaryKeys) {
+			long manifestSummaryKeyModelDeletionCount = getModelDeletionCount(
+				manifestSummaryKey);
+
+			if (manifestSummaryKeyModelDeletionCount == -1) {
+				continue;
+			}
+
+			if (modelDeletionCount == -1) {
+				modelDeletionCount = manifestSummaryKeyModelDeletionCount;
+			}
+			else {
+				modelDeletionCount += manifestSummaryKeyModelDeletionCount;
+			}
+		}
+
+		return modelDeletionCount;
+	}
+
 	public long getModelDeletionCount(Class<? extends ClassedModel> clazz) {
 		return getModelDeletionCount(clazz.getName());
+	}
+
+	public long getModelDeletionCount(StagedModelType[] stagedModelTypes) {
+		if (ArrayUtil.isEmpty(stagedModelTypes)) {
+			return 0;
+		}
+
+		long modelDeletionCount = -1;
+
+		for (StagedModelType stagedModelType : stagedModelTypes) {
+			long stagedModelTypeModelDeletionCount = getModelDeletionCount(
+				stagedModelType.toString());
+
+			if (stagedModelTypeModelDeletionCount == -1) {
+				continue;
+			}
+
+			if (modelDeletionCount == -1) {
+				modelDeletionCount = stagedModelTypeModelDeletionCount;
+			}
+			else {
+				modelDeletionCount += stagedModelTypeModelDeletionCount;
+			}
+		}
+
+		return modelDeletionCount;
 	}
 
 	public long getModelDeletionCount(String modelName) {
@@ -234,10 +319,9 @@ public class ManifestSummary implements Serializable {
 
 	private Map<String, String[]> _configurationPortletOptions =
 		new HashMap<String, String[]>();
-	private List<Portlet> _configurationPortlets = new ArrayList<Portlet>();
 	private List<Portlet> _dataPortlets = new ArrayList<Portlet>();
-	private Set<String> _dataRootPortletIds = new HashSet<String>();
 	private Date _exportDate;
+	private List<Portlet> _layoutPortlets = new ArrayList<Portlet>();
 	private Set<String> _manifestSummaryKeys = new HashSet<String>();
 	private Map<String, LongWrapper> _modelAdditionCounters =
 		new HashMap<String, LongWrapper>();

@@ -14,7 +14,7 @@
 
 <body class="$css_class">
 
-<a href="#main-content" id="skip-to-content">#language ("skip-to-content")</a>
+#quick_access("#main-content")
 
 $theme.include($body_top_include)
 
@@ -23,18 +23,8 @@ $theme.include($body_top_include)
 #end
 
 <div class="container-fluid" id="wrapper">
-	<div class="row-fluid">
-		<div class="span12" id="content-wrapper">
-			<header id="banner" role="banner">
-				<div id="heading">
-					<h1 class="company-title">
-						<a class="$logo_css_class" href="$control_panel_url" title="#language ("go-to") #language ("control-panel")">
-							<span>#language ("control-panel")</span>
-						</a>
-					</h1>
-				</div>
-			</header>
-
+	<div class="row">
+		<div class="col-md-12" id="content-wrapper">
 			<div id="content">
 				#if ($selectable)
 					$theme.include($content_include)

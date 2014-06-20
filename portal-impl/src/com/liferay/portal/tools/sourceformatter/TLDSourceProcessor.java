@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,6 @@
 
 package com.liferay.portal.tools.sourceformatter;
 
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
-
 import java.io.File;
 
 import java.util.List;
@@ -27,30 +24,28 @@ import java.util.List;
 public class TLDSourceProcessor extends BaseSourceProcessor {
 
 	@Override
-	protected void doFormat() throws Exception {
-		String[] excludes = new String[] {
-			"**\\bin\\**", "**\\classes\\**", "**\\WEB-INF\\tld\\**"
-		};
+	protected void format() throws Exception {
+		String[] excludes = new String[] {"**\\WEB-INF\\tld\\**"};
 		String[] includes = new String[] {"**\\*.tld"};
 
 		List<String> fileNames = getFileNames(excludes, includes);
 
 		for (String fileName : fileNames) {
-			File file = new File(BASEDIR + fileName);
-
-			String content = fileUtil.read(file);
-
-			String newContent = trimContent(content, false);
-
-			if ((newContent != null) && !content.equals(newContent)) {
-				fileUtil.write(file, newContent);
-
-				fileName = StringUtil.replace(
-					fileName, StringPool.BACK_SLASH, StringPool.SLASH);
-
-				sourceFormatterHelper.printError(fileName, file);
-			}
+			format(fileName);
 		}
+	}
+
+	@Override
+	protected String format(String fileName) throws Exception {
+		File file = new File(BASEDIR + fileName);
+
+		String content = fileUtil.read(file);
+
+		String newContent = trimContent(content, false);
+
+		compareAndAutoFixContent(file, fileName, content, newContent);
+
+		return newContent;
 	}
 
 }

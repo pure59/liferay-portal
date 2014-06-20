@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,12 +22,15 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
-import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
 
 /**
  * @author Shuyang Zhou
  */
 public class TransactionInterceptor implements MethodInterceptor {
+
+	public TransactionAttributeSource getTransactionAttributeSource() {
+		return transactionAttributeSource;
+	}
 
 	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
@@ -56,15 +59,6 @@ public class TransactionInterceptor implements MethodInterceptor {
 	public void setPlatformTransactionManager(
 		PlatformTransactionManager platformTransactionManager) {
 
-		if (platformTransactionManager instanceof
-				CallbackPreferringPlatformTransactionManager) {
-
-			transactionExecutor = new CallbackPreferringTransactionExecutor();
-		}
-		else {
-			transactionExecutor = new DefaultTransactionExecutor();
-		}
-
 		this.platformTransactionManager = platformTransactionManager;
 	}
 
@@ -74,10 +68,17 @@ public class TransactionInterceptor implements MethodInterceptor {
 		this.transactionAttributeSource = transactionAttributeSource;
 	}
 
+	public void setTransactionExecutor(
+		TransactionExecutor transactionExecutor) {
+
+		this.transactionExecutor = transactionExecutor;
+	}
+
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link
 	 *             #setPlatformTransactionManager(PlatformTransactionManager)}
 	 */
+	@Deprecated
 	public void setTransactionManager(
 		PlatformTransactionManager platformTransactionManager) {
 

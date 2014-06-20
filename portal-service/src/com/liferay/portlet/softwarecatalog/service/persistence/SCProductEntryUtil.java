@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,10 @@
 
 package com.liferay.portlet.softwarecatalog.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.service.ServiceContext;
@@ -37,6 +38,7 @@ import java.util.List;
  * @see SCProductEntryPersistenceImpl
  * @generated
  */
+@ProviderType
 public class SCProductEntryUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -61,8 +63,7 @@ public class SCProductEntryUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#countWithDynamicQuery(DynamicQuery)
 	 */
-	public long countWithDynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
 	}
 
@@ -70,7 +71,7 @@ public class SCProductEntryUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery)
 	 */
 	public static List<SCProductEntry> findWithDynamicQuery(
-		DynamicQuery dynamicQuery) throws SystemException {
+		DynamicQuery dynamicQuery) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -78,8 +79,7 @@ public class SCProductEntryUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#findWithDynamicQuery(DynamicQuery, int, int)
 	 */
 	public static List<SCProductEntry> findWithDynamicQuery(
-		DynamicQuery dynamicQuery, int start, int end)
-		throws SystemException {
+		DynamicQuery dynamicQuery, int start, int end) {
 		return getPersistence().findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -88,7 +88,7 @@ public class SCProductEntryUtil {
 	 */
 	public static List<SCProductEntry> findWithDynamicQuery(
 		DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
+		OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findWithDynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
@@ -97,8 +97,7 @@ public class SCProductEntryUtil {
 	/**
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel)
 	 */
-	public static SCProductEntry update(SCProductEntry scProductEntry)
-		throws SystemException {
+	public static SCProductEntry update(SCProductEntry scProductEntry) {
 		return getPersistence().update(scProductEntry);
 	}
 
@@ -106,7 +105,7 @@ public class SCProductEntryUtil {
 	 * @see com.liferay.portal.service.persistence.BasePersistence#update(com.liferay.portal.model.BaseModel, ServiceContext)
 	 */
 	public static SCProductEntry update(SCProductEntry scProductEntry,
-		ServiceContext serviceContext) throws SystemException {
+		ServiceContext serviceContext) {
 		return getPersistence().update(scProductEntry, serviceContext);
 	}
 
@@ -115,11 +114,9 @@ public class SCProductEntryUtil {
 	*
 	* @param groupId the group ID
 	* @return the matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findByGroupId(
-		long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId) {
 		return getPersistence().findByGroupId(groupId);
 	}
 
@@ -134,11 +131,9 @@ public class SCProductEntryUtil {
 	* @param start the lower bound of the range of s c product entries
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @return the range of matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findByGroupId(
-		long groupId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, int start, int end) {
 		return getPersistence().findByGroupId(groupId, start, end);
 	}
 
@@ -154,12 +149,10 @@ public class SCProductEntryUtil {
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findByGroupId(
 		long groupId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByGroupId(groupId, start, end, orderByComparator);
 	}
@@ -171,13 +164,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry findByGroupId_First(
 		long groupId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence().findByGroupId_First(groupId, orderByComparator);
 	}
 
@@ -187,12 +178,10 @@ public class SCProductEntryUtil {
 	* @param groupId the group ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching s c product entry, or <code>null</code> if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry fetchByGroupId_First(
 		long groupId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByGroupId_First(groupId, orderByComparator);
 	}
 
@@ -203,13 +192,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry findByGroupId_Last(
 		long groupId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence().findByGroupId_Last(groupId, orderByComparator);
 	}
 
@@ -219,12 +206,10 @@ public class SCProductEntryUtil {
 	* @param groupId the group ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching s c product entry, or <code>null</code> if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry fetchByGroupId_Last(
 		long groupId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().fetchByGroupId_Last(groupId, orderByComparator);
 	}
 
@@ -236,13 +221,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a s c product entry with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry[] findByGroupId_PrevAndNext(
 		long productEntryId, long groupId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence()
 				   .findByGroupId_PrevAndNext(productEntryId, groupId,
 			orderByComparator);
@@ -253,11 +236,9 @@ public class SCProductEntryUtil {
 	*
 	* @param groupId the group ID
 	* @return the matching s c product entries that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> filterFindByGroupId(
-		long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId) {
 		return getPersistence().filterFindByGroupId(groupId);
 	}
 
@@ -272,11 +253,9 @@ public class SCProductEntryUtil {
 	* @param start the lower bound of the range of s c product entries
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @return the range of matching s c product entries that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> filterFindByGroupId(
-		long groupId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, int start, int end) {
 		return getPersistence().filterFindByGroupId(groupId, start, end);
 	}
 
@@ -292,12 +271,10 @@ public class SCProductEntryUtil {
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching s c product entries that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> filterFindByGroupId(
 		long groupId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .filterFindByGroupId(groupId, start, end, orderByComparator);
 	}
@@ -310,13 +287,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a s c product entry with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry[] filterFindByGroupId_PrevAndNext(
 		long productEntryId, long groupId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence()
 				   .filterFindByGroupId_PrevAndNext(productEntryId, groupId,
 			orderByComparator);
@@ -326,10 +301,8 @@ public class SCProductEntryUtil {
 	* Removes all the s c product entries where groupId = &#63; from the database.
 	*
 	* @param groupId the group ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByGroupId(long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByGroupId(long groupId) {
 		getPersistence().removeByGroupId(groupId);
 	}
 
@@ -338,10 +311,8 @@ public class SCProductEntryUtil {
 	*
 	* @param groupId the group ID
 	* @return the number of matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByGroupId(long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByGroupId(long groupId) {
 		return getPersistence().countByGroupId(groupId);
 	}
 
@@ -350,10 +321,8 @@ public class SCProductEntryUtil {
 	*
 	* @param groupId the group ID
 	* @return the number of matching s c product entries that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int filterCountByGroupId(long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int filterCountByGroupId(long groupId) {
 		return getPersistence().filterCountByGroupId(groupId);
 	}
 
@@ -362,11 +331,9 @@ public class SCProductEntryUtil {
 	*
 	* @param companyId the company ID
 	* @return the matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findByCompanyId(
-		long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId) {
 		return getPersistence().findByCompanyId(companyId);
 	}
 
@@ -381,11 +348,9 @@ public class SCProductEntryUtil {
 	* @param start the lower bound of the range of s c product entries
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @return the range of matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findByCompanyId(
-		long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long companyId, int start, int end) {
 		return getPersistence().findByCompanyId(companyId, start, end);
 	}
 
@@ -401,12 +366,10 @@ public class SCProductEntryUtil {
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findByCompanyId(
 		long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByCompanyId(companyId, start, end, orderByComparator);
 	}
@@ -418,13 +381,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry findByCompanyId_First(
 		long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence()
 				   .findByCompanyId_First(companyId, orderByComparator);
 	}
@@ -435,12 +396,10 @@ public class SCProductEntryUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching s c product entry, or <code>null</code> if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry fetchByCompanyId_First(
 		long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByCompanyId_First(companyId, orderByComparator);
 	}
@@ -452,13 +411,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry findByCompanyId_Last(
 		long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence()
 				   .findByCompanyId_Last(companyId, orderByComparator);
 	}
@@ -469,12 +426,10 @@ public class SCProductEntryUtil {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching s c product entry, or <code>null</code> if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry fetchByCompanyId_Last(
 		long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByCompanyId_Last(companyId, orderByComparator);
 	}
@@ -487,13 +442,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a s c product entry with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry[] findByCompanyId_PrevAndNext(
 		long productEntryId, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence()
 				   .findByCompanyId_PrevAndNext(productEntryId, companyId,
 			orderByComparator);
@@ -503,10 +456,8 @@ public class SCProductEntryUtil {
 	* Removes all the s c product entries where companyId = &#63; from the database.
 	*
 	* @param companyId the company ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByCompanyId(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByCompanyId(long companyId) {
 		getPersistence().removeByCompanyId(companyId);
 	}
 
@@ -515,10 +466,8 @@ public class SCProductEntryUtil {
 	*
 	* @param companyId the company ID
 	* @return the number of matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByCompanyId(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByCompanyId(long companyId) {
 		return getPersistence().countByCompanyId(companyId);
 	}
 
@@ -528,11 +477,9 @@ public class SCProductEntryUtil {
 	* @param groupId the group ID
 	* @param userId the user ID
 	* @return the matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findByG_U(
-		long groupId, long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long userId) {
 		return getPersistence().findByG_U(groupId, userId);
 	}
 
@@ -548,11 +495,9 @@ public class SCProductEntryUtil {
 	* @param start the lower bound of the range of s c product entries
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @return the range of matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findByG_U(
-		long groupId, long userId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long userId, int start, int end) {
 		return getPersistence().findByG_U(groupId, userId, start, end);
 	}
 
@@ -569,12 +514,10 @@ public class SCProductEntryUtil {
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findByG_U(
 		long groupId, long userId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .findByG_U(groupId, userId, start, end, orderByComparator);
 	}
@@ -587,13 +530,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry findByG_U_First(
 		long groupId, long userId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence()
 				   .findByG_U_First(groupId, userId, orderByComparator);
 	}
@@ -605,12 +546,10 @@ public class SCProductEntryUtil {
 	* @param userId the user ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching s c product entry, or <code>null</code> if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry fetchByG_U_First(
 		long groupId, long userId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByG_U_First(groupId, userId, orderByComparator);
 	}
@@ -623,13 +562,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry findByG_U_Last(
 		long groupId, long userId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence()
 				   .findByG_U_Last(groupId, userId, orderByComparator);
 	}
@@ -641,12 +578,10 @@ public class SCProductEntryUtil {
 	* @param userId the user ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching s c product entry, or <code>null</code> if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry fetchByG_U_Last(
 		long groupId, long userId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .fetchByG_U_Last(groupId, userId, orderByComparator);
 	}
@@ -660,13 +595,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a s c product entry with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry[] findByG_U_PrevAndNext(
 		long productEntryId, long groupId, long userId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence()
 				   .findByG_U_PrevAndNext(productEntryId, groupId, userId,
 			orderByComparator);
@@ -678,11 +611,9 @@ public class SCProductEntryUtil {
 	* @param groupId the group ID
 	* @param userId the user ID
 	* @return the matching s c product entries that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> filterFindByG_U(
-		long groupId, long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long userId) {
 		return getPersistence().filterFindByG_U(groupId, userId);
 	}
 
@@ -698,11 +629,9 @@ public class SCProductEntryUtil {
 	* @param start the lower bound of the range of s c product entries
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @return the range of matching s c product entries that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> filterFindByG_U(
-		long groupId, long userId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long groupId, long userId, int start, int end) {
 		return getPersistence().filterFindByG_U(groupId, userId, start, end);
 	}
 
@@ -719,12 +648,10 @@ public class SCProductEntryUtil {
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching s c product entries that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> filterFindByG_U(
 		long groupId, long userId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence()
 				   .filterFindByG_U(groupId, userId, start, end,
 			orderByComparator);
@@ -739,13 +666,11 @@ public class SCProductEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a s c product entry with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry[] filterFindByG_U_PrevAndNext(
 		long productEntryId, long groupId, long userId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence()
 				   .filterFindByG_U_PrevAndNext(productEntryId, groupId,
 			userId, orderByComparator);
@@ -756,10 +681,8 @@ public class SCProductEntryUtil {
 	*
 	* @param groupId the group ID
 	* @param userId the user ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeByG_U(long groupId, long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeByG_U(long groupId, long userId) {
 		getPersistence().removeByG_U(groupId, userId);
 	}
 
@@ -769,10 +692,8 @@ public class SCProductEntryUtil {
 	* @param groupId the group ID
 	* @param userId the user ID
 	* @return the number of matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countByG_U(long groupId, long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countByG_U(long groupId, long userId) {
 		return getPersistence().countByG_U(groupId, userId);
 	}
 
@@ -782,10 +703,8 @@ public class SCProductEntryUtil {
 	* @param groupId the group ID
 	* @param userId the user ID
 	* @return the number of matching s c product entries that the user has permission to view
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int filterCountByG_U(long groupId, long userId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int filterCountByG_U(long groupId, long userId) {
 		return getPersistence().filterCountByG_U(groupId, userId);
 	}
 
@@ -796,12 +715,10 @@ public class SCProductEntryUtil {
 	* @param repoArtifactId the repo artifact ID
 	* @return the matching s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry findByRG_RA(
 		java.lang.String repoGroupId, java.lang.String repoArtifactId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence().findByRG_RA(repoGroupId, repoArtifactId);
 	}
 
@@ -811,11 +728,9 @@ public class SCProductEntryUtil {
 	* @param repoGroupId the repo group ID
 	* @param repoArtifactId the repo artifact ID
 	* @return the matching s c product entry, or <code>null</code> if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry fetchByRG_RA(
-		java.lang.String repoGroupId, java.lang.String repoArtifactId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String repoGroupId, java.lang.String repoArtifactId) {
 		return getPersistence().fetchByRG_RA(repoGroupId, repoArtifactId);
 	}
 
@@ -826,12 +741,10 @@ public class SCProductEntryUtil {
 	* @param repoArtifactId the repo artifact ID
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching s c product entry, or <code>null</code> if a matching s c product entry could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry fetchByRG_RA(
 		java.lang.String repoGroupId, java.lang.String repoArtifactId,
-		boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByRG_RA(repoGroupId, repoArtifactId, retrieveFromCache);
 	}
@@ -842,12 +755,10 @@ public class SCProductEntryUtil {
 	* @param repoGroupId the repo group ID
 	* @param repoArtifactId the repo artifact ID
 	* @return the s c product entry that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry removeByRG_RA(
 		java.lang.String repoGroupId, java.lang.String repoArtifactId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence().removeByRG_RA(repoGroupId, repoArtifactId);
 	}
 
@@ -857,11 +768,9 @@ public class SCProductEntryUtil {
 	* @param repoGroupId the repo group ID
 	* @param repoArtifactId the repo artifact ID
 	* @return the number of matching s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static int countByRG_RA(java.lang.String repoGroupId,
-		java.lang.String repoArtifactId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.lang.String repoArtifactId) {
 		return getPersistence().countByRG_RA(repoGroupId, repoArtifactId);
 	}
 
@@ -902,18 +811,15 @@ public class SCProductEntryUtil {
 	* @param productEntryId the primary key of the s c product entry
 	* @return the s c product entry that was removed
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a s c product entry with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry remove(
 		long productEntryId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence().remove(productEntryId);
 	}
 
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry updateImpl(
-		com.liferay.portlet.softwarecatalog.model.SCProductEntry scProductEntry)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.softwarecatalog.model.SCProductEntry scProductEntry) {
 		return getPersistence().updateImpl(scProductEntry);
 	}
 
@@ -923,12 +829,10 @@ public class SCProductEntryUtil {
 	* @param productEntryId the primary key of the s c product entry
 	* @return the s c product entry
 	* @throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException if a s c product entry with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry findByPrimaryKey(
 		long productEntryId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
+		throws com.liferay.portlet.softwarecatalog.NoSuchProductEntryException {
 		return getPersistence().findByPrimaryKey(productEntryId);
 	}
 
@@ -937,22 +841,23 @@ public class SCProductEntryUtil {
 	*
 	* @param productEntryId the primary key of the s c product entry
 	* @return the s c product entry, or <code>null</code> if a s c product entry with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portlet.softwarecatalog.model.SCProductEntry fetchByPrimaryKey(
-		long productEntryId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long productEntryId) {
 		return getPersistence().fetchByPrimaryKey(productEntryId);
+	}
+
+	public static java.util.Map<java.io.Serializable, com.liferay.portlet.softwarecatalog.model.SCProductEntry> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys) {
+		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
 	* Returns all the s c product entries.
 	*
 	* @return the s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
-	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findAll() {
 		return getPersistence().findAll();
 	}
 
@@ -966,11 +871,9 @@ public class SCProductEntryUtil {
 	* @param start the lower bound of the range of s c product entries
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @return the range of s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findAll(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		int start, int end) {
 		return getPersistence().findAll(start, end);
 	}
 
@@ -985,22 +888,17 @@ public class SCProductEntryUtil {
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCProductEntry> findAll(
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().findAll(start, end, orderByComparator);
 	}
 
 	/**
 	* Removes all the s c product entries from the database.
-	*
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeAll() {
 		getPersistence().removeAll();
 	}
 
@@ -1008,11 +906,19 @@ public class SCProductEntryUtil {
 	* Returns the number of s c product entries.
 	*
 	* @return the number of s c product entries
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int countAll()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int countAll() {
 		return getPersistence().countAll();
+	}
+
+	/**
+	* Returns the primaryKeys of s c licenses associated with the s c product entry.
+	*
+	* @param pk the primary key of the s c product entry
+	* @return long[] of the primaryKeys of s c licenses associated with the s c product entry
+	*/
+	public static long[] getSCLicensePrimaryKeys(long pk) {
+		return getPersistence().getSCLicensePrimaryKeys(pk);
 	}
 
 	/**
@@ -1020,10 +926,9 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @return the s c licenses associated with the s c product entry
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCLicense> getSCLicenses(
-		long pk) throws com.liferay.portal.kernel.exception.SystemException {
+		long pk) {
 		return getPersistence().getSCLicenses(pk);
 	}
 
@@ -1038,11 +943,9 @@ public class SCProductEntryUtil {
 	* @param start the lower bound of the range of s c product entries
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @return the range of s c licenses associated with the s c product entry
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCLicense> getSCLicenses(
-		long pk, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long pk, int start, int end) {
 		return getPersistence().getSCLicenses(pk, start, end);
 	}
 
@@ -1058,12 +961,10 @@ public class SCProductEntryUtil {
 	* @param end the upper bound of the range of s c product entries (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of s c licenses associated with the s c product entry
-	* @throws SystemException if a system exception occurred
 	*/
 	public static java.util.List<com.liferay.portlet.softwarecatalog.model.SCLicense> getSCLicenses(
 		long pk, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
 		return getPersistence().getSCLicenses(pk, start, end, orderByComparator);
 	}
 
@@ -1072,10 +973,8 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @return the number of s c licenses associated with the s c product entry
-	* @throws SystemException if a system exception occurred
 	*/
-	public static int getSCLicensesSize(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static int getSCLicensesSize(long pk) {
 		return getPersistence().getSCLicensesSize(pk);
 	}
 
@@ -1085,10 +984,8 @@ public class SCProductEntryUtil {
 	* @param pk the primary key of the s c product entry
 	* @param scLicensePK the primary key of the s c license
 	* @return <code>true</code> if the s c license is associated with the s c product entry; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsSCLicense(long pk, long scLicensePK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsSCLicense(long pk, long scLicensePK) {
 		return getPersistence().containsSCLicense(pk, scLicensePK);
 	}
 
@@ -1097,10 +994,8 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry to check for associations with s c licenses
 	* @return <code>true</code> if the s c product entry has any s c licenses associated with it; <code>false</code> otherwise
-	* @throws SystemException if a system exception occurred
 	*/
-	public static boolean containsSCLicenses(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static boolean containsSCLicenses(long pk) {
 		return getPersistence().containsSCLicenses(pk);
 	}
 
@@ -1109,10 +1004,8 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @param scLicensePK the primary key of the s c license
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addSCLicense(long pk, long scLicensePK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addSCLicense(long pk, long scLicensePK) {
 		getPersistence().addSCLicense(pk, scLicensePK);
 	}
 
@@ -1121,11 +1014,9 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @param scLicense the s c license
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addSCLicense(long pk,
-		com.liferay.portlet.softwarecatalog.model.SCLicense scLicense)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.softwarecatalog.model.SCLicense scLicense) {
 		getPersistence().addSCLicense(pk, scLicense);
 	}
 
@@ -1134,10 +1025,8 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @param scLicensePKs the primary keys of the s c licenses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void addSCLicenses(long pk, long[] scLicensePKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void addSCLicenses(long pk, long[] scLicensePKs) {
 		getPersistence().addSCLicenses(pk, scLicensePKs);
 	}
 
@@ -1146,11 +1035,9 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @param scLicenses the s c licenses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void addSCLicenses(long pk,
-		java.util.List<com.liferay.portlet.softwarecatalog.model.SCLicense> scLicenses)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portlet.softwarecatalog.model.SCLicense> scLicenses) {
 		getPersistence().addSCLicenses(pk, scLicenses);
 	}
 
@@ -1158,10 +1045,8 @@ public class SCProductEntryUtil {
 	* Clears all associations between the s c product entry and its s c licenses. Also notifies the appropriate model listeners and clears the mapping table finder cache.
 	*
 	* @param pk the primary key of the s c product entry to clear the associated s c licenses from
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void clearSCLicenses(long pk)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void clearSCLicenses(long pk) {
 		getPersistence().clearSCLicenses(pk);
 	}
 
@@ -1170,10 +1055,8 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @param scLicensePK the primary key of the s c license
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeSCLicense(long pk, long scLicensePK)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeSCLicense(long pk, long scLicensePK) {
 		getPersistence().removeSCLicense(pk, scLicensePK);
 	}
 
@@ -1182,11 +1065,9 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @param scLicense the s c license
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeSCLicense(long pk,
-		com.liferay.portlet.softwarecatalog.model.SCLicense scLicense)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		com.liferay.portlet.softwarecatalog.model.SCLicense scLicense) {
 		getPersistence().removeSCLicense(pk, scLicense);
 	}
 
@@ -1195,10 +1076,8 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @param scLicensePKs the primary keys of the s c licenses
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void removeSCLicenses(long pk, long[] scLicensePKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void removeSCLicenses(long pk, long[] scLicensePKs) {
 		getPersistence().removeSCLicenses(pk, scLicensePKs);
 	}
 
@@ -1207,11 +1086,9 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @param scLicenses the s c licenses
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void removeSCLicenses(long pk,
-		java.util.List<com.liferay.portlet.softwarecatalog.model.SCLicense> scLicenses)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portlet.softwarecatalog.model.SCLicense> scLicenses) {
 		getPersistence().removeSCLicenses(pk, scLicenses);
 	}
 
@@ -1220,10 +1097,8 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @param scLicensePKs the primary keys of the s c licenses to be associated with the s c product entry
-	* @throws SystemException if a system exception occurred
 	*/
-	public static void setSCLicenses(long pk, long[] scLicensePKs)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public static void setSCLicenses(long pk, long[] scLicensePKs) {
 		getPersistence().setSCLicenses(pk, scLicensePKs);
 	}
 
@@ -1232,11 +1107,9 @@ public class SCProductEntryUtil {
 	*
 	* @param pk the primary key of the s c product entry
 	* @param scLicenses the s c licenses to be associated with the s c product entry
-	* @throws SystemException if a system exception occurred
 	*/
 	public static void setSCLicenses(long pk,
-		java.util.List<com.liferay.portlet.softwarecatalog.model.SCLicense> scLicenses)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		java.util.List<com.liferay.portlet.softwarecatalog.model.SCLicense> scLicenses) {
 		getPersistence().setSCLicenses(pk, scLicenses);
 	}
 
@@ -1254,6 +1127,7 @@ public class SCProductEntryUtil {
 	/**
 	 * @deprecated As of 6.2.0
 	 */
+	@Deprecated
 	public void setPersistence(SCProductEntryPersistence persistence) {
 	}
 

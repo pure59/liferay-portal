@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.social.service.http;
+
+import aQute.bnd.annotation.ProviderType;
 
 /**
  * Provides the SOAP utility for the
@@ -54,5 +56,6 @@ package com.liferay.portlet.social.service.http;
  * @see com.liferay.portlet.social.service.SocialRequestServiceUtil
  * @generated
  */
+@ProviderType
 public class SocialRequestServiceSoap {
 }

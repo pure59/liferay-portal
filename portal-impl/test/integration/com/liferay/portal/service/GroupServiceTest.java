@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,10 +15,10 @@
 package com.liferay.portal.service;
 
 import com.liferay.portal.GroupParentException;
-import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
+import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
-import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.Company;
@@ -26,6 +26,7 @@ import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutPrototype;
+import com.liferay.portal.model.Organization;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
@@ -37,19 +38,29 @@ import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
-import com.liferay.portal.test.TransactionalCallbackAwareExecutionTestListener;
+import com.liferay.portal.test.ResetDatabaseExecutionTestListener;
+import com.liferay.portal.test.Sync;
+import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.GroupTestUtil;
-import com.liferay.portal.util.LayoutTestUtil;
-import com.liferay.portal.util.TestPropsValues;
-import com.liferay.portal.util.UserTestUtil;
+import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.util.test.CompanyTestUtil;
+import com.liferay.portal.util.test.GroupTestUtil;
+import com.liferay.portal.util.test.LayoutTestUtil;
+import com.liferay.portal.util.test.OrganizationTestUtil;
+import com.liferay.portal.util.test.RandomTestUtil;
+import com.liferay.portal.util.test.RoleTestUtil;
+import com.liferay.portal.util.test.ServiceContextTestUtil;
+import com.liferay.portal.util.test.TestPropsValues;
+import com.liferay.portal.util.test.UserTestUtil;
+import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
 import com.liferay.portlet.blogs.model.BlogsEntry;
 import com.liferay.portlet.blogs.service.BlogsEntryLocalServiceUtil;
-import com.liferay.portlet.blogs.util.BlogsTestUtil;
+import com.liferay.portlet.blogs.util.test.BlogsTestUtil;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -59,19 +70,46 @@ import org.junit.runner.RunWith;
 /**
  * @author Julio Camarero
  * @author Roberto Díaz
+ * @author Sergio González
  */
 @ExecutionTestListeners(
 	listeners = {
 		MainServletExecutionTestListener.class,
-		TransactionalCallbackAwareExecutionTestListener.class
+		ResetDatabaseExecutionTestListener.class,
+		SynchronousDestinationExecutionTestListener.class
 	})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
-@Transactional
+@Sync
 public class GroupServiceTest {
 
 	@Before
-	public void setUp() {
-		FinderCacheUtil.clearCache();
+	public void setUp() throws Exception {
+		_group = GroupTestUtil.addGroup();
+	}
+
+	@Test
+	public void testAddCompanyStagingGroup() throws Exception {
+		Group companyGroup = GroupLocalServiceUtil.getCompanyGroup(
+			TestPropsValues.getCompanyId());
+
+		ServiceContext serviceContext = new ServiceContext();
+
+		serviceContext.setAttribute("staging", Boolean.TRUE);
+
+		Group companyStagingGroup = GroupLocalServiceUtil.addGroup(
+			TestPropsValues.getUserId(), GroupConstants.DEFAULT_PARENT_GROUP_ID,
+			companyGroup.getClassName(), companyGroup.getClassPK(),
+			companyGroup.getGroupId(), companyGroup.getDescriptiveName(),
+			companyGroup.getDescription(), companyGroup.getType(),
+			companyGroup.isManualMembership(),
+			companyGroup.getMembershipRestriction(),
+			companyGroup.getFriendlyURL(), false, companyGroup.isActive(),
+			serviceContext);
+
+		Assert.assertTrue(companyStagingGroup.isCompanyStagingGroup());
+
+		Assert.assertEquals(
+			companyGroup.getGroupId(), companyStagingGroup.getLiveGroupId());
 	}
 
 	@Test
@@ -145,8 +183,22 @@ public class GroupServiceTest {
 	public void testDeleteSite() throws Exception {
 		Group group = GroupTestUtil.addGroup();
 
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+		int initialTagsCount = AssetTagLocalServiceUtil.getGroupTagsCount(
+			group.getGroupId());
+
+		AssetTagLocalServiceUtil.addTag(
+			TestPropsValues.getUserId(), RandomTestUtil.randomString(), null,
+			serviceContext);
+
+		Assert.assertEquals(
+			initialTagsCount + 1,
+			AssetTagLocalServiceUtil.getGroupTagsCount(group.getGroupId()));
+
 		User user = UserTestUtil.addUser(
-			ServiceTestUtil.randomString(), group.getGroupId());
+			RandomTestUtil.randomString(), group.getGroupId());
 
 		BlogsEntry blogsEntry = BlogsTestUtil.addEntry(
 			user.getUserId(), group, true);
@@ -157,6 +209,9 @@ public class GroupServiceTest {
 
 		GroupLocalServiceUtil.deleteGroup(group.getGroupId());
 
+		Assert.assertEquals(
+			initialTagsCount,
+			AssetTagLocalServiceUtil.getGroupTagsCount(group.getGroupId()));
 		Assert.assertNull(
 			BlogsEntryLocalServiceUtil.fetchBlogsEntry(
 				blogsEntry.getEntryId()));
@@ -164,11 +219,11 @@ public class GroupServiceTest {
 
 	@Test
 	public void testFindGroupByDescription() throws Exception {
-		String description = ServiceTestUtil.randomString();
+		String description = RandomTestUtil.randomString();
 
 		GroupTestUtil.addGroup(
 			GroupConstants.DEFAULT_PARENT_GROUP_ID,
-			ServiceTestUtil.randomString(), description);
+			RandomTestUtil.randomString(), description);
 
 		LinkedHashMap<String, Object> groupParams =
 			new LinkedHashMap<String, Object>();
@@ -186,12 +241,12 @@ public class GroupServiceTest {
 	@Test
 	public void testFindGroupByDescriptionWithSpaces() throws Exception {
 		String description =
-			ServiceTestUtil.randomString() + StringPool.SPACE +
-				ServiceTestUtil.randomString();
+			RandomTestUtil.randomString() + StringPool.SPACE +
+				RandomTestUtil.randomString();
 
 		GroupTestUtil.addGroup(
 			GroupConstants.DEFAULT_PARENT_GROUP_ID,
-			ServiceTestUtil.randomString(), description);
+			RandomTestUtil.randomString(), description);
 
 		LinkedHashMap<String, Object> groupParams =
 			new LinkedHashMap<String, Object>();
@@ -208,7 +263,7 @@ public class GroupServiceTest {
 
 	@Test
 	public void testFindGroupByName() throws Exception {
-		String name = ServiceTestUtil.randomString();
+		String name = RandomTestUtil.randomString();
 
 		GroupTestUtil.addGroup(GroupConstants.DEFAULT_PARENT_GROUP_ID, name);
 
@@ -227,8 +282,8 @@ public class GroupServiceTest {
 	@Test
 	public void testFindGroupByNameWithSpaces() throws Exception {
 		String name =
-			ServiceTestUtil.randomString() + StringPool.SPACE +
-				ServiceTestUtil.randomString();
+			RandomTestUtil.randomString() + StringPool.SPACE +
+				RandomTestUtil.randomString();
 
 		GroupTestUtil.addGroup(GroupConstants.DEFAULT_PARENT_GROUP_ID, name);
 
@@ -287,6 +342,31 @@ public class GroupServiceTest {
 	}
 
 	@Test
+	public void testGetUserSitesGroups() throws Exception {
+		Organization parentOrganization = OrganizationTestUtil.addOrganization(
+			true);
+
+		Group parentOrganizationGroup = parentOrganization.getGroup();
+
+		LayoutTestUtil.addLayout(
+			parentOrganizationGroup.getGroupId(),
+			RandomTestUtil.randomString());
+
+		Organization organization = OrganizationTestUtil.addOrganization(
+			parentOrganization.getOrganizationId(),
+			RandomTestUtil.randomString(), false);
+
+		UserLocalServiceUtil.addOrganizationUsers(
+			organization.getOrganizationId(),
+			new long[] {TestPropsValues.getUserId()});
+
+		List<Group> groups = GroupServiceUtil.getUserSitesGroups(
+			TestPropsValues.getUserId(), null, false, QueryUtil.ALL_POS);
+
+		Assert.assertTrue(groups.contains(parentOrganizationGroup));
+	}
+
+	@Test
 	public void testGroupHasCurrentPageScopeDescriptiveName() throws Exception {
 		ThemeDisplay themeDisplay = new ThemeDisplay();
 
@@ -294,7 +374,7 @@ public class GroupServiceTest {
 
 		themeDisplay.setPlid(group.getClassPK());
 
-		themeDisplay.setScopeGroupId(TestPropsValues.getGroupId());
+		themeDisplay.setScopeGroupId(_group.getGroupId());
 
 		String scopeDescriptiveName = group.getScopeDescriptiveName(
 			themeDisplay);
@@ -322,7 +402,7 @@ public class GroupServiceTest {
 
 		Group group = addGroup(false, false, true);
 
-		themeDisplay.setScopeGroupId(TestPropsValues.getGroupId());
+		themeDisplay.setScopeGroupId(_group.getGroupId());
 
 		String scopeDescriptiveName = group.getScopeDescriptiveName(
 			themeDisplay);
@@ -351,7 +431,7 @@ public class GroupServiceTest {
 		themeDisplay.setScopeGroupId(group.getGroupId());
 
 		Group subgroup = GroupTestUtil.addGroup(
-			group.getGroupId(), ServiceTestUtil.randomString());
+			group.getGroupId(), RandomTestUtil.randomString());
 
 		String scopeLabel = subgroup.getScopeLabel(themeDisplay);
 
@@ -397,7 +477,7 @@ public class GroupServiceTest {
 
 		themeDisplay.setPlid(group.getClassPK());
 
-		themeDisplay.setScopeGroupId(TestPropsValues.getGroupId());
+		themeDisplay.setScopeGroupId(_group.getGroupId());
 
 		String scopeLabel = group.getScopeLabel(themeDisplay);
 
@@ -411,7 +491,7 @@ public class GroupServiceTest {
 		Group group = GroupTestUtil.addGroup();
 
 		Group subgroup = GroupTestUtil.addGroup(
-			group.getGroupId(), ServiceTestUtil.randomString());
+			group.getGroupId(), RandomTestUtil.randomString());
 
 		themeDisplay.setScopeGroupId(subgroup.getGroupId());
 
@@ -426,11 +506,40 @@ public class GroupServiceTest {
 
 		Group group = GroupTestUtil.addGroup();
 
-		themeDisplay.setScopeGroupId(TestPropsValues.getGroupId());
+		themeDisplay.setScopeGroupId(_group.getGroupId());
 
 		String scopeLabel = group.getScopeLabel(themeDisplay);
 
 		Assert.assertEquals("site", scopeLabel);
+	}
+
+	@Test
+	public void testInheritLocalesByDefault() throws Exception {
+		Group group = GroupTestUtil.addGroup();
+
+		Assert.assertTrue(LanguageUtil.isInheritLocales(group.getGroupId()));
+
+		Locale[] portalAvailableLocales = LanguageUtil.getAvailableLocales();
+
+		Locale[] groupAvailableLocales = LanguageUtil.getAvailableLocales(
+			group.getGroupId());
+
+		Assert.assertArrayEquals(portalAvailableLocales, groupAvailableLocales);
+	}
+
+	@Test
+	public void testInvalidChangeAvailableLanguageIds() throws Exception {
+		testUpdateDisplaySettings(
+			new Locale[] {LocaleUtil.SPAIN, LocaleUtil.US},
+			new Locale[] {LocaleUtil.GERMANY, LocaleUtil.US}, null, true);
+	}
+
+	@Test
+	public void testInvalidChangeDefaultLanguageId() throws Exception {
+		testUpdateDisplaySettings(
+			new Locale[] {LocaleUtil.SPAIN, LocaleUtil.US},
+			new Locale[] {LocaleUtil.SPAIN, LocaleUtil.US}, LocaleUtil.GERMANY,
+			true);
 	}
 
 	@Test
@@ -475,7 +584,7 @@ public class GroupServiceTest {
 				group1.getDescription(), group1.getType(),
 				group1.isManualMembership(), group1.getMembershipRestriction(),
 				group1.getFriendlyURL(), group1.isActive(),
-				ServiceTestUtil.getServiceContext());
+				ServiceContextTestUtil.getServiceContext());
 
 			Assert.fail("A child group cannot be its parent group");
 		}
@@ -503,7 +612,7 @@ public class GroupServiceTest {
 				group1.getDescription(), group1.getType(),
 				group1.isManualMembership(), group1.getMembershipRestriction(),
 				group1.getFriendlyURL(), group1.isActive(),
-				ServiceTestUtil.getServiceContext());
+				ServiceContextTestUtil.getServiceContext());
 
 			Assert.fail("A child group cannot be its parent group");
 		}
@@ -530,7 +639,7 @@ public class GroupServiceTest {
 				stagingGroup.getType(), stagingGroup.isManualMembership(),
 				stagingGroup.getMembershipRestriction(),
 				stagingGroup.getFriendlyURL(), stagingGroup.isActive(),
-				ServiceTestUtil.getServiceContext());
+				ServiceContextTestUtil.getServiceContext());
 
 			Assert.fail("A group cannot have its live group as parent");
 		}
@@ -550,7 +659,7 @@ public class GroupServiceTest {
 				group.getDescription(), group.getType(),
 				group.isManualMembership(), group.getMembershipRestriction(),
 				group.getFriendlyURL(), group.isActive(),
-				ServiceTestUtil.getServiceContext());
+				ServiceContextTestUtil.getServiceContext());
 
 			Assert.fail("A group cannot be its own parent");
 		}
@@ -574,6 +683,33 @@ public class GroupServiceTest {
 		Assert.assertFalse(group111.isRoot());
 		Assert.assertEquals(group1.getGroupId(), group11.getParentGroupId());
 		Assert.assertEquals(group11.getGroupId(), group111.getParentGroupId());
+	}
+
+	@Test
+	public void testUpdateAvailableLocales() throws Exception {
+		Group group = GroupTestUtil.addGroup();
+
+		Locale[] availableLocales =
+			new Locale[] {LocaleUtil.GERMANY, LocaleUtil.SPAIN, LocaleUtil.US};
+
+		group = GroupTestUtil.updateDisplaySettings(
+			group.getGroupId(), availableLocales, null);
+
+		Assert.assertArrayEquals(
+			availableLocales,
+			LanguageUtil.getAvailableLocales(group.getGroupId()));
+	}
+
+	@Test
+	public void testUpdateDefaultLocale() throws Exception {
+		Group group = GroupTestUtil.addGroup();
+
+		group = GroupTestUtil.updateDisplaySettings(
+			group.getGroupId(), null, LocaleUtil.SPAIN);
+
+		Assert.assertEquals(
+			LocaleUtil.SPAIN,
+			PortalUtil.getSiteDefaultLocale(group.getGroupId()));
 	}
 
 	@Test
@@ -643,31 +779,44 @@ public class GroupServiceTest {
 			true);
 	}
 
+	@Test
+	public void testValidChangeAvailableLanguageIds() throws Exception {
+		testUpdateDisplaySettings(
+			new Locale[] {LocaleUtil.GERMANY, LocaleUtil.SPAIN, LocaleUtil.US},
+			new Locale[] {LocaleUtil.SPAIN, LocaleUtil.US}, null, false);
+	}
+
+	@Test
+	public void testValidChangeDefaultLanguageId() throws Exception {
+		testUpdateDisplaySettings(
+			new Locale[] {LocaleUtil.GERMANY, LocaleUtil.SPAIN, LocaleUtil.US},
+			new Locale[] {LocaleUtil.GERMANY, LocaleUtil.SPAIN, LocaleUtil.US},
+			LocaleUtil.GERMANY, false);
+	}
+
 	protected Group addGroup(
 			boolean site, boolean layout, boolean layoutPrototype)
 		throws Exception {
 
 		if (site) {
-			return GroupTestUtil.addGroup(ServiceTestUtil.randomString());
+			return GroupTestUtil.addGroup(RandomTestUtil.randomString());
 		}
 		else if (layout) {
-			Group group = GroupTestUtil.addGroup(
-				ServiceTestUtil.randomString());
+			Group group = GroupTestUtil.addGroup(RandomTestUtil.randomString());
 
 			Layout scopeLayout = LayoutTestUtil.addLayout(
-				group.getGroupId(), ServiceTestUtil.randomString());
+				group.getGroupId(), RandomTestUtil.randomString());
 
 			return GroupLocalServiceUtil.addGroup(
 				TestPropsValues.getUserId(),
 				GroupConstants.DEFAULT_PARENT_GROUP_ID, Layout.class.getName(),
 				scopeLayout.getPlid(), GroupConstants.DEFAULT_LIVE_GROUP_ID,
-				ServiceTestUtil.randomString(), null, 0, true,
+				RandomTestUtil.randomString(), null, 0, true,
 				GroupConstants.DEFAULT_MEMBERSHIP_RESTRICTION, null, false,
 				true, null);
 		}
 		else if (layoutPrototype) {
-			Group group = GroupTestUtil.addGroup(
-				ServiceTestUtil.randomString());
+			Group group = GroupTestUtil.addGroup(RandomTestUtil.randomString());
 
 			group.setClassName(LayoutPrototype.class.getName());
 
@@ -681,7 +830,7 @@ public class GroupServiceTest {
 	protected void givePermissionToManageSubsites(User user, Group group)
 		throws Exception {
 
-		Role role = ServiceTestUtil.addRole(
+		Role role = RoleTestUtil.addRole(
 			"Subsites Admin", RoleConstants.TYPE_SITE, Group.class.getName(),
 			ResourceConstants.SCOPE_GROUP_TEMPLATE,
 			String.valueOf(GroupConstants.DEFAULT_PARENT_GROUP_ID),
@@ -729,8 +878,9 @@ public class GroupServiceTest {
 
 		PermissionThreadLocal.setPermissionChecker(permissionChecker);
 
-		ServiceContext serviceContext = ServiceTestUtil.getServiceContext(
-			group1.getGroupId(), user.getUserId());
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				group1.getGroupId(), user.getUserId());
 
 		if (addGroup) {
 			try {
@@ -877,5 +1027,42 @@ public class GroupServiceTest {
 			}
 		}
 	}
+
+	protected void testUpdateDisplaySettings(
+			Locale[] portalAvailableLocales, Locale[] groupAvailableLocales,
+			Locale groupDefaultLocale, boolean expectFailure)
+		throws Exception {
+
+		Locale[] availableLocales = LanguageUtil.getAvailableLocales();
+
+		CompanyTestUtil.resetCompanyLocales(
+			TestPropsValues.getCompanyId(), portalAvailableLocales,
+			LocaleUtil.getDefault());
+
+		Group group = GroupTestUtil.addGroup(
+			GroupConstants.DEFAULT_PARENT_GROUP_ID,
+			RandomTestUtil.randomString());
+
+		try {
+			GroupTestUtil.updateDisplaySettings(
+				group.getGroupId(), groupAvailableLocales, groupDefaultLocale);
+
+			if (expectFailure) {
+				Assert.fail();
+			}
+		}
+		catch (LocaleException le) {
+			if (!expectFailure) {
+				Assert.fail();
+			}
+		}
+		finally {
+			CompanyTestUtil.resetCompanyLocales(
+				TestPropsValues.getCompanyId(), availableLocales,
+				LocaleUtil.getDefault());
+		}
+	}
+
+	private Group _group;
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,15 +14,19 @@
 
 package com.liferay.portlet.wiki.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
+import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.service.WikiNodeLocalServiceUtil;
+
+import java.util.Map;
 
 /**
  * @author Zsolt Berentey
@@ -31,6 +35,20 @@ public class WikiNodeStagedModelDataHandler
 	extends BaseStagedModelDataHandler<WikiNode> {
 
 	public static final String[] CLASS_NAMES = {WikiNode.class.getName()};
+
+	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException {
+
+		WikiNode wikiNode =
+			WikiNodeLocalServiceUtil.fetchWikiNodeByUuidAndGroupId(
+				uuid, groupId);
+
+		if (wikiNode != null) {
+			WikiNodeLocalServiceUtil.deleteNode(wikiNode);
+		}
+	}
 
 	@Override
 	public String[] getClassNames() {
@@ -45,8 +63,23 @@ public class WikiNodeStagedModelDataHandler
 		Element nodeElement = portletDataContext.getExportDataElement(node);
 
 		portletDataContext.addClassedModel(
-			nodeElement, ExportImportPathUtil.getModelPath(node), node,
-			WikiPortletDataHandler.NAMESPACE);
+			nodeElement, ExportImportPathUtil.getModelPath(node), node);
+	}
+
+	@Override
+	protected void doImportMissingReference(
+			PortletDataContext portletDataContext, String uuid, long groupId,
+			long nodeId)
+		throws Exception {
+
+		WikiNode existingNode =
+			WikiNodeLocalServiceUtil.fetchNodeByUuidAndGroupId(uuid, groupId);
+
+		Map<Long, Long> nodeIds =
+			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+				WikiNode.class);
+
+		nodeIds.put(nodeId, existingNode.getNodeId());
 	}
 
 	@Override
@@ -57,7 +90,7 @@ public class WikiNodeStagedModelDataHandler
 		long userId = portletDataContext.getUserId(node.getUserUuid());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			node, WikiPortletDataHandler.NAMESPACE);
+			node);
 
 		WikiNode importedNode = null;
 
@@ -111,8 +144,29 @@ public class WikiNodeStagedModelDataHandler
 				userId, nodeName, node.getDescription(), serviceContext);
 		}
 
-		portletDataContext.importClassedModel(
-			node, importedNode, WikiPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(node, importedNode);
+	}
+
+	@Override
+	protected void doRestoreStagedModel(
+			PortletDataContext portletDataContext, WikiNode node)
+		throws Exception {
+
+		long userId = portletDataContext.getUserId(node.getUserUuid());
+
+		WikiNode existingNode =
+			WikiNodeLocalServiceUtil.fetchNodeByUuidAndGroupId(
+				node.getUuid(), portletDataContext.getScopeGroupId());
+
+		if ((existingNode == null) || !existingNode.isInTrash()) {
+			return;
+		}
+
+		TrashHandler trashHandler = existingNode.getTrashHandler();
+
+		if (trashHandler.isRestorable(existingNode.getNodeId())) {
+			trashHandler.restoreTrashEntry(userId, existingNode.getNodeId());
+		}
 	}
 
 	protected String getNodeName(

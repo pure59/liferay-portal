@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -48,7 +48,7 @@ public class LiferayFileUpload extends ServletFileUpload {
 	}
 
 	@Override
-	public List<LiferayFileItem> parseRequest(HttpServletRequest request)
+	public List<FileItem> parseRequest(HttpServletRequest request)
 		throws FileUploadException {
 
 		_session.removeAttribute(LiferayFileUpload.FILE_NAME);
@@ -60,6 +60,7 @@ public class LiferayFileUpload extends ServletFileUpload {
 	/**
 	 * @deprecated As of 6.1.0
 	 */
+	@Deprecated
 	@Override
 	@SuppressWarnings("rawtypes")
 	protected FileItem createItem(Map headers, boolean formField)

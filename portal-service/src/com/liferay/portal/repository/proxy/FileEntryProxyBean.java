@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.repository.proxy;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -37,6 +39,7 @@ import java.util.Map;
 /**
  * @author Mika Koivisto
  */
+@ProviderType
 public class FileEntryProxyBean
 	extends RepositoryModelProxyBean implements FileEntry {
 
@@ -73,7 +76,7 @@ public class FileEntryProxyBean
 	@Override
 	public boolean containsPermission(
 			PermissionChecker permissionChecker, String actionId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return _fileEntry.containsPermission(permissionChecker, actionId);
 	}
@@ -89,16 +92,12 @@ public class FileEntryProxyBean
 	}
 
 	@Override
-	public InputStream getContentStream()
-		throws PortalException, SystemException {
-
+	public InputStream getContentStream() throws PortalException {
 		return _fileEntry.getContentStream();
 	}
 
 	@Override
-	public InputStream getContentStream(String version)
-		throws PortalException, SystemException {
-
+	public InputStream getContentStream(String version) throws PortalException {
 		return _fileEntry.getContentStream(version);
 	}
 
@@ -131,27 +130,21 @@ public class FileEntryProxyBean
 	}
 
 	@Override
-	public FileVersion getFileVersion()
-		throws PortalException, SystemException {
-
+	public FileVersion getFileVersion() throws PortalException {
 		FileVersion fileVersion = _fileEntry.getFileVersion();
 
 		return newFileVersionProxyBean(fileVersion);
 	}
 
 	@Override
-	public FileVersion getFileVersion(String version)
-		throws PortalException, SystemException {
-
+	public FileVersion getFileVersion(String version) throws PortalException {
 		FileVersion fileVersion = _fileEntry.getFileVersion(version);
 
 		return newFileVersionProxyBean(fileVersion);
 	}
 
 	@Override
-	public List<FileVersion> getFileVersions(int status)
-		throws SystemException {
-
+	public List<FileVersion> getFileVersions(int status) {
 		List<FileVersion> fileVersions = _fileEntry.getFileVersions(status);
 
 		return toFileVersionProxyBeans(fileVersions);
@@ -180,10 +173,22 @@ public class FileEntryProxyBean
 	}
 
 	@Override
-	public FileVersion getLatestFileVersion()
-		throws PortalException, SystemException {
+	public String getIconCssClass() {
+		return _fileEntry.getIconCssClass();
+	}
 
+	@Override
+	public FileVersion getLatestFileVersion() throws PortalException {
 		FileVersion fileVersion = _fileEntry.getLatestFileVersion();
+
+		return newFileVersionProxyBean(fileVersion);
+	}
+
+	@Override
+	public FileVersion getLatestFileVersion(boolean trusted)
+		throws PortalException {
+
+		FileVersion fileVersion = _fileEntry.getLatestFileVersion(trusted);
 
 		return newFileVersionProxyBean(fileVersion);
 	}
@@ -271,7 +276,7 @@ public class FileEntryProxyBean
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
+	public String getUserUuid() {
 		return _fileEntry.getUserUuid();
 	}
 
@@ -286,8 +291,10 @@ public class FileEntryProxyBean
 	}
 
 	/**
-	 * @deprecated As of 6.2.0, replaced by {@link FileVersionProxyBean#getUserId()}
+	 * @deprecated As of 6.2.0, replaced by {@link
+	 *             FileVersionProxyBean#getUserId()}
 	 */
+	@Deprecated
 	@Override
 	public long getVersionUserId() {
 		long versionUserId = 0;
@@ -305,8 +312,10 @@ public class FileEntryProxyBean
 	}
 
 	/**
-	 * @deprecated As of 6.2.0, replaced by {@link FileVersionProxyBean#getUserName()}
+	 * @deprecated As of 6.2.0, replaced by {@link
+	 *             FileVersionProxyBean#getUserName()}
 	 */
+	@Deprecated
 	@Override
 	public String getVersionUserName() {
 		String versionUserName = StringPool.BLANK;
@@ -324,8 +333,10 @@ public class FileEntryProxyBean
 	}
 
 	/**
-	 * @deprecated As of 6.2.0, replaced by {@link FileVersionProxyBean#getUserUuid()}
+	 * @deprecated As of 6.2.0, replaced by {@link
+	 *             FileVersionProxyBean#getUserUuid()}
 	 */
+	@Deprecated
 	@Override
 	public String getVersionUserUuid() {
 		String versionUserUuid = StringPool.BLANK;
@@ -360,6 +371,16 @@ public class FileEntryProxyBean
 	@Override
 	public boolean isEscapedModel() {
 		return _fileEntry.isEscapedModel();
+	}
+
+	@Override
+	public boolean isInTrash() {
+		return _fileEntry.isInTrash();
+	}
+
+	@Override
+	public boolean isInTrashContainer() {
+		return _fileEntry.isInTrashContainer();
 	}
 
 	@Override

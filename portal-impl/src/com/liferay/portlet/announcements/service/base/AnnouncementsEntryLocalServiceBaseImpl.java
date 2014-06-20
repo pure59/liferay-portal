@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,13 +16,25 @@ package com.liferay.portlet.announcements.service.base;
 
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.IdentifiableBean;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.DefaultActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Projection;
+import com.liferay.portal.kernel.dao.orm.Property;
+import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
+import com.liferay.portal.kernel.lar.ManifestSummary;
+import com.liferay.portal.kernel.lar.PortletDataContext;
+import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -36,10 +48,13 @@ import com.liferay.portal.service.persistence.OrganizationFinder;
 import com.liferay.portal.service.persistence.OrganizationPersistence;
 import com.liferay.portal.service.persistence.RoleFinder;
 import com.liferay.portal.service.persistence.RolePersistence;
+import com.liferay.portal.service.persistence.TeamFinder;
+import com.liferay.portal.service.persistence.TeamPersistence;
 import com.liferay.portal.service.persistence.UserFinder;
 import com.liferay.portal.service.persistence.UserGroupFinder;
 import com.liferay.portal.service.persistence.UserGroupPersistence;
 import com.liferay.portal.service.persistence.UserPersistence;
+import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.announcements.model.AnnouncementsEntry;
 import com.liferay.portlet.announcements.service.AnnouncementsEntryLocalService;
@@ -80,12 +95,11 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 *
 	 * @param announcementsEntry the announcements entry
 	 * @return the announcements entry that was added
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public AnnouncementsEntry addAnnouncementsEntry(
-		AnnouncementsEntry announcementsEntry) throws SystemException {
+		AnnouncementsEntry announcementsEntry) {
 		announcementsEntry.setNew(true);
 
 		return announcementsEntryPersistence.update(announcementsEntry);
@@ -108,12 +122,11 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 * @param entryId the primary key of the announcements entry
 	 * @return the announcements entry that was removed
 	 * @throws PortalException if a announcements entry with the primary key could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	@Override
 	public AnnouncementsEntry deleteAnnouncementsEntry(long entryId)
-		throws PortalException, SystemException {
+		throws PortalException {
 		return announcementsEntryPersistence.remove(entryId);
 	}
 
@@ -122,12 +135,11 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 *
 	 * @param announcementsEntry the announcements entry
 	 * @return the announcements entry that was removed
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	@Override
 	public AnnouncementsEntry deleteAnnouncementsEntry(
-		AnnouncementsEntry announcementsEntry) throws SystemException {
+		AnnouncementsEntry announcementsEntry) {
 		return announcementsEntryPersistence.remove(announcementsEntry);
 	}
 
@@ -144,12 +156,10 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 *
 	 * @param dynamicQuery the dynamic query
 	 * @return the matching rows
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public List dynamicQuery(DynamicQuery dynamicQuery) {
 		return announcementsEntryPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -164,12 +174,10 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 * @param start the lower bound of the range of model instances
 	 * @param end the upper bound of the range of model instances (not inclusive)
 	 * @return the range of matching rows
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end)
-		throws SystemException {
+	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
 		return announcementsEntryPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -186,12 +194,11 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 * @param end the upper bound of the range of model instances (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching rows
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
 	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
+		OrderByComparator orderByComparator) {
 		return announcementsEntryPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -201,11 +208,9 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 *
 	 * @param dynamicQuery the dynamic query
 	 * @return the number of rows that match the dynamic query
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public long dynamicQueryCount(DynamicQuery dynamicQuery)
-		throws SystemException {
+	public long dynamicQueryCount(DynamicQuery dynamicQuery) {
 		return announcementsEntryPersistence.countWithDynamicQuery(dynamicQuery);
 	}
 
@@ -215,18 +220,16 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 * @param dynamicQuery the dynamic query
 	 * @param projection the projection to apply to the query
 	 * @return the number of rows that match the dynamic query
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public long dynamicQueryCount(DynamicQuery dynamicQuery,
-		Projection projection) throws SystemException {
+		Projection projection) {
 		return announcementsEntryPersistence.countWithDynamicQuery(dynamicQuery,
 			projection);
 	}
 
 	@Override
-	public AnnouncementsEntry fetchAnnouncementsEntry(long entryId)
-		throws SystemException {
+	public AnnouncementsEntry fetchAnnouncementsEntry(long entryId) {
 		return announcementsEntryPersistence.fetchByPrimaryKey(entryId);
 	}
 
@@ -236,11 +239,10 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 * @param uuid the announcements entry's UUID
 	 * @param  companyId the primary key of the company
 	 * @return the matching announcements entry, or <code>null</code> if a matching announcements entry could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public AnnouncementsEntry fetchAnnouncementsEntryByUuidAndCompanyId(
-		String uuid, long companyId) throws SystemException {
+		String uuid, long companyId) {
 		return announcementsEntryPersistence.fetchByUuid_C_First(uuid,
 			companyId, null);
 	}
@@ -251,17 +253,110 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 * @param entryId the primary key of the announcements entry
 	 * @return the announcements entry
 	 * @throws PortalException if a announcements entry with the primary key could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public AnnouncementsEntry getAnnouncementsEntry(long entryId)
-		throws PortalException, SystemException {
+		throws PortalException {
 		return announcementsEntryPersistence.findByPrimaryKey(entryId);
 	}
 
 	@Override
+	public ActionableDynamicQuery getActionableDynamicQuery() {
+		ActionableDynamicQuery actionableDynamicQuery = new DefaultActionableDynamicQuery();
+
+		actionableDynamicQuery.setBaseLocalService(com.liferay.portlet.announcements.service.AnnouncementsEntryLocalServiceUtil.getService());
+		actionableDynamicQuery.setClass(AnnouncementsEntry.class);
+		actionableDynamicQuery.setClassLoader(getClassLoader());
+
+		actionableDynamicQuery.setPrimaryKeyPropertyName("entryId");
+
+		return actionableDynamicQuery;
+	}
+
+	protected void initActionableDynamicQuery(
+		ActionableDynamicQuery actionableDynamicQuery) {
+		actionableDynamicQuery.setBaseLocalService(com.liferay.portlet.announcements.service.AnnouncementsEntryLocalServiceUtil.getService());
+		actionableDynamicQuery.setClass(AnnouncementsEntry.class);
+		actionableDynamicQuery.setClassLoader(getClassLoader());
+
+		actionableDynamicQuery.setPrimaryKeyPropertyName("entryId");
+	}
+
+	@Override
+	public ExportActionableDynamicQuery getExportActionableDynamicQuery(
+		final PortletDataContext portletDataContext) {
+		final ExportActionableDynamicQuery exportActionableDynamicQuery = new ExportActionableDynamicQuery() {
+				@Override
+				public long performCount() throws PortalException {
+					ManifestSummary manifestSummary = portletDataContext.getManifestSummary();
+
+					StagedModelType stagedModelType = getStagedModelType();
+
+					long modelAdditionCount = super.performCount();
+
+					manifestSummary.addModelAdditionCount(stagedModelType.toString(),
+						modelAdditionCount);
+
+					long modelDeletionCount = ExportImportHelperUtil.getModelDeletionCount(portletDataContext,
+							stagedModelType);
+
+					manifestSummary.addModelDeletionCount(stagedModelType.toString(),
+						modelDeletionCount);
+
+					return modelAdditionCount;
+				}
+			};
+
+		initActionableDynamicQuery(exportActionableDynamicQuery);
+
+		exportActionableDynamicQuery.setAddCriteriaMethod(new ActionableDynamicQuery.AddCriteriaMethod() {
+				@Override
+				public void addCriteria(DynamicQuery dynamicQuery) {
+					portletDataContext.addDateRangeCriteria(dynamicQuery,
+						"modifiedDate");
+
+					StagedModelType stagedModelType = exportActionableDynamicQuery.getStagedModelType();
+
+					if (stagedModelType.getReferrerClassNameId() >= 0) {
+						Property classNameIdProperty = PropertyFactoryUtil.forName(
+								"classNameId");
+
+						dynamicQuery.add(classNameIdProperty.eq(
+								stagedModelType.getReferrerClassNameId()));
+					}
+				}
+			});
+
+		exportActionableDynamicQuery.setCompanyId(portletDataContext.getCompanyId());
+
+		exportActionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+				@Override
+				public void performAction(Object object)
+					throws PortalException {
+					AnnouncementsEntry stagedModel = (AnnouncementsEntry)object;
+
+					StagedModelDataHandlerUtil.exportStagedModel(portletDataContext,
+						stagedModel);
+				}
+			});
+		exportActionableDynamicQuery.setStagedModelType(new StagedModelType(
+				PortalUtil.getClassNameId(AnnouncementsEntry.class.getName())));
+
+		return exportActionableDynamicQuery;
+	}
+
+	/**
+	 * @throws PortalException
+	 */
+	@Override
+	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
+		throws PortalException {
+		return deleteAnnouncementsEntry((AnnouncementsEntry)persistedModel);
+	}
+
+	@Override
 	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
-		throws PortalException, SystemException {
+		throws PortalException {
 		return announcementsEntryPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
@@ -272,11 +367,10 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 * @param  companyId the primary key of the company
 	 * @return the matching announcements entry
 	 * @throws PortalException if a matching announcements entry could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public AnnouncementsEntry getAnnouncementsEntryByUuidAndCompanyId(
-		String uuid, long companyId) throws PortalException, SystemException {
+		String uuid, long companyId) throws PortalException {
 		return announcementsEntryPersistence.findByUuid_C_First(uuid,
 			companyId, null);
 	}
@@ -291,11 +385,9 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 * @param start the lower bound of the range of announcements entries
 	 * @param end the upper bound of the range of announcements entries (not inclusive)
 	 * @return the range of announcements entries
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public List<AnnouncementsEntry> getAnnouncementsEntries(int start, int end)
-		throws SystemException {
+	public List<AnnouncementsEntry> getAnnouncementsEntries(int start, int end) {
 		return announcementsEntryPersistence.findAll(start, end);
 	}
 
@@ -303,10 +395,9 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 * Returns the number of announcements entries.
 	 *
 	 * @return the number of announcements entries
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public int getAnnouncementsEntriesCount() throws SystemException {
+	public int getAnnouncementsEntriesCount() {
 		return announcementsEntryPersistence.countAll();
 	}
 
@@ -315,70 +406,12 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	 *
 	 * @param announcementsEntry the announcements entry
 	 * @return the announcements entry that was updated
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public AnnouncementsEntry updateAnnouncementsEntry(
-		AnnouncementsEntry announcementsEntry) throws SystemException {
+		AnnouncementsEntry announcementsEntry) {
 		return announcementsEntryPersistence.update(announcementsEntry);
-	}
-
-	/**
-	 * Returns the announcements delivery local service.
-	 *
-	 * @return the announcements delivery local service
-	 */
-	public com.liferay.portlet.announcements.service.AnnouncementsDeliveryLocalService getAnnouncementsDeliveryLocalService() {
-		return announcementsDeliveryLocalService;
-	}
-
-	/**
-	 * Sets the announcements delivery local service.
-	 *
-	 * @param announcementsDeliveryLocalService the announcements delivery local service
-	 */
-	public void setAnnouncementsDeliveryLocalService(
-		com.liferay.portlet.announcements.service.AnnouncementsDeliveryLocalService announcementsDeliveryLocalService) {
-		this.announcementsDeliveryLocalService = announcementsDeliveryLocalService;
-	}
-
-	/**
-	 * Returns the announcements delivery remote service.
-	 *
-	 * @return the announcements delivery remote service
-	 */
-	public com.liferay.portlet.announcements.service.AnnouncementsDeliveryService getAnnouncementsDeliveryService() {
-		return announcementsDeliveryService;
-	}
-
-	/**
-	 * Sets the announcements delivery remote service.
-	 *
-	 * @param announcementsDeliveryService the announcements delivery remote service
-	 */
-	public void setAnnouncementsDeliveryService(
-		com.liferay.portlet.announcements.service.AnnouncementsDeliveryService announcementsDeliveryService) {
-		this.announcementsDeliveryService = announcementsDeliveryService;
-	}
-
-	/**
-	 * Returns the announcements delivery persistence.
-	 *
-	 * @return the announcements delivery persistence
-	 */
-	public AnnouncementsDeliveryPersistence getAnnouncementsDeliveryPersistence() {
-		return announcementsDeliveryPersistence;
-	}
-
-	/**
-	 * Sets the announcements delivery persistence.
-	 *
-	 * @param announcementsDeliveryPersistence the announcements delivery persistence
-	 */
-	public void setAnnouncementsDeliveryPersistence(
-		AnnouncementsDeliveryPersistence announcementsDeliveryPersistence) {
-		this.announcementsDeliveryPersistence = announcementsDeliveryPersistence;
 	}
 
 	/**
@@ -455,63 +488,6 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	public void setAnnouncementsEntryFinder(
 		AnnouncementsEntryFinder announcementsEntryFinder) {
 		this.announcementsEntryFinder = announcementsEntryFinder;
-	}
-
-	/**
-	 * Returns the announcements flag local service.
-	 *
-	 * @return the announcements flag local service
-	 */
-	public com.liferay.portlet.announcements.service.AnnouncementsFlagLocalService getAnnouncementsFlagLocalService() {
-		return announcementsFlagLocalService;
-	}
-
-	/**
-	 * Sets the announcements flag local service.
-	 *
-	 * @param announcementsFlagLocalService the announcements flag local service
-	 */
-	public void setAnnouncementsFlagLocalService(
-		com.liferay.portlet.announcements.service.AnnouncementsFlagLocalService announcementsFlagLocalService) {
-		this.announcementsFlagLocalService = announcementsFlagLocalService;
-	}
-
-	/**
-	 * Returns the announcements flag remote service.
-	 *
-	 * @return the announcements flag remote service
-	 */
-	public com.liferay.portlet.announcements.service.AnnouncementsFlagService getAnnouncementsFlagService() {
-		return announcementsFlagService;
-	}
-
-	/**
-	 * Sets the announcements flag remote service.
-	 *
-	 * @param announcementsFlagService the announcements flag remote service
-	 */
-	public void setAnnouncementsFlagService(
-		com.liferay.portlet.announcements.service.AnnouncementsFlagService announcementsFlagService) {
-		this.announcementsFlagService = announcementsFlagService;
-	}
-
-	/**
-	 * Returns the announcements flag persistence.
-	 *
-	 * @return the announcements flag persistence
-	 */
-	public AnnouncementsFlagPersistence getAnnouncementsFlagPersistence() {
-		return announcementsFlagPersistence;
-	}
-
-	/**
-	 * Sets the announcements flag persistence.
-	 *
-	 * @param announcementsFlagPersistence the announcements flag persistence
-	 */
-	public void setAnnouncementsFlagPersistence(
-		AnnouncementsFlagPersistence announcementsFlagPersistence) {
-		this.announcementsFlagPersistence = announcementsFlagPersistence;
 	}
 
 	/**
@@ -850,6 +826,80 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	}
 
 	/**
+	 * Returns the team local service.
+	 *
+	 * @return the team local service
+	 */
+	public com.liferay.portal.service.TeamLocalService getTeamLocalService() {
+		return teamLocalService;
+	}
+
+	/**
+	 * Sets the team local service.
+	 *
+	 * @param teamLocalService the team local service
+	 */
+	public void setTeamLocalService(
+		com.liferay.portal.service.TeamLocalService teamLocalService) {
+		this.teamLocalService = teamLocalService;
+	}
+
+	/**
+	 * Returns the team remote service.
+	 *
+	 * @return the team remote service
+	 */
+	public com.liferay.portal.service.TeamService getTeamService() {
+		return teamService;
+	}
+
+	/**
+	 * Sets the team remote service.
+	 *
+	 * @param teamService the team remote service
+	 */
+	public void setTeamService(
+		com.liferay.portal.service.TeamService teamService) {
+		this.teamService = teamService;
+	}
+
+	/**
+	 * Returns the team persistence.
+	 *
+	 * @return the team persistence
+	 */
+	public TeamPersistence getTeamPersistence() {
+		return teamPersistence;
+	}
+
+	/**
+	 * Sets the team persistence.
+	 *
+	 * @param teamPersistence the team persistence
+	 */
+	public void setTeamPersistence(TeamPersistence teamPersistence) {
+		this.teamPersistence = teamPersistence;
+	}
+
+	/**
+	 * Returns the team finder.
+	 *
+	 * @return the team finder
+	 */
+	public TeamFinder getTeamFinder() {
+		return teamFinder;
+	}
+
+	/**
+	 * Sets the team finder.
+	 *
+	 * @param teamFinder the team finder
+	 */
+	public void setTeamFinder(TeamFinder teamFinder) {
+		this.teamFinder = teamFinder;
+	}
+
+	/**
 	 * Returns the user local service.
 	 *
 	 * @return the user local service
@@ -998,6 +1048,120 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 		this.userGroupFinder = userGroupFinder;
 	}
 
+	/**
+	 * Returns the announcements delivery local service.
+	 *
+	 * @return the announcements delivery local service
+	 */
+	public com.liferay.portlet.announcements.service.AnnouncementsDeliveryLocalService getAnnouncementsDeliveryLocalService() {
+		return announcementsDeliveryLocalService;
+	}
+
+	/**
+	 * Sets the announcements delivery local service.
+	 *
+	 * @param announcementsDeliveryLocalService the announcements delivery local service
+	 */
+	public void setAnnouncementsDeliveryLocalService(
+		com.liferay.portlet.announcements.service.AnnouncementsDeliveryLocalService announcementsDeliveryLocalService) {
+		this.announcementsDeliveryLocalService = announcementsDeliveryLocalService;
+	}
+
+	/**
+	 * Returns the announcements delivery remote service.
+	 *
+	 * @return the announcements delivery remote service
+	 */
+	public com.liferay.portlet.announcements.service.AnnouncementsDeliveryService getAnnouncementsDeliveryService() {
+		return announcementsDeliveryService;
+	}
+
+	/**
+	 * Sets the announcements delivery remote service.
+	 *
+	 * @param announcementsDeliveryService the announcements delivery remote service
+	 */
+	public void setAnnouncementsDeliveryService(
+		com.liferay.portlet.announcements.service.AnnouncementsDeliveryService announcementsDeliveryService) {
+		this.announcementsDeliveryService = announcementsDeliveryService;
+	}
+
+	/**
+	 * Returns the announcements delivery persistence.
+	 *
+	 * @return the announcements delivery persistence
+	 */
+	public AnnouncementsDeliveryPersistence getAnnouncementsDeliveryPersistence() {
+		return announcementsDeliveryPersistence;
+	}
+
+	/**
+	 * Sets the announcements delivery persistence.
+	 *
+	 * @param announcementsDeliveryPersistence the announcements delivery persistence
+	 */
+	public void setAnnouncementsDeliveryPersistence(
+		AnnouncementsDeliveryPersistence announcementsDeliveryPersistence) {
+		this.announcementsDeliveryPersistence = announcementsDeliveryPersistence;
+	}
+
+	/**
+	 * Returns the announcements flag local service.
+	 *
+	 * @return the announcements flag local service
+	 */
+	public com.liferay.portlet.announcements.service.AnnouncementsFlagLocalService getAnnouncementsFlagLocalService() {
+		return announcementsFlagLocalService;
+	}
+
+	/**
+	 * Sets the announcements flag local service.
+	 *
+	 * @param announcementsFlagLocalService the announcements flag local service
+	 */
+	public void setAnnouncementsFlagLocalService(
+		com.liferay.portlet.announcements.service.AnnouncementsFlagLocalService announcementsFlagLocalService) {
+		this.announcementsFlagLocalService = announcementsFlagLocalService;
+	}
+
+	/**
+	 * Returns the announcements flag remote service.
+	 *
+	 * @return the announcements flag remote service
+	 */
+	public com.liferay.portlet.announcements.service.AnnouncementsFlagService getAnnouncementsFlagService() {
+		return announcementsFlagService;
+	}
+
+	/**
+	 * Sets the announcements flag remote service.
+	 *
+	 * @param announcementsFlagService the announcements flag remote service
+	 */
+	public void setAnnouncementsFlagService(
+		com.liferay.portlet.announcements.service.AnnouncementsFlagService announcementsFlagService) {
+		this.announcementsFlagService = announcementsFlagService;
+	}
+
+	/**
+	 * Returns the announcements flag persistence.
+	 *
+	 * @return the announcements flag persistence
+	 */
+	public AnnouncementsFlagPersistence getAnnouncementsFlagPersistence() {
+		return announcementsFlagPersistence;
+	}
+
+	/**
+	 * Sets the announcements flag persistence.
+	 *
+	 * @param announcementsFlagPersistence the announcements flag persistence
+	 */
+	public void setAnnouncementsFlagPersistence(
+		AnnouncementsFlagPersistence announcementsFlagPersistence) {
+		this.announcementsFlagPersistence = announcementsFlagPersistence;
+	}
+
 	public void afterPropertiesSet() {
 		persistedModelLocalServiceRegistry.register("com.liferay.portlet.announcements.model.AnnouncementsEntry",
 			announcementsEntryLocalService);
@@ -1037,13 +1201,18 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	}
 
 	/**
-	 * Performs an SQL query.
+	 * Performs a SQL query.
 	 *
 	 * @param sql the sql query
 	 */
-	protected void runSQL(String sql) throws SystemException {
+	protected void runSQL(String sql) {
 		try {
 			DataSource dataSource = announcementsEntryPersistence.getDataSource();
+
+			DB db = DBFactoryUtil.getDB();
+
+			sql = db.buildSQL(sql);
+			sql = PortalUtil.transformSQL(sql);
 
 			SqlUpdate sqlUpdate = SqlUpdateFactoryUtil.getSqlUpdate(dataSource,
 					sql, new int[0]);
@@ -1055,12 +1224,6 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 		}
 	}
 
-	@BeanReference(type = com.liferay.portlet.announcements.service.AnnouncementsDeliveryLocalService.class)
-	protected com.liferay.portlet.announcements.service.AnnouncementsDeliveryLocalService announcementsDeliveryLocalService;
-	@BeanReference(type = com.liferay.portlet.announcements.service.AnnouncementsDeliveryService.class)
-	protected com.liferay.portlet.announcements.service.AnnouncementsDeliveryService announcementsDeliveryService;
-	@BeanReference(type = AnnouncementsDeliveryPersistence.class)
-	protected AnnouncementsDeliveryPersistence announcementsDeliveryPersistence;
 	@BeanReference(type = com.liferay.portlet.announcements.service.AnnouncementsEntryLocalService.class)
 	protected com.liferay.portlet.announcements.service.AnnouncementsEntryLocalService announcementsEntryLocalService;
 	@BeanReference(type = com.liferay.portlet.announcements.service.AnnouncementsEntryService.class)
@@ -1069,12 +1232,6 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	protected AnnouncementsEntryPersistence announcementsEntryPersistence;
 	@BeanReference(type = AnnouncementsEntryFinder.class)
 	protected AnnouncementsEntryFinder announcementsEntryFinder;
-	@BeanReference(type = com.liferay.portlet.announcements.service.AnnouncementsFlagLocalService.class)
-	protected com.liferay.portlet.announcements.service.AnnouncementsFlagLocalService announcementsFlagLocalService;
-	@BeanReference(type = com.liferay.portlet.announcements.service.AnnouncementsFlagService.class)
-	protected com.liferay.portlet.announcements.service.AnnouncementsFlagService announcementsFlagService;
-	@BeanReference(type = AnnouncementsFlagPersistence.class)
-	protected AnnouncementsFlagPersistence announcementsFlagPersistence;
 	@BeanReference(type = com.liferay.counter.service.CounterLocalService.class)
 	protected com.liferay.counter.service.CounterLocalService counterLocalService;
 	@BeanReference(type = com.liferay.mail.service.MailService.class)
@@ -1111,6 +1268,14 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	protected RolePersistence rolePersistence;
 	@BeanReference(type = RoleFinder.class)
 	protected RoleFinder roleFinder;
+	@BeanReference(type = com.liferay.portal.service.TeamLocalService.class)
+	protected com.liferay.portal.service.TeamLocalService teamLocalService;
+	@BeanReference(type = com.liferay.portal.service.TeamService.class)
+	protected com.liferay.portal.service.TeamService teamService;
+	@BeanReference(type = TeamPersistence.class)
+	protected TeamPersistence teamPersistence;
+	@BeanReference(type = TeamFinder.class)
+	protected TeamFinder teamFinder;
 	@BeanReference(type = com.liferay.portal.service.UserLocalService.class)
 	protected com.liferay.portal.service.UserLocalService userLocalService;
 	@BeanReference(type = com.liferay.portal.service.UserService.class)
@@ -1127,6 +1292,18 @@ public abstract class AnnouncementsEntryLocalServiceBaseImpl
 	protected UserGroupPersistence userGroupPersistence;
 	@BeanReference(type = UserGroupFinder.class)
 	protected UserGroupFinder userGroupFinder;
+	@BeanReference(type = com.liferay.portlet.announcements.service.AnnouncementsDeliveryLocalService.class)
+	protected com.liferay.portlet.announcements.service.AnnouncementsDeliveryLocalService announcementsDeliveryLocalService;
+	@BeanReference(type = com.liferay.portlet.announcements.service.AnnouncementsDeliveryService.class)
+	protected com.liferay.portlet.announcements.service.AnnouncementsDeliveryService announcementsDeliveryService;
+	@BeanReference(type = AnnouncementsDeliveryPersistence.class)
+	protected AnnouncementsDeliveryPersistence announcementsDeliveryPersistence;
+	@BeanReference(type = com.liferay.portlet.announcements.service.AnnouncementsFlagLocalService.class)
+	protected com.liferay.portlet.announcements.service.AnnouncementsFlagLocalService announcementsFlagLocalService;
+	@BeanReference(type = com.liferay.portlet.announcements.service.AnnouncementsFlagService.class)
+	protected com.liferay.portlet.announcements.service.AnnouncementsFlagService announcementsFlagService;
+	@BeanReference(type = AnnouncementsFlagPersistence.class)
+	protected AnnouncementsFlagPersistence announcementsFlagPersistence;
 	@BeanReference(type = PersistedModelLocalServiceRegistry.class)
 	protected PersistedModelLocalServiceRegistry persistedModelLocalServiceRegistry;
 	private String _beanIdentifier;

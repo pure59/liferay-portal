@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -23,7 +23,7 @@ long folderId = BeanParamUtil.getLong(folder, request, "folderId", JournalFolder
 
 String eventName = ParamUtil.getString(request, "eventName", liferayPortletResponse.getNamespace() + "selectFolder");
 
-String folderName = LanguageUtil.get(pageContext, "home");
+String folderName = LanguageUtil.get(request, "home");
 
 if (folder != null) {
 	folderName = folder.getName();
@@ -47,11 +47,11 @@ if (folder != null) {
 	%>
 
 	<%
-	boolean showAddFolderButton = JournalFolderPermission.contains(permissionChecker, scopeGroupId, folderId, ActionKeys.ADD_FOLDER);
+	boolean hasAddFolderPermission = JournalFolderPermission.contains(permissionChecker, scopeGroupId, folderId, ActionKeys.ADD_FOLDER);
 	%>
 
 	<aui:button-row>
-		<c:if test="<%= showAddFolderButton %>">
+		<c:if test="<%= hasAddFolderPermission %>">
 			<portlet:renderURL var="editFolderURL">
 				<portlet:param name="struts_action" value="/journal/edit_folder" />
 				<portlet:param name="redirect" value="<%= currentURL %>" />
@@ -65,7 +65,7 @@ if (folder != null) {
 		Map<String, Object> data = new HashMap<String, Object>();
 
 		data.put("folderid", String.valueOf(folderId));
-		data.put("foldername", HtmlUtil.escape(folderName));
+		data.put("foldername", folderName);
 		%>
 
 		<aui:button cssClass="selector-button" data="<%= data %>" value="choose-this-folder" />
@@ -93,6 +93,10 @@ if (folder != null) {
 			</liferay-portlet:renderURL>
 
 			<%
+			AssetRendererFactory assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(JournalFolder.class.getName());
+
+			AssetRenderer assetRenderer = assetRendererFactory.getAssetRenderer(curFolder.getFolderId());
+
 			int foldersCount = 0;
 			int articlesCount = 0;
 
@@ -109,21 +113,17 @@ if (folder != null) {
 			catch (com.liferay.portal.kernel.repository.RepositoryException re) {
 				rowURL = null;
 			}
-
-			String image = null;
-
-			if ((foldersCount + articlesCount) > 0) {
-				image = "folder_full_document";
-			}
-			else {
-				image = "folder_empty";
-			}
 			%>
 
 			<liferay-ui:search-container-column-text
 				name="folder"
 			>
-				<liferay-ui:icon image="<%= image %>" label="<%= true %>" message="<%= HtmlUtil.escape(curFolder.getName()) %>" url="<%= (rowURL != null) ? rowURL.toString() : StringPool.BLANK %>" />
+				<liferay-ui:icon
+					iconCssClass="<%= assetRenderer.getIconCssClass() %>"
+					label="<%= true %>"
+					message="<%= HtmlUtil.escape(curFolder.getName()) %>"
+					url="<%= (rowURL != null) ? rowURL.toString() : StringPool.BLANK %>"
+				/>
 			</liferay-ui:search-container-column-text>
 
 			<liferay-ui:search-container-column-text
@@ -132,7 +132,7 @@ if (folder != null) {
 			/>
 
 			<liferay-ui:search-container-column-text
-				name="num-of-articles"
+				name="num-of-web-content-instances"
 				value="<%= String.valueOf(articlesCount) %>"
 			/>
 
@@ -143,7 +143,7 @@ if (folder != null) {
 					Map<String, Object> data = new HashMap<String, Object>();
 
 					data.put("folderid", curFolder.getFolderId());
-					data.put("foldername", HtmlUtil.escape(curFolder.getName()));
+					data.put("foldername", curFolder.getName());
 					%>
 
 					<aui:button cssClass="selector-button" data="<%= data %>" value="choose" />
@@ -157,17 +157,5 @@ if (folder != null) {
 </aui:form>
 
 <aui:script use="aui-base">
-	var Util = Liferay.Util;
-
-	A.one('#<portlet:namespace />selectFolderFm').delegate(
-		'click',
-		function(event) {
-			var result = Util.getAttributes(event.currentTarget, 'data-');
-
-			Util.getOpener().Liferay.fire('<%= HtmlUtil.escapeJS(eventName) %>', result);
-
-			Util.getWindow().hide();
-		},
-		'.selector-button'
-	);
+	Liferay.Util.selectEntityHandler('#<portlet:namespace />selectFolderFm', '<%= HtmlUtil.escapeJS(eventName) %>');
 </aui:script>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -64,7 +64,8 @@ public class ExpandoBridgeIndexerImpl implements ExpandoBridgeIndexer {
 
 		sb.append(FIELD_NAMESPACE);
 		sb.append(StringPool.FORWARD_SLASH);
-		sb.append(ExpandoTableConstants.DEFAULT_TABLE_NAME.toLowerCase());
+		sb.append(
+			StringUtil.toLowerCase(ExpandoTableConstants.DEFAULT_TABLE_NAME));
 		sb.append(StringPool.FORWARD_SLASH);
 		sb.append(columnName);
 
@@ -74,7 +75,7 @@ public class ExpandoBridgeIndexerImpl implements ExpandoBridgeIndexer {
 	protected void addAttribute(
 			Document document, ExpandoColumn expandoColumn,
 			List<ExpandoValue> expandoValues)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		String fieldName = encodeFieldName(expandoColumn.getName());
 
@@ -206,8 +207,7 @@ public class ExpandoBridgeIndexerImpl implements ExpandoBridgeIndexer {
 	}
 
 	protected void doAddAttributes(
-			Document document, ExpandoBridge expandoBridge)
-		throws SystemException {
+		Document document, ExpandoBridge expandoBridge) {
 
 		List<ExpandoColumn> expandoColumns =
 			ExpandoColumnLocalServiceUtil.getDefaultTableColumns(

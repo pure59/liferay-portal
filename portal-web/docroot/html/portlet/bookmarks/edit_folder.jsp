@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -31,7 +31,7 @@ if (folder != null) {
 	BookmarksUtil.addPortletBreadcrumbEntries(folderId, request, renderResponse);
 
 	if (!layout.isTypeControlPanel()) {
-		PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "edit"), currentURL);
+		PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "edit"), currentURL);
 	}
 }
 else {
@@ -39,16 +39,18 @@ else {
 		BookmarksUtil.addPortletBreadcrumbEntries(parentFolderId, request, renderResponse);
 
 		if (!layout.isTypeControlPanel()) {
-			PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "add-subfolder"), currentURL);
+			PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "add-subfolder"), currentURL);
 		}
 	}
 	else if (!layout.isTypeControlPanel()) {
-		PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(pageContext, "add-folder"), currentURL);
+		PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "add-folder"), currentURL);
 	}
 }
 %>
 
-<liferay-util:include page="/html/portlet/bookmarks/top_links.jsp" />
+<c:if test="<%= !windowState.equals(LiferayWindowState.POP_UP) %>">
+	<liferay-util:include page="/html/portlet/bookmarks/top_links.jsp" />
+</c:if>
 
 <portlet:actionURL var="editFolderURL">
 	<portlet:param name="struts_action" value="/bookmarks/edit_folder" />
@@ -63,7 +65,7 @@ else {
 	<liferay-ui:header
 		backURL="<%= redirect %>"
 		localizeTitle="<%= (folder == null) %>"
-		title='<%= (folder == null) ? ((parentFolderId > 0) ? "add-subfolder" : "add-folder") : LanguageUtil.format(pageContext, "edit-x", folder.getName()) %>'
+		title='<%= (folder == null) ? ((parentFolderId > 0) ? "add-subfolder" : "add-folder") : LanguageUtil.format(request, "edit-x", folder.getName(), false) %>'
 	/>
 
 	<liferay-ui:error exception="<%= FolderNameException.class %>" message="please-enter-a-valid-name" />
@@ -72,26 +74,21 @@ else {
 
 	<aui:fieldset>
 		<c:if test="<%= folder != null %>">
-			<aui:field-wrapper label="parent-folder">
 
-				<%
-				String parentFolderName = LanguageUtil.get(pageContext, "home");
+			<%
+			String parentFolderName = LanguageUtil.get(request, "home");
 
-				try {
-					BookmarksFolder parentFolder = BookmarksFolderServiceUtil.getFolder(parentFolderId);
+			try {
+				BookmarksFolder parentFolder = BookmarksFolderServiceUtil.getFolder(parentFolderId);
 
-					parentFolderName = parentFolder.getName();
-				}
-				catch (NoSuchFolderException nsfe) {
-				}
-				%>
+				parentFolderName = parentFolder.getName();
+			}
+			catch (NoSuchFolderException nsfe) {
+			}
+			%>
 
-				<portlet:renderURL var="viewFolderURL">
-					<portlet:param name="struts_action" value="/bookmarks/view" />
-					<portlet:param name="folderId" value="<%= String.valueOf(parentFolderId) %>" />
-				</portlet:renderURL>
-
-				<aui:a href="<%= viewFolderURL %>" id="parentFolderName"><%= parentFolderName %></aui:a>
+			<div class="form-group">
+				<aui:input label="parent-folder" name="parentFolderName" type="resource" value="<%= parentFolderName %>" />
 
 				<aui:button name="selectFolderButton" value="select" />
 
@@ -107,7 +104,7 @@ else {
 										width: 680
 									},
 									id: '<portlet:namespace />selectFolder',
-									title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "folder") %>',
+									title: '<liferay-ui:message arguments="folder" key="select-x" />',
 									uri: '<liferay-portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="struts_action" value="/bookmarks/select_folder" /></liferay-portlet:renderURL>'
 								},
 								function(event) {
@@ -118,7 +115,7 @@ else {
 										nameValue: event.name
 									};
 
-									Liferay.Util.selectFolder(folderData, '<liferay-portlet:renderURL portletName="<%= portletResource %>"><portlet:param name="struts_action" value="/bookmarks/view" /></liferay-portlet:renderURL>', '<portlet:namespace />');
+									Liferay.Util.selectFolder(folderData, '<portlet:namespace />');
 								}
 							);
 						}
@@ -129,13 +126,13 @@ else {
 				String taglibRemoveFolder = "Liferay.Util.removeFolderSelection('parentFolderId', 'parentFolderName', '" + renderResponse.getNamespace() + "');";
 				%>
 
-				<aui:button name="removeFolderButton" onClick="<%= taglibRemoveFolder %>" value="remove" />
+				<aui:button disabled="<%= (parentFolderId <= 0) %>" name="removeFolderButton" onClick="<%= taglibRemoveFolder %>" value="remove" />
+			</div>
 
-				<aui:input disabled="<%= mergeWithParentFolderDisabled %>" label="merge-with-parent-folder" name="mergeWithParentFolder" type="checkbox" />
-			</aui:field-wrapper>
+			<aui:input disabled="<%= mergeWithParentFolderDisabled %>" label="merge-with-parent-folder" name="mergeWithParentFolder" type="checkbox" />
 		</c:if>
 
-		<aui:input autoFocus="<%= (windowState.equals(WindowState.MAXIMIZED) || windowState.equals(LiferayWindowState.POP_UP)) %>" name="name" />
+		<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" name="name" />
 
 		<aui:input name="description" />
 
@@ -166,7 +163,7 @@ else {
 
 <aui:script>
 	function <portlet:namespace />saveFolder() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = "<%= (folder == null) ? Constants.ADD : Constants.UPDATE %>";
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (folder == null) ? Constants.ADD : Constants.UPDATE %>';
 
 		submitForm(document.<portlet:namespace />fm);
 	}

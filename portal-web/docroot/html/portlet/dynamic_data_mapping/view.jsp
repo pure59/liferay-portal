@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -29,15 +29,19 @@ portletURL.setParameter("tabs1", tabs1);
 %>
 
 <liferay-ui:error exception="<%= RequiredStructureException.class %>">
-	<liferay-ui:message key="required-structures-could-not-be-deleted" />
 
 	<%
 	RequiredStructureException rse = (RequiredStructureException)errorException;
 	%>
 
-	<c:if test="<%= rse.getType() == RequiredStructureException.REFERENCED_TEMPLATE %>">
-		<liferay-ui:message key="they-are-referenced-by-templates" />
-	</c:if>
+	<c:choose>
+		<c:when test="<%= rse.getType() == RequiredStructureException.REFERENCED_TEMPLATE %>">
+			<liferay-ui:message key="required-structures-could-not-be-deleted.-they-are-referenced-by-templates" />
+		</c:when>
+		<c:otherwise>
+			<liferay-ui:message key="required-structures-could-not-be-deleted" />
+		</c:otherwise>
+	</c:choose>
 </liferay-ui:error>
 
 <aui:form action="<%= portletURL.toString() %>" method="post" name="fm">
@@ -70,8 +74,13 @@ portletURL.setParameter("tabs1", tabs1);
 	>
 
 		<c:if test="<%= showToolbar %>">
+
+			<%
+			request.setAttribute(WebKeys.SEARCH_CONTAINER, searchContainer);
+			%>
+
 			<liferay-util:include page="/html/portlet/dynamic_data_mapping/toolbar.jsp">
-				<liferay-util:param name="toolbarItem" value="view-all" />
+				<liferay-util:param name="groupId" value="<%= String.valueOf(groupId) %>" />
 			</liferay-util:include>
 		</c:if>
 
@@ -120,22 +129,16 @@ portletURL.setParameter("tabs1", tabs1);
 				<liferay-ui:search-container-column-text
 					href="<%= rowHREF %>"
 					name="storage-type"
-					value="<%= LanguageUtil.get(pageContext, structure.getStorageType()) %>"
+					value="<%= LanguageUtil.get(request, structure.getStorageType()) %>"
 				/>
 			</c:if>
 
 			<c:if test="<%= scopeClassNameId == 0 %>">
 				<liferay-ui:search-container-column-text
-					buffer="buffer"
 					href="<%= rowHREF %>"
 					name="type"
-				>
-
-					<%
-					buffer.append(ResourceActionsUtil.getModelResource(locale, structure.getClassName()));
-					%>
-
-				</liferay-ui:search-container-column-text>
+					value="<%= ResourceActionsUtil.getModelResource(locale, structure.getClassName()) %>"
+				/>
 			</c:if>
 
 			<liferay-ui:search-container-column-date
@@ -148,6 +151,7 @@ portletURL.setParameter("tabs1", tabs1);
 
 			<liferay-ui:search-container-column-jsp
 				align="right"
+				cssClass="entry-action"
 				path="/html/portlet/dynamic_data_mapping/structure_action.jsp"
 			/>
 		</liferay-ui:search-container-row>
@@ -172,7 +176,7 @@ portletURL.setParameter("tabs1", tabs1);
 			{
 				id: '<portlet:namespace />copyStructure',
 				refreshWindow: window,
-				title: '<%= UnicodeLanguageUtil.get(pageContext, "copy-data-definition") %>',
+				title: '<%= UnicodeLanguageUtil.format(request, "copy-x", ddmDisplay.getStructureName(locale), false) %>',
 				uri: uri
 			}
 		);
@@ -182,12 +186,12 @@ portletURL.setParameter("tabs1", tabs1);
 		window,
 		'<portlet:namespace />deleteStructures',
 		function() {
-			if (confirm('<%= UnicodeLanguageUtil.get(pageContext, "are-you-sure-you-want-to-delete-this") %>')) {
-				document.<portlet:namespace />fm.method = "post";
-				document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = "<%= Constants.DELETE %>";
+			if (confirm('<%= UnicodeLanguageUtil.get(request, "are-you-sure-you-want-to-delete-this") %>')) {
+				document.<portlet:namespace />fm.method = 'post';
+				document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= Constants.DELETE %>';
 				document.<portlet:namespace />fm.<portlet:namespace />deleteStructureIds.value = Liferay.Util.listCheckedExcept(document.<portlet:namespace />fm, '<portlet:namespace />allRowIds');
 
-				submitForm(document.<portlet:namespace />fm, "<portlet:actionURL><portlet:param name="struts_action" value="/dynamic_data_mapping/edit_structure" /></portlet:actionURL>");
+				submitForm(document.<portlet:namespace />fm, '<portlet:actionURL><portlet:param name="struts_action" value="/dynamic_data_mapping/edit_structure" /></portlet:actionURL>');
 			}
 		},
 		['liferay-util-list-fields']

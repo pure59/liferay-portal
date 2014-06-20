@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -20,9 +20,7 @@ import com.liferay.portal.kernel.log.LogUtil;
 import com.liferay.portal.kernel.portlet.PortletBag;
 import com.liferay.portal.kernel.portlet.PortletBagPool;
 import com.liferay.portal.kernel.servlet.DirectRequestDispatcherFactoryUtil;
-import com.liferay.portal.kernel.servlet.PipingServletResponse;
 import com.liferay.portal.kernel.servlet.TrackedServletRequest;
-import com.liferay.portal.kernel.servlet.taglib.FileAvailabilityUtil;
 import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -36,6 +34,8 @@ import com.liferay.portal.model.PortletConstants;
 import com.liferay.portal.model.Theme;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.CustomJspRegistryUtil;
+import com.liferay.taglib.FileAvailabilityUtil;
+import com.liferay.taglib.servlet.PipingServletResponse;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -75,14 +75,14 @@ public class IncludeTag extends AttributesTagSupport {
 
 				return EVAL_PAGE;
 			}
-			else if (!FileAvailabilityUtil.isAvailable(servletContext, page)) {
+
+			if (!FileAvailabilityUtil.isAvailable(servletContext, page)) {
 				return processEndTag();
 			}
-			else {
-				doInclude(page);
 
-				return EVAL_PAGE;
-			}
+			doInclude(page);
+
+			return EVAL_PAGE;
 		}
 		catch (Exception e) {
 			throw new JspException(e);
@@ -115,14 +115,14 @@ public class IncludeTag extends AttributesTagSupport {
 
 				return EVAL_BODY_INCLUDE;
 			}
-			else if (!FileAvailabilityUtil.isAvailable(servletContext, page)) {
+
+			if (!FileAvailabilityUtil.isAvailable(servletContext, page)) {
 				return processStartTag();
 			}
-			else {
-				doInclude(page);
 
-				return EVAL_BODY_INCLUDE;
-			}
+			doInclude(page);
+
+			return EVAL_BODY_INCLUDE;
 		}
 		catch (Exception e) {
 			throw new JspException(e);
@@ -178,7 +178,7 @@ public class IncludeTag extends AttributesTagSupport {
 	}
 
 	protected void cleanUpSetAttributes() {
-		if (isCleanUpSetAttributes()) {
+		if (isCleanUpSetAttributes() && (_trackedRequest != null)) {
 			for (String name : _trackedRequest.getSetAttributes()) {
 				_trackedRequest.removeAttribute(name);
 			}
@@ -195,11 +195,11 @@ public class IncludeTag extends AttributesTagSupport {
 			String currentURL = (String)request.getAttribute(
 				WebKeys.CURRENT_URL);
 
-			_log.error(
+			String message =
 				"Current URL " + currentURL + " generates exception: " +
-					e.getMessage());
+					e.getMessage();
 
-			LogUtil.log(_log, e);
+			LogUtil.log(_log, e, message);
 
 			if (e instanceof JspException) {
 				throw (JspException)e;
@@ -213,8 +213,7 @@ public class IncludeTag extends AttributesTagSupport {
 
 		Theme theme = (Theme)request.getAttribute(WebKeys.THEME);
 
-		ThemeUtil.include(
-			servletContext, request, response, pageContext, page, theme);
+		ThemeUtil.include(servletContext, request, response, page, theme);
 	}
 
 	protected String getCustomPage(

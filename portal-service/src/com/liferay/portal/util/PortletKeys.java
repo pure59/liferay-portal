@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -35,6 +35,8 @@ public class PortletKeys {
 
 	public static final String ASSET_BROWSER = "172";
 
+	public static final String ASSET_CATEGORIES_ADMIN = "147";
+
 	public static final String ASSET_CATEGORIES_NAVIGATION = "122";
 
 	public static final String ASSET_PUBLISHER = "101";
@@ -51,11 +53,15 @@ public class PortletKeys {
 
 	public static final String BOOKMARKS = "28";
 
+	public static final String BOOKMARKS_ADMIN = "198";
+
 	public static final String BREADCRUMB = "73";
 
 	public static final String CALENDAR = "8";
 
 	public static final String CHAT = "1_WAR_chatportlet";
+
+	public static final String COMMENTS = "196";
 
 	public static final String CONTROL_PANEL_HOME = "190";
 
@@ -71,7 +77,11 @@ public class PortletKeys {
 
 	public static final String DOCUMENT_LIBRARY = "20";
 
+	public static final String DOCUMENT_LIBRARY_ADMIN = "199";
+
 	public static final String DOCUMENT_LIBRARY_DISPLAY = "110";
+
+	public static final String DOCUMENT_SELECTOR = "200";
 
 	public static final String DYNAMIC_DATA_LIST_DISPLAY = "169";
 
@@ -91,7 +101,11 @@ public class PortletKeys {
 
 	public static final String GROUP_STATISTICS = "181";
 
+	public static final String HIGHEST_RATED_ASSETS = "194";
+
 	public static final String IFRAME = "48";
+
+	public static final String IMAGE_UPLOADER = "195";
 
 	public static final String INVITATION = "100";
 
@@ -102,9 +116,6 @@ public class PortletKeys {
 	public static final String JOURNAL_CONTENT_LIST = "62";
 
 	public static final String JOURNAL_CONTENT_SEARCH = "77";
-
-	public static final String KNOWLEDGE_BASE_ADMIN =
-		"1_WAR_knowledgebaseportlet";
 
 	public static final String LANGUAGE = "82";
 
@@ -135,6 +146,8 @@ public class PortletKeys {
 
 	public static final String MONITORING = "131";
 
+	public static final String MOST_VIEWED_ASSETS = "193";
+
 	public static final String MY_ACCOUNT = "2";
 
 	public static final String MY_PAGES = "140";
@@ -146,6 +159,8 @@ public class PortletKeys {
 	public static final String MY_WORKFLOW_INSTANCES = "158";
 
 	public static final String MY_WORKFLOW_TASKS = "153";
+
+	public static final String NAVIGATION = "71";
 
 	public static final String NESTED_PORTLETS = "118";
 
@@ -219,6 +234,10 @@ public class PortletKeys {
 
 	public static final String SITE_SETTINGS = "165";
 
+	public static final String SITE_TEAMS_ADMIN = "191";
+
+	public static final String SITE_TEMPLATE_SETTINGS = "192";
+
 	public static final String SITES_ADMIN = "134";
 
 	public static final String SITES_DIRECTORY = "184";
@@ -236,6 +255,7 @@ public class PortletKeys {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #ASSET_CATEGORIES_NAVIGATION}
 	 */
+	@Deprecated
 	public static final String TAGS_CATEGORIES_NAVIGATION =
 		ASSET_CATEGORIES_NAVIGATION;
 
@@ -246,6 +266,7 @@ public class PortletKeys {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #ASSET_TAGS_NAVIGATION}
 	 */
+	@Deprecated
 	public static final String TAGS_ENTRIES_NAVIGATION = ASSET_TAGS_NAVIGATION;
 
 	public static final String TRANSLATOR = "26";

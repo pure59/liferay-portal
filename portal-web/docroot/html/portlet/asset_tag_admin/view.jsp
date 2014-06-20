@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,12 +18,12 @@
 
 <aui:form name="fm">
 	<aui:nav-bar>
-		<aui:nav>
+		<aui:nav cssClass="navbar-nav">
 			<c:if test="<%= AssetPermission.contains(permissionChecker, themeDisplay.getSiteGroupId(), ActionKeys.ADD_TAG) %>">
 				<aui:nav-item id="addTagButton" label="add-tag" />
 			</c:if>
 
-			<c:if test="<%= AssetPermission.contains(permissionChecker, themeDisplay.getSiteGroupId(), ActionKeys.PERMISSIONS) && GroupPermissionUtil.contains(permissionChecker, themeDisplay.getSiteGroupId(), ActionKeys.PERMISSIONS) %>">
+			<c:if test="<%= PropsValues.ASSET_TAG_PERMISSIONS_ENABLED && AssetPermission.contains(permissionChecker, themeDisplay.getSiteGroupId(), ActionKeys.PERMISSIONS) && GroupPermissionUtil.contains(permissionChecker, themeDisplay.getSiteGroupId(), ActionKeys.PERMISSIONS) %>">
 				<liferay-security:permissionsURL
 					modelResource="com.liferay.portlet.asset"
 					modelResourceDescription="<%= themeDisplay.getScopeGroupName() %>"
@@ -35,26 +35,26 @@
 				<aui:nav-item data-url="<%= permissionsURL %>" id="tagsPermissionsButton" label="permissions" />
 			</c:if>
 
-			<aui:nav-item dropdown="<%= true %>" label="actions">
-				<aui:nav-item iconClass="icon-remove" id="deleteSelectedTags" label="delete" />
+			<aui:nav-item cssClass="hide" dropdown="<%= true %>" id="tagsActionsButton" label="actions">
+				<aui:nav-item iconCssClass="icon-random" id="mergeSelectedTags" label="merge" />
 
-				<aui:nav-item iconClass="icon-random" id="mergeSelectedTags" label="merge" />
+				<aui:nav-item cssClass="item-remove" iconCssClass="icon-remove" id="deleteSelectedTags" label="delete" />
 			</aui:nav-item>
 		</aui:nav>
 
-		<div class="navbar-search pull-right">
-			<div class="form-search">
-				<input class="search-query span9" id="<portlet:namespace/>tagsAdminSearchInput" name="<portlet:namespace/>tagsAdminSearchInput" type="text" />
+		<aui:nav-bar-search cssClass="pull-right">
+			<div class="col-xs-12 form-search">
+				<liferay-ui:input-search id="tagsAdminSearchInput" name="tagsAdminSearchInput" showButton="<%= false %>" />
 			</div>
-		</div>
+		</aui:nav-bar-search>
 	</aui:nav-bar>
 
-	<div class="tags-admin-container lfr-app-column-view">
+	<div class="lfr-app-column-view tags-admin-container">
 		<div class="tags-admin-content-wrapper">
 			<aui:row cssClass="tags-admin-content">
 				<aui:col cssClass="tags-admin-list-container" width="<%= 35 %>">
 					<div class="hide selected-tags-wrapper">
-						<h3 class="tags-header"><%= LanguageUtil.get(pageContext, "selected") %></h3>
+						<h3 class="tags-header"><%= LanguageUtil.get(request, "selected") %></h3>
 
 						<div class="tag-staging-area">
 							<div class="token-container"></div>
@@ -62,18 +62,18 @@
 					</div>
 
 					<div class="available-tags-wrapper">
-						<aui:input cssClass="select-tags" inline="<%= true %>" label="" name="checkAllTags" title='<%= LanguageUtil.get(pageContext, "check-all-tags") %>' type="checkbox" />
+						<aui:input cssClass="select-tags" inline="<%= true %>" label="" name="checkAllTags" title='<%= LanguageUtil.get(request, "check-all-tags") %>' type="checkbox" />
 
-						<h3 class="tags-header"><%= LanguageUtil.get(pageContext, "available") %></h3>
+						<h3 class="tags-header"><%= LanguageUtil.get(request, "available") %></h3>
 					</div>
 
-					<div class="tags-admin-list unstyled"></div>
+					<div class="list-unstyled tags-admin-list"></div>
 
 					<div class="tags-pagination"></div>
 				</aui:col>
 
 				<aui:col cssClass="tags-admin-edit-tag" width="<%= 65 %>">
-					<h3><%= LanguageUtil.get(pageContext, "tag-details") %></h3>
+					<h3><%= LanguageUtil.get(request, "tag-details") %></h3>
 
 					<div class="tag-view-container"></div>
 				</aui:col>

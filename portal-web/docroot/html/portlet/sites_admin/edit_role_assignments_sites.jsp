@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -50,11 +50,14 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_role_assignments.
 	if (tabs3.equals("current")) {
 		groupParams.put("groupsRoles", new Long(role.getRoleId()));
 	}
+
+	total = GroupLocalServiceUtil.searchCount(company.getCompanyId(), searchTerms.getName(), searchTerms.getDescription(), groupParams, searchTerms.isAndOperator());
+
+	searchContainer.setTotal(total);
 	%>
 
 	<liferay-ui:search-container-results
 		results="<%= GroupLocalServiceUtil.search(company.getCompanyId(), searchTerms.getName(), searchTerms.getDescription(), groupParams, searchTerms.isAndOperator(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
-		total="<%= GroupLocalServiceUtil.searchCount(company.getCompanyId(), searchTerms.getName(), searchTerms.getDescription(), groupParams, searchTerms.isAndOperator()) %>"
 	/>
 
 	<liferay-ui:search-form
@@ -65,12 +68,12 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_role_assignments.
 	<div class="separator"><!-- --></div>
 
 	<%
-	String taglibOnClick = renderResponse.getNamespace() + "updateRoleGroups('" + portletURL.toString() + StringPool.AMPERSAND + renderResponse.getNamespace() + "cur=" + cur + "');";
+	portletURL.setParameter("cur", String.valueOf(cur));
+
+	String taglibOnClick = renderResponse.getNamespace() + "updateRoleGroups('" + portletURL.toString() + "');";
 	%>
 
 	<aui:button onClick="<%= taglibOnClick %>" value="update-associations" />
-
-	<br /><br />
 
 	<liferay-ui:search-container-row
 		className="com.liferay.portal.model.Group"
@@ -87,7 +90,7 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_role_assignments.
 
 		<liferay-ui:search-container-column-text
 			name="type"
-			value="<%= LanguageUtil.get(pageContext, group.getTypeLabel()) %>"
+			value="<%= LanguageUtil.get(request, group.getTypeLabel()) %>"
 		/>
 	</liferay-ui:search-container-row>
 

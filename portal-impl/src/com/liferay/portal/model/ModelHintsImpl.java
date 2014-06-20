@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -29,7 +29,6 @@ import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReader;
 import com.liferay.portal.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.util.PropsUtil;
-import com.liferay.util.PwdGenerator;
 
 import java.io.InputStream;
 
@@ -100,7 +99,7 @@ public class ModelHintsImpl implements ModelHints {
 	@Override
 	public String buildCustomValidatorName(String validatorName) {
 		return validatorName.concat(StringPool.UNDERLINE).concat(
-			PwdGenerator.getPassword(PwdGenerator.KEY3, 4));
+			StringUtil.randomId());
 	}
 
 	@Override
@@ -118,15 +117,14 @@ public class ModelHintsImpl implements ModelHints {
 		if (fields == null) {
 			return null;
 		}
-		else {
-			Element fieldsEl = (Element)fields.get(field + _ELEMENTS_SUFFIX);
 
-			if (fieldsEl == null) {
-				return null;
-			}
-			else {
-				return fieldsEl;
-			}
+		Element fieldsEl = (Element)fields.get(field + _ELEMENTS_SUFFIX);
+
+		if (fieldsEl == null) {
+			return null;
+		}
+		else {
+			return fieldsEl;
 		}
 	}
 
@@ -185,21 +183,20 @@ public class ModelHintsImpl implements ModelHints {
 		if (fields == null) {
 			return Collections.emptyList();
 		}
-		else {
-			List<Tuple> sanitizeTuples = new ArrayList<Tuple>();
 
-			for (Map.Entry<String, Object> entry : fields.entrySet()) {
-				String key = entry.getKey();
+		List<Tuple> sanitizeTuples = new ArrayList<Tuple>();
 
-				if (key.endsWith(_SANITIZE_SUFFIX)) {
-					Tuple sanitizeTuple = (Tuple)entry.getValue();
+		for (Map.Entry<String, Object> entry : fields.entrySet()) {
+			String key = entry.getKey();
 
-					sanitizeTuples.add(sanitizeTuple);
-				}
+			if (key.endsWith(_SANITIZE_SUFFIX)) {
+				Tuple sanitizeTuple = (Tuple)entry.getValue();
+
+				sanitizeTuples.add(sanitizeTuple);
 			}
-
-			return sanitizeTuples;
 		}
+
+		return sanitizeTuples;
 	}
 
 	@Override
@@ -272,16 +269,14 @@ public class ModelHintsImpl implements ModelHints {
 		if (fields == null) {
 			return false;
 		}
-		else {
-			Boolean localized = (Boolean)fields.get(
-				field + _LOCALIZATION_SUFFIX);
 
-			if (localized != null) {
-				return localized;
-			}
-			else {
-				return false;
-			}
+		Boolean localized = (Boolean)fields.get(field + _LOCALIZATION_SUFFIX);
+
+		if (localized != null) {
+			return localized;
+		}
+		else {
+			return false;
 		}
 	}
 

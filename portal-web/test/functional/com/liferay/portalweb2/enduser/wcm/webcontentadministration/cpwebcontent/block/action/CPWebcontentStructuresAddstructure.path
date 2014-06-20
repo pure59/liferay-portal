@@ -15,6 +15,16 @@
 </tr>
 <!---->
 <tr>
+	<td>EXTEND_ACTION_PATH</td>
+	<td>Dynamicdatamapping</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
 	<td>STRUCTURES_IFRAME</td>
 	<td>//div[contains(@class,'dialog-iframe-bd')]/iframe[contains(@src,'scopeTitle=Structures')]</td>
 	<td></td>
@@ -30,8 +40,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>LOCALIZATION_NAME</td>
+	<td>//li[@data-value='${key_localizationName}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>NAME_FIELD_REQUIRED</td>
+	<td>//span[@id='_166_nameBoundingBox']/div/div[@class='required']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>DETAILS</td>
-	<td>//div[@class='accordion-toggle']</td>
+	<td>//div[@class='panel-toggle']</td>
 	<td></td>
 </tr>
 <tr>
@@ -56,89 +76,12 @@
 </tr>
 <tr>
 	<td>CANCEL_BUTTON</td>
-	<td>//button[contains(., 'Cancel')]</td>
+	<td>//button[contains(.,'Cancel')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td></td>
 	<td></td>
-	<td></td>
-</tr>
-<!--FIELD_MENU-->
-<tr>
-	<td>FIELD_MENU_BOOLEAN</td>
-	<td>//li[@title='Boolean']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_DATE</td>
-	<td>//li[@title='Date']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_DECIMAL</td>
-	<td>//li[@title='Decimal']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_DOCUMENTS</td>
-	<td>//li[@title='Documents and Media']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_HTML</td>
-	<td>//li[@title='HTML']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_IMAGE</td>
-	<td>//li[@title='Image']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_INTEGER</td>
-	<td>//li[@title='Integer']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_LINK_TO_PAGE</td>
-	<td>//li[@title='Link to Page']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_NUMBER</td>
-	<td>//li[@title='Number']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_RADIO</td>
-	<td>//li[@title='Radio']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_SELECT</td>
-	<td>//li[@title='Select']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_TEXT</td>
-	<td>//li[@title='Text']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_MENU_TEXT_BOX</td>
-	<td>//li[@title='Text Box']</td>
-	<td></td>
-</tr>
-<tr>
-	<td></td>
-	<td></td>
-	<td></td>
-</tr>
-<!--DIAGRAM_BUILDER-->
-<tr>
-	<td>DIAGRAM_BUILDER_DROP_CONTAINER</td>
-	<td>//div[@class='diagram-builder-drop-container']</td>
 	<td></td>
 </tr>
 </tbody>

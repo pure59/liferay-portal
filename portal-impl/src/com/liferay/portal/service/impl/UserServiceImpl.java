@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,15 +16,16 @@ package com.liferay.portal.service.impl;
 
 import com.liferay.portal.RequiredUserException;
 import com.liferay.portal.ReservedUserEmailAddressException;
-import com.liferay.portal.UserEmailAddressException;
-import com.liferay.portal.UserScreenNameException;
+import com.liferay.portal.UserFieldException;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.SetUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
 import com.liferay.portal.model.Address;
@@ -65,8 +66,10 @@ import com.liferay.portlet.announcements.model.AnnouncementsDelivery;
 import com.liferay.portlet.usersadmin.util.UsersAdminUtil;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Provides the remote service for accessing, adding, authenticating, deleting,
@@ -91,12 +94,11 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         be found, if the user did not have permission to assign group
 	 *         members, or if the operation was not allowed by the membership
 	 *         policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void addGroupUsers(
 			long groupId, long[] userIds, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -152,11 +154,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         organization members, if current user did not have an
 	 *         organization in common with a given user, or if the operation was
 	 *         not allowed by the membership policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void addOrganizationUsers(long organizationId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -174,7 +175,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 
 		OrganizationMembershipPolicyUtil.propagateMembership(
 			userIds, new long[] {organizationId}, null);
-
 	}
 
 	/**
@@ -185,11 +185,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userIds the primary keys of the users
 	 * @throws PortalException if the user did not have permission to assign
 	 *         policy members
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void addPasswordPolicyUsers(long passwordPolicyId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -211,11 +210,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         be found, if the user did not have permission to assign role
 	 *         members, or if the operation was not allowed by the membership
 	 *         policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void addRoleUsers(long roleId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -240,11 +238,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if a team or user with the primary key could not
 	 *         be found or if the user did not have permission to assign team
 	 *         members
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void addTeamUsers(long teamId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -304,7 +301,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         operation was not allowed by the membership policy, if the
 	 *         creator did not have permission to add users, or if the email
 	 *         address was reserved
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User addUser(
@@ -316,7 +312,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			int birthdayYear, String jobTitle, long[] groupIds,
 			long[] organizationIds, long[] roleIds, long[] userGroupIds,
 			boolean sendEmail, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		boolean workflowEnabled = WorkflowThreadLocal.isEnabled();
 
@@ -388,7 +384,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         creator did not have permission to add users, if the email
 	 *         address was reserved, if the operation was not allowed by the
 	 *         membership policy, or if some other portal exception occurred
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User addUser(
@@ -403,7 +398,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			List<Phone> phones, List<Website> websites,
 			List<AnnouncementsDelivery> announcementsDelivers,
 			boolean sendEmail, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		boolean workflowEnabled = WorkflowThreadLocal.isEnabled();
 
@@ -432,11 +427,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         could not be found, if the current user did not have permission
 	 *         to assign group members, or if the operation was not allowed by
 	 *         the membership policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void addUserGroupUsers(long userGroupId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -502,7 +496,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         operation was not allowed by the membership policy, if the
 	 *         creator did not have permission to add users, or if the email
 	 *         address was reserved
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User addUserWithWorkflow(
@@ -514,7 +507,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			int birthdayYear, String jobTitle, long[] groupIds,
 			long[] organizationIds, long[] roleIds, long[] userGroupIds,
 			boolean sendEmail, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		long creatorUserId = 0;
 
@@ -540,7 +533,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			userGroupIds);
 
 		propagateMembership(
-			new long[]{user.getUserId()}, groupIds, organizationIds, roleIds,
+			new long[] {user.getUserId()}, groupIds, organizationIds, roleIds,
 			userGroupIds);
 
 		return user;
@@ -599,7 +592,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         operation was not allowed by the membership policy, if the
 	 *         creator did not have permission to add users, if the email
 	 *         address was reserved, or if some other portal exception occurred
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User addUserWithWorkflow(
@@ -614,7 +606,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			List<Phone> phones, List<Website> websites,
 			List<AnnouncementsDelivery> announcementsDelivers,
 			boolean sendEmail, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		boolean indexingEnabled = serviceContext.isIndexingEnabled();
 
@@ -664,12 +656,9 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if a user with the primary key could not be
 	 *         found, if the user's portrait could not be found, or if the
 	 *         current user did not have permission to update the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public void deletePortrait(long userId)
-		throws PortalException, SystemException {
-
+	public void deletePortrait(long userId) throws PortalException {
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.UPDATE);
 
@@ -684,11 +673,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if a role or user with the primary key could not
 	 *         be found, or if the current user did not have permission to
 	 *         assign role members
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void deleteRoleUser(long roleId, long userId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		RolePermissionUtil.check(
 			getPermissionChecker(), roleId, ActionKeys.ASSIGN_MEMBERS);
@@ -702,12 +690,9 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userId the primary key of the user
 	 * @throws PortalException if a user with the primary key could not be found
 	 *         or if the current user did not have permission to delete the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public void deleteUser(long userId)
-		throws PortalException, SystemException {
-
+	public void deleteUser(long userId) throws PortalException {
 		if (getUserId() == userId) {
 			throw new RequiredUserException();
 		}
@@ -720,7 +705,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 
 	@Override
 	public List<User> getCompanyUsers(long companyId, int start, int end)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		PermissionChecker permissionChecker = getPermissionChecker();
 
@@ -732,9 +717,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	}
 
 	@Override
-	public int getCompanyUsersCount(long companyId)
-		throws PortalException, SystemException {
-
+	public int getCompanyUsersCount(long companyId) throws PortalException {
 		PermissionChecker permissionChecker = getPermissionChecker();
 
 		if (!permissionChecker.isCompanyAdmin(companyId)) {
@@ -751,12 +734,9 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the primary keys of the users belonging to the group
 	 * @throws PortalException if the current user did not have permission to
 	 *         view group assignments
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public long[] getGroupUserIds(long groupId)
-		throws PortalException, SystemException {
-
+	public long[] getGroupUserIds(long groupId) throws PortalException {
 		GroupPermissionUtil.check(
 			getPermissionChecker(), groupId, ActionKeys.VIEW_MEMBERS);
 
@@ -770,12 +750,9 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the users belonging to the group
 	 * @throws PortalException if the current user did not have permission to
 	 *         view group assignments
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public List<User> getGroupUsers(long groupId)
-		throws PortalException, SystemException {
-
+	public List<User> getGroupUsers(long groupId) throws PortalException {
 		GroupPermissionUtil.check(
 			getPermissionChecker(), groupId, ActionKeys.VIEW_MEMBERS);
 
@@ -789,11 +766,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the primary keys of the users belonging to the organization
 	 * @throws PortalException if the current user did not have permission to
 	 *         view organization assignments
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public long[] getOrganizationUserIds(long organizationId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		OrganizationPermissionUtil.check(
 			getPermissionChecker(), organizationId, ActionKeys.VIEW_MEMBERS);
@@ -808,11 +784,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return users belonging to the organization
 	 * @throws PortalException if the current user did not have permission to
 	 *         view organization assignments
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public List<User> getOrganizationUsers(long organizationId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		OrganizationPermissionUtil.check(
 			getPermissionChecker(), organizationId, ActionKeys.VIEW_MEMBERS);
@@ -827,12 +802,9 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the primary keys of the users belonging to the role
 	 * @throws PortalException if the current user did not have permission to
 	 *         view role members
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public long[] getRoleUserIds(long roleId)
-		throws PortalException, SystemException {
-
+	public long[] getRoleUserIds(long roleId) throws PortalException {
 		RolePermissionUtil.check(
 			getPermissionChecker(), roleId, ActionKeys.VIEW);
 
@@ -848,11 +820,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if a user with the email address could not be
 	 *         found or if the current user did not have permission to view the
 	 *         user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User getUserByEmailAddress(long companyId, String emailAddress)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userLocalService.getUserByEmailAddress(
 			companyId, emailAddress);
@@ -870,12 +841,9 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the user with the primary key
 	 * @throws PortalException if a user with the primary key could not be found
 	 *         or if the current user did not have permission to view the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public User getUserById(long userId)
-		throws PortalException, SystemException {
-
+	public User getUserById(long userId) throws PortalException {
 		User user = userPersistence.findByPrimaryKey(userId);
 
 		UserPermissionUtil.check(
@@ -892,11 +860,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the user with the screen name
 	 * @throws PortalException if a user with the screen name could not be found
 	 *         or if the current user did not have permission to view the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User getUserByScreenName(long companyId, String screenName)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = userLocalService.getUserByScreenName(companyId, screenName);
 
@@ -908,7 +875,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 
 	@Override
 	public List<User> getUserGroupUsers(long userGroupId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserGroupPermissionUtil.check(
 			getPermissionChecker(), userGroupId, ActionKeys.VIEW_MEMBERS);
@@ -924,11 +891,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the primary key of the user with the email address
 	 * @throws PortalException if a user with the email address could not be
 	 *         found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public long getUserIdByEmailAddress(long companyId, String emailAddress)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = getUserByEmailAddress(companyId, emailAddress);
 
@@ -945,11 +911,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  screenName the user's screen name
 	 * @return the primary key of the user with the screen name
 	 * @throws PortalException if a user with the screen name could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public long getUserIdByScreenName(long companyId, String screenName)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		User user = getUserByScreenName(companyId, screenName);
 
@@ -968,11 +933,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         <code>false</code> otherwise
 	 * @throws PortalException if the current user did not have permission to
 	 *         view the user or group members
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public boolean hasGroupUser(long groupId, long userId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		try {
 			UserPermissionUtil.check(
@@ -995,11 +959,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         <code>false</code> otherwise
 	 * @throws PortalException if the current user did not have permission to
 	 *         view the user or role members
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public boolean hasRoleUser(long roleId, long userId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		try {
 			UserPermissionUtil.check(
@@ -1026,12 +989,11 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return <code>true</code> if the user has the role; <code>false</code>
 	 *         otherwise
 	 * @throws PortalException if a role with the name could not be found
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public boolean hasRoleUser(
 			long companyId, String name, long userId, boolean inherited)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		try {
 			UserPermissionUtil.check(
@@ -1057,24 +1019,18 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if the current user did not have permission to
 	 *         assign role members or if the operation was not allowed by the
 	 *         membership policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void setRoleUsers(long roleId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		RolePermissionUtil.check(
 			getPermissionChecker(), roleId, ActionKeys.ASSIGN_MEMBERS);
 
-		List<Long> unsetUserIds = new ArrayList<Long>(userIds.length);
+		Set<Long> unsetUserIds = SetUtil.fromArray(
+			rolePersistence.getUserPrimaryKeys(roleId));
 
-		List<User> users = rolePersistence.getUsers(roleId);
-
-		for (User user : users) {
-			if (!ArrayUtil.contains(userIds, user.getUserId())) {
-				unsetUserIds.add(user.getUserId());
-			}
-		}
+		unsetUserIds.removeAll(SetUtil.fromArray(userIds));
 
 		if (!unsetUserIds.isEmpty()) {
 			RoleMembershipPolicyUtil.checkRoles(
@@ -1107,24 +1063,19 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userIds the primary keys of the users
 	 * @throws PortalException if the current user did not have permission to
 	 *         assign group members
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void setUserGroupUsers(long userGroupId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserGroupPermissionUtil.check(
 			getPermissionChecker(), userGroupId, ActionKeys.ASSIGN_MEMBERS);
 
-		List<Long> unsetUserIds = new ArrayList<Long>(userIds.length);
+		Set<Long> unsetUserIds =
+			SetUtil.fromArray(
+				userGroupPersistence.getUserPrimaryKeys(userGroupId));
 
-		List<User> users = userGroupPersistence.getUsers(userGroupId);
-
-		for (User user : users) {
-			if (!ArrayUtil.contains(userIds, user.getUserId())) {
-				unsetUserIds.add(user.getUserId());
-			}
-		}
+		unsetUserIds.removeAll(SetUtil.fromArray(userIds));
 
 		if (!unsetUserIds.isEmpty()) {
 			UserGroupMembershipPolicyUtil.checkMembership(
@@ -1158,11 +1109,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userIds the primary keys of the users
 	 * @throws PortalException if the current user did not have permission to
 	 *         modify user group assignments
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void unsetGroupTeamsUsers(long groupId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -1184,12 +1134,11 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if the current user did not have permission to
 	 *         modify group assignments or if the operation was not allowed by
 	 *         the membership policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void unsetGroupUsers(
 			long groupId, long[] userIds, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		userIds = UsersAdminUtil.filterUnsetGroupUserIds(
 			getPermissionChecker(), groupId, userIds);
@@ -1248,11 +1197,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if the current user did not have permission to
 	 *         modify organization assignments or if the operation was not
 	 *         allowed by the membership policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void unsetOrganizationUsers(long organizationId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		userIds = UsersAdminUtil.filterUnsetOrganizationUserIds(
 			getPermissionChecker(), organizationId, userIds);
@@ -1280,11 +1228,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userIds the primary keys of the users
 	 * @throws PortalException if the current user did not have permission to
 	 *         modify policy assignments
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void unsetPasswordPolicyUsers(long passwordPolicyId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -1305,11 +1252,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if the current user did not have permission to
 	 *         modify role assignments or if the operation was not allowed by
 	 *         the membership policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void unsetRoleUsers(long roleId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -1333,11 +1279,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  userIds the primary keys of the users
 	 * @throws PortalException if the current user did not have permission to
 	 *         modify team assignments
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void unsetTeamUsers(long teamId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -1357,11 +1302,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if the current user did not have permission to
 	 *         modify user group assignments or if the operation was not allowed
 	 *         by the membership policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void unsetUserGroupUsers(long userGroupId, long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (userIds.length == 0) {
 			return;
@@ -1387,12 +1331,11 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the user
 	 * @throws PortalException if the current user did not have permission to
 	 *         update the user's agreement to terms-of-use
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updateAgreedToTermsOfUse(
 			long userId, boolean agreedToTermsOfUse)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.UPDATE);
@@ -1414,13 +1357,12 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the user
 	 * @throws PortalException if a user with the primary key could not be found
 	 *         or if the current user did not have permission to update the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updateEmailAddress(
 			long userId, String password, String emailAddress1,
 			String emailAddress2, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.UPDATE);
@@ -1470,7 +1412,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the user
 	 * @throws PortalException if the user's information was invalid or if the
 	 *         email address was reserved
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updateIncompleteUser(
@@ -1481,7 +1422,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			int suffixId, boolean male, int birthdayMonth, int birthdayDay,
 			int birthdayYear, String jobTitle, boolean updateUserInformation,
 			boolean sendEmail, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		long creatorUserId = 0;
 
@@ -1511,11 +1452,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the user
 	 * @throws PortalException if the user did not have permission to lock out
 	 *         the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updateLockoutById(long userId, boolean lockout)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.DELETE);
@@ -1531,11 +1471,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the user
 	 * @throws PortalException if a user with the primary key could not be found
 	 *         or if the current user did not have permission to update the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updateOpenId(long userId, String openId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.UPDATE);
@@ -1553,12 +1492,11 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         whether user indexing is enabled.
 	 * @throws PortalException if a user with the primary key could not be found
 	 *         or if the current user did not have permission to update the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public void updateOrganizations(
 			long userId, long[] organizationIds, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.UPDATE);
@@ -1580,13 +1518,12 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @return the user
 	 * @throws PortalException if a user with the primary key could not be found
 	 *         or if the current user did not have permission to update the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updatePassword(
 			long userId, String password1, String password2,
 			boolean passwordReset)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.UPDATE);
@@ -1604,11 +1541,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if a user with the primary key could not be
 	 *         found, if the new portrait was invalid, or if the current user
 	 *         did not have permission to update the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updatePortrait(long userId, byte[] bytes)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.UPDATE);
@@ -1626,11 +1562,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if a user with the primary key could not be
 	 *         found, if the new question or answer were invalid, or if the
 	 *         current user did not have permission to update the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updateReminderQuery(long userId, String question, String answer)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.UPDATE);
@@ -1647,11 +1582,10 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @throws PortalException if a user with the primary key could not be
 	 *         found, if the new screen name was invalid, or if the current user
 	 *         did not have permission to update the user
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updateScreenName(long userId, String screenName)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.UPDATE);
@@ -1662,8 +1596,32 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	/**
 	 * Updates the user's workflow status.
 	 *
+	 * @param      userId the primary key of the user
+	 * @param      status the user's new workflow status
+	 * @return     the user
+	 * @throws     PortalException if a user with the primary key could not be
+	 *             found, if the current user was updating her own status to
+	 *             anything but {@link
+	 *             com.liferay.portal.kernel.workflow.WorkflowConstants#STATUS_APPROVED},
+	 *             or if the current user did not have permission to update the
+	 *             user's workflow status.
+	 * @deprecated As of 7.0.0, replaced by {@link #updateStatus(long, int,
+	 *             ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public User updateStatus(long userId, int status) throws PortalException {
+		return updateStatus(userId, status, new ServiceContext());
+	}
+
+	/**
+	 * Updates the user's workflow status.
+	 *
 	 * @param  userId the primary key of the user
 	 * @param  status the user's new workflow status
+	 * @param  serviceContext the service context to be applied. You can specify
+	 *         an unencrypted custom password (used by an LDAP listener) for the
+	 *         user via attribute <code>passwordUnencrypted</code>.
 	 * @return the user
 	 * @throws PortalException if a user with the primary key could not be
 	 *         found, if the current user was updating her own status to
@@ -1671,11 +1629,11 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         com.liferay.portal.kernel.workflow.WorkflowConstants#STATUS_APPROVED},
 	 *         or if the current user did not have permission to update the
 	 *         user's workflow status.
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
-	public User updateStatus(long userId, int status)
-		throws PortalException, SystemException {
+	public User updateStatus(
+			long userId, int status, ServiceContext serviceContext)
+		throws PortalException {
 
 		if ((getUserId() == userId) &&
 			(status != WorkflowConstants.STATUS_APPROVED)) {
@@ -1686,7 +1644,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.DELETE);
 
-		return userLocalService.updateStatus(userId, status);
+		return userLocalService.updateStatus(userId, status, serviceContext);
 	}
 
 	/**
@@ -1706,6 +1664,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 * @param  emailAddress the user's new email address
 	 * @param  facebookId the user's new Facebook ID
 	 * @param  openId the user's new OpenID
+	 * @param  portrait whether to update the user's portrait image
+	 * @param  portraitBytes the new portrait image data
 	 * @param  languageId the user's new language ID
 	 * @param  timeZoneId the user's new time zone ID
 	 * @param  greeting the user's new greeting
@@ -1750,7 +1710,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         found, if the new information was invalid, if the current user
 	 *         did not have permission to update the user, or if the operation
 	 *         was not allowed by the membership policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updateUser(
@@ -1758,20 +1717,21 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			String newPassword2, boolean passwordReset,
 			String reminderQueryQuestion, String reminderQueryAnswer,
 			String screenName, String emailAddress, long facebookId,
-			String openId, String languageId, String timeZoneId,
-			String greeting, String comments, String firstName,
-			String middleName, String lastName, int prefixId, int suffixId,
-			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
-			String smsSn, String aimSn, String facebookSn, String icqSn,
-			String jabberSn, String msnSn, String mySpaceSn, String skypeSn,
-			String twitterSn, String ymSn, String jobTitle, long[] groupIds,
+			String openId, boolean portrait, byte[] portraitBytes,
+			String languageId, String timeZoneId, String greeting,
+			String comments, String firstName, String middleName,
+			String lastName, int prefixId, int suffixId, boolean male,
+			int birthdayMonth, int birthdayDay, int birthdayYear, String smsSn,
+			String aimSn, String facebookSn, String icqSn, String jabberSn,
+			String msnSn, String mySpaceSn, String skypeSn, String twitterSn,
+			String ymSn, String jobTitle, long[] groupIds,
 			long[] organizationIds, long[] roleIds,
 			List<UserGroupRole> userGroupRoles, long[] userGroupIds,
 			List<Address> addresses, List<EmailAddress> emailAddresses,
 			List<Phone> phones, List<Website> websites,
 			List<AnnouncementsDelivery> announcementsDelivers,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, organizationIds, ActionKeys.UPDATE);
@@ -1806,18 +1766,19 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		long curUserId = getUserId();
 
 		if (curUserId == userId) {
-			screenName = screenName.trim().toLowerCase();
+			emailAddress = StringUtil.toLowerCase(emailAddress.trim());
 
-			if (!screenName.equalsIgnoreCase(user.getScreenName())) {
-				validateScreenName(user, screenName);
-			}
+			if (!StringUtil.equalsIgnoreCase(
+					emailAddress, user.getEmailAddress())) {
 
-			emailAddress = emailAddress.trim().toLowerCase();
-
-			if (!emailAddress.equalsIgnoreCase(user.getEmailAddress())) {
 				validateEmailAddress(user, emailAddress);
 			}
 		}
+
+		validateUpdatePermission(
+			user, screenName, emailAddress, firstName, middleName, lastName,
+			prefixId, suffixId, birthdayMonth, birthdayDay, birthdayYear, male,
+			jobTitle);
 
 		// Group membership policy
 
@@ -1997,12 +1958,13 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		user = userLocalService.updateUser(
 			userId, oldPassword, newPassword1, newPassword2, passwordReset,
 			reminderQueryQuestion, reminderQueryAnswer, screenName,
-			emailAddress, facebookId, openId, languageId, timeZoneId, greeting,
-			comments, firstName, middleName, lastName, prefixId, suffixId, male,
-			birthdayMonth, birthdayDay, birthdayYear, smsSn, aimSn, facebookSn,
-			icqSn, jabberSn, msnSn, mySpaceSn, skypeSn, twitterSn, ymSn,
-			jobTitle, groupIds, organizationIds, roleIds, userGroupRoles,
-			userGroupIds, serviceContext);
+			emailAddress, facebookId, openId, portrait, portraitBytes,
+			languageId, timeZoneId, greeting, comments, firstName, middleName,
+			lastName, prefixId, suffixId, male, birthdayMonth, birthdayDay,
+			birthdayYear, smsSn, aimSn, facebookSn, icqSn, jabberSn, msnSn,
+			mySpaceSn, skypeSn, twitterSn, ymSn, jobTitle, groupIds,
+			organizationIds, roleIds, userGroupRoles, userGroupIds,
+			serviceContext);
 
 		if (!addGroupIds.isEmpty() || !removeGroupIds.isEmpty()) {
 			SiteMembershipPolicyUtil.propagateMembership(
@@ -2048,6 +2010,111 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		}
 
 		return user;
+	}
+
+	/**
+	 * Updates the user with additional parameters.
+	 *
+	 * @param      userId the primary key of the user
+	 * @param      oldPassword the user's old password
+	 * @param      newPassword1 the user's new password (optionally
+	 *             <code>null</code>)
+	 * @param      newPassword2 the user's new password confirmation (optionally
+	 *             <code>null</code>)
+	 * @param      passwordReset whether the user should be asked to reset their
+	 *             password the next time they login
+	 * @param      reminderQueryQuestion the user's new password reset question
+	 * @param      reminderQueryAnswer the user's new password reset answer
+	 * @param      screenName the user's new screen name
+	 * @param      emailAddress the user's new email address
+	 * @param      facebookId the user's new Facebook ID
+	 * @param      openId the user's new OpenID
+	 * @param      languageId the user's new language ID
+	 * @param      timeZoneId the user's new time zone ID
+	 * @param      greeting the user's new greeting
+	 * @param      comments the user's new comments
+	 * @param      firstName the user's new first name
+	 * @param      middleName the user's new middle name
+	 * @param      lastName the user's new last name
+	 * @param      prefixId the user's new name prefix ID
+	 * @param      suffixId the user's new name suffix ID
+	 * @param      male whether user is male
+	 * @param      birthdayMonth the user's new birthday month (0-based, meaning
+	 *             0 for January)
+	 * @param      birthdayDay the user's new birthday day
+	 * @param      birthdayYear the user's birthday year
+	 * @param      smsSn the user's new SMS screen name
+	 * @param      aimSn the user's new AIM screen name
+	 * @param      facebookSn the user's new Facebook screen name
+	 * @param      icqSn the user's new ICQ screen name
+	 * @param      jabberSn the user's new Jabber screen name
+	 * @param      msnSn the user's new MSN screen name
+	 * @param      mySpaceSn the user's new MySpace screen name
+	 * @param      skypeSn the user's new Skype screen name
+	 * @param      twitterSn the user's new Twitter screen name
+	 * @param      ymSn the user's new Yahoo! Messenger screen name
+	 * @param      jobTitle the user's new job title
+	 * @param      groupIds the primary keys of the user's groups
+	 * @param      organizationIds the primary keys of the user's organizations
+	 * @param      roleIds the primary keys of the user's roles
+	 * @param      userGroupRoles the user user's group roles
+	 * @param      userGroupIds the primary keys of the user's user groups
+	 * @param      addresses the user's addresses
+	 * @param      emailAddresses the user's email addresses
+	 * @param      phones the user's phone numbers
+	 * @param      websites the user's websites
+	 * @param      announcementsDelivers the announcements deliveries
+	 * @param      serviceContext the service context to be applied (optionally
+	 *             <code>null</code>). Can set the UUID (with the
+	 *             <code>uuid</code> attribute), asset category IDs, asset tag
+	 *             names, and expando bridge attributes for the user.
+	 * @return     the user
+	 * @throws     PortalException if a user with the primary key could not be
+	 *             found, if the new information was invalid, if the current
+	 *             user did not have permission to update the user, or if the
+	 *             operation was not allowed by the membership policy
+	 * @deprecated As of 7.0.0, replaced by {@link #updateUser(long, String,
+	 *             String, String, boolean, String, String, String, String,
+	 *             long, String, String, String, String, String, String, String,
+	 *             String, int, int, boolean, int, int, int, String, String,
+	 *             String, String, String, String, String, String, String,
+	 *             String, String, long[], long[], long[], java.util.List,
+	 *             long[], java.util.List, java.util.List, java.util.List,
+	 *             java.util.List, java.util.List, boolean, byte[],
+	 *             com.liferay.portal.service.ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public User updateUser(
+			long userId, String oldPassword, String newPassword1,
+			String newPassword2, boolean passwordReset,
+			String reminderQueryQuestion, String reminderQueryAnswer,
+			String screenName, String emailAddress, long facebookId,
+			String openId, String languageId, String timeZoneId,
+			String greeting, String comments, String firstName,
+			String middleName, String lastName, int prefixId, int suffixId,
+			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
+			String smsSn, String aimSn, String facebookSn, String icqSn,
+			String jabberSn, String msnSn, String mySpaceSn, String skypeSn,
+			String twitterSn, String ymSn, String jobTitle, long[] groupIds,
+			long[] organizationIds, long[] roleIds,
+			List<UserGroupRole> userGroupRoles, long[] userGroupIds,
+			List<Address> addresses, List<EmailAddress> emailAddresses,
+			List<Phone> phones, List<Website> websites,
+			List<AnnouncementsDelivery> announcementsDelivers,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return updateUser(
+			userId, oldPassword, newPassword1, newPassword2, passwordReset,
+			reminderQueryQuestion, reminderQueryAnswer, screenName,
+			emailAddress, facebookId, openId, true, null, languageId,
+			timeZoneId, greeting, comments, firstName, middleName, lastName,
+			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
+			smsSn, aimSn, facebookSn, icqSn, jabberSn, msnSn, mySpaceSn,
+			skypeSn, twitterSn, ymSn, jobTitle, groupIds, organizationIds,
+			roleIds, userGroupRoles, userGroupIds, addresses, emailAddresses,
+			phones, websites, announcementsDelivers, serviceContext);
 	}
 
 	/**
@@ -2106,7 +2173,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *         found, if the new information was invalid, if the current user
 	 *         did not have permission to update the user, or if the operation
 	 *         was not allowed by the membership policy
-	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public User updateUser(
@@ -2124,24 +2190,25 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			long[] organizationIds, long[] roleIds,
 			List<UserGroupRole> userGroupRoles, long[] userGroupIds,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return updateUser(
 			userId, oldPassword, newPassword1, newPassword2, passwordReset,
 			reminderQueryQuestion, reminderQueryAnswer, screenName,
-			emailAddress, facebookId, openId, languageId, timeZoneId, greeting,
-			comments, firstName, middleName, lastName, prefixId, suffixId, male,
-			birthdayMonth, birthdayDay, birthdayYear, smsSn, aimSn, facebookSn,
-			icqSn, jabberSn, msnSn, mySpaceSn, skypeSn, twitterSn, ymSn,
-			jobTitle, groupIds, organizationIds, roleIds, userGroupRoles,
-			userGroupIds, null, null, null, null, null, serviceContext);
+			emailAddress, facebookId, openId, true, null, languageId,
+			timeZoneId, greeting, comments, firstName, middleName, lastName,
+			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
+			smsSn, aimSn, facebookSn, icqSn, jabberSn, msnSn, mySpaceSn,
+			skypeSn, twitterSn, ymSn, jobTitle, groupIds, organizationIds,
+			roleIds, userGroupRoles, userGroupIds, null, null, null, null, null,
+			serviceContext);
 	}
 
 	protected void checkAddUserPermission(
 			long creatorUserId, long companyId, String emailAddress,
 			long[] groupIds, long[] organizationIds, long[] roleIds,
 			long[] userGroupIds, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		Company company = companyPersistence.findByPrimaryKey(companyId);
 
@@ -2189,7 +2256,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	}
 
 	protected long[] checkGroups(long userId, long[] groupIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		long[] oldGroupIds = null;
 
@@ -2214,8 +2281,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 
 				if (!ArrayUtil.contains(groupIds, group.getGroupId()) &&
 					(!GroupPermissionUtil.contains(
-						permissionChecker, group.getGroupId(),
-						ActionKeys.ASSIGN_MEMBERS) ||
+						permissionChecker, group, ActionKeys.ASSIGN_MEMBERS) ||
 					 SiteMembershipPolicyUtil.isMembershipProtected(
 						 permissionChecker, user.getUserId(),
 						 group.getGroupId()) ||
@@ -2251,7 +2317,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	protected void checkMembership(
 			long[] userIds, long[] groupIds, long[] organizationIds,
 			long[] roleIds, long[] userGroupIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (groupIds != null) {
 			SiteMembershipPolicyUtil.checkMembership(userIds, groupIds, null);
@@ -2273,7 +2339,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	}
 
 	protected long[] checkOrganizations(long userId, long[] organizationIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		long[] oldOrganizationIds = null;
 
@@ -2296,7 +2362,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 				if (!ArrayUtil.contains(
 						organizationIds, organization.getOrganizationId()) &&
 					(!OrganizationPermissionUtil.contains(
-						permissionChecker, organization.getOrganizationId(),
+						permissionChecker, organization,
 						ActionKeys.ASSIGN_MEMBERS) ||
 					 OrganizationMembershipPolicyUtil.isMembershipProtected(
 						permissionChecker, userId,
@@ -2333,7 +2399,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	}
 
 	protected long[] checkRoles(long userId, long[] roleIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		long[] oldRoleIds = null;
 
@@ -2388,7 +2454,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	}
 
 	protected long[] checkUserGroupIds(long userId, long[] userGroupIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		long[] oldUserGroupIds = null;
 
@@ -2440,7 +2506,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 
 	protected List<UserGroupRole> checkUserGroupRoles(
 			long userId, List<UserGroupRole> userGroupRoles)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		List<UserGroupRole> oldUserGroupRoles = null;
 
@@ -2468,8 +2534,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 							group.getOrganizationId());
 
 					if (!UserGroupRolePermissionUtil.contains(
-							permissionChecker, oldUserGroupRole.getGroupId(),
-							oldUserGroupRole.getRoleId()) ||
+							permissionChecker, group, role) ||
 						OrganizationMembershipPolicyUtil.isRoleProtected(
 							getPermissionChecker(), userId,
 							organization.getOrganizationId(),
@@ -2484,8 +2549,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 				else if (role.getType() == RoleConstants.TYPE_SITE) {
 					if (!userGroupRoles.contains(oldUserGroupRole) &&
 						(!UserGroupRolePermissionUtil.contains(
-							permissionChecker, oldUserGroupRole.getGroupId(),
-							oldUserGroupRole.getRoleId()) ||
+							permissionChecker, group, role) ||
 						 SiteMembershipPolicyUtil.isRoleProtected(
 							 getPermissionChecker(), userId, group.getGroupId(),
 							 role.getRoleId()) ||
@@ -2517,7 +2581,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	protected void propagateMembership(
 			long[] userIds, long[] groupIds, long[] organizationIds,
 			long[] roleIds, long[] userGroupIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (groupIds != null) {
 			SiteMembershipPolicyUtil.propagateMembership(
@@ -2541,7 +2605,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 
 	protected void updateAnnouncementsDeliveries(
 			long userId, List<AnnouncementsDelivery> announcementsDeliveries)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		for (AnnouncementsDelivery announcementsDelivery :
 				announcementsDeliveries) {
@@ -2555,13 +2619,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	}
 
 	protected void validateEmailAddress(User user, String emailAddress)
-		throws PortalException, SystemException {
-
-		PermissionChecker permissionChecker = getPermissionChecker();
-
-		if (!UsersAdminUtil.hasUpdateEmailAddress(permissionChecker, user)) {
-			throw new UserEmailAddressException();
-		}
+		throws PortalException {
 
 		if (!user.hasCompanyMx() && user.hasCompanyMx(emailAddress)) {
 			Company company = companyPersistence.findByPrimaryKey(
@@ -2574,7 +2632,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	}
 
 	protected void validateOrganizationUsers(long[] userIds)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		PermissionChecker permissionChecker = getPermissionChecker();
 
@@ -2607,13 +2665,78 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		}
 	}
 
-	protected void validateScreenName(User user, String screenName)
-		throws PortalException, SystemException {
+	protected void validateUpdatePermission(
+			User user, String screenName, String emailAddress, String firstName,
+			String middleName, String lastName, int prefixId, int suffixId,
+			int birthdayMonth, int birthdayDay, int birthdayYear, boolean male,
+			String jobTitle)
+		throws PortalException {
 
-		PermissionChecker permissionChecker = getPermissionChecker();
+		List<String> fields = new ArrayList<String>();
 
-		if (!UsersAdminUtil.hasUpdateScreenName(permissionChecker, user)) {
-			throw new UserScreenNameException();
+		Contact contact = user.getContact();
+
+		Calendar birthday = CalendarFactoryUtil.getCalendar();
+
+		birthday.setTime(contact.getBirthday());
+
+		if ((birthdayMonth != birthday.get(Calendar.MONTH)) ||
+			(birthdayDay != birthday.get(Calendar.DAY_OF_MONTH)) ||
+			(birthdayYear != birthday.get(Calendar.YEAR))) {
+
+			fields.add("birthday");
+		}
+
+		if (!StringUtil.equalsIgnoreCase(
+				emailAddress, user.getEmailAddress())) {
+
+			fields.add("emailAddress");
+		}
+
+		if (!StringUtil.equalsIgnoreCase(firstName, user.getFirstName())) {
+			fields.add("firstName");
+		}
+
+		if (male != contact.getMale()) {
+			fields.add("gender");
+		}
+
+		if (!StringUtil.equalsIgnoreCase(jobTitle, user.getJobTitle())) {
+			fields.add("jobTitle");
+		}
+
+		if (!StringUtil.equalsIgnoreCase(lastName, user.getLastName())) {
+			fields.add("lastName");
+		}
+
+		if (!StringUtil.equalsIgnoreCase(middleName, user.getMiddleName())) {
+			fields.add("middleName");
+		}
+
+		if (prefixId != contact.getPrefixId()) {
+			fields.add("prefix");
+		}
+
+		if (!StringUtil.equalsIgnoreCase(screenName, user.getScreenName())) {
+			fields.add("screenName");
+		}
+
+		if (suffixId != contact.getSuffixId()) {
+			fields.add("suffix");
+		}
+
+		UserFieldException ufe = new UserFieldException();
+
+		for (String field : fields) {
+			if (!UsersAdminUtil.hasUpdateFieldPermission(
+					getPermissionChecker(), getUser(), user, field)) {
+
+				ufe.addField(field);
+			}
+		}
+
+		if (ufe.hasFields()) {
+			throw ufe;
 		}
 	}
 

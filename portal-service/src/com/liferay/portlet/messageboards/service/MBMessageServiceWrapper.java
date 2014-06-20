@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.messageboards.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see MBMessageService
  * @generated
  */
+@ProviderType
 public class MBMessageServiceWrapper implements MBMessageService,
 	ServiceWrapper<MBMessageService> {
 	public MBMessageServiceWrapper(MBMessageService mbMessageService) {
@@ -56,8 +59,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		long permissionOwnerId, long threadId, long parentMessageId,
 		java.lang.String subject, java.lang.String body,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.addDiscussionMessage(groupId, className,
 			classPK, permissionClassName, permissionClassPK, permissionOwnerId,
 			threadId, parentMessageId, subject, body, serviceContext);
@@ -68,6 +70,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 	String, String, java.util.List, boolean, double, boolean,
 	com.liferay.portal.service.ServiceContext)}
 	*/
+	@Deprecated
 	@Override
 	public com.liferay.portlet.messageboards.model.MBMessage addMessage(
 		long groupId, long categoryId, long threadId, long parentMessageId,
@@ -76,8 +79,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		java.util.List<com.liferay.portal.kernel.util.ObjectValuePair<java.lang.String, java.io.InputStream>> inputStreamOVPs,
 		boolean anonymous, double priority, boolean allowPingbacks,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.addMessage(groupId, categoryId, threadId,
 			parentMessageId, subject, body, format, inputStreamOVPs, anonymous,
 			priority, allowPingbacks, serviceContext);
@@ -90,8 +92,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		java.util.List<com.liferay.portal.kernel.util.ObjectValuePair<java.lang.String, java.io.InputStream>> inputStreamOVPs,
 		boolean anonymous, double priority, boolean allowPingbacks,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.addMessage(groupId, categoryId, subject, body,
 			format, inputStreamOVPs, anonymous, priority, allowPingbacks,
 			serviceContext);
@@ -101,8 +102,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 	public com.liferay.portlet.messageboards.model.MBMessage addMessage(
 		long categoryId, java.lang.String subject, java.lang.String body,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.addMessage(categoryId, subject, body,
 			serviceContext);
 	}
@@ -114,8 +114,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		java.util.List<com.liferay.portal.kernel.util.ObjectValuePair<java.lang.String, java.io.InputStream>> inputStreamOVPs,
 		boolean anonymous, double priority, boolean allowPingbacks,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.addMessage(parentMessageId, subject, body,
 			format, inputStreamOVPs, anonymous, priority, allowPingbacks,
 			serviceContext);
@@ -126,38 +125,34 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		java.lang.String className, long classPK,
 		java.lang.String permissionClassName, long permissionClassPK,
 		long permissionOwnerId, long messageId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_mbMessageService.deleteDiscussionMessage(groupId, className, classPK,
 			permissionClassName, permissionClassPK, permissionOwnerId, messageId);
 	}
 
 	@Override
 	public void deleteMessage(long messageId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_mbMessageService.deleteMessage(messageId);
 	}
 
 	@Override
 	public void deleteMessageAttachments(long messageId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_mbMessageService.deleteMessageAttachments(messageId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.messageboards.model.MBMessage> getCategoryMessages(
 		long groupId, long categoryId, int status, int start, int end)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.getCategoryMessages(groupId, categoryId,
 			status, start, end);
 	}
 
 	@Override
 	public int getCategoryMessagesCount(long groupId, long categoryId,
-		int status) throws com.liferay.portal.kernel.exception.SystemException {
+		int status) {
 		return _mbMessageService.getCategoryMessagesCount(groupId, categoryId,
 			status);
 	}
@@ -168,8 +163,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		double version, java.lang.String displayStyle,
 		java.lang.String feedURL, java.lang.String entryURL,
 		com.liferay.portal.theme.ThemeDisplay themeDisplay)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.getCategoryMessagesRSS(groupId, categoryId,
 			status, max, type, version, displayStyle, feedURL, entryURL,
 			themeDisplay);
@@ -181,15 +175,13 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		java.lang.String displayStyle, java.lang.String feedURL,
 		java.lang.String entryURL,
 		com.liferay.portal.theme.ThemeDisplay themeDisplay)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.getCompanyMessagesRSS(companyId, status, max,
 			type, version, displayStyle, feedURL, entryURL, themeDisplay);
 	}
 
 	@Override
-	public int getGroupMessagesCount(long groupId, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public int getGroupMessagesCount(long groupId, int status) {
 		return _mbMessageService.getGroupMessagesCount(groupId, status);
 	}
 
@@ -199,8 +191,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		java.lang.String displayStyle, java.lang.String feedURL,
 		java.lang.String entryURL,
 		com.liferay.portal.theme.ThemeDisplay themeDisplay)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.getGroupMessagesRSS(groupId, status, max,
 			type, version, displayStyle, feedURL, entryURL, themeDisplay);
 	}
@@ -211,8 +202,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		java.lang.String displayStyle, java.lang.String feedURL,
 		java.lang.String entryURL,
 		com.liferay.portal.theme.ThemeDisplay themeDisplay)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.getGroupMessagesRSS(groupId, userId, status,
 			max, type, version, displayStyle, feedURL, entryURL, themeDisplay);
 	}
@@ -220,8 +210,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 	@Override
 	public com.liferay.portlet.messageboards.model.MBMessage getMessage(
 		long messageId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.getMessage(messageId);
 	}
 
@@ -229,16 +218,14 @@ public class MBMessageServiceWrapper implements MBMessageService,
 	public com.liferay.portlet.messageboards.model.MBMessageDisplay getMessageDisplay(
 		long messageId, int status, java.lang.String threadView,
 		boolean includePrevAndNext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.getMessageDisplay(messageId, status,
 			threadView, includePrevAndNext);
 	}
 
 	@Override
 	public int getThreadAnswersCount(long groupId, long categoryId,
-		long threadId)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long threadId) {
 		return _mbMessageService.getThreadAnswersCount(groupId, categoryId,
 			threadId);
 	}
@@ -246,15 +233,14 @@ public class MBMessageServiceWrapper implements MBMessageService,
 	@Override
 	public java.util.List<com.liferay.portlet.messageboards.model.MBMessage> getThreadMessages(
 		long groupId, long categoryId, long threadId, int status, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		int end) {
 		return _mbMessageService.getThreadMessages(groupId, categoryId,
 			threadId, status, start, end);
 	}
 
 	@Override
 	public int getThreadMessagesCount(long groupId, long categoryId,
-		long threadId, int status)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		long threadId, int status) {
 		return _mbMessageService.getThreadMessagesCount(groupId, categoryId,
 			threadId, status);
 	}
@@ -265,8 +251,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		java.lang.String displayStyle, java.lang.String feedURL,
 		java.lang.String entryURL,
 		com.liferay.portal.theme.ThemeDisplay themeDisplay)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.getThreadMessagesRSS(threadId, status, max,
 			type, version, displayStyle, feedURL, entryURL, themeDisplay);
 	}
@@ -274,29 +259,25 @@ public class MBMessageServiceWrapper implements MBMessageService,
 	@Override
 	public void restoreMessageAttachmentFromTrash(long messageId,
 		java.lang.String fileName)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_mbMessageService.restoreMessageAttachmentFromTrash(messageId, fileName);
 	}
 
 	@Override
 	public void subscribeMessage(long messageId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_mbMessageService.subscribeMessage(messageId);
 	}
 
 	@Override
 	public void unsubscribeMessage(long messageId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_mbMessageService.unsubscribeMessage(messageId);
 	}
 
 	@Override
 	public void updateAnswer(long messageId, boolean answer, boolean cascade)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		_mbMessageService.updateAnswer(messageId, answer, cascade);
 	}
 
@@ -307,8 +288,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		long permissionOwnerId, long messageId, java.lang.String subject,
 		java.lang.String body,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.updateDiscussionMessage(className, classPK,
 			permissionClassName, permissionClassPK, permissionOwnerId,
 			messageId, subject, body, serviceContext);
@@ -321,8 +301,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 		java.util.List<java.lang.String> existingFiles, double priority,
 		boolean allowPingbacks,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbMessageService.updateMessage(messageId, subject, body,
 			inputStreamOVPs, existingFiles, priority, allowPingbacks,
 			serviceContext);
@@ -331,6 +310,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public MBMessageService getWrappedMBMessageService() {
 		return _mbMessageService;
 	}
@@ -338,6 +318,7 @@ public class MBMessageServiceWrapper implements MBMessageService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedMBMessageService(MBMessageService mbMessageService) {
 		_mbMessageService = mbMessageService;
 	}

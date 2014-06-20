@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,6 @@
 package com.liferay.portlet;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.ActionResult;
@@ -29,6 +28,7 @@ import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.servlet.TempAttributesServletRequest;
 import com.liferay.portal.kernel.struts.LastPath;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -182,6 +182,14 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 			return;
 		}
 
+		if (!isValidPortletId(portlet.getPortletId())) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Invalid portlet id " + portlet.getPortletId());
+			}
+
+			throw new PrincipalException();
+		}
+
 		if (portlet.isUndeployedPortlet()) {
 			return;
 		}
@@ -217,17 +225,14 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 			HttpServletRequest request, Portlet portlet)
 		throws PortalException {
 
-		if (!PropsValues.AUTH_TOKEN_CHECK_ENABLED) {
-			return;
-		}
-
 		Map<String, String> initParams = portlet.getInitParams();
 
 		boolean checkAuthToken = GetterUtil.getBoolean(
 			initParams.get("check-auth-token"), true);
 
 		if (checkAuthToken) {
-			AuthTokenUtil.check(request);
+			AuthTokenUtil.checkCSRFToken(
+				request, SecurityPortletContainerWrapper.class.getName());
 		}
 	}
 
@@ -315,7 +320,7 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 	protected boolean hasAccessPermission(
 			HttpServletRequest request, Portlet portlet)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
@@ -325,8 +330,15 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 		Layout layout = (Layout)request.getAttribute(WebKeys.LAYOUT);
 
-		PortletMode portletMode = PortletModeFactory.getPortletMode(
-			ParamUtil.getString(request, "p_p_mode"));
+		PortletMode portletMode = PortletMode.VIEW;
+
+		String portletId = portlet.getPortletId();
+		String ppid = request.getParameter("p_p_id");
+		String ppmode = request.getParameter("p_p_mode");
+
+		if (portletId.equals(ppid) && (ppmode != null)) {
+			portletMode = PortletModeFactory.getPortletMode(ppmode);
+		}
 
 		return PortletPermissionUtil.hasAccessPermission(
 			permissionChecker, themeDisplay.getScopeGroupId(), layout, portlet,
@@ -335,7 +347,7 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 	protected void isAccessAllowedToControlPanelPortlet(
 			HttpServletRequest request, Portlet portlet)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
@@ -362,7 +374,7 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 	protected boolean isAccessAllowedToLayoutPortlet(
 			HttpServletRequest request, Portlet portlet)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if (isAccessGrantedByRuntimePortlet(request, portlet)) {
 			return true;
@@ -431,7 +443,7 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 	protected boolean isAccessGrantedByPortletOnPage(
 			HttpServletRequest request, Portlet portlet)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -477,7 +489,7 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 	protected boolean isLayoutConfigurationAllowed(
 			HttpServletRequest request, Portlet portlet)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -577,6 +589,32 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 		return false;
 	}
 
+	protected boolean isValidPortletId(String portletId) {
+		for (int i = 0; i < portletId.length(); i++) {
+			char c = portletId.charAt(i);
+
+			if ((c >= CharPool.LOWER_CASE_A) && (c <= CharPool.LOWER_CASE_Z)) {
+				continue;
+			}
+
+			if ((c >= CharPool.UPPER_CASE_A) && (c <= CharPool.UPPER_CASE_Z)) {
+				continue;
+			}
+
+			if ((c >= CharPool.NUMBER_0) && (c <= CharPool.NUMBER_9)) {
+				continue;
+			}
+
+			if (c == CharPool.UNDERLINE) {
+				continue;
+			}
+
+			return false;
+		}
+
+		return true;
+	}
+
 	protected ActionResult processActionException(
 		HttpServletRequest request, HttpServletResponse response,
 		Portlet portlet, PrincipalException e) {
@@ -587,9 +625,11 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 		String url = getOriginalURL(request);
 
-		_log.warn(
-			"Reject process action for " + url + " on " +
-				portlet.getPortletId());
+		if (_log.isWarnEnabled()) {
+			_log.warn(
+				"Reject process action for " + url + " on " +
+					portlet.getPortletId());
+		}
 
 		return ActionResult.EMPTY_ACTION_RESULT;
 	}
@@ -634,9 +674,11 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
-		_log.warn(
-			"Reject serveResource for " + url + " on " +
-				portlet.getPortletId());
+		if (_log.isWarnEnabled()) {
+			_log.warn(
+				"Reject serveResource for " + url + " on " +
+					portlet.getPortletId());
+		}
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(

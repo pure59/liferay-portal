@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,8 +14,9 @@
 
 package com.liferay.portal.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -35,7 +36,8 @@ import java.io.Serializable;
  * @see com.liferay.portal.model.impl.GroupModelImpl
  * @generated
  */
-public interface GroupModel extends AttachedModel, BaseModel<Group> {
+@ProviderType
+public interface GroupModel extends AttachedModel, BaseModel<Group>, MVCCModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -55,6 +57,22 @@ public interface GroupModel extends AttachedModel, BaseModel<Group> {
 	 * @param primaryKey the primary key of this group
 	 */
 	public void setPrimaryKey(long primaryKey);
+
+	/**
+	 * Returns the mvcc version of this group.
+	 *
+	 * @return the mvcc version of this group
+	 */
+	@Override
+	public long getMvccVersion();
+
+	/**
+	 * Sets the mvcc version of this group.
+	 *
+	 * @param mvccVersion the mvcc version of this group
+	 */
+	@Override
+	public void setMvccVersion(long mvccVersion);
 
 	/**
 	 * Returns the uuid of this group.
@@ -117,9 +135,8 @@ public interface GroupModel extends AttachedModel, BaseModel<Group> {
 	 * Returns the creator user uuid of this group.
 	 *
 	 * @return the creator user uuid of this group
-	 * @throws SystemException if a system exception occurred
 	 */
-	public String getCreatorUserUuid() throws SystemException;
+	public String getCreatorUserUuid();
 
 	/**
 	 * Sets the creator user uuid of this group.

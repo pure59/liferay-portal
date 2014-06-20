@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,7 +19,6 @@ import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.DocumentImpl;
@@ -35,12 +34,11 @@ import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.service.WikiNodeLocalServiceUtil;
 import com.liferay.portlet.wiki.service.permission.WikiNodePermission;
-import com.liferay.portlet.wiki.service.persistence.WikiNodeActionableDynamicQuery;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Locale;
 
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 import javax.portlet.PortletURL;
 
 /**
@@ -53,6 +51,9 @@ public class WikiNodeIndexer extends BaseIndexer {
 	public static final String PORTLET_ID = PortletKeys.WIKI;
 
 	public WikiNodeIndexer() {
+		setDefaultSelectedFieldNames(
+			Field.COMPANY_ID, Field.ENTRY_CLASS_NAME, Field.ENTRY_CLASS_PK,
+			Field.UID);
 		setFilterSearch(false);
 		setPermissionAware(false);
 	}
@@ -108,7 +109,8 @@ public class WikiNodeIndexer extends BaseIndexer {
 	@Override
 	protected Summary doGetSummary(
 			Document document, Locale locale, String snippet,
-			PortletURL portletURL)
+			PortletURL portletURL, PortletRequest portletRequest,
+			PortletResponse portletResponse)
 		throws Exception {
 
 		return null;
@@ -119,6 +121,14 @@ public class WikiNodeIndexer extends BaseIndexer {
 		WikiNode node = (WikiNode)obj;
 
 		Document document = getDocument(obj);
+
+		if (!node.isInTrash()) {
+			SearchEngineUtil.deleteDocument(
+				getSearchEngineId(), node.getCompanyId(),
+				document.get(Field.UID));
+
+			return;
+		}
 
 		SearchEngineUtil.updateDocument(
 			getSearchEngineId(), node.getCompanyId(), document);
@@ -143,39 +153,41 @@ public class WikiNodeIndexer extends BaseIndexer {
 		return PORTLET_ID;
 	}
 
-	protected void reindexEntries(long companyId)
-		throws PortalException, SystemException {
+	protected void reindexEntries(long companyId) throws PortalException {
+		final ActionableDynamicQuery actionableDynamicQuery =
+			WikiNodeLocalServiceUtil.getActionableDynamicQuery();
 
-		final Collection<Document> documents = new ArrayList<Document>();
+		actionableDynamicQuery.setAddCriteriaMethod(
+			new ActionableDynamicQuery.AddCriteriaMethod() {
 
-		ActionableDynamicQuery actionableDynamicQuery =
-			new WikiNodeActionableDynamicQuery() {
+				@Override
+				public void addCriteria(DynamicQuery dynamicQuery) {
+					Property property = PropertyFactoryUtil.forName("status");
 
-			@Override
-			protected void addCriteria(DynamicQuery dynamicQuery) {
-				Property property = PropertyFactoryUtil.forName("status");
+					dynamicQuery.add(
+						property.eq(WorkflowConstants.STATUS_IN_TRASH));
+				}
 
-				dynamicQuery.add(
-					property.eq(WorkflowConstants.STATUS_IN_TRASH));
-			}
-
-			@Override
-			protected void performAction(Object object) throws PortalException {
-				WikiNode node = (WikiNode)object;
-
-				Document document = getDocument(node);
-
-				documents.add(document);
-			}
-
-		};
-
+			});
 		actionableDynamicQuery.setCompanyId(companyId);
+		actionableDynamicQuery.setPerformActionMethod(
+			new ActionableDynamicQuery.PerformActionMethod() {
+
+				@Override
+				public void performAction(Object object)
+					throws PortalException {
+
+					WikiNode node = (WikiNode)object;
+
+					Document document = getDocument(node);
+
+					actionableDynamicQuery.addDocument(document);
+				}
+
+			});
+		actionableDynamicQuery.setSearchEngineId(getSearchEngineId());
 
 		actionableDynamicQuery.performActions();
-
-		SearchEngineUtil.updateDocuments(
-			getSearchEngineId(), companyId, documents);
 	}
 
 }

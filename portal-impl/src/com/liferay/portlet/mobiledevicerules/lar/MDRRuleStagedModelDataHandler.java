@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -37,6 +37,18 @@ public class MDRRuleStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {MDRRule.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+		String uuid, long groupId, String className, String extraData) {
+
+		MDRRule rule = MDRRuleLocalServiceUtil.fetchMDRRuleByUuidAndGroupId(
+			uuid, groupId);
+
+		if (rule != null) {
+			MDRRuleLocalServiceUtil.deleteRule(rule);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -54,14 +66,14 @@ public class MDRRuleStagedModelDataHandler
 		MDRRuleGroup ruleGroup = MDRRuleGroupLocalServiceUtil.getRuleGroup(
 			rule.getRuleGroupId());
 
-		StagedModelDataHandlerUtil.exportStagedModel(
-			portletDataContext, ruleGroup);
+		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			portletDataContext, rule, ruleGroup,
+			PortletDataContext.REFERENCE_TYPE_PARENT);
 
 		Element ruleElement = portletDataContext.getExportDataElement(rule);
 
 		portletDataContext.addClassedModel(
-			ruleElement, ExportImportPathUtil.getModelPath(rule), rule,
-			MDRPortletDataHandler.NAMESPACE);
+			ruleElement, ExportImportPathUtil.getModelPath(rule), rule);
 	}
 
 	@Override
@@ -69,15 +81,9 @@ public class MDRRuleStagedModelDataHandler
 			PortletDataContext portletDataContext, MDRRule rule)
 		throws Exception {
 
-		String ruleGroupPath = ExportImportPathUtil.getModelPath(
-			portletDataContext, MDRRuleGroup.class.getName(),
+		StagedModelDataHandlerUtil.importReferenceStagedModel(
+			portletDataContext, rule, MDRRuleGroup.class,
 			rule.getRuleGroupId());
-
-		MDRRuleGroup ruleGroup =
-			(MDRRuleGroup)portletDataContext.getZipEntryAsObject(ruleGroupPath);
-
-		StagedModelDataHandlerUtil.importStagedModel(
-			portletDataContext, ruleGroup);
 
 		Map<Long, Long> ruleGroupIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -87,7 +93,7 @@ public class MDRRuleStagedModelDataHandler
 			ruleGroupIds, rule.getRuleGroupId(), rule.getRuleGroupId());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			rule, MDRPortletDataHandler.NAMESPACE);
+			rule);
 
 		serviceContext.setUserId(
 			portletDataContext.getUserId(rule.getUserUuid()));
@@ -121,8 +127,7 @@ public class MDRRuleStagedModelDataHandler
 				serviceContext);
 		}
 
-		portletDataContext.importClassedModel(
-			rule, importedRule, MDRPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(rule, importedRule);
 	}
 
 }

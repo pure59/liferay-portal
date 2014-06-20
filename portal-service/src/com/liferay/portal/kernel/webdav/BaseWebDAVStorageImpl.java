@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,8 @@
 
 package com.liferay.portal.kernel.webdav;
 
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.webdav.methods.MethodFactory;
+import com.liferay.portal.kernel.webdav.methods.MethodFactoryRegistryUtil;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Lock;
 import com.liferay.portal.service.GroupLocalServiceUtil;
@@ -24,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Brian Wing Shun Chan
+ * @author Fabio Pezzutto
  */
 public abstract class BaseWebDAVStorageImpl implements WebDAVStorage {
 
@@ -53,6 +55,11 @@ public abstract class BaseWebDAVStorageImpl implements WebDAVStorage {
 		throws WebDAVException {
 
 		return HttpServletResponse.SC_FORBIDDEN;
+	}
+
+	@Override
+	public MethodFactory getMethodFactory() {
+		return MethodFactoryRegistryUtil.getDefaultMethodFactory();
 	}
 
 	@Override
@@ -152,7 +159,7 @@ public abstract class BaseWebDAVStorageImpl implements WebDAVStorage {
 		return false;
 	}
 
-	protected long getPlid(long groupId) throws SystemException {
+	protected long getPlid(long groupId) {
 		return LayoutLocalServiceUtil.getDefaultPlid(groupId);
 	}
 

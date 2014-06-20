@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,26 +14,14 @@
  */
 --%>
 
-<portlet:renderURL var="viewSitesTreeURL">
-	<portlet:param name="struts_action" value="/sites_admin/view" />
-	<portlet:param name="toolbarItem" value="browse" />
-	<portlet:param name="sitesListView" value="<%= SiteConstants.LIST_VIEW_TREE %>" />
-</portlet:renderURL>
-
-<aui:nav-item href="<%= viewSitesTreeURL %>" label="browse" selected='<%= toolbarItem.equals("browse") %>' />
-
-<portlet:renderURL var="viewSitesFlatURL">
-	<portlet:param name="struts_action" value="/sites_admin/view" />
-	<portlet:param name="toolbarItem" value="view-all-sites" />
-	<portlet:param name="sitesListView" value="<%= SiteConstants.LIST_VIEW_FLAT_SITES %>" />
-</portlet:renderURL>
-
-<aui:nav-item href="<%= viewSitesFlatURL %>" label="view-all" selected='<%= toolbarItem.equals("view-all-sites") %>' />
-
 <c:if test="<%= PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_COMMUNITY) %>">
 
 	<%
 	List<LayoutSetPrototype> layoutSetPrototypes = LayoutSetPrototypeServiceUtil.search(company.getCompanyId(), Boolean.TRUE, null);
+	%>
+
+	<%
+	boolean hasAddLayoutSetPrototypePermission = PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_LAYOUT_SET_PROTOTYPE);
 	%>
 
 	<portlet:renderURL var="viewSitesURL">
@@ -47,16 +35,12 @@
 		<portlet:param name="redirect" value="<%= viewSitesURL %>" />
 	</liferay-portlet:renderURL>
 
-	<%
-	boolean hasAddLayoutSetPrototypePermission = PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_LAYOUT_SET_PROTOTYPE);
-	%>
-
 	<c:choose>
 		<c:when test="<%= layoutSetPrototypes.isEmpty() && !hasAddLayoutSetPrototypePermission %>">
-			<aui:nav-item href="<%= addSiteURL %>" iconClass="icon-plus" label="add" selected='<%= toolbarItem.equals("add") %>' />
+			<aui:nav-item href="<%= addSiteURL %>" iconCssClass="icon-plus" label="add" selected='<%= toolbarItem.equals("add") %>' />
 		</c:when>
 		<c:otherwise>
-			<aui:nav-item dropdown="<%= true %>" label="add" selected='<%= toolbarItem.equals("add") %>'>
+			<aui:nav-item dropdown="<%= true %>" iconCssClass="icon-plus" label="add" selected='<%= toolbarItem.equals("add") %>'>
 
 				<%
 				addSiteURL.setParameter("showPrototypes", "0");
@@ -78,6 +62,8 @@
 				%>
 
 				<c:if test="<%= hasAddLayoutSetPrototypePermission %>">
+					<aui:nav-item cssClass="divider" />
+
 					<liferay-portlet:renderURL portletName="<%= PortletKeys.LAYOUT_SET_PROTOTYPE %>" varImpl="manageSiteTemplateURL">
 						<portlet:param name="struts_action" value="/layout_set_prototypes/view" />
 						<portlet:param name="redirect" value="<%= viewSitesURL %>" />

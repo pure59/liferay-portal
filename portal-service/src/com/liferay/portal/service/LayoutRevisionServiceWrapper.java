@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link LayoutRevisionService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see LayoutRevisionService
  * @generated
  */
+@ProviderType
 public class LayoutRevisionServiceWrapper implements LayoutRevisionService,
 	ServiceWrapper<LayoutRevisionService> {
 	public LayoutRevisionServiceWrapper(
@@ -60,8 +63,7 @@ public class LayoutRevisionServiceWrapper implements LayoutRevisionService,
 		java.lang.String colorSchemeId, java.lang.String wapThemeId,
 		java.lang.String wapColorSchemeId, java.lang.String css,
 		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutRevisionService.addLayoutRevision(userId,
 			layoutSetBranchId, layoutBranchId, parentLayoutRevisionId, head,
 			plid, portletPreferencesPlid, privateLayout, name, title,
@@ -73,6 +75,7 @@ public class LayoutRevisionServiceWrapper implements LayoutRevisionService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public LayoutRevisionService getWrappedLayoutRevisionService() {
 		return _layoutRevisionService;
 	}
@@ -80,6 +83,7 @@ public class LayoutRevisionServiceWrapper implements LayoutRevisionService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedLayoutRevisionService(
 		LayoutRevisionService layoutRevisionService) {
 		_layoutRevisionService = layoutRevisionService;

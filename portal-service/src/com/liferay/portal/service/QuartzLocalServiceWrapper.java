@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link QuartzLocalService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see QuartzLocalService
  * @generated
  */
+@ProviderType
 public class QuartzLocalServiceWrapper implements QuartzLocalService,
 	ServiceWrapper<QuartzLocalService> {
 	public QuartzLocalServiceWrapper(QuartzLocalService quartzLocalService) {
@@ -48,14 +51,14 @@ public class QuartzLocalServiceWrapper implements QuartzLocalService,
 	}
 
 	@Override
-	public void checkQuartzTables()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void checkQuartzTables() {
 		_quartzLocalService.checkQuartzTables();
 	}
 
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public QuartzLocalService getWrappedQuartzLocalService() {
 		return _quartzLocalService;
 	}
@@ -63,6 +66,7 @@ public class QuartzLocalServiceWrapper implements QuartzLocalService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedQuartzLocalService(
 		QuartzLocalService quartzLocalService) {
 		_quartzLocalService = quartzLocalService;

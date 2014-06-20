@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portal.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Validator;
 
@@ -28,6 +30,7 @@ import java.util.Map;
  * @see ClusterGroup
  * @generated
  */
+@ProviderType
 public class ClusterGroupWrapper implements ClusterGroup,
 	ModelWrapper<ClusterGroup> {
 	public ClusterGroupWrapper(ClusterGroup clusterGroup) {
@@ -48,6 +51,7 @@ public class ClusterGroupWrapper implements ClusterGroup,
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("clusterGroupId", getClusterGroupId());
 		attributes.put("name", getName());
 		attributes.put("clusterNodeIds", getClusterNodeIds());
@@ -58,6 +62,12 @@ public class ClusterGroupWrapper implements ClusterGroup,
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		Long mvccVersion = (Long)attributes.get("mvccVersion");
+
+		if (mvccVersion != null) {
+			setMvccVersion(mvccVersion);
+		}
+
 		Long clusterGroupId = (Long)attributes.get("clusterGroupId");
 
 		if (clusterGroupId != null) {
@@ -101,6 +111,26 @@ public class ClusterGroupWrapper implements ClusterGroup,
 	@Override
 	public void setPrimaryKey(long primaryKey) {
 		_clusterGroup.setPrimaryKey(primaryKey);
+	}
+
+	/**
+	* Returns the mvcc version of this cluster group.
+	*
+	* @return the mvcc version of this cluster group
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _clusterGroup.getMvccVersion();
+	}
+
+	/**
+	* Sets the mvcc version of this cluster group.
+	*
+	* @param mvccVersion the mvcc version of this cluster group
+	*/
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_clusterGroup.setMvccVersion(mvccVersion);
 	}
 
 	/**
@@ -292,8 +322,7 @@ public class ClusterGroupWrapper implements ClusterGroup,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_clusterGroup.persist();
 	}
 
@@ -324,6 +353,7 @@ public class ClusterGroupWrapper implements ClusterGroup,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public ClusterGroup getWrappedClusterGroup() {
 		return _clusterGroup;
 	}
@@ -331,6 +361,16 @@ public class ClusterGroupWrapper implements ClusterGroup,
 	@Override
 	public ClusterGroup getWrappedModel() {
 		return _clusterGroup;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _clusterGroup.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _clusterGroup.isFinderCacheEnabled();
 	}
 
 	@Override

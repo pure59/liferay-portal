@@ -9,7 +9,7 @@ AUI.add(
 
 		var CSS_SUCCESS = 'alert alert-success';
 
-		var CSS_ERROR = 'alert alert-error';
+		var CSS_ERROR = 'alert alert-danger';
 
 		var EDITOR = 'editor';
 
@@ -75,6 +75,10 @@ AUI.add(
 			},
 
 			editorName: {
+				validator: isString
+			},
+
+			namespace: {
 				validator: isString
 			},
 
@@ -175,10 +179,13 @@ AUI.add(
 								}
 							}
 						},
-						data: {
-							content: instance.get(EDITOR).getData()
-						},
-						dataType: 'json'
+						data: Liferay.Util.ns(
+							instance.get('namespace'),
+							{
+								content: instance.get(EDITOR).getData()
+							}
+						),
+						dataType: 'JSON'
 					}
 				);
 			},

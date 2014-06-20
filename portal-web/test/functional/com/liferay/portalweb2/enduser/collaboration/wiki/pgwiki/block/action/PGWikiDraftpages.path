@@ -19,18 +19,23 @@
 	<td></td>
 </tr>
 <tr>
-	<td>SUCCESS_MESSAGE</td>
-	<td>//div[@class='alert alert-success']</td>
+	<td>EXTEND_ACTION_PATH</td>
+	<td>PGWiki</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
 	<td></td>
 </tr>
 <tr>
 	<td>INFO_MESSAGE_1</td>
-	<td>xpath=(//div[@class='alert alert-info'])[1]</td>
+	<td>xpath=(//div[contains(@class,'alert') and contains(@class,'alert-info')])[1]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>INFO_MESSAGE_2</td>
-	<td>xpath=(//div[@class='alert alert-info'])[3]</td>
+	<td>xpath=(//div[contains(@class,'alert') and contains(@class,'alert-info')])[3]</td>
 	<td></td>
 </tr>
 <tr>
@@ -57,7 +62,7 @@
 </tr>
 <tr>
 	<td>DRAFT_PAGES_TABLE_STATUS</td>
-	<td>//div[@id='_36_ocerSearchContainerSearchContainer']//tr[contains(.,'${key_wikiPageTitle}')]/td[2]/a</td>
+	<td>//div[@id='_36_ocerSearchContainerSearchContainer']//tr[contains(.,'${key_wikiPageTitle}')]/td[2]//span/strong</td>
 	<td></td>
 </tr>
 <tr>
@@ -77,7 +82,7 @@
 </tr>
 <tr>
 	<td>DRAFT_PAGES_TABLE_ACTIONS</td>
-	<td>//div[@id='_36_ocerSearchContainerSearchContainer']//tr[contains(.,'${key_wikiPageTitle}')]/td[6]/div/a[@title='Actions']</td>
+	<td>//div[@id='_36_ocerSearchContainerSearchContainer']//tr[contains(.,'${key_wikiPageTitle}')]/td[6]/div/a</td>
 	<td></td>
 </tr>
 <tr>
@@ -88,32 +93,32 @@
 <!--DRAFT_PAGES_MENULIST-->
 <tr>
 	<td>DRAFT_PAGES_MENULIST_EDIT</td>
-	<td>//div[@id='_36_ircfSearchContainer']//div[@class='lfr-component lfr-menu-list']/ul/li/a[contains(.,'Edit')]</td>
+	<td>//div[@id='_36_ircfSearchContainer']//div[contains(@class,'lfr-component') and contains(@class,'lfr-menu-list')]/ul/li/a[contains(.,'Edit')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DRAFT_PAGES_MENULIST_PERMISSIONS</td>
-	<td>//div[@id='_36_ircfSearchContainer']//div[@class='lfr-component lfr-menu-list']/ul/li/a[contains(.,'Permissions')]</td>
+	<td>//div[@id='_36_ircfSearchContainer']//div[contains(@class,'lfr-component') and contains(@class,'lfr-menu-list')]/ul/li/a[contains(.,'Permissions')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DRAFT_PAGES_MENULIST_COPY</td>
-	<td>//div[@id='_36_ircfSearchContainer']//div[@class='lfr-component lfr-menu-list']/ul/li/a[contains(.,'Copy')]</td>
+	<td>//div[@id='_36_ircfSearchContainer']//div[contains(@class,'lfr-component') and contains(@class,'lfr-menu-list')]/ul/li/a[contains(.,'Copy')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DRAFT_PAGES_MENULIST_MOVE</td>
-	<td>//div[@id='_36_ircfSearchContainer']//div[@class='lfr-component lfr-menu-list']/ul/li/a[contains(.,'Move')]</td>
+	<td>//div[@id='_36_ircfSearchContainer']//div[contains(@class,'lfr-component') and contains(@class,'lfr-menu-list')]/ul/li/a[contains(.,'Move')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DRAFT_PAGES_MENULIST_SUBSCRIBE</td>
-	<td>//div[@id='_36_ircfSearchContainer']//div[@class='lfr-component lfr-menu-list']/ul/li/a[contains(.,'Subscribe')]</td>
+	<td>//div[@id='_36_ircfSearchContainer']//div[contains(@class,'lfr-component') and contains(@class,'lfr-menu-list')]/ul/li/a[contains(.,'Subscribe')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DRAFT_PAGES_MENULIST_DISCARD_DRAFT</td>
-	<td>//div[@id='_36_ircfSearchContainer']//div[@class='lfr-component lfr-menu-list']/ul/li/a[contains(.,'Discard Draft')]</td>
+	<td>//div[@id='_36_ircfSearchContainer']//div[contains(@class,'lfr-component') and contains(@class,'lfr-menu-list')]/ul/li/a[contains(.,'Discard Draft')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -140,7 +145,7 @@
 </tr>
 <tr>
 	<td>PENDING_APPROVAL_TABLE_STATUS</td>
-	<td>//div[@id='_36_ircfSearchContainer']//tr[contains(.,'${key_wikiPageTitle}')]/td[2]/a</td>
+	<td>//div[@id='_36_ircfSearchContainer']//tr[contains(.,'${key_wikiPageTitle}')]/td[2]/span/span/span/strong</td>
 	<td></td>
 </tr>
 <tr>

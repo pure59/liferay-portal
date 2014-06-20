@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.model;
 
-import com.liferay.portal.kernel.exception.SystemException;
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.service.ServiceContext;
@@ -38,6 +39,7 @@ import java.util.Date;
  * @see com.liferay.portlet.documentlibrary.model.impl.DLFileRankModelImpl
  * @generated
  */
+@ProviderType
 public interface DLFileRankModel extends BaseModel<DLFileRank> {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -119,9 +121,8 @@ public interface DLFileRankModel extends BaseModel<DLFileRank> {
 	 * Returns the user uuid of this document library file rank.
 	 *
 	 * @return the user uuid of this document library file rank
-	 * @throws SystemException if a system exception occurred
 	 */
-	public String getUserUuid() throws SystemException;
+	public String getUserUuid();
 
 	/**
 	 * Sets the user uuid of this document library file rank.

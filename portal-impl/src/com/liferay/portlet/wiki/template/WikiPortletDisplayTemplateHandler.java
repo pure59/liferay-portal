@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.portlet.asset.model.AssetEntry;
 import com.liferay.portlet.portletdisplaytemplate.util.PortletDisplayTemplateConstants;
 import com.liferay.portlet.wiki.model.WikiPage;
 import com.liferay.portlet.wiki.service.WikiNodeLocalService;
@@ -70,12 +71,16 @@ public class WikiPortletDisplayTemplateHandler
 		fieldsTemplateVariableGroup.empty();
 
 		fieldsTemplateVariableGroup.addVariable(
+			"asset-entry", AssetEntry.class, "assetEntry");
+		fieldsTemplateVariableGroup.addVariable(
 			"wiki-page", WikiPage.class, PortletDisplayTemplateConstants.ENTRY);
 		fieldsTemplateVariableGroup.addVariable(
 			"wiki-page-content", String.class, "formattedContent");
 
+		String[] restrictedVariables = getRestrictedVariables(language);
+
 		TemplateVariableGroup wikiServicesTemplateVariableGroup =
-			new TemplateVariableGroup("wiki-services");
+			new TemplateVariableGroup("wiki-services", restrictedVariables);
 
 		wikiServicesTemplateVariableGroup.setAutocompleteEnabled(false);
 

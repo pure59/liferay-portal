@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.social.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.AutoEscape;
 import com.liferay.portal.model.AttachedModel;
@@ -37,6 +39,7 @@ import java.io.Serializable;
  * @see com.liferay.portlet.social.model.impl.SocialActivityCounterModelImpl
  * @generated
  */
+@ProviderType
 public interface SocialActivityCounterModel extends AttachedModel,
 	BaseModel<SocialActivityCounter> {
 	/*

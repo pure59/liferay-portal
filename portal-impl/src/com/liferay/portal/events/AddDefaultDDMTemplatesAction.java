@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,12 +17,10 @@ package com.liferay.portal.events;
 import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.events.SimpleAction;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.template.TemplateHandler;
 import com.liferay.portal.kernel.template.TemplateHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.service.GroupLocalServiceUtil;
@@ -59,7 +57,7 @@ public class AddDefaultDDMTemplatesAction extends SimpleAction {
 			String name, String description, String language,
 			String scriptFileName, boolean cacheable,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		DDMTemplate ddmTemplate = DDMTemplateLocalServiceUtil.fetchTemplate(
 			groupId, classNameId, templateKey);
@@ -69,14 +67,14 @@ public class AddDefaultDDMTemplatesAction extends SimpleAction {
 		}
 
 		Map<Locale, String> nameMap = new HashMap<Locale, String>();
-
-		Locale locale = LocaleUtil.getDefault();
-
-		nameMap.put(locale, LanguageUtil.get(locale, name));
-
 		Map<Locale, String> descriptionMap = new HashMap<Locale, String>();
 
-		descriptionMap.put(locale, LanguageUtil.get(locale, description));
+		Locale[] locales = LanguageUtil.getAvailableLocales(groupId);
+
+		for (Locale locale : locales) {
+			nameMap.put(locale, LanguageUtil.get(locale, name));
+			descriptionMap.put(locale, LanguageUtil.get(locale, description));
+		}
 
 		String script = ContentUtil.get(scriptFileName);
 

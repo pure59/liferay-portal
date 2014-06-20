@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -44,6 +44,7 @@ public class ExpandoBridgeFactoryUtil {
 	 * @deprecated As of 6.1.0, replaced by {@link #getExpandoBridge(long,
 	 *             String)}
 	 */
+	@Deprecated
 	public static ExpandoBridge getExpandoBridge(String className) {
 		long companyId = CompanyThreadLocal.getCompanyId();
 
@@ -54,6 +55,7 @@ public class ExpandoBridgeFactoryUtil {
 	 * @deprecated As of 6.1.0, replaced by {@link #getExpandoBridge(long,
 	 *             String, long)}
 	 */
+	@Deprecated
 	public static ExpandoBridge getExpandoBridge(
 		String className, long classPK) {
 

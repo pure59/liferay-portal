@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.documentlibrary.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -45,6 +46,21 @@ public class RepositoryStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {Repository.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException {
+
+		Repository repository =
+			RepositoryLocalServiceUtil.fetchRepositoryByUuidAndGroupId(
+				uuid, groupId);
+
+		if (repository != null) {
+			RepositoryLocalServiceUtil.deleteRepository(
+				repository.getRepositoryId());
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -74,19 +90,16 @@ public class RepositoryStagedModelDataHandler
 
 		portletDataContext.addClassedModel(
 			repositoryElement, ExportImportPathUtil.getModelPath(repository),
-			repository, DLPortletDataHandler.NAMESPACE);
+			repository);
 
 		List<RepositoryEntry> repositoryEntries =
 			RepositoryEntryLocalServiceUtil.getRepositoryEntries(
 				repository.getRepositoryId());
 
 		for (RepositoryEntry repositoryEntry : repositoryEntries) {
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, repositoryEntry);
-
-			portletDataContext.addReferenceElement(
-				repository, repositoryElement, repositoryEntry,
-				PortletDataContext.REFERENCE_TYPE_CHILD, false);
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, repository, repositoryEntry,
+				PortletDataContext.REFERENCE_TYPE_CHILD);
 		}
 	}
 
@@ -98,7 +111,7 @@ public class RepositoryStagedModelDataHandler
 		long userId = portletDataContext.getUserId(repository.getUserUuid());
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			repository, DLPortletDataHandler.NAMESPACE);
+			repository);
 
 		Repository importedRepository = null;
 
@@ -173,17 +186,10 @@ public class RepositoryStagedModelDataHandler
 			}
 		}
 
-		portletDataContext.importClassedModel(
-			repository, importedRepository, DLPortletDataHandler.NAMESPACE);
+		portletDataContext.importClassedModel(repository, importedRepository);
 
-		List<Element> repositoryEntryElements =
-			portletDataContext.getReferenceDataElements(
-				repository, RepositoryEntry.class);
-
-		for (Element repositoryEntryElement : repositoryEntryElements) {
-			StagedModelDataHandlerUtil.importStagedModel(
-				portletDataContext, repositoryEntryElement);
-		}
+		StagedModelDataHandlerUtil.importReferenceStagedModels(
+			portletDataContext, repository, RepositoryEntry.class);
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,8 +21,8 @@ import com.liferay.portal.kernel.dao.orm.ORMException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
 import com.liferay.portal.model.Lock;
-import com.liferay.portal.test.EnvironmentExecutionTestListener;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
+import com.liferay.portal.test.MainServletExecutionTestListener;
 
 import java.sql.BatchUpdateException;
 
@@ -44,12 +44,12 @@ import org.junit.runner.RunWith;
 /**
  * @author Shuyang Zhou
  */
-@ExecutionTestListeners(listeners = {EnvironmentExecutionTestListener.class})
+@ExecutionTestListeners(listeners = {MainServletExecutionTestListener.class})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
 public class LockLocalServiceTest {
 
 	@Before
-	public void setUp() throws SystemException {
+	public void setUp() {
 		LockLocalServiceUtil.unlock("className", "key");
 	}
 
@@ -90,26 +90,26 @@ public class LockLocalServiceTest {
 		String key = "testKey";
 		String owner1 = "testOwner1";
 
-		Lock lock1 = LockLocalServiceUtil.lock(className, key, owner1, false);
+		Lock lock1 = LockLocalServiceUtil.lock(className, key, owner1);
 
 		Assert.assertEquals(owner1, lock1.getOwner());
 		Assert.assertTrue(lock1.isNew());
 
 		String owner2 = "owner2";
 
-		Lock lock2 = LockLocalServiceUtil.lock(className, key, owner2, false);
+		Lock lock2 = LockLocalServiceUtil.lock(className, key, owner2);
 
 		Assert.assertEquals(owner1, lock2.getOwner());
 		Assert.assertFalse(lock2.isNew());
 
-		LockLocalServiceUtil.unlock(className, key, owner1, false);
+		LockLocalServiceUtil.unlock(className, key, owner1);
 
-		lock2 = LockLocalServiceUtil.lock(className, key, owner2, false);
+		lock2 = LockLocalServiceUtil.lock(className, key, owner2);
 
 		Assert.assertEquals(owner2, lock2.getOwner());
 		Assert.assertTrue(lock2.isNew());
 
-		LockLocalServiceUtil.unlock(className, key, owner2, false);
+		LockLocalServiceUtil.unlock(className, key, owner2);
 	}
 
 	private class LockingJob implements Runnable {
@@ -135,7 +135,7 @@ public class LockLocalServiceTest {
 			while (true) {
 				try {
 					Lock lock = LockLocalServiceUtil.lock(
-						_className, _key, _owner, false);
+						_className, _key, _owner);
 
 					if (lock.isNew()) {
 
@@ -146,7 +146,7 @@ public class LockLocalServiceTest {
 						while (true) {
 							try {
 								LockLocalServiceUtil.unlock(
-									_className, _key, _owner, false);
+									_className, _key, _owner);
 
 								if (++count >= _requiredSuccessCount) {
 									return;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -41,7 +41,9 @@ public class AddressImpl extends AddressBaseImpl {
 		catch (Exception e) {
 			country = new CountryImpl();
 
-			_log.warn(e);
+			if (_log.isWarnEnabled()) {
+				_log.warn(e);
+			}
 		}
 
 		return country;
@@ -57,7 +59,9 @@ public class AddressImpl extends AddressBaseImpl {
 		catch (Exception e) {
 			region = new RegionImpl();
 
-			_log.warn(e);
+			if (_log.isWarnEnabled()) {
+				_log.warn(e);
+			}
 		}
 
 		return region;
@@ -73,7 +77,9 @@ public class AddressImpl extends AddressBaseImpl {
 		catch (Exception e) {
 			type = new ListTypeImpl();
 
-			_log.warn(e);
+			if (_log.isWarnEnabled()) {
+				_log.warn(e);
+			}
 		}
 
 		return type;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Provides a wrapper for {@link BackgroundTaskService}.
  *
@@ -21,6 +23,7 @@ package com.liferay.portal.service;
  * @see BackgroundTaskService
  * @generated
  */
+@ProviderType
 public class BackgroundTaskServiceWrapper implements BackgroundTaskService,
 	ServiceWrapper<BackgroundTaskService> {
 	public BackgroundTaskServiceWrapper(
@@ -49,6 +52,13 @@ public class BackgroundTaskServiceWrapper implements BackgroundTaskService,
 	}
 
 	@Override
+	public int getBackgroundTasksCount(long groupId,
+		java.lang.String taskExecutorClassName, java.lang.String completed) {
+		return _backgroundTaskService.getBackgroundTasksCount(groupId,
+			taskExecutorClassName, completed);
+	}
+
+	@Override
 	public java.lang.String getBackgroundTaskStatusJSON(long backgroundTaskId) {
 		return _backgroundTaskService.getBackgroundTaskStatusJSON(backgroundTaskId);
 	}
@@ -56,6 +66,7 @@ public class BackgroundTaskServiceWrapper implements BackgroundTaskService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */
+	@Deprecated
 	public BackgroundTaskService getWrappedBackgroundTaskService() {
 		return _backgroundTaskService;
 	}
@@ -63,6 +74,7 @@ public class BackgroundTaskServiceWrapper implements BackgroundTaskService,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
 	 */
+	@Deprecated
 	public void setWrappedBackgroundTaskService(
 		BackgroundTaskService backgroundTaskService) {
 		_backgroundTaskService = backgroundTaskService;

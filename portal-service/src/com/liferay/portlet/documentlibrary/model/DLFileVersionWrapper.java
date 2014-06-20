@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.documentlibrary.model;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see DLFileVersion
  * @generated
  */
+@ProviderType
 public class DLFileVersionWrapper implements DLFileVersion,
 	ModelWrapper<DLFileVersion> {
 	public DLFileVersionWrapper(DLFileVersion dlFileVersion) {
@@ -62,6 +65,7 @@ public class DLFileVersionWrapper implements DLFileVersion,
 		attributes.put("repositoryId", getRepositoryId());
 		attributes.put("folderId", getFolderId());
 		attributes.put("fileEntryId", getFileEntryId());
+		attributes.put("treePath", getTreePath());
 		attributes.put("extension", getExtension());
 		attributes.put("mimeType", getMimeType());
 		attributes.put("title", getTitle());
@@ -146,6 +150,12 @@ public class DLFileVersionWrapper implements DLFileVersion,
 
 		if (fileEntryId != null) {
 			setFileEntryId(fileEntryId);
+		}
+
+		String treePath = (String)attributes.get("treePath");
+
+		if (treePath != null) {
+			setTreePath(treePath);
 		}
 
 		String extension = (String)attributes.get("extension");
@@ -357,11 +367,9 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	* Returns the user uuid of this document library file version.
 	*
 	* @return the user uuid of this document library file version
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _dlFileVersion.getUserUuid();
 	}
 
@@ -493,6 +501,26 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	@Override
 	public void setFileEntryId(long fileEntryId) {
 		_dlFileVersion.setFileEntryId(fileEntryId);
+	}
+
+	/**
+	* Returns the tree path of this document library file version.
+	*
+	* @return the tree path of this document library file version
+	*/
+	@Override
+	public java.lang.String getTreePath() {
+		return _dlFileVersion.getTreePath();
+	}
+
+	/**
+	* Sets the tree path of this document library file version.
+	*
+	* @param treePath the tree path of this document library file version
+	*/
+	@Override
+	public void setTreePath(java.lang.String treePath) {
+		_dlFileVersion.setTreePath(treePath);
 	}
 
 	/**
@@ -739,11 +767,9 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	* Returns the status by user uuid of this document library file version.
 	*
 	* @return the status by user uuid of this document library file version
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getStatusByUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getStatusByUserUuid() {
 		return _dlFileVersion.getStatusByUserUuid();
 	}
 
@@ -800,6 +826,7 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	/**
 	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
 	*/
+	@Deprecated
 	@Override
 	public boolean getApproved() {
 		return _dlFileVersion.getApproved();
@@ -863,16 +890,6 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	@Override
 	public boolean isIncomplete() {
 		return _dlFileVersion.isIncomplete();
-	}
-
-	/**
-	* Returns <code>true</code> if this document library file version is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this document library file version is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _dlFileVersion.isInTrash();
 	}
 
 	/**
@@ -995,15 +1012,24 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_dlFileVersion.persist();
 	}
 
 	@Override
+	public void updateTreePath(java.lang.String treePath) {
+		_dlFileVersion.updateTreePath(treePath);
+	}
+
+	@Override
+	public java.lang.String buildTreePath()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _dlFileVersion.buildTreePath();
+	}
+
+	@Override
 	public java.io.InputStream getContentStream(boolean incrementCounter)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _dlFileVersion.getContentStream(incrementCounter);
 	}
 
@@ -1014,35 +1040,19 @@ public class DLFileVersionWrapper implements DLFileVersion,
 
 	@Override
 	public com.liferay.portlet.documentlibrary.model.DLFileEntry getFileEntry()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _dlFileVersion.getFileEntry();
 	}
 
 	@Override
 	public com.liferay.portlet.documentlibrary.model.DLFolder getFolder()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _dlFileVersion.getFolder();
 	}
 
 	@Override
 	public java.lang.String getIcon() {
 		return _dlFileVersion.getIcon();
-	}
-
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _dlFileVersion.getTrashContainer();
-	}
-
-	@Override
-	public boolean isInTrashContainer()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _dlFileVersion.isInTrashContainer();
 	}
 
 	@Override
@@ -1078,6 +1088,7 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedModel}
 	 */
+	@Deprecated
 	public DLFileVersion getWrappedDLFileVersion() {
 		return _dlFileVersion;
 	}
@@ -1085,6 +1096,16 @@ public class DLFileVersionWrapper implements DLFileVersion,
 	@Override
 	public DLFileVersion getWrappedModel() {
 		return _dlFileVersion;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _dlFileVersion.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _dlFileVersion.isFinderCacheEnabled();
 	}
 
 	@Override

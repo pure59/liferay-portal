@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -38,7 +38,7 @@ public class JournalArticleCacheModel implements CacheModel<JournalArticle>,
 	Externalizable {
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(67);
+		StringBundler sb = new StringBundler(69);
 
 		sb.append("{uuid=");
 		sb.append(uuid);
@@ -64,6 +64,8 @@ public class JournalArticleCacheModel implements CacheModel<JournalArticle>,
 		sb.append(classNameId);
 		sb.append(", classPK=");
 		sb.append(classPK);
+		sb.append(", treePath=");
+		sb.append(treePath);
 		sb.append(", articleId=");
 		sb.append(articleId);
 		sb.append(", version=");
@@ -152,6 +154,13 @@ public class JournalArticleCacheModel implements CacheModel<JournalArticle>,
 		journalArticleImpl.setFolderId(folderId);
 		journalArticleImpl.setClassNameId(classNameId);
 		journalArticleImpl.setClassPK(classPK);
+
+		if (treePath == null) {
+			journalArticleImpl.setTreePath(StringPool.BLANK);
+		}
+		else {
+			journalArticleImpl.setTreePath(treePath);
+		}
 
 		if (articleId == null) {
 			journalArticleImpl.setArticleId(StringPool.BLANK);
@@ -269,11 +278,16 @@ public class JournalArticleCacheModel implements CacheModel<JournalArticle>,
 
 		journalArticleImpl.resetOriginalValues();
 
+		journalArticleImpl.setDefaultLanguageId(_defaultLanguageId);
+
+		journalArticleImpl.setDocument(_document);
+
 		return journalArticleImpl;
 	}
 
 	@Override
-	public void readExternal(ObjectInput objectInput) throws IOException {
+	public void readExternal(ObjectInput objectInput)
+		throws ClassNotFoundException, IOException {
 		uuid = objectInput.readUTF();
 		id = objectInput.readLong();
 		resourcePrimKey = objectInput.readLong();
@@ -286,6 +300,7 @@ public class JournalArticleCacheModel implements CacheModel<JournalArticle>,
 		folderId = objectInput.readLong();
 		classNameId = objectInput.readLong();
 		classPK = objectInput.readLong();
+		treePath = objectInput.readUTF();
 		articleId = objectInput.readUTF();
 		version = objectInput.readDouble();
 		title = objectInput.readUTF();
@@ -307,6 +322,9 @@ public class JournalArticleCacheModel implements CacheModel<JournalArticle>,
 		statusByUserId = objectInput.readLong();
 		statusByUserName = objectInput.readUTF();
 		statusDate = objectInput.readLong();
+
+		_defaultLanguageId = (java.lang.String)objectInput.readObject();
+		_document = (com.liferay.portal.kernel.xml.Document)objectInput.readObject();
 	}
 
 	@Override
@@ -337,6 +355,13 @@ public class JournalArticleCacheModel implements CacheModel<JournalArticle>,
 		objectOutput.writeLong(folderId);
 		objectOutput.writeLong(classNameId);
 		objectOutput.writeLong(classPK);
+
+		if (treePath == null) {
+			objectOutput.writeUTF(StringPool.BLANK);
+		}
+		else {
+			objectOutput.writeUTF(treePath);
+		}
 
 		if (articleId == null) {
 			objectOutput.writeUTF(StringPool.BLANK);
@@ -428,6 +453,9 @@ public class JournalArticleCacheModel implements CacheModel<JournalArticle>,
 		}
 
 		objectOutput.writeLong(statusDate);
+
+		objectOutput.writeObject(_defaultLanguageId);
+		objectOutput.writeObject(_document);
 	}
 
 	public String uuid;
@@ -442,6 +470,7 @@ public class JournalArticleCacheModel implements CacheModel<JournalArticle>,
 	public long folderId;
 	public long classNameId;
 	public long classPK;
+	public String treePath;
 	public String articleId;
 	public double version;
 	public String title;
@@ -463,4 +492,6 @@ public class JournalArticleCacheModel implements CacheModel<JournalArticle>,
 	public long statusByUserId;
 	public String statusByUserName;
 	public long statusDate;
+	public java.lang.String _defaultLanguageId;
+	public com.liferay.portal.kernel.xml.Document _document;
 }

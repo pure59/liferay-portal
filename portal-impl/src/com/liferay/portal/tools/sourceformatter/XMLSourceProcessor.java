@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.portal.tools.sourceformatter;
 
+import com.liferay.portal.kernel.io.unsync.UnsyncBufferedReader;
+import com.liferay.portal.kernel.io.unsync.UnsyncStringReader;
 import com.liferay.portal.kernel.util.PropertiesUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -36,84 +38,40 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Hugo Huijser
  */
 public class XMLSourceProcessor extends BaseSourceProcessor {
 
-	@Override
-	protected void doFormat() throws Exception {
-		String[] excludes = new String[] {
-			"**\\.idea\\**", "**\\bin\\**", "**\\classes\\**"
-		};
-		String[] includes = new String[] {"**\\*.xml"};
+	public static String formatXML(String content) {
+		String newContent = StringUtil.replace(content, "\"/>\n", "\" />\n");
 
-		List<String> fileNames = getFileNames(excludes, includes);
+		while (true) {
+			Matcher matcher = _commentPattern1.matcher(newContent);
 
-		for (String fileName : fileNames) {
-			File file = new File(BASEDIR + fileName);
+			if (matcher.find()) {
+				newContent = StringUtil.replaceFirst(
+					newContent, ">\n", ">\n\n", matcher.start());
 
-			fileName = StringUtil.replace(
-				fileName, StringPool.BACK_SLASH, StringPool.SLASH);
-
-			String content = fileUtil.read(file);
-
-			String newContent = content;
-
-			if (!fileName.contains("/build")) {
-				Properties leadingSpacesExclusions = getExclusionsProperties(
-					"source_formatter_xml_leading_spaces_exclusions." +
-						"properties");
-
-				String excluded = null;
-
-				if (leadingSpacesExclusions != null) {
-					excluded = leadingSpacesExclusions.getProperty(fileName);
-				}
-
-				if (excluded == null) {
-					newContent = trimContent(newContent, false);
-				}
+				continue;
 			}
 
-			if (fileName.contains("/build") && !fileName.contains("/tools/")) {
-				newContent = formatAntXML(fileName, newContent);
-			}
-			else if (fileName.endsWith("structures.xml")) {
-				newContent = formatDDLStructuresXML(newContent);
-			}
-			else if (fileName.endsWith("routes.xml")) {
-				newContent = formatFriendlyURLRoutesXML(fileName, newContent);
-			}
-			else if ((portalSource &&
-					  fileName.endsWith("/portlet-custom.xml")) ||
-					 (!portalSource && fileName.endsWith("/portlet.xml"))) {
+			matcher = _commentPattern2.matcher(newContent);
 
-				newContent = formatPortletXML(newContent);
-			}
-			else if (portalSource && fileName.endsWith("/service.xml")) {
-				formatServiceXML(fileName, newContent);
-			}
-			else if (portalSource && fileName.endsWith("/struts-config.xml")) {
-				formatStrutsConfigXML(fileName, content);
-			}
-			else if (portalSource && fileName.endsWith("/tiles-defs.xml")) {
-				formatTilesDefsXML(fileName, content);
-			}
-			else if (portalSource && fileName.endsWith("WEB-INF/web.xml") ||
-					 !portalSource && fileName.endsWith("/web.xml")) {
-
-				newContent = formatWebXML(fileName, content);
+			if (!matcher.find()) {
+				break;
 			}
 
-			if ((newContent != null) && !content.equals(newContent)) {
-				fileUtil.write(file, newContent);
-
-				sourceFormatterHelper.printError(fileName, file);
-			}
+			newContent = StringUtil.replaceFirst(
+				newContent, "-->\n", "-->\n\n", matcher.start());
 		}
+
+		return newContent;
 	}
 
 	protected String fixAntXMLProjectName(String fileName, String content) {
@@ -177,6 +135,243 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 		return content;
 	}
 
+	protected String fixPoshiXMLElementWithNoChild(String content) {
+		Matcher matcher = _poshiElementWithNoChildPattern.matcher(content);
+
+		while (matcher.find()) {
+			content = StringUtil.replace(content, matcher.group(), "\" />");
+		}
+
+		return content;
+	}
+
+	protected String fixPoshiXMLEndLines(String content) {
+		Matcher matcher = _poshiEndLinesPattern.matcher(content);
+
+		while (matcher.find()) {
+			String statement = matcher.group();
+
+			String newStatement = StringUtil.replace(
+				statement, matcher.group(), ">\n\n" + matcher.group(1));
+
+			content = StringUtil.replace(content, statement, newStatement);
+		}
+
+		return content;
+	}
+
+	protected String fixPoshiXMLEndLinesAfterClosingElement(String content) {
+		Matcher matcher = _poshiEndLinesAfterClosingElementPattern.matcher(
+			content);
+
+		while (matcher.find()) {
+			String statement = matcher.group();
+
+			String closingElementName = matcher.group(1);
+
+			if (StringUtil.equalsIgnoreCase("</and>", closingElementName) ||
+				StringUtil.equalsIgnoreCase("</elseif>", closingElementName) ||
+				StringUtil.equalsIgnoreCase("</not>", closingElementName) ||
+				StringUtil.equalsIgnoreCase("</or>", closingElementName) ||
+				StringUtil.equalsIgnoreCase("</then>", closingElementName)) {
+
+				String newStatement = StringUtil.replace(
+					statement, matcher.group(2), "\n");
+
+				content = StringUtil.replace(content, statement, newStatement);
+			}
+			else if (!StringUtil.equalsIgnoreCase(
+						"</var>", closingElementName)) {
+
+				String newStatement = StringUtil.replace(
+					statement, matcher.group(2), "\n\n");
+
+				content = StringUtil.replace(content, statement, newStatement);
+			}
+		}
+
+		return content;
+	}
+
+	protected String fixPoshiXMLEndLinesBeforeClosingElement(String content) {
+		Matcher matcher = _poshiEndLinesBeforeClosingElementPattern.matcher(
+			content);
+
+		while (matcher.find()) {
+			String statement = matcher.group();
+
+			String newStatement = StringUtil.replace(
+				statement, matcher.group(1), "\n");
+
+			content = StringUtil.replace(content, statement, newStatement);
+		}
+
+		return content;
+	}
+
+	protected String fixPoshiXMLNumberOfTabs(String content) {
+		Matcher matcher = _poshiTabsPattern.matcher(content);
+
+		int tabCount = 0;
+
+		boolean ignoredCdataBlock = false;
+		boolean ignoredCommentBlock = false;
+
+		while (matcher.find()) {
+			String statement = matcher.group();
+
+			Matcher quoteWithSlashMatcher = _poshiQuoteWithSlashPattern.matcher(
+				statement);
+
+			String fixedQuoteStatement = statement;
+
+			if (quoteWithSlashMatcher.find()) {
+				fixedQuoteStatement = StringUtil.replace(
+					statement, quoteWithSlashMatcher.group(), "\"\"");
+			}
+
+			Matcher closingTagMatcher = _poshiClosingTagPattern.matcher(
+				fixedQuoteStatement);
+			Matcher openingTagMatcher = _poshiOpeningTagPattern.matcher(
+				fixedQuoteStatement);
+			Matcher wholeTagMatcher = _poshiWholeTagPattern.matcher(
+				fixedQuoteStatement);
+
+			if (closingTagMatcher.find() && !openingTagMatcher.find() &&
+				!wholeTagMatcher.find() && !statement.contains("<!--") &&
+				!statement.contains("-->") &&
+				!statement.contains("<![CDATA[") &&
+				!statement.contains("]]>")) {
+
+				tabCount--;
+			}
+
+			if (statement.contains("]]>")) {
+				ignoredCdataBlock = false;
+			}
+			else if (statement.contains("<![CDATA[")) {
+				ignoredCdataBlock = true;
+			}
+
+			if (statement.contains("-->")) {
+				ignoredCommentBlock = false;
+			}
+			else if (statement.contains("<!--")) {
+				ignoredCommentBlock = true;
+			}
+
+			if (!ignoredCommentBlock && !ignoredCdataBlock) {
+				StringBundler sb = new StringBundler(tabCount + 1);
+
+				for (int i = 0; i < tabCount; i++) {
+					sb.append(StringPool.TAB);
+				}
+
+				sb.append(StringPool.LESS_THAN);
+
+				String newStatement = StringUtil.replace(
+					statement, matcher.group(1), sb.toString());
+
+				content = StringUtil.replaceFirst(
+					content, statement, newStatement, matcher.start());
+			}
+
+			if (openingTagMatcher.find() && !closingTagMatcher.find() &&
+				!wholeTagMatcher.find() && !statement.contains("<!--") &&
+				!statement.contains("-->") &&
+				!statement.contains("<![CDATA[") &&
+				!statement.contains("]]>")) {
+
+				tabCount++;
+			}
+		}
+
+		return content;
+	}
+
+	@Override
+	protected void format() throws Exception {
+		String[] excludes = new String[] {
+			"**\\.bnd\\**", "**\\.idea\\**", "**\\.ivy\\**",
+			"portal-impl\\**\\*.action", "portal-impl\\**\\*.function",
+			"portal-impl\\**\\*.macro", "portal-impl\\**\\*.testcase",
+			"tools\\sdk\\**"
+		};
+
+		String[] includes = new String[] {
+			"**\\*.action","**\\*.function","**\\*.macro","**\\*.testcase",
+			"**\\*.xml"
+		};
+
+		List<String> exclusions = getExclusions("xml.excludes");
+
+		_friendlyUrlRoutesSortExclusions = getExclusions(
+			"friendly.url.routes.sort.excludes");
+
+		List<String> fileNames = getFileNames(excludes, includes);
+
+		for (String fileName : fileNames) {
+			File file = new File(BASEDIR + fileName);
+
+			fileName = StringUtil.replace(
+				fileName, StringPool.BACK_SLASH, StringPool.SLASH);
+
+			if (isExcluded(exclusions, fileName)) {
+				continue;
+			}
+
+			String content = fileUtil.read(file);
+
+			String newContent = content;
+
+			if (!fileName.contains("/build")) {
+				newContent = trimContent(newContent, false);
+			}
+
+			if (fileName.contains("/build") && !fileName.contains("/tools/")) {
+				newContent = formatAntXML(fileName, newContent);
+			}
+			else if (fileName.endsWith("structures.xml")) {
+				newContent = formatDDLStructuresXML(newContent);
+			}
+			else if (fileName.endsWith("routes.xml")) {
+				newContent = formatFriendlyURLRoutesXML(fileName, newContent);
+			}
+			else if ((portalSource &&
+					  fileName.endsWith("/portlet-custom.xml")) ||
+					 (!portalSource && fileName.endsWith("/portlet.xml"))) {
+
+				newContent = formatPortletXML(newContent);
+			}
+			else if (portalSource &&
+					 (fileName.endsWith(".action") ||
+					  fileName.endsWith(".function") ||
+					  fileName.endsWith(".macro") ||
+					  fileName.endsWith(".testcase"))) {
+
+				newContent = formatPoshiXML(fileName, newContent);
+			}
+			else if (portalSource && fileName.endsWith("/service.xml")) {
+				formatServiceXML(fileName, newContent);
+			}
+			else if (portalSource && fileName.endsWith("/struts-config.xml")) {
+				formatStrutsConfigXML(fileName, newContent);
+			}
+			else if (portalSource && fileName.endsWith("/tiles-defs.xml")) {
+				formatTilesDefsXML(fileName, newContent);
+			}
+			else if ((portalSource && fileName.endsWith("WEB-INF/web.xml")) ||
+					 (!portalSource && fileName.endsWith("/web.xml"))) {
+
+				newContent = formatWebXML(fileName, newContent);
+			}
+
+			newContent = formatXML(newContent);
+
+			compareAndAutoFixContent(file, fileName, content, newContent);
+		}
+	}
+
 	protected String formatAntXML(String fileName, String content)
 		throws DocumentException, IOException {
 
@@ -196,13 +391,12 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 			String name = targetElement.attributeValue("name");
 
 			if (name.equals("Test")) {
-				name = name.toLowerCase();
+				name = StringUtil.toLowerCase(name);
 			}
 
 			if (name.compareTo(previousName) < -1) {
 				processErrorMessage(
-					fileName,
-					fileName + " has an unordered target " + name);
+					fileName, fileName + " has an unordered target " + name);
 
 				break;
 			}
@@ -247,18 +441,9 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 	}
 
 	protected String formatFriendlyURLRoutesXML(String fileName, String content)
-		throws DocumentException, IOException {
+		throws DocumentException {
 
-		Properties friendlyUrlRoutesSortExclusions = getExclusionsProperties(
-			"source_formatter_friendly_url_routes_sort_exclusions.properties");
-
-		String excluded = null;
-
-		if (friendlyUrlRoutesSortExclusions != null) {
-			excluded = friendlyUrlRoutesSortExclusions.getProperty(fileName);
-		}
-
-		if (excluded != null) {
+		if (isExcluded(_friendlyUrlRoutesSortExclusions, fileName)) {
 			return content;
 		}
 
@@ -415,6 +600,26 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 		return document.formattedString();
 	}
 
+	protected String formatPoshiXML(String fileName, String content)
+		throws IOException {
+
+		content = sortPoshiAttributes(fileName, content);
+
+		content = sortPoshiCommands(content);
+
+		content = sortPoshiVariables(content);
+
+		content = fixPoshiXMLElementWithNoChild(content);
+
+		content = fixPoshiXMLEndLinesAfterClosingElement(content);
+
+		content = fixPoshiXMLEndLinesBeforeClosingElement(content);
+
+		content = fixPoshiXMLEndLines(content);
+
+		return fixPoshiXMLNumberOfTabs(content);
+	}
+
 	protected void formatServiceXML(String fileName, String content)
 		throws DocumentException {
 
@@ -458,7 +663,8 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 
 						processErrorMessage(
 							fileName,
-							"sort: " + fileName + " " + referencePackagePath);
+							"sort: " + fileName + " " + entityName + " " +
+								referenceEntity);
 					}
 				}
 
@@ -541,7 +747,6 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 				!previousName.equals("portlet")) {
 
 				processErrorMessage(fileName, "sort: " + fileName + " " + name);
-
 			}
 
 			previousName = name;
@@ -585,12 +790,14 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 			urlPatterns.add(locale);
 		}
 
-		StringBundler sb = new StringBundler();
+		StringBundler sb = new StringBundler(6 * urlPatterns.size());
 
 		for (String urlPattern : urlPatterns) {
 			sb.append("\t<servlet-mapping>\n");
 			sb.append("\t\t<servlet-name>I18n Servlet</servlet-name>\n");
-			sb.append("\t\t<url-pattern>/" + urlPattern +"/*</url-pattern>\n");
+			sb.append("\t\t<url-pattern>/");
+			sb.append(urlPattern);
+			sb.append("/*</url-pattern>\n");
 			sb.append("\t</servlet-mapping>\n");
 		}
 
@@ -619,18 +826,238 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 
 		y = newContent.lastIndexOf("</url-pattern>", y) + 15;
 
-		sb = new StringBundler();
+		sb = new StringBundler(3 * urlPatterns.size() + 1);
 
 		sb.append("\t\t\t<url-pattern>/c/portal/protected</url-pattern>\n");
 
 		for (String urlPattern : urlPatterns) {
-			sb.append(
-				"\t\t\t<url-pattern>/" + urlPattern +
-					"/c/portal/protected</url-pattern>\n");
+			sb.append("\t\t\t<url-pattern>/");
+			sb.append(urlPattern);
+			sb.append("/c/portal/protected</url-pattern>\n");
 		}
 
 		return newContent.substring(0, x) + sb.toString() +
 			newContent.substring(y);
 	}
+
+	protected String sortPoshiAttributes(String fileName, String content)
+		throws IOException {
+
+		StringBundler sb = new StringBundler();
+
+		UnsyncBufferedReader unsyncBufferedReader = new UnsyncBufferedReader(
+			new UnsyncStringReader(content));
+
+		String line = null;
+
+		int lineCount = 0;
+
+		boolean sortAttributes = true;
+
+		while ((line = unsyncBufferedReader.readLine()) != null) {
+			lineCount++;
+
+			String trimmedLine = StringUtil.trimLeading(line);
+
+			if (sortAttributes) {
+				if (trimmedLine.startsWith(StringPool.LESS_THAN) &&
+					trimmedLine.endsWith(StringPool.GREATER_THAN) &&
+					!trimmedLine.startsWith("<%") &&
+					!trimmedLine.startsWith("<!")) {
+
+					line = sortAttributes(fileName, line, lineCount, false);
+				}
+				else if (trimmedLine.startsWith("<![CDATA[") &&
+						 !trimmedLine.endsWith("]]>")) {
+
+					sortAttributes = false;
+				}
+			}
+			else if (trimmedLine.endsWith("]]>")) {
+				sortAttributes = true;
+			}
+
+			sb.append(line);
+			sb.append("\n");
+		}
+
+		unsyncBufferedReader.close();
+
+		content = sb.toString();
+
+		if (content.endsWith("\n")) {
+			content = content.substring(0, content.length() - 1);
+		}
+
+		return content;
+	}
+
+	protected String sortPoshiCommands(String content) {
+		Matcher matcher = _poshiCommandsPattern.matcher(content);
+
+		Map<String, String> commandBlocksMap = new TreeMap<String, String>(
+			String.CASE_INSENSITIVE_ORDER);
+
+		String previousName = StringPool.BLANK;
+
+		boolean hasUnsortedCommands = false;
+
+		while (matcher.find()) {
+			String commandBlock = matcher.group();
+			String commandName = matcher.group(1);
+
+			commandBlocksMap.put(commandName, commandBlock);
+
+			if (!hasUnsortedCommands &&
+				(commandName.compareToIgnoreCase(previousName) < 0)) {
+
+				hasUnsortedCommands = true;
+			}
+
+			previousName = commandName;
+		}
+
+		if (!hasUnsortedCommands) {
+			return content;
+		}
+
+		StringBundler sb = new StringBundler();
+
+		matcher = _poshiSetUpPattern.matcher(content);
+
+		if (matcher.find()) {
+			String setUpBlock = matcher.group();
+
+			content = content.replace(setUpBlock, "");
+
+			sb.append(setUpBlock);
+		}
+
+		matcher = _poshiTearDownPattern.matcher(content);
+
+		if (matcher.find()) {
+			String tearDownBlock = matcher.group();
+
+			content = content.replace(tearDownBlock, "");
+
+			sb.append(tearDownBlock);
+		}
+
+		for (Map.Entry<String, String> entry : commandBlocksMap.entrySet()) {
+			sb.append("\n\t");
+			sb.append(entry.getValue());
+			sb.append("\n");
+		}
+
+		int x = content.indexOf("<command");
+		int y = content.lastIndexOf("</command>");
+
+		String commandBlock = content.substring(x, y);
+
+		commandBlock = "\n\t" + commandBlock + "</command>\n";
+
+		String newCommandBlock = sb.toString();
+
+		return StringUtil.replaceFirst(content, commandBlock, newCommandBlock);
+	}
+
+	protected String sortPoshiVariables(String content) {
+		Matcher matcher = _poshiVariablesBlockPattern.matcher(content);
+
+		while (matcher.find()) {
+			String previousName = StringPool.BLANK;
+			String tabs = StringPool.BLANK;
+
+			Map<String, String> variableLinesMap = new TreeMap<String, String>(
+				String.CASE_INSENSITIVE_ORDER);
+
+			String variableBlock = matcher.group(1);
+
+			variableBlock = variableBlock.trim();
+
+			Matcher variableLineMatcher = _poshiVariableLinePattern.matcher(
+				variableBlock);
+
+			boolean hasUnsortedVariables = false;
+
+			while (variableLineMatcher.find()) {
+				if (tabs.equals(StringPool.BLANK)) {
+					tabs = variableLineMatcher.group(1);
+				}
+
+				String variableLine = variableLineMatcher.group(2);
+				String variableName = variableLineMatcher.group(3);
+
+				variableLinesMap.put(variableName, variableLine);
+
+				if (!hasUnsortedVariables &&
+					(variableName.compareToIgnoreCase(previousName) < 0)) {
+
+					hasUnsortedVariables = true;
+				}
+
+				previousName = variableName;
+			}
+
+			if (!hasUnsortedVariables) {
+				continue;
+			}
+
+			StringBundler sb = new StringBundler();
+
+			for (Map.Entry<String, String> entry :
+					variableLinesMap.entrySet()) {
+
+				sb.append(tabs);
+				sb.append(entry.getValue());
+				sb.append("\n");
+			}
+
+			String newVariableBlock = sb.toString();
+
+			newVariableBlock = newVariableBlock.trim();
+
+			content = StringUtil.replaceFirst(
+				content, variableBlock, newVariableBlock);
+		}
+
+		return content;
+	}
+
+	private static Pattern _commentPattern1 = Pattern.compile(
+		">\n\t+<!--[\n ]");
+	private static Pattern _commentPattern2 = Pattern.compile(
+		"[\t ]-->\n[\t<]");
+
+	private List<String> _friendlyUrlRoutesSortExclusions;
+	private Pattern _poshiClosingTagPattern = Pattern.compile("</[^>/]*>");
+	private Pattern _poshiCommandsPattern = Pattern.compile(
+		"\\<command.*name=\\\"([^\\\"]*)\\\".*\\>[\\s\\S]*?\\</command\\>" +
+			"[\\n|\\t]*?(?:[^(?:/\\>)]*?--\\>)*+");
+	private Pattern _poshiElementWithNoChildPattern = Pattern.compile(
+		"\\\"[\\s]*\\>[\\n\\s\\t]*\\</[a-z\\-]+>");
+	private Pattern _poshiEndLinesAfterClosingElementPattern = Pattern.compile(
+		"(\\</[a-z\\-]+>)(\\n+)\\t*\\<[a-z]+");
+	private Pattern _poshiEndLinesBeforeClosingElementPattern = Pattern.compile(
+		"(\\n+)(\\t*</[a-z\\-]+>)");
+	private Pattern _poshiEndLinesPattern = Pattern.compile(
+		"\\>\\n\\n\\n+(\\t*\\<)");
+	private Pattern _poshiOpeningTagPattern = Pattern.compile(
+		"<[^/][^>]*[^/]>");
+	private Pattern _poshiQuoteWithSlashPattern = Pattern.compile(
+		"\"[^\"]*\\>[^\"]*\"");
+	private Pattern _poshiSetUpPattern = Pattern.compile(
+		"\\n[\\t]++\\<set-up\\>([\\s\\S]*?)\\</set-up\\>" +
+			"[\\n|\\t]*?(?:[^(?:/\\>)]*?--\\>)*+\\n");
+	private Pattern _poshiTabsPattern = Pattern.compile("\\n*([ \\t]*<).*");
+	private Pattern _poshiTearDownPattern = Pattern.compile(
+		"\\n[\\t]++\\<tear-down\\>([\\s\\S]*?)\\</tear-down\\>" +
+			"[\\n|\\t]*?(?:[^(?:/\\>)]*?--\\>)*+\\n");
+	private Pattern _poshiVariableLinePattern = Pattern.compile(
+		"([\\t]*+)(\\<var name=\\\"([^\\\"]*)\\\".*?/\\>.*+(?:\\</var\\>)??)");
+	private Pattern _poshiVariablesBlockPattern = Pattern.compile(
+		"((?:[\\t]*+\\<var.*?\\>\\n[\\t]*+){2,}?)" +
+			"(?:(?:\\n){1,}+|\\</execute\\>)");
+	private Pattern _poshiWholeTagPattern = Pattern.compile("<[^\\>^/]*\\/>");
 
 }

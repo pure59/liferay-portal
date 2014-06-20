@@ -1,6 +1,7 @@
 AUI.add(
 	'liferay-dockbar-add-page',
 	function(A) {
+		var AObject = A.Object;
 		var Lang = A.Lang;
 
 		var Dockbar = Liferay.Dockbar;
@@ -21,9 +22,11 @@ AUI.add(
 
 		var STR_CANCEL_ADD_OPERATION = 'cancelAddOperation';
 
-		var STR_HIDDEN_CHECKBOX = 'hiddenCheckbox';
+		var STR_HIDDEN_CHECKBOX = 'addLayoutHidden';
 
-		var STR_NAME = 'name';
+		var STR_ID = 'id';
+
+		var STR_NAME = 'addLayoutName';
 
 		var STR_NODE_LIST = 'nodeList';
 
@@ -37,19 +40,23 @@ AUI.add(
 
 		var AddPage = A.Component.create(
 			{
-				AUGMENTS: [Dockbar.AddPageSearch, Liferay.PortletBase],
-
-				EXTENDS: Dockbar.AddBase,
-
-				NAME: 'addpage',
-
 				ATTRS: {
 					createPageMessage: {
 						validator: Lang.isString
 					},
+
 					parentLayoutId: {
 						validator: Lang.isNumber
 					},
+
+					refresh: {
+						validator: Lang.isBoolean
+					},
+
+					toggleOnCancel: {
+						validator: Lang.isBoolean
+					},
+
 					transition: {
 						validator: Lang.isObject,
 						value: {
@@ -57,6 +64,12 @@ AUI.add(
 						}
 					}
 				},
+
+				AUGMENTS: [Liferay.PortletBase],
+
+				EXTENDS: Dockbar.AddBase,
+
+				NAME: 'addpage',
 
 				prototype: {
 					initializer: function(config) {
@@ -96,69 +109,111 @@ AUI.add(
 						instance._bindUI();
 					},
 
-					_bindUI: function() {
-						var instance = this;
-
-						instance._addForm.on('submit', instance._addPage, instance);
-
-						instance._cancelButton.on('click', instance._cancelAction, instance);
-
-						instance._hiddenCheckbox.on('change', instance._updateNavigationProxy, instance);
-
-						instance._nameInput.on('input', instance._updateNavigationProxy, instance);
-
-						instance._togglerDelegate.on('toggler:expandedChange', instance._updateActivePage, instance);
-					},
-
 					_addPage: function(event) {
 						var instance = this;
 
-						event.preventDefault();
+						var addForm = instance._addForm;
+
+						var formValidator = instance._getFormValidator(addForm);
+
+						if (!formValidator.hasErrors()) {
+							instance._disableFormElements();
+
+							if (instance.get('refresh')) {
+								submitForm(addForm);
+							}
+							else {
+								event.preventDefault();
+
+								A.io.request(
+									addForm.get('action'),
+									{
+										after: {
+											success: function(event, id, obj) {
+												var responseData = this.get(STR_RESPONSE_DATA);
+
+												instance._loadingMask.hide();
+
+												var panel = addForm.ancestor();
+
+												panel.empty();
+
+												panel.plug(A.Plugin.ParseContent);
+
+												panel.setContent(responseData);
+											}
+										},
+										dataType: 'JSON',
+										form: {
+											id: addForm.get(STR_ID)
+										}
+									}
+								);
+
+								instance._loadingMask.show();
+							}
+						}
+						else {
+							AObject.some(
+								formValidator.errors,
+								function(item, index) {
+									var field = formValidator.getField(index);
+
+									field.scrollIntoView();
+									field.focus();
+
+									return true;
+								}
+							);
+						}
+					},
+
+					_bindUI: function() {
+						var instance = this;
+
+						instance._eventHandles.push(
+							instance._addForm.on('submit', instance._addPage, instance),
+							instance._cancelButton.on('click', instance._cancelAction, instance),
+							instance._hiddenCheckbox.on('change', instance._updateNavigationProxy, instance),
+							instance._nameInput.on('valuechange', instance._updateNavigationProxy, instance),
+							instance._togglerDelegate.on('toggler:expandedChange', instance._updateActivePage, instance)
+						);
+					},
+
+					_cancelAction: function(event) {
+						var instance = this;
+
+						if (instance.get('toggleOnCancel')) {
+							event.preventDefault();
+
+							Dockbar.toggleAddPanel();
+						}
+					},
+
+					_disableFormElements: function() {
+						var instance = this;
 
 						var nodes = instance.get(STR_NODES);
 
 						nodes.each(
-							function(item, index, collection) {
+							function(item, index) {
 								var header = item.one(SELECTOR_TOGGLER_HEADER);
 
 								var active = header.hasClass(CSS_ACTIVE);
 
-								item.all('input, select, textarea').set('disabled', !active);
+								item.all('input, select, textarea').attr('disabled', !active);
 							}
 						);
-
-						A.io.request(
-							instance._addForm.get('action'),
-							{
-								dataType: 'json',
-								form: {
-									id: instance._addForm.get('id')
-								},
-								after: {
-									success: function(event, id, obj) {
-										var response = this.get(STR_RESPONSE_DATA);
-
-										instance._loadingMask.hide();
-
-										var panel = instance._addForm.ancestor();
-
-										panel.empty();
-
-										panel.plug(A.Plugin.ParseContent);
-
-										panel.setContent(response);
-									}
-								}
-							}
-						);
-
-						instance._loadingMask.show();
 					},
 
-					_cancelAction: function(event) {
-						event.preventDefault();
+					_getFormValidator: function(formNode) {
+						var instance = this;
 
-						Dockbar.toggleAddPanel();
+						if (!instance._formValidator) {
+							instance._formValidator = Liferay.Form.get(formNode.attr('id')).formValidator;
+						}
+
+						return instance._formValidator;
 					},
 
 					_updateActivePage: function(event) {
@@ -184,9 +239,9 @@ AUI.add(
 
 								header.addClass(CSS_ACTIVE);
 
-								instance.byId('type').set(STR_VALUE, selectedType);
+								instance.byId('addLayoutType').set(STR_VALUE, selectedType);
 
-								instance.byId('layoutPrototypeId').set(STR_VALUE, selectedPrototypeId);
+								instance.byId('addLayoutPrototypeId').set(STR_VALUE, selectedPrototypeId);
 							}
 						}
 					},
@@ -194,7 +249,8 @@ AUI.add(
 					_updateNavigationProxy: function(event) {
 						var instance = this;
 
-						Liferay.fire('dockbaraddpage:previewPageTitle',
+						Liferay.fire(
+							'dockbaraddpage:previewPageTitle',
 							{
 								data: {
 									hidden: instance._hiddenCheckbox.get('checked'),

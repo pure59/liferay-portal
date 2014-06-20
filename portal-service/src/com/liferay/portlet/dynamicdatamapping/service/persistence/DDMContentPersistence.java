@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,8 @@
  */
 
 package com.liferay.portlet.dynamicdatamapping.service.persistence;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.service.persistence.BasePersistence;
 
@@ -30,6 +32,7 @@ import com.liferay.portlet.dynamicdatamapping.model.DDMContent;
  * @see DDMContentUtil
  * @generated
  */
+@ProviderType
 public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -42,11 +45,9 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	*
 	* @param uuid the uuid
 	* @return the matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByUuid(
-		java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		java.lang.String uuid);
 
 	/**
 	* Returns a range of all the d d m contents where uuid = &#63;.
@@ -59,11 +60,9 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param start the lower bound of the range of d d m contents
 	* @param end the upper bound of the range of d d m contents (not inclusive)
 	* @return the range of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByUuid(
-		java.lang.String uuid, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		java.lang.String uuid, int start, int end);
 
 	/**
 	* Returns an ordered range of all the d d m contents where uuid = &#63;.
@@ -77,12 +76,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param end the upper bound of the range of d d m contents (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByUuid(
 		java.lang.String uuid, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the first d d m content in the ordered set where uuid = &#63;.
@@ -91,13 +88,11 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent findByUuid_First(
 		java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the first d d m content in the ordered set where uuid = &#63;.
@@ -105,12 +100,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param uuid the uuid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching d d m content, or <code>null</code> if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByUuid_First(
 		java.lang.String uuid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the last d d m content in the ordered set where uuid = &#63;.
@@ -119,13 +112,11 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent findByUuid_Last(
 		java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the last d d m content in the ordered set where uuid = &#63;.
@@ -133,12 +124,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param uuid the uuid
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching d d m content, or <code>null</code> if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByUuid_Last(
 		java.lang.String uuid,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the d d m contents before and after the current d d m content in the ordered set where uuid = &#63;.
@@ -148,32 +137,26 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a d d m content with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent[] findByUuid_PrevAndNext(
 		long contentId, java.lang.String uuid,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Removes all the d d m contents where uuid = &#63; from the database.
 	*
 	* @param uuid the uuid
-	* @throws SystemException if a system exception occurred
 	*/
-	public void removeByUuid(java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public void removeByUuid(java.lang.String uuid);
 
 	/**
 	* Returns the number of d d m contents where uuid = &#63;.
 	*
 	* @param uuid the uuid
 	* @return the number of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
-	public int countByUuid(java.lang.String uuid)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public int countByUuid(java.lang.String uuid);
 
 	/**
 	* Returns the d d m content where uuid = &#63; and groupId = &#63; or throws a {@link com.liferay.portlet.dynamicdatamapping.NoSuchContentException} if it could not be found.
@@ -182,12 +165,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param groupId the group ID
 	* @return the matching d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent findByUUID_G(
 		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the d d m content where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
@@ -195,11 +176,9 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param uuid the uuid
 	* @param groupId the group ID
 	* @return the matching d d m content, or <code>null</code> if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByUUID_G(
-		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		java.lang.String uuid, long groupId);
 
 	/**
 	* Returns the d d m content where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
@@ -208,11 +187,9 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param groupId the group ID
 	* @param retrieveFromCache whether to use the finder cache
 	* @return the matching d d m content, or <code>null</code> if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByUUID_G(
-		java.lang.String uuid, long groupId, boolean retrieveFromCache)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		java.lang.String uuid, long groupId, boolean retrieveFromCache);
 
 	/**
 	* Removes the d d m content where uuid = &#63; and groupId = &#63; from the database.
@@ -220,12 +197,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param uuid the uuid
 	* @param groupId the group ID
 	* @return the d d m content that was removed
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent removeByUUID_G(
 		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the number of d d m contents where uuid = &#63; and groupId = &#63;.
@@ -233,10 +208,8 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param uuid the uuid
 	* @param groupId the group ID
 	* @return the number of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
-	public int countByUUID_G(java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public int countByUUID_G(java.lang.String uuid, long groupId);
 
 	/**
 	* Returns all the d d m contents where uuid = &#63; and companyId = &#63;.
@@ -244,11 +217,9 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param uuid the uuid
 	* @param companyId the company ID
 	* @return the matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByUuid_C(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		java.lang.String uuid, long companyId);
 
 	/**
 	* Returns a range of all the d d m contents where uuid = &#63; and companyId = &#63;.
@@ -262,11 +233,9 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param start the lower bound of the range of d d m contents
 	* @param end the upper bound of the range of d d m contents (not inclusive)
 	* @return the range of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByUuid_C(
-		java.lang.String uuid, long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		java.lang.String uuid, long companyId, int start, int end);
 
 	/**
 	* Returns an ordered range of all the d d m contents where uuid = &#63; and companyId = &#63;.
@@ -281,12 +250,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param end the upper bound of the range of d d m contents (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByUuid_C(
 		java.lang.String uuid, long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the first d d m content in the ordered set where uuid = &#63; and companyId = &#63;.
@@ -296,13 +263,11 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent findByUuid_C_First(
 		java.lang.String uuid, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the first d d m content in the ordered set where uuid = &#63; and companyId = &#63;.
@@ -311,12 +276,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching d d m content, or <code>null</code> if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByUuid_C_First(
 		java.lang.String uuid, long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the last d d m content in the ordered set where uuid = &#63; and companyId = &#63;.
@@ -326,13 +289,11 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent findByUuid_C_Last(
 		java.lang.String uuid, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the last d d m content in the ordered set where uuid = &#63; and companyId = &#63;.
@@ -341,12 +302,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching d d m content, or <code>null</code> if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByUuid_C_Last(
 		java.lang.String uuid, long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the d d m contents before and after the current d d m content in the ordered set where uuid = &#63; and companyId = &#63;.
@@ -357,23 +316,19 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a d d m content with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent[] findByUuid_C_PrevAndNext(
 		long contentId, java.lang.String uuid, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Removes all the d d m contents where uuid = &#63; and companyId = &#63; from the database.
 	*
 	* @param uuid the uuid
 	* @param companyId the company ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public void removeByUuid_C(java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public void removeByUuid_C(java.lang.String uuid, long companyId);
 
 	/**
 	* Returns the number of d d m contents where uuid = &#63; and companyId = &#63;.
@@ -381,21 +336,17 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param uuid the uuid
 	* @param companyId the company ID
 	* @return the number of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
-	public int countByUuid_C(java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public int countByUuid_C(java.lang.String uuid, long companyId);
 
 	/**
 	* Returns all the d d m contents where groupId = &#63;.
 	*
 	* @param groupId the group ID
 	* @return the matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByGroupId(
-		long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		long groupId);
 
 	/**
 	* Returns a range of all the d d m contents where groupId = &#63;.
@@ -408,11 +359,9 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param start the lower bound of the range of d d m contents
 	* @param end the upper bound of the range of d d m contents (not inclusive)
 	* @return the range of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByGroupId(
-		long groupId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		long groupId, int start, int end);
 
 	/**
 	* Returns an ordered range of all the d d m contents where groupId = &#63;.
@@ -426,12 +375,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param end the upper bound of the range of d d m contents (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByGroupId(
 		long groupId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the first d d m content in the ordered set where groupId = &#63;.
@@ -440,13 +387,11 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent findByGroupId_First(
 		long groupId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the first d d m content in the ordered set where groupId = &#63;.
@@ -454,12 +399,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param groupId the group ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching d d m content, or <code>null</code> if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByGroupId_First(
 		long groupId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the last d d m content in the ordered set where groupId = &#63;.
@@ -468,13 +411,11 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent findByGroupId_Last(
 		long groupId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the last d d m content in the ordered set where groupId = &#63;.
@@ -482,12 +423,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param groupId the group ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching d d m content, or <code>null</code> if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByGroupId_Last(
 		long groupId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the d d m contents before and after the current d d m content in the ordered set where groupId = &#63;.
@@ -497,43 +436,35 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a d d m content with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent[] findByGroupId_PrevAndNext(
 		long contentId, long groupId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Removes all the d d m contents where groupId = &#63; from the database.
 	*
 	* @param groupId the group ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public void removeByGroupId(long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public void removeByGroupId(long groupId);
 
 	/**
 	* Returns the number of d d m contents where groupId = &#63;.
 	*
 	* @param groupId the group ID
 	* @return the number of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
-	public int countByGroupId(long groupId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public int countByGroupId(long groupId);
 
 	/**
 	* Returns all the d d m contents where companyId = &#63;.
 	*
 	* @param companyId the company ID
 	* @return the matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByCompanyId(
-		long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		long companyId);
 
 	/**
 	* Returns a range of all the d d m contents where companyId = &#63;.
@@ -546,11 +477,9 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param start the lower bound of the range of d d m contents
 	* @param end the upper bound of the range of d d m contents (not inclusive)
 	* @return the range of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByCompanyId(
-		long companyId, int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		long companyId, int start, int end);
 
 	/**
 	* Returns an ordered range of all the d d m contents where companyId = &#63;.
@@ -564,12 +493,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param end the upper bound of the range of d d m contents (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findByCompanyId(
 		long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the first d d m content in the ordered set where companyId = &#63;.
@@ -578,13 +505,11 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent findByCompanyId_First(
 		long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the first d d m content in the ordered set where companyId = &#63;.
@@ -592,12 +517,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching d d m content, or <code>null</code> if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByCompanyId_First(
 		long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the last d d m content in the ordered set where companyId = &#63;.
@@ -606,13 +529,11 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent findByCompanyId_Last(
 		long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the last d d m content in the ordered set where companyId = &#63;.
@@ -620,12 +541,10 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param companyId the company ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching d d m content, or <code>null</code> if a matching d d m content could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByCompanyId_Last(
 		long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Returns the d d m contents before and after the current d d m content in the ordered set where companyId = &#63;.
@@ -635,32 +554,26 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a d d m content with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent[] findByCompanyId_PrevAndNext(
 		long contentId, long companyId,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Removes all the d d m contents where companyId = &#63; from the database.
 	*
 	* @param companyId the company ID
-	* @throws SystemException if a system exception occurred
 	*/
-	public void removeByCompanyId(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public void removeByCompanyId(long companyId);
 
 	/**
 	* Returns the number of d d m contents where companyId = &#63;.
 	*
 	* @param companyId the company ID
 	* @return the number of matching d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
-	public int countByCompanyId(long companyId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public int countByCompanyId(long companyId);
 
 	/**
 	* Caches the d d m content in the entity cache if it is enabled.
@@ -693,16 +606,13 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param contentId the primary key of the d d m content
 	* @return the d d m content that was removed
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a d d m content with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent remove(
 		long contentId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent updateImpl(
-		com.liferay.portlet.dynamicdatamapping.model.DDMContent ddmContent)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portlet.dynamicdatamapping.model.DDMContent ddmContent);
 
 	/**
 	* Returns the d d m content with the primary key or throws a {@link com.liferay.portlet.dynamicdatamapping.NoSuchContentException} if it could not be found.
@@ -710,32 +620,30 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param contentId the primary key of the d d m content
 	* @return the d d m content
 	* @throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException if a d d m content with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent findByPrimaryKey(
 		long contentId)
-		throws com.liferay.portal.kernel.exception.SystemException,
-			com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
+		throws com.liferay.portlet.dynamicdatamapping.NoSuchContentException;
 
 	/**
 	* Returns the d d m content with the primary key or returns <code>null</code> if it could not be found.
 	*
 	* @param contentId the primary key of the d d m content
 	* @return the d d m content, or <code>null</code> if a d d m content with the primary key could not be found
-	* @throws SystemException if a system exception occurred
 	*/
 	public com.liferay.portlet.dynamicdatamapping.model.DDMContent fetchByPrimaryKey(
-		long contentId)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		long contentId);
+
+	@Override
+	public java.util.Map<java.io.Serializable, com.liferay.portlet.dynamicdatamapping.model.DDMContent> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys);
 
 	/**
 	* Returns all the d d m contents.
 	*
 	* @return the d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
-	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findAll()
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findAll();
 
 	/**
 	* Returns a range of all the d d m contents.
@@ -747,11 +655,9 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param start the lower bound of the range of d d m contents
 	* @param end the upper bound of the range of d d m contents (not inclusive)
 	* @return the range of d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findAll(
-		int start, int end)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		int start, int end);
 
 	/**
 	* Returns an ordered range of all the d d m contents.
@@ -764,27 +670,20 @@ public interface DDMContentPersistence extends BasePersistence<DDMContent> {
 	* @param end the upper bound of the range of d d m contents (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
 	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMContent> findAll(
 		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
-		throws com.liferay.portal.kernel.exception.SystemException;
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator);
 
 	/**
 	* Removes all the d d m contents from the database.
-	*
-	* @throws SystemException if a system exception occurred
 	*/
-	public void removeAll()
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public void removeAll();
 
 	/**
 	* Returns the number of d d m contents.
 	*
 	* @return the number of d d m contents
-	* @throws SystemException if a system exception occurred
 	*/
-	public int countAll()
-		throws com.liferay.portal.kernel.exception.SystemException;
+	public int countAll();
 }

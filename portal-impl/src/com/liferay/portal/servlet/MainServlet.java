@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,6 +18,7 @@ import com.liferay.portal.NoSuchLayoutException;
 import com.liferay.portal.dao.shard.ShardDataSourceTargetSource;
 import com.liferay.portal.events.EventsProcessorUtil;
 import com.liferay.portal.events.StartupAction;
+import com.liferay.portal.events.StartupHelperUtil;
 import com.liferay.portal.kernel.cache.Lifecycle;
 import com.liferay.portal.kernel.cache.ThreadLocalCacheManager;
 import com.liferay.portal.kernel.deploy.hot.HotDeployUtil;
@@ -29,9 +30,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.plugin.PluginPackage;
 import com.liferay.portal.kernel.servlet.DynamicServletRequest;
 import com.liferay.portal.kernel.servlet.PortalSessionThreadLocal;
-import com.liferay.portal.kernel.servlet.PortletSessionTracker;
 import com.liferay.portal.kernel.servlet.ProtectedServletRequest;
-import com.liferay.portal.kernel.servlet.ServletContextPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
@@ -197,17 +196,6 @@ public class MainServlet extends ActionServlet {
 		callParentInit();
 
 		if (_log.isDebugEnabled()) {
-			_log.debug("Initialize servlet context pool");
-		}
-
-		try {
-			initServletContextPool();
-		}
-		catch (Exception e) {
-			_log.error(e, e);
-		}
-
-		if (_log.isDebugEnabled()) {
 			_log.debug("Process startup events");
 		}
 
@@ -361,6 +349,8 @@ public class MainServlet extends ActionServlet {
 
 		servletContext.setAttribute(WebKeys.STARTUP_FINISHED, true);
 
+		StartupHelperUtil.setStartupFinished(true);
+
 		ThreadLocalCacheManager.clearAll(Lifecycle.REQUEST);
 	}
 
@@ -413,21 +403,27 @@ public class MainServlet extends ActionServlet {
 			}
 		}
 		catch (Exception e) {
-			_log.error(e, e);
+			if (e instanceof NoSuchLayoutException) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(e, e);
+				}
+			}
+			else {
+				_log.error(e, e);
+			}
 		}
 
 		if (_log.isDebugEnabled()) {
 			_log.debug("Set portal port");
 		}
 
-		setPortalPort(request);
+		setPortalInetSocketAddresses(request);
 
 		if (_log.isDebugEnabled()) {
 			_log.debug("Check variables");
 		}
 
 		checkServletContext(request);
-		checkPortletSessionTracker(request);
 		checkPortletRequestProcessor(request);
 		checkTilesDefinitionsFactory();
 
@@ -567,18 +563,6 @@ public class MainServlet extends ActionServlet {
 			servletContext.setAttribute(
 				WebKeys.PORTLET_STRUTS_PROCESSOR, portletReqProcessor);
 		}
-	}
-
-	protected void checkPortletSessionTracker(HttpServletRequest request) {
-		HttpSession session = request.getSession();
-
-		if (session.getAttribute(WebKeys.PORTLET_SESSION_TRACKER) != null) {
-			return;
-		}
-
-		session.setAttribute(
-			WebKeys.PORTLET_SESSION_TRACKER,
-			PortletSessionTracker.getInstance());
 	}
 
 	protected void checkServletContext(HttpServletRequest request) {
@@ -940,14 +924,6 @@ public class MainServlet extends ActionServlet {
 		ServerCapabilitiesUtil.determineServerCapabilities(getServletContext());
 	}
 
-	protected void initServletContextPool() throws Exception {
-		ServletContext servletContext = getServletContext();
-
-		String contextPath = PortalUtil.getPathContext();
-
-		ServletContextPool.put(contextPath, servletContext);
-	}
-
 	protected void initSocial(PluginPackage pluginPackage) throws Exception {
 		ClassLoader classLoader = ClassLoaderUtil.getPortalClassLoader();
 
@@ -996,7 +972,7 @@ public class MainServlet extends ActionServlet {
 	protected long loginUser(
 			HttpServletRequest request, HttpServletResponse response,
 			long companyId, long userId, String remoteUser)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		if ((userId > 0) || (remoteUser == null)) {
 			return userId;
@@ -1015,8 +991,8 @@ public class MainServlet extends ActionServlet {
 
 		User user = UserLocalServiceUtil.getUserById(userId);
 
-		if (PropsValues.USERS_UPDATE_LAST_LOGIN) {
-			UserLocalServiceUtil.updateLastLogin(
+		if (PropsValues.USERS_UPDATE_LAST_LOGIN && !user.isDefaultUser()) {
+			user = UserLocalServiceUtil.updateLastLogin(
 				userId, request.getRemoteAddr());
 		}
 
@@ -1212,6 +1188,8 @@ public class MainServlet extends ActionServlet {
 
 		if (plid > 0) {
 			try {
+				redirect = HttpUtil.addParameter(redirect, "refererPlid", plid);
+
 				Layout layout = LayoutLocalServiceUtil.getLayout(plid);
 
 				Group group = layout.getGroup();
@@ -1292,8 +1270,8 @@ public class MainServlet extends ActionServlet {
 		PortalUtil.sendError(status, (Exception)t, dynamicRequest, response);
 	}
 
-	protected void setPortalPort(HttpServletRequest request) {
-		PortalUtil.setPortalPort(request);
+	protected void setPortalInetSocketAddresses(HttpServletRequest request) {
+		PortalUtil.setPortalInetSocketAddresses(request);
 	}
 
 	protected void setPrincipal(
@@ -1312,7 +1290,9 @@ public class MainServlet extends ActionServlet {
 				remoteUserId = JAASHelper.getJaasUserId(companyId, remoteUser);
 			}
 			catch (Exception e) {
-				_log.warn(e);
+				if (_log.isWarnEnabled()) {
+					_log.warn(e);
+				}
 			}
 
 			if (remoteUserId > 0) {
@@ -1329,11 +1309,12 @@ public class MainServlet extends ActionServlet {
 	}
 
 	private static final boolean _HTTP_HEADER_VERSION_VERBOSITY_DEFAULT =
-		PropsValues.HTTP_HEADER_VERSION_VERBOSITY.equalsIgnoreCase(
-			ReleaseInfo.getName());
+		StringUtil.equalsIgnoreCase(
+			PropsValues.HTTP_HEADER_VERSION_VERBOSITY, ReleaseInfo.getName());
 
 	private static final boolean _HTTP_HEADER_VERSION_VERBOSITY_PARTIAL =
-		PropsValues.HTTP_HEADER_VERSION_VERBOSITY.equalsIgnoreCase("partial");
+		StringUtil.equalsIgnoreCase(
+			PropsValues.HTTP_HEADER_VERSION_VERBOSITY, "partial");
 
 	private static final String _LIFERAY_PORTAL_REQUEST_HEADER =
 		"Liferay-Portal";

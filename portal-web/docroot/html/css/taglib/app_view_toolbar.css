@@ -1,7 +1,16 @@
+@import "compass";
+@import "mixins";
+
 .app-view-taglib {
 	.display-style .icon {
 		background-image: url(@theme_image_path@/application/layouts.png);
 		background-repeat: no-repeat;
+	}
+
+	.form-search {
+		@include respond-to(phone, tablet) {
+			margin-top: 5px;
+		}
 	}
 
 	.icon-display-descriptive {
@@ -34,9 +43,54 @@
 		}
 
 		.select-all-entries {
-			left: 10px;
+			left: 7px;
 			position: absolute;
-			top: 10px;
+			top: 15px;
+			z-index: 1;
+
+			@include respond-to(phone, tablet) {
+				top: 17px;
+			}
+		}
+	}
+}
+
+.navbar {
+	.nav-display-style-buttons {
+		float: right;
+		margin: 8px 0 8px 15px;
+
+		@include respond-to(phone) {
+			float: none;
+			margin: 7.5px -15px;
+		}
+
+		.display-style-buttons {
+			> .dropdown {
+				@include respond-to(phone) {
+					> .dropdown-menu {
+						background-color: transparent;
+						border-width: 0;
+
+						@include box-shadow(none);
+
+						display: block;
+						float: none;
+						margin-top: 0;
+						position: static;
+						width: auto;
+					}
+
+					> .dropdown-toggle {
+						display: none;
+					}
+				}
+			}
+		}
+
+		.display-style-buttons-container .dropdown-toggle .caret {
+			border-bottom-color: #333;
+			border-top-color: #333;
 		}
 	}
 }

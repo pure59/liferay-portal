@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,7 @@
 package com.liferay.portlet.trash.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -24,8 +24,10 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
@@ -75,10 +77,11 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 			{ "createDate", Types.TIMESTAMP },
 			{ "classNameId", Types.BIGINT },
 			{ "classPK", Types.BIGINT },
+			{ "systemEventSetKey", Types.BIGINT },
 			{ "typeSettings", Types.CLOB },
 			{ "status", Types.INTEGER }
 		};
-	public static final String TABLE_SQL_CREATE = "create table TrashEntry (entryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,classNameId LONG,classPK LONG,typeSettings TEXT null,status INTEGER)";
+	public static final String TABLE_SQL_CREATE = "create table TrashEntry (entryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,classNameId LONG,classPK LONG,systemEventSetKey LONG,typeSettings TEXT null,status INTEGER)";
 	public static final String TABLE_SQL_DROP = "drop table TrashEntry";
 	public static final String ORDER_BY_JPQL = " ORDER BY trashEntry.createDate DESC";
 	public static final String ORDER_BY_SQL = " ORDER BY TrashEntry.createDate DESC";
@@ -121,6 +124,7 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		model.setCreateDate(soapModel.getCreateDate());
 		model.setClassNameId(soapModel.getClassNameId());
 		model.setClassPK(soapModel.getClassPK());
+		model.setSystemEventSetKey(soapModel.getSystemEventSetKey());
 		model.setTypeSettings(soapModel.getTypeSettings());
 		model.setStatus(soapModel.getStatus());
 
@@ -195,8 +199,12 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		attributes.put("createDate", getCreateDate());
 		attributes.put("classNameId", getClassNameId());
 		attributes.put("classPK", getClassPK());
+		attributes.put("systemEventSetKey", getSystemEventSetKey());
 		attributes.put("typeSettings", getTypeSettings());
 		attributes.put("status", getStatus());
+
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
 
 		return attributes;
 	}
@@ -251,6 +259,12 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 			setClassPK(classPK);
 		}
 
+		Long systemEventSetKey = (Long)attributes.get("systemEventSetKey");
+
+		if (systemEventSetKey != null) {
+			setSystemEventSetKey(systemEventSetKey);
+		}
+
 		String typeSettings = (String)attributes.get("typeSettings");
 
 		if (typeSettings != null) {
@@ -264,8 +278,8 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getEntryId() {
 		return _entryId;
 	}
@@ -275,8 +289,8 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		_entryId = entryId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -298,8 +312,8 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -321,8 +335,8 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		return _originalCompanyId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -333,17 +347,23 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -358,8 +378,8 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -399,8 +419,8 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		setClassNameId(classNameId);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassNameId() {
 		return _classNameId;
 	}
@@ -422,8 +442,8 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		return _originalClassNameId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getClassPK() {
 		return _classPK;
 	}
@@ -445,8 +465,19 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		return _originalClassPK;
 	}
 
-	@Override
 	@JSON
+	@Override
+	public long getSystemEventSetKey() {
+		return _systemEventSetKey;
+	}
+
+	@Override
+	public void setSystemEventSetKey(long systemEventSetKey) {
+		_systemEventSetKey = systemEventSetKey;
+	}
+
+	@JSON
+	@Override
 	public String getTypeSettings() {
 		if (_typeSettings == null) {
 			return StringPool.BLANK;
@@ -461,8 +492,8 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		_typeSettings = typeSettings;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getStatus() {
 		return _status;
 	}
@@ -511,6 +542,7 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		trashEntryImpl.setCreateDate(getCreateDate());
 		trashEntryImpl.setClassNameId(getClassNameId());
 		trashEntryImpl.setClassPK(getClassPK());
+		trashEntryImpl.setSystemEventSetKey(getSystemEventSetKey());
 		trashEntryImpl.setTypeSettings(getTypeSettings());
 		trashEntryImpl.setStatus(getStatus());
 
@@ -559,6 +591,16 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 	@Override
 	public int hashCode() {
 		return (int)getPrimaryKey();
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
 	}
 
 	@Override
@@ -619,6 +661,8 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 
 		trashEntryCacheModel.classPK = getClassPK();
 
+		trashEntryCacheModel.systemEventSetKey = getSystemEventSetKey();
+
 		trashEntryCacheModel.typeSettings = getTypeSettings();
 
 		String typeSettings = trashEntryCacheModel.typeSettings;
@@ -634,7 +678,7 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(21);
+		StringBundler sb = new StringBundler(23);
 
 		sb.append("{entryId=");
 		sb.append(getEntryId());
@@ -652,6 +696,8 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		sb.append(getClassNameId());
 		sb.append(", classPK=");
 		sb.append(getClassPK());
+		sb.append(", systemEventSetKey=");
+		sb.append(getSystemEventSetKey());
 		sb.append(", typeSettings=");
 		sb.append(getTypeSettings());
 		sb.append(", status=");
@@ -663,7 +709,7 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(34);
+		StringBundler sb = new StringBundler(37);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portlet.trash.model.TrashEntry");
@@ -702,6 +748,10 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 		sb.append(getClassPK());
 		sb.append("]]></column-value></column>");
 		sb.append(
+			"<column><column-name>systemEventSetKey</column-name><column-value><![CDATA[");
+		sb.append(getSystemEventSetKey());
+		sb.append("]]></column-value></column>");
+		sb.append(
 			"<column><column-name>typeSettings</column-name><column-value><![CDATA[");
 		sb.append(getTypeSettings());
 		sb.append("]]></column-value></column>");
@@ -727,7 +777,6 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _originalCreateDate;
@@ -737,6 +786,7 @@ public class TrashEntryModelImpl extends BaseModelImpl<TrashEntry>
 	private long _classPK;
 	private long _originalClassPK;
 	private boolean _setOriginalClassPK;
+	private long _systemEventSetKey;
 	private String _typeSettings;
 	private int _status;
 	private long _columnBitmask;

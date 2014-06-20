@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -47,7 +47,7 @@
 	}
 	%>
 
-	<div class="sites-directory-taglib nav-menu">
+	<div class="nav-menu sites-directory-taglib">
 		<c:choose>
 			<c:when test="<%= hidden %>">
 				<div class="alert alert-info">
@@ -75,10 +75,10 @@
 									List<Group> childGroups = null;
 
 									if (rootGroup != null) {
-										childGroups = rootGroup.getChildrenWithLayouts(true, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+										childGroups = rootGroup.getChildrenWithLayouts(true, QueryUtil.ALL_POS, QueryUtil.ALL_POS, new GroupNameComparator(true));
 									}
 									else {
-										childGroups = GroupLocalServiceUtil.getLayoutsGroups(group.getCompanyId(), GroupConstants.DEFAULT_LIVE_GROUP_ID, true, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+										childGroups = GroupLocalServiceUtil.getLayoutsGroups(group.getCompanyId(), GroupConstants.DEFAULT_LIVE_GROUP_ID, true, QueryUtil.ALL_POS, QueryUtil.ALL_POS, new GroupNameComparator(true));
 									}
 
 									List<Group> visibleGroups = new UniqueList<Group>();
@@ -91,11 +91,14 @@
 											visibleGroups.add(childGroup);
 										}
 									}
+
+									total = visibleGroups.size();
+
+									searchContainer.setTotal(total);
 									%>
 
 									<liferay-ui:search-container-results
 										results="<%= ListUtil.subList(visibleGroups, searchContainer.getStart(), searchContainer.getEnd()) %>"
-										total="<%= visibleGroups.size() %>"
 									/>
 
 									<liferay-ui:search-container-row
@@ -124,11 +127,11 @@
 											showCheckbox="<%= false %>"
 											thumbnailSrc='<%= themeDisplay.getPathImage() + "/layout_set_logo?img_id=" + layoutSet.getLogoId() + "&t=" + WebServerServletTokenUtil.getToken(layoutSet.getLogoId()) %>'
 											title="<%= HtmlUtil.escape(childGroup.getDescriptiveName(locale)) %>"
-											url="<%= PortalUtil.getGroupFriendlyURL(childGroup, !childGroup.hasPublicLayouts(), themeDisplay) %>"
+											url="<%= (childGroup.getGroupId() != scopeGroupId) ? PortalUtil.getGroupFriendlyURL(childGroup, !childGroup.hasPublicLayouts(), themeDisplay) : null %>"
 										/>
 									</liferay-ui:search-container-row>
 
-									<liferay-ui:search-iterator />
+									<liferay-ui:search-paginator searchContainer="<%= searchContainer %>" />
 								</liferay-ui:search-container>
 							</c:otherwise>
 						</c:choose>
@@ -157,10 +160,10 @@ private void _buildSitesList(Group rootGroup, Group curGroup, List<Group> branch
 	List<Group> childGroups = null;
 
 	if (rootGroup != null) {
-		childGroups = rootGroup.getChildrenWithLayouts(true, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+		childGroups = rootGroup.getChildrenWithLayouts(true, QueryUtil.ALL_POS, QueryUtil.ALL_POS, new GroupNameComparator(true));
 	}
 	else {
-		childGroups = GroupLocalServiceUtil.getLayoutsGroups(curGroup.getCompanyId(), GroupConstants.DEFAULT_LIVE_GROUP_ID, true, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+		childGroups = GroupLocalServiceUtil.getLayoutsGroups(curGroup.getCompanyId(), GroupConstants.DEFAULT_LIVE_GROUP_ID, true, QueryUtil.ALL_POS, QueryUtil.ALL_POS, new GroupNameComparator(true));
 	}
 
 	List<Group> visibleGroups = new UniqueList<Group>();
@@ -225,7 +228,14 @@ private void _buildSitesList(Group rootGroup, Group curGroup, List<Group> branch
 			sb.append("\" ");
 		}
 
-		sb.append("><a ");
+		sb.append(">");
+
+		if (childGroup.getGroupId() != themeDisplay.getScopeGroupId()) {
+			sb.append("<a ");
+		}
+		else {
+			sb.append("<span ");
+		}
 
 		if (Validator.isNotNull(className)) {
 			sb.append("class=\"");
@@ -233,13 +243,22 @@ private void _buildSitesList(Group rootGroup, Group curGroup, List<Group> branch
 			sb.append("\" ");
 		}
 
-		sb.append("href=\"");
-		sb.append(HtmlUtil.escapeHREF(PortalUtil.getGroupFriendlyURL(childGroup, !childGroup.hasPublicLayouts(), themeDisplay)));
-		sb.append("\"> ");
+		if (childGroup.getGroupId() != themeDisplay.getScopeGroupId()) {
+			sb.append("href=\"");
+			sb.append(HtmlUtil.escapeHREF(PortalUtil.getGroupFriendlyURL(childGroup, !childGroup.hasPublicLayouts(), themeDisplay)));
+			sb.append("\"");
+		}
+
+		sb.append("> ");
 
 		sb.append(HtmlUtil.escape(childGroup.getDescriptiveName(themeDisplay.getLocale())));
 
-		sb.append("</a>");
+		if (childGroup.getGroupId() != themeDisplay.getScopeGroupId()) {
+			sb.append("</a>");
+		}
+		else {
+			sb.append("</span>");
+		}
 
 		if (open) {
 			StringBundler childGroupSB = null;

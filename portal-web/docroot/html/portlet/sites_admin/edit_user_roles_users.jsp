@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,7 +22,7 @@ String tabs1 = (String)request.getAttribute("edit_user_roles.jsp-tabs1");
 int cur = (Integer)request.getAttribute("edit_user_roles.jsp-cur");
 
 Group group = (Group)request.getAttribute("edit_user_roles.jsp-group");
-String groupName = (String)request.getAttribute("edit_user_roles.jsp-groupName");
+String groupDescriptiveName = (String)request.getAttribute("edit_user_roles.jsp-groupDescriptiveName");
 Role role = (Role)request.getAttribute("edit_user_roles.jsp-role");
 long roleId = (Long)request.getAttribute("edit_user_roles.jsp-roleId");
 Organization organization = (Organization)request.getAttribute("edit_user_roles.jsp-organization");
@@ -34,9 +34,9 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_user_roles.jsp-po
 <aui:input name="removeUserIds" type="hidden" />
 
 <div>
-	<%= LanguageUtil.format(pageContext, "step-x-of-x", new String[] {"2", "2"}) %>
+	<%= LanguageUtil.format(request, "step-x-of-x", new String[] {"2", "2"}, false) %>
 
-	<%= LanguageUtil.format(pageContext, "current-signifies-current-users-associated-with-the-x-role.-available-signifies-all-users-associated-with-the-x-x", new String[] {HtmlUtil.escape(role.getTitle(locale)), HtmlUtil.escape(groupName), LanguageUtil.get(pageContext, (group.isOrganization() ? "organization" : "site"))}) %>
+	<%= LanguageUtil.format(request, "current-signifies-current-users-associated-with-the-x-role.-available-signifies-all-users-associated-with-the-x-x", new String[] {HtmlUtil.escape(role.getTitle(locale)), HtmlUtil.escape(groupDescriptiveName), LanguageUtil.get(request, (group.isOrganization() ? "organization" : "site"))}) %>
 </div>
 
 <br />
@@ -98,12 +98,12 @@ PortletURL portletURL = (PortletURL)request.getAttribute("edit_user_roles.jsp-po
 	<div class="separator"><!-- --></div>
 
 	<%
-	String taglibOnClick = renderResponse.getNamespace() + "updateUserGroupRoleUsers('" + portletURL.toString() + StringPool.AMPERSAND + renderResponse.getNamespace() + "cur=" + cur + "');";
+	portletURL.setParameter("cur", String.valueOf(cur));
+
+	String taglibOnClick = renderResponse.getNamespace() + "updateUserGroupRoleUsers('" + portletURL.toString() + "');";
 	%>
 
-	<aui:button onClick="<%= taglibOnClick %>" value="update-associations" />
-
-	<br /><br />
+	<aui:button onClick="<%= taglibOnClick %>" primary="<%= true %>" value="update-associations" />
 
 	<liferay-ui:search-iterator />
 </liferay-ui:search-container>

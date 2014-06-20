@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -47,7 +47,7 @@ MembershipRequest membershipRequest = (MembershipRequest)request.getAttribute(We
 			backURL="<%= redirect %>"
 			escapeXml="<%= false %>"
 			localizeTitle="<%= false %>"
-			title='<%= LanguageUtil.format(pageContext, "reply-membership-request-for-x", HtmlUtil.escape(group.getDescriptiveName(locale))) %>'
+			title='<%= LanguageUtil.format(request, "reply-membership-request-for-x", HtmlUtil.escape(group.getDescriptiveName(locale)), false) %>'
 		/>
 	</c:if>
 
@@ -76,20 +76,18 @@ MembershipRequest membershipRequest = (MembershipRequest)request.getAttribute(We
 
 	<aui:model-context bean="<%= membershipRequest %>" model="<%= MembershipRequest.class %>" />
 
-	<aui:fieldset>
-		<c:if test="<%= Validator.isNotNull(group.getDescription()) %>">
-			<aui:field-wrapper label="description">
+	<c:if test="<%= Validator.isNotNull(group.getDescription()) %>">
+		<aui:field-wrapper label="description">
+			<p>
 				<%= HtmlUtil.escape(group.getDescription()) %>
-			</aui:field-wrapper>
-		</c:if>
-
-		<aui:field-wrapper label="user-name">
-			<%= HtmlUtil.escape(PortalUtil.getUserName(membershipRequest.getUserId(), StringPool.BLANK)) %>
+			</p>
 		</aui:field-wrapper>
+	</c:if>
 
-		<aui:field-wrapper label="user-comments">
-			<%= HtmlUtil.escape(membershipRequest.getComments()) %>
-		</aui:field-wrapper>
+	<aui:fieldset>
+		<aui:input name="userName" type="resource" value="<%= PortalUtil.getUserName(membershipRequest.getUserId(), StringPool.BLANK) %>" />
+
+		<aui:input name="userComments" readonly="<%= true %>" type="textarea" value="<%= HtmlUtil.escape(membershipRequest.getComments()) %>" />
 
 		<aui:select autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" label="status" name="statusId">
 			<aui:option label="approve" value="<%= MembershipRequestConstants.STATUS_APPROVED %>" />

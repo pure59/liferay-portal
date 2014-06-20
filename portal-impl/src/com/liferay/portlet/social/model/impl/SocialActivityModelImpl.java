@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,27 +15,33 @@
 package com.liferay.portlet.social.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 import com.liferay.portlet.social.model.SocialActivity;
 import com.liferay.portlet.social.model.SocialActivityModel;
+import com.liferay.portlet.social.model.SocialActivitySoap;
 
 import java.io.Serializable;
 
 import java.sql.Types;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,6 +57,7 @@ import java.util.Map;
  * @see com.liferay.portlet.social.model.SocialActivityModel
  * @generated
  */
+@JSON(strict = true)
 public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 	implements SocialActivityModel {
 	/*
@@ -101,6 +108,58 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 	public static long RECEIVERUSERID_COLUMN_BITMASK = 128L;
 	public static long TYPE_COLUMN_BITMASK = 256L;
 	public static long USERID_COLUMN_BITMASK = 512L;
+
+	/**
+	 * Converts the soap model instance into a normal model instance.
+	 *
+	 * @param soapModel the soap model instance to convert
+	 * @return the normal model instance
+	 */
+	public static SocialActivity toModel(SocialActivitySoap soapModel) {
+		if (soapModel == null) {
+			return null;
+		}
+
+		SocialActivity model = new SocialActivityImpl();
+
+		model.setActivityId(soapModel.getActivityId());
+		model.setGroupId(soapModel.getGroupId());
+		model.setCompanyId(soapModel.getCompanyId());
+		model.setUserId(soapModel.getUserId());
+		model.setCreateDate(soapModel.getCreateDate());
+		model.setActivitySetId(soapModel.getActivitySetId());
+		model.setMirrorActivityId(soapModel.getMirrorActivityId());
+		model.setClassNameId(soapModel.getClassNameId());
+		model.setClassPK(soapModel.getClassPK());
+		model.setParentClassNameId(soapModel.getParentClassNameId());
+		model.setParentClassPK(soapModel.getParentClassPK());
+		model.setType(soapModel.getType());
+		model.setExtraData(soapModel.getExtraData());
+		model.setReceiverUserId(soapModel.getReceiverUserId());
+
+		return model;
+	}
+
+	/**
+	 * Converts the soap model instances into normal model instances.
+	 *
+	 * @param soapModels the soap model instances to convert
+	 * @return the normal model instances
+	 */
+	public static List<SocialActivity> toModels(SocialActivitySoap[] soapModels) {
+		if (soapModels == null) {
+			return null;
+		}
+
+		List<SocialActivity> models = new ArrayList<SocialActivity>(soapModels.length);
+
+		for (SocialActivitySoap soapModel : soapModels) {
+			models.add(toModel(soapModel));
+		}
+
+		return models;
+	}
+
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
 				"lock.expiration.time.com.liferay.portlet.social.model.SocialActivity"));
 
@@ -155,6 +214,9 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		attributes.put("type", getType());
 		attributes.put("extraData", getExtraData());
 		attributes.put("receiverUserId", getReceiverUserId());
+
+		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
+		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
 
 		return attributes;
 	}
@@ -246,6 +308,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		}
 	}
 
+	@JSON
 	@Override
 	public long getActivityId() {
 		return _activityId;
@@ -256,6 +319,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		_activityId = activityId;
 	}
 
+	@JSON
 	@Override
 	public long getGroupId() {
 		return _groupId;
@@ -278,6 +342,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		return _originalGroupId;
 	}
 
+	@JSON
 	@Override
 	public long getCompanyId() {
 		return _companyId;
@@ -300,6 +365,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		return _originalCompanyId;
 	}
 
+	@JSON
 	@Override
 	public long getUserId() {
 		return _userId;
@@ -319,19 +385,26 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
+	public String getUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		_userUuid = userUuid;
 	}
 
 	public long getOriginalUserId() {
 		return _originalUserId;
 	}
 
+	@JSON
 	@Override
 	public long getCreateDate() {
 		return _createDate;
@@ -354,6 +427,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		return _originalCreateDate;
 	}
 
+	@JSON
 	@Override
 	public long getActivitySetId() {
 		return _activitySetId;
@@ -376,6 +450,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		return _originalActivitySetId;
 	}
 
+	@JSON
 	@Override
 	public long getMirrorActivityId() {
 		return _mirrorActivityId;
@@ -418,6 +493,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		setClassNameId(classNameId);
 	}
 
+	@JSON
 	@Override
 	public long getClassNameId() {
 		return _classNameId;
@@ -440,6 +516,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		return _originalClassNameId;
 	}
 
+	@JSON
 	@Override
 	public long getClassPK() {
 		return _classPK;
@@ -462,6 +539,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		return _originalClassPK;
 	}
 
+	@JSON
 	@Override
 	public long getParentClassNameId() {
 		return _parentClassNameId;
@@ -472,6 +550,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		_parentClassNameId = parentClassNameId;
 	}
 
+	@JSON
 	@Override
 	public long getParentClassPK() {
 		return _parentClassPK;
@@ -482,6 +561,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		_parentClassPK = parentClassPK;
 	}
 
+	@JSON
 	@Override
 	public int getType() {
 		return _type;
@@ -504,6 +584,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		return _originalType;
 	}
 
+	@JSON
 	@Override
 	public String getExtraData() {
 		if (_extraData == null) {
@@ -519,6 +600,7 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 		_extraData = extraData;
 	}
 
+	@JSON
 	@Override
 	public long getReceiverUserId() {
 		return _receiverUserId;
@@ -538,14 +620,19 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 	}
 
 	@Override
-	public String getReceiverUserUuid() throws SystemException {
-		return PortalUtil.getUserValue(getReceiverUserId(), "uuid",
-			_receiverUserUuid);
+	public String getReceiverUserUuid() {
+		try {
+			User user = UserLocalServiceUtil.getUserById(getReceiverUserId());
+
+			return user.getUuid();
+		}
+		catch (PortalException pe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
 	public void setReceiverUserUuid(String receiverUserUuid) {
-		_receiverUserUuid = receiverUserUuid;
 	}
 
 	public long getOriginalReceiverUserId() {
@@ -651,6 +738,16 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 	@Override
 	public int hashCode() {
 		return (int)getPrimaryKey();
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return ENTITY_CACHE_ENABLED;
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return FINDER_CACHE_ENABLED;
 	}
 
 	@Override
@@ -860,7 +957,6 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 	private long _originalCompanyId;
 	private boolean _setOriginalCompanyId;
 	private long _userId;
-	private String _userUuid;
 	private long _originalUserId;
 	private boolean _setOriginalUserId;
 	private long _createDate;
@@ -885,7 +981,6 @@ public class SocialActivityModelImpl extends BaseModelImpl<SocialActivity>
 	private boolean _setOriginalType;
 	private String _extraData;
 	private long _receiverUserId;
-	private String _receiverUserUuid;
 	private long _originalReceiverUserId;
 	private boolean _setOriginalReceiverUserId;
 	private long _columnBitmask;

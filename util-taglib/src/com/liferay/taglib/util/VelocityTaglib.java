@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -29,12 +29,14 @@ import com.liferay.taglib.ui.IconTag;
 import com.liferay.taglib.ui.JournalArticleTag;
 import com.liferay.taglib.ui.MySitesTag;
 import com.liferay.taglib.ui.PngImageTag;
+import com.liferay.taglib.ui.QuickAccessTag;
 import com.liferay.taglib.ui.RatingsTag;
 
 import javax.portlet.PortletURL;
 import javax.portlet.WindowState;
 
 import javax.servlet.ServletContext;
+import javax.servlet.jsp.PageContext;
 
 /**
  * @author Daniel Reuther
@@ -52,6 +54,7 @@ public interface VelocityTaglib {
 	 *             Boolean, Boolean, Boolean, String, long, long, String,
 	 *             Boolean, Boolean, long, long, Boolean, String)}
 	 */
+	@Deprecated
 	public void actionURL(
 			String windowState, String portletMode, Boolean secure,
 			Boolean copyCurrentRenderParameters, Boolean escapeXml, String name,
@@ -102,6 +105,17 @@ public interface VelocityTaglib {
 	public void discussion(
 			String className, long classPK, String formAction, String formName,
 			boolean hideControls, boolean ratingsEnabled, String redirect,
+			long userId)
+		throws Exception;
+
+	/**
+	 * @deprecated As of 6.2.0, replaced by {@link #discussion(String, long,
+	 *             String, String, boolean, boolean, String, long)})}
+	 */
+	@Deprecated
+	public void discussion(
+			String className, long classPK, String formAction, String formName,
+			boolean hideControls, boolean ratingsEnabled, String redirect,
 			String subject, long userId)
 		throws Exception;
 
@@ -135,7 +149,11 @@ public interface VelocityTaglib {
 
 	public MySitesTag getMySitesTag() throws Exception;
 
+	public PageContext getPageContext();
+
 	public PngImageTag getPngImageTag() throws Exception;
+
+	public QuickAccessTag getQuickAccessTag() throws Exception;
 
 	public RatingsTag getRatingsTag() throws Exception;
 
@@ -149,36 +167,43 @@ public interface VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #iconBack}
 	 */
+	@Deprecated
 	public void iconBack() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconClose}
 	 */
+	@Deprecated
 	public void iconClose() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconConfiguration}
 	 */
+	@Deprecated
 	public void iconConfiguration() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconEdit}
 	 */
+	@Deprecated
 	public void iconEdit() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconEditDefaults}
 	 */
+	@Deprecated
 	public void iconEditDefaults() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconEditGuest}
 	 */
+	@Deprecated
 	public void iconEditGuest() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconHelp}
 	 */
+	@Deprecated
 	public void iconHelp() throws Exception;
 
 	public void iconHelp(String message) throws Exception;
@@ -186,41 +211,49 @@ public interface VelocityTaglib {
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconMaximize}
 	 */
+	@Deprecated
 	public void iconMaximize() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconMinimize}
 	 */
+	@Deprecated
 	public void iconMinimize() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconOptions}
 	 */
+	@Deprecated
 	public void iconOptions() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconPortlet}
 	 */
+	@Deprecated
 	public void iconPortlet() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconPortlet(Portlet)}
 	 */
+	@Deprecated
 	public void iconPortlet(Portlet portlet) throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconPortletCss}
 	 */
+	@Deprecated
 	public void iconPortletCss() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconPrint}
 	 */
+	@Deprecated
 	public void iconPrint() throws Exception;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #portletIconRefresh}
 	 */
+	@Deprecated
 	public void iconRefresh() throws Exception;
 
 	public void include(ServletContext servletContext, String page)
@@ -241,12 +274,13 @@ public interface VelocityTaglib {
 	public void language() throws Exception;
 
 	public void language(
-			String formName, String formAction, String name, int displayStyle)
+			String formName, String formAction, String name,
+			String displayStyle)
 		throws Exception;
 
 	public void language(
 			String formName, String formAction, String name,
-			String[] languageIds, int displayStyle)
+			String[] languageIds, String displayStyle)
 		throws Exception;
 
 	public void layoutIcon(Layout layout) throws Exception;
@@ -256,11 +290,13 @@ public interface VelocityTaglib {
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #mySites}
 	 */
+	@Deprecated
 	public void myPlaces() throws Exception;
 
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #mySites(int)}
 	 */
+	@Deprecated
 	public void myPlaces(int max) throws Exception;
 
 	public void mySites() throws Exception;
@@ -277,6 +313,7 @@ public interface VelocityTaglib {
 	 * @deprecated As of 6.2.0, replaced by {@link #permissionsURL(String,
 	 *             String, String, Object, String, String, int[])}
 	 */
+	@Deprecated
 	public void permissionsURL(
 			String redirect, String modelResource,
 			String modelResourceDescription, String resourcePrimKey,
@@ -313,6 +350,10 @@ public interface VelocityTaglib {
 
 	public void portletIconRefresh() throws Exception;
 
+	public void quickAccess() throws Exception;
+
+	public void quickAccess(String contentId) throws Exception;
+
 	public void ratings(
 			String className, long classPK, int numberOfStars, String type,
 			String url)
@@ -337,6 +378,7 @@ public interface VelocityTaglib {
 	 *             Boolean, Boolean, Boolean, long, long, String, Boolean,
 	 *             Boolean, long, long, Boolean, String)}
 	 */
+	@Deprecated
 	public void renderURL(
 			String windowState, String portletMode, Boolean secure,
 			Boolean copyCurrentRenderParameters, Boolean escapeXml, long plid,
@@ -377,6 +419,10 @@ public interface VelocityTaglib {
 			String url)
 		throws Exception;
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public void staging() throws Exception;
 
 	public void toggle(
