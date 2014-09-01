@@ -820,7 +820,7 @@ public class PortalImpl implements Portal {
 			domain = domain.substring(0, pos);
 		}
 
-		if (isValidVirtualHostname(domain)) {
+		if (isValidPortalDomain(domain)) {
 			return url;
 		}
 
@@ -4812,20 +4812,23 @@ public class PortalImpl implements Portal {
 		if (layout != null) {
 			Group group = layout.getGroup();
 
+			long doAsGroupId = ParamUtil.getLong(request, "doAsGroupId");
+
+			if (doAsGroupId <= 0) {
+				HttpServletRequest originalRequest = getOriginalServletRequest(
+					request);
+
+				doAsGroupId = ParamUtil.getLong(originalRequest, "doAsGroupId");
+			}
+
+			Group doAsGroup = null;
+
+			if (doAsGroupId > 0) {
+				doAsGroup = GroupLocalServiceUtil.fetchGroup(doAsGroupId);
+			}
+
 			if (group.isControlPanel()) {
-				long doAsGroupId = ParamUtil.getLong(request, "doAsGroupId");
-
-				if (doAsGroupId <= 0) {
-					HttpServletRequest originalRequest =
-						getOriginalServletRequest(request);
-
-					doAsGroupId = ParamUtil.getLong(
-						originalRequest, "doAsGroupId");
-				}
-
-				Group doAsGroup = GroupLocalServiceUtil.fetchGroup(doAsGroupId);
-
-				if ((doAsGroupId <= 0) || (doAsGroup == null)) {
+				if (doAsGroup == null) {
 					doAsGroupId = getDefaultScopeGroupId(group.getCompanyId());
 				}
 
@@ -4845,8 +4848,11 @@ public class PortalImpl implements Portal {
 					}
 				}
 			}
+			else if (doAsGroup != null) {
+				scopeGroupId = doAsGroupId;
+			}
 
-			if ((portletId != null) &&
+			if ((portletId != null) && (group != null) &&
 				(group.isStaged() || group.isStagingGroup())) {
 
 				Group liveGroup = group;
@@ -5617,7 +5623,7 @@ public class PortalImpl implements Portal {
 			StringBundler sb = new StringBundler(4);
 
 			sb.append(url.substring(0, x));
-			sb.append(_JSESSIONID);
+			sb.append(JSESSIONID);
 			sb.append(sessionId);
 			sb.append(url.substring(x));
 
@@ -5641,7 +5647,7 @@ public class PortalImpl implements Portal {
 			}
 		}
 
-		sb.append(_JSESSIONID);
+		sb.append(JSESSIONID);
 		sb.append(sessionId);
 
 		return sb.toString();
@@ -5925,32 +5931,8 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public String getValidPortalDomain(long companyId, String domain) {
-		if (Validator.isHostName(domain)) {
-			if (isValidVirtualHost(domain)) {
-				return domain;
-			}
-
-			if (StringUtil.equalsIgnoreCase(
-					domain, PropsValues.WEB_SERVER_HOST)) {
-
-				return PropsValues.WEB_SERVER_HOST;
-			}
-
-			if (isValidVirtualHostname(domain)) {
-				return domain;
-			}
-
-			if (StringUtil.equalsIgnoreCase(
-					domain, getCDNHostHttp(companyId))) {
-
-				return domain;
-			}
-
-			if (StringUtil.equalsIgnoreCase(
-					domain, getCDNHostHttps(companyId))) {
-
-				return domain;
-			}
+		if (isValidPortalDomain(companyId, domain)) {
+			return domain;
 		}
 
 		if (_log.isWarnEnabled()) {
@@ -8298,7 +8280,9 @@ public class PortalImpl implements Portal {
 		Group group, boolean privateLayoutSet, ThemeDisplay themeDisplay,
 		boolean canonicalURL) {
 
-		if (!canonicalURL || isValidVirtualHost(themeDisplay.getServerName())) {
+		if (!canonicalURL ||
+			isValidPortalDomain(themeDisplay.getServerName())) {
+
 			return false;
 		}
 
@@ -8317,6 +8301,40 @@ public class PortalImpl implements Portal {
 		}
 
 		return true;
+	}
+
+	protected boolean isValidPortalDomain(long companyId, String domain) {
+		if (!Validator.isHostName(domain)) {
+			return false;
+		}
+
+		if (isValidVirtualHost(domain)) {
+			return true;
+		}
+
+		if (StringUtil.equalsIgnoreCase(domain, PropsValues.WEB_SERVER_HOST)) {
+			return true;
+		}
+
+		if (isValidVirtualHostname(domain)) {
+			return true;
+		}
+
+		if (StringUtil.equalsIgnoreCase(domain, getCDNHostHttp(companyId))) {
+			return true;
+		}
+
+		if (StringUtil.equalsIgnoreCase(domain, getCDNHostHttps(companyId))) {
+			return true;
+		}
+
+		return false;
+	}
+
+	protected boolean isValidPortalDomain(String domain) {
+		long companyId = CompanyThreadLocal.getCompanyId();
+
+		return isValidPortalDomain(companyId, domain);
 	}
 
 	protected boolean isValidVirtualHost(String domain) {
@@ -8438,8 +8456,6 @@ public class PortalImpl implements Portal {
 	}
 
 	private static final String _J_SECURITY_CHECK = "j_security_check";
-
-	private static final String _JSESSIONID = ";jsessionid=";
 
 	private static final String _LOCALHOST = "localhost";
 
